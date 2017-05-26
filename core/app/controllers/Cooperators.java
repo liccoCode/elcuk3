@@ -9,6 +9,7 @@ import models.procure.BtbCustom;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
+import models.view.post.CooperatorPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Controller;
@@ -27,9 +28,10 @@ import java.util.List;
 public class Cooperators extends Controller {
 
     @Check("cooperators.index")
-    public static void index() {
-        List<Cooperator> coopers = Cooperator.findAll();
-        render(coopers);
+    public static void index(CooperatorPost p) {
+        if(p == null) p = new CooperatorPost();
+        List<Cooperator> coopers = p.query();
+        render(p, coopers);
     }
 
     public static void show(long id, Boolean full) {
@@ -40,6 +42,12 @@ public class Cooperators extends Controller {
         } else {
             render(coper, full);
         }
+    }
+
+    public static void showCooperItem(Long id) {
+        Cooperator coper = Cooperator.findById(id);
+        List<CooperItem> items = coper.cooperItems;
+        render("/Cooperators/_items.html", items, coper);
     }
 
     /**
@@ -125,7 +133,10 @@ public class Cooperators extends Controller {
         }
         copItem.checkAndUpdate();
         flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
-        redirect("/cooperators/index#" + copItem.cooperator.id);
+        CooperatorPost p = new CooperatorPost();
+        p.search = copItem.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
     }
 
     public static void removeCooperItem(CooperItem copItem) {

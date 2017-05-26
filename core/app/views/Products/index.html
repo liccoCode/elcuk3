@@ -1,6 +1,10 @@
 #{extends 'main_full.html' /}
 #{set title:'Product' /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
 #{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'products/index.coffee'/}
 #{/set}
@@ -24,6 +28,14 @@
         <option ${s == p.state ? 'selected' : ''} value="${s}">${s}</option>
       #{/list}
       </select>
+
+      <div class="input-prepend inline">
+        <select name="p.categories" multiple="multiple" id="categories">
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+        #{/list}
+        </select>
+      </div>
 
       <label class="checkbox inline">
         <input type="checkbox" name="p.scope" value="true"#{if p.scope} checked #{/if}> 全局搜索

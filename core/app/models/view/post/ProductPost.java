@@ -16,9 +16,13 @@ import java.util.List;
  * Time: 5:56 PM
  */
 public class ProductPost extends Post<Product> {
-    public String state;
+
+    private static final long serialVersionUID = 9125924809280823169L;
+    public String state = "Active";
 
     public boolean scope = false;
+
+    public List<String> categories = new ArrayList<>();
 
     public ProductPost() {
         this.perSize = 25;
@@ -42,6 +46,10 @@ public class ProductPost extends Post<Product> {
                 .append(" LEFT JOIN l.sellings s")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
+
+        if(categories.size() > 0) {
+            sbd.append(" AND p.category.id IN " + SqlSelect.inlineParam(categories));
+        }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();

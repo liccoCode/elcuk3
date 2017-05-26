@@ -801,7 +801,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         /**
          * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
          */
-        newUnit.parent = this;
+        newUnit.parent = this.parent != null ? this.parent : this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
@@ -858,9 +858,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
             newUnit.currWhouse = Whouse
-                    .autoMatching(unit.shipType, unit.isb2b ? "B2B" : unit.selling.market.shortHand(), unit.fba);
+                    .autoMatching(unit.shipType, Objects.equals(unit.projectName, User.COR.MengTop.name()) ? "B2B"
+                            : unit.selling.market.shortHand(), unit.fba);
         } else {
-            newUnit.currWhouse = Whouse.autoMatching(unit.shipType, unit.isb2b ? "B2B" : "", unit.fba);
+            newUnit.currWhouse = Whouse.autoMatching(unit.shipType,
+                    Objects.equals(unit.projectName, User.COR.MengTop.name()) ? "B2B" : "", unit.fba);
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
@@ -910,7 +912,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.fba.updateFBAShipment(null);
         // 原采购计划数量变更
         this.save();
-        newUnit.parent = this;
+        newUnit.parent = this.parent != null ? this.parent : this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
@@ -1106,7 +1108,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     oldShipType);
         }
 
-        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        this.projectName = unit.projectName;
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
         if(logs.size() > 0) {
@@ -1162,7 +1164,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.comment = unit.comment;
         this.autoUpdateComment(unit);
         this.purchaseSample = unit.purchaseSample;
-        this.projectName = unit.isb2b ? "B2B" : OperatorConfig.getVal("brandname");
+        this.projectName = unit.projectName;
         if(Validation.hasErrors()) return;
         //仓库加工修改
         int parentCurrQty = 0;
@@ -2500,8 +2502,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsComplete() {
-        return !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                this.mainBox.height == 0);
+        return Objects.equals(this.projectName, User.COR.MengTop.name()) && this.mainBox != null &&
+                this.mainBox.num != 0 ||
+                !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
+                        this.mainBox.height == 0);
     }
 
     public boolean validBoxInfoIsCorrect() {

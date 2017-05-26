@@ -31,36 +31,36 @@ public class StockPost extends Post<ProcureUnit> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("1=1");
+        StringBuilder sbd = new StringBuilder("SELECT p FROM ProcureUnit p LEFT JOIN p.fba fba WHERE 1=1");
         List<Object> params = new ArrayList<>();
         if(this.flag) {
-            sbd.append(" AND unqualifiedQty > 0 ");
+            sbd.append(" AND p.unqualifiedQty > 0 ");
         } else {
-            sbd.append(" AND availableQty > 0 ");
+            sbd.append(" AND p.availableQty > 0 ");
         }
 
         Long unit_id = isSearchForId();
         if(unit_id != null) {
-            sbd.append(" AND id=?");
+            sbd.append(" AND p.id=?");
             params.add(unit_id);
             return new F.T2<>(sbd.toString(), params);
         }
 
         if(this.whouses != null && this.whouses.length > 0) {
-            sbd.append(" AND currWhouse.id IN  " + SqlSelect.inlineParam(whouses));
+            sbd.append(" AND p.currWhouse.id IN  " + SqlSelect.inlineParam(whouses));
         }
 
         if(cooperator != null && this.cooperator.id != null) {
-            sbd.append(" AND cooperator.id=?");
+            sbd.append(" AND p.cooperator.id=?");
             params.add(this.cooperator.id);
         }
 
         if(StringUtils.isNotBlank(this.projectName)) {
-            sbd.append(" AND projectName=?");
+            sbd.append(" AND p.projectName=?");
             params.add(this.projectName);
         }
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND (product.sku LIKE ? OR fba.shipmentId LIKE ? )");
+            sbd.append(" AND (p.product.sku LIKE ? OR p.fba.shipmentId LIKE ? )");
             for(int i = 0; i < 2; i++) params.add(this.word());
         }
         return new F.T2<>(sbd.toString(), params);
@@ -74,7 +74,7 @@ public class StockPost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        String sql = params._1 + " ORDER BY currWhouse.id DESC, createDate DESC";
+        String sql = params._1 + " ORDER BY p.currWhouse.id DESC, p.createDate DESC";
         if(this.pagination)
             return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
         else
@@ -85,13 +85,13 @@ public class StockPost extends Post<ProcureUnit> {
     public List<ProcureUnit> queryUnQualifiedIndex() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        String sql = params._1 + " ORDER BY id DESC";
+        String sql = params._1 + " ORDER BY p.id DESC";
         return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count(params._1, params._2.toArray());
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
