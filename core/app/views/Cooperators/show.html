@@ -1,4 +1,9 @@
-#{script 'cooperators/show.coffee'/}
+#{extends 'main_full.html'/}
+#{set title:"供应商详情" /}
+#{set 'moreScripts'}
+    #{script 'cooperators/show.coffee'/}
+    #{script 'jquery.validate.min.js'/}
+#{/set}
 
 #{if flash.success}
 <div class="row-fluid">
@@ -85,15 +90,15 @@
           </tr>
 
           <tr>
-            <td colspan="4">
-              Memo:
+            <th>Memo</th>
+            <td colspan="3">
               <textarea rows="8" class="span12" name="cop.memo">${coper.memo}</textarea>
             </td>
           </tr>
 
           <tr>
-            <td colspan="4">
-              交易条款
+            <th>交易条款</th>
+            <td colspan="3">
               <textarea rows="20" class="span12" name="cop.tradingTerms">${coper.tradingTerms}</textarea>
             </td>
           </tr>

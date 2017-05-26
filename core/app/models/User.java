@@ -216,6 +216,7 @@ public class User extends Model {
         };
 
         public abstract String label();
+
         public abstract String url();
     }
 
@@ -647,5 +648,22 @@ public class User extends Model {
         return Notification.find("user=? AND state = 'UNCHECKED' ORDER BY createAt", this).fetch();
     }
 
+    /**
+     * 是否含有跨部门查看数据权限
+     *
+     * @return
+     */
+    public boolean isHaveCrossCop() {
+        return Role.isHaveCrossCop(this);
+    }
+
+    /**
+     * 是否物流人员
+     *
+     * @return
+     */
+    public boolean isShipmentRole() {
+        return Role.isShipmentRole(this);
+    }
 
 }

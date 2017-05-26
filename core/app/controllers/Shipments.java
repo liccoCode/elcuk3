@@ -65,6 +65,18 @@ public class Shipments extends Controller {
         render(shipments, p);
     }
 
+    public static void indexByCooperId(Long cooperId) {
+        ShipmentPost p = new ShipmentPost();
+        p.pagination = false;
+        p.cooperId = cooperId;
+        p.dateType = "createDate";
+        List<Shipment> shipments = p.query();
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        List<Whouse> whouses = Whouse.findAll();
+        List<Cooperator> cooperators = Cooperator.shippers();
+        render("Shipments/index.html", shipments, p, whouses, cooperators);
+    }
+
     public static void indexB2B(ShipmentPost p) {
         if(p == null) p = new ShipmentPost();
         p.projectName = User.COR.MengTop;

@@ -83,7 +83,14 @@ $ ->
   $("input[name='p.search']").typeahead({
     source: (query, process) ->
       $.get('/products/source', {search: query})
-      .done((c) ->
+        .done((c) ->
         process(c)
       )
+  })
+
+  $("#categories").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '品线',
+    maxHeight: 200,
+    includeSelectAllOption: true
   })

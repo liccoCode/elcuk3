@@ -255,9 +255,11 @@ public class Deliveryment extends GenericModel {
         int delivery = 0;
         int total = 0;
         for(ProcureUnit unit : this.units) {
-            if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
-                delivery += unit.qty();
-            total += unit.qty();
+            if(!Objects.equals(unit.type, ProcureUnit.T.StockSplit)) {
+                if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
+                    delivery += unit.qty();
+                total += unit.qty();
+            }
         }
         if(Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state) && delivery == total) {
             this.state = S.DONE;
