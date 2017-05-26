@@ -5,10 +5,12 @@ import models.User;
 import models.material.Material;
 import models.material.MaterialBom;
 import models.procure.Cooperator;
+import models.product.Product;
 import models.view.Ret;
 import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
+import play.db.helper.SqlSelect;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -126,5 +128,39 @@ public class Materials extends Controller {
         flash.success("解除关系成功！");
         editBom(bomId);
     }
+
+    public static void showMaterialList(String search, String type) {
+        String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
+        MaterialPost p = new MaterialPost();
+        p.search = search;
+        if(StringUtils.isNotBlank(type)) {
+            p.type = Material.T.valueOf(type);
+        }
+        p.pagination = false;
+        List<Material> materials = p.query();
+        render("/Products/showMaterialList.html", materials);
+    }
+
+    public static void bindMaterialForSku(String[] ids, String sku) {
+        Product product = Product.findById(sku);
+        List<Material> materials = Material.find(" id IN " + SqlSelect.inlineParam(ids)).fetch();
+        materials.forEach(m -> {
+            m.products.add(product);
+            m.save();
+        });
+        render("/Products/showMaterialList.html", materials);
+    }
+
+    public static void unBindMaterialForSku(String[] ids, String sku) {
+        Product product = Product.findById(sku);
+        List<Material> materials = Material.find(" id IN " + SqlSelect.inlineParam(ids)).fetch();
+        materials.forEach(m -> {
+            m.products.remove(product);
+            m.save();
+        });
+        render("/Products/showMaterialList.html", materials);
+
+    }
+
 
 }

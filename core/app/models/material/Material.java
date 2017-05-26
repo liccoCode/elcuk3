@@ -3,6 +3,7 @@ package models.material;
 import com.google.gson.annotations.Expose;
 import models.User;
 import models.procure.Cooperator;
+import models.product.Product;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -86,6 +87,9 @@ public class Material extends Model {
 
     @ManyToMany(mappedBy = "materials", cascade = CascadeType.PERSIST)
     public List<MaterialBom> boms = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    public List<Product> products = new ArrayList<>();
 
     /**
      * 创建人

@@ -61,10 +61,10 @@
 
 <div class="row-fluid">
   <div class="input-append">
-    <input type="text" name="quickSearch" data-url="@{Materials.sameMaterial()}" placeholder="采购计划ID"
+    <input type="text" name="quickSearch" data-url="@{Materials.sameMaterial()}" placeholder="物料信息"
            id="quickSearchInput">
     <input type="hidden" name="refundId" value="${bom.id}"/>
-    <input type="button" class="btn btn-warning" rel="tooltip" id="quickAddByEdit" title="输入采购ID，可以快速添加采购计划"
+    <input type="button" class="btn btn-warning" rel="tooltip" id="quickAddByEdit" title="输入物料信息，可以快速添加采购计划"
            value="确定添加" data-url="@{Materials.quickAddByMaterialName()}" data-id="${bom.id}">
   </div>
 </div>
