@@ -1,0 +1,22 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th></th>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>物料类别</th>
+    <th>规格</th>
+    <th width="150px;">工艺</th>
+    <th width="150px;">图号/版本</th>
+  </tr>
+#{list items:materials, as:'m'}
+  <tr>
+    <td><input type="checkbox" name="mids" value="${m.id}"></td>
+    <td>${m.code}</td>
+    <td>${m.name}</td>
+    <td>${m.type.label()}</td>
+    <td>${m.specification}</td>
+    <td>${m.technology}</td>
+    <td>${m.version}</td>
+  </tr>
+#{/list}
+</table>

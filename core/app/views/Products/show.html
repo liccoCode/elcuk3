@@ -5,6 +5,7 @@
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
     #{script 'products/show.coffee'/}
+    #{script 'products/show.es6'/}
     #{script 'products/skulinechart.coffee'/}
     #{script 'localResize.coffee'/}
     #{script 'localResize.ui.coffee'/}
@@ -45,6 +46,9 @@
         <a href="#whouseAttrs" data-toggle="tab" id="showWhouseAttr">仓库信息</a>
       </li>
     #{/power.ck}
+  <li>
+    <a href="#material_tab" data-toggle='tab'>物料信息</a>
+  </li>
 </ul>
 
 <div id="selling_tabs" class="tab-content">
@@ -116,5 +120,10 @@
           #{include 'Products/_whouseAttrsForm.html'/}
       </div>
     #{/power.ck}
+
+  <div class="tab-pane fade" id="material_tab">
+      #{include 'Products/_material.html'/}
+  </div>
+
 </div>
 #{/else}
