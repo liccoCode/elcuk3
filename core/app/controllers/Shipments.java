@@ -280,7 +280,7 @@ public class Shipments extends Controller {
 
 
     @Check("shipments.beginship")
-    public static void beginShip(String id, Date date) {
+    public static void beginShip(String id, Date date, boolean sync) {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.planArrivDate", ship.dates.planArrivDate);
 
@@ -290,7 +290,7 @@ public class Shipments extends Controller {
         }
 
         try {
-            ship.beginShip(date);
+            ship.beginShip(date, sync);
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
         }
