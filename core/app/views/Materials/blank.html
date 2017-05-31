@@ -34,16 +34,10 @@
               #{/list}
           </select>
         </td>
-        <th>供应商</th>
+        <th>包装组</th>
         <td>
-          <select name="m.cooperator.id" class="selectize" style="width:300px;" required>
-            <option value="">请选择</option>
-              #{list items:cooperators, as:'c'}
-                <option value="${c.id}">${c.name}</option>
-              #{/list}
-          </select>
+          <input type="text"/>
         </td>
-
       </tr>
       <tr>
         <th>规格</th>
@@ -57,15 +51,6 @@
         <th>工艺</th>
         <td><input type="text" class="input-xxlarge" name="m.technology" value=""></td>
       </tr>
-      <tr>
-        <th>包装组</th>
-        <td>
-          <input type="text"/>
-        </td>
-        <th></th>
-        <td></td>
-      </tr>
-
       <tr>
         <th>备注</th>
         <td colspan="4">
