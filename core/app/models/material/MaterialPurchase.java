@@ -5,10 +5,8 @@ import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
-import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 物料采购单
  * Created by IntelliJ IDEA.
  * User: Even
  * Date: 17/5/31

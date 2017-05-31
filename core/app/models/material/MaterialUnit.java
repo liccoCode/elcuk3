@@ -17,6 +17,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
+ * 物料采购计划
  * Created by IntelliJ IDEA.
  * User: Even
  * Date: 17/5/31
@@ -97,7 +98,7 @@ public class MaterialUnit extends Model {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     public ProcureUnit.STAGE stage;
-    
+
 
     /**
      * 质检状态 and 质检结果
