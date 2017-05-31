@@ -309,11 +309,13 @@ public class Deliveryment extends GenericModel {
         double totalSeven = this.totalAmountForSevenDay();
         double checkLimit = Double.parseDouble(OperatorConfig.getVal("checklimit"));
         double checkLimitPerWeek = Double.parseDouble(OperatorConfig.getVal("checklimitperweek"));
+        boolean flag = this.units.stream().anyMatch(unit -> ProcureUnit.find("cooperator.id =? and sku=?",this
+                .cooperator.id, unit.sku).fetch().size() < 2);    //判断 该供应商包含第一次下单的sku
         boolean isNeedApply = (totalDmt > checkLimit);
-        if(isNeedApply)
-            return new Ret(true, "单笔金额超过 ¥ " + checkLimit + ",需要审核，是否提交审核？");
-        else if((totalSeven + totalDmt) > checkLimitPerWeek)
-            return new Ret(true, "该供应商本周金额超过 ¥ " + checkLimitPerWeek + ",需要审核，是否提交审核？");
+        if(isNeedApply && flag)
+            return new Ret(true, "单笔金额超过 ¥ " + checkLimit + "，并且是该供应商第一次下单的sku,需要审核，是否提交审核？");
+        else if((totalSeven + totalDmt) > checkLimitPerWeek && flag)
+            return new Ret(true, "该供应商本周金额超过 ¥ " + checkLimitPerWeek + "，并且是该供应商第一次下单的sku,需要审核，是否提交审核？");
         else
             return new Ret(false);
     }

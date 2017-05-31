@@ -180,7 +180,11 @@
     <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
     <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
-    <td>${unit.result?.label()}</td>
+    <td>
+      <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
+           ${unit.result?.label()}
+      </a>
+    </td>
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate /}</td>
   </tr>
