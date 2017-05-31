@@ -14,7 +14,7 @@
     <th style="width:70px;">销售级别</th>
     <th style="width:80px;">上市时间</th>
     <th style="width:80px;">退市时间</th>
-    <th style="width:100px;">Action</th>
+    <th style="width:140px;">Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
@@ -59,6 +59,9 @@
                 <i class="icon-trash"></i>
               </a>
             #{/power.ck}
+          <a href="" class="btn btn-mini btn-warning" rel="tooltip" title="物料配置">
+            <i class="icon-th-list"></i>
+          </a>
         </td>
       </tr>
     #{/list}
