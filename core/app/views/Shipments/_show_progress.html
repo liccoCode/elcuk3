@@ -249,14 +249,30 @@
 
 <!-- 隐藏 Model -->
 <div class="modal hide fade" id="funcsForm">
-  <form action="#" method="POST">
+  <form action="#" method="POST" class="form-horizontal">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal">×</button>
       <h4>设置时间</h4>
     </div>
     <div class="modal-body">
-      <label>日期:</label>
-      <input type="date" name="date" date-format='yyyy-MM-dd'>
+    <div class="control-group">
+        <label class="control-label" for="inputEmail">日期:</label>
+        <div class="controls">
+          <input type="date" name="date" date-format='yyyy-MM-dd'>
+        </div>
+    </div>
+
+      <!-- 权限控制判断是否显示 "同步亚马逊" 按钮-->
+    #{power.ck "shipment.syncdatabase"}
+      <div class="control-group">
+          <div class="controls">
+            <label class="checkbox">
+              <input type="checkbox" name="sync" > 是否同步亚马逊
+            </label>
+          </div>
+      </div>
+    #{/power.ck}
+
     </div>
     <div class="modal-footer">
       <a href="#" class="btn" data-dismiss="modal">Close</a>
