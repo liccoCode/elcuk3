@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class MaterialPurchase extends GenericModel {
 
+    private static final long serialVersionUID = 6762554005097525886L;
 
     public MaterialPurchase() {
 
