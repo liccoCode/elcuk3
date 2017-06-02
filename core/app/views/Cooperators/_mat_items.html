@@ -1,0 +1,43 @@
+<table id="cooperItemList" class="table table-condensed table-bordered">
+  <tr>
+    <th>#</th>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>物料类别</th>
+    <th>包装组编号</th>
+    <th>规格</th>
+    <th width="150px;">工艺</th>
+    <th width="150px;">图号/版本</th>
+    <th>价格</th>
+    <th>生产周期(day)</th>
+    <th>每箱数量</th>
+    <th>最低采购量</th>
+    <th width="70"></th>
+  </tr>
+#{list items:items, as:'itm'}
+  <tr>
+    <td>${itm.id}</td>
+    <td rel="popover" content="${itm.memo}">${itm.material?.code}</td>
+    <td>${itm.material?.name}</td>
+    <td>${itm.material?.type?.label()}</td>
+    <td></td>
+    <td>${itm.material?.specification}</td>
+    <td>${itm.material?.technology}</td>
+    <td>${itm.material?.version}</td>
+    <td>${itm.price.format('#.##')} ${itm.currency}</td>
+    <td>${itm.period}</td>
+    <td>${itm.boxSize}</td>
+    <td>${itm.lowestOrderNum}</td>
+    <td>
+      <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
+      <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
+    </td>
+  </tr>
+#{/list}
+  <!-- 为此供应商关联新的产品 -->
+  <tr>
+    <td colspan="13">
+      <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-warning">为[${coper.fullName}]添加新的生产的物料</a>
+    </td>
+  </tr>
+</table>

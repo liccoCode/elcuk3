@@ -5,6 +5,7 @@ import controllers.Login;
 import models.User;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
+import models.material.Material;
 import models.product.Product;
 import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
@@ -12,7 +13,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.*;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.text.Collator;
@@ -318,6 +318,15 @@ public class Cooperator extends Model {
         return allSkus;
     }
 
+    public List<Material> findMaterialNotExistCooper() {
+        List<Material> materials = Material.findAll();
+        List<CooperItem> items = this.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
+        List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
+                .collect(Collectors.toList());
+        return notExists;
+    }
+
     @Override
     public boolean equals(Object o) {
         if(this == o) return true;
@@ -366,4 +375,13 @@ public class Cooperator extends Model {
         cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return cooperators;
     }
+
+
+    public long showItemNum(boolean flag) {
+        if(flag)
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.SKU)).count();
+        else
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.MATERIAL)).count();
+    }
+
 }
