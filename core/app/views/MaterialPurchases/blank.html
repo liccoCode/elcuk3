@@ -1,0 +1,75 @@
+#{extends 'main_full.html' /}
+#{set title:'采购收货入库单' /}
+#{set 'moreScripts'}
+    #{script 'inbounds/blank.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Inbounds.create(), method:'POST', id: 'new_inbound'}
+    #{info_row title: '物料采购单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>采购单名称</th>
+        <td>
+          <input type="text" name="purchase.name" value="">
+        </td>
+        <th>物料名称</th>
+        <td style="width: 40%;"><input type="text" name="inbound.status" value="Create"></td>
+      </tr>
+      <tr>
+        <th>物料编码</th>
+        <td><input type="text" name="inbound.plan.id" value="" readonly></td>
+        <th>供应商</th>
+        <td>
+          <select></select>
+        </td>
+      </tr>
+      <tr>
+        <th>采购数量</th>
+        <td><input type="text" class="span8" name="inbound.name" value=""></td>
+        <th>物料分配项目</th>
+        <td>
+          <input type="text" value="" readonly>
+        </td>
+      </tr>
+      <tr>
+        <th>预计单价<span style="color:red">*</span></th>
+        <td><input type="date" name="inbound.receiveDate" required></td>
+        <th>实际单价</th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>预计交货时间</th>
+        <td><input type="date" value=""></td>
+        <th></th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="inbound.memo" rows="4" class="input-block-level"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="record.origin" value="">
+          <input type="hidden" name="record.state" value="">
+          <button class="btn btn-primary" name="create_record">创建</button>
+          <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+#{/form}
+
