@@ -17,6 +17,7 @@ import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 控制器
@@ -46,8 +47,16 @@ public class Cooperators extends Controller {
 
     public static void showCooperItem(Long id) {
         Cooperator coper = Cooperator.findById(id);
-        List<CooperItem> items = coper.cooperItems;
+        List<CooperItem> items = coper.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.SKU)).collect(Collectors.toList());
         render("/Cooperators/_items.html", items, coper);
+    }
+
+    public static void showMaterialItem(Long id) {
+        Cooperator coper = Cooperator.findById(id);
+        List<CooperItem> items = coper.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
+        render("/Cooperators/_mat_items.html", items, coper);
     }
 
     /**
@@ -103,12 +112,32 @@ public class Cooperators extends Controller {
         render(copItem, cop);
     }
 
+    public static void newMaterialItem(long cooperId) {
+        Cooperator cop = Cooperator.findById(cooperId);
+        renderArgs.put("materials", cop.findMaterialNotExistCooper());
+        render(cop);
+    }
+
+    public static void saveMaterialItem(CooperItem copItem, long cooperId) {
+        checkAuthenticity();
+        validation.valid(copItem);
+        Cooperator cop = Cooperator.findById(cooperId);
+        if(Validation.hasErrors())
+            render("Cooperators/newMaterialItem.html", copItem, cop);
+        copItem.saveMaterialItem(cop);
+        flash.success("创建成功.");
+        redirect("/cooperators/index#" + copItem.cooperator.id);
+    }
+
     public static void editCooperItem(long cooperId) {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
         renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
-        render("Cooperators/newCooperItem.html", copItem);
+        if(copItem.type.equals(CooperItem.T.SKU))
+            render("Cooperators/newCooperItem.html", copItem);
+        else
+            render("Cooperators/newMaterialItem.html", copItem);
     }
 
     public static void saveCooperItem(CooperItem copItem, long cooperId) {
