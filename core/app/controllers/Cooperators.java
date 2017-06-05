@@ -114,17 +114,22 @@ public class Cooperators extends Controller {
 
     public static void newMaterialItem(long cooperId) {
         Cooperator cop = Cooperator.findById(cooperId);
+        CooperItem copItem = new CooperItem();
         renderArgs.put("materials", cop.findMaterialNotExistCooper());
-        render(cop);
+        render(cop, copItem);
     }
 
     public static void saveMaterialItem(CooperItem copItem, long cooperId) {
         checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
+        renderArgs.put("materials", cop.findMaterialNotExistCooper());
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
         copItem.saveMaterialItem(cop);
+        if(Validation.hasErrors())
+            render("Cooperators/newMaterialItem.html", copItem, cop);
         flash.success("创建成功.");
         redirect("/cooperators/index#" + copItem.cooperator.id);
     }

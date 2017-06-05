@@ -1,5 +1,5 @@
 #{extends 'main.html'/}
-#{set title:"创建新的CooperItem" /}
+#{set title:"${copItem.id? '更新':'创建'}CooperItem" /}
 #{set 'moreScripts'}
     #{script 'cooperators/newCooperItem.coffee'/}
     #{script 'jquery.validate.min.js'/}
@@ -16,6 +16,7 @@
 </style>
 
 #{errorMsgs /}
+#{flash_alert /}
 
 <div class="row">
   <div class="alert alert-info" style="text-align:center">
@@ -29,7 +30,7 @@
           <select name="copItem.material.id" class="selectize" style="width:250px;">
             <option value="">请选择</option>
           #{list items:materials, as:'m'}
-            <option value="${m.id}" ${copItem.material.id==m.id?'selected':''}>${m.name}</option>
+            <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.name}</option>
           #{/list}
           </select>
           <input type="hidden" name="cooperId" value="${cop.id}">
@@ -159,7 +160,7 @@
 
       <tr>
         <td colspan="4">
-          <button type="submit" class="btn btn-primary">创建</button>
+          <button type="submit" class="btn btn-primary">${copItem.id? '更新':'创建'}</button>
         </td>
       </tr>
     </table>
