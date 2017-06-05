@@ -29,17 +29,18 @@
           <select name="copItem.material.id" class="selectize" style="width:250px;">
             <option value="">请选择</option>
           #{list items:materials, as:'m'}
-            <option value="${m.id}" ${copItem.material}>${m.name}</option>
+            <option value="${m.id}" ${copItem.material.id==m.id?'selected':''}>${m.name}</option>
           #{/list}
           </select>
           <input type="hidden" name="cooperId" value="${cop.id}">
+          <input type="hidden" name="copItem.id" value="${copItem.id}">
         #{authenticityToken /}
         </td>
 
         <th>价格</th>
         <td>
           <div class="inline">
-            <input class="input input-mini" type="text" name="copItem.price" value="">
+            <input class="input input-mini" type="text" name="copItem.price" value="${copItem.price}">
           #{pickCurrency name:'copItem.currency',  class:'input-mini'/}
           </div>
         </td>
@@ -47,7 +48,7 @@
       <tr>
         <th>其他价格</th>
         <td>
-          <input class="input input-mini" type="text" name="copItem.otherPrice" value="">
+          <input class="input input-mini" type="text" name="copItem.otherPrice" value="${copItem.otherPrice}">
           <select class="input-mini">
             <option value="CNY">CNY</option>
           </select>
@@ -58,9 +59,9 @@
 
       <tr>
         <th>生产周期(day)</th>
-        <td><input type="text" class="input-mini" name="copItem.period" value=""></td>
+        <td><input type="text" class="input-mini" name="copItem.period" value="${copItem.period}"></td>
         <th>最低采购量</th>
-        <td><input type="text" class="input-mini" name="copItem.lowestOrderNum" value=""></td>
+        <td><input type="text" class="input-mini" name="copItem.lowestOrderNum" value="${copItem.lowestOrderNum}"></td>
       </tr>
     #{if copItem != null && copItem.items != null && copItem.items.size() > 0}
       <tr>
@@ -145,14 +146,14 @@
       <tr>
         <th>产品要求</th>
         <td colspan="3">
-          <textarea rows="8" name="copItem.productTerms" class="input input-block-level"></textarea>
+          <textarea rows="8" name="copItem.productTerms" class="input input-block-level">${copItem.productTerms}</textarea>
         </td>
       </tr>
 
       <tr>
         <th>Memo</th>
         <td colspan="3">
-          <textarea rows="8" name="copItem.memo" class="input input-block-level"></textarea>
+          <textarea rows="8" name="copItem.memo" class="input input-block-level">${copItem.memo}</textarea>
         </td>
       </tr>
 

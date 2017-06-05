@@ -30,7 +30,7 @@
     <td>${itm.lowestOrderNum}</td>
     <td>
       <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
-      <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
+      <a href="@{Cooperators.removeCooperItemById(itm.id)}" class="btn btn-mini"><i class="icon-remove"></i></a>
     </td>
   </tr>
 #{/list}
