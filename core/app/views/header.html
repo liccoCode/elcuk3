@@ -57,6 +57,8 @@
                 #{power.ck "products.index"}
                   <li><a href="@{Products.index()}">产品</a></li>
                 #{/power.ck}
+              <li><a href="@{Materials.index()}">物料</a></li>
+              <li><a href="@{Materials.indexBom()}">包装BOM</a></li>
               <li class="divider"></li>
                 #{power.ck "categorys.show"}
                   <li><a href="@{Categorys.show()}">产品类别</a></li>
@@ -86,6 +88,9 @@
                 #{/power.ck}
                 #{power.ck "deliveryments.index"}
                   <li><a href="@{Deliveryments.index()}">采购单</a></li>
+                #{/power.ck}
+                #{power.ck "deliveryments.index"}
+                  <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
                 #{/power.ck}
                 #{power.ck "deliverplans.index"}
                   <li><a href="@{Deliverplans.index()}">出货单</a></li>

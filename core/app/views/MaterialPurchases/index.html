@@ -1,0 +1,98 @@
+#{extends 'main_full.html'/}
+#{set title:"采购单列表 ()" /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+    #{script 'deliveryments/index.coffee'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+
+#{info_row}
+<ul>
+  <li><strong>[最先交货时间]</strong>为采购单有交货情况后, 记录的第一次交货时间</li>
+  <li><strong>[最后交货时间]</strong>为采购单有交货情况后, 记录的第后一次交货时间</li>
+</ul>
+#{/info_row}
+#{flash_alert /}
+#{errorMsgs /}
+
+<form action="@{MaterialPurchases.index()}" class="search_form" id="deliverys_form">
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">From:</span>
+        <input type="date" name="p.from" value="${p.from.date()}">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${p.to.date()}">
+      </div>
+
+      <select name="p.dateType" style="width: 150px;" class="inline">
+      #{list items:models.view.post.DeliveryPost.DateType.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.state" style="width: 150px;" class="inline">
+        <option value="">状态</option>
+      #{list items:models.procure.Deliveryment.S.values(), as:'t'}
+        <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.deliveryType" style="width: 150px;" class="inline">
+        <option value="">类型</option>
+      #{list items:models.procure.Deliveryment.T.values(), as:'t'}
+        <option value="${t.name()}" ${t.name() == p.dateType?.name() ? 'selected' : ''}>${t.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.cooperId" class="inline selectize" style="width:150px;">
+        <option value="">供应商</option>
+      #{list items:suppliers, as:'sp'}
+        <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="inline">
+        <a target="_blank" class="btn btn-primary" href='@{MaterialPurchases.blank()}'>
+          <i class="icon-plus"></i>新增手动单
+        </a>
+
+        <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank">
+          <i class="icon-download-alt"></i>下载Excel</a>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" name="p.page" value="${p.page}">
+
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th width="20px;"></th>
+          <th>#</th>
+          <th>请款单</th>
+          <th>Name</th>
+          <th>State</th>
+          <th>单据类型</th>
+          <th>供应商</th>
+          <th>最先交货时间</th>
+          <th>最后交货时间</th>
+          <th>交货进度</th>
+          <th>所属公司</th>
+          <th>User</th>
+          <th>Create</th>
+        </tr>
+
+      </table>
+      <div class="btn-toolbar">
+
+      </div>
+    </div>
+  </div>
+</form>

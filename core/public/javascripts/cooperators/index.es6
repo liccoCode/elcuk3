@@ -6,11 +6,12 @@ $(() => {
     if ($("#div" + id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='10'>";
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='12'>";
       html += "<div id='div" + id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + id).load($(this).data("url"), {id: id});
     }
   });
+
 
 });

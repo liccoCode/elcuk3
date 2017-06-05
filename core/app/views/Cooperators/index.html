@@ -34,6 +34,8 @@
       <table class="table table-condensed table-bordered" id="data-table">
         <tr>
           <th>供应商全称</th>
+          <th width="100px;">SKU</th>
+          <th width="120px;">物料</th>
           <th>代码</th>
           <th>供应商类型</th>
           <th>订单数</th>
@@ -46,12 +48,18 @@
         </tr>
       #{list items:coopers, as:'c'}
         <tr>
+          <td>${c.fullName}</td>
           <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
             <span><i class="icon-reorder"></i></span>
-            <span>${c.fullName}</span>
-            #{if c.type==models.procure.Cooperator.T.SUPPLIER}
-              <span class="badge badge-info">${c.cooperItems?.size()}</span>
-            #{/if}
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <span class="badge badge-info">${c.showItemNum(true)}</span>
+              #{/if}
+          </td>
+          <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showMaterialItem()}">
+            <span><i class="icon-reorder"></i></span>
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <span class="badge badge-info">${c.showItemNum(false)}</span>
+              #{/if}
           </td>
           <td>${c.name}</td>
           <td>${c.type?.to_s()}</td>

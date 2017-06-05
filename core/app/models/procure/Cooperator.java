@@ -5,6 +5,7 @@ import controllers.Login;
 import models.User;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
+import models.material.Material;
 import models.product.Product;
 import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
@@ -12,15 +13,11 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.*;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -306,9 +303,10 @@ public class Cooperator extends Model {
      * @return
      */
     public List<String> frontSkuAutoPopulate() {
-        // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<>(Product.skus(false));
-        final List<String> existSkus = this.cooperItems.stream().map(itm -> itm.sku).collect(Collectors.toList());
+        final List<String> existSkus = this.cooperItems.stream()
+                .filter(itm -> Objects.equals(itm.type, CooperItem.T.SKU))
+                .map(itm -> itm.sku).collect(Collectors.toList());
         CollectionUtils.filter(allSkus, o -> {
             for(String existSku : existSkus) {
                 if(existSku.equals(o.toString())) return false;
@@ -316,6 +314,15 @@ public class Cooperator extends Model {
             return true;
         });
         return allSkus;
+    }
+
+    public List<Material> findMaterialNotExistCooper() {
+        List<Material> materials = Material.findAll();
+        List<CooperItem> items = this.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
+        List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
+                .collect(Collectors.toList());
+        return notExists;
     }
 
     @Override
@@ -366,4 +373,13 @@ public class Cooperator extends Model {
         cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return cooperators;
     }
+
+
+    public long showItemNum(boolean flag) {
+        if(flag)
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.SKU)).count();
+        else
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.MATERIAL)).count();
+    }
+
 }

@@ -1,0 +1,73 @@
+#{extends 'main.html' /}
+#{set title:'创建物料' /}
+#{set 'moreScripts'}
+    #{script 'inbounds/blank.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Materials.create(), method:'POST', id: 'new_inbound'}
+    #{info_row title: '创建物料'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>物料编码<span style="color:red">*</span></th>
+        <td>
+          <input type="text" name="m.code" required autocomplete="off">
+        </td>
+        <th>物料名称<span style="color:red">*</span></th>
+        <td style="width: 40%;"><input type="text" name="m.name" value="" required></td>
+      </tr>
+      <tr>
+        <th>物料类型<span style="color:red">*</span></th>
+        <td>
+          <select name="m.type" required>
+              #{list items:models.material.Material.T, as:'t'}
+                <option value="${t.name()}">${t.label()}</option>
+              #{/list}
+          </select>
+        </td>
+        <th>包装组</th>
+        <td>
+          <input type="text"/>
+        </td>
+      </tr>
+      <tr>
+        <th>规格</th>
+        <td><input type="text" name="m.specification" value=""></td>
+        <th>材质</th>
+        <td><input type="text" class="input-xxlarge" name="m.texture" value=""></td>
+      </tr>
+      <tr>
+        <th>图号/版本</th>
+        <td><input type="text" name="m.version" value=""></td>
+        <th>工艺</th>
+        <td><input type="text" class="input-xxlarge" name="m.technology" value=""></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="inbound.memo" rows="4" class="input-block-level"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="record.origin" value="">
+          <input type="hidden" name="record.state" value="">
+          <button class="btn btn-primary" name="create_record">创建</button>
+          <a href="@{Materials.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+#{/form}
+

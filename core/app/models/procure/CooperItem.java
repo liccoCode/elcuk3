@@ -4,18 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
+import models.material.Material;
 import models.product.Product;
 import models.view.dto.CooperItemDTO;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,10 +36,12 @@ public class CooperItem extends Model {
     @OneToOne
     public Product product;
 
+    @OneToOne
+    public Material material;
+
     /**
      * 冗余字段
      */
-    @Required
     @MinSize(5)
     @Expose
     public String sku;
@@ -116,10 +122,35 @@ public class CooperItem extends Model {
     @Transient
     public List<CooperItemDTO> items = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public T type;
+
+    public enum T {
+
+        SKU {
+            @Override
+            public String label() {
+                return "SKU";
+            }
+        },
+        MATERIAL {
+            @Override
+            public String label() {
+                return "包材物料";
+            }
+        };
+
+        public abstract String label();
+
+    }
+
     /**
      * 方案Json串
      */
     public String attributes;
+
+    public Date createDate;
 
     public CooperItem checkAndUpdate() {
         this.check();
@@ -134,13 +165,13 @@ public class CooperItem extends Model {
 
     public void getAttributes() {
         if(this.items == null || this.items.isEmpty()) {
-             this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "[]",
-                     CooperItemDTO.class);
+            this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "[]",
+                    CooperItemDTO.class);
         }
     }
 
     public void setDefaultValue() {
-        if( this.items != null && this.items.size() > 0) {
+        if(this.items != null && this.items.size() > 0) {
             CooperItemDTO dto = this.items.get(0);
             this.height = dto.height;
             this.width = dto.width;
@@ -168,6 +199,7 @@ public class CooperItem extends Model {
     public CooperItem checkAndSave(Cooperator cooperator) {
         this.sku = this.sku.trim();
         this.product = Product.findById(this.sku);
+        this.createDate = new Date();
         this.check();
         if(cooperator == null || !cooperator.isPersistent())
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
@@ -180,6 +212,19 @@ public class CooperItem extends Model {
         this.setAttributes();
         this.setDefaultValue();
         return this.save();
+    }
+
+    public void saveMaterialItem(Cooperator cooperator) {
+        Material material = Material.findById(this.material.id);
+        if(cooperator.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, material))) {
+            Validation.addError("", "该供应商下已经存在该物料，请选择其他物料!");
+            return;
+        }
+        this.type = T.MATERIAL;
+        this.cooperator = cooperator;
+        this.createDate = new Date();
+        this.setAttributes();
+        this.setDefaultValue();
     }
 
     /**
