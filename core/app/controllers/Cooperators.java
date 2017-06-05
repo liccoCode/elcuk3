@@ -133,11 +133,25 @@ public class Cooperators extends Controller {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
-        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
-        if(copItem.type.equals(CooperItem.T.SKU))
+
+        if(copItem.type.equals(CooperItem.T.SKU)) {
+            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
-        else
+        } else {
+            renderArgs.put("materials", copItem.cooperator.findMaterialNotExistCooper());
             render("Cooperators/newMaterialItem.html", copItem);
+        }
+    }
+
+    public static void removeCooperItemById(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.delete();
+        flash.success("删除成功！");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
+
     }
 
     public static void saveCooperItem(CooperItem copItem, long cooperId) {
