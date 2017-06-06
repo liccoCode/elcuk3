@@ -272,6 +272,9 @@ public class Refund extends GenericModel {
                     unit.save();
                 }
             }
+            if(refund.type == T.After_Receive) {
+                Inbound.createTailInboundByUnQualifiedHandle(refund);
+            }
         }
     }
 
@@ -337,8 +340,6 @@ public class Refund extends GenericModel {
      * @param memo
      */
     public static void unQualifiedHandle(List<ProcureUnit> units, String memo) {
-
-
         Refund refund = new Refund();
         refund.id = id();
         refund.memo = memo;
@@ -348,6 +349,7 @@ public class Refund extends GenericModel {
         refund.creator = Login.current();
         refund.createDate = new Date();
         refund.refundDate = new Date();
+        refund.memo = memo;
         refund.save();
         units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
             ProcureUnit pro = ProcureUnit.findById(unit.id);
@@ -362,7 +364,7 @@ public class Refund extends GenericModel {
             refund.unitList.add(u);
         });
         refund.save();
-        Inbound.createTailInboundByUnQualifiedHandle(refund, memo);
+
     }
 
     /**

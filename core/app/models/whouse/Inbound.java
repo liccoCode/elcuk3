@@ -383,7 +383,7 @@ public class Inbound extends GenericModel {
         });
     }
 
-    public static void createTailInboundByUnQualifiedHandle(Refund refund, String memo) {
+    public static void createTailInboundByUnQualifiedHandle(Refund refund) {
         Inbound inbound = new Inbound();
         User user = Login.current();
         inbound.id = id();
@@ -395,7 +395,7 @@ public class Inbound extends GenericModel {
         inbound.createDate = new Date();
         inbound.receiver = user;
         inbound.projectName = user.projectName;
-        inbound.memo = memo;
+        inbound.memo = refund.memo;
         inbound.save();
         refund.unitList.forEach(i -> {
             InboundUnit u = new InboundUnit();
