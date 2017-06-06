@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Created by licco on 2016/11/25.
+ * Created by licco on 2016/11/2.
+ * 退货单
  */
 @Entity
 @DynamicUpdate
@@ -336,6 +337,8 @@ public class Refund extends GenericModel {
      * @param memo
      */
     public static void unQualifiedHandle(List<ProcureUnit> units, String memo) {
+
+
         Refund refund = new Refund();
         refund.id = id();
         refund.memo = memo;
@@ -356,8 +359,10 @@ public class Refund extends GenericModel {
             u.planQty = unit.attrs.qty;
             u.qty = unit.attrs.qty;
             u.save();
+            refund.unitList.add(u);
         });
         refund.save();
+        Inbound.createTailInboundByUnQualifiedHandle(refund, memo);
     }
 
     /**

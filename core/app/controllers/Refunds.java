@@ -25,10 +25,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -149,10 +146,14 @@ public class Refunds extends Controller {
     }
 
     public static void unQualifiedHandle(Long unitId, int qty, String memo) {
+        if(StringUtils.isNotBlank(Refund.isAllReufund(unitId))) {
+            flash.error("采购计划" + unitId + "已经创建了退货单，请先处理！");
+            unQualifiedIndex(null);
+        }
         ProcureUnit unit = new ProcureUnit();
         unit.id = unitId;
         unit.attrs.qty = qty;
-        Refund.unQualifiedHandle(Arrays.asList(unit), memo);
+        Refund.unQualifiedHandle(Collections.singletonList(unit), memo);
         flash.success("不良品退货成功!");
         unQualifiedIndex(null);
     }
