@@ -114,17 +114,22 @@ public class Cooperators extends Controller {
 
     public static void newMaterialItem(long cooperId) {
         Cooperator cop = Cooperator.findById(cooperId);
+        CooperItem copItem = new CooperItem();
         renderArgs.put("materials", cop.findMaterialNotExistCooper());
-        render(cop);
+        render(cop, copItem);
     }
 
     public static void saveMaterialItem(CooperItem copItem, long cooperId) {
         checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
+        renderArgs.put("materials", cop.findMaterialNotExistCooper());
+        renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
         copItem.saveMaterialItem(cop);
+        if(Validation.hasErrors())
+            render("Cooperators/newMaterialItem.html", copItem, cop);
         flash.success("创建成功.");
         redirect("/cooperators/index#" + copItem.cooperator.id);
     }
@@ -133,11 +138,25 @@ public class Cooperators extends Controller {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
-        renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
-        if(copItem.type.equals(CooperItem.T.SKU))
+
+        if(copItem.type.equals(CooperItem.T.SKU)) {
+            renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
-        else
+        } else {
+            renderArgs.put("materials", copItem.cooperator.findMaterialNotExistCooper());
             render("Cooperators/newMaterialItem.html", copItem);
+        }
+    }
+
+    public static void removeCooperItemById(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.delete();
+        flash.success("删除成功！");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
+
     }
 
     public static void saveCooperItem(CooperItem copItem, long cooperId) {

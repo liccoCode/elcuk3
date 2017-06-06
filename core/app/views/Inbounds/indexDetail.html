@@ -95,7 +95,7 @@
             <th>收货类型</th>
             <th>供应商</th>
             <th>状态</th>
-            <th width="140px;">制单时间</th>
+            <th width="130px;">制单时间</th>
             <th>采购数量</th>
             <th>收货数量</th>
             <th>预计收货时间</th>
@@ -104,7 +104,6 @@
             <th>质检结果</th>
             <th>合格数</th>
             <th>不良品数</th>
-            <th>入库数</th>
             <th>目标仓库</th>
             <th>可用库存</th>
           </tr>
@@ -128,13 +127,12 @@
             <td>${i.result?.label()}</td>
             <td>${i.qualifiedQty}</td>
             <td>${i.unqualifiedQty}</td>
-            <td>${i.inboundQty}</td>
             <td>${i.unit.currWhouse?.name}</td>
             <td>${i.unit.availableQty}</td>
           </tr>
         #{/list}
           <tr>
-            <td colspan="20">
+            <td colspan="21">
             #{if units.size() == 0}
               暂时还没有入库记录
             #{/if}
