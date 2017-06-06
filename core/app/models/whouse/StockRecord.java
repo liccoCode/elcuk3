@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Entity
 public class StockRecord extends Model {
-    
+
     private static final long serialVersionUID = 8998389774247420866L;
     /**
      * 仓库
@@ -64,6 +64,14 @@ public class StockRecord extends Model {
     @Enumerated(EnumType.STRING)
     @Expose
     public T type;
+
+    /**
+     * 不良品入库的类型
+     * 可以为空
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public Refund.InboundType inboundType;
 
     public enum T {
         Inbound {

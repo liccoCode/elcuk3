@@ -17,10 +17,7 @@ import play.db.jpa.Model;
 import javax.persistence.*;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -306,9 +303,10 @@ public class Cooperator extends Model {
      * @return
      */
     public List<String> frontSkuAutoPopulate() {
-        // 需要一份 Clone, 不能修改缓存中的值
         List<String> allSkus = new ArrayList<>(Product.skus(false));
-        final List<String> existSkus = this.cooperItems.stream().map(itm -> itm.sku).collect(Collectors.toList());
+        final List<String> existSkus = this.cooperItems.stream()
+                .filter(itm -> Objects.equals(itm.type, CooperItem.T.SKU))
+                .map(itm -> itm.sku).collect(Collectors.toList());
         CollectionUtils.filter(allSkus, o -> {
             for(String existSku : existSkus) {
                 if(existSku.equals(o.toString())) return false;

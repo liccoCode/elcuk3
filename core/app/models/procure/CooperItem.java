@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
@@ -18,6 +19,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -202,6 +204,7 @@ public class CooperItem extends Model {
         if(cooperator == null || !cooperator.isPersistent())
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.cooperator = cooperator;
+        this.type = T.SKU;
         for(CooperItem copitm : this.cooperator.cooperItems) {
             if(copitm.sku.equals(this.sku))
                 throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
@@ -212,13 +215,17 @@ public class CooperItem extends Model {
         return this.save();
     }
 
-    public CooperItem saveMaterialItem(Cooperator cooperator) {
+    public void saveMaterialItem(Cooperator cooperator) {
+        Material material = Material.findById(this.material.id);
+        if(cooperator.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, material))) {
+            Validation.addError("", "该供应商下已经存在该物料，请选择其他物料!");
+            return;
+        }
         this.type = T.MATERIAL;
         this.cooperator = cooperator;
         this.createDate = new Date();
         this.setAttributes();
         this.setDefaultValue();
-        return this.save();
     }
 
     /**

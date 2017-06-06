@@ -1,6 +1,6 @@
 $(() => {
 
-  $("#data_table").on("click", "[name='refundBtn'],[name='transferBtn']", function (e) {
+  $("#data_table").on("click", "[name='refundBtn']", function (e) {
     e.preventDefault();
     let memo = $(this).parent("td").parent("tr").find("input[name='memo']").val();
     let qty = $(this).parent("td").parent("tr").find("input[name$='attrs.qty']").val();
@@ -8,6 +8,34 @@ $(() => {
       $("#id_input").val($(this).data("id"));
       $("#qty_input").val(qty);
       $("#memo_input").val(memo);
+      $("#data_form").attr("action", $(this).data("url")).submit();
+    } else {
+      noty({
+        text: '必须填写处理说明和数量!',
+        type: 'warning'
+      });
+    }
+  });
+
+  $("#data_table").on("click", "[name='transferBtn']", function (e) {
+    e.preventDefault();
+    let $tr = $(this).parent("td").parent("tr");
+    let type = $tr.find("select[name='type']").val();
+    if (!type) {
+      noty({
+        text: '必须选择不良入库类型!',
+        type: 'warning'
+      });
+      return;
+    }
+
+    let memo = $tr.find("input[name='memo']").val();
+    let qty = $tr.find("input[name$='attrs.qty']").val();
+    if (memo && qty) {
+      $("#id_input").val($(this).data("id"));
+      $("#qty_input").val(qty);
+      $("#memo_input").val(memo);
+      $("#type_input").val(type);
       $("#data_form").attr("action", $(this).data("url")).submit();
     } else {
       noty({
