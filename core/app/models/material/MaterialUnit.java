@@ -9,8 +9,10 @@ import models.procure.ProcureUnit;
 import models.qc.CheckTaskDTO;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Min;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -23,6 +25,8 @@ import java.util.Date;
  * Date: 17/5/31
  * Time: AM10:18
  */
+@Entity
+@DynamicUpdate
 public class MaterialUnit extends Model {
 
     /**
@@ -133,11 +137,6 @@ public class MaterialUnit extends Model {
     public User.COR projectName;
 
     /**
-     * 备注
-     */
-    public String remark;
-
-    /**
      * 创建人
      */
     @OneToOne
@@ -187,4 +186,12 @@ public class MaterialUnit extends Model {
         this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
     }
 
+    /**
+     * 手动单采购计划数据验证
+     */
+    public void validateManual() {
+        Validation.required("物料编码", this.material.code);
+        Validation.required("采购数量", this.planQty);
+        Validation.required("预计单价", this.planPrice);
+    }
 }
