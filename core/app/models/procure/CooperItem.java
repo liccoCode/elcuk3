@@ -204,6 +204,7 @@ public class CooperItem extends Model {
         if(cooperator == null || !cooperator.isPersistent())
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.cooperator = cooperator;
+        this.type = T.SKU;
         for(CooperItem copitm : this.cooperator.cooperItems) {
             if(copitm.sku.equals(this.sku))
                 throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
