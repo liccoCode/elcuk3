@@ -30,7 +30,7 @@ import java.util.*;
 public class Inbound extends GenericModel {
 
     private static final long serialVersionUID = -4192529114985615298L;
-    
+
     @Id
     @Column(length = 30)
     @Expose
@@ -362,7 +362,7 @@ public class Inbound extends GenericModel {
 
     private void createTailInbound(List<InboundUnit> tail_units) {
         Inbound inbound = new Inbound();
-        inbound.id = this.id();
+        inbound.id = id();
         inbound.name = this.name + "--尾货单";
         inbound.type = this.type;
         inbound.cooperator = this.cooperator;
@@ -378,6 +378,31 @@ public class Inbound extends GenericModel {
             u.inbound = inbound;
             u.planQty = i.planQty - i.qty;
             u.qty = u.planQty;
+            u.unit = i.unit;
+            u.save();
+        });
+    }
+
+    public static void createTailInboundByUnQualifiedHandle(Refund refund, String memo) {
+        Inbound inbound = new Inbound();
+        User user = Login.current();
+        inbound.id = id();
+        inbound.type = T.Machining;
+        inbound.name = String.format("%s_%s_%s_%s--退货收货单",
+                refund.cooperator.name, inbound.type.label(), Dates.date2Date(), user.username);
+        inbound.cooperator = refund.cooperator;
+        inbound.status = S.Create;
+        inbound.createDate = new Date();
+        inbound.receiver = user;
+        inbound.projectName = user.projectName;
+        inbound.memo = memo;
+        inbound.save();
+        refund.unitList.forEach(i -> {
+            InboundUnit u = new InboundUnit();
+            u.status = InboundUnit.S.Create;
+            u.inbound = inbound;
+            u.planQty = i.planQty;
+            u.qty = i.qty;
             u.unit = i.unit;
             u.save();
         });
