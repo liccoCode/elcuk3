@@ -157,8 +157,8 @@ public class Refunds extends Controller {
         unQualifiedIndex(null);
     }
 
-    public static void transferQty(Long unitId, int qty, String memo) {
-        Refund.transferQty(unitId, qty, memo);
+    public static void transferQty(Long unitId, int qty, String memo, String type) {
+        Refund.transferQty(unitId, qty, memo, type);
         flash.success("不良品转入成功!");
         unQualifiedIndex(null);
     }

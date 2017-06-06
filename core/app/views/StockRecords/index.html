@@ -35,7 +35,7 @@
       <select name="p.type" class="inline">
         <option value="">异动类型</option>
       #{list items:models.whouse.StockRecord.T.values(), as:'t'}
-            <option value="${t.name()}" ${p.type==t ? 'selected' : ''}>${t.label()}</option>
+        <option value="${t.name()}" ${p.type==t ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
@@ -61,7 +61,6 @@
             <th>采购计划ID</th>
             <th>Selling</th>
             <th>SKU</th>
-            <th>名称</th>
             <th>FBA</th>
             <th>FBA 仓库</th>
             <th>供应商</th>
@@ -82,10 +81,8 @@
               <a href="@{ProcureUnits.detail(r.unit?.id)}#${r.unit?.id}" target="_blank">${r.unit?.id}</a>
             </td>
             <td>${r.unit?.selling?.sellingId}</td>
-            <td><a target="_blank" href="@{Products.show(r.unit?.sku)}">${r.unit?.sku}</a></td>
-            <td>
-              <a href="#" rel="tooltip" title="${r.unit?.product?.abbreviation}">
-              ${r.unit?.product?.abbreviation?.xxLong()}</a>
+            <td><a target="_blank" href="@{Products.show(r.unit?.sku)}" rel="tooltip"
+                   title="${r.unit?.product?.abbreviation}">${r.unit?.sku}</a>
             </td>
             <td>${r.unit?.fba?.shipmentId}</td>
             <td>${r.unit?.whouse?.name}</td>
@@ -95,7 +92,12 @@
             <td>#{time_tooltip time: r.createDate, datetime: true/}</td>
             <td>${r.qty}</td>
             <td>${r.type.label()}</td>
-            <td>${r.category?.label()}</td>
+            <td>
+                #{if r.type == models.whouse.StockRecord.T.Unqualified_Transfer}
+                ${r.inboundType?.label()}
+                #{/if}
+                #{else }${r.category?.label()}#{/else}
+            </td>
             <td>
               <a href="${r.showRecordLink()}" target="_blank">${r.type.label()}记录 ${r.recordId}</a>
             </td>

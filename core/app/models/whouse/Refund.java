@@ -151,6 +151,49 @@ public class Refund extends GenericModel {
     public boolean isb2b = false;
 
 
+    public enum InboundType {
+
+        Good {
+            @Override
+            public String label() {
+                return "良品入库";
+            }
+        },
+        Rework {
+            @Override
+            public String label() {
+                return "返工入库";
+            }
+        },
+        SpecialMining {
+            @Override
+            public String label() {
+                return "特采入库";
+            }
+        },
+        Machining {
+            @Override
+            public String label() {
+                return "加工入库";
+            }
+        },
+        Pick {
+            @Override
+            public String label() {
+                return "挑选入库";
+            }
+        },
+        Purchase {
+            @Override
+            public String label() {
+                return "采购入库";
+            }
+        };
+
+        public abstract String label();
+    }
+
+
     public Refund() {
         this.status = S.Create;
         this.creator = Login.current();
@@ -324,7 +367,7 @@ public class Refund extends GenericModel {
      * @param qty
      * @param memo
      */
-    public static void transferQty(Long unitId, int qty, String memo) {
+    public static void transferQty(Long unitId, int qty, String memo, String type) {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
             unit.stage = ProcureUnit.STAGE.IN_STORAGE;
@@ -335,8 +378,11 @@ public class Refund extends GenericModel {
         unit.availableQty += qty;
         unit.result = InboundUnit.R.Qualified;
         unit.save();
+        Inbound.createTransferInbound(unit, qty, memo, Refund.InboundType.valueOf(type));
         /**异动记录**/
         StockRecord record = new StockRecord();
+        if(StringUtils.isNotBlank(type))
+            record.inboundType = Refund.InboundType.valueOf(type);
         record.creator = Login.current();
         record.whouse = unit.whouse;
         record.unit = unit;
