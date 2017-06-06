@@ -162,5 +162,12 @@ public class Materials extends Controller {
 
     }
 
+    /**
+     * 根据ID返回单个物料信息
+     */
+    public static void findMaterial(long id) {
+        Material material = Material.findById(id);
+        renderJSON(material);
+    }
 
 }
