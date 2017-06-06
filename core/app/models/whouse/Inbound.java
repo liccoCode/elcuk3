@@ -12,7 +12,6 @@ import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -30,6 +29,8 @@ import java.util.*;
 @DynamicUpdate
 public class Inbound extends GenericModel {
 
+    private static final long serialVersionUID = -4192529114985615298L;
+    
     @Id
     @Column(length = 30)
     @Expose

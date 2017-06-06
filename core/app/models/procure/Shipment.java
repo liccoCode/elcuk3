@@ -50,6 +50,7 @@ import java.util.*;
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
+    private static final long serialVersionUID = -608639102102679863L;
 
     public Shipment() {
         this.createDate = new Date();
@@ -74,7 +75,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
-        // TODO effect: source 与 target 可以删除.
         this.source = shipment.source;
         this.target = shipment.target;
     }
@@ -613,10 +613,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
 
-        this.items.forEach(itm -> {
-            itm.shipment = null;
-            itm.save();
-        });
+        this.items.forEach(GenericModel::delete);
         this.state = S.CANCEL;
         this.save();
     }
@@ -665,7 +662,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @param datetime
      */
-    public synchronized void beginShip(Date datetime) {
+    public synchronized void beginShip(Date datetime, boolean sync) {
         /**
          * 0. 检查
          *  0.1 运输单状态 CONFIRM
@@ -702,18 +699,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
-        // 在测试环境下也不能标记 SHIPPED
-        this.items.stream().filter(shipItem -> shipItem.unit.fba != null)
-                .forEach(shipItem -> {
-                    if(!Arrays.asList(T.SEA, T.AIR).contains(this.type)) {
-                        //暂停提交空运和海运的物流跟踪号到 Amazon(Amazon 要求最长为 10, 而空运和海运的跟踪号一般都超过 10 位)
-                        //详情: http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_Datatypes.html#NonPartneredLtlDataInput
-                        shipItem.unit.fba.putTransportContentRetry(3, this);
-                    }
-                    // 在测试环境下也不能标记 SHIPPED
-                    shipItem.unit.fba.updateFBAShipmentRetry(3,
-                            Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
-                });
+
+        //只有页面勾选了"同步亚马逊"按钮，才进行亚马逊更新操作
+        if(sync){
+            // 在测试环境下也不能标记 SHIPPED
+            this.items.stream().filter(shipItem -> shipItem.unit.fba != null)
+                    .forEach(shipItem -> {
+                        if(!Arrays.asList(T.SEA, T.AIR).contains(this.type)) {
+                            //暂停提交空运和海运的物流跟踪号到 Amazon(Amazon 要求最长为 10, 而空运和海运的跟踪号一般都超过 10 位)
+                            //详情: http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_Datatypes.html#NonPartneredLtlDataInput
+                            shipItem.unit.fba.putTransportContentRetry(3, this);
+                        }
+                        // 在测试环境下也不能标记 SHIPPED
+                        shipItem.unit.fba.updateFBAShipmentRetry(3,
+                                Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
+                    });
+        }
+
 
         for(ShipItem shipItem : this.items) {
             shipItem.shipDate = datetime;

@@ -10,6 +10,7 @@ import models.market.Listing;
 import models.market.M;
 import models.market.OrderItem;
 import models.market.Selling;
+import models.material.Material;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.dto.ProductDTO;
@@ -66,6 +67,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
     public List<ProductAttr> productAttrs = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST)
+    public List<Material> materials = new ArrayList<>();
 
     /**
      * 唯一的标示
