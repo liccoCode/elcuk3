@@ -2,6 +2,7 @@ package models.whouse;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.Dates;
 import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
@@ -368,6 +369,7 @@ public class Inbound extends GenericModel {
         inbound.status = S.Create;
         inbound.createDate = new Date();
         inbound.receiver = this.receiver;
+        inbound.projectName = Login.current().projectName;
         inbound.save();
         tail_units.forEach(i -> {
             InboundUnit u = new InboundUnit();
@@ -401,6 +403,47 @@ public class Inbound extends GenericModel {
                     .save();
         }
         this.save();
+    }
+
+    /**
+     * 转入良品时，系统默认生成一条收货入库记录
+     *
+     * @param unit
+     * @param qty
+     * @param memo
+     * @param type
+     */
+    public static void createTransferInbound(ProcureUnit unit, int qty, String memo, Refund.InboundType type) {
+        Inbound inbound = new Inbound();
+        User user = Login.current();
+        inbound.id = id();
+        inbound.name = String
+                .format("%s_%s_%s_%s", unit.cooperator.name, type.label(), Dates.date2Date(), user.username);
+        inbound.type = T.Purchase;
+        inbound.cooperator = unit.cooperator;
+        inbound.plan = unit.deliverplan;
+        inbound.status = S.End;
+        inbound.projectName = Login.current().projectName;
+        inbound.memo = memo;
+        inbound.createDate = new Date();
+        inbound.receiveDate = new Date();
+        inbound.receiver = user;
+        inbound.save();
+        InboundUnit inboundUnit = new InboundUnit();
+        inboundUnit.inbound = inbound;
+        inboundUnit.unit = unit;
+        inboundUnit.planQty = qty;
+        inboundUnit.qty = qty;
+        inboundUnit.status = InboundUnit.S.Inbound;
+        inboundUnit.result = InboundUnit.R.Qualified;
+        inboundUnit.qualifiedQty = qty;
+        inboundUnit.inboundQty = qty;
+        inboundUnit.target = unit.currWhouse;
+        inboundUnit.qcDate = new Date();
+        inboundUnit.qcUser = user;
+        inboundUnit.inboundDate = new Date();
+        inboundUnit.confirmUser = user;
+        inboundUnit.save();
     }
 
     public void saveLog(String info, String fid) {
