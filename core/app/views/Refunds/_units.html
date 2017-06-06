@@ -7,12 +7,12 @@
     <th style="width:60px;">采购计划</th>
     <th style="width:60px;">采购单</th>
     <th style="width:300px;">Selling</th>
-    <th width="200px;">SKU</th>
-    <th>产品名称</th>
+    <th width="160px;">SKU</th>
+    <th width="180px;">产品名称</th>
     <th style="width:120px;">FBA-ShipmentId</th>
     <th style="width:85px;">产品条码</th>
-    <th style="width:80px;">计划退货数量</th>
-    <th style="width:80px;">实际退货数量</th>
+    <th style="width:80px;">计划退货数</th>
+    <th style="width:80px;">实际退货数</th>
     <th style="width:60px;">包装信息</th>
     <th style="width:100px;">去往仓库</th>
     <th style="width:60px;">运输方式</th>
@@ -32,7 +32,7 @@
     <td>${unit.unit?.deliveryment?.id}</td>
     <td>${unit.unit?.selling?.sellingId}</td>
     <td>${unit.unit?.product?.sku}</td>
-    <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation}</td>
+    <td title="${unit.unit?.product?.abbreviation}">${unit.unit?.product?.abbreviation.xxLong()}</td>
     <td>${unit.unit?.fba?.shipmentId}</td>
     <td>${unit.unit?.selling?.fnSku}</td>
     <td>${unit.planQty}</td>
