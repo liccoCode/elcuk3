@@ -1,6 +1,7 @@
 package models.material;
 
 import com.google.gson.annotations.Expose;
+import models.ElcukRecord;
 import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
@@ -9,8 +10,10 @@ import models.procure.ProcureUnit;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
+import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.jpa.GenericModel;
-import play.libs.F;
+import play.i18n.Messages;
 
 import javax.persistence.*;
 import java.util.*;
@@ -71,13 +74,24 @@ public class MaterialPurchase extends GenericModel {
     @Expose
     @Required
     public Date createDate = new Date();
-    
+
     /**
      * 采购单类型
      */
     @Enumerated(EnumType.STRING)
     public Deliveryment.T deliveryType;
 
+    /**
+     * 下单时间
+     */
+    public Date orderTime;
+
+    /**
+     * 交货时间
+     */
+    public Date deliveryTime;
+
+    public Date confirmDate;
     @Lob
     public String memo = " ";
 
@@ -103,27 +117,62 @@ public class MaterialPurchase extends GenericModel {
         return this.units.get(0).cooperator;
     }
 
+
     /**
-      * 交货的状态.
-      * 如果全部交货, 则进行交货状态更新
-      *
-      * @return
+     * 确认物料下采购单
+     */
+    public void confirm() {
+        if(!Arrays.asList(Deliveryment.S.APPROVE, Deliveryment.S.PENDING, Deliveryment.S.REJECT).contains(this.state))
+            Validation.addError("", "采购单状态非 " + Deliveryment.S.PENDING.label() + " 不可以确认");
+        if(this.orderTime == null)
+            Validation.addError("", "下单时间必须填写");
+        if(Validation.hasErrors()) return;
+        this.confirmDate = new Date();
+        this.state = Deliveryment.S.CONFIRM;
+        this.save();
+    }
 
-     public F.T2<Integer, Integer> deliveryProcress() {
-         int delivery = 0;
-         int total = 0;
-         for(MaterialUnit unit : this.units) {
-             if(!Objects.equals(unit.type, ProcureUnit.T.StockSplit)) {
-                 if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
-                     delivery += unit.qty();
-                 total += unit.qty();
-             }
-         }
-         if(Arrays.asList(Deliveryment.S.PENDING, Deliveryment.S.CONFIRM).contains(this.state) && delivery == total) {
-             this.state = Deliveryment.S.DONE;
-             this.save();
-         }
-         return new F.T2<>(delivery, total == 0 ? 1 : total);
-     }  */
+    /**
+     * 取消物料采购单
+     */
+    public void cancel(String msg) {
+        // 只允许所有都是 units 都为 采购中 的才能够取消.
+        if(this.units.stream().anyMatch(unit -> unit.stage != ProcureUnit.STAGE.DELIVERY)) {
+            Validation.addError("", "采购计划必须全部都是采购中的才能取消采购单！");
+            return;
+        }
+        if(Validation.hasErrors()) return;
+        this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
+        this.state = Deliveryment.S.CANCEL;
+        this.save();
+        new ElcukRecord(Messages.get("materialPurchases.cancel"),
+                Messages.get("materialPurchases.cancel.msg", this.id, msg.trim()), this.id).save();
+    }
 
+
+    /**
+     * 将 MaterialUnit 从 MaterialPurchase 中解除
+     *
+     * @param pids
+     */
+    public List<MaterialUnit> unAssignUnitInMaterialPurchase(List<Long> pids) {
+        List<MaterialUnit> units = MaterialUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(MaterialUnit unit : units) {
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
+                Validation.addError("materialPurchase.units.unassign", "%s");
+            } else if(this.deliveryType == Deliveryment.T.MANUAL) {
+                //手动采购单中的默认的采购计划不允许从采购单中移除
+                Validation.addError("", "手动单中默认的采购计划不允许被移除!");
+            } else {
+                unit.toggleAssignTodeliveryment(null, false);
+            }
+        }
+        if(Validation.hasErrors()) return new ArrayList<>();
+        this.units.removeAll(units);
+        this.save();
+
+        new ElcukRecord(Messages.get("materialPurchase.delunit"),
+                Messages.get("materialPurchase.delunit.msg", pids, this.id), this.id).save();
+        return units;
+    }
 }

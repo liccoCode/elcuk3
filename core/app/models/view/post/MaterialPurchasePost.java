@@ -129,10 +129,10 @@ public class MaterialPurchasePost extends Post<MaterialPurchase> {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-
-                    .append(" u.material.code LIKE ? ")
-                    .append(") ");
-            for(int i = 0; i < 1; i++) {
+                    .append(" m.id LIKE ?")
+                    .append(" OR u.material.code LIKE ?")
+                    .append(")");
+            for(int i = 0; i < 2; i++) {
                 params.add(word);
             }
         }
