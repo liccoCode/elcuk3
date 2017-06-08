@@ -159,6 +159,10 @@ public class Refunds extends Controller {
     }
 
     public static void transferQty(Long unitId, int qty, String memo, String type) {
+        if(StringUtils.isNotBlank(Refund.isAllReufund(unitId))) {
+            flash.error("采购计划" + unitId + "已经创建了退货单，请先处理！");
+            unQualifiedIndex(null);
+        }
         Refund.transferQty(unitId, qty, memo, type);
         flash.success("不良品转入成功!");
         unQualifiedIndex(null);
