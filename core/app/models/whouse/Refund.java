@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Created by licco on 2016/11/25.
+ * Created by licco on 2016/11/2.
+ * 退货单
  */
 @Entity
 @DynamicUpdate
@@ -182,12 +183,6 @@ public class Refund extends GenericModel {
             public String label() {
                 return "挑选入库";
             }
-        },
-        Purchase {
-            @Override
-            public String label() {
-                return "采购入库";
-            }
         };
 
         public abstract String label();
@@ -271,6 +266,9 @@ public class Refund extends GenericModel {
                     unit.save();
                 }
             }
+            if(refund.type == T.After_Receive) {
+                Inbound.createTailInboundByUnQualifiedHandle(refund);
+            }
         }
     }
 
@@ -345,6 +343,7 @@ public class Refund extends GenericModel {
         refund.creator = Login.current();
         refund.createDate = new Date();
         refund.refundDate = new Date();
+        refund.memo = memo;
         refund.save();
         units.stream().filter(unit -> Optional.ofNullable(unit.id).isPresent()).forEach(unit -> {
             ProcureUnit pro = ProcureUnit.findById(unit.id);
@@ -356,8 +355,10 @@ public class Refund extends GenericModel {
             u.planQty = unit.attrs.qty;
             u.qty = unit.attrs.qty;
             u.save();
+            refund.unitList.add(u);
         });
         refund.save();
+
     }
 
     /**
