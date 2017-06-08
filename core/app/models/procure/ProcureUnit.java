@@ -6,7 +6,6 @@ import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
-import models.OperatorConfig;
 import models.Role;
 import models.User;
 import models.activiti.ActivitiDefinition;
@@ -27,7 +26,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -1720,8 +1718,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         fee.amount = this.leftAmount();
         fee.save();
         new ERecordBuilder("procureunit.tailpay")
-                .msgArgs(this.product.sku,
-                        String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .msgArgs(this.product.sku, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class)
                 .save();
         return fee;
@@ -1780,8 +1777,30 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public float appliedAmount() {
         float appliedAmount = 0;
-        for(PaymentUnit fee : this.fees()) {
-            appliedAmount += fee.amount();
+        float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
+        float second = this.cooperator.second / 100;
+        if(this.parent == null) {
+            if(this.is_parent()) {
+                if(this.hasPrePay())
+                    appliedAmount += this.attrs.price * this.paidQty() * pre;
+                if(this.hasSecondPay())
+                    appliedAmount += this.attrs.price * this.paidQty() * second;
+                if(this.hasTailPay())
+                    appliedAmount = this.attrs.price * this.paidQty();
+            } else {
+                for(PaymentUnit fee : this.fees()) {
+                    appliedAmount += fee.amount();
+                }
+            }
+        } else {
+            ProcureUnit parent = this.parent;
+            /*如果父采购计划没有请款,则按照正常请款**/
+            if(parent.hasPrePay()) {
+                appliedAmount += this.attrs.price * this.paidQty() * pre;
+            }
+            for(PaymentUnit fee : this.fees()) {
+                appliedAmount += fee.amount();
+            }
         }
         return appliedAmount;
     }
@@ -2578,6 +2597,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public float otherPrice() {
         CooperItem cooperItem = CooperItem.find("cooperator.id=? AND sku=?", this.cooperator.id, this.sku).first();
         return cooperItem == null ? 0 : cooperItem.otherPrice;
+    }
+
+    public boolean is_parent() {
+        return ProcureUnit.count("parent.id=?", this.id) > 0;
     }
 
 }
