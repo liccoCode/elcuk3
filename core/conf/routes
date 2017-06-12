@@ -35,7 +35,7 @@ GET     /apply/transport/{id}                               Applys.transport
 POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
 DELETE  /apply/transport/{id}/shipment                      Applys.departShipmentFromApply(format:'json')
 GET     /apply/procure/{id}                                 Applys.procure
-POST     /apply/procure/{id}                                Applys.procure
+POST    /apply/procure/{id}                                 Applys.procure
 PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
 POST    /apply/transport                                    Applys.shipmentToApply
 

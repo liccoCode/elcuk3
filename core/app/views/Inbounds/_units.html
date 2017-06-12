@@ -101,15 +101,13 @@
         </td>
         <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
-              #{if Arrays.asList("IN_STORAGE","OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE")
-              .contains(unit.unit.stage.name()) || unit.status.name()=="Create" } readonly #{/if}
+              #{if unit.status.name()!="Receive" } readonly #{/if}
                  style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
                  value="${unit.unqualifiedQty}"
-              #{if Arrays.asList("IN_STORAGE","OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE")
-              .contains(unit.unit.stage.name()) || unit.status.name()=="Create" } readonly #{/if}
+              #{if unit.status.name()!="Receive" } readonly #{/if}
                  style="width:35px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
