@@ -9,9 +9,12 @@ import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.text.Collator;
+import java.text.RuleBasedCollator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,6 +27,7 @@ import java.util.List;
 public class Material extends Model {
 
     private static final long serialVersionUID = 4894533191306168541L;
+    private static final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
     /**
      * 物料编码
      */
@@ -111,5 +115,14 @@ public class Material extends Model {
 
     public String memo;
 
+    /**
+     * 返回所有物料信息
+     */
+    public static List<Material> suppliers() {
+        List<Material> materials = Material.all().fetch();
+        materials.sort((c1, c2) -> collator.compare(c1.name, c2.name));
+        return materials;
+    }
 
+    
 }

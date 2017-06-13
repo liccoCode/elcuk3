@@ -701,7 +701,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(datetime == null) datetime = new Date();
 
         //只有页面勾选了"同步亚马逊"按钮，才进行亚马逊更新操作
-        if(sync) {
+        if(!sync) {
             // 在测试环境下也不能标记 SHIPPED
             this.items.stream().filter(shipItem -> shipItem.unit.fba != null).forEach(shipItem -> {
                 if(!Arrays.asList(T.SEA, T.AIR).contains(this.type)) {

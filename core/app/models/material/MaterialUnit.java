@@ -5,15 +5,20 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.qc.CheckTaskDTO;
 import models.whouse.InboundUnit;
 import models.whouse.Whouse;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Min;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -23,6 +28,8 @@ import java.util.Date;
  * Date: 17/5/31
  * Time: AM10:18
  */
+@Entity
+@DynamicUpdate
 public class MaterialUnit extends Model {
 
     /**
@@ -131,17 +138,11 @@ public class MaterialUnit extends Model {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     public User.COR projectName;
-
     /**
-     * 备注
-     */
-    public String remark;
-
-    /**
-     * 创建人
+     * 操作人员
      */
     @OneToOne
-    public User creator;
+    public User handler;
 
     /**
      * 创建时间
@@ -187,4 +188,57 @@ public class MaterialUnit extends Model {
         this.lastBox = JSON.parseObject(this.lastBoxInfo, CheckTaskDTO.class);
     }
 
+    /**
+     * 手动单采购计划数据验证
+     */
+    public void validateManual() {
+        Validation.required("物料编码", this.material.code);
+        Validation.required("采购数量", this.planQty);
+        Validation.required("预计单价", this.planPrice);
+    }
+
+    public float totalAmountToCNY() {
+        return this.planCurrency.toCNY(new BigDecimal(this.planCurrency.toString())
+                .multiply(new BigDecimal(this.paidQty())).setScale(2, 4).floatValue());
+
+    }
+
+    public int paidQty() {
+        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
+                .contains(this.stage.name()))
+            return inboundQty;
+        else
+            return this.planQty;
+    }
+
+    /**
+     * 总共需要申请的金额
+     *
+     * @return
+     */
+    public float totalAmount() {
+        return new BigDecimal(this.planPrice)
+                .multiply(new BigDecimal(this.paidQty()))
+                .setScale(2, 4)
+                .floatValue();
+    }
+
+    public float formatPrice() {
+        return new BigDecimal(this.planPrice).setScale(2, 4).floatValue();
+    }
+
+    /**
+     * 将 MaterialUnit 添加到/移出 采购单,状态改变
+     *
+     * @param materialPurchase
+     */
+    public void toggleAssignTodeliveryment(MaterialPurchase materialPurchase, boolean assign) {
+        if(assign) {
+            this.materialPurchase = materialPurchase;
+            this.stage = ProcureUnit.STAGE.DELIVERY;
+        } else {
+            this.materialPurchase = null;
+            this.stage = ProcureUnit.STAGE.PLAN;
+        }
+    }
 }

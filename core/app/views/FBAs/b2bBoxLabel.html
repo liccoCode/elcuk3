@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FBA Packing Slips</title>
+  <style>
+    body{
+      font-family:STXihei;
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+
+<table border="0" style="border: none;margin:0 0 0 0;" cellpadding="0" cellspacing="0" width="100%">
+#{list items:1..boxNumber, as: 'i'}
+  <tr style="height: 98.6mm; vertical-align:middle;">
+    <td width="49%" style="vertical-align:middle">
+      <table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td>梦拓普技术有限公司</td>
+        </tr>
+        <tr>
+          <td>MENGTOP TECHNOLOGY CO., LIMITED PACKING LIST</td>
+        </tr>
+        <tr>
+          <th>供应商编码</th>
+          <th>ID</th>
+          <th>SKU</th>
+          <th>箱数(Ctn)</th>
+        </tr>
+        <tr>
+          <td>${procureUnit.cooperator?.name}</td>
+          <td>${procureUnit.id}</td>
+          <td>${procureUnit.product?.sku}</td>
+          <td>${procureUnit.id}</td>
+        </tr>
+        <tr>
+          <th>箱号</th>
+          <th>产品名称</th>
+          <th>净重(KG)</th>
+          <th>毛重(KG)</th>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </td>
+    <td width="2%"></td>
+    <td width="49%" style="vertical-align:middle">
+        #{render './fba.html', isexpress: isexpress,shipmentId: shipmentId, fba: fba, shipFrom: shipFrom,
+          boxNumber: procureUnit.numberToStr(i)/}
+    </td>
+  </tr>
+#{/list}
+</table>
+
+
+</body>
+</html>
+

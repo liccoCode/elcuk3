@@ -1,0 +1,109 @@
+#{extends 'main_full.html' /}
+#{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+
+<div class="row-fluid">
+  <form action="@{MaterialUnits.index()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <select name="p.dateType" class="inline">
+        #{list items:p.DATE_TYPES, as:'t'}
+          <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+        #{/list}
+        </select>
+
+
+        <div class="input-prepend inline">
+          <select name="p.stages" multiple="multiple" id="stage">
+            <option value="">阶段</option>
+          #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+              #{if stage.label() != '审批中'}
+                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+              #{/if}
+          #{/list}
+          </select>
+        </div>
+
+        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
+          <option value="">供应商</option>
+        #{list items:cooperators, as:'cop'}
+          <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+        #{/list}
+        </select>
+
+        <select name="p.projectName" class="inline">
+          <option value="">物料类型</option>
+        #{list items:models.material.Material.T, as:'t'}
+          <option value="${t.name()}" ${p.type.contains(t) ? 'selected' : ''}>${t.label()}</option>
+        #{/list}
+        </select>
+
+
+        <select name="p.projectName" class="inline">
+          <option value="">项目名称</option>
+        #{list items:models.User.COR, as:'c'}
+            #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+              <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+            #{/if}
+        #{/list}
+        </select>
+
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:200px;" name="p.search" placeholder="物料计划ID,物料编码" value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-prepend input-append inline">
+      <button class="btn btn-info" name="splitBtn" data-loading>物料收货入库单</button>
+    </div>
+
+    <div class="inline">
+      <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
+        <i class="icon-plus"></i>创建物料出库单
+      </a>
+      <a target="_blank" class="btn btn-primary" href='@{Deliveryments.manual()}'>
+        <i class="icon-plus"></i>创建物料退货单
+      </a>
+      <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank"><i
+          class="icon-download-alt"></i>导出物料计划</a>
+    </div>
+  </form>
+</div>
+
+<form method="post" id="create_materialUnit">
+  <div class="row-fluid">
+    <div class="span12">
+    #{render 'MaterialUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
+    </div>
+  </div>
+</form>
+
+
