@@ -1795,7 +1795,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             ProcureUnit parent = this.parent;
             /*如果父采购计划没有请款,则按照正常请款**/
-            if(parent.hasPrePay() && !this.hasPrePay()) {
+            if(parent.hasPrePay() && !parent.hasEqualWithPrePay() && !this.hasPrePay()) {
                 appliedAmount += this.attrs.price * this.paidQty() * pre;
             }
             for(PaymentUnit fee : this.fees()) {
@@ -1844,6 +1844,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean hasPrePay() {
         return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.cashpledge());
+    }
+
+    public boolean hasEqualWithPrePay() {
+        float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
+        double total = this.fees().stream().filter(fee -> fee.feeType == FeeType.cashpledge())
+                .mapToDouble(fee -> fee.amount()).sum();
+        return new BigDecimal(this.attrs.price * this.paidQty() * pre).compareTo(new BigDecimal(total)) == 0;
     }
 
     /**
