@@ -160,8 +160,8 @@
                 <div class="span2">
                     #{if procureUnit.isNeedPay}
                         #{power.ck 'procureunits.billingprepay'}
-                            #{ifnot procureUnit.hasPrePay()
-                            || (procureUnit.parent != null && procureUnit.parent.hasPrePay())}
+                            #{ifnot procureUnit.hasPrePay() || (procureUnit.parent != null
+                            && procureUnit.parent.hasPrePay() && !procureUnit.parent.hasEqualWithPrePay())}
                                 #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
                                   <input type="submit" value="申请预付款" class="btn btn-mini btn-success"
                                          rel="tooltip" title="${apply.cooperator.first}%">
