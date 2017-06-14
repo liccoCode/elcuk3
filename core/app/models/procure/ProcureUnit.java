@@ -1833,9 +1833,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public float totalAmountToCNY() {
         return this.attrs.currency.toCNY(new BigDecimal(this.attrs.price.toString())
                 .multiply(new BigDecimal(this.paidQty())).setScale(2, 4).floatValue());
-
     }
-
 
     /**
      * 是否拥有了 预付款
