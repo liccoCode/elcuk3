@@ -1,28 +1,24 @@
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered dataTable" id="unit_table">
   <tr>
-  #{if checkbox}
+  #{if materialUnitsIndex}
     <th width="20px;">
       <label class="checkbox">
         <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
       </label>
     </th>
   #{/if}
-  #{if relationPage}
-    <th width="20px;">
-      <input type="checkbox" name="checkAll" data-index="${dpIndex}">
-    </th>
-  #{/if}
     <th>物料计划ID</th>
-    <th width="40px;">阶段</th>
+    <th width="40px;">阶段22</th>
     <th width="150px;">物料编码</th>
     <th width="130px;">物料名称</th>
-    <th>深圳仓库</th>
-    <th>供应商</th>
-    <th>物料采购单</th>
-    <th>物料出货单</th>
+    <th>物料采购单<br>供应商</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
-    <th>可用库存</th>
+    <th>采购余量</th>
+    <th>单价</th>
+    <th>总价</th>
+    <th>剩余请款金额</th>
+    <th>Action</th>
     <th>预计交货时间</th>
     <th>实际交货时间</th>
     <th>质检状态</th>
@@ -36,67 +32,36 @@
 
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
-      #{if checkbox}
-        <td>
-          <label class="checkbox">
-              #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
-              #{if unit.fba && unit.fba.dto}
-                <!-- 优先使用自身的 FBA 箱包装数据 -->
-                  #{set dto: unit.fba.dto/}
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
-                       data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
-                       data-width="${dto.width}" data-height="${dto.height}">
-              #{/if}
-              #{elseif cooperItem}
-                <!-- 使用维护好的合作伙伴的数据 -->
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
-                       data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
-                       data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
-                       data-width="${cooperItem.width}" data-height="${cooperItem.height}">
-              #{/elseif}
-              #{else}
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="" data-num="" data-lastcartonnum=""
-                       data-singleboxweight="" data-length=""
-                       data-width="" data-height="">
-              #{/else}
-          </label>
-        </td>
-      #{/if}
-      #{if relationPage}
+
+      #{if materialUnitsIndex}
         <td>
           <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-      <i class="icon-reorder"></i>
-        #{if unit.parent}
-          <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
-             rel="tooltip" title="${unit.type?.label()}"></i>
-        #{/if}<br>
     ${unit.id}
     </td>
-
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
 
-    <td>
-      物料编码
-    </td>
-    <td>
-      物料编码
-    </td>
-    <td>${unit.whouse?.name}</td>
-    <td>${unit.cooperator?.name}</td>
-    <td>${unit.materialPurchase?.id}</td>
+    <td>${unit.material?.code}${str}</td>
+    <td>${unit.material?.name}</td>
+    <td>${unit.materialPurchase?.id}<br>${unit.cooperator?.name}</td>
     <td #{if unit.planQty != unit.qty && (unit.qty !=0 && unit.qty)} style="color:red"#{/if}>
-    ${unit.planQty}/${unit.qty}/${unit.inboundQty}
+    ${unit.planQty}/${unit.qty}/${unit.qty}
     </td>
     <td>${unit.availableQty}</td>
+    <td>${unit.planPrice}</td>
+    <td>${unit.planQty}*${unit.planPrice}</td>
+    <td>${unit.planQty}*${unit.planPrice}</td>
+    <td>
+      #{if materialUnitsIndex}
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
+                         uid="${unit.id}">修改</a>
+      #{/if}
+    </td>
 
-    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
-    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+    <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
+    <td>#{time_tooltip time:unit.deliveryDate/}</td>
     <td>
         #{if unit.result}
           <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
@@ -112,13 +77,6 @@
           <i style="color:red" class="icon-remove"></i>
         #{/elseif}
     </td>
-
-
-    <td>
-      <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
-      ${unit.result?.label()}
-      </a>
-    </td>
     <td>
         #{if unit.stage.name()=='IN_STORAGE'}
           <input type="button" data-id="${unit.id}" name="editBoxInfo" value="填写"
@@ -128,7 +86,7 @@
     </td>
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}</td>
-    <td>$#{time_tooltip time:unit.createDate/}</td>
+    <td>#{time_tooltip time:unit.createDate/}</td>
   </tr>
 
 

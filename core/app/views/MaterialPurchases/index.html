@@ -1,9 +1,10 @@
 #{extends 'main_full.html'/}
-#{set title:"物料采购单列表 ()" /}
+#{set title:"物料采购单列表 (${materialPurchases.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'deliveryments/index.coffee'/}
     #{script 'procureunits/_unit_list.coffee'/}
+    #{script 'MaterialPurchases/index.es6'/}
 #{/set}
 
 #{info_row}
@@ -107,11 +108,13 @@
               #{else }没有请款单#{/else}
           </td>
           <td>关联采购单</td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+
+          <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
             <span><i class="icon-reorder"></i></span>
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
           </td>
+
           <td>${dmt.supplier()?.name}</td>
           <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>供应商反馈</td>

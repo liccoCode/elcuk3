@@ -47,7 +47,7 @@
         <option value="">项目名称</option>
           #{list items:models.User.COR, as:'c'}
               #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
-                <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+                <option ${c.name() == p?.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
               #{/if}
           #{/list}
       </select>

@@ -10,10 +10,12 @@ import models.material.MaterialUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.product.Category;
+import models.view.Ret;
 import models.view.post.MaterialPost;
 import models.view.post.MaterialUnitPost;
 import models.view.post.ProcurePost;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
 import play.mvc.Before;
@@ -21,6 +23,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,7 +35,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MaterialUnits extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         String brandName = OperatorConfig.getVal("brandname");
@@ -40,6 +43,8 @@ public class MaterialUnits extends Controller {
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("categoryIds", Category.categoryIds());
+        renderArgs.put("logs",
+                ElcukRecord.records(Arrays.asList("materialUnit.save", "materialUnit.remove", "materialUnit.split"), 50));
 
         //为视图提供日期
         DateTime dateTime = new DateTime();
@@ -56,12 +61,25 @@ public class MaterialUnits extends Controller {
     public static void index(MaterialUnitPost p) {
         if(p == null) {
             p = new MaterialUnitPost();
-            p.dateType = "attrs.planShipDate";
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
+        }
+        render(p);
+    }
+
+    /**
+     * 仓库模块 物料计划查询
+     * @param p
+     */
+    public static void indexWhouse(MaterialUnitPost p) {
+        if(p == null) {
+            p = new MaterialUnitPost();
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
         p.pagination = false;
         render(p);
     }
-
 
     /**
      * 根据ID返回单个信息
@@ -106,5 +124,30 @@ public class MaterialUnits extends Controller {
         materialUnit.delete();
         flash.success("删除成功.");
         MaterialPurchases.show(materialPurchaseId);
+    }
+
+
+    /**
+     * 明天 后天 大后天 计划视图
+     */
+    public static void planView(Date date) {
+        MaterialUnitPost p = new MaterialUnitPost(ProcureUnit.STAGE.DELIVERY);
+        p.dateType = "attrs.planDeliveryDate";
+        p.from = date;
+        p.to = date;
+        MaterialUnits.index(p);
+    }
+
+    /**
+     * 物料计划创建物料出货单进行验证
+     * @param pids
+     */
+    public static void createValidate(List<Long> pids) {
+        String msg = MaterialUnit.validateIsInbound(pids);
+        if(StringUtils.isNotBlank(msg)) {
+            renderJSON(new Ret(false, msg));
+        } else {
+            renderJSON(new Ret(true));
+        }
     }
 }
