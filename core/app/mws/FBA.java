@@ -77,8 +77,7 @@ public class FBA {
                         msg.append("PLAN 不存在 MSKU ").append(unit.selling.merchantSKU);
                     } else {
                         if(StringUtils.isBlank(unit.selling.fnSku)) {
-                            unit.selling.fnSku = inboundItemMap
-                                    .get(fixHistoryMSKU(unit.selling.merchantSKU))
+                            unit.selling.fnSku = inboundItemMap.get(fixHistoryMSKU(unit.selling.merchantSKU))
                                     .getFulfillmentNetworkSKU();
                         }
                         member = planFba;
