@@ -94,6 +94,7 @@
         <th>数量(计划/交货/入库)</th>
         <th>单价</th>
         <th>单价*入库数量</th>
+        <th>剩余请款金额</th>
         <th>阶段</th>
         <th>抵达货代</th>
         <th>FBA</th>
@@ -114,7 +115,7 @@
           <td data-toggle="toggle" data-target="#unit_${pid}">
             <i class="icon-reorder"></i>
               #{if procureUnit.parent}
-                <i class="icon-retweet" style="color:${procureUnit.type.name()=='ProcureSplit'?'blue':'orange'}"
+                <i class="icon-retweet" style="color:${procureUnit.type?.name()=='ProcureSplit'?'blue':'orange'}"
                    rel="tooltip" title="${procureUnit.type?.label()}"></i>
               #{/if}
           ${procureUnit.id}
@@ -123,7 +124,8 @@
             <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
           </td>
           <td>
-            <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
+            <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank" rel="tooltip"
+               title="${procureUnit.sid}">${procureUnit.sid.overLong()}</a>
               #{list items:procureUnit.fees(), as:'fee'}
                 <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
               #{/list}
@@ -136,6 +138,7 @@
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
           <td class="price" amount="${procureUnit.totalAmount()}">
           ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
+          <td>${procureUnit.leftAmount()}</td>
           <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>
@@ -152,12 +155,13 @@
           </td>
         </tr>
           <tr id="unit_${pid}" style="display:none">
-            <td colspan="11">
+            <td colspan="12">
               <div class="row-fluid">
                 <div class="span2">
                     #{if procureUnit.isNeedPay}
                         #{power.ck 'procureunits.billingprepay'}
-                            #{ifnot procureUnit.hasPrePay()}
+                            #{ifnot procureUnit.hasPrePay() || (procureUnit.parent != null
+                            && procureUnit.parent.hasPrePay() && !procureUnit.parent.hasEqualWithPrePay())}
                                 #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
                                   <input type="submit" value="申请预付款" class="btn btn-mini btn-success"
                                          rel="tooltip" title="${apply.cooperator.first}%">
@@ -288,7 +292,7 @@
         <td rel='tooltip' title='汇总美金' class="usd"></td>
         <td rel='tooltip' title="汇总人民币" class="cny"></td>
         <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
-        <td colspan="3"></td>
+        <td colspan="4"></td>
       </tr>
     </table>
   </div>

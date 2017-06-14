@@ -183,6 +183,12 @@ public class Refund extends GenericModel {
             public String label() {
                 return "挑选入库";
             }
+        },
+        Exchange {
+            @Override
+            public String label() {
+                return "换货入库";
+            }
         };
 
         public abstract String label();
