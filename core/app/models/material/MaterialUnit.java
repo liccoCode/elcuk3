@@ -5,21 +5,25 @@ import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
+import models.procure.DeliverPlan;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.qc.CheckTaskDTO;
 import models.whouse.InboundUnit;
+import models.whouse.Outbound;
+import models.whouse.Refund;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
 /**
  * 物料采购计划
@@ -55,8 +59,25 @@ public class MaterialUnit extends Model {
      * 一个采购单只能拥有一个供应商
      */
     @ManyToOne
-    public Cooperator cooperator;
+    public Cooperator cooperator; 
 
+    /**
+     * 出库单
+     */
+    @ManyToOne
+    public MaterialOutbound outbound;
+    
+    /**
+     * 出货单
+     */
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public MaterialPlan materialPlan;
+
+    /**
+     * 出货计划
+     */
+    @OneToMany(mappedBy = "materialUnit", cascade = {CascadeType.PERSIST})
+    public List<MaterialPlanUnit> units = new ArrayList<>();
 
     /**
      * 计划采购数量
@@ -72,15 +93,14 @@ public class MaterialUnit extends Model {
     public int qty;
 
     /**
-     * 入库数量
-     */
-    public int inboundQty;
-
-    /**
      * 可用库存数量
      */
     public int availableQty;
 
+    /**
+     * 入库数
+     */
+    public int inboundQty;
 
     /**
      * 预计交货时间
@@ -181,6 +201,13 @@ public class MaterialUnit extends Model {
     @Required
     public Currency currency;
 
+    /**
+     * 此 Unit 的状态
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public ProcureUnit.PLANSTAGE planstage = ProcureUnit.PLANSTAGE.PLAN;
 
     @PostLoad
     public void postPersist() {
@@ -206,7 +233,7 @@ public class MaterialUnit extends Model {
     public int paidQty() {
         if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
                 .contains(this.stage.name()))
-            return inboundQty;
+            return qty;
         else
             return this.planQty;
     }
@@ -240,5 +267,50 @@ public class MaterialUnit extends Model {
             this.materialPurchase = null;
             this.stage = ProcureUnit.STAGE.PLAN;
         }
+    }
+    
+    /**
+     * 物料计划创建物料出货单进行验证
+     * @param pids
+     */
+    public static String validateIsInbound(List<Long> pids) {
+        List<MaterialUnit> units = MaterialUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        String msg = "";
+        for(MaterialUnit unit : units) {
+//            if(unit.stage != ProcureUnit.STAGE.IN_STORAGE) {
+//                return "请选择阶段为【已入仓】的物料采购计划！";
+//            } 
+            if(unit.outbound != null) {
+                return "物料采购计划【" + unit.id + "】已经在物料出库单 【" + unit.outbound.id + "】中！";
+            }
+            if(StringUtils.isNotEmpty(msg))
+                return msg;
+        }
+        return msg;
+    }
+
+
+    /**
+     * 将 MaterialUnit 添加到/移出 出库单,状态改变
+     *
+     * @param materialPlan
+     */
+    public void toggleAssignTodeliverplan(MaterialPlan materialPlan, boolean assign) {
+        if(assign) {
+            this.materialPlan = materialPlan;
+            this.planstage = ProcureUnit.PLANSTAGE.DELIVERY;
+        } else {
+            this.materialPlan = null;
+            this.planstage = ProcureUnit.PLANSTAGE.PLAN;
+        }
+    }
+
+    /**
+     * 物料计划查询剩余数量
+     * @return
+     */
+    public double getRemaining() {
+         double sum = this.units.stream().mapToDouble(MaterialPlanUnit->qty).sum();
+         return this.planQty - sum ;
     }
 }

@@ -94,7 +94,7 @@ $(() => {
     let html = _.template($("#copy").text())({"num": index});
     html = html.replace("<select></select>", selectLet);
     html = html.replace("units[<%= num %>].material.id", "units["+index+"].material.id");
-    html = html.replace("units[&lt;%= num %&gt;].currency", "units["+index+"].currency");
+    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].currency");
     console.log(html);
     $("#btn_tr").before(html);
     window.$ui.dateinput();
@@ -126,7 +126,7 @@ $(() => {
         if (!r.flag) {
           alert(r.message);
         } else {
-          $input.parent("td").parent("tr").next("tr").find("input[name$='price']").val(r.price);
+          $input.parent("td").parent("tr").next("tr").find("input[name$='planPrice']").val(r.price);
           $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize", r.boxSize);
           $input.parent("td").parent("tr").next("tr").find("option:contains(" + r.currency + ")").prop('selected', true);
           calu_box_size();
