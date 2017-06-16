@@ -97,6 +97,10 @@ public class MaterialUnit extends Model {
      */
     public int availableQty;
 
+    /**
+     * 入库数
+     */
+    public int inboundQty;
 
     /**
      * 预计交货时间

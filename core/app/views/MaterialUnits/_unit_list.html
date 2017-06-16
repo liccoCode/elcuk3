@@ -18,7 +18,9 @@
     <th>单价</th>
     <th>总价</th>
     <th>剩余请款金额</th>
-    <th>Action</th>
+  #{if materialUnitsIndex}
+  <th>Action
+  #{/if}
     <th>预计交货时间</th>
     <th>实际交货时间</th>
     <th>质检状态</th>
@@ -46,18 +48,18 @@
     <td>${unit.material?.code}${str}</td>
     <td>${unit.material?.name}</td>
     <td>${unit.materialPurchase?.id}<br>${unit.cooperator?.name}</td>
-    <td #{if unit.planQty != unit.qty && (unit.qty !=0 && unit.qty)} style="color:red"#{/if}>
-    ${unit.planQty}/${unit.qty}/${unit.qty}
+    <td #{if unit.planQty != unit.qty && (unit.qty !=0 && unit.inboundQty)} style="color:red"#{/if}>
+    ${unit.planQty}/${unit.qty}/${unit.inboundQty}
     </td>
     <td>${unit.availableQty}</td>
     <td>${unit.planPrice}</td>
     <td>${unit.planQty}*${unit.planPrice}</td>
     <td>${unit.planQty}*${unit.planPrice}</td>
     <td>
-      #{if materialUnitsIndex}
+        #{if materialUnitsIndex}
           <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
-                         uid="${unit.id}">修改</a>
-      #{/if}
+             uid="${unit.id}">修改</a>
+        #{/if}
     </td>
 
     <td>#{time_tooltip time:unit.planDeliveryDate/}</td>

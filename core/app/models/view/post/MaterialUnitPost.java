@@ -44,6 +44,11 @@ public class MaterialUnitPost extends Post<MaterialUnit> {
         DATE_TYPES.add(new F.T2<>("deliveryDate", "实际 [交货] 时间"));
     }
 
+    /**
+     * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
+     */
+    public Date from;
+    public Date to;
 
     public MaterialUnitPost() {
         //this.perSize = 100;

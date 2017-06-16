@@ -112,8 +112,8 @@ public class MaterialPurchases extends Controller {
         });
 
         purchase.save();
-        flash.success("Deliveryment %s 创建成功.", purchase.id);
-        index(null);
+        flash.success("MaterialPurchase %s 创建成功.", purchase.id);
+        MaterialPurchases.show(purchase.id);
     }
 
     /**
@@ -147,11 +147,7 @@ public class MaterialPurchases extends Controller {
         renderJSON(StringUtils.replace(buff.toString(), "},]", "}]"));
     }
 
-    /**
-     * 供应商的价格
-     * @param cooperId
-     * @param materialId
-     */
+    // 供应商的价格
     public static void price(long cooperId, Long materialId) {
         validation.required(cooperId);
         if(Validation.hasErrors())
