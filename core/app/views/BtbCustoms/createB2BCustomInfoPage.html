@@ -2,6 +2,7 @@
 #{set title:'新增客户' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'btbcustoms/b2bIndex.es6'/}
 #{/set}
 <style>
   .table td{
@@ -26,54 +27,137 @@
           <input type="text" name="b.customName" value="${b.customName}" required>
           <input type="hidden" name="b.id" value="${b.id}">
         </td>
-        <th>收货联系人</th>
-        <td>
-          <input type="text" name="b.receiver" value="${b.receiver}">
-        </td>
-      </tr>
-      <tr>
         <th>联系人<span style="color:red">*</span>：</th>
         <td><input type="text" name="b.contacts" value="${b.contacts}" required></td>
-        <th>收货联系人电话</th>
-        <td><input type="text" name="b.receiverPhone" value="${b.receiverPhone}"></td>
+
       </tr>
       <tr>
         <th>联系人电话<span style="color:red">*</span>：</th>
         <td><input type="text" name="b.contactPhone" value="${b.contactPhone}" required></td>
-        <th rowspan="2">收货地址</th>
-        <td rowspan="2">
-          <div class="input-prepend input-append">
-            <span class="add-on">国家:</span>
-            <input type="text" name="b.countryCode" value="${b.countryCode}">
-          </div>
-          <div class="input-prepend input-append">
-            <span class="add-on">邮编:</span>
-            <input type="text" name="b.postalCode" value="${b.postalCode}"><br>
-          </div>
-          <br>
-          <div class="input-prepend input-append">
-            <span class="add-on">城市:</span>
-            <input type="text" name="b.city" value="${b.city}"><br>
-          </div>
-          <div class="input-prepend input-append">
-            <span class="add-on">街道:</span>
-            <input type="text" name="b.address" value="${b.address}"><br>
-          </div>
-        </td>
-      </tr>
-      <tr>
         <th>邮箱：</th>
         <td><input type="text" name="b.email" value="${b.email}"></td>
       </tr>
+    </table>
+
+  #{info_row title:'收货地址'/}
+    <table class="table table-bordered">
+    #{if b.addresses.size()==0}
       <tr>
-        <td></td>
+        <th>收货联系人1</th>
+        <td><input type="text" name="b.addresses[0].receiver" value="${b.addresses[0]?.receiver}"></td>
+        <th>收货联系人电话</th>
+        <td><input type="text" name="b.addresses[0].receiverPhone" value="${b.addresses[0]?.receiverPhone}"></td>
+      </tr>
+      <tr>
         <td>
-          <input type="submit" class="btn btn-primary" value="保存">
-          <a href="@{BtbCustoms.b2bCustomInfoIndex()}" class="btn btn-danger">取消</a>
+          <div class="input-prepend input-append">
+            <span class="add-on">国家:</span>
+            <input type="text" name="b.addresses[0].countryCode" value="${b.addresses[0]?.countryCode}">
+          </div>
         </td>
+        <td>
+          <div class="input-prepend input-append">
+            <span class="add-on">邮编:</span>
+            <input type="text" name="b.addresses[0].postalCode" value="${b.addresses[0]?.postalCode}">
+          </div>
+        </td>
+        <td>
+          <div class="input-prepend input-append">
+            <span class="add-on">城市:</span>
+            <input type="text" name="b.addresses[0].city" value="${b.addresses[0]?.city}">
+          </div>
+        </td>
+        <td>
+          <div class="input-prepend input-append">
+            <span class="add-on">街道:</span>
+            <input type="text" name="b.addresses[0].address" value="${b.addresses[0]?.address}">
+          </div>
+        </td>
+      </tr>
+    #{/if}
+    #{else }
+        #{list items:b.addresses, as:'a'}
+          <tr>
+            <th>收货联系人</th>
+            <td>
+              <input type="text" name="b.addresses[${a_index-1}].receiver" value="${b.addresses[a_index-1]?.receiver}">
+              <input type="hidden" name="b.addresses[${a_index-1}].id" value="${b.addresses[a_index-1]?.id}">
+            </td>
+            <th>收货联系人电话</th>
+            <td><input type="text" name="b.addresses[${a_index-1}].receiverPhone" value="${b.addresses[a_index-1]?.receiverPhone}"></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="input-prepend input-append">
+                <span class="add-on">国家:</span>
+                <input type="text" name="b.addresses[${a_index-1}].countryCode" value="${b.addresses[a_index-1]?.countryCode}">
+              </div>
+            </td>
+            <td>
+              <div class="input-prepend input-append">
+                <span class="add-on">邮编:</span>
+                <input type="text" name="b.addresses[${a_index-1}].postalCode" value="${b.addresses[a_index-1]?.postalCode}">
+              </div>
+            </td>
+            <td>
+              <div class="input-prepend input-append">
+                <span class="add-on">城市:</span>
+                <input type="text" name="b.addresses[${a_index-1}].city" value="${b.addresses[a_index-1]?.city}">
+              </div>
+            </td>
+            <td>
+              <div class="input-prepend input-append">
+                <span class="add-on">街道:</span>
+                <input type="text" name="b.addresses[${a_index-1}].address" value="${b.addresses[a_index-1]?.address}">
+              </div>
+              <a href="" class=""><i class="icon-remove"></i></a>
+            </td>
+          </tr>
+        #{/list}
+    #{/else}
+      <tr id="btn_tr">
+        <td><input type="button" class="btn btn-primary" value="新增地址" id="add_address_btn"></td>
+        <td></td>
         <td></td>
         <td></td>
       </tr>
     </table>
+    <input type="submit" class="btn btn-primary" value="保存">
+    <a href="@{BtbCustoms.b2bCustomInfoIndex()}" class="btn btn-danger">取消</a>
   </form>
 </div>
+
+<script type="text/template" id="copy">
+  <tr>
+    <th>收货联系人<%= num+1 %></th>
+    <td><input type="text" name="b.addresses[<%= num %>].receiver" value=""></td>
+    <th>收货联系人电话</th>
+    <td><input type="text" name="b.addresses[<%= num %>].receiverPhone" value=""></td>
+  </tr>
+  <tr>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">国家:</span>
+        <input type="text" name="b.addresses[<%= num %>].countryCode" value="">
+      </div>
+    </td>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">邮编:</span>
+        <input type="text" name="b.addresses[<%= num %>].postalCode" value="">
+      </div>
+    </td>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">城市:</span>
+        <input type="text" name="b.addresses[<%= num %>].city" value="">
+      </div>
+    </td>
+    <td>
+      <div class="input-prepend input-append">
+        <span class="add-on">街道:</span>
+        <input type="text" name="b.addresses[<%= num %>].address" value="">
+      </div>
+    </td>
+  </tr>
+</script>
