@@ -39,14 +39,15 @@
       <tr>
         <th style="text-align:center">收货地址:</th>
         <td colspan="5">
-        #{if b.btbCustom?.addresses?.size()==0}
-          <a href="@{BtbCustoms.createB2BCustomInfoPage(b.btbCustom.id)}">新增收货地址</a>
-        #{/if}
-        #{else }
+        #{if b.btbCustom?.addresses?.size()>0}
             #{list b.btbCustom?.addresses,as:'a'}
               <label><input type="radio" name="b.address.id" value="${a.id}">
               ${a.receiver} ${a.receiverPhone} ${a.countryCode} ${a.city} ${a.postalCode} ${a.address}<br></label>
             #{/list}
+        #{/if}
+        #{else }
+          <input type="button" class="btn" data-url="@{BtbCustoms.createBtbOrderByCustom()}" id="add_new_address"
+                 value="刷新收货地址">
         #{/else}
         </td>
       </tr>
