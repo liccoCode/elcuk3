@@ -1,5 +1,5 @@
 #{extends 'main_full.html'/}
-#{set title:"采购单列表 ()" /}
+#{set title:"物料采购单列表 ()" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'deliveryments/index.coffee'/}
@@ -75,20 +75,64 @@
       <table class="table table-condensed table-bordered">
         <tr>
           <th width="20px;"></th>
-          <th>#</th>
-          <th>请款单</th>
+          <th>物料采购单ID</th>
+          <th>物料请款单</th>
+          <th>关联采购单</th>
           <th>Name</th>
-          <th>State</th>
-          <th>单据类型</th>
           <th>供应商</th>
+          <th>State</th>
+          <th>供应商反馈</th>
+          <th>单据类型</th>
           <th>最先交货时间</th>
           <th>最后交货时间</th>
           <th>交货进度</th>
-          <th>所属公司</th>
           <th>User</th>
           <th>Create</th>
         </tr>
-
+      #{list items:materialPurchases, as:'dmt'}
+        <tr>
+          <td>
+              #{if dmt.apply == null}
+                <input type="checkbox" name="deliverymentIds" value="${dmt.id}">
+              #{/if}
+          </td>
+          <td>
+            <a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a>
+          </td>
+          <td>
+              #{if dmt.apply}
+                <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
+                <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
+              #{/if}
+              #{else }没有请款单#{/else}
+          </td>
+          <td>关联采购单</td>
+          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+            <span><i class="icon-reorder"></i></span>
+            <span>${dmt.name}</span>
+            <span class="badge badge-info">${dmt.units.size()}</span>
+          </td>
+          <td>${dmt.supplier()?.name}</td>
+          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
+          <td>供应商反馈</td>
+          <td>${dmt.deliveryType?.label()}</td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
+             
+            </div>
+          </td>
+          <td>${dmt.handler.username}</td>
+          <td>#{time_tooltip time:dmt.createDate/}</td>
+        </tr>
+       
+      #{/list}
+        <tr class="tb_footer">
+          <td colspan="13">
+          #{bootstrap_pager pi:p, url:'' /}
+          </td>
+        </tr>
       </table>
       <div class="btn-toolbar">
 

@@ -1,75 +1,126 @@
 #{extends 'main_full.html' /}
 #{set title:'采购收货入库单' /}
 #{set 'moreScripts'}
-    #{script 'inbounds/blank.js'/}
+    #{script 'MaterialPurchases/blank.es6'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
-
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Inbounds.create(), method:'POST', id: 'new_inbound'}
+#{form @MaterialPurchases.create(), method:'POST', id: 'new_inbound'}
     #{info_row title: '物料采购单'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-bordered">
-      <tr>
-        <th>采购单名称</th>
-        <td>
-          <input type="text" name="purchase.name" value="">
-        </td>
-        <th>物料名称</th>
-        <td style="width: 40%;"><input type="text" name="inbound.status" value="Create"></td>
-      </tr>
-      <tr>
-        <th>物料编码</th>
-        <td><input type="text" name="inbound.plan.id" value="" readonly></td>
-        <th>供应商</th>
-        <td>
-          <select></select>
-        </td>
-      </tr>
-      <tr>
-        <th>采购数量</th>
-        <td><input type="text" class="span8" name="inbound.name" value=""></td>
-        <th>物料分配项目</th>
-        <td>
-          <input type="text" value="" readonly>
-        </td>
-      </tr>
-      <tr>
-        <th>预计单价<span style="color:red">*</span></th>
-        <td><input type="date" name="inbound.receiveDate" required></td>
-        <th>实际单价</th>
-        <td></td>
-      </tr>
-      <tr>
-        <th>预计交货时间</th>
-        <td><input type="date" value=""></td>
-        <th></th>
-        <td></td>
-      </tr>
-      <tr>
-        <th>备注</th>
-        <td colspan="4">
-          <textarea name="inbound.memo" rows="4" class="input-block-level"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4">
-          <input type="hidden" name="record.origin" value="">
-          <input type="hidden" name="record.state" value="">
-          <button class="btn btn-primary" name="create_record">创建</button>
-          <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
+
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>采购单名称</th>
+    <td>
+      <input type="text" name="purchase.name" value="" required>
+    </td>
+    <th>物料名称</th>
+    <td>
+      <select name="units[0].material.id" id="unit_material" class="inline selectize" style="width:150px;">
+        <option value="">请选择</option>
+          #{list items:materials, as:'m'}
+            <option value="${m.id}">${m.name}</option>
+          #{/list}
+      </select>
+    </td>
+    <th>物料编码</th>
+    <td><input type="text" name="units[0].material.code" id="materialCode" readonly></td>
+  </tr>
+
+  <tr>
+    <th>供应商</th>
+    <td>
+      <select name="purchase.cooperator.id">
+      </select>
+    </td>
+    <th>采购数量</th>
+    <td>
+      <input type="text" class="input-mini" placeHolder="具体数量" name="units[0].planQty">
+      <input type="text" id="box_num" name="box_size" class="input-mini" placeHolder="箱数" boxSize="">
+      <span class="add-on">箱</span>
+      <input type="hidden" name="units[0].attrs.qty">
+    </td>
+    <th>所属公司</th>
+    <td colspan="3">
+      <select name="p.projectName" class="inline">
+        <option value="">项目名称</option>
+          #{list items:models.User.COR, as:'c'}
+              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+              #{/if}
+          #{/list}
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th>价格</th>
+    <td>
+      <input type="text" class="span1 inline" id="unit_price" name="units[0].planPrice">
+        #{pickCurrency id:'unit_currency', name:'units[0].attrs.planCurrency',class: 'span1 inline',
+        c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
+    </td>
+    <th>预计交货时间</th>
+    <td><input type="date" name="units[0].planDeliveryDate"></td>
+    <th></th>
+    <td></td>
+  </tr>
+  <tr>
+
+  </tr>
+  <tr id="btn_tr">
+    <th>备注</th>
+    <td colspan="4">
+      <textarea name="purchase.memo" rows="4" class="input-block-level"></textarea>
+    </td>
+  </tr>
+
+
+  <tr>
+    <td colspan="2">
+      <button class="btn btn-primary">保存</button>
+    </td>
+    <td colspan="2">
+      <button class="btn btn-warning" id="addSkuBtn">新增SKU</button>
+    </td>
+  </tr>
+</table>
+
 
 #{/form}
 
+
+<script type="text/template" id="copy">
+  <tr>
+    <th>物料名称 <span style="color:red"><%= num+1 %></span></th>
+    <td>
+      <select></select>
+    </td>
+    <th>物料编码</th>
+    <td colspan="3">
+      <input type="text" name="units[<%= num %>].material.code" readonly>
+    </td>
+  </tr>
+  <tr>
+    <th>采购数量</th>
+    <td>
+      <input type="text" class="input-mini" placeHolder="具体数量" name="units[<%= num %>].planQty">
+      <input type="text" name="box_size" class="input-mini" placeHolder="箱数">
+      <span class="add-on">箱</span>
+    </td>
+    <th>价格</th>
+    <td>
+      <input type="text" class="span1 inline" id="unit_price" name="units[<%= num %>].planPrice">
+    #{pickCurrency id:'unit_currency', name:'units[<%= num %>].planCurrency',class: 'span1 inline',
+    c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
+    </td>
+    <th>所属公司</th>
+    <td colspan="3">
+      <select name="units[<%= num %>].projectName">
+      #{list items:models.User.COR, as:'c'}
+        <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
+      #{/list}
+      </select>
+    </td>
+  </tr>
+</script>
