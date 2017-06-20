@@ -1,0 +1,130 @@
+#{extends 'main_full.html' /}
+#{set title:'编辑物料出库单' /}
+#{set 'moreScripts'}
+  #{script 'materialOutbounds/edit.es6'/} 
+  #{script 'materialOutbounds/blank.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @MaterialOutbounds.update(), method:'POST', id: 'new_outbound'}
+    #{info_row title:'物料出库单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>物料出库单ID</th>
+        <td><input type="text" name="rid" value="${outbound?.id}" readonly/></td>
+        <th>出库单名称<span style="color:red">*</span></th>
+        <td><input type="text" class="span8" name="outbound.name" value="${outbound?.name}" required></td>
+      </tr>
+      <tr>
+        <th>物料分配项目</th>
+        <td>
+          <input type="text" value="${outbound?.projectName}" readonly>
+        </td>
+        <th>出库类型</th>
+        <td>
+          <select name="outbound.type">
+              #{list items:models.material.MaterialOutbound.C, as:'t'}
+                <option value="${t.name()}" #{if t==outbound.type} selected #{/if}>${t.label()}</option>
+              #{/list}
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th>收货方</th>
+        <td>
+          <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
+            <option value="">供应商</option>
+              #{list items:cooperators, as:'cop'}
+                <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+              #{/list}
+          </select>
+        </td>
+        <th>目的地</th>
+        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" value="${outbound?.whouse}" required>
+        </td>
+      </tr>
+
+      <tr>
+        <th>发货人</th>
+        <td><input type="text" name="outbound.consignor" value="${outbound?.consignor}"/></td>
+        </td>
+        <th>出库日期<span style="color:red">*</span></th>
+        <td><input type="date" name="outbound.outboundDate" value="${outbound?.outboundDate}" required></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="5">
+          <textarea name="outbound.memo" rows="4" class="input-block-level">${outbound?.memo}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6">
+          <button class="btn btn-primary" name="create_record">创建/更新</button>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
+            <i class="icon-list-alt"></i>导出</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+#{/form}
+
+#{info_row title:'已添加进入【出库单】的【物料采购单元】'/}
+<div class="row-fluid">
+  <div class="span12">
+  #{render 'MaterialOutbounds/_units.html', units:outbound.units, is_check: true/}
+  #{if outbound.status.name()=='Create'}
+      #{power.ck 'outbounds.delete'}
+        <button class="btn btn-danger" id="deleteBtn">解除</button>
+      #{/power.ck}
+  #{/if}
+  #{else }
+    <button class="btn btn-warning" id="cancelBtn">撤销出库</button>
+  #{/else}
+  </div>
+</div>
+<br>
+
+
+<div class="row-fluid">
+  <div class="span12">
+    <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+  </div>
+</div>
+<div class="row-fluid">
+  <div style="min-height:300px;" class="span12 well" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  </div>
+</div>
+
+<div id="cancel_outbound_modal" class="modal hide fade">
+  <form action="@{StockRecords.cancelOutbound()}" method="post">
+    <div class="modal-body">
+      <table>
+        <tr>
+          <th style="width:70px;">撤销原因:</th>
+          <td>
+            <textarea style="height:150px;width:430px;" name="msg" required></textarea>
+            <input type="hidden" id="recordIds" name="ids" value=""/>
+            <input type="hidden" name="outboundId" value="${outbound.id}"/>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      <input type="submit" value="提交" class="btn btn-primary">
+    </div>
+  </form>
+</div>

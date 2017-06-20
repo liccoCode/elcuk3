@@ -1,9 +1,10 @@
 #{extends 'main_full.html'/}
-#{set title:"物料采购单列表 ()" /}
+#{set title:"物料采购单列表 (${materialPurchases.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'deliveryments/index.coffee'/}
     #{script 'procureunits/_unit_list.coffee'/}
+    #{script 'MaterialPurchases/index.es6'/}
 #{/set}
 
 #{info_row}
@@ -86,8 +87,7 @@
           <th>最先交货时间</th>
           <th>最后交货时间</th>
           <th>交货进度</th>
-          <th>User</th>
-          <th>Create</th>
+          <th>User/Create</th>
         </tr>
       #{list items:materialPurchases, as:'dmt'}
         <tr>
@@ -107,11 +107,13 @@
               #{else }没有请款单#{/else}
           </td>
           <td>关联采购单</td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+
+          <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
             <span><i class="icon-reorder"></i></span>
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
           </td>
+
           <td>${dmt.supplier()?.name}</td>
           <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
           <td>供应商反馈</td>
@@ -120,13 +122,13 @@
           <td></td>
           <td>
             <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
-             
-            </div>
-          </td>
-          <td>${dmt.handler.username}</td>
-          <td>#{time_tooltip time:dmt.createDate/}</td>
+              <div class="bar" style="width: 20%;">
+                <p style="color:black;">2 / 15</p>
+              </div>
+            </div></td>
+          <td>${dmt.handler.username}/#{time_tooltip time:dmt.createDate/}</td>
         </tr>
-       
+
       #{/list}
         <tr class="tb_footer">
           <td colspan="13">

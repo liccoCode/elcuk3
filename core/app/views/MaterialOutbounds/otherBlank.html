@@ -1,0 +1,168 @@
+#{extends 'main_full.html' /}
+#{set title:'其它物料出库单' /}
+#{set 'moreScripts'}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'outbounds/blank.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Outbounds.otherCreate(), method:'POST', id: 'new_outbound'}
+    #{info_row title:'物料出库单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>出库单ID</th>
+        <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
+        <th>出库单名称<span style="color:red">*</span></th>
+        <td><input type="text" class="span8" name="outbound.name" value="${name}" required></td>
+        <th>出库日期<span style="color:red">*</span></th>
+        <td><input type="date" name="outbound.outboundDate" required></td>
+      </tr>
+      <tr>
+        <th>出库类型</th>
+        <td>
+          <select name="outbound.type">
+              #{list items:models.whouse.StockRecord.C, as:'t'}
+                  #{if !t.name().equals("Normal")}
+                    <option value="${t.name()}">${t.label()}</option>
+                  #{/if}
+              #{/list}
+          </select>
+        </td>
+        <th>货代公司</th>
+        <td>
+          <!-------------------------- targetId 备选项 ---------------------------------------------------------->
+          <select style="display:none;" id="shipperOptions">
+              #{list items:shippers, as: 'ship'}
+                <option ${ship.id.toString() == outbound?.targetId ? 'selected' : ''} value="${ship.id}">
+                ${ship.name}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="supplierOptions">
+              #{list items:suppliers, as: 'sup'}
+                <option ${sup.id.toString() == outbound?.targetId ? 'selected' : ''} value="${sup.id}">
+                ${sup.name}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="sampleOptions">
+              #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
+                <option ${outbound?.targetId == target ? 'selected' : ''} value="${target}">
+                ${target}
+                </option>
+              #{/list}
+          </select>
+          <select style="display:none;" id="processOptions">
+            <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+              品拓生产部
+            </option>
+          </select>
+          <!--------------------------------------------------------------------------------------------------->
+          <select name="outbound.targetId" style="width: 230px;">
+          </select>
+        </td>
+        <th>发货人</th>
+        <td>
+          <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">
+            <option value="">发货人</option>
+              #{list items:users, as:'u'}
+                <option value="${u.id}">${u.username}</option>
+              #{/list}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="5">
+          <textarea name="outbound.memo" rows="4" class="input-block-level"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6">
+          <button class="btn btn-primary" name="create_record">创建</button>
+          <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+    #{info_row title:'已添加进入【物料出库单】的【物料计划】'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered" id="data_table">
+      <tr>
+        <th>
+          <label class="checkbox">
+            <input type="checkbox" id="checkbox_all" class="checkall" value="">
+          </label>
+        </th>
+        <th>采购计划ID</th>
+        <th>采购单</th>
+        <th>Selling</th>
+        <th>SKU</th>
+        <th>产品名称</th>
+        <th>供应商</th>
+        <th>可用库存</th>
+        <th>实际出库数量</th>
+        <th>仓库名称</th>
+        <th>收货入库记录ID</th>
+        <th>阶段</th>
+        <th>项目名称</th>
+        <th>备注</th>
+      </tr>
+        #{list items:units, as:'unit'}
+          <tr class="text-center">
+            <td>
+              <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
+              <input type="hidden" name="pids" value="${unit.id}">
+            </td>
+            <td>${unit.id}</td>
+            <td>${unit.deliveryment.id}</td>
+            <td>${unit.selling?.sellingId}</td>
+            <td>${unit.product.abbreviation}</td>
+            <td>${unit.cooperator?.name}</td>
+            <td>${unit.whouse?.name}</td>
+            <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+            <td>${unit.fba?.shipmentId}</td>
+            <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
+            <td>${unit.availableQty}</td>
+            <td>${unit.outQty}</td>
+            <td>
+              <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+            </td>
+            <td>${unit.currWhouse?.name}</td>
+            <td>${unit.showInboundIds()}</td>
+            <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+            <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
+          </tr>
+        #{/list}
+    </table>
+  </div>
+</div>
+#{/form}
+
+<div class="input-append">
+  <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
+  <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+  </div>
+</div>
+

@@ -89,18 +89,18 @@
                 #{power.ck "deliveryments.index"}
                   <li><a href="@{Deliveryments.index()}">采购单</a></li>
                 #{/power.ck}
-                #{power.ck "deliveryments.index"}
-                  <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
-                #{/power.ck}
                 #{power.ck "deliverplans.index"}
                   <li><a href="@{Deliverplans.index()}">出货单</a></li>
                 #{/power.ck}
                 #{power.ck "cooperators.index"}
                   <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
                 #{/power.ck}
+                <li class="divider"></li>
 
-                #{power.ck "procures.datapanel"}
-                  <li><a href="@{ProcureUnits.dataPanel()}">日均采购计划</a></li>
+                #{power.ck "deliveryments.index"}
+                  <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
+                  <li><a href="@{MaterialUnits.index()}">物料采购计划</a></li>
+                  <li><a href="@{MaterialPlans.index()}">物料出货单</a></li>
                 #{/power.ck}
             </ul>
           </li>
@@ -213,6 +213,13 @@
                 #{power.ck "whouses.index"}
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
+              <li class="divider"></li>
+
+              #{power.ck "deliveryments.index"}
+                <!-- <li><a href="@{MaterialUnits.indexWhouse()}">物料采购计划</a></li> -->
+                <li><a href="@{MaterialOutbounds.indexMaterial()}">物料库存管理</a></li>
+                <li><a href="@{MaterialOutbounds.index()}">物料出库</a></li>  
+              #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
