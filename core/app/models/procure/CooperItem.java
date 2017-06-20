@@ -227,7 +227,6 @@ public class CooperItem extends Model {
         this.createDate = new Date();
         this.setAttributes();
         this.setDefaultValue();
-        this.save();
     }
 
     /**

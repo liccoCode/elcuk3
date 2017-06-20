@@ -6,16 +6,16 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.db.jpa.Model;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
- * User: licco
- * Date: 16/1/20
- * Time: 下午3:55
+ * Created by licco on 16/1/20.
  */
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
@@ -31,8 +31,24 @@ public class BtbCustom extends Model {
 
     public String email;
 
-    @OneToMany(mappedBy = "btbCustom", fetch = FetchType.LAZY)
-    public List<BtbCustomAddress> addresses = new ArrayList<>();
+    /**
+     * 收货人
+     */
+    public String receiver;
+
+    /**
+     * 收货人电话
+     */
+    public String receiverPhone;
+
+
+    public String countryCode;
+
+    public String city;
+
+    public String postalCode;
+
+    public String address;
 
     /**
      * 创建人
@@ -49,7 +65,7 @@ public class BtbCustom extends Model {
     @OneToMany(mappedBy = "btbCustom", cascade = {CascadeType.PERSIST})
     public List<BtbOrder> orders = new ArrayList<>();
 
-    public boolean validRepeatCustomName() {
+    public boolean vaildRepeatCustomName() {
         boolean flag = false;
         List<BtbCustom> c;
         if(id == null) {

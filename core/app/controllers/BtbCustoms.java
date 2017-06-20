@@ -6,7 +6,6 @@ import helper.J;
 import models.ElcukRecord;
 import models.market.BtbOrder;
 import models.procure.BtbCustom;
-import models.procure.BtbCustomAddress;
 import models.view.post.BtbCustomPost;
 import models.view.post.BtbOrderPost;
 import org.apache.commons.lang.StringUtils;
@@ -55,7 +54,7 @@ public class BtbCustoms extends Controller {
     }
 
     public static void createB2BCustom(BtbCustom b) {
-        if(b.validRepeatCustomName()) {
+        if(b.vaildRepeatCustomName()) {
             flash.error("客户/公司名称重复了，请重新填写！");
             render("Cooperators/createB2BCustomInfoPage.html", b);
         }
@@ -63,10 +62,6 @@ public class BtbCustoms extends Controller {
             b.createDate = new Date();
             b.creator = Login.current();
             b.save();
-            b.addresses.forEach(address -> {
-                address.btbCustom = b;
-                address.save();
-            });
         } else {
             BtbCustom old = BtbCustom.findById(b.id);
             old.customName = b.customName;
@@ -75,21 +70,6 @@ public class BtbCustoms extends Controller {
             old.contacts = b.contacts;
             old.updateDate = new Date();
             old.save();
-            b.addresses.forEach(address -> {
-                if(address.id == null) {
-                    address.btbCustom = old;
-                    address.save();
-                } else {
-                    BtbCustomAddress entity = BtbCustomAddress.findById(address.id);
-                    entity.receiver = address.receiver;
-                    entity.receiverPhone = address.receiverPhone;
-                    entity.countryCode = address.countryCode;
-                    entity.city = address.city;
-                    entity.postalCode = address.postalCode;
-                    entity.address = address.address;
-                    entity.save();
-                }
-            });
         }
         b2bCustomInfoIndex(new BtbCustomPost());
     }
@@ -127,14 +107,6 @@ public class BtbCustoms extends Controller {
         render(b, pageTitle);
     }
 
-    public static void cancelBtbOrder(Long id) {
-        BtbOrder b = BtbOrder.findById(id);
-        b.stage = BtbOrder.STAGE.Cancel;
-        b.save();
-        flash.success("取消订单成功！");
-        btbOrderIndex(new BtbOrderPost());
-    }
-
     public static void createBtbOrder(BtbOrder b) {
         if(StringUtils.isEmpty(b.orderNo)) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
@@ -166,14 +138,12 @@ public class BtbCustoms extends Controller {
 
     public static void findInfoById(Long id) {
         BtbCustom custom = BtbCustom.findById(id);
-        BtbCustomAddress address = custom.addresses.get(0);
-        if(address != null)
-            renderJSON(J.json(GTs.MapBuilder.map("receiver", address.receiver)
-                    .put("receiverPhone", address.receiverPhone)
-                    .put("countryCode", address.countryCode)
-                    .put("city", address.city)
-                    .put("address", address.address)
-                    .put("postalCode", address.postalCode).build()));
+        renderJSON(J.json(GTs.MapBuilder.map("receiver", custom.receiver)
+                .put("receiverPhone", custom.receiverPhone)
+                .put("countryCode", custom.countryCode)
+                .put("city", custom.city)
+                .put("address", custom.address)
+                .put("postalCode", custom.postalCode).build()));
     }
 
 

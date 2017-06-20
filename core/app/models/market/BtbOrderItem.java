@@ -10,15 +10,11 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 
 /**
- * Created by IntelliJ IDEA.
- * User: licco
- * Date: 16/1/21
- * Time: 下午2:52
+ * Created by licco on 16/1/21.
  */
 @Entity
 public class BtbOrderItem extends Model {
 
-    private static final long serialVersionUID = 3865690355246211727L;
     @ManyToOne
     public Product product;
 
@@ -37,17 +33,6 @@ public class BtbOrderItem extends Model {
     @Column(length = 10)
     @Required
     public Currency currency;
-
-    /**
-     * 其他售价
-     */
-    public BigDecimal otherPrice;
-
-    @Expose
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10)
-    @Required
-    public Currency otherCurrency;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public BtbOrder btbOrder;

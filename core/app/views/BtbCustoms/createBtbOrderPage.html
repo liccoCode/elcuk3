@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title: '创建订单'/}
+#{set title: pageTitle/}
 #{set 'moreScripts'}
     #{script 'btbcustoms/btbOrder.coffee'/}
 #{/set}
@@ -19,12 +19,12 @@
   #{info_row title:'订单基本信息' /}
     <table class="table table-bordered">
       <tr>
-        <th style="text-align:center">订单号<span style="color:red">*</span>:</th>
+        <td style="text-align:center">订单号<span style="color:red">*</span>:</td>
         <td width="240px;">
           <input type="text" name="b.orderNo" value="${b.orderNo}">
           <input type="hidden" name="id" value="${b.id}">
         </td>
-        <th style="text-align:center">客户/公司名称<span style="color:red">*</span>:</th>
+        <td style="text-align:center">客户/公司名称<span style="color:red">*</span>:</td>
         <td width="400px;">
           <select name="b.btbCustom.id" required class="selectize">
             <option value="">请选择</option>
@@ -33,33 +33,14 @@
           #{/list}
           </select>
         </td>
-        <th style="text-align:center">销售日期<span style="color:red">*</span>:</th>
+        <td style="text-align:center">销售日期<span style="color:red">*</span>:</td>
         <td><input type="date" name="b.saleDate" value="${b.saleDate.date()}" required></td>
       </tr>
       <tr>
-        <th style="text-align:center">收货地址:</th>
-        <td colspan="5">
-        #{if b.btbCustom?.addresses?.size()>0}
-            #{list b.btbCustom?.addresses,as:'a'}
-              <label><input type="radio" name="b.address.id" value="${a.id}">
-              ${a.receiver} ${a.receiverPhone} ${a.countryCode} ${a.city} ${a.postalCode} ${a.address}<br></label>
-            #{/list}
-        #{/if}
-        #{else }
-          <input type="button" class="btn" data-url="@{BtbCustoms.createBtbOrderByCustom()}" id="add_new_address"
-                 value="刷新收货地址">
-        #{/else}
-        </td>
-      </tr>
-      <tr>
-        <th style="text-align:center">备注:</th>
+        <td style="text-align:center">备注:</td>
         <td colspan="5">
           <textarea style="width:98%;height:60px;" name="b.memo">${b.memo}</textarea>
         </td>
-      </tr>
-      <tr>
-        <th style="text-align:center">Remark:</th>
-        <td colspan="5"><input type="text" style="width:98%;" name="b.remark" value="${b.remark}"></td>
       </tr>
     </table>
   #{info_row title:'订单SKU明细' /}
@@ -67,36 +48,28 @@
     #{if b.btbOrderItemList.size()>0}
         #{list items:b.btbOrderItemList, as:'i'}
           <tr>
-            <th style="text-align:center">SKU<span style="color:red">*</span>:</th>
+            <td style="text-align:center">SKU<span style="color:red">*</span>:</td>
             <td>
               <input type="text" id="inputsku" name="b.btbOrderItemList[${i_index-1}].product.sku"
                      value="${i.product.sku}" required>
               <input type="hidden" name="b.btbOrderItemList[${i_index-1}].id" value="${i.id}">
             </td>
-            <th style="text-align:center">name：</th>
+            <td style="text-align:center">name：</td>
             <td style="width:200px;">
               <input type="text" name="skuName" value="${i.product.productName}" readonly>
             </td>
-            <th>销量：</th>
+            <td>销量：</td>
             <td>
               <input type="text" name="b.btbOrderItemList[${i_index-1}].qty" value="${i.qty}" required>
             </td>
-            <th>售价：
+            <td>售价：
               <input type="text" style="width:60px;" name="b.btbOrderItemList[${i_index-1}].price" value="${i.price}" required>
               <select style="width:100px;" name="b.btbOrderItemList[${i_index-1}].currency">
                   #{list items:helper.Currency, as:'c'}
                     <option value="${c.name()}" #{if i.currency.name()==c.name()} selected #{/if}>${c.name()}</option>
                   #{/list}
               </select>
-            </th>
-            <th>其他费用:
-              <input type="text" style="width:60px;" name="b.btbOrderItemList[${i_index-1}].otherPrice" value="${i.otherPrice}" required>
-              <select style="width:100px;" name="b.btbOrderItemList[${i_index-1}].otherCurrency">
-                  #{list items:helper.Currency, as:'c'}
-                    <option value="${c.name()}" ${i.otherCurrency==c?'selected':''}>${c.name()}</option>
-                  #{/list}
-              </select>
-            </th>
+            </td>
             <td>
               <input type="button" class="btn btn-danger" name="deleteBtn" value="删除"/>
             </td>
@@ -125,21 +98,13 @@
               #{/list}
           </select>
         </td>
-        <td>其他价格:
-          <input type="text" style="width:60px;" name="b.btbOrderItemList[0].otherPrice" value="" required>
-          <select style="width:100px;" name="b.btbOrderItemList[0].otherCurrency">
-              #{list items:helper.Currency, as:'c'}
-                <option value="${c.name()}" #{if c.name()=='USD'} selected #{/if}>${c.name()}</option>
-              #{/list}
-          </select>
-        </td>
         <td>
           <input type="button" class="btn btn-danger" name="deleteBtn" value="删除"/>
         </td>
       </tr>
     #{/else}
       <tr id="addSkuTr">
-        <td colspan="9" style="text-align:right;">
+        <td colspan="8" style="text-align:right;">
           <input type="button" class="btn btn-success" id="addSkuBtn" value="添加SKU">
         </td>
       </tr>
@@ -147,8 +112,8 @@
   #{info_row title:'订单其他明细' /}
     <table class="table table-bordered">
       <tr>
-        <th>客户运费:</th>
-        <td>
+        <td>客户运费：</td>
+        <td colspan="3">
           <input type="text" style="width:100px;" name="b.customShipCost" value="${b.customShipCost}">
           <select style="width:100px;" name="b.customShipUnit">
           #{list items:helper.Currency, as:'c'}
@@ -157,17 +122,9 @@
           #{/list}
           </select>
         </td>
-        <th>Shipping Way:</th>
-        <td>
-          <select style="width:100px;" name="b.shipWay">
-          #{list items:models.market.BtbOrder.SH, as:'c'}
-            <option value="${c.name()}" #{if c.name()==b.shipWay?.name()} selected #{/if}>${c.label()}</option>
-          #{/list}
-          </select>
-        </td>
       </tr>
       <tr>
-        <th>银行收费方式:</th>
+        <td>银行收费方式:</td>
         <td style="width:25%;">
           <select style="width:100px;" name="b.bankCharges" id="bankChargeSelect">
           #{list items:models.market.BtbOrder.C, as:'c'}
@@ -178,7 +135,7 @@
           <input type="text" id="bankChargesOther" name="b.bankChargesOther" value="${b.bankChargesOther}"
           #{if b.bankCharges?.name()!='Other'} readonly #{/if}>
         </td>
-        <th>手续费:</th>
+        <td>手续费:</td>
         <td>
           <input type="text" style="width:100px;" name="b.bankChargesCost" value="${b.bankChargesCost}">
           <select style="width:100px;" name="b.bankChargesUnit">
@@ -216,35 +173,12 @@
         </td>
         <td>运输方式<span style="color:red">*</span>:</td>
         <td>
-          <select style="width:100px;" name="b.type">
-            <option value="">请选择</option>
-          #{list items:models.procure.Shipment.T, as:'t'}
-            <option value="${t.name()}" #{if t.name()==b.type?.name()} selected #{/if}>${t.label()}</option>
+          <select style="width:100px;" name="b.shipWay">
+          #{list items:models.market.BtbOrder.SH, as:'c'}
+            <option value="${c.name()}" #{if c.name()==b.shipWay?.name()} selected #{/if}>${c.label()}</option>
           #{/list}
           </select>
         </td>
-      </tr>
-      <tr>
-        <th>Pricing Term</th>
-        <td>
-          <select name="b.pricingTerm">
-            <option value="">请选择</option>
-          #{list items:models.market.BtbOrder.PT, as:'p'}
-            <option value="${p.name()}" ${b.pricingTerm==p?'selected':''}>${p.label()}</option>
-          #{/list}
-          </select>
-        </td>
-        <th>Port Of Shipment</th>
-        <td>
-          <select name="b.port">
-            <option value="">请选择</option>
-          #{list items:models.market.BtbOrder.P, as:'p'}
-            <option value="${p.name()}" ${b.port==p?'selected':''}>${p.name()}</option>
-          #{/list}
-          </select>
-        </td>
-        <th></th>
-        <td></td>
       </tr>
       <tr>
         <td>备注:</td>
@@ -259,9 +193,9 @@
     <div class="controls">
       <input type="submit" class="btn btn-success" value="保存">
       <a href="@{BtbCustoms.btbOrderIndex()}" class="btn">返回</a>
-    #{if b.id}
-      <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-primary">下载PI</a>
-    #{/if}
+      #{if b.id}
+        <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-primary">下载PI</a>
+      #{/if}
     </div>
   </div>
 </form>

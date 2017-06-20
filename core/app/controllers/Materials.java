@@ -40,6 +40,7 @@ public class Materials extends Controller {
     }
 
     public static void create(Material m) {
+        m.projectName = Login.current().projectName;
         m.save();
         flash.success("新增物料【" + m.code + "】成功！");
         index(new MaterialPost());
