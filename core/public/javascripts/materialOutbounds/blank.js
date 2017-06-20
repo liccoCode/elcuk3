@@ -19,4 +19,29 @@ $(() => {
     }
   });
 
+$("input[name$='outQty']").change(function () {
+    let $input = $(this);
+    let value = $input.val();
+    let origin = $input.data('origin');
+    if(isNaN(value)){
+      noty({
+        text: '请输入数字!',
+        type: 'error'
+      });
+      $(this).val($(this).data('origin'));
+      $(this).focus();
+      return false;
+    }
+    if (value > origin) {
+      noty({
+        text: '出库数超过物料可用数!',
+        type: 'error'
+      });
+      $(this).val($(this).data('origin'));
+      $(this).focus();
+      return false;
+    }
+  
+  });
+
 });
