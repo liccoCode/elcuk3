@@ -704,13 +704,8 @@ public class Orderr extends GenericModel {
         invoice.updateDate = new Date();
         invoice.updator = "auto_reply";
 
-        String editAddress = this.formataddress(this.country);
-        if(StringUtils.isNotBlank(this.address1)) {
-            invoice.invoiceto = this.reciver + "," + this.address1.replace("DE", "Deutschland");
-        } else {
-            invoice.invoiceto = editAddress;
-        }
-        invoice.address = this.formataddress(this.country);
+        invoice.invoiceto = this.formataddress(this.country);
+        invoice.address = this.formataddress(invoice.invoiceto);
         invoice.notaxamount = amt._2;
         invoice.taxamount = amt._3;
         invoice.totalamount = amt._1;
