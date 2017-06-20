@@ -2,6 +2,7 @@ package models.material;
 
 import com.google.gson.annotations.Expose;
 import models.User;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
 import org.hibernate.annotations.DynamicUpdate;
@@ -116,6 +117,19 @@ public class Material extends Model {
     public String memo;
 
     /**
+     * 项目名称(所属公司)
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    /**
+     * 实际出库数(用于物料出库单创建,不会在数据库产生映射)
+     */
+    @Transient
+    public int outQty;
+
+    /**
      * 返回所有物料信息
      */
     public static List<Material> suppliers() {
@@ -124,5 +138,16 @@ public class Material extends Model {
         return materials;
     }
 
-    
+
+    /**
+     * 根据物料ID查询库存
+     * @return
+     */
+    public int availableQty() {
+        List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
+                .find(" materialUnit.material.id=? AND materialPlan.receipt = ?", id ,MaterialPlan.R.WAREHOUSE).fetch();
+        int  availableQty =   materialPlanUnitList.stream().mapToInt(unit -> unit.availableQty).sum();
+        return availableQty;
+    }
+
 }

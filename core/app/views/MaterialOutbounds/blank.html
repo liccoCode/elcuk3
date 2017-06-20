@@ -1,9 +1,7 @@
 #{extends 'main_full.html' /}
-#{set title:'新建出库单' /}
+#{set title:'新建物料出库单' /}
 #{set 'moreScripts'}
-    #{script 'jquery.filedrop.js'/}
-    #{script 'component/dropUpload.coffee'/}
-    #{script 'outbounds/blank.js'/}
+    #{script 'materialOutbounds/blank.js'/}
 #{/set}
 <style>
   .table td{
@@ -14,45 +12,52 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{info_row title:'物料出库单'/}
+#{form @MaterialOutbounds.create(), method:'POST', id: 'new_outbound'}
+    #{info_row title:'物料出库单'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-bordered">
       <tr>
         <th>物料出库单ID</th>
         <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
-        <th>State</th>
-        <td><input type="text" value="${outbound?.status?.label()}" readonly></td>
-      </tr>
-      <tr>
         <th>出库单名称<span style="color:red">*</span></th>
         <td><input type="text" class="span8" name="outbound.name" required></td>
-        <th>供应商</th>
-        <td>
-          <input type="hidden" name="outbound.cooperator.id" value="${outbound?.cooperator?.id}" required/>
-          <input type="text" name="outbound.cooperator.name" value="${outbound?.cooperator?.name}" readonly/>
-        </td>
       </tr>
       <tr>
-        <th>收货类型</th>
-        <td><input type="text" class="span8" name="outbound.name" required></td>
-        <th>目的地<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="outbound.name" required></td>
+        <th>物料分配项目</th>
+        <td>
+          <input type="text" value="${outbound?.projectName}" readonly>
+        </td>
+        <th>出库类型</th>
+        <td>
+          <select name="outbound.type">
+              #{list items:models.material.MaterialOutbound.C, as:'t'}
+                <option value="${t.name()}">${t.label()}</option>
+              #{/list}
+          </select>
+        </td>
       </tr>
+
       <tr>
         <th>收货方</th>
-        <td><input type="text" class="span8" name="outbound.name" required></td>
-        <th>项目名称<span style="color:red">*</span></th>
-        <td><input type="text" name="outbound.projectName" value="${outbound?.projectName}" readonly/></td>
-      </tr>
-      <tr>
-        <th>创建人</th>
         <td>
-          <input type="hidden" name="outbound.creator.id" value="${outbound?.creator?.id}" required/>
-          <input type="text" name="outbound.creator.username" value="${outbound?.creator?.username}" readonly/>
+          <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
+            <option value="">供应商</option>
+              #{list items:cooperators, as:'cop'}
+                <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+              #{/list}
+          </select>
         </td>
-        <th>创建日期</th>
-        <td><input type="text" name="outbound.createDate" value="${outbound?.createDate}" readonly="true"></td>
+        <th>目的地</th>
+        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" required></td>
+      </tr>
+
+      <tr>
+        <th>发货人</th>
+        <td><input type="text" name="outbound.consignor" /></td>
+        </td>
+        <th>出库日期<span style="color:red">*</span></th>
+        <td><input type="date" name="outbound.outboundDate" required></td>
       </tr>
       <tr>
         <th>备注</th>
@@ -62,72 +67,52 @@
       </tr>
       <tr>
         <td colspan="6">
-          <button class="btn btn-primary" name="create_record">创建</button>
-          <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
+          <button class="btn btn-primary" name="create_record">创建/更新</button>
+          <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
+            <i class="icon-list-alt"></i>导出</a>
         </td>
       </tr>
     </table>
   </div>
 </div>
-#{info_row title:'已添加进入【出库单】的【采购单元】'/}
+    #{info_row title:'已添加进入【出库单】的【物料单元  】'/}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-condensed table-bordered" id="data_table">
       <tr>
         <th><input type="checkbox"></th>
-        <th width="40px;">物料计划ID</th>
-        <th width="40px;">阶段</th>
         <th>物料编码</th>
         <th>物料名称</th>
-        <th>计划数量</th>
-        <th>交货数量</th>
-        <th>入库数量</th>
-        <th>可用库存</th>
-        <th>采购单</th>
-        <th>预计交货时间</th>
-        <th>实际交货时间</th>
-        <th>Action</th>
-        <th>质检结果</th>
+        <th>供应商</th>
+        <th>物料可用数</th>
+        <th>物料出库数</th>
         <th>项目名称</th>
-        <th>创建人</th>
-        <th>创建时间</th>
+        <th>备注</th>
       </tr>
-    #{list items:units, as:'unit'}
-      <tr class="text-center">
-        <td>
-          <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
-          <input type="hidden" name="pids" value="${unit.id}">
-        </td>
-        <td>${unit.id}</td>
-        <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-        <td>${unit.material?.code}</td>
-        <td>${unit.material?.name}</td>
-        <td>${unit.planQty}</td>
-        <td>${unit.qty}</td>
-        <td>${unit.inboundQty}</td>
-        <td>${unit.availableQty}</td>
-        <td>${unit.materialPurchase?.id}</td>
-        <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
-        <td>#{time_tooltip time:unit.deliveryDate/}</td>
-        <td>
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">交货</a>
-          <a href="@{MaterialUnits.destroy(unit.id)}" data-confirm="确认删除?" class="btn btn-small btn-danger"> 签收</a>
-        </td>
-        <td>
-          <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
-          ${unit.result?.label()}
-          </a>
-        </td>
-        <td>${unit.projectName}</td>
-        <td>${unit.handler?.username}</td>
-        <td>#{time_tooltip time:unit.createDate /}</td>
-      </tr>
-    #{/list}
+
+        #{list items:units, as:'unit'}
+          <tr class="text-center" id="unit_${unit.id}">
+            <td>
+              <input type="checkbox" name="ck" value="${unit.id}">
+              <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
+            </td>
+            <td>${unit.code}</td>
+            <td>${unit.name}</td>
+            <td></td>
+            <td>${unit.availableQty()}</td>
+            <td>
+              <input type="text" style="width:40px;" name="dtos[${unit_index-1}].outQty">
+            </td>
+            <td>${unit.projectName}</td>
+            <td>${unit.memo}</td>
+          </tr>
+        #{/list}
+
     </table>
-    <button class="btn btn-danger" id="deleteByCreateBtn">解除</button>
   </div>
 </div>
 
+#{/form}
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
   <div class="modal-body">

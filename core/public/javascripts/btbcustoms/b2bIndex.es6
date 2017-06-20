@@ -11,11 +11,4 @@ $(() => {
       $("#div" + id).load("/BtbCustoms/showBtbOrderList", {id: id});
     }
   });
-
-  $("#add_address_btn").click(function () {
-    let index = $("input[name$='receiver']").length;
-    let html = _.template($("#copy").text())({"num": index});
-    $("#btn_tr").before(html);
-  });
-
 });

@@ -17,12 +17,11 @@ $ ->
         source: (query, process) ->
           sku = $sku.val()
           $.get('/products/sameSku', {sku: sku})
-            .done((c) ->
+          .done((c) ->
             process(c)
           )
         updater: (item) ->
-          $.post('/products/findProductName',
-            sku: item, (r) ->
+          $.post('/products/findProductName', sku: item, (r) ->
             $sku.parent("td").next().next().find("input").val(r.name)
           )
           item
@@ -52,16 +51,11 @@ $ ->
       tr.next("tr").toggle()
     else
       tr.after("<tr style='background-color:#F2F2F2'><td colspan='8'><div id='div#{order_id}'></div></td></tr>")
-      $("#div" + order_id).load("/BtbCustoms/btbOrderItemList",
-        id: order_id)
+      $("#div" + order_id).load("/BtbCustoms/btbOrderItemList", id: order_id)
   )
 
   $("#download_excel").click((e) ->
     e.preventDefault()
     $form = $("#search_form")
     window.open('/Excels/btbOrderDetailReport?' + $form.serialize(), "_blank")
-  )
-
-  $("#add_new_address").click(->
-    window.location.href = $(this).data("url") + "?id=" + $("select[name='b.btbCustom.id']").val();
   )

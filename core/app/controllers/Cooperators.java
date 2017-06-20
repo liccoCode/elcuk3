@@ -245,4 +245,15 @@ public class Cooperators extends Controller {
         }
         renderJSON(J.json(names));
     }
+
+    /**
+     * 异步请求获取供应商地址
+     *
+     * @param id
+     */
+    public static void findById(Long id) {
+        Cooperator cop = Cooperator.findById(id);
+        renderJSON(GTs.newMap("id", cop.id).put("address", cop.address).build());
+    }
+    
 }

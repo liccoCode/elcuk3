@@ -7,8 +7,6 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.BtbCustom;
-import models.procure.BtbCustomAddress;
-import models.procure.Shipment;
 import models.product.Product;
 import org.apache.commons.lang3.StringUtils;
 import play.data.validation.Validation;
@@ -26,7 +24,6 @@ import java.util.*;
 @Entity
 public class BtbOrder extends Model {
 
-    private static final long serialVersionUID = -3233443084938668622L;
     public String orderNo;
 
     @ManyToOne
@@ -35,28 +32,6 @@ public class BtbOrder extends Model {
     public Date saleDate;
 
     public String memo;
-
-    public String remark;
-
-    public enum STAGE {
-        Create {
-            @Override
-            public String label() {
-                return "已创建";
-            }
-        },
-        Cancel {
-            @Override
-            public String label() {
-                return "已取消";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    @Enumerated(EnumType.STRING)
-    public STAGE stage;
 
     /**
      * 客户运费单位
@@ -112,12 +87,6 @@ public class BtbOrder extends Model {
      */
     @Enumerated(EnumType.STRING)
     public SH shipWay;
-
-    /**
-     * 物流运输方式
-     */
-    @Enumerated(EnumType.STRING)
-    public Shipment.T type;
 
     /**
      * 运输备注
@@ -200,7 +169,7 @@ public class BtbOrder extends Model {
         FEDEX {
             @Override
             public String label() {
-                return "FedEx";
+                return "FEDEX";
             }
         },
         TNT {
@@ -212,97 +181,18 @@ public class BtbOrder extends Model {
         AIR {
             @Override
             public String label() {
-                return "By Air";
+                return "空运";
             }
         },
         SEA {
             @Override
             public String label() {
-                return "By Sea";
-            }
-        },
-        Forwarder {
-            @Override
-            public String label() {
-                return "By Forwarder";
-            }
-        },
-        Other {
-            @Override
-            public String label() {
-                return "Other";
+                return "海运";
             }
         };
 
         public abstract String label();
     }
-
-    public enum PT {
-        EXW_Shenzhen {
-            @Override
-            public String label() {
-                return "EXW Shenzhen";
-            }
-        },
-        FCA_Shenzhen {
-            @Override
-            public String label() {
-                return "FCA Shenzhen";
-            }
-        },
-        FOB_Shenzhen {
-            @Override
-            public String label() {
-                return "FOB Shenzhen";
-            }
-        },
-        CIF_Shenzhen {
-            @Override
-            public String label() {
-                return "CIF Shenzhen";
-            }
-        },
-        FCA_HK {
-            @Override
-            public String label() {
-                return "FCA HK";
-            }
-        },
-        FOB_HK {
-            @Override
-            public String label() {
-                return "FOB HK";
-            }
-        },
-        CIF_HK {
-            @Override
-            public String label() {
-                return "CIF HK";
-            }
-        },
-        Other {
-            @Override
-            public String label() {
-                return "Other";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    public enum P {
-        Shenzhen,
-        HK
-    }
-
-    @Enumerated(EnumType.STRING)
-    public P port;
-
-    @Enumerated(EnumType.STRING)
-    public PT pricingTerm;
-
-    @OneToOne
-    public BtbCustomAddress address;
 
     @OneToMany(mappedBy = "btbOrder", fetch = FetchType.LAZY)
     public List<BtbOrderItem> btbOrderItemList = new ArrayList<>();
@@ -312,7 +202,6 @@ public class BtbOrder extends Model {
         if(this.id == null) {
             btbOrder.createDate = new Date();
             btbOrder.creator = Login.current();
-            btbOrder.stage = STAGE.Create;
             this.createLogs(" 新增订单【" + btbOrder.orderNo + "】");
             btbOrder.save();
         } else {
@@ -332,10 +221,6 @@ public class BtbOrder extends Model {
             this.shipCostUnit = btbOrder.shipCostUnit;
             this.shipWay = btbOrder.shipWay;
             this.shipRemark = btbOrder.shipRemark;
-            this.pricingTerm = btbOrder.pricingTerm;
-            this.remark = btbOrder.remark;
-            this.port = btbOrder.port;
-            this.type = btbOrder.type;
             this.save();
         }
         if(btbOrder.btbOrderItemList != null && btbOrder.btbOrderItemList.size() > 0) {
@@ -356,7 +241,7 @@ public class BtbOrder extends Model {
                     }
                 }
             }
-            /*删除的SKU明细*/
+            /***删除的SKU明细**/
             for(BtbOrderItem item : this.btbOrderItemList) {
                 if(!btbOrder.btbOrderItemList.contains(item)) {
                     logs.add("删除SKU" + item.product.sku);
@@ -364,6 +249,8 @@ public class BtbOrder extends Model {
                 }
             }
         }
+
+
         if(logs.size() > 0) {
             new ERecordBuilder("btbOrder.update").msgArgs(this.orderNo, StringUtils.join(logs, "<br>"))
                     .fid(this.orderNo).save();
@@ -430,12 +317,14 @@ public class BtbOrder extends Model {
         }
     }
 
+
     public void createLogs(String msg) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         StringBuilder message = new StringBuilder("操作人:" + Login.current().username + " 操作时间:" +
                 formatter.format(new Date())).append(msg);
         new ElcukRecord("B2B订单管理", message.toString(), this.orderNo).save();
     }
+
 
     public List<String> doneUpdate(BtbOrder order) {
         List<String> logs = new ArrayList<>();
@@ -453,7 +342,6 @@ public class BtbOrder extends Model {
         logs.addAll(Reflects.logFieldFade(this, "shipCostUnit", order.shipCostUnit));
         logs.addAll(Reflects.logFieldFade(this, "shipWay", order.shipWay));
         logs.addAll(Reflects.logFieldFade(this, "shipRemark", order.shipRemark));
-        logs.addAll(Reflects.logFieldFade(this, "address", order.address));
         return logs;
     }
 
@@ -463,8 +351,6 @@ public class BtbOrder extends Model {
         logs.addAll(Reflects.logFieldFade(old, "qty", item.qty));
         logs.addAll(Reflects.logFieldFade(old, "price", item.price));
         logs.addAll(Reflects.logFieldFade(old, "currency", item.currency));
-        logs.addAll(Reflects.logFieldFade(old, "otherPrice", item.otherPrice));
-        logs.addAll(Reflects.logFieldFade(old, "otherCurrency", item.otherCurrency));
         return logs;
     }
 

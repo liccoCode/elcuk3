@@ -2,26 +2,25 @@ package models.material;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
-import models.OperatorConfig;
+import helper.Reflects;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.procure.Shipment;
 import models.whouse.Outbound;
-import models.whouse.StockRecord;
-import models.whouse.Whouse;
+import models.whouse.Refund;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 物料出库单model
@@ -37,17 +36,11 @@ public class MaterialOutbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
 
+
     @Id
     @Column(length = 30)
     @Expose
-    @Required
     public String id;
-
-    /**
-     * 物料采购计划
-     */
-    @OneToMany(mappedBy = "outbound", cascade = {CascadeType.PERSIST})
-    public List<MaterialUnit> units = new ArrayList<>();
 
     /**
      * 名称
@@ -56,36 +49,43 @@ public class MaterialOutbound extends GenericModel {
     public String name;
 
     /**
+     * 项目名称
+     */
+    @Required
+    public String projectName;
+
+    /**
      * 出库类型
      */
     @Enumerated(EnumType.STRING)
     @Required
     @Expose
-    public StockRecord.C type;
+    public C type;
 
 
-    @Enumerated(EnumType.STRING)
-    @Required
-    @Expose
-    public S status;
-
-    public enum S {
-        Create {
+    public enum C {
+        Scll {
             @Override
             public String label() {
-                return "已创建";
+                return "生产领料";
             }
         },
-        Outbound {
+        Wfgc {
             @Override
             public String label() {
-                return "已出库";
+                return "外发工厂";
             }
         },
-        Cancel {
+        Shll {
             @Override
             public String label() {
-                return "已取消";
+                return "损毁领料";
+            }
+        },
+        Other {
+            @Override
+            public String label() {
+                return "其他";
             }
         };
 
@@ -94,19 +94,38 @@ public class MaterialOutbound extends GenericModel {
 
 
     /**
-     * 供应商
+     * (收货方)供应商
      * 一个采购单只能拥有一个供应商
      */
     @ManyToOne
     public Cooperator cooperator;
 
+    /**
+     * 目的地
+     */
+    public String whouse;
 
     /**
-     * 项目名称
+     * 发货人
+     */
+    public String consignor;
+
+    /**
+     * 出库时间
      */
     @Required
-    public String projectName;
+    public Date outboundDate;
 
+    /**
+     * 物料出库计划
+     */
+    @OneToMany(mappedBy = "materialOutbound", cascade = {CascadeType.PERSIST})
+    public List<MaterialOutboundUnit> units = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Required
+    @Expose
+    public Outbound.S status;
 
     /**
      * 制单人
@@ -126,18 +145,16 @@ public class MaterialOutbound extends GenericModel {
     public String memo;
 
 
-
-    public MaterialOutbound(MaterialUnit unit) {
+    public MaterialOutbound() {
         init();
-        this.cooperator = unit.cooperator;
-        this.projectName = unit.projectName.label();
     }
 
     public void init() {
         this.id = id();
-        this.status = S.Create;
+        this.status = Outbound.S.Create;
         this.createDate = new Date();
         this.creator = Login.current();
+        this.projectName = Login.current().projectName.label();
     }
 
 
@@ -148,8 +165,46 @@ public class MaterialOutbound extends GenericModel {
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
                 DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
                 "";
-        return String.format("WDP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
+        return String.format("WLC|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
 
+    public void saveAndLog(MaterialOutbound outbound) {
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "name", outbound.name));  //出库单名称
+        logs.addAll(Reflects.logFieldFade(this, "type", outbound.type));  //出库类型
+        if(outbound.cooperator != null)
+            //logs.addAll(Reflects.logFieldFade(this, "cooperator.id", outbound.cooperator.id)); //收货方
+            logs.addAll(Reflects.logFieldFade(this, "whouse", outbound.whouse));// 目的地
+        logs.addAll(Reflects.logFieldFade(this, "consignor", outbound.consignor));// 发货人
+        logs.addAll(Reflects.logFieldFade(this, "outboundDate", outbound.outboundDate));//出库时间
+        logs.addAll(Reflects.logFieldFade(this, "memo", outbound.memo));    //备注
+        if(logs.size() > 0) {
+            new ERecordBuilder("materialOutbound.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this
+                    .id)
+                    .save();
+        }
+
+        Cooperator cooperator = Cooperator.findById(outbound.cooperator.id);
+        this.cooperator = cooperator;
+        this.save();
+    }
+
+    public static void confirmOutBound(List<String> ids) {
+        for(String id : ids) {
+            MaterialOutbound out = MaterialOutbound.findById(id);
+            for(MaterialOutboundUnit p : out.units) {
+                if(p.outQty > p.material.availableQty()) {
+                    Validation.addError("", "物料出库计划【" + p.id + "】的出库数量大于物料可用库存量，请先检查！");
+                    return;
+                }
+            }
+            if(Validation.hasErrors()) {
+                return;
+            }
+            out.status = Outbound.S.Outbound;
+            out.outboundDate = new Date();
+            out.save();
+        }
+    }
 }

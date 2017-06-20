@@ -216,7 +216,9 @@
               <li class="divider"></li>
 
               #{power.ck "deliveryments.index"}
-                <li><a href="@{MaterialUnits.indexWhouse()}">物料采购计划</a></li>
+                <!-- <li><a href="@{MaterialUnits.indexWhouse()}">物料采购计划</a></li> -->
+                <li><a href="@{MaterialOutbounds.indexMaterial()}">物料库存管理</a></li>
+                <li><a href="@{MaterialOutbounds.index()}">物料出库</a></li>  
               #{/power.ck}
             </ul>
           </li>
