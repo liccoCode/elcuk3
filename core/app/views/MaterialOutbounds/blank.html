@@ -98,10 +98,10 @@
             </td>
             <td>${unit.code}</td>
             <td>${unit.name}</td>
-            <td></td>
+            <td>${unit.cooperators()}</td>
             <td>${unit.availableQty()}</td>
             <td>
-              <input type="text" style="width:40px;" name="dtos[${unit_index-1}].outQty">
+              <input type="text" style="width:40px;" data-origin="${unit.availableQty()}" name="dtos[${unit_index-1}].outQty">
             </td>
             <td>${unit.projectName}</td>
             <td>${unit.memo}</td>

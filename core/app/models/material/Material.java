@@ -5,6 +5,7 @@ import models.User;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -141,13 +142,31 @@ public class Material extends Model {
 
     /**
      * 根据物料ID查询库存
+     *
      * @return
      */
     public int availableQty() {
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
-                .find(" materialUnit.material.id=? AND materialPlan.receipt = ?", id ,MaterialPlan.R.WAREHOUSE).fetch();
-        int  availableQty =   materialPlanUnitList.stream().mapToInt(unit -> unit.availableQty).sum();
+                .find(" materialUnit.material.id=? AND materialPlan.receipt = ?", id, MaterialPlan.R.WAREHOUSE).fetch();
+        int availableQty = materialPlanUnitList.stream().mapToInt(unit -> unit.availableQty).sum();
         return availableQty;
     }
 
+    /**
+     * 根据物料查询对应 的所有供应商
+     */
+    public String cooperators() {
+        List<Cooperator> cooperatorList = Cooperator
+                .find("SELECT distinct c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci" +
+                        ".id", id)
+                .fetch();
+        StringBuilder buff = new StringBuilder();
+        for(Cooperator co : cooperatorList) {
+            buff.append("," + co.name );
+        }
+        if(buff.length() > 0 ){
+            return buff.substring(1).toString();
+        }
+        return null;
+    }
 }
