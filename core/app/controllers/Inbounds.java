@@ -32,7 +32,10 @@ import java.util.stream.Collectors;
 import static play.modules.pdf.PDF.renderPDF;
 
 /**
- * Created by licco on 2016/11/9.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/9
+ * Time: 上午9:54
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Inbounds extends Controller {
