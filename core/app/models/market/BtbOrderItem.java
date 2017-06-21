@@ -38,16 +38,7 @@ public class BtbOrderItem extends Model {
     @Required
     public Currency currency;
 
-    /**
-     * 其他售价
-     */
-    public BigDecimal otherPrice;
 
-    @Expose
-    @Enumerated(EnumType.STRING)
-    @Column(length = 10)
-    @Required
-    public Currency otherCurrency;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public BtbOrder btbOrder;

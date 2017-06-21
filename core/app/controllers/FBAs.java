@@ -13,7 +13,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.libs.Files;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
