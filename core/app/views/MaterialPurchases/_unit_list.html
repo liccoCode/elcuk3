@@ -54,7 +54,7 @@
     <td>${unit.material?.name}</td>
     <td>${unit.planQty}</td>
     <td>${unit.qty}</td>
-    <td>${unit.inboundQty}</td>
+    <td>${unit.qty}</td>
     <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
         <td>${unit.planCurrency?.symbol()} ${unit.formatPrice().format('#,###.##')}</td>
@@ -65,7 +65,6 @@
     <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
     <td>#{time_tooltip time:unit.deliveryDate/}</td>
     <td>
-
       <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>
       <a href="@{MaterialUnits.destroy(unit.id)}" data-confirm="确认删除?" class="btn btn-small btn-danger"> 删除</a>
     </td>

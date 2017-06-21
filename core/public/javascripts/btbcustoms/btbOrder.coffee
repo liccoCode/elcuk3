@@ -51,7 +51,7 @@ $ ->
     if $("#div" + order_id).html() != undefined
       tr.next("tr").toggle()
     else
-      tr.after("<tr style='background-color:#F2F2F2'><td colspan='8'><div id='div#{order_id}'></div></td></tr>")
+      tr.after("<tr style='background-color:#F2F2F2'><td colspan='9'><div id='div#{order_id}'></div></td></tr>")
       $("#div" + order_id).load("/BtbCustoms/btbOrderItemList",
         id: order_id)
   )

@@ -1,0 +1,37 @@
+<table class="table table-condensed table-bordered" id="data_table">
+  <tr>
+  #{if is_check}
+    <th width="18px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
+  #{/if}
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>供应商</th>
+    <th>物料可用数</th>
+    <th>物料出库数</th>
+    <th>项目名称</th>
+  </tr>
+#{list items:units, as:'unit'}
+  <tr class="text-center" id="unit_${unit.id}">
+      #{if is_check}
+        <td>
+          <input type="checkbox" name="ck" value="${unit.id}">
+          <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
+        </td>
+      #{/if}
+    <td>${unit?.material?.code}</td>
+    <td>${unit?.material?.name}</td>
+    <td>${unit?.material?.name}</td>
+    <td>${unit?.material?.availableQty()}</td>
+    <td>
+    #{if is_check}
+      <input type="text" style="width:40px;" name="dtos[${unit_index-1}].outQty" value="${unit.outQty}" data-id="${unit.id}"
+             data-origin="${unit?.material?.availableQty()}" >
+    #{/if}
+    #{else}
+       ${unit.outQty}
+    #{/else}
+    </td>
+    <td>${unit?.material?.projectName}</td>
+  </tr>
+#{/list}
+</table>

@@ -18,7 +18,7 @@ import javax.persistence.ManyToOne;
 public class BtbCustomAddress extends Model {
 
     private static final long serialVersionUID = 8527174010155272913L;
-    
+
     @ManyToOne
     public BtbCustom btbCustom;
 

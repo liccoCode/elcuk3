@@ -1,0 +1,44 @@
+#{set tr_key: key ? key : 'unit'/}
+<table class="table table-condensed table-bordered dataTable" id="unit_table">
+
+  <tr>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>采购余量</th>
+    <th>交货数量</th>
+    <th>预计交货时间</th>
+    <th>实际交货时间</th>
+    <th>项目名称</th>
+    <th>创建人</th>
+    <th>创建时间</th>
+  </tr>
+
+#{list items:units, as:'unit'}
+  <tr class="text-center">
+    <td>${unit.materialUnit?.material?.code}</td>
+    <td>${unit.materialUnit?.material?.name}</td>
+    <td>${unit.qty}</td>
+    <td>${unit.qty}</td>
+    <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
+    <td>#{time_tooltip time:unit.deliveryDate/}</td>
+    <td>${unit.materialUnit?.projectName}</td>
+    <td>${unit.handler?.username}</td>
+    <td>#{time_tooltip time:unit.createDate /}</td>
+  </tr>
+#{/list}
+#{if p != null}
+  <tr class="tb_footer">
+    <td colspan="25">
+        #{bootstrap_pager pi:p, url:'' /}
+    </td>
+  </tr>
+#{/if}
+</table>
+
+<!-- Ship To Modal -->
+<div id="fba_ship_to_modal" class="modal hide fade">
+  <div class="modal-body" id="fba_ship_to_body"></div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+  </div>
+</div>

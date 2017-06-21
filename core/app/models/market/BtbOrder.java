@@ -1,5 +1,6 @@
 package models.market;
 
+import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.Currency;
 import helper.Reflects;
@@ -11,6 +12,7 @@ import models.procure.BtbCustomAddress;
 import models.procure.Shipment;
 import models.product.Product;
 import org.apache.commons.lang3.StringUtils;
+import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 
@@ -304,6 +306,19 @@ public class BtbOrder extends Model {
     @OneToOne
     public BtbCustomAddress address;
 
+    /**
+     * 其他售价
+     */
+    public BigDecimal otherPrice;
+
+    @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    @Required
+    public Currency otherCurrency;
+
+    public String otherRemark;
+
     @OneToMany(mappedBy = "btbOrder", fetch = FetchType.LAZY)
     public List<BtbOrderItem> btbOrderItemList = new ArrayList<>();
 
@@ -454,6 +469,9 @@ public class BtbOrder extends Model {
         logs.addAll(Reflects.logFieldFade(this, "shipWay", order.shipWay));
         logs.addAll(Reflects.logFieldFade(this, "shipRemark", order.shipRemark));
         logs.addAll(Reflects.logFieldFade(this, "address", order.address));
+        logs.addAll(Reflects.logFieldFade(this, "otherPrice", order.otherPrice));
+        logs.addAll(Reflects.logFieldFade(this, "otherCurrency", order.otherCurrency));
+        logs.addAll(Reflects.logFieldFade(this, "otherRemark", order.otherRemark));
         return logs;
     }
 
@@ -463,8 +481,6 @@ public class BtbOrder extends Model {
         logs.addAll(Reflects.logFieldFade(old, "qty", item.qty));
         logs.addAll(Reflects.logFieldFade(old, "price", item.price));
         logs.addAll(Reflects.logFieldFade(old, "currency", item.currency));
-        logs.addAll(Reflects.logFieldFade(old, "otherPrice", item.otherPrice));
-        logs.addAll(Reflects.logFieldFade(old, "otherCurrency", item.otherCurrency));
         return logs;
     }
 

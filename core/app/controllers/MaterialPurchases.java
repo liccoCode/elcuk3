@@ -9,9 +9,7 @@ import models.ElcukRecord;
 import models.OperatorConfig;
 import models.User;
 import models.finance.ProcureApply;
-import models.material.Material;
-import models.material.MaterialPurchase;
-import models.material.MaterialUnit;
+import models.material.*;
 import models.procure.*;
 import models.product.Product;
 import models.view.Ret;
@@ -114,7 +112,8 @@ public class MaterialPurchases extends Controller {
         });
 
         purchase.save();
-        flash.success("Deliveryment %s 创建成功.", purchase.id);
+        flash.success("MaterialPurchase %s 创建成功.", purchase.id);
+        MaterialPurchases.show(purchase.id);
     }
 
     /**
@@ -219,5 +218,15 @@ public class MaterialPurchases extends Controller {
 
         flash.success("成功将 %s 物料计划从当前物料采购单中移除.", StringUtils.join(pids, ","));
         show(dmt.id);
+    }
+
+    /**
+     * 根据出货单ID查询出货计划集合
+     * @param id
+     */
+    public static void showMaterialUnitList(String id) {
+        MaterialPurchase materialPurchase = MaterialPurchase.findById(id);
+        List<MaterialUnit> units = materialPurchase.units;
+        render("/MaterialUnits/_unit_list.html", units);
     }
 }

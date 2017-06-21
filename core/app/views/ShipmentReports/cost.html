@@ -8,12 +8,15 @@
 <div class="row-fluid">
   <div class="span12">
     <div class="input-prepend inline">
-      <span class="add-on">运输时间From:</span>
-      <input type="date" style="width:90px;" id="select_from" value="${from}">
-
-      <span class="add-on" style="margin-left:20px;">To:</span>
-      <input type="date" style="width:90px;" id="select_to" value="${to}">&nbsp;
-      <input type="button" class="btn" value="Search" id="count_btn">
+      <div class="input-prepend input-append inline">
+        <span class="add-on">运输时间From:</span>
+        <input type="date" value="${from}" id="select_from">
+        <span class="add-on">To:</span>
+        <input type="date" name="p.to" value="${to}" id="select_to">
+      </div>
+      <div class="input-prepend input-append inline">
+        <input type="button" class="btn btn-primary" value="Search" id="count_btn">
+      </div>
     </div>
   </div>
 </div>
@@ -65,7 +68,6 @@
       <div class="input-prepend inline">
         <span class="add-on">From:</span>
         <input type="date" style="width:90px;" name="excel.from" value="${excel.from.date()}">
-
         <span class="add-on" style="margin-left:20px;">To:</span>
         <input type="date" style="width:90px;" name="excel.to" value="${excel.to.date()}">
       </div>
