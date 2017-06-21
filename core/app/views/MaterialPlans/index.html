@@ -31,14 +31,6 @@
         <option value="">状态</option>
       #{/select_enum}
 
-
-    <select name="p.fk" class="inline">
-      <option value="">供应商反馈</option>
-      <option value="">同意</option>
-      <option value="">不同意</option>
-      <option value="">不反馈</option>
-    </select>
-
     <div class="input-prepend input-append inline">
       <span class="add-on"><i class="icon-search"></i></span>
       <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="物料出货单ID,物料编码">
@@ -63,7 +55,6 @@
           <th>出货单名称</th>
           <th>供应商</th>
           <th>状态</th>
-          <th>供应商反馈</th>
           <th>收货类型</th>
           <th>收货方</th>
           <th>财务审核</th>
@@ -94,7 +85,6 @@
 
           <td>${dp.cooperator?.name}</td>
           <td>${dp.state.label()}</td>
-          <td></td>
           <td></td>
           <td></td>
           <td></td>

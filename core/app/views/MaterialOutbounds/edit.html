@@ -1,6 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'编辑物料出库单' /}
 #{set 'moreScripts'}
+  #{script 'jquery.filedrop.js'/}
+  #{script 'component/dropUpload.coffee'/}
   #{script 'materialOutbounds/edit.es6'/} 
   #{script 'materialOutbounds/blank.js'/}
 #{/set}
@@ -95,6 +97,7 @@
 </div>
 <br>
 
+#{records records:records/}
 
 <div class="row-fluid">
   <div class="span12">

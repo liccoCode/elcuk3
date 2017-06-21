@@ -59,14 +59,14 @@ public class MaterialUnit extends Model {
      * 一个采购单只能拥有一个供应商
      */
     @ManyToOne
-    public Cooperator cooperator; 
+    public Cooperator cooperator;
 
     /**
      * 出库单
      */
     @ManyToOne
     public MaterialOutbound outbound;
-    
+
     /**
      * 出货单
      */
@@ -219,7 +219,7 @@ public class MaterialUnit extends Model {
      * 手动单采购计划数据验证
      */
     public void validateManual() {
-        Validation.required("物料编码", this.material.code);
+        Validation.required("物料编码", this.material.id);
         Validation.required("采购数量", this.planQty);
         Validation.required("预计单价", this.planPrice);
     }
@@ -268,9 +268,10 @@ public class MaterialUnit extends Model {
             this.stage = ProcureUnit.STAGE.PLAN;
         }
     }
-    
+
     /**
      * 物料计划创建物料出货单进行验证
+     *
      * @param pids
      */
     public static String validateIsInbound(List<Long> pids) {
@@ -307,10 +308,31 @@ public class MaterialUnit extends Model {
 
     /**
      * 物料计划查询剩余数量
+     *
      * @return
      */
     public double getRemaining() {
-         double sum = this.units.stream().mapToDouble(MaterialPlanUnit->qty).sum();
-         return this.planQty - sum ;
+        double sum = this.units.stream().mapToDouble(MaterialPlanUnit -> qty).sum();
+        return this.planQty - sum;
+    }
+
+    /**
+     * 预计单价金额格式化
+     * @return
+     */
+    public float formatPlanPrice() {
+        return new BigDecimal(this.planPrice).setScale(2, 4).floatValue();
+    }
+
+    /**
+     * 总共需要申请的金额
+     *
+     * @return
+     */
+    public float totallanPrice() {
+        return new BigDecimal(this.planPrice)
+                .multiply(new BigDecimal(planQty))
+                .setScale(2, 4)
+                .floatValue();
     }
 }

@@ -82,18 +82,18 @@ public class MaterialPurchase extends GenericModel {
     public Deliveryment.T deliveryType;
 
     /**
-     * 下单时间
+     * 下单时间(确认时间)
      */
     public Date orderTime;
-
-    /**
-     * 交货时间
-     */
-    public Date deliveryTime;
-
-    public Date confirmDate;
     @Lob
     public String memo = " ";
+
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
 
 
     public static String id() {
@@ -124,10 +124,8 @@ public class MaterialPurchase extends GenericModel {
     public void confirm() {
         if(!Arrays.asList(Deliveryment.S.APPROVE, Deliveryment.S.PENDING, Deliveryment.S.REJECT).contains(this.state))
             Validation.addError("", "采购单状态非 " + Deliveryment.S.PENDING.label() + " 不可以确认");
-        if(this.orderTime == null)
-            Validation.addError("", "下单时间必须填写");
         if(Validation.hasErrors()) return;
-        this.confirmDate = new Date();
+        this.orderTime = new Date();
         this.state = Deliveryment.S.CONFIRM;
         this.save();
     }

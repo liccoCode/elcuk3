@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
@@ -11,6 +12,7 @@ import models.view.post.MaterialPlanPost;
 import models.view.post.MaterialUnitPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -26,6 +28,12 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MaterialPlans extends Controller {
 
+
+    @Before(only = {"show"})
+    public static void showPageSetUp() {
+        String id = request.params.get("id");
+        renderArgs.put("records", ElcukRecord.records(id));
+    }
 
     /**
      * 跳转 到 创建物料出库单页面
@@ -91,8 +99,6 @@ public class MaterialPlans extends Controller {
         unit.updateAttr(attr, value);
         renderJSON(new Ret());
     }
-
-    
     /**
      * 将 MaterialPlanUnit 从 MaterialPlan 中解除
      */
@@ -127,7 +133,7 @@ public class MaterialPlans extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialPlanUnit( MaterialPlanUnit unit) {
+    public static void updateMaterialPlanUnit(MaterialPlanUnit unit) {
         MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(unit.id);
         materialPlanUnit.receiptQty =  unit.receiptQty;
         materialPlanUnit.save();
