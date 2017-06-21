@@ -132,7 +132,7 @@ public class MaterialPlanUnit extends Model {
                 default:
                     throw new FastRuntimeException("不支持的属性类型!");
             }
-            new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br/>"))
+            new ERecordBuilder("materialPlan.updateAttr").msgArgs(this.id, StringUtils.join(logs, "<br/>"))
                     .fid(this.id).save();
             this.save();
         }

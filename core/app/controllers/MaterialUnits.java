@@ -1,28 +1,19 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.GTs;
-import helper.Webs;
-import models.ElcukRecord;
 import models.OperatorConfig;
-import models.material.Material;
 import models.material.MaterialUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.product.Category;
 import models.view.Ret;
-import models.view.post.MaterialPost;
 import models.view.post.MaterialUnitPost;
-import models.view.post.ProcurePost;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
-import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -43,14 +34,6 @@ public class MaterialUnits extends Controller {
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("categoryIds", Category.categoryIds());
-        renderArgs.put("logs",
-                ElcukRecord.records(Arrays.asList("materialUnit.save", "materialUnit.remove", "materialUnit.split"), 50));
-
-        //为视图提供日期
-        DateTime dateTime = new DateTime();
-        renderArgs.put("tomorrow1", dateTime.plusDays(1).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow2", dateTime.plusDays(2).toString("yyyy-MM-dd"));
-        renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
     }
 
     /**
@@ -124,18 +107,6 @@ public class MaterialUnits extends Controller {
         materialUnit.delete();
         flash.success("删除成功.");
         MaterialPurchases.show(materialPurchaseId);
-    }
-
-
-    /**
-     * 明天 后天 大后天 计划视图
-     */
-    public static void planView(Date date) {
-        MaterialUnitPost p = new MaterialUnitPost(ProcureUnit.STAGE.DELIVERY);
-        p.dateType = "attrs.planDeliveryDate";
-        p.from = date;
-        p.to = date;
-        MaterialUnits.index(p);
     }
 
     /**

@@ -10,11 +10,11 @@ $(() => {
       $.get('/Materials/findMaterial', {
         id: id
       }, function (r) {
-        //物料code赋值
-        $("#materialCode").val(r.code);
+        //物料名称赋值
+        $("#materialName").val(r.name);
+        
         //级联查询供应商
         let $cooperators = $("select[name='purchase.cooperator.id']");
-
         $.get('/MaterialPurchases/cooperators', {id: id}, function (r) {
           LoadMask.mask();
           $cooperators.empty();
@@ -55,10 +55,10 @@ $(() => {
       $.get('/MaterialPurchases/materials', {
         cooperId: id
       }, function (c) {
-        let html = "  <select name='units[<%= num %>].material.id' class='inline selectize' style='width:150px;'> ";
+        let html = "  <select name='units[<%= num %>].material.id' class='inline selectize' style='width:250px;'> ";
         html += "<option value=''>请选择</option>";
         c.forEach(function (value) {
-          html += "<option value=" + value['id'] + ">" + value['name'] + "</option>";
+          html += "<option value=" + value['id'] + ">" + value['code'] + "</option>";
         });
         html += "</select>";
         console.log(html);
@@ -115,7 +115,7 @@ $(() => {
               id: id
             }, function (r) {
               //物料code赋值
-              $input.parent("td").parent("tr").find("input[name$='material.code']").val(r.code);
+              $input.parent("td").parent("tr").find("input[name$='material.name']").val(r.name);
 
             });
 

@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.ElcukRecord;
 import models.OperatorConfig;
 import models.material.Material;
 import models.material.MaterialOutbound;
@@ -37,6 +38,9 @@ public class MaterialOutbounds extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
+        String id = request.params.get("id");
+        if(id != null)
+            renderArgs.put("records", ElcukRecord.records(id));
     }
 
     /**
@@ -123,7 +127,8 @@ public class MaterialOutbounds extends Controller {
     }
 
     /**
-     *  出库单修改页面ajax 解绑
+     * 出库单修改页面ajax 解绑
+     *
      * @param ids
      */
     public static void deleteUnit(Long[] ids) {
@@ -144,6 +149,7 @@ public class MaterialOutbounds extends Controller {
 
     /**
      * 出库单列表页面 出库单出库ajax验证
+     *
      * @param ids
      */
     public static void validMaterialOutboundQty(String[] ids) {
@@ -161,6 +167,7 @@ public class MaterialOutbounds extends Controller {
 
     /**
      * 出库单列表页面 出库单出库
+     *
      * @param ids
      */
     public static void confirmMaterialOutbound(List<String> ids) {

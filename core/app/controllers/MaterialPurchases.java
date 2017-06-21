@@ -1,6 +1,5 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
@@ -9,9 +8,13 @@ import models.ElcukRecord;
 import models.OperatorConfig;
 import models.User;
 import models.finance.ProcureApply;
-import models.material.*;
-import models.procure.*;
-import models.product.Product;
+import models.material.Material;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
+import models.procure.CooperItem;
+import models.procure.Cooperator;
+import models.procure.Deliveryment;
+import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
 import models.view.post.MaterialPurchasePost;
@@ -22,9 +25,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 public class MaterialPurchases extends Controller {
 
 
-    @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
+    @Before(only = {"show", "update", "delunits", "cancel", "confirm"})
     public static void showPageSetUp() {
         String id = request.params.get("id");
         String brandName = OperatorConfig.getVal("brandname");
@@ -98,6 +99,7 @@ public class MaterialPurchases extends Controller {
         purchase.state = Deliveryment.S.PENDING;
         purchase.name = purchase.name.trim();
         purchase.deliveryType = Deliveryment.T.MANUAL;
+        purchase.projectName = Login.current().projectName;
 
         units.stream().filter(unit -> unit.material != null).forEach(unit -> {
             unit.cooperator = purchase.cooperator;
@@ -170,7 +172,7 @@ public class MaterialPurchases extends Controller {
         buff.append("[");
         for(Material co : materialList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+                    ("\"").append(",").append("\"").append("code").append("\"").append(":").append("\"").append(co.code)
                     .append("\"").append("},");
         }
         buff.append("]");
