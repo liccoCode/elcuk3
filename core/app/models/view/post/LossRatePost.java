@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class LossRatePost extends Post<LossRate> {
 
-
+    private static final long serialVersionUID = -4400684666002811569L;
     public String compenType;
     public Date from;
     public Date to;

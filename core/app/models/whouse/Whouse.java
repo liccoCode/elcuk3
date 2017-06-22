@@ -291,7 +291,7 @@ public class Whouse extends Model {
             if(exist != null) continue;
 
             if(nextBeginDate.getDayOfWeek() == 1) {
-                if(Arrays.asList("EASYACC", "Brandworl").contains(OperatorConfig.getVal("brandname"))) {
+                if(Arrays.asList("EASYACC", "Brandworl", "Reapow").contains(OperatorConfig.getVal("brandname"))) {
                     if(type == M.AMAZON_US) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
