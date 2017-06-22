@@ -30,7 +30,8 @@
 
         <div class="input-append input-prepend inline">
           <span class="add-on"><i class="icon-file"></i></span>
-          <button class="btn btn-success" id="download_excel" data-url="@{Excels.exportMonthlyShipment()}">导出Excel</button>
+          <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.exportMonthlyShipment()}"
+                  value="导出Excel"/>
         </div>
 
       </div>
@@ -55,7 +56,7 @@
           <th>空运cbm</th>
           <th>快递cbm</th>
         </tr>
-      #{list items:list.values(), as:'dto'}
+      #{list items:list, as:'dto'}
         <tr>
           <td>${dto.categoryId}</td>
           <td>${dto.sku}</td>

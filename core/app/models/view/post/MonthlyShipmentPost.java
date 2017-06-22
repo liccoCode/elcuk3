@@ -8,10 +8,7 @@ import models.view.dto.MonthlyShipmentDTO;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +25,8 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
         return null;
     }
 
-    public Map<String, MonthlyShipmentDTO> queryBySku() {
+    public List<MonthlyShipmentDTO> queryBySku() {
+        List<MonthlyShipmentDTO> list = new ArrayList<>();
         Map<String, MonthlyShipmentDTO> map = new HashMap<>();
         SqlSelect sql = buildSql();
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
@@ -42,9 +40,10 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
                 dto.sku = sku;
                 this.buildDto(dto, row);
                 map.put(sku, dto);
+                list.add(dto);
             }
         }
-        return map;
+        return list;
     }
 
     private SqlSelect buildSql() {

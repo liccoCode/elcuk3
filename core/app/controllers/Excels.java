@@ -815,7 +815,7 @@ public class Excels extends Controller {
 
     public static void exportMonthlyShipment(MonthlyShipmentPost p) {
         if(p == null) p = new MonthlyShipmentPost();
-        Map<String, MonthlyShipmentDTO> list = p.queryBySku();
+        List<MonthlyShipmentDTO> list = p.queryBySku();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月物流发货量报表.xls"));

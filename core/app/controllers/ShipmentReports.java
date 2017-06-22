@@ -175,8 +175,7 @@ public class ShipmentReports extends Controller {
 
     public static void monthlyShipmentReport(MonthlyShipmentPost p) {
         if(p == null) p = new MonthlyShipmentPost();
-        Map<String, MonthlyShipmentDTO> list = p.queryBySku();
-        
+        List<MonthlyShipmentDTO> list = p.queryBySku();
         render(list, p);
     }
 
