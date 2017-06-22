@@ -10,10 +10,12 @@ import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.CostReportDTO;
+import models.view.dto.MonthlyShipmentDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
 import models.view.post.LossRatePost;
+import models.view.post.MonthlyShipmentPost;
 import models.view.report.ArrivalRate;
 import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
@@ -169,6 +171,13 @@ public class ShipmentReports extends Controller {
             flash.error(Webs.E(e));
         }
         render(lossrates, losstotal, p, shipItems);
+    }
+
+    public static void monthlyShipmentReport(MonthlyShipmentPost p) {
+        if(p == null) p = new MonthlyShipmentPost();
+        Map<String, MonthlyShipmentDTO> list = p.queryBySku();
+        
+        render(list, p);
     }
 
 }
