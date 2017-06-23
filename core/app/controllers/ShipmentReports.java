@@ -179,4 +179,11 @@ public class ShipmentReports extends Controller {
         render(list, p);
     }
 
+    public static void monthlyShipmentPrescription(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<Shipment> list = p.queryMonthlyShipment();
+
+        render(list, p);
+    }
+
 }

@@ -15,9 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by licco on 15/6/11.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/6/11
+ * Time: 下午2:43
  */
 public class ArrivalRatePost extends Post<ArrivalRate> {
+
+    private static final long serialVersionUID = 1993384893755767775L;
 
     public ArrivalRatePost() {
         this.from = Dates.morning(Dates.monthBegin(DateTime.now().minusMonths(1).toDate()));
@@ -100,6 +105,16 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
                         "(s.dates.planArrivDateForCountRate, '%Y-%m-%d') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?" +
                         " AND s.state IN (?,?,?) ", Dates.morning(this.from), Dates.night(this.to), Shipment.S.RECEIPTD,
                 Shipment.S.RECEIVING, Shipment.S.DONE).fetch();
+    }
+
+    public List<Shipment> queryMonthlyShipment() {
+        return Shipment.find("FROM Shipment s WHERE s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?" +
+                        " AND s.state IN (?,?,?) ",
+                Dates.morning(this.from),
+                Dates.night(this.to),
+                Shipment.S.RECEIPTD,
+                Shipment.S.RECEIVING,
+                Shipment.S.DONE).fetch();
     }
 
     public Long isZero(Long num) {
