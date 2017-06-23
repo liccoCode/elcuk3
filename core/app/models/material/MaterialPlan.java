@@ -6,10 +6,8 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.DeliverPlan;
 import models.procure.ProcureUnit;
-import models.whouse.Inbound;
-import models.whouse.InboundUnit;
+import models.view.Ret;
 import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -23,17 +21,14 @@ import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
+ * 物料出貨單
  * Created by IntelliJ IDEA.
- * User: mac
- * Date: 16-1-21
- * Time: 上午10:12
+ * User: Even
+ * Date: 17/6/12
+ * Time: PM6:18
  */
 @Entity
 @DynamicUpdate
@@ -65,7 +60,7 @@ public class MaterialPlan extends GenericModel {
 
     public enum P {
         /**
-         * 已创建
+         * 已创建：创建成功后即为“已创建”
          */
         CREATE {
             @Override
@@ -75,12 +70,12 @@ public class MaterialPlan extends GenericModel {
         },
 
         /**
-         * 已交货
+         * 已出货：确认出货数量后为“已出货”
          */
         DONE {
             @Override
             public String label() {
-                return "已交货";
+                return "已出货";
             }
         };
 
@@ -139,7 +134,6 @@ public class MaterialPlan extends GenericModel {
     /**
      * 目的地
      */
-    @Required
     public String address;
 
     /**
@@ -189,58 +183,40 @@ public class MaterialPlan extends GenericModel {
 
 
     /**
-     * 通过 MaterialUnit 来创建采购单
-     * <p/>
-     * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
+     * 创建物料出货单
      */
-    public synchronized static MaterialPlan createFromProcures(List<Long> pids, String name, User user) {
-        List<MaterialUnit> units = MaterialUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+    public synchronized static MaterialPlan createMaterialPlan(List<Long> pids, String name, User user) {
+        List<Material> materias = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+
         MaterialPlan materialPlan = new MaterialPlan(MaterialPlan.id());
-        if(pids.size() != units.size()) {
+        if(pids.size() != materias.size()) {
             Validation.addError("materialPurchase.units.create", "%s");
             return materialPlan;
         }
-        Cooperator cop = units.get(0).cooperator;
-        for(MaterialUnit unit : units) {
-            isUnitToaterialPurchaseValid(unit, cop);
-        }
+        Cooperator cop = Cooperator
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci" +
+                        ".id", materias.get(0).id).first();
+
         if(Validation.hasErrors()) return materialPlan;
         materialPlan.cooperator = cop;
         materialPlan.handler = user;
         materialPlan.name = name.trim();
         materialPlan.state = P.CREATE;
+        materialPlan.address = cop.address;
 
-        // 将 MaterialUnit 添加进入 出货单 , MaterialUnit 进入 采购中 阶段
-        for(MaterialUnit unit : units) {
-            unit.toggleAssignTodeliverplan(materialPlan, true);
+        // 将 Material 添加进入 出货单
+        for(Material material : materias) {
             MaterialPlanUnit planUnit = new MaterialPlanUnit();
-            planUnit.materialPlan =  materialPlan;
-            planUnit.materialUnit =  unit;
+            planUnit.materialPlan = materialPlan;
+            planUnit.material = material;
             planUnit.handler = Login.current();
             planUnit.stage = ProcureUnit.STAGE.DELIVERY;
-            planUnit.planDeliveryDate =  unit.planDeliveryDate;
             materialPlan.units.add(planUnit);
         }
-        
         materialPlan.save();
-        new ERecordBuilder("materialPlan.createFromProcures")
+        new ERecordBuilder("materialPlan.createMaterialPlan")
                 .msgArgs(StringUtils.join(pids, ","), materialPlan.id).fid(materialPlan.id).save();
         return materialPlan;
-    }
-
-    private static boolean isUnitToaterialPurchaseValid(MaterialUnit unit, Cooperator cop) {
-        if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
-            Validation.addError("", "物料采购计划单必须在采购中状态!");
-            return false;
-        }
-        if(!cop.equals(unit.cooperator)) {
-            Validation.addError("", "添加一个出货单只能一个供应商!");
-            return false;
-        }
-        /** 验证物料计划下面的 出货计划数量总和是否等于 物料计划的数量 **/
-         
-
-        return true;
     }
 
 
@@ -251,7 +227,7 @@ public class MaterialPlan extends GenericModel {
         List<MaterialPlanUnit> units = MaterialPlanUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(MaterialPlanUnit unit : units) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
-                Validation.addError("deliveryment.units.unassign", "%s");
+                Validation.addError("materialPlan.units.unassign", "%s");
             } else {
                 unit.toggleAssignToMaterialPlan(null, false);
             }
@@ -263,6 +239,43 @@ public class MaterialPlan extends GenericModel {
         new ElcukRecord(Messages.get("deliverplan.delunit"),
                 Messages.get("deliverplan.delunit.msg", pids, this.id), this.id).save();
         return units;
+    }
+
+    /**
+     * 确认物料出货单
+     */
+    public void confirm() {
+        if(!Arrays.asList(P.CREATE).contains(this.state))
+            Validation.addError("", "采购单状态非 " + P.CREATE.label() + " 不可以确认");
+        if(Validation.hasErrors()) return;
+        this.state = P.DONE;
+        this.save();
+    }
+
+    public static MaterialPlan addunits(String id, String code) {
+        MaterialPlan materialPlan = MaterialPlan.findById(id);
+        //验证物料编码是否存在于出货单元里面
+        long count = materialPlan.units.stream().filter(unit -> unit.material.code.equals(code)).count();
+        if(count > 0) {
+            Validation.addError("", "物料编码 %s 已经存在于物料出库单元！", code);
+            return materialPlan;
+        }
+        Material material = Material.find("byCode", code).first();
+        if(material == null) {
+            Validation.addError("", "物料编码 %s 不存在！", code);
+            return materialPlan;
+        }
+        // 将 Material 添加进入 出货单
+        MaterialPlanUnit planUnit = new MaterialPlanUnit();
+        planUnit.materialPlan = materialPlan;
+        planUnit.material = material;
+        planUnit.handler = Login.current();
+        planUnit.stage = ProcureUnit.STAGE.DELIVERY;
+        materialPlan.units.add(planUnit);
+        materialPlan.save();
+        new ERecordBuilder("materialPlan.addunits")
+                .msgArgs(code, materialPlan.id).fid(materialPlan.id).save();
+        return materialPlan;
     }
 
 }

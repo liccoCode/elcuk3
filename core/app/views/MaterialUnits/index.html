@@ -32,7 +32,7 @@
         <div class="input-prepend inline">
           <select name="p.stages" multiple="multiple" id="stage">
             <option value="">阶段</option>
-          #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+          #{list items:models.material.MaterialUnit.STAGE.values(), as:'stage'}
               #{if stage.label() != '审批中'}
                 <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
               #{/if}
@@ -61,7 +61,7 @@
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
         <div class="inline">
-          <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank"><i
+          <a href="" class="btn btn-success" target="_blank"><i
               class="icon-download-alt"></i>导出物料计划${str}</a>
         </div>
       </div>
@@ -73,17 +73,6 @@
   <div class="row-fluid">
     <div class="span12">
     #{render 'MaterialUnits/_unit_list.html', units: p.query(), p:p, checkbox:true , materialUnitsIndex:true/}
-    </div>
-  </div>
-
-  <div class="row-fluid">
-    <div class="span12">
-      <div class="input-append">
-        <input type="text" id="name_deliverplan" name="deliverName" value="${name}" placeHolder="物料出货单的别名(必须)">
-        <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>
-          添加出货单
-        </button>
-      </div>
     </div>
   </div>
 

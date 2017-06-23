@@ -2,6 +2,8 @@ package ext;
 
 import helper.Webs;
 import models.market.M;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
 import models.whouse.Inbound;
@@ -237,6 +239,30 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#5BB75B";
             default:
                 return "#333333";
+        }
+    }
+
+    public static String rgb(MaterialPurchase.S state) {
+        switch(state) {
+            case PENDING:
+                return "#5CB85C";
+            case CONFIRM:
+                return "#FAA52C";
+            case CANCEL:
+            default:
+                return "#708090";
+        }
+    }
+    
+    public static String rgb(MaterialUnit.STAGE stage) {
+        switch(stage) {
+            case CANCEL:
+                return "#708090";
+            case DELIVERY:
+                return "#40B0F9";
+            case CLOSE:
+            default:
+                return "#42CFC4";
         }
     }
 

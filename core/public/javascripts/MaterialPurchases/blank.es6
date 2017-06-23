@@ -94,7 +94,7 @@ $(() => {
     let html = _.template($("#copy").text())({"num": index});
     html = html.replace("<select></select>", selectLet);
     html = html.replace("units[<%= num %>].material.id", "units["+index+"].material.id");
-    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].currency");
+    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].planCurrency");
     console.log(html);
     $("#btn_tr").before(html);
     window.$ui.dateinput();
