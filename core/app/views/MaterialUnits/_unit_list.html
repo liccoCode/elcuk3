@@ -10,9 +10,10 @@
   #{/if}
     <th>#</th>
     <th width="40px;">阶段</th>
-    <th width="80px;">物料编码</th>
+    <th width="100px;">物料编码</th>
     <th width="250px;">物料名称</th>
-    <th>物料采购单<br>供应商</th>
+    <th>物料采购单</th>
+    <th>供应商</th>
     <th>采购数</th>
     <th>采购余量</th>
     <th>单价</th>
@@ -37,11 +38,11 @@
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
     ${unit.id}
     </td>
-    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-
+    <td style="color:${unit.stage?.rgb()}">${unit.stage.label()}</td>
     <td>${unit.material?.code}${str}</td>
     <td>${unit.material?.name}</td>
-    <td>${unit.materialPurchase?.id}<br>${unit.cooperator?.name}</td>
+    <td>${unit.materialPurchase?.id}</td>
+    <td>${unit.cooperator?.name}</td>
     <td>${unit.planQty}</td>
     <td>${unit.availableQty}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>

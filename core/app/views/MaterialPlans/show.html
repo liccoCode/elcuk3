@@ -1,10 +1,10 @@
 #{extends 'main_full.html'/}
 #{set title:"物料出货单 #" + dp.id /}
 #{set 'moreScripts'}
-  #{script 'jquery.filedrop.js'/}
-  #{script 'component/dropUpload.coffee'/}
-  #{script 'materialPlans/edit.js'/}
-  #{script 'deliveryments/show.coffee'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'materialPlans/edit.js'/}
+    #{script 'deliveryments/show.coffee'/}
 #{/set}
 
 #{errorMsgs /}
@@ -28,24 +28,24 @@
           <tr>
             <th>出库单名称<span style="color:red">*</span></th>
             <td><input type="text" class="span8" name="dp.name" value="${dp.name}" required></td>
+            <th>收货类型<span style="color:red">*</span></th>
+            <td>
+              <select name="dp.receipt" class="inline" required>
+                <option value="">收货类型</option>
+              #{list items:models.material.MaterialPlan.R, as:'c'}
+                <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
+              #{/list}
+              </select>
+            </td>
+          </tr>
+          <tr>
             <th>供应商</th>
             <td>
               <input type="hidden" value="${dp?.cooperator?.id}" required/>
               <input type="text" value="${dp?.cooperator?.name}" readonly/>
             </td>
-          </tr>
-          <tr>
-            <th>收货类型</th>
-            <td>
-              <select name="dp.receipt" class="inline">
-                <option value="">收货类型</option>
-              #{list items:models.material.MaterialPlan.R, as:'c'}
-                <option value="${c.name()}">${c.label()}</option>
-              #{/list}
-              </select>
-            </td>
-            <th>目的地<span style="color:red">*</span></th>
-            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" required></td>
+            <th>目的地</th>
+            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}"></td>
           </tr>
           <tr>
             <th>收货方</th>
@@ -93,24 +93,18 @@
   </div>
 </div>
 
-
-
-
-
-#{success_row title:"已经添加进入[出货单]的[采购单元] "/}
+#{success_row title:"已经添加进入[物料出货单]的[出货单元] "/}
 <form action="#" id="bulkpost" method="POST">
   <div class="row-fluid">
     <div class="span12" id="unit_list">
       <table class="table table-condensed table-bordered" id="unit_table">
         <tr>
-          <th></th>
+          <th>#</th>
           <th>物料编码</th>
           <th>物料名称</th>
           <th>采购余量</th>
           <th>交货数量</th>
           <th>Action_签收数量</th>
-          <th>预计交货时间</th>
-          <th>实际交货时间</th>
           <th>项目名称</th>
           <th>创建人</th>
           <th>创建时间</th>
@@ -119,25 +113,26 @@
         <tr class="text-center">
           <td>
             <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                           data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                           data-width="" data-height="">
+                   data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
+                   data-width="" data-height="">
           </td>
-          <td>${unit.materialUnit?.material?.code}</td>
-          <td>${unit.materialUnit?.material?.name}</td>
-          <td>${unit.materialUnit?.getRemaining()}</td>
+          <td>${unit.material?.code}</td>
+          <td>${unit.material?.name}</td>
+          <td>${unit.material?.surplusConfirmQty()}</td>
           <td>
-            <input type="text" name="qty" class="input-medium" value="${unit.qty}">
+              #{if qtyEdit}
+                <input type="text" name="qty" class="input-medium" value="0">
+              #{/if}
+              #{else } ${unit.qty} #{/else}
           </td>
           <td>
-            #{if unit.receiptQty == 0 }
-              <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
-                 uid="${unit.id}">签收异常</a>
-            #{/if}
-            #{else } ${unit.receiptQty} #{/else}
+              #{if unit.receiptQty == 0 }
+                <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
+                   uid="${unit.id}">签收异常</a>
+              #{/if}
+              #{else } ${unit.receiptQty} #{/else}
           </td>
-          <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
-          <td>#{time_tooltip time:unit.deliveryDate/}</td>
-          <td>${unit.materialUnit?.projectName}</td>
+          <td>${unit.material?.projectName}</td>
           <td>${unit.handler?.username}</td>
           <td>#{time_tooltip time:unit.createDate /}</td>
         </tr>
@@ -145,16 +140,29 @@
       </table>
     </div>
   </div>
+
+#{if qtyEdit}
   <div class="row-fluid">
-    <div class="btn-toolbar">
-    #{power.ck "products.edit"}
-      <a href="javascript:void(0);" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
-         id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
-        解除
-      </a>
-    #{/power.ck}
+    <div class="span12">
+      <div class="input-append">
+        <a href="javascript:void(0);" data-url='@{MaterialPlans.confirm(dp.id)}'
+           id="confirmPlanBtn" class="btn btn-primary">
+          确认
+        </a>
+        <a href="javascript:void(0);" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
+           id="delunit_form_submit" rel="popover" class="btn btn-warning"
+           content="将 DELIVERY 状态的出货计划从出货单中移除出去" placement="right">
+          解除
+        </a>
+        <input type="text" id="code" placeHolder="物料编码(必须)" required>
+        <a href="javascript:void(0);" data-url='@{MaterialPlans.confirm(dp.id)}'
+           id="addPlanUnitBtn" class="btn btn-primary">
+          快速添加
+        </a>
+      </div>
     </div>
   </div>
+#{/if}
   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
 </form>
 
@@ -179,7 +187,7 @@
   <div class="modal-header">
     <h4>签收数量修改</h4>
   </div>
-  <div class="modal-body" style="height:300px;">
+  <div class="modal-body">
     <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
       <input type="hidden" name="unit.id" id="unit_id">
       <table class="table table-condensed table-bordered">
@@ -199,8 +207,14 @@
 </div>
 <!--  修改签收数量 弹出div end   -->
 
+<form action="@{MaterialPlans.confirm(dp.id)}" method="post" id="confirm_form">
+  <input type="hidden" name="unit.id" value="${dp?.id}" id="unit_id">
+</form>
 
 
-
+<form action="@{MaterialPlans.addunits(dp.id)}" method="post" id="addunits_form">
+  <input type="hidden" name="unit.id" value="${dp?.id}" id="unit_id">
+  <input type="hidden" name="code" id="unit_code">
+</form>
 
 

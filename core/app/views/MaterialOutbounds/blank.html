@@ -28,10 +28,11 @@
         <td>
           <input type="text" value="${outbound?.projectName}" readonly>
         </td>
-        <th>出库类型</th>
+        <th>出库类型<span style="color:red">*</span></th>
         <td>
-          <select name="outbound.type">
+          <select name="outbound.type" required>
               #{list items:models.material.MaterialOutbound.C, as:'t'}
+                <option value="">出库类型</option>
                 <option value="${t.name()}">${t.label()}</option>
               #{/list}
           </select>
@@ -49,7 +50,7 @@
           </select>
         </td>
         <th>目的地</th>
-        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" required></td>
+        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" ></td>
       </tr>
 
       <tr>

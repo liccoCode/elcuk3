@@ -37,6 +37,7 @@
       <input type="hidden" name="p.page" value="${p.page}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
+
   </div>
 </div>
 #{/form}
@@ -85,8 +86,8 @@
 
           <td>${dp.cooperator?.name}</td>
           <td>${dp.state.label()}</td>
-          <td></td>
-          <td></td>
+          <td>${dp.receipt?.label()}</td>
+          <td>${dp.receive}</td>
           <td></td>
           <td>${dp.handler.username}</td>
           <td>#{time_tooltip time:dp.createDate/}</td>

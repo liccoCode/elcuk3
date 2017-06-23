@@ -43,7 +43,7 @@
     <td>${unit.material?.code}</td>
     <td>${unit.material?.name}</td>
     <td>${unit.planQty}</td>
-    <td>${unit.availableQty}</td>
+    <td>${unit.material?.surplusConfirmQty()}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
     <td>

@@ -6,7 +6,6 @@ import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
@@ -16,7 +15,10 @@ import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 物料采购单
@@ -40,7 +42,6 @@ public class MaterialPurchase extends GenericModel {
     @Expose
     public String id;
 
-
     public String name;
 
     /**
@@ -50,7 +51,39 @@ public class MaterialPurchase extends GenericModel {
     @Expose
     @Column(nullable = false)
     @Required
-    public Deliveryment.S state;
+    public S state;
+
+    public enum S {
+        /**
+         * 计划：创建成功后即为“计划”
+         */
+        PENDING {
+            @Override
+            public String label() {
+                return "计划";
+            }
+        },
+        /**
+         * 已确认并已下单：点击确认后变为“已确认并已下单”
+         */
+        CONFIRM {
+            @Override
+            public String label() {
+                return "确认并已下单";
+            }
+        },
+        /**
+         * 取消：取消采购单后变为“取消”
+         */
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消";
+            }
+        };
+
+        public abstract String label();
+    }
 
     /**
      * 采购计划
@@ -85,6 +118,7 @@ public class MaterialPurchase extends GenericModel {
      * 下单时间(确认时间)
      */
     public Date orderTime;
+
     @Lob
     public String memo = " ";
 
@@ -122,11 +156,11 @@ public class MaterialPurchase extends GenericModel {
      * 确认物料下采购单
      */
     public void confirm() {
-        if(!Arrays.asList(Deliveryment.S.APPROVE, Deliveryment.S.PENDING, Deliveryment.S.REJECT).contains(this.state))
+        if(!Arrays.asList(S.PENDING).contains(this.state))
             Validation.addError("", "采购单状态非 " + Deliveryment.S.PENDING.label() + " 不可以确认");
         if(Validation.hasErrors()) return;
         this.orderTime = new Date();
-        this.state = Deliveryment.S.CONFIRM;
+        this.state = S.CONFIRM;
         this.save();
     }
 
@@ -135,13 +169,13 @@ public class MaterialPurchase extends GenericModel {
      */
     public void cancel(String msg) {
         // 只允许所有都是 units 都为 采购中 的才能够取消.
-        if(this.units.stream().anyMatch(unit -> unit.stage != ProcureUnit.STAGE.DELIVERY)) {
+        if(this.units.stream().anyMatch(unit -> unit.stage != MaterialUnit.STAGE.DELIVERY)) {
             Validation.addError("", "采购计划必须全部都是采购中的才能取消采购单！");
             return;
         }
         if(Validation.hasErrors()) return;
         this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
-        this.state = Deliveryment.S.CANCEL;
+        this.state = MaterialPurchase.S.CANCEL;
         this.save();
         new ElcukRecord(Messages.get("materialPurchases.cancel"),
                 Messages.get("materialPurchases.cancel.msg", this.id, msg.trim()), this.id).save();
@@ -156,7 +190,7 @@ public class MaterialPurchase extends GenericModel {
     public List<MaterialUnit> unAssignUnitInMaterialPurchase(List<Long> pids) {
         List<MaterialUnit> units = MaterialUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         for(MaterialUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
+            if(unit.stage != MaterialUnit.STAGE.DELIVERY) {
                 Validation.addError("materialPurchase.units.unassign", "%s");
             } else if(this.deliveryType == Deliveryment.T.MANUAL) {
                 //手动采购单中的默认的采购计划不允许从采购单中移除

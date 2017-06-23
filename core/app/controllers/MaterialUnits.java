@@ -4,17 +4,13 @@ import controllers.api.SystemOperation;
 import models.OperatorConfig;
 import models.material.MaterialUnit;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.product.Category;
-import models.view.Ret;
 import models.view.post.MaterialUnitPost;
 import models.whouse.Whouse;
-import org.apache.commons.lang.StringUtils;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,23 +40,7 @@ public class MaterialUnits extends Controller {
     public static void index(MaterialUnitPost p) {
         if(p == null) {
             p = new MaterialUnitPost();
-            p.stages.add(ProcureUnit.STAGE.PLAN);
-            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
-        render(p);
-    }
-
-    /**
-     * 仓库模块 物料计划查询
-     * @param p
-     */
-    public static void indexWhouse(MaterialUnitPost p) {
-        if(p == null) {
-            p = new MaterialUnitPost();
-            p.stages.add(ProcureUnit.STAGE.PLAN);
-            p.stages.add(ProcureUnit.STAGE.OUTBOUND);
-        }
-        p.pagination = false;
         render(p);
     }
 
@@ -108,17 +88,5 @@ public class MaterialUnits extends Controller {
         flash.success("删除成功.");
         MaterialPurchases.show(materialPurchaseId);
     }
-
-    /**
-     * 物料计划创建物料出货单进行验证
-     * @param pids
-     */
-    public static void createValidate(List<Long> pids) {
-        String msg = MaterialUnit.validateIsInbound(pids);
-        if(StringUtils.isNotBlank(msg)) {
-            renderJSON(new Ret(false, msg));
-        } else {
-            renderJSON(new Ret(true));
-        }
-    }
+    
 }

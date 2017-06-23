@@ -147,11 +147,30 @@ public class Material extends Model {
      */
     public int availableQty() {
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
-                .find(" materialUnit.material.id=? AND materialPlan.receipt = ?", id, MaterialPlan.R.WAREHOUSE).fetch();
-        int availableQty = materialPlanUnitList.stream().mapToInt(unit -> unit.availableQty).sum();
-        return availableQty;
+                .find(" material.id=? AND materialPlan.receipt = ?", id, MaterialPlan.R.WAREHOUSE).fetch();
+        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum();
     }
 
+    /**
+     * 根据物料ID查询采购余量(采购单已确认)
+     *
+     * @return
+     */
+    public int surplusConfirmQty() {
+        List<MaterialUnit> materialUnitList = MaterialUnit
+                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.CONFIRM).fetch();
+        return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum() - availableQty();
+    }
+
+    /**
+     * 根据物料ID查询采购余量(采购单未确认)
+     * @return
+     */
+    public int surplusPendingQty() {
+        List<MaterialUnit> materialUnitList = MaterialUnit
+                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.PENDING).fetch();
+        return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum();
+    }
     /**
      * 根据物料查询对应 的所有供应商
      */

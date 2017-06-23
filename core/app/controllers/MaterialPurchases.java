@@ -14,7 +14,6 @@ import models.material.MaterialUnit;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.DeliveryPost;
 import models.view.post.MaterialPurchasePost;
@@ -88,15 +87,16 @@ public class MaterialPurchases extends Controller {
     }
 
     /**
-     * 新增物流采购单
+     * 新增物料采购单
+     *
      * @param purchase
      * @param units
      */
     public static void create(MaterialPurchase purchase, List<MaterialUnit> units) {
-        Validation.required("采购单别名", purchase.name);
+        Validation.required("物料采购单别名", purchase.name);
         purchase.id = MaterialPurchase.id();
         purchase.handler = Login.current();
-        purchase.state = Deliveryment.S.PENDING;
+        purchase.state = MaterialPurchase.S.PENDING;
         purchase.name = purchase.name.trim();
         purchase.deliveryType = Deliveryment.T.MANUAL;
         purchase.projectName = Login.current().projectName;
@@ -105,7 +105,7 @@ public class MaterialPurchases extends Controller {
             unit.cooperator = purchase.cooperator;
             unit.handler = Login.current();
             unit.materialPurchase = purchase;
-            unit.stage = ProcureUnit.STAGE.DELIVERY;
+            unit.stage = MaterialUnit.STAGE.DELIVERY;
             unit.validateManual();
             if(Validation.hasErrors()) {
                 render("MaterialPurchases/blank.html", purchase, units);
@@ -119,7 +119,8 @@ public class MaterialPurchases extends Controller {
     }
 
     /**
-     * 修改物料采购单 
+     * 修改物料采购单
+     *
      * @param dmt
      */
     public static void update(MaterialPurchase dmt) {
@@ -224,6 +225,7 @@ public class MaterialPurchases extends Controller {
 
     /**
      * 根据出货单ID查询出货计划集合
+     *
      * @param id
      */
     public static void showMaterialUnitList(String id) {

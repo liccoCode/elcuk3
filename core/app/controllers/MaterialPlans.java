@@ -4,14 +4,18 @@ import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.material.Material;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
 import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.MaterialPlanPost;
+import models.view.post.MaterialPost;
 import models.view.post.MaterialUnitPost;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -35,22 +39,34 @@ public class MaterialPlans extends Controller {
         renderArgs.put("records", ElcukRecord.records(id));
     }
 
+
+    /**
+     * 查询物料采购余量信息
+     *
+     * @param p
+     */
+    public static void indexMaterial(MaterialPost p) {
+        if(p == null) p = new MaterialPost();
+        List<Material> materials = p.query();
+        render(p, materials);
+    }
+
+
     /**
      * 跳转 到 创建物料出库单页面
-     * TODO effect: 需要调整权限
      */
-    @Check("procures.createdeliveryment")
-    public static void materialPlan(List<Long> pids, String deliverName) {
-        if(StringUtils.isBlank(deliverName))
+    public static void materialPlan(List<Long> pids, String planName) {
+        if(StringUtils.isBlank(planName))
             Validation.addError("", "出货单名称必须填写!");
         if(pids == null || pids.size() <= 0)
-            Validation.addError("", "必须选择物料采购计划单!");
+            Validation.addError("", "必须选择物料信息!");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            MaterialUnits.index(new MaterialUnitPost(ProcureUnit.STAGE.PLAN));
+            MaterialPlans.indexMaterial(new MaterialPost());
         }
+
         MaterialPlan materialPlan = MaterialPlan
-                .createFromProcures(pids, deliverName, User.findByUserName(Secure.Security.connected()));
+                .createMaterialPlan(pids, planName, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             MaterialUnits.index(new MaterialUnitPost(ProcureUnit.STAGE.PLAN));
@@ -70,7 +86,11 @@ public class MaterialPlans extends Controller {
     public static void show(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
         List<MaterialPlanUnit> units = dp.units;
-        render(dp, units);
+        boolean qtyEdit = false;
+        if(dp.state == MaterialPlan.P.CREATE) {
+            qtyEdit = true;
+        }
+        render(dp, units, qtyEdit);
     }
 
     /**
@@ -92,13 +112,18 @@ public class MaterialPlans extends Controller {
      *
      * @param id
      * @param value
-     * @param attr
      */
-    public static void updateUnit(String id, String value, String attr) {
+    public static void updateUnit(String id, String value) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(Long.valueOf(id));
-        unit.updateAttr(attr, value);
-        renderJSON(new Ret());
+        //验证交货数量需判断不能大于采购余量
+        if(unit.material.surplusConfirmQty() >= NumberUtils.toInt(value)) {
+            unit.updateAttr(value);
+            renderJSON(new Ret());
+        } else {
+            renderJSON(new Ret(false, "交货数量大于采购余量"));
+        }
     }
+
     /**
      * 将 MaterialPlanUnit 从 MaterialPlan 中解除
      */
@@ -111,7 +136,7 @@ public class MaterialPlans extends Controller {
         dp.unassignUnitToMaterialPlan(pids);
         if(Validation.hasErrors()) render("MaterialPlans/show.html", dp);
 
-        flash.success("成功将 %s 采购计划从出货单 %s 中移除.", StringUtils.join(pids, ","), id);
+        flash.success("成功将 %s 出货单元从物料出货单 %s 中移除.", StringUtils.join(pids, ","), id);
         if(dp.units.isEmpty()) {
             dp.delete();
             index(null);
@@ -121,7 +146,38 @@ public class MaterialPlans extends Controller {
     }
 
     /**
+     * 物料出货单确认验证
+     *
+     * @param id
+     */
+    public static void confirmValidate(String id) {
+        MaterialPlan dp = MaterialPlan.findById(id);
+        //验证交货数量需判断不能大于采购余量
+        long count = dp.units.stream().filter(unit -> unit.material.surplusPendingQty() > 0).count();
+        if(count > 0) {
+            renderJSON(new Ret(true, "【物料编码】存在未确认的采购数***，是否仍要交货？"));
+        }
+    }
+
+    /**
+     * 确认物料出货单
+     */
+    public static void confirm(String id) {
+        MaterialPlan dp = MaterialPlan.findById(id);
+        dp.confirm();
+
+        if(Validation.hasErrors()) {
+            show(id);
+        } else {
+            new ElcukRecord(Messages.get("materialPlans.confirm"), String.format("确认[物料出货单] %s", id), id).save();
+            flash.success("物料出货单 %s 确认成功.", id);
+            show(id);
+        }
+    }
+
+    /**
      * 根据出货单ID查询出货计划集合
+     *
      * @param id
      */
     public static void showMaterialPlanUnitList(String id) {
@@ -135,8 +191,25 @@ public class MaterialPlans extends Controller {
      */
     public static void updateMaterialPlanUnit(MaterialPlanUnit unit) {
         MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(unit.id);
-        materialPlanUnit.receiptQty =  unit.receiptQty;
+        materialPlanUnit.receiptQty = unit.receiptQty;
         materialPlanUnit.save();
         renderJSON(new Ret());
+    }
+
+
+    /**
+     * MaterialPlan 添加 MaterialPlanUnit
+     */
+    public static void addunits(String id, String code) {
+        Validation.required("materialPlans.addunits", code);
+        if(Validation.hasErrors()) show(id);
+
+        MaterialPlan materialPlan = MaterialPlan.addunits(id, code);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            MaterialPlans.show(id);
+        }
+        flash.success("物料 %s 添加成功.", code);
+        MaterialPlans.show(materialPlan.id);
     }
 }
