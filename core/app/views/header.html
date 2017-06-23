@@ -95,7 +95,7 @@
                 #{power.ck "cooperators.index"}
                   <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
                 #{/power.ck}
-                <li class="divider"></li>
+              <li class="divider"></li>
 
                 #{power.ck "deliveryments.index"}
                   <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
@@ -145,6 +145,7 @@
                 #{power.ck "shipmentreports.lossrate"}
                   <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
                 #{/power.ck}
+              <li><a href="@{ShipmentReports.monthlyShipmentReport()}">单月物流发货量报表</a></li>
             </ul>
           </li>
         #{/power.ck}

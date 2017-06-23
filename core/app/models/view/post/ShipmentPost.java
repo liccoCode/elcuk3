@@ -1,6 +1,5 @@
 package models.view.post;
 
-import helper.DBUtils;
 import helper.Dates;
 import models.User;
 import models.procure.ProcureUnit;
@@ -11,7 +10,9 @@ import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,7 @@ import java.util.regex.Pattern;
  * Time: 11:06 AM
  */
 public class ShipmentPost extends Post<Shipment> {
+    private static final long serialVersionUID = -2199641514934402388L;
     public static final List<F.T2<String, String>> DATE_TYPES;
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d+)$");
     private static final Pattern NUM = Pattern.compile("^[0-9]*$");
@@ -79,7 +81,7 @@ public class ShipmentPost extends Post<Shipment> {
         StringBuilder sql = new StringBuilder("SELECT s FROM Shipment s LEFT JOIN s.items i ");
         sql.append(" LEFT JOIN i.unit.fba f WHERE 1=1 ");
 
-        /**如果传入进来的是shipmentId或者采购单Id**/
+        /*如果传入进来的是shipmentId或者采购单Id*/
         if(StringUtils.isNotBlank(this.search)) {
             this.search = this.search.trim();
             Matcher deliver_matcher = DELIVER_ID.matcher(this.search);
@@ -109,11 +111,11 @@ public class ShipmentPost extends Post<Shipment> {
         }
 
         if(this.dateType.equals("createDate")) {
-            sql.append(" AND s." + this.dateType + ">=?");
-            sql.append(" AND s." + this.dateType + "<=?");
+            sql.append(" AND s.").append(this.dateType).append(">=?");
+            sql.append(" AND s.").append(this.dateType).append("<=?");
         } else {
-            sql.append(" AND s.dates." + this.dateType + ">=?");
-            sql.append(" AND s.dates." + this.dateType + "<=?");
+            sql.append(" AND s.dates.").append(this.dateType).append(">=?");
+            sql.append(" AND s.dates.").append(this.dateType).append("<=?");
         }
         params.add(Dates.morning(this.from));
         params.add(Dates.morning(this.to));
@@ -129,7 +131,7 @@ public class ShipmentPost extends Post<Shipment> {
                 if(state == null) continue;
                 states.add(state.name());
             }
-            if(states.size() > 0) sql.append(" AND s.state IN " + SqlSelect.inlineParam(states));
+            if(states.size() > 0) sql.append(" AND s.state IN ").append(SqlSelect.inlineParam(states));
         }
 
         if(this.iExpress != null) {
