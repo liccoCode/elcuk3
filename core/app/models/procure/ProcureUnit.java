@@ -865,7 +865,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
         /**库存分拆需要分析包装信息**/
-        if(this.lastBox != null && this.mainBox != null && newUnit.availableQty % this.mainBox.num == 0) {
+        if(this.lastBox != null && this.mainBox != null && this.mainBox.num != 0
+                && newUnit.availableQty % this.mainBox.num == 0) {
             newUnit.mainBox.boxNum = newUnit.availableQty / this.mainBox.num;
             newUnit.mainBox.num = this.mainBox.num;
             newUnit.mainBox.singleBoxWeight = this.mainBox.singleBoxWeight;
@@ -1510,7 +1511,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public void remove() {
-        /**
+        /*
          * TODO: 这里需要理清楚
          * 1. 什么时候可以删除采购计划?
          * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?

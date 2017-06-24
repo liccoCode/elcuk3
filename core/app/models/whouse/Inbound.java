@@ -387,7 +387,7 @@ public class Inbound extends GenericModel {
         Inbound inbound = new Inbound();
         User user = Login.current();
         inbound.id = id();
-        inbound.type = T.Machining;
+        inbound.type = T.Purchase;
         inbound.name = String.format("%s_%s_%s_%s--退货收货单",
                 refund.cooperator.name, inbound.type.label(), Dates.date2Date(), user.username);
         inbound.cooperator = refund.cooperator;

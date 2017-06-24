@@ -1,11 +1,20 @@
 package models.view.report;
 
+import models.market.M;
+
 import java.io.Serializable;
 
 /**
- * Created by licco on 15/6/11.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/6/11
+ * Time: 下午2:11
  */
 public class ArrivalRate implements Serializable {
+
+    private static final long serialVersionUID = 2549758127620926692L;
+
+    public M market;
 
     public String shipType;
 
