@@ -211,7 +211,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.easya.cc/";
+                return "https://e.mengtop.com/";
             }
         };
 
