@@ -66,15 +66,19 @@ public class MaterialUnits extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialUnit( MaterialUnit unit) {
+    public static void updateMaterialUnit(MaterialUnit unit, String updateType) {
         MaterialUnit materialUnit = MaterialUnit.findById(unit.id);
-        materialUnit.planQty =  unit.planQty;
-        materialUnit.planPrice =  unit.planPrice;
-        materialUnit.planCurrency =  unit.planCurrency;
-        materialUnit.planDeliveryDate =  unit.planDeliveryDate;
-        materialUnit.save();  
+        materialUnit.planQty = unit.planQty;
+        materialUnit.planPrice = unit.planPrice;
+        materialUnit.planCurrency = unit.planCurrency;
+        materialUnit.planDeliveryDate = unit.planDeliveryDate;
+        materialUnit.save();
         flash.success("操作成功");
-        MaterialPurchases.show(unit.materialPurchase.id);
+        if("MaterialUnitIndex".equals(updateType)) {
+           index(new MaterialUnitPost());
+        } else if("MaterialPurchaseShow".equals(updateType)) {
+            MaterialPurchases.show(unit.materialPurchase.id);
+        }
     }
 
 
@@ -88,5 +92,5 @@ public class MaterialUnits extends Controller {
         flash.success("删除成功.");
         MaterialPurchases.show(materialPurchaseId);
     }
-    
+
 }

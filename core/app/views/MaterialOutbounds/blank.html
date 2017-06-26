@@ -31,8 +31,8 @@
         <th>出库类型<span style="color:red">*</span></th>
         <td>
           <select name="outbound.type" required>
+              <option value="">出库类型</option>
               #{list items:models.material.MaterialOutbound.C, as:'t'}
-                <option value="">出库类型</option>
                 <option value="${t.name()}">${t.label()}</option>
               #{/list}
           </select>
@@ -43,7 +43,7 @@
         <th>收货方</th>
         <td>
           <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
-            <option value="">供应商</option>
+            <option value="">请选择供应商</option>
               #{list items:cooperators, as:'cop'}
                 <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
               #{/list}

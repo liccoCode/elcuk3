@@ -5,7 +5,6 @@ import helper.Dates;
 import models.OperatorConfig;
 import models.material.Material;
 import models.material.MaterialUnit;
-import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public class MaterialUnitPost extends Post<MaterialUnit> {
 
-    public List<ProcureUnit.STAGE> stages = new ArrayList<>();
+    public List<MaterialUnit.STAGE> stages = new ArrayList<>();
     public static final List<String> projectNames = new ArrayList<>();
     public long cooperatorId;
     public long materialId;
@@ -34,20 +33,11 @@ public class MaterialUnitPost extends Post<MaterialUnit> {
     public MaterialUnitPost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stages.add(ProcureUnit.STAGE.DONE);
-        this.stages.add(ProcureUnit.STAGE.DELIVERY);
-        this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         this.perSize = 70;
         projectNames.clear();
         projectNames.add(OperatorConfig.getVal("brandname"));
         projectNames.add("B2B");
 
-    }
-
-
-    public MaterialUnitPost(ProcureUnit.STAGE stage) {
-        this();
-        this.stages.add(stage);
     }
 
     @Override

@@ -155,9 +155,10 @@
   <div class="modal-header">
     <h4>物料计划修改</h4>
   </div>
-  <div class="modal-body" style="height:300px;">
+  <div class="modal-body">
     <form action="@{MaterialUnits.updateMaterialUnit()}" method="post" id="updateUnit_form">
       <input type="hidden" name="unit.id" id="unit_id">
+      <input type="hidden" name="updateType" value="MaterialPurchaseShow">
       <table class="table table-condensed table-bordered">
         <tr>
           <th width="30%">采购数量</th>

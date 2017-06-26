@@ -31,11 +31,8 @@
 
         <div class="input-prepend inline">
           <select name="p.stages" multiple="multiple" id="stage">
-            <option value="">阶段</option>
           #{list items:models.material.MaterialUnit.STAGE.values(), as:'stage'}
-              #{if stage.label() != '审批中'}
-                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
-              #{/if}
+            <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
           #{/list}
           </select>
         </div>
@@ -80,5 +77,40 @@
 
 
 
-
+<!--  修改物料计划 弹出div begin   -->
+<div id="bom_modal" class="modal hide fade">
+  <div class="modal-header">
+    <h4>物料计划修改</h4>
+  </div>
+  <div class="modal-body">
+    <form action="@{MaterialUnits.updateMaterialUnit()}" method="post" id="updateUnit_form">
+      <input type="hidden" name="unit.id" id="unit_id">
+      <input type="hidden" name="updateType" value="MaterialUnitIndex">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th width="30%">采购数量</th>
+          <td>
+            <input type="text" placeHolder="具体数量" id="unit_planQty" name="unit.planQty">
+          </td>
+        </tr>
+        <tr>
+          <th>价格</th>
+          <td>
+            <input type="text" id="unit_planPrice" name="unit.planPrice">
+            <select style="width:100px;" id="unit_planCurrency" name="unit.planCurrency">
+            #{list items:helper.Currency, as:'c'}
+              <option value="${c.name()}">${c.name()}</option>
+            #{/list}
+            </select>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+  </div>
+</div>
+<!--  修改物料计划 弹出div end   -->
 

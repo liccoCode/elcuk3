@@ -87,6 +87,19 @@
   #{render 'MaterialOutbounds/_units.html', units:outbound.units, is_check: true/}
   </div>
 </div>
+#{if qtyEdit}
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-append">
+        <input type="text" id="code" placeHolder="物料编码(必须)" required>
+        <a href="javascript:void(0);" 
+           id="addPlanUnitBtn" class="btn btn-primary">
+          快速添加
+        </a>
+      </div>
+    </div>
+  </div>
+#{/if}
 <br>
 
 #{records records:records/}
@@ -123,3 +136,10 @@
     </div>
   </form>
 </div>
+
+
+
+<form action="@{MaterialOutbounds.addunits(outbound.id)}" method="post" id="addunits_form">
+  <input type="hidden" name="unit.id" value="${outbound?.id}" id="unit_id">
+  <input type="hidden" name="code" id="unit_code">
+</form>

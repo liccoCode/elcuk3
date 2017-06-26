@@ -15,7 +15,6 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.view.Ret;
-import models.view.post.DeliveryPost;
 import models.view.post.MaterialPurchasePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -48,7 +47,7 @@ public class MaterialPurchases extends Controller {
     }
 
     @Before(only = {"index"})
-    public static void beforeIndex(DeliveryPost p) {
+    public static void beforeIndex(MaterialPurchasePost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
         List<ProcureApply> availableApplies = ProcureApply.unPaidApplies(p == null ? null : p.cooperId);
         renderArgs.put("suppliers", suppliers);
