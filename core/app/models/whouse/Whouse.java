@@ -291,13 +291,13 @@ public class Whouse extends Model {
             if(exist != null) continue;
 
             if(nextBeginDate.getDayOfWeek() == 1) {
-                if(Arrays.asList("EASYACC", "Brandworl", "Reapow").contains(OperatorConfig.getVal("brandname"))) {
+                if(Arrays.asList("EASYACC", "Brandworl", "Ecooe").contains(OperatorConfig.getVal("brandname"))) {
                     if(type == M.AMAZON_US) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
             } else if(nextBeginDate.getDayOfWeek() == 2) {
-                if(Collections.singletonList("Reapow").contains(OperatorConfig.getVal("brandname"))) {
+                if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
                     if(type == M.AMAZON_DE) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
