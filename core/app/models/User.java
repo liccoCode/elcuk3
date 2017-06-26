@@ -159,10 +159,10 @@ public class User extends Model {
                 return "https://e.easya.cc/";
             }
         },
-        Reapow {
+        Ecooe {
             @Override
             public String label() {
-                return "Reapow";
+                return "ecooe";
             }
 
             @Override
