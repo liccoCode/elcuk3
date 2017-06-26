@@ -247,5 +247,4 @@ public class MaterialPlans extends Controller {
         flash.success("物料审核成功.");
         index(new MaterialPlanPost());
     }
-    
 }

@@ -226,8 +226,8 @@ public class MaterialPlan extends GenericModel {
             return materialPlan;
         }
         Cooperator cop = Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci" +
-                        ".id", materias.get(0).id).first();
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
+                        + ".id", materias.get(0).id).first();
 
         if(Validation.hasErrors()) return materialPlan;
         materialPlan.cooperator = cop;
@@ -256,8 +256,8 @@ public class MaterialPlan extends GenericModel {
      * 将指定 MaterialPlanUnit 从 出货单 中删除
      */
     public List<MaterialPlanUnit> unassignUnitToMaterialPlan(List<Long> pids) {
-        List<MaterialPlanUnit> units = MaterialPlanUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(MaterialPlanUnit unit : units) {
+        List<MaterialPlanUnit> planUnits = MaterialPlanUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(MaterialPlanUnit unit : planUnits) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("materialPlan.units.unassign", "%s");
             } else {
@@ -265,12 +265,12 @@ public class MaterialPlan extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
+        this.units.removeAll(planUnits);
         this.save();
 
         new ElcukRecord(Messages.get("deliverplan.delunit"),
                 Messages.get("deliverplan.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        return planUnits;
     }
 
     /**

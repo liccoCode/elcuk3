@@ -188,8 +188,8 @@ public class MaterialPurchase extends GenericModel {
      * @param pids
      */
     public List<MaterialUnit> unAssignUnitInMaterialPurchase(List<Long> pids) {
-        List<MaterialUnit> units = MaterialUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(MaterialUnit unit : units) {
+        List<MaterialUnit> materialUnits = MaterialUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(MaterialUnit unit : materialUnits) {
             if(unit.stage != MaterialUnit.STAGE.DELIVERY) {
                 Validation.addError("materialPurchase.units.unassign", "%s");
             } else if(this.deliveryType == Deliveryment.T.MANUAL) {
@@ -200,11 +200,11 @@ public class MaterialPurchase extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
+        this.units.removeAll(materialUnits);
         this.save();
 
         new ElcukRecord(Messages.get("materialPurchase.delunit"),
                 Messages.get("materialPurchase.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        return materialUnits;
     }
 }

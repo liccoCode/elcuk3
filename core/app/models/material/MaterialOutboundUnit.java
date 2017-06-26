@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import models.User;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
-import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
@@ -35,7 +34,6 @@ public class MaterialOutboundUnit extends Model {
      */
     @OneToOne(fetch = FetchType.LAZY)
     public Material material;
-    
     /**
      * 实际出库数
      */
