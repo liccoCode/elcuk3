@@ -162,7 +162,7 @@ public class User extends Model {
         Ecooe {
             @Override
             public String label() {
-                return "ecooe";
+                return "Ecooe";
             }
 
             @Override
