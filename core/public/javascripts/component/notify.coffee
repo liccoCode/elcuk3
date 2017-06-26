@@ -63,7 +63,7 @@ $ ->
         $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
       $("#notifyNumber").html(r.count)
     )
-  newsCount()
+  # newsCount()
 
   #将选中的通知状态更改成已读
   $("#updateState").on("click", (e) ->
