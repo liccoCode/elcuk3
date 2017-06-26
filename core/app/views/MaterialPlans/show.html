@@ -44,12 +44,6 @@
               <input type="hidden" value="${dp?.cooperator?.id}" required/>
               <input type="text" value="${dp?.cooperator?.name}" readonly/>
             </td>
-            <th>目的地</th>
-            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}"></td>
-          </tr>
-          <tr>
-            <th>收货方</th>
-            <td><input type="text" class="span8" name="dp.receive" value="${dp?.receive}" required></td>
             <th>项目名称<span style="color:red">*</span></th>
             <td>
               <select name="dp.projectName" class="inline">
@@ -62,6 +56,19 @@
               #{/list}
               </select>
             </td>
+          </tr>
+          <tr>
+            <th>收货方</th>
+            <td>
+              <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
+                <option value="">请输入收货供应商代码/品拓</option>
+                  #{list items:cooperators, as:'cop'}
+                    <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+                  #{/list}
+              </select>
+            </td>
+            <th>目的地</th>
+            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse" ></td>
           </tr>
           <tr>
             <th>创建人</th>

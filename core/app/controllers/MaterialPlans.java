@@ -7,7 +7,7 @@ import models.User;
 import models.material.Material;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
-import models.procure.ProcureUnit;
+import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.MaterialPlanPost;
 import models.view.post.MaterialPost;
@@ -20,6 +20,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,8 +34,10 @@ import java.util.List;
 public class MaterialPlans extends Controller {
 
 
-    @Before(only = {"show"})
+    @Before(only = {"show", "blank"})
     public static void showPageSetUp() {
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        renderArgs.put("cooperators", cooperators);
         String id = request.params.get("id");
         renderArgs.put("records", ElcukRecord.records(id));
     }
@@ -69,7 +72,7 @@ public class MaterialPlans extends Controller {
                 .createMaterialPlan(pids, planName, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            MaterialUnits.index(new MaterialUnitPost(ProcureUnit.STAGE.PLAN));
+            MaterialUnits.index(new MaterialUnitPost());
         }
         flash.success("物料出货单 %s 创建成功.", pids.toString());
         MaterialPlans.show(materialPlan.id);
@@ -80,7 +83,8 @@ public class MaterialPlans extends Controller {
         List<MaterialPlan> materialPlans;
         if(p == null) p = new MaterialPlanPost();
         materialPlans = p.query();
-        render(materialPlans, p);
+        MaterialPlan.S financeState = MaterialPlan.S.PENDING_REVIEW;
+        render(materialPlans, p, financeState);
     }
 
     public static void show(String id) {
@@ -101,7 +105,7 @@ public class MaterialPlans extends Controller {
     public static void update(MaterialPlan dp) {
         validation.valid(dp);
         if(Validation.hasErrors())
-            render("MaterialPlans/show.html", dp);
+            show(dp.id);
         dp.save();
         flash.success("更新成功.");
         show(dp.id);
@@ -212,4 +216,36 @@ public class MaterialPlans extends Controller {
         flash.success("物料 %s 添加成功.", code);
         MaterialPlans.show(materialPlan.id);
     }
+
+
+    /**
+     * 批量财务审核
+     * @param pids
+     */
+    public static void approveBatch(List<String> pids) {
+        MaterialPlan.approve(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(new MaterialPlanPost());
+        }
+        flash.success("物料审核成功.");
+        index(new MaterialPlanPost());
+    }
+
+    /**
+     * 单个财务审核
+     * @param id
+     */
+    public static void approve(String id) {
+        List<String> pids = new ArrayList<>();
+        pids.add(id);
+        MaterialPlan.approve(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(new MaterialPlanPost());
+        }
+        flash.success("物料审核成功.");
+        index(new MaterialPlanPost());
+    }
+    
 }

@@ -25,51 +25,19 @@ public class MaterialPurchasePost extends Post<MaterialPurchase> {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(7).toDate();
         this.to = now.toDate();
-        this.dateType = DateType.CREATE;
         this.perSize = 25;
     }
 
 
     public Date from;
     public Date to;
-    public Deliveryment.S state;
+    public MaterialPurchase.S state;
     public Long cooperId;
 
-    public DateType dateType;
     public Long materialId;
 
 
-    public enum DateType {
-        /**
-         * 创建时间
-         */
-        CREATE {
-            @Override
-            public String label() {
-                return "创建时间";
-            }
-        },
-        /**
-         * 预计交货时间
-         */
-        PLAYDELIVERY {
-            @Override
-            public String label() {
-                return "预计交货时间";
-            }
-        },
-        /**
-         * 实际交货时间
-         */
-        DELIVERY {
-            @Override
-            public String label() {
-                return "实际交货时间";
-            }
-        };
 
-        public abstract String label();
-    }
 
     public List<MaterialPurchase> query() {
         F.T2<String, List<Object>> params = params();
@@ -95,17 +63,9 @@ public class MaterialPurchasePost extends Post<MaterialPurchase> {
         List<Object> params = new ArrayList<>();
 
         /** 时间参数 **/
-        if(this.dateType != null) {
-            if(this.dateType == DateType.PLAYDELIVERY) {
-                sbd.append(" u.planDeliveryDate>=? AND u.planDeliveryDate<=?");
-            } else if(this.dateType == DateType.DELIVERY) {
-                sbd.append(" u.deliveryDate>=? AND u.deliveryDate<=?");
-            } else {
-                sbd.append(" m.createDate>=? AND m.createDate<=?");
-            }
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
-        }
+        sbd.append(" m.createDate>=? AND m.createDate<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
 
         /** 状态参数 **/
         if(this.state != null) {

@@ -38,7 +38,7 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
 
     public Long cooperId;
 
-    public DeliverPlan.P planState;
+    public MaterialPlan.P planState;
 
 
     @Override

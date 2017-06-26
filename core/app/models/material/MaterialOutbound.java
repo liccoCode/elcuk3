@@ -128,16 +128,17 @@ public class MaterialOutbound extends GenericModel {
     public Outbound.S status;
 
     /**
-     * 制单人
+     * 操作人员
      */
     @OneToOne
-    public User creator;
+    public User handler;
 
     /**
      * 创建时间
      */
+    @Expose
     @Required
-    public Date createDate;
+    public Date createDate = new Date();
 
     /**
      * 备注
@@ -153,7 +154,7 @@ public class MaterialOutbound extends GenericModel {
         this.id = id();
         this.status = Outbound.S.Create;
         this.createDate = new Date();
-        this.creator = Login.current();
+        this.handler = Login.current();
         this.projectName = Login.current().projectName.label();
     }
 
@@ -206,5 +207,38 @@ public class MaterialOutbound extends GenericModel {
             out.outboundDate = new Date();
             out.save();
         }
+    }
+
+
+    /**
+     * 出库单快速添加物料编码
+     *
+     * @param id
+     * @param code
+     * @return
+     */
+    public static MaterialOutbound addunits(String id, String code) {
+        MaterialOutbound materialOutbound = MaterialOutbound.findById(id);
+        //验证物料编码是否存在于出库单元里面
+        long count = materialOutbound.units.stream().filter(unit -> unit.material.code.equals(code)).count();
+        if(count > 0) {
+            Validation.addError("", "物料编码 %s 已经存在于物料出库单元！", code);
+            return materialOutbound;
+        }
+        Material material = Material.find("byCode", code).first();
+        if(material == null) {
+            Validation.addError("", "物料编码 %s 不存在！", code);
+            return materialOutbound;
+        }
+        // 将 Material 添加进入 出库单
+        MaterialOutboundUnit planUnit = new MaterialOutboundUnit();
+        planUnit.materialOutbound = materialOutbound;
+        planUnit.material = material;
+        planUnit.handler = Login.current();
+        materialOutbound.units.add(planUnit);
+        materialOutbound.save();
+        new ERecordBuilder("materialOutbound.addunits")
+                .msgArgs(code, materialOutbound.id).fid(materialOutbound.id).save();
+        return materialOutbound;
     }
 }

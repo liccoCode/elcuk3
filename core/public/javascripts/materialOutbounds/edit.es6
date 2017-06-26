@@ -81,6 +81,26 @@ $(() => {
     }
   });
 
+
+  //快速添加物料编码js处理
+  $('#addPlanUnitBtn').click(function (e) {
+    e.stopPropagation();
+    let code = $("#code").val() ;
+    //实际交货数量
+    if (code == '' || code == null) {
+      noty({
+        text: '请输入物料编码!',
+        type: 'error'
+      });
+      return;
+    }
+
+    $("#unit_code").val(code);
+    $("#addunits_form").submit();
+
+  });
+
+
   function fidCallBack () {
     return {
       fid: $("input[name='rid']").val(),

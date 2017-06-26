@@ -7,7 +7,6 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.view.Ret;
 import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -51,7 +50,7 @@ public class MaterialPlan extends GenericModel {
     public String name;
 
     /**
-     * 此出仓单的状态
+     * 此出货单的状态
      */
     @Enumerated(EnumType.STRING)
     @Expose
@@ -114,6 +113,39 @@ public class MaterialPlan extends GenericModel {
         public abstract String label();
     }
 
+
+    /**
+     * 财务审核状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    @Column(nullable = false)
+    public S financeState;
+
+    public enum S {
+        /**
+         * 待审核
+         */
+        PENDING_REVIEW {
+            @Override
+            public String label() {
+                return "待审核";
+            }
+        },
+        /**
+         * 审核通过
+         */
+        APPROVE {
+            @Override
+            public String label() {
+                return "已审";
+            }
+        };
+
+        public abstract String label();
+    }
+
+
     @OneToMany(mappedBy = "materialPlan", cascade = {CascadeType.PERSIST})
     public List<MaterialPlanUnit> units = new ArrayList<>();
 
@@ -132,21 +164,21 @@ public class MaterialPlan extends GenericModel {
     public StockRecord.C type;
 
     /**
-     * 目的地
-     */
-    public String address;
-
-    /**
-     * 收货方
-     */
-    @Required
-    public String receive;
-
-    /**
      * 项目名称
      */
     @Required
     public String projectName;
+
+    /**
+     * 收货方供应商
+     */
+    @ManyToOne
+    public Cooperator receiveCooperator;
+
+    /**
+     * 目的地(收货方供应商)
+     */
+    public String address;
 
     @OneToOne
     public User handler;
@@ -202,7 +234,7 @@ public class MaterialPlan extends GenericModel {
         materialPlan.handler = user;
         materialPlan.name = name.trim();
         materialPlan.state = P.CREATE;
-        materialPlan.address = cop.address;
+        materialPlan.financeState = S.PENDING_REVIEW;
 
         // 将 Material 添加进入 出货单
         for(Material material : materias) {
@@ -252,6 +284,13 @@ public class MaterialPlan extends GenericModel {
         this.save();
     }
 
+    /**
+     * 出货单快速添加物料编码
+     *
+     * @param id
+     * @param code
+     * @return
+     */
     public static MaterialPlan addunits(String id, String code) {
         MaterialPlan materialPlan = MaterialPlan.findById(id);
         //验证物料编码是否存在于出货单元里面
@@ -278,4 +317,22 @@ public class MaterialPlan extends GenericModel {
         return materialPlan;
     }
 
+    /**
+     * 财务审核
+     * @param pids
+     */
+    public static void approve(List<String> pids) {
+        List<MaterialPlan> plans = MaterialPlan.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(MaterialPlan plan : plans) {
+            if(plan.financeState != S.PENDING_REVIEW) {
+                Validation.addError("", "采购单 %s 状态非 %s 不可以审核", plan.id, S.PENDING_REVIEW.label());
+            }
+        }
+        if(Validation.hasErrors()) return;
+        for(MaterialPlan plan : plans) {
+            plan.financeState = S.APPROVE;
+            plan.save();
+        }
+
+    }
 }

@@ -49,8 +49,7 @@
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
       #{if materialUnitsIndex}
         <td>
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
-             uid="${unit.id}">修改</a>
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>
         </td>
       #{/if}
     <td>${unit.projectName}</td>
