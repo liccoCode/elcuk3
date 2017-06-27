@@ -26,25 +26,33 @@
           </tr>
           <tr>
             <th>出库单名称<span style="color:red">*</span></th>
-            <td><input type="text" class="span8" name="dp.name" value="${dp.name}" required></td>
+            <td>
+                <input type="text" class="span8" name="dp.name" value="${dp.name}" #{if !qtyEdit}readonly#{/if} required>
+            </td>
             <th>收货类型<span style="color:red">*</span></th>
             <td>
+            #{if qtyEdit}
               <select name="dp.receipt" class="inline" required>
                 <option value="">收货类型</option>
               #{list items:models.material.MaterialPlan.R, as:'c'}
                 <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
               #{/list}
               </select>
+            #{/if}
+            #{else }
+              <input type="text" name="dp.receipt" value="${dp.receipt.label()}" readonly>
+            #{/else}
             </td>
           </tr>
           <tr>
             <th>供应商</th>
             <td>
-              <input type="hidden" name="dp.cooperator.id"  value="${dp?.cooperator?.id}" required/>
+              <input type="hidden" name="dp.cooperator.id"  value="${dp?.cooperator?.id}" #{if !qtyEdit}readonly#{/if} required/>
               <input type="text" value="${dp?.cooperator?.name}" readonly/>
             </td>
             <th>项目名称<span style="color:red">*</span></th>
             <td>
+            #{if qtyEdit}
               <select name="dp.projectName" class="inline" required>
                 <option value="">项目名称</option>
               #{list items:models.User.COR, as:'c'}
@@ -53,20 +61,30 @@
                   #{/if}
               #{/list}
               </select>
+            #{/if}
+            #{else }
+              <input type="text" name="dp.projectName" value="${dp.projectName}" readonly>
+            #{/else}
             </td>
           </tr>
           <tr>
             <th>收货方</th>
             <td>
+            #{if qtyEdit}
               <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
                 <option value="">请输入收货供应商代码/品拓</option>
               #{list items:cooperators, as:'cop'}
                 <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
               #{/list}
               </select>
+            #{/if}
+            #{else }
+              <input type="hidden" name="dp.receiveCooperator.id" value="${dp.receiveCooperator?.id}" readonly>
+              <input type="text"  value="${dp.receiveCooperator?.name}" readonly>
+            #{/else}
             </td>
             <th>目的地</th>
-            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse"></td>
+            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse" #{if !qtyEdit}readonly#{/if}></td>
           </tr>
           <tr>
             <th>创建人</th>
