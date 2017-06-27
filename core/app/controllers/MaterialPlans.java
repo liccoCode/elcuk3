@@ -3,18 +3,18 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
-import models.User;
 import models.material.Material;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import models.view.Ret;
 import models.view.post.MaterialPlanPost;
 import models.view.post.MaterialPost;
-import models.view.post.MaterialUnitPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -54,11 +54,10 @@ public class MaterialPlans extends Controller {
         render(p, materials);
     }
 
-
     /**
-     * 跳转 到 创建物料出库单页面
+     * 跳转到创建物料出库单页面
      */
-    public static void materialPlan(List<Long> pids, String planName) {
+    public static void blank(List<Long> pids, String planName) {
         if(StringUtils.isBlank(planName))
             Validation.addError("", "出货单名称必须填写!");
         if(pids == null || pids.size() <= 0)
@@ -68,14 +67,53 @@ public class MaterialPlans extends Controller {
             MaterialPlans.indexMaterial(new MaterialPost());
         }
 
-        MaterialPlan materialPlan = MaterialPlan
-                .createMaterialPlan(pids, planName, User.findByUserName(Secure.Security.connected()));
+        List<Material> units = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+
+        Cooperator cop = Cooperator
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
+                        + ".id", units.get(0).id).first();
+        MaterialPlan dp = new MaterialPlan();
+        dp.id= MaterialPlan.id();
+        dp.state = MaterialPlan.P.CREATE;
+        dp.name = planName;
+        dp.cooperator = cop;
+        dp.handler = Login.current();
+        dp.projectName = Login.current().projectName.label();
+        render(units, dp);
+    }
+
+    /**
+     * 创建物料出货单
+     */
+    public static void create(MaterialPlan dp, List<Material> dtos) {
+        //1 验证必填属性
+        validation.valid(dp);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            MaterialUnits.index(new MaterialUnitPost());
+            MaterialPlans.indexMaterial(new MaterialPost());
         }
-        flash.success("物料出货单 %s 创建成功.", pids.toString());
-        MaterialPlans.show(materialPlan.id);
+        //2 新增 出货单元
+        dp.id = MaterialPlan.id();
+        dp.handler = Login.current();
+        dp.name = dp.name.trim();
+        dp.state = MaterialPlan.P.CREATE;
+        dp.financeState = MaterialPlan.S.PENDING_REVIEW;
+        dp.save();
+        //3 新增 出货计划单元
+        for(Material dto : dtos) {
+            if(dto != null) {
+                Material material = Material.findById(dto.id);
+                MaterialPlanUnit planUnit = new MaterialPlanUnit();
+                planUnit.materialPlan = dp;
+                planUnit.material = material;
+                planUnit.qty = dto.outQty;
+                planUnit.handler = Login.current();
+                planUnit.stage = ProcureUnit.STAGE.DELIVERY;
+                planUnit.save();
+            }
+        }
+        flash.success("物料出货单 %s 创建成功.", dp.id);
+        MaterialPlans.show(dp.id);
     }
 
     @Check("deliverplans.index")
@@ -134,11 +172,10 @@ public class MaterialPlans extends Controller {
     public static void delunits(String id, List<Long> pids) {
         MaterialPlan dp = MaterialPlan.findById(id);
         notFoundIfNull(dp);
-
-        Validation.required("materialPlans.delunits", pids);
-        if(Validation.hasErrors()) render("MaterialPlans/show.html", dp);
+        Validation.required("请选择要解除的出货单元", pids);
+        if(Validation.hasErrors()) show(dp.id);
         dp.unassignUnitToMaterialPlan(pids);
-        if(Validation.hasErrors()) render("MaterialPlans/show.html", dp);
+        if(Validation.hasErrors()) show(dp.id);
 
         flash.success("成功将 %s 出货单元从物料出货单 %s 中移除.", StringUtils.join(pids, ","), id);
         if(dp.units.isEmpty()) {
@@ -220,6 +257,7 @@ public class MaterialPlans extends Controller {
 
     /**
      * 批量财务审核
+     *
      * @param pids
      */
     public static void approveBatch(List<String> pids) {
@@ -234,6 +272,7 @@ public class MaterialPlans extends Controller {
 
     /**
      * 单个财务审核
+     *
      * @param id
      */
     public static void approve(String id) {

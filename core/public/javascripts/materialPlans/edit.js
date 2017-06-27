@@ -90,22 +90,28 @@ $(() => {
 
   //确认js处理
   $('#confirmPlanBtn').click(function (e) {
+    var $form;
+    e.preventDefault();
+    $form = $("#confirm_form");
+
     $.get('/MaterialPlans/confirmValidate', {
       id: $('#deliverymentId').val()
     }, function (r) {
       if (r.flag) {
         if (confirm(r.message)) {
-          $("#confirm_form").submit();
+          return $form.submit();
         }
       } else {
-        $("#confirm_form").submit();
+        return $form.submit();
       }
     })
   });
 
   //快速添加物料编码js处理
   $('#addPlanUnitBtn').click(function (e) {
-    e.stopPropagation();
+    var $form;
+      e.preventDefault();
+      $form = $("#addunits_form");
     let code = $("#code").val() ;
     //实际交货数量
     if (code == '' || code == null) {
@@ -117,7 +123,7 @@ $(() => {
     }
 
     $("#unit_code").val(code);
-    $("#addunits_form").submit();
+    return $form.submit();
 
   });
 
@@ -137,6 +143,21 @@ $(() => {
     }
   });
 
+  //解除js处理
+    $("#delunit_form_submit").click(function (e) {
+      e.preventDefault();
+
+      let num = $("input[name='pids']:checked").length;
+      if (num == 0) {
+        noty({
+          text: '请选择需要解除的出货单元!',
+          type: 'error'
+        });
+        returbn
+      } else {
+        $('#bulkpost').attr('action', $(this).data('url')).submit();
+      }
+    });
 
 });
 

@@ -5,9 +5,9 @@ import controllers.Login;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
-import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -34,10 +34,6 @@ import java.util.*;
 public class MaterialPlan extends GenericModel {
 
     private static final long serialVersionUID = -5438540657539304801L;
-
-    public MaterialPlan(String id) {
-        this.id = id;
-    }
 
     @Id
     @Column(length = 30)
@@ -157,13 +153,6 @@ public class MaterialPlan extends GenericModel {
     public Cooperator cooperator;
 
     /**
-     * 出库类型
-     */
-    @Enumerated(EnumType.STRING)
-    @Expose
-    public StockRecord.C type;
-
-    /**
      * 项目名称
      */
     @Required
@@ -190,7 +179,6 @@ public class MaterialPlan extends GenericModel {
     @Lob
     public String memo = " ";
 
-
     /**
      * 生成ID
      *
@@ -212,46 +200,6 @@ public class MaterialPlan extends GenericModel {
                 .orElse("00");
         return String.format("WDP|%s|%s", dt.toString("yyyyMM"), numStr);
     }
-
-
-    /**
-     * 创建物料出货单
-     */
-    public synchronized static MaterialPlan createMaterialPlan(List<Long> pids, String name, User user) {
-        List<Material> materias = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-
-        MaterialPlan materialPlan = new MaterialPlan(MaterialPlan.id());
-        if(pids.size() != materias.size()) {
-            Validation.addError("materialPurchase.units.create", "%s");
-            return materialPlan;
-        }
-        Cooperator cop = Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
-                        + ".id", materias.get(0).id).first();
-
-        if(Validation.hasErrors()) return materialPlan;
-        materialPlan.cooperator = cop;
-        materialPlan.handler = user;
-        materialPlan.name = name.trim();
-        materialPlan.state = P.CREATE;
-        materialPlan.financeState = S.PENDING_REVIEW;
-
-        // 将 Material 添加进入 出货单
-        for(Material material : materias) {
-            MaterialPlanUnit planUnit = new MaterialPlanUnit();
-            planUnit.materialPlan = materialPlan;
-            planUnit.material = material;
-            planUnit.handler = Login.current();
-            planUnit.stage = ProcureUnit.STAGE.DELIVERY;
-            materialPlan.units.add(planUnit);
-        }
-        materialPlan.save();
-        new ERecordBuilder("materialPlan.createMaterialPlan")
-                .msgArgs(StringUtils.join(pids, ","), materialPlan.id).fid(materialPlan.id).save();
-        return materialPlan;
-    }
-
-
     /**
      * 将指定 MaterialPlanUnit 从 出货单 中删除
      */
@@ -299,11 +247,20 @@ public class MaterialPlan extends GenericModel {
             Validation.addError("", "物料编码 %s 已经存在于物料出库单元！", code);
             return materialPlan;
         }
+        //验证物料编码是否存在于物料信息
         Material material = Material.find("byCode", code).first();
         if(material == null) {
             Validation.addError("", "物料编码 %s 不存在！", code);
             return materialPlan;
         }
+        //验证该物料与出货单是否同一个供应商
+        List<CooperItem> cooperItems = CooperItem.find(" material.code=? AND cooperator.id = ?", code,
+                materialPlan.cooperator.id).fetch();
+        if(cooperItems == null || cooperItems.size() < 1) {
+            Validation.addError("", "物料编码 %s 与当前出货单 供应商不一致！", code);
+            return materialPlan;
+        }
+
         // 将 Material 添加进入 出货单
         MaterialPlanUnit planUnit = new MaterialPlanUnit();
         planUnit.materialPlan = materialPlan;
@@ -319,6 +276,7 @@ public class MaterialPlan extends GenericModel {
 
     /**
      * 财务审核
+     *
      * @param pids
      */
     public static void approve(List<String> pids) {
