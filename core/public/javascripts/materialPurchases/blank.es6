@@ -12,6 +12,8 @@ $(() => {
       }, function (r) {
         //物料名称赋值
         $("#materialName").val(r.name);
+        //采购未确认数赋值
+        $("#surplusPendingQty").val(r.surplusPendingQty);
         
         //级联查询供应商
         let $cooperators = $("select[name='purchase.cooperator.id']");
@@ -44,7 +46,7 @@ $(() => {
         if (!r.flag) {
           alert(r.message);
         } else {
-          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#unit_planCurrency option:contains(" + r.currency + ")").prop('selected', true);
           $("#unit_price").val(r.price);
           $("#box_num").attr("boxSize", r.boxSize);
           calu_box_size();
@@ -128,6 +130,7 @@ $(() => {
         } else {
           $input.parent("td").parent("tr").next("tr").find("input[name$='planPrice']").val(r.price);
           $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize", r.boxSize);
+          $input.parent("td").parent("tr").next("tr").next("tr").find("input[name='surplusPendingQty']").val(r.surplusPendingQty);
           $input.parent("td").parent("tr").next("tr").find("option:contains(" + r.currency + ")").prop('selected', true);
           calu_box_size();
         }

@@ -1,7 +1,7 @@
 #{extends 'main_full.html' /}
 #{set title:'新增物料采购单' /}
 #{set 'moreScripts'}
-    #{script 'MaterialPurchases/blank.es6'/}
+    #{script 'materialPurchases/blank.es6'/}
 #{/set}
 #{errorMsgs /}
 #{flash_alert/}
@@ -12,11 +12,25 @@
 <table class="table table-condensed table-bordered">
   <tr>
     <th>采购单名称<span style="color:red">*</span></th>
-    <td colspan="5">
+    <td>
       <input type="text" name="purchase.name" style="width: 240px;" required>
+    </td>
+
+    <th>所属公司</th>
+    <td >
+      <select name="p.projectName" class="inline">
+        <option value="">项目名称</option>
+          #{list items:models.User.COR, as:'c'}
+              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                <option ${c.name() == p?.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+              #{/if}
+          #{/list}
+      </select>
     </td>
   </tr>
   <tr>
+
+
     <th>物料编码</th>
     <td>
       <select name="units[0].material.id" id="unit_material" class="inline selectize" style="width:250px;">
@@ -28,13 +42,21 @@
     </td>
     <th>物料名称</th>
     <td><input type="text" name="units[0].material.name" id="materialName" readonly></td>
+
+  </tr>
+  <tr>
     <th>供应商<span style="color:red">*</span></th>
     <td>
       <select name="purchase.cooperator.id" required>
       </select>
     </td>
+    <th>价格<span style="color:red">*</span></th>
+    <td>
+      <input type="text" class="span1 inline" id="unit_price" name="units[0].planPrice">
+        #{pickCurrency id:'unit_planCurrency', name:'units[0].planCurrency',class: 'span1 inline',
+        c:units[0]?.currency?:helper.Currency.CNY, native: 'aaa'/}
+        </td>
   </tr>
-
   <tr>
     <th>采购数量<span style="color:red">*</span></th>
     <td>
@@ -42,23 +64,11 @@
       <input type="text" id="box_num" name="box_size" class="input-mini" placeHolder="箱数" boxSize="">
       <span class="add-on">箱</span>
     </td>
-    <th>价格<span style="color:red">*</span></th>
-    <td>
-      <input type="text" class="span1 inline" id="unit_price" name="units[0].planPrice">
-        #{pickCurrency id:'unit_currency', name:'units[0].planCurrency',class: 'span1 inline',
-        c:units[0]?.currency?:helper.Currency.CNY, native: 'aaa'/}
-    </td>
-    <th>所属公司</th>
-    <td colspan="3">
-      <select name="p.projectName" class="inline">
-        <option value="">项目名称</option>
-          #{list items:models.User.COR, as:'c'}
-              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
-                <option ${c.name() == p?.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
-              #{/if}
-          #{/list}
-      </select>
-    </td>
+    <th>采购未确认数</th>
+    <td colspan="3"><input type="text"  id="surplusPendingQty" readonly></td>
+  </tr>
+
+  <tr>
   </tr>
   <tr id="btn_tr">
     <th>备注</th>
@@ -89,7 +99,7 @@
       <select></select>
     </td>
     <th>物料名称</th>
-    <td colspan="3">
+    <td>
       <input type="text" name="units[<%= num %>].material.name" readonly>
     </td>
   </tr>
@@ -105,6 +115,13 @@
       <input type="text" class="span1 inline" id="unit_price" name="units[<%= num %>].planPrice" required>
     #{pickCurrency id:'unit_currency', name:'units[<%= num %>].planCurrency',class: 'span1 inline',
     c:units[0]?.currency?:helper.Currency.CNY, native: 'aaa'/}
+    </td>
+  </tr>
+  <tr>
+
+    <th>采购未确认数</th>
+    <td>
+      <input type="text" name="surplusPendingQty" readonly>
     </td>
     <th>所属公司</th>
     <td colspan="3">
