@@ -15,9 +15,9 @@
     <th>物料采购单</th>
     <th>供应商</th>
     <th>采购数</th>
-    <th>采购余量</th>
     <th>单价</th>
     <th>总价</th>
+    <th>采购余量</th>
   #{if materialUnitsIndex}
   <th>Action
   #{/if}
@@ -44,9 +44,9 @@
     <td>${unit.materialPurchase?.id}</td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.planQty}</td>
-    <td>${unit.availableQty}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+    <td>${unit.material?.surplusConfirmQty()}</td>
       #{if materialUnitsIndex}
         <td>
           <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>

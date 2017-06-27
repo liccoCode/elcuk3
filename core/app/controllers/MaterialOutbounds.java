@@ -104,7 +104,7 @@ public class MaterialOutbounds extends Controller {
         if(outbound.status == Outbound.S.Create) {
             qtyEdit = true;
         }
-        render(outbound, brandName , qtyEdit);
+        render(outbound, brandName ,qtyEdit);
     }
 
 
@@ -189,7 +189,7 @@ public class MaterialOutbounds extends Controller {
         Validation.required("materialOutbound.addunits", code);
         if(Validation.hasErrors()) edit(id);
 
-        MaterialOutbound materialOutbound = MaterialOutbound.addunits(id, code);
+        MaterialOutbound.addunits(id, code);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             edit(id);

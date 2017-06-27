@@ -29,7 +29,7 @@
       </select>
 
       <select name="p.cooperId" class="inline selectize" style="width:150px;">
-        <option value="">供应商</option>
+        <option value="">收货方</option>
         #{list items:cooperators, as:'cop'}
           <option value="${cop.id}" #{if cop.id==p.cooperId} selected #{/if}>${cop.name}</option>
         #{/list}
