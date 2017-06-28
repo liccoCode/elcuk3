@@ -83,7 +83,7 @@ public class Bootstrap extends Job {
         /**
          * 流程activiti的初始化
          */
-        ActivitiEngine.initEngine();
+        //ActivitiEngine.initEngine();
 
         /**
          * 为所有 Listing 做一个状态的变化过程记录的初始化
