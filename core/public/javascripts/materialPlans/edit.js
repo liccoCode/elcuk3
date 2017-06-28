@@ -1,68 +1,56 @@
 /**
  * Created by licco on 2016/11/17.
  */
-const attrsFormat = {
-  'qty': "实际交货数量",
-  "handType": '交货不足处理方式',
-  "result": '质检结果',
-  "way": '质检不合格处理方式',
-  "qualifiedQty": '合格数',
-  "unqualifiedQty": '不良品数',
-  "inboundQty": '实际入库数',
-  "target": '目标仓库'
-};
 
 $(() => {
   $('#unit_table').on('change', 'td>:input[name$=qty]', function () {
-     let $input = $(this);
-     let id = $(this).parents('tr').find('input[name$=pids]').val();
-     let attr = $input.attr('name');
-     let value = $input.val();
+    let $input = $(this);
+    let id = $(this).parents('tr').find('input[name$=pids]').val();
+    let attr = $input.attr('name');
+    let value = $input.val();
 
-     //实际交货数量
-     if (attr == 'qty' && $(this).val() < 0) {
-       noty({
-         text: '收货数量不能小于0!',
-         type: 'error'
-       });
-       $(this).val(0);
-       return;
-     }
+    //实际交货数量
+    if (attr == 'qty' && $(this).val() < 0) {
+      noty({
+        text: '收货数量不能小于0!',
+        type: 'error'
+      });
+      $(this).val(0);
+      return;
+    }
 
-     if (attr == 'qty' && $(this).val() == $(this).data('qty')) {
-       $(this).parent('td').next().find('select').hide();
-       $(this).attr("style", "width:35px;");
-     } else if (attr == 'qty' && $(this).val() != $(this).data('qty')) {
-       if ($(this).val() / $(this).data('qty') < 0.9 && $(this).parent('td').next().find('select').val() == 'Delivery') {
-         $(this).attr("style", "width:35px;background-color:yellow;");
-       }
-       $(this).parent('td').next().find('select').show();
-     }
+    if (attr == 'qty' && $(this).val() == $(this).data('qty')) {
+      $(this).parent('td').next().find('select').hide();
+      $(this).attr("style", "width:35px;");
+    } else if (attr == 'qty' && $(this).val() != $(this).data('qty')) {
+      if ($(this).val() / $(this).data('qty') < 0.9 && $(this).parent('td').next().find('select').val() == 'Delivery') {
+        $(this).attr("style", "width:35px;background-color:yellow;");
+      }
+      $(this).parent('td').next().find('select').show();
+    }
 
+    if ($(this).val()) {
+      $.post('/MaterialPlans/updateUnit', {
+        id: id,
+        attr: attr,
+        value: value
+      }, (r) => {
+        if (r.flag) {
+          noty({
+            text: '更新交货数量成功!',
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
 
-     if ($(this).val()) {
-       $.post('/MaterialPlans/updateUnit', {
-         id: id,
-         attr: attr,
-         value: value
-       }, (r) => {
-         if (r) {
-           const msg = attrsFormat[attr];
-           noty({
-             text: '更新' + msg + '成功!',
-             type: 'success'
-           });
-         } else {
-           noty({
-             text: r.message,
-             type: 'error'
-           });
-         }
-       });
-     }
-   });
-
-//点击明细修改按钮，显示弹出框,并初始化明细数据
+  //点击明细修改按钮，显示弹出框,并初始化明细数据
   $("#unit_table a[name='unitUpdateBtn']").click(function (e) {
     let id = $(this).attr("uid");
     //赋值
@@ -70,36 +58,106 @@ $(() => {
     $("#bom_modal").modal('show');
   });
 
-
-//签收异常js处理
-$('#submitUpdateBtn').click(function (e) {
-  e.stopPropagation();
-  let $btn = $(this);
-  let receiptQty = $("#unit_receiptQty").val();
-  let $aobj =   $("#qs_"+$("#unit_id").val());
-  if (receiptQty == null || receiptQty == undefined || receiptQty == '' || isNaN(receiptQty)) {
-    alert("请输入数字");
-    $("#unit_receiptQty").focus();
-    return false;
-  }else{
-    $.post('/MaterialPlans/updateMaterialPlanUnit', $("#updateUnit_form").serialize(), (r) =>  {
-      if (r) {
-               $aobj.parent("td").text(receiptQty);
-               $aobj.remove();
-               $('#bom_modal').modal('hide');
-               noty({
-                    text: '更新成功!',
-                    type: 'success'
-                  });
-            } else {
-                noty({
-                  text: r.message,
-                  type: 'error'
-                });
-            }
-    });
-  }
+  //签收异常js处理
+  $('#submitUpdateBtn').click(function (e) {
+    e.stopPropagation();
+    let $btn = $(this);
+    let receiptQty = $("#unit_receiptQty").val();
+    let $aobj = $("#qs_" + $("#unit_id").val());
+    if (receiptQty == null || receiptQty == undefined || receiptQty == '' || isNaN(receiptQty)) {
+      alert("请输入数字");
+      $("#unit_receiptQty").focus();
+      return false;
+    } else {
+      $.post('/MaterialPlans/updateMaterialPlanUnit', $("#updateUnit_form").serialize(), (r) => {
+        if (r) {
+          $aobj.parent("td").text(receiptQty);
+          $aobj.remove();
+          $('#bom_modal').modal('hide');
+          noty({
+            text: '更新成功!',
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
   });
+
+  //确认js处理
+  $('#confirmPlanBtn').click(function (e) {
+    var $form;
+    e.preventDefault();
+    $form = $("#confirm_form");
+
+    $.get('/MaterialPlans/confirmValidate', {
+      id: $('#deliverymentId').val()
+    }, function (r) {
+      if (r.flag) {
+        if (confirm(r.message)) {
+          return $form.submit();
+        }
+      } else {
+        return $form.submit();
+      }
+    })
+  });
+
+  //快速添加物料编码js处理
+  $('#addPlanUnitBtn').click(function (e) {
+    var $form;
+      e.preventDefault();
+      $form = $("#addunits_form");
+    let code = $("#code").val() ;
+    //实际交货数量
+    if (code == '' || code == null) {
+      noty({
+        text: '请输入物料编码!',
+        type: 'error'
+      });
+      return;
+    }
+
+    $("#unit_code").val(code);
+    return $form.submit();
+
+  });
+
+
+  // 切换供应商, 自行查询目的地
+  $("#outCooperator").change(function () {
+    let id = $(this).val();
+    if (id) {
+      LoadMask.mask();
+      $.get('/Cooperators/findById', {
+        id: id
+      }, function (r) {
+        //目的地赋值
+        $("#whouse").val(r.address);
+        LoadMask.unmask();
+      });
+    }
+  });
+
+  //解除js处理
+    $("#delunit_form_submit").click(function (e) {
+      e.preventDefault();
+
+      let num = $("input[name='pids']:checked").length;
+      if (num == 0) {
+        noty({
+          text: '请选择需要解除的出货单元!',
+          type: 'error'
+        });
+        returbn
+      } else {
+        $('#bulkpost').attr('action', $(this).data('url')).submit();
+      }
+    });
 
 });
 

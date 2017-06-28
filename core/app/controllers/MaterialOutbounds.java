@@ -2,6 +2,7 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.ElcukRecord;
 import models.OperatorConfig;
 import models.material.Material;
 import models.material.MaterialOutbound;
@@ -19,7 +20,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +37,9 @@ public class MaterialOutbounds extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
+        String id = request.params.get("id");
+        if(id != null)
+            renderArgs.put("records", ElcukRecord.records(id));
     }
 
     /**
@@ -78,8 +81,7 @@ public class MaterialOutbounds extends Controller {
         Validation.required("物料出库单出库类型", outbound.type);
         Validation.required("物料出库单出库日期", outbound.name);
         outbound.id = MaterialOutbound.id();
-        outbound.createDate = new Date();
-        outbound.creator = Login.current();
+        outbound.handler = Login.current();
         outbound.save();
         for(Material dto : dtos) {
             if(dto != null) {
@@ -98,7 +100,11 @@ public class MaterialOutbounds extends Controller {
     public static void edit(String id) {
         MaterialOutbound outbound = MaterialOutbound.findById(id);
         String brandName = OperatorConfig.getVal("brandname");
-        render(outbound, brandName);
+        boolean qtyEdit = false;
+        if(outbound.status == Outbound.S.Create) {
+            qtyEdit = true;
+        }
+        render(outbound, brandName ,qtyEdit);
     }
 
 
@@ -123,7 +129,8 @@ public class MaterialOutbounds extends Controller {
     }
 
     /**
-     *  出库单修改页面ajax 解绑
+     * 出库单修改页面ajax 解绑
+     *
      * @param ids
      */
     public static void deleteUnit(Long[] ids) {
@@ -144,6 +151,7 @@ public class MaterialOutbounds extends Controller {
 
     /**
      * 出库单列表页面 出库单出库ajax验证
+     *
      * @param ids
      */
     public static void validMaterialOutboundQty(String[] ids) {
@@ -161,6 +169,7 @@ public class MaterialOutbounds extends Controller {
 
     /**
      * 出库单列表页面 出库单出库
+     *
      * @param ids
      */
     public static void confirmMaterialOutbound(List<String> ids) {
@@ -171,5 +180,21 @@ public class MaterialOutbounds extends Controller {
         }
         flash.success(SqlSelect.inlineParam(ids) + "出库成功!");
         index(new MaterialOutboundPost());
+    }
+
+    /**
+     * MaterialOutbound 添加 MaterialOutboundUnit
+     */
+    public static void addunits(String id, String code) {
+        Validation.required("materialOutbound.addunits", code);
+        if(Validation.hasErrors()) edit(id);
+
+        MaterialOutbound.addunits(id, code);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            edit(id);
+        }
+        flash.success("物料 %s 添加成功.", code);
+        edit(id);
     }
 }

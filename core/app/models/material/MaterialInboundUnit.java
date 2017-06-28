@@ -1,8 +1,6 @@
 package models.material;
 
 import models.User;
-import models.procure.ProcureUnit;
-import models.whouse.Inbound;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.Model;
 

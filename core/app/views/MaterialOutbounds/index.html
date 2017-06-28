@@ -29,7 +29,7 @@
       </select>
 
       <select name="p.cooperId" class="inline selectize" style="width:150px;">
-        <option value="">供应商</option>
+        <option value="">收货方</option>
         #{list items:cooperators, as:'cop'}
           <option value="${cop.id}" #{if cop.id==p.cooperId} selected #{/if}>${cop.name}</option>
         #{/list}
@@ -40,13 +40,6 @@
         #{list items:models.material.MaterialOutbound.C, as:'t'}
           <option value="${t.name()}" #{if t==p.type} selected #{/if}>${t.label()}</option>
         #{/list}
-      </select>
-
-      <select name="p.projectName" class="inline">
-        <option value="">项目名称</option>
-      #{list items:models.view.post.ProcurePost.projectNames, as:'n'}
-        <option ${n == p.projectName ? 'selected' : ''} value="${n}">${n}</option>
-      #{/list}
       </select>
 
       <div class="input-prepend input-append inline">
@@ -105,10 +98,10 @@
               <td>${o.projectName}</td>
               <td>${o.type?.label()}</td>
               <td style="background-color:${o.status.rgb()}">${o.status?.label()}</td>
-              <td>${o.type?.label()}</td>
+              <td>${o.cooperator?.name}</td>
               <td title="${o.whouse}">${o.whouse.overLong()}</td>
               <td>${o.consignor}</td>
-              <td>${o.creator?.username}</td>
+              <td>${o.handler?.username}</td>
               <td>#{time_tooltip time:o.outboundDate/}</td>
               <td title="${o.memo}">${o.memo.overLong()}</td>
             </tr>

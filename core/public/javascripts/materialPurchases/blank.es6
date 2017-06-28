@@ -10,11 +10,13 @@ $(() => {
       $.get('/Materials/findMaterial', {
         id: id
       }, function (r) {
-        //物料code赋值
-        $("#materialCode").val(r.code);
+        //物料名称赋值
+        $("#materialName").val(r.name);
+        //采购未确认数赋值
+        $("#surplusPendingQty").val(r.surplusPendingQty);
+        
         //级联查询供应商
         let $cooperators = $("select[name='purchase.cooperator.id']");
-
         $.get('/MaterialPurchases/cooperators', {id: id}, function (r) {
           LoadMask.mask();
           $cooperators.empty();
@@ -44,7 +46,7 @@ $(() => {
         if (!r.flag) {
           alert(r.message);
         } else {
-          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#unit_planCurrency option:contains(" + r.currency + ")").prop('selected', true);
           $("#unit_price").val(r.price);
           $("#box_num").attr("boxSize", r.boxSize);
           calu_box_size();
@@ -55,10 +57,10 @@ $(() => {
       $.get('/MaterialPurchases/materials', {
         cooperId: id
       }, function (c) {
-        let html = "  <select name='units[<%= num %>].material.id' class='inline selectize' style='width:150px;'> ";
+        let html = "  <select name='units[<%= num %>].material.id' class='inline selectize' style='width:250px;'> ";
         html += "<option value=''>请选择</option>";
         c.forEach(function (value) {
-          html += "<option value=" + value['id'] + ">" + value['name'] + "</option>";
+          html += "<option value=" + value['id'] + ">" + value['code'] + "</option>";
         });
         html += "</select>";
         console.log(html);
@@ -94,7 +96,7 @@ $(() => {
     let html = _.template($("#copy").text())({"num": index});
     html = html.replace("<select></select>", selectLet);
     html = html.replace("units[<%= num %>].material.id", "units["+index+"].material.id");
-    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].currency");
+    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].planCurrency");
     console.log(html);
     $("#btn_tr").before(html);
     window.$ui.dateinput();
@@ -115,7 +117,7 @@ $(() => {
               id: id
             }, function (r) {
               //物料code赋值
-              $input.parent("td").parent("tr").find("input[name$='material.code']").val(r.code);
+              $input.parent("td").parent("tr").find("input[name$='material.name']").val(r.name);
 
             });
 
@@ -128,6 +130,7 @@ $(() => {
         } else {
           $input.parent("td").parent("tr").next("tr").find("input[name$='planPrice']").val(r.price);
           $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize", r.boxSize);
+          $input.parent("td").parent("tr").next("tr").next("tr").find("input[name='surplusPendingQty']").val(r.surplusPendingQty);
           $input.parent("td").parent("tr").next("tr").find("option:contains(" + r.currency + ")").prop('selected', true);
           calu_box_size();
         }

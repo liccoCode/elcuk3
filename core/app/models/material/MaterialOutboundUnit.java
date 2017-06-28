@@ -1,10 +1,13 @@
 package models.material;
 
+import com.google.gson.annotations.Expose;
+import models.User;
 import org.hibernate.annotations.DynamicUpdate;
-import play.db.jpa.GenericModel;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,12 +34,21 @@ public class MaterialOutboundUnit extends Model {
      */
     @OneToOne(fetch = FetchType.LAZY)
     public Material material;
-
-
     /**
      * 实际出库数
      */
     public int outQty;
 
+    /**
+     * 操作人员
+     */
+    @OneToOne
+    public User handler;
 
+    /**
+     * 创建时间
+     */
+    @Expose
+    @Required
+    public Date createDate = new Date();
 }

@@ -1,6 +1,5 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
@@ -9,11 +8,13 @@ import models.ElcukRecord;
 import models.OperatorConfig;
 import models.User;
 import models.finance.ProcureApply;
-import models.material.*;
-import models.procure.*;
-import models.product.Product;
+import models.material.Material;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
+import models.procure.CooperItem;
+import models.procure.Cooperator;
+import models.procure.Deliveryment;
 import models.view.Ret;
-import models.view.post.DeliveryPost;
 import models.view.post.MaterialPurchasePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
@@ -22,9 +23,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -37,18 +36,17 @@ import java.util.stream.Collectors;
 public class MaterialPurchases extends Controller {
 
 
-    @Before(only = {"show", "update", "addunits", "delunits", "cancel", "confirm"})
+    @Before(only = {"blank", "show", "update", "delunits", "cancel", "confirm"})
     public static void showPageSetUp() {
         String id = request.params.get("id");
-        String brandName = OperatorConfig.getVal("brandname");
         renderArgs.put("records", ElcukRecord.records(id));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.openUsers());
-        renderArgs.put("brandName", brandName);
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
     @Before(only = {"index"})
-    public static void beforeIndex(DeliveryPost p) {
+    public static void beforeIndex(MaterialPurchasePost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
         List<ProcureApply> availableApplies = ProcureApply.unPaidApplies(p == null ? null : p.cooperId);
         renderArgs.put("suppliers", suppliers);
@@ -87,23 +85,25 @@ public class MaterialPurchases extends Controller {
     }
 
     /**
-     * 新增物流采购单
+     * 新增物料采购单
+     *
      * @param purchase
      * @param units
      */
     public static void create(MaterialPurchase purchase, List<MaterialUnit> units) {
-        Validation.required("采购单别名", purchase.name);
+        Validation.required("物料采购单别名", purchase.name);
         purchase.id = MaterialPurchase.id();
         purchase.handler = Login.current();
-        purchase.state = Deliveryment.S.PENDING;
+        purchase.state = MaterialPurchase.S.PENDING;
         purchase.name = purchase.name.trim();
         purchase.deliveryType = Deliveryment.T.MANUAL;
+        purchase.projectName = Login.current().projectName;
 
         units.stream().filter(unit -> unit.material != null).forEach(unit -> {
             unit.cooperator = purchase.cooperator;
             unit.handler = Login.current();
             unit.materialPurchase = purchase;
-            unit.stage = ProcureUnit.STAGE.DELIVERY;
+            unit.stage = MaterialUnit.STAGE.DELIVERY;
             unit.validateManual();
             if(Validation.hasErrors()) {
                 render("MaterialPurchases/blank.html", purchase, units);
@@ -117,7 +117,8 @@ public class MaterialPurchases extends Controller {
     }
 
     /**
-     * 修改物料采购单 
+     * 修改物料采购单
+     *
      * @param dmt
      */
     public static void update(MaterialPurchase dmt) {
@@ -139,8 +140,8 @@ public class MaterialPurchases extends Controller {
         StringBuilder buff = new StringBuilder();
         buff.append("[");
         for(Cooperator co : cooperatorList) {
-            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append("\"")
+                    .append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
                     .append("\"").append("},");
         }
         buff.append("]");
@@ -152,10 +153,10 @@ public class MaterialPurchases extends Controller {
         validation.required(cooperId);
         if(Validation.hasErrors())
             renderJSON(new Ret(Webs.V(Validation.errors())));
-
+        Material m = Material.findById(materialId);
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
-                .put("period", copItem.period).put("boxSize", copItem.boxSize).build());
+                .put("period", copItem.period).put("boxSize", copItem.boxSize).put("surplusPendingQty", m.surplusPendingQty()).build());
     }
 
 
@@ -169,8 +170,8 @@ public class MaterialPurchases extends Controller {
         StringBuilder buff = new StringBuilder();
         buff.append("[");
         for(Material co : materialList) {
-            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append("\"")
+                    .append(",").append("\"").append("code").append("\"").append(":").append("\"").append(co.code)
                     .append("\"").append("},");
         }
         buff.append("]");
@@ -222,6 +223,7 @@ public class MaterialPurchases extends Controller {
 
     /**
      * 根据出货单ID查询出货计划集合
+     *
      * @param id
      */
     public static void showMaterialUnitList(String id) {

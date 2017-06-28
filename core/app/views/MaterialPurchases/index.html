@@ -4,7 +4,7 @@
     #{script 'component/pagination.coffee'/}
     #{script 'deliveryments/index.coffee'/}
     #{script 'procureunits/_unit_list.coffee'/}
-    #{script 'MaterialPurchases/index.es6'/}
+    #{script 'materialPurchases/index.es6'/}
 #{/set}
 
 #{info_row}
@@ -26,23 +26,10 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" style="width: 150px;" class="inline">
-      #{list items:models.view.post.DeliveryPost.DateType.values(), as:'d'}
-        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
-      #{/list}
-      </select>
-
       <select name="p.state" style="width: 150px;" class="inline">
         <option value="">状态</option>
-      #{list items:models.procure.Deliveryment.S.values(), as:'t'}
+      #{list items:models.material.MaterialPurchase.S.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.state?.name() ? 'selected' : ''}>${t.label()}</option>
-      #{/list}
-      </select>
-
-      <select name="p.deliveryType" style="width: 150px;" class="inline">
-        <option value="">类型</option>
-      #{list items:models.procure.Deliveryment.T.values(), as:'t'}
-        <option value="${t.name()}" ${t.name() == p.dateType?.name() ? 'selected' : ''}>${t.label()}</option>
       #{/list}
       </select>
 
@@ -55,13 +42,14 @@
 
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+        <input type="text" style="width:160px;" name="p.search" class="input-medium" value="${p.search}"
+               placeHolder="搜索 物料编码 or 采购单ID">
         <button class="btn btn-primary" data-loading>搜索</button>
       </div>
 
       <div class="inline">
         <a target="_blank" class="btn btn-primary" href='@{MaterialPurchases.blank()}'>
-          <i class="icon-plus"></i>新增手动单
+          <i class="icon-plus"></i>新增物料手动单
         </a>
 
         <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank">
@@ -77,17 +65,12 @@
         <tr>
           <th width="20px;"></th>
           <th>物料采购单ID</th>
-          <th>物料请款单</th>
-          <th>关联采购单</th>
           <th>Name</th>
           <th>供应商</th>
           <th>State</th>
-          <th>供应商反馈</th>
           <th>单据类型</th>
-          <th>最先交货时间</th>
-          <th>最后交货时间</th>
-          <th>交货进度</th>
-          <th>User/Create</th>
+          <th>User</th>
+          <th>Create</th>
         </tr>
       #{list items:materialPurchases, as:'dmt'}
         <tr>
@@ -99,15 +82,6 @@
           <td>
             <a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a>
           </td>
-          <td>
-              #{if dmt.apply}
-                <a href="@{Applys.procure(dmt.apply.id)}">${dmt.apply.serialNumber}</a>
-                <i class="icon-question-sign" rel='tooltip' title='剩余 ¥ ${dmt.leftAmount()} 没有请款'></i>
-              #{/if}
-              #{else }没有请款单#{/else}
-          </td>
-          <td>关联采购单</td>
-
           <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
             <span><i class="icon-reorder"></i></span>
             <span>${dmt.name}</span>
@@ -115,18 +89,10 @@
           </td>
 
           <td>${dmt.supplier()?.name}</td>
-          <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>
-          <td>供应商反馈</td>
+          <td style="color:${dmt.state?.rgb()}">${dmt.state.label()}</td>
           <td>${dmt.deliveryType?.label()}</td>
-          <td></td>
-          <td></td>
-          <td>
-            <div class="progress ${procress.bgcolor()} progress-striped" style="margin-bottom:0;">
-              <div class="bar" style="width: 20%;">
-                <p style="color:black;">2 / 15</p>
-              </div>
-            </div></td>
-          <td>${dmt.handler.username}/#{time_tooltip time:dmt.createDate/}</td>
+          <td>${dmt.handler.username}</td>
+          <td>#{time_tooltip time:dmt.createDate/}</td>
         </tr>
 
       #{/list}

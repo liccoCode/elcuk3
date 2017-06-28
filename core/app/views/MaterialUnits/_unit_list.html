@@ -8,24 +8,19 @@
       </label>
     </th>
   #{/if}
-    <th>物料计划ID</th>
-    <th width="40px;">阶段22</th>
-    <th width="150px;">物料编码</th>
-    <th width="130px;">物料名称</th>
-    <th>物料采购单<br>供应商</th>
-    <th width="100px;">数量<br>(计划/交货/入库)</th>
-    <th>采购余量</th>
+    <th>#</th>
+    <th width="40px;">阶段</th>
+    <th width="100px;">物料编码</th>
+    <th width="250px;">物料名称</th>
+    <th>物料采购单</th>
+    <th>供应商</th>
+    <th>采购数</th>
     <th>单价</th>
     <th>总价</th>
-    <th>剩余请款金额</th>
+    <th>采购余量</th>
   #{if materialUnitsIndex}
   <th>Action
   #{/if}
-    <th>预计交货时间</th>
-    <th>实际交货时间</th>
-    <th>质检状态</th>
-    <th>质检结果</th>
-    <th>包装信息</th>
     <th>项目名称</th>
     <th>创建人</th>
     <th>创建时间</th>
@@ -43,49 +38,20 @@
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
     ${unit.id}
     </td>
-    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-
+    <td style="color:${unit.stage?.rgb()}">${unit.stage.label()}</td>
     <td>${unit.material?.code}${str}</td>
     <td>${unit.material?.name}</td>
-    <td>${unit.materialPurchase?.id}<br>${unit.cooperator?.name}</td>
-    <td #{if unit.planQty != unit.qty && (unit.qty !=0 && unit.inboundQty)} style="color:red"#{/if}>
-    ${unit.planQty}/${unit.qty}/${unit.inboundQty}
-    </td>
-    <td>${unit.availableQty}</td>
-    <td>${unit.planPrice}</td>
-    <td>${unit.planQty}*${unit.planPrice}</td>
-    <td>${unit.planQty}*${unit.planPrice}</td>
-    <td>
-        #{if materialUnitsIndex}
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
-             uid="${unit.id}">修改</a>
-        #{/if}
-    </td>
-
-    <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
-    <td>#{time_tooltip time:unit.deliveryDate/}</td>
-    <td>
-        #{if unit.result}
-          <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
-          ${unit.result.name()=='UnCheck'? '未检' : '已检'}
-          </a>
-        #{/if}
-    </td>
-    <td>
-        #{if unit.result?.name()=='Qualified'}
-          <i style="color:green" class="icon-ok"></i>
-        #{/if}
-        #{elseif unit.result?.name()=='Unqualified'}
-          <i style="color:red" class="icon-remove"></i>
-        #{/elseif}
-    </td>
-    <td>
-        #{if unit.stage.name()=='IN_STORAGE'}
-          <input type="button" data-id="${unit.id}" name="editBoxInfo" value="填写"
-                 class="btn btn-mini ${unit.validBoxInfoIsCorrect() ? 'btn-success' : 'btn-danger'}">
-
-        #{/if}
-    </td>
+    <td>${unit.materialPurchase?.id}</td>
+    <td>${unit.cooperator?.name}</td>
+    <td>${unit.planQty}</td>
+    <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
+    <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+    <td>${unit.material?.surplusConfirmQty()}</td>
+      #{if materialUnitsIndex}
+        <td>
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>
+        </td>
+      #{/if}
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}</td>
     <td>#{time_tooltip time:unit.createDate/}</td>

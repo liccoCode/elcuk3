@@ -2,7 +2,6 @@ package models.material;
 
 import com.google.gson.annotations.Expose;
 import models.User;
-import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
 import org.hibernate.annotations.DynamicUpdate;
@@ -141,13 +140,49 @@ public class Material extends Model {
 
     /**
      * 根据物料ID查询库存
+     *
      * @return
      */
     public int availableQty() {
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
-                .find(" materialUnit.material.id=? AND materialPlan.receipt = ?", id ,MaterialPlan.R.WAREHOUSE).fetch();
-        int  availableQty =   materialPlanUnitList.stream().mapToInt(unit -> unit.availableQty).sum();
-        return availableQty;
+                .find(" material.id=? AND materialPlan.receipt = ?", id, MaterialPlan.R.WAREHOUSE).fetch();
+        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum();
     }
 
+    /**
+     * 根据物料ID查询采购余量(采购单已确认)
+     *
+     * @return
+     */
+    public int surplusConfirmQty() {
+        List<MaterialUnit> materialUnitList = MaterialUnit
+                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.CONFIRM).fetch();
+        return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum() - availableQty();
+    }
+
+    /**
+     * 根据物料ID查询采购余量(采购单未确认)
+     * @return
+     */
+    public int surplusPendingQty() {
+        List<MaterialUnit> materialUnitList = MaterialUnit
+                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.PENDING).fetch();
+        return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum();
+    }
+    /**
+     * 根据物料查询对应 的所有供应商
+     */
+    public String cooperators() {
+        List<Cooperator> cooperatorList = Cooperator
+                .find("SELECT distinct c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
+                        + ".id", id).fetch();
+        StringBuilder buff = new StringBuilder();
+        for(Cooperator co : cooperatorList) {
+            buff.append("," + co.name );
+        }
+        if(buff.length() > 0 ){
+            return buff.substring(1).toString();
+        }
+        return null;
+    }
 }
