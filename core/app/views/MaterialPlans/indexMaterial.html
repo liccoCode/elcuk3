@@ -60,6 +60,7 @@
             <th>物料类别</th>
             <th>采购余量</th>
             <th>采购未确认数量</th>
+            <th>物料供应商</th>
             <th>项目名称</th>
           </tr>
         #{list items:materials, as:'m'}
@@ -76,6 +77,7 @@
             <td>${m.type.label()}</td>
             <td>${m.surplusConfirmQty()}</td>
             <td>${m.surplusPendingQty()}</td>
+            <td>${m.cooperators()}</td>
             <td>${m.projectName}</td>
           </tr>
         #{/list}

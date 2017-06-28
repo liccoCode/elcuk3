@@ -57,6 +57,7 @@
             <th>物料名称</th>
             <th>物料类别</th>
             <th>可用库存</th>
+            <th>物料供应商</th>
             <th>项目名称</th>
           </tr>
         #{list items:materials, as:'m'}
@@ -72,6 +73,7 @@
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
             <td>${m.availableQty()}</td>
+            <td>${m.cooperators()}</td>
             <td>${m.projectName}</td>
           </tr>
         #{/list}
