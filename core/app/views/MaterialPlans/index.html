@@ -70,6 +70,7 @@
           <th>收货类型</th>
           <th>收货方</th>
           <th>财务审核</th>
+          <th width="125px;">出货时间</th>
           <th>User</th>
           <th>Create</th>
         </tr>
@@ -107,6 +108,7 @@
               ${dp.financeState?.label()}
               #{/else}
           </td>
+          <td>${dp.deliveryDate.datetime()}</td>
           <td>${dp.handler.username}</td>
           <td>#{time_tooltip time:dp.createDate/}</td>
         </tr>

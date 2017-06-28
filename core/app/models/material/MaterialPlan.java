@@ -169,6 +169,13 @@ public class MaterialPlan extends GenericModel {
      */
     public String address;
 
+
+    /**
+     * 出货时间(即为确认交货数量时的时间)
+     */
+    @Expose
+    public Date deliveryDate;
+
     @OneToOne
     public User handler;
 
@@ -229,6 +236,7 @@ public class MaterialPlan extends GenericModel {
             Validation.addError("", "采购单状态非 " + P.CREATE.label() + " 不可以确认");
         if(Validation.hasErrors()) return;
         this.state = P.DONE;
+        this.deliveryDate = new Date();
         this.save();
     }
 
