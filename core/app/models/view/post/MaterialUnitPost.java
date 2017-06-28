@@ -4,9 +4,7 @@ package models.view.post;
 import helper.Dates;
 import models.OperatorConfig;
 import models.material.Material;
-import models.material.MaterialBom;
 import models.material.MaterialUnit;
-import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
@@ -24,40 +22,17 @@ import java.util.List;
  */
 public class MaterialUnitPost extends Post<MaterialUnit> {
 
-
-    /**
-     * 选择过滤的日期类型
-     */
-    public String dateType;
-    public List<ProcureUnit.STAGE> stages = new ArrayList<>();
+    public List<MaterialUnit.STAGE> stages = new ArrayList<>();
     public static final List<String> projectNames = new ArrayList<>();
     public long cooperatorId;
     public long materialId;
     public String projectName;
     public Material.T type;
-    public static final List<F.T2<String, String>> DATE_TYPES;
 
-    static {
-        DATE_TYPES = new ArrayList<>();
-        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<>("planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<>("deliveryDate", "实际 [交货] 时间"));
-    }
-
-    /**
-     * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
-     */
-    public Date from;
-    public Date to;
 
     public MaterialUnitPost() {
-        //this.perSize = 100;
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stages.add(ProcureUnit.STAGE.DONE);
-        this.stages.add(ProcureUnit.STAGE.DELIVERY);
-        this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
-        this.dateType = "createDate";
         this.perSize = 70;
         projectNames.clear();
         projectNames.add(OperatorConfig.getVal("brandname"));
@@ -65,29 +40,14 @@ public class MaterialUnitPost extends Post<MaterialUnit> {
 
     }
 
-
-    public MaterialUnitPost(ProcureUnit.STAGE stage) {
-        this();
-        this.stages.add(stage);
-    }
-
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT m FROM MaterialUnit m WHERE  1=1 AND ");
         List<Object> params = new ArrayList<>();
         /** 时间参数 **/
-        if(this.dateType != null) {
-            if(this.dateType.equals("planDeliveryDate")) {
-                sbd.append(" m.planDeliveryDate>=? AND m.planDeliveryDate<=?");
-            } else if(this.dateType.equals("deliveryDate")) {
-                sbd.append(" m.deliveryDate>=? AND m.deliveryDate<=?");
-            } else {
-                sbd.append(" m.createDate>=? AND m.createDate<=?");
-            }
-            params.add(Dates.morning(this.from));
-            params.add(Dates.night(this.to));
-        }
-
+        sbd.append(" m.createDate>=? AND m.createDate<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
 
         /** 状态参数 **/
         if(stages.size() > 0) {

@@ -1,5 +1,6 @@
 package controllers;
 
+import helper.GTs;
 import helper.J;
 import models.User;
 import models.material.Material;
@@ -168,7 +169,7 @@ public class Materials extends Controller {
      */
     public static void findMaterial(long id) {
         Material material = Material.findById(id);
-        renderJSON(material);
+        renderJSON(GTs.newMap("code", material.code).put("name", material.name).put("surplusPendingQty", material.surplusPendingQty()).build());
     }
 
 }

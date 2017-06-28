@@ -1,7 +1,5 @@
 $(() => {
 
-
-
   $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let id = $(this).data("id");
@@ -16,6 +14,45 @@ $(() => {
       $("#div" + format_id).load($(this).data("url"), {id: id}, function () {
         $("#data-table").unmask();
       });
+    }
+  });
+
+  //财务审核js处理
+  $("#confirmMaterialPlanBtn").click(function (e) {
+    let num = $("input[name='pids']:checked").length;
+    if (num == 0) {
+      noty({
+        text: '请选择需要审核的数据!',
+        type: 'error'
+      });
+    } else {
+      let i = 0;
+      let ids = [];
+      $("input[name='pids']:checked").each(function () {
+        console.log($(this).attr("financeState"));
+        if ($(this).attr("financeState") != "PENDING_REVIEW") {
+          i++;
+          noty({
+            text: $(this).val() + '已经审核，请选择【待审核】的出货单',
+            type: 'error'
+          });
+          return false;
+        }
+        ids.push($(this).val());
+      });
+      if (i == 0) {
+        if (confirm("点击审核后，即表示出货单据已审核通过！")) {
+          return $('#create_deliveryment').attr('action', $(this).data('url')).submit();
+        }
+      }
+    }
+  });
+
+  //单个数据财务审核js处理
+  $("#data-table a[name='approveBtn']").click(function (e) {
+    e.preventDefault();
+    if (confirm("点击审核后，即表示出货单据已审核通过！")) {
+      return $('#create_deliveryment').attr('action', $(this).data('url')).submit();
     }
   });
 

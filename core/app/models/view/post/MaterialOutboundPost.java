@@ -4,13 +4,11 @@ import helper.Dates;
 import models.material.Material;
 import models.material.MaterialOutbound;
 import models.whouse.Outbound;
-import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -22,14 +20,14 @@ public class MaterialOutboundPost extends Post<MaterialOutbound> {
 
     public Outbound.S status;
     public MaterialOutbound.C type;
-    public String projectName;  
+    public String projectName;
     public Long cooperId;
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM MaterialOutbound o LEFT JOIN o.units u WHERE " +
-                "1=1");
-       
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM MaterialOutbound o LEFT JOIN o.units u WHERE "
+                + "1=1");
+
         List<Object> params = new ArrayList<>();
 
         /** 时间参数 **/
@@ -70,8 +68,8 @@ public class MaterialOutboundPost extends Post<MaterialOutbound> {
                 params.add(word);
             }
         }
-        
-        
+
+
         sbd.append(" ORDER BY o.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }

@@ -28,9 +28,10 @@
         <td>
           <input type="text" value="${outbound?.projectName}" readonly>
         </td>
-        <th>出库类型</th>
+        <th>出库类型<span style="color:red">*</span></th>
         <td>
-          <select name="outbound.type">
+          <select name="outbound.type" required>
+              <option value="">出库类型</option>
               #{list items:models.material.MaterialOutbound.C, as:'t'}
                 <option value="${t.name()}">${t.label()}</option>
               #{/list}
@@ -42,14 +43,14 @@
         <th>收货方</th>
         <td>
           <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
-            <option value="">供应商</option>
+            <option value="">请选择供应商</option>
               #{list items:cooperators, as:'cop'}
                 <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
               #{/list}
           </select>
         </td>
         <th>目的地</th>
-        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" required></td>
+        <td><input type="text" class="span8" name="outbound.whouse" id="whouse" ></td>
       </tr>
 
       <tr>
@@ -67,7 +68,7 @@
       </tr>
       <tr>
         <td colspan="6">
-          <button class="btn btn-primary" name="create_record">创建/更新</button>
+          <button class="btn btn-primary" name="create_record">创建</button>
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
             <i class="icon-list-alt"></i>导出</a>
         </td>
@@ -98,10 +99,10 @@
             </td>
             <td>${unit.code}</td>
             <td>${unit.name}</td>
-            <td></td>
+            <td>${unit.cooperators()}</td>
             <td>${unit.availableQty()}</td>
             <td>
-              <input type="text" style="width:40px;" name="dtos[${unit_index-1}].outQty">
+              <input type="text" style="width:40px;" data-origin="${unit.availableQty()}" name="dtos[${unit_index-1}].outQty">
             </td>
             <td>${unit.projectName}</td>
             <td>${unit.memo}</td>

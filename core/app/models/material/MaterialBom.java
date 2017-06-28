@@ -22,9 +22,7 @@ import java.util.List;
 public class MaterialBom extends Model {
 
     private static final long serialVersionUID = -4405409676464248103L;
-    
     public String number;
-
     public String name;
 
     public enum S {
@@ -80,8 +78,7 @@ public class MaterialBom extends Model {
     public Date createDate;
 
     public Date updateDate;
-    
-    public boolean isDel = false;
 
+    public boolean isDel = false;
     public String memo;
 }

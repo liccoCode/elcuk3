@@ -6,8 +6,6 @@
     <th>物料名称</th>
     <th>采购余量</th>
     <th>交货数量</th>
-    <th>预计交货时间</th>
-    <th>实际交货时间</th>
     <th>项目名称</th>
     <th>创建人</th>
     <th>创建时间</th>
@@ -15,13 +13,11 @@
 
 #{list items:units, as:'unit'}
   <tr class="text-center">
-    <td>${unit.materialUnit?.material?.code}</td>
-    <td>${unit.materialUnit?.material?.name}</td>
+    <td>${unit.material?.code}</td>
+    <td>${unit.material?.name}</td>
+    <td>${unit.material?.surplusConfirmQty()}</td>
     <td>${unit.qty}</td>
-    <td>${unit.qty}</td>
-    <td>#{time_tooltip time:unit.planDeliveryDate/}</td>
-    <td>#{time_tooltip time:unit.deliveryDate/}</td>
-    <td>${unit.materialUnit?.projectName}</td>
+    <td>${unit.material?.projectName}</td>
     <td>${unit.handler?.username}</td>
     <td>#{time_tooltip time:unit.createDate /}</td>
   </tr>

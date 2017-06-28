@@ -1,6 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'编辑物料出库单' /}
 #{set 'moreScripts'}
+  #{script 'jquery.filedrop.js'/}
+  #{script 'component/dropUpload.coffee'/}
   #{script 'materialOutbounds/edit.es6'/} 
   #{script 'materialOutbounds/blank.js'/}
 #{/set}
@@ -69,7 +71,7 @@
       </tr>
       <tr>
         <td colspan="6">
-          <button class="btn btn-primary" name="create_record">创建/更新</button>
+          <button class="btn btn-primary" name="create_record">更新</button>
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
             <i class="icon-list-alt"></i>导出</a>
         </td>
@@ -83,18 +85,24 @@
 <div class="row-fluid">
   <div class="span12">
   #{render 'MaterialOutbounds/_units.html', units:outbound.units, is_check: true/}
-  #{if outbound.status.name()=='Create'}
-      #{power.ck 'outbounds.delete'}
-        <button class="btn btn-danger" id="deleteBtn">解除</button>
-      #{/power.ck}
-  #{/if}
-  #{else }
-    <button class="btn btn-warning" id="cancelBtn">撤销出库</button>
-  #{/else}
   </div>
 </div>
+#{if qtyEdit}
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-append">
+        <input type="text" id="code" placeHolder="物料编码(必须)" required>
+        <a href="javascript:void(0);"
+           id="addPlanUnitBtn" class="btn btn-primary">
+          快速添加
+        </a>
+      </div>
+    </div>
+  </div>
+#{/if}
 <br>
 
+#{records records:records/}
 
 <div class="row-fluid">
   <div class="span12">
@@ -109,7 +117,7 @@
 </div>
 
 <div id="cancel_outbound_modal" class="modal hide fade">
-  <form action="@{StockRecords.cancelOutbound()}" method="post">
+  <form action="" method="post">
     <div class="modal-body">
       <table>
         <tr>
@@ -128,3 +136,10 @@
     </div>
   </form>
 </div>
+
+
+
+<form action="@{MaterialOutbounds.addunits(outbound.id)}" method="post" id="addunits_form">
+  <input type="hidden" name="unit.id" value="${outbound?.id}" id="unit_id">
+  <input type="hidden" name="code" id="unit_code">
+</form>

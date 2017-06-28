@@ -2,7 +2,7 @@
 #{set title:"物料库存列表"  /}
 
 #{set 'moreScripts'}
-    #{script 'materialOutbounds/indexMaterial.es6'/}
+    #{script 'materialPlans/indexMaterial.es6'/}
 #{/set}
 <style>
   .table td{
@@ -14,7 +14,7 @@
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{MaterialOutbounds.indexMaterial()}" method="get" class="search_form" id="search_Form">
+  <form action="@{MaterialPlans.indexMaterial()}" method="get" class="search_form" id="search_Form">
     <div class="row-fluid">
       <div class="span12">
         <select name="p.type" class="inline">
@@ -29,14 +29,16 @@
           <input type="text" style="width:220px;" name="p.search" placeholder="物料编码 or 物料名称" value="${p.search}">
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
+
         </div>
-        <a href="javascript:void(0)" data-url="@{MaterialOutbounds.blank()}" class="btn btn-success inline"
-                     id="createOutboundBtn"><i class="icon-plane"> </i>创建物料出库单</a>
+        <div class="input-prepend input-append inline">
+          <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单
+                   </a>
       </div>
     </div>
   </form>
 
-  <form method="post" id="outboundForm">
+  <form method="post" id="planForm" action="@{MaterialPlans.blank()}">
     <div class="row-fluid">
       <div class="span12">
         <table class="table table-condensed table-bordered" id="data-table">
@@ -49,7 +51,8 @@
             <th>物料编码</th>
             <th>物料名称</th>
             <th>物料类别</th>
-            <th>可用库存</th>
+            <th>采购余量</th>
+            <th>采购未确认数量</th>
             <th>项目名称</th>
           </tr>
         #{list items:materials, as:'m'}
@@ -64,7 +67,8 @@
             <td>${m.code}</td>
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
-            <td>${m.availableQty()}</td>
+            <td>${m.surplusConfirmQty()}</td>
+            <td>${m.surplusPendingQty()}</td>
             <td>${m.projectName}</td>
           </tr>
         #{/list}
@@ -81,7 +85,7 @@
         </table>
       </div>
     </div>
+
+    <input type="hidden" id="name_form" name="planName" >
   </form>
 </div>
-
-

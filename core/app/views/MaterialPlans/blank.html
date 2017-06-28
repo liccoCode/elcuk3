@@ -1,0 +1,133 @@
+#{extends 'main_full.html'/}
+#{set title:"物料出货单 #" + dp.id /}
+#{set 'moreScripts'}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'materialPlans/edit.js'/}
+    #{script 'deliveryments/show.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+
+#{info_row title:'物料出货单信息'/}
+
+
+<form action="@{MaterialPlans.create()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
+  <div class="row-fluid">
+    <div class="tab-content">
+      <div class="tab-pane fade active in" id='currentPage'>
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>物料出库单ID</th>
+            <td><input type="text" id="deliverymentId" name="dp.id" value="${dp?.id}" readonly/></td>
+            <th>State</th>
+            <td><input type="text" value="${dp?.state?.label()}" readonly></td>
+          </tr>
+          <tr>
+            <th>出库单名称<span style="color:red">*</span></th>
+            <td><input type="text" class="span8" name="dp.name" value="${dp.name}" required></td>
+            <th>收货类型<span style="color:red">*</span></th>
+            <td>
+              <select name="dp.receipt" class="inline" required>
+                <option value="">收货类型</option>
+              #{list items:models.material.MaterialPlan.R, as:'c'}
+                <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
+              #{/list}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>供应商</th>
+            <td>
+              <input type="hidden" name="dp.cooperator.id" value="${dp?.cooperator?.id}" required/>
+              <input type="text" value="${dp?.cooperator?.name}" readonly/>
+            </td>
+            <th>项目名称<span style="color:red">*</span></th>
+            <td>
+              <select name="dp.projectName" class="inline" required>
+                <option value="${brandName}">${brandName}</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>收货方</th>
+            <td>
+              <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
+                <option value="">请输入收货供应商代码/品拓</option>
+              #{list items:cooperators, as:'cop'}
+                <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+              #{/list}
+              </select>
+            </td>
+            <th>目的地</th>
+            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse"></td>
+          </tr>
+          <tr>
+            <th>创建人</th>
+            <td>
+              <input type="hidden" name="dp.handler.id" value="${dp?.handler?.id}" required/>
+              <input type="text" name="dp.handler.username" value="${dp?.handler?.username}" readonly/>
+            </td>
+            <th>创建日期</th>
+            <td>
+              <input type="text" readonly class="input-medium" value="${dp.createDate.datetime()}">
+            </td>
+          </tr>
+          <tr>
+            <th>备注</th>
+            <td colspan="5">
+              <textarea name="dp.memo" rows="4" class="input-block-level">${dp?.memo}</textarea>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <button class="btn btn-primary" name="create_record">创建</button>
+            </td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span12" id="unit_list">
+      <table class="table table-condensed table-bordered" id="unit_table">
+        <tr>
+          <th>#</th>
+          <th>物料编码</th>
+          <th>物料名称</th>
+          <th>采购余量</th>
+          <th>采购未确认数量</th>
+          <th>交货数量</th>
+          <th>项目名称</th>
+        </tr>
+      #{list items:units, as:'unit'}
+        <tr class="text-center" id="unit_${unit.id}">
+          <td>
+            <input type="checkbox" name="ck" value="${unit.id}">
+            <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
+          </td>
+          <td>${unit.code}</td>
+          <td>${unit.name}</td>
+          <td>${unit.surplusConfirmQty()}</td>
+          <td>${unit.surplusPendingQty()}</td>
+          <td>
+            <input type="text" style="width:40px;" data-origin="${unit.availableQty()}" name="dtos[${unit_index-1}].outQty">
+          </td>
+          <td>${unit.projectName}</td>
+        </tr>
+      #{/list}
+
+      </table>
+    </div>
+  </div>
+  <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+</form>
+
+
+
+
+
