@@ -54,7 +54,14 @@
           </td>
 
           <th>对应原始SKU</th>
-          <td><input type="text" name="pro.origin_sku" value="${pro.origin_sku}"></td>
+          <td>
+            <select  style="width:100px;" name="pro.origin_project">
+            #{list items:models.User.COR.values(), as:'c'}
+              <option value="${c.name()}">${c.label()}</option>
+            #{/list}
+            </select>
+            <input type="text" name="pro.origin_sku" value="${pro.origin_sku}">
+          </td>
         </tr>
 
         <tr>
