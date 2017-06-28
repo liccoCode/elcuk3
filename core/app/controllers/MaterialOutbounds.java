@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MaterialOutbounds extends Controller {
 
-    @Before(only = {"index", "blank", "edit"})
+    @Before(only = {"index", "blank", "edit" ,"indexMaterial"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);

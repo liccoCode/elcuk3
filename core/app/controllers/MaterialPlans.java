@@ -35,7 +35,7 @@ import java.util.List;
 public class MaterialPlans extends Controller {
 
 
-    @Before(only = {"show", "blank"})
+    @Before(only = {"show", "blank","indexMaterial"})
     public static void showPageSetUp() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);

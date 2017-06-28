@@ -2,6 +2,7 @@ package models.material;
 
 import com.google.gson.annotations.Expose;
 import models.User;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
 import org.hibernate.annotations.DynamicUpdate;
@@ -94,6 +95,8 @@ public class Material extends Model {
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Product> products = new ArrayList<>();
+    @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
+    public List<CooperItem> cooperItems = new ArrayList<>();
 
     /**
      * 创建人
