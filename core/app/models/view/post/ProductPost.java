@@ -53,7 +53,7 @@ public class ProductPost extends Post<Product> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append("AND (").append(" p.sku LIKE ?");
+            sbd.append("AND (").append(" p.sku LIKE ? OR p.origin_sku LIKE ? ");
             if(this.scope)
                 sbd.append(" OR p.abbreviation LIKE ?").append("OR p.locates LIKE ?")
                         .append("OR p.sellingPoints LIKE ?").append(" OR s.asin LIKE ?")
@@ -61,9 +61,9 @@ public class ProductPost extends Post<Product> {
                         .append(" OR s.aps.productDesc LIKE ? ").append(" OR s.aps.searchTerms LIKE ? ");
             sbd.append(" OR a.value LIKE ?").append(" OR s.fnSku LIKE ?").append(")");
             if(this.scope)
-                for(int i = 0; i < 11; i++) params.add(word);
+                for(int i = 0; i < 12; i++) params.add(word);
             else
-                for(int i = 0; i < 3; i++) params.add(word);
+                for(int i = 0; i < 4; i++) params.add(word);
         }
 
         if(StringUtils.isNotBlank(this.state)) {
