@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.material.Material;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
@@ -40,6 +41,7 @@ public class MaterialPlans extends Controller {
         renderArgs.put("cooperators", cooperators);
         String id = request.params.get("id");
         renderArgs.put("records", ElcukRecord.records(id));
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
 
@@ -58,8 +60,6 @@ public class MaterialPlans extends Controller {
      * 跳转到创建物料出库单页面
      */
     public static void blank(List<Long> pids, String planName) {
-        if(StringUtils.isBlank(planName))
-            Validation.addError("", "出货单名称必须填写!");
         if(pids == null || pids.size() <= 0)
             Validation.addError("", "必须选择物料信息!");
         if(Validation.hasErrors()) {

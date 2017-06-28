@@ -17,15 +17,11 @@
     </td>
 
     <th>所属公司</th>
-    <td >
-      <select name="p.projectName" class="inline">
-        <option value="">项目名称</option>
-          #{list items:models.User.COR, as:'c'}
-              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
-                <option ${c.name() == p?.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
-              #{/if}
-          #{/list}
+    <td>
+      <select name="units[0].projectName" class="inline">
+        <option value="${brandName}">${brandName}</option>
       </select>
+
     </td>
   </tr>
   <tr>
@@ -55,7 +51,7 @@
       <input type="text" class="span1 inline" id="unit_price" name="units[0].planPrice">
         #{pickCurrency id:'unit_planCurrency', name:'units[0].planCurrency',class: 'span1 inline',
         c:units[0]?.currency?:helper.Currency.CNY, native: 'aaa'/}
-        </td>
+    </td>
   </tr>
   <tr>
     <th>采购数量<span style="color:red">*</span></th>
@@ -65,7 +61,7 @@
       <span class="add-on">箱</span>
     </td>
     <th>采购未确认数</th>
-    <td colspan="3"><input type="text"  id="surplusPendingQty" readonly></td>
+    <td colspan="3"><input type="text" id="surplusPendingQty" readonly></td>
   </tr>
 
   <tr>
@@ -126,9 +122,7 @@
     <th>所属公司</th>
     <td colspan="3">
       <select name="units[<%= num %>].projectName">
-      #{list items:models.User.COR, as:'c'}
-        <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
-      #{/list}
+        <option value="${brandName}">${brandName}</option>
       </select>
     </td>
   </tr>
