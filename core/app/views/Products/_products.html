@@ -26,7 +26,8 @@
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
         <td class="span10">${prod.productName} #{if prod.origin_sku}<br>
-          <span style="color:red">同EA sku:${prod.origin_sku}</span>#{/if}
+          <span style="color:red">同EA sku:<a href="https://e.easyacc.com/product/${prod.origin_sku}" target="_blank">
+          ${prod.origin_sku}</a></span>#{/if}
         </td>
           #{set unit: prod.recentlyUnit()/}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
