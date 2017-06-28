@@ -11,13 +11,7 @@ $(() => {
         type: 'error'
       });
       return false;
-    } else if (name == null || name =='') {
-      noty({
-        text: '请输入物料出货单的别名',
-        type: 'error'
-      });
-      return false;
-    } else {
+    }  else {
       $("#name_form").val(name);
       $("#planForm").submit();
     }
