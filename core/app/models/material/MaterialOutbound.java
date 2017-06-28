@@ -6,9 +6,7 @@ import helper.Reflects;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.whouse.Outbound;
-import models.whouse.Refund;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -18,7 +16,6 @@ import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -164,8 +161,8 @@ public class MaterialOutbound extends GenericModel {
         DateTime nextMonth = dt.plusMonths(1);
         String count = MaterialOutbound.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
-                "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("WLC|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
@@ -185,9 +182,8 @@ public class MaterialOutbound extends GenericModel {
                     .id)
                     .save();
         }
-
-        Cooperator cooperator = Cooperator.findById(outbound.cooperator.id);
-        this.cooperator = cooperator;
+        Cooperator cp = Cooperator.findById(outbound.cooperator.id);
+        this.cooperator = cp;
         this.save();
     }
 

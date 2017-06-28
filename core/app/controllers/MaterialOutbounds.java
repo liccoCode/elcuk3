@@ -7,7 +7,6 @@ import models.OperatorConfig;
 import models.material.Material;
 import models.material.MaterialOutbound;
 import models.material.MaterialOutboundUnit;
-import models.material.MaterialPlan;
 import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.MaterialOutboundPost;
@@ -21,7 +20,6 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -106,7 +104,7 @@ public class MaterialOutbounds extends Controller {
         if(outbound.status == Outbound.S.Create) {
             qtyEdit = true;
         }
-        render(outbound, brandName , qtyEdit);
+        render(outbound, brandName ,qtyEdit);
     }
 
 
@@ -191,7 +189,7 @@ public class MaterialOutbounds extends Controller {
         Validation.required("materialOutbound.addunits", code);
         if(Validation.hasErrors()) edit(id);
 
-        MaterialOutbound materialOutbound = MaterialOutbound.addunits(id, code);
+        MaterialOutbound.addunits(id, code);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             edit(id);

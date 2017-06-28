@@ -42,11 +42,6 @@
     </div>
 
     <div class="input-prepend input-append inline">
-      <a href="javascript:void(0)" data-url="" class="btn btn-warning inline"
-         id="createInboundBtn">发给供应商</a>
-    </div>
-
-    <div class="input-prepend input-append inline">
       <a href="javascript:void(0)" data-url='@{MaterialPlans.approveBatch()}' class="btn btn-warning inline"
          id="confirmMaterialPlanBtn">财务审核</a>
     </div>
@@ -69,7 +64,6 @@
             </label>
           </th>
           <th>物料出货单ID</th>
-          <th>物料请款单ID</th>
           <th>出货单名称</th>
           <th>供应商</th>
           <th>状态</th>
@@ -91,9 +85,6 @@
           <td>
             <a href="@{MaterialPlans.show(dp.id)}" target="_blank">${dp.id}</a>
           </td>
-          <td>
-
-          </td>
 
           <td style="cursor:pointer;" data-url="@{MaterialPlans.showMaterialPlanUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
             <span><i class="icon-reorder"></i></span>
@@ -109,7 +100,8 @@
 
               #{if dp.financeState.name() == financeState.name()}
                 <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                <a href="@{MaterialPlans.approve(dp.id)}" class="btn btn-small btn-warning" uid="${dp.id}">审核</a>
+                <a  href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
+                    class="btn btn-small btn-warning" uid="${dp.id}">审核</a>
               #{/if}
               #{else}
               ${dp.financeState?.label()}

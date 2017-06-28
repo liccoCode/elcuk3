@@ -1,7 +1,5 @@
 $(() => {
 
-
-
   $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let id = $(this).data("id");
@@ -43,10 +41,19 @@ $(() => {
         ids.push($(this).val());
       });
       if (i == 0) {
-        $('#create_deliveryment').attr('action', $(this).data('url')).submit();
+        if (confirm("点击审核后，即表示出货单据已审核通过！")) {
+          return $('#create_deliveryment').attr('action', $(this).data('url')).submit();
+        }
       }
     }
   });
 
+  //单个数据财务审核js处理
+  $("#data-table a[name='approveBtn']").click(function (e) {
+    e.preventDefault();
+    if (confirm("点击审核后，即表示出货单据已审核通过！")) {
+      return $('#create_deliveryment').attr('action', $(this).data('url')).submit();
+    }
+  });
 
 });

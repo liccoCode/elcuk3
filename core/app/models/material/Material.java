@@ -2,10 +2,8 @@ package models.material;
 
 import com.google.gson.annotations.Expose;
 import models.User;
-import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -176,9 +174,8 @@ public class Material extends Model {
      */
     public String cooperators() {
         List<Cooperator> cooperatorList = Cooperator
-                .find("SELECT distinct c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci" +
-                        ".id", id)
-                .fetch();
+                .find("SELECT distinct c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
+                        + ".id", id).fetch();
         StringBuilder buff = new StringBuilder();
         for(Cooperator co : cooperatorList) {
             buff.append("," + co.name );

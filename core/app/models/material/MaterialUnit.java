@@ -1,29 +1,20 @@
 package models.material;
 
-import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
-import models.procure.DeliverPlan;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.qc.CheckTaskDTO;
-import models.whouse.InboundUnit;
-import models.whouse.Outbound;
-import models.whouse.Refund;
 import models.whouse.Whouse;
-import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Min;
 import play.data.validation.Required;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * 物料采购计划

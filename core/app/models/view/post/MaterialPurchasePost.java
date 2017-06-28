@@ -2,7 +2,6 @@ package models.view.post;
 
 import helper.Dates;
 import models.material.MaterialPurchase;
-import models.procure.Deliveryment;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
@@ -58,8 +57,8 @@ public class MaterialPurchasePost extends Post<MaterialPurchase> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT  m FROM MaterialPurchase m LEFT JOIN m.units u WHERE " +
-                "1=1 AND");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT  m FROM MaterialPurchase m LEFT JOIN m.units u WHERE "
+                + "1=1 AND");
         List<Object> params = new ArrayList<>();
 
         /** 时间参数 **/

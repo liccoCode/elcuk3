@@ -18,6 +18,7 @@ $(() => {
       });
       return false;
     } else {
+      $("#name_form").val(name);
       $("#planForm").submit();
     }
   });

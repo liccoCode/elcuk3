@@ -50,14 +50,13 @@ public class MaterialUnits extends Controller {
     public static void findMaterialUnit(long id) {
         MaterialUnit materialUnit = MaterialUnit.findById(id);
         StringBuilder buff = new StringBuilder();
-        buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(materialUnit.id).append
-                ("\"").append(",").append("\"").append("planQty").append("\"").append(":").append("\"")
-                .append(materialUnit.planQty).append
-                ("\"").append(",").append("\"").append("planPrice").append("\"").append(":").append("\"")
-                .append(materialUnit.planPrice).append
-                ("\"").append(",").append("\"").append("planDeliveryDate").append("\"").append(":").append("\"")
-                .append(materialUnit.planDeliveryDate).append
-                ("\"").append(",").append("\"").append("planCurrency").append("\"").append(":").append("\"")
+        buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(materialUnit.id)
+                .append("\"").append(",").append("\"").append("planQty").append("\"").append(":").append("\"")
+                .append(materialUnit.planQty).append("\"").append(",").append("\"").append("planPrice").append("\"")
+                .append(":").append("\"").append(materialUnit.planPrice).append("\"")
+                .append(",").append("\"").append("planDeliveryDate").append("\"").append(":").append("\"")
+                .append(materialUnit.planDeliveryDate).append("\"").append(",").append("\"")
+                .append("planCurrency").append("\"").append(":").append("\"")
                 .append(materialUnit.planCurrency)
                 .append("\"").append("}");
         renderJSON(buff.toString());
@@ -75,7 +74,7 @@ public class MaterialUnits extends Controller {
         materialUnit.save();
         flash.success("操作成功");
         if("MaterialUnitIndex".equals(updateType)) {
-           index(new MaterialUnitPost());
+            index(new MaterialUnitPost());
         } else if("MaterialPurchaseShow".equals(updateType)) {
             MaterialPurchases.show(unit.materialPurchase.id);
         }

@@ -10,7 +10,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
