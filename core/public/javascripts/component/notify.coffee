@@ -63,7 +63,7 @@ $ ->
         $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
       $("#notifyNumber").html(r.count)
     )
-  newsCount()
+  # newsCount()
 
   #将选中的通知状态更改成已读
   $("#updateState").on("click", (e) ->
@@ -73,7 +73,7 @@ $ ->
       noty({text: '未选中通知', type: 'error', timeout: 3000})
     else
       updateState($checkbox.serialize(), ->
-         newsCount()
+         # newsCount()
          $('input:checkbox:checked[name="noteID"]').remove()
       )
   )
@@ -83,7 +83,7 @@ $ ->
       $span = $(@)
       updateState({noteID:$span.attr("data-id")}, ->
          $("#notificationBtn").click()
-         newsCount()
+         # newsCount()
       )
     )
 

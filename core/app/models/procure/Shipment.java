@@ -1730,4 +1730,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return null;
     }
 
+    public float calPrescription() {
+        return (float) (this.dates.receiptDate.getTime() - this.dates.planBeginDate.getTime()) / (1000 * 60 * 60 * 24);
+    }
+
 }

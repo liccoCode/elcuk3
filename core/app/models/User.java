@@ -159,10 +159,10 @@ public class User extends Model {
                 return "https://e.easya.cc/";
             }
         },
-        Reapow {
+        Ecooe {
             @Override
             public String label() {
-                return "Reapow";
+                return "Ecooe";
             }
 
             @Override
@@ -211,7 +211,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.easya.cc/";
+                return "https://e.mengtop.com/";
             }
         };
 

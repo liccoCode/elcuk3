@@ -8,10 +8,7 @@ import models.view.dto.MonthlyShipmentDTO;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +25,8 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
         return null;
     }
 
-    public Map<String, MonthlyShipmentDTO> queryBySku() {
+    public List<MonthlyShipmentDTO> queryBySku() {
+        List<MonthlyShipmentDTO> list = new ArrayList<>();
         Map<String, MonthlyShipmentDTO> map = new HashMap<>();
         SqlSelect sql = buildSql();
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
@@ -42,9 +40,10 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
                 dto.sku = sku;
                 this.buildDto(dto, row);
                 map.put(sku, dto);
+                list.add(dto);
             }
         }
-        return map;
+        return list;
     }
 
     private SqlSelect buildSql() {
@@ -61,8 +60,8 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
                 .leftJoin(" FBAShipment f ON u.fba_id = f.id ")
                 .leftJoin(" Product d ON d.sku = u.product_sku ")
                 .leftJoin(" PaymentUnit p ON p.shipment_id= s.id ")
-                .where("s.inbondDate >=?").params(Dates.morning(this.from))
-                .andWhere("s.inbondDate <=?").params(Dates.night(this.to));
+                .where("s.planBeginDate >=?").params(Dates.morning(this.from))
+                .andWhere("s.planBeginDate <=?").params(Dates.night(this.to));
         sql.groupBy("u.product_sku, s.type ");
         sql.orderBy("d.category_categoryId ASC");
         return sql;
@@ -71,9 +70,8 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
     private void buildDto(MonthlyShipmentDTO dto, Map<String, Object> row) {
         Shipment.T type = Shipment.T.valueOf(row.get("type").toString());
         dto.categoryId = row.get("categoryId").toString();
-        M market = M.valueOf(row.get("market").toString());
-        dto.market = market;
-        dto.centerId = row.get("centerId").toString();
+        dto.market = row.get("market") == null ? null : M.valueOf(row.get("market").toString());
+        dto.centerId = row.get("centerId") == null ? "" : row.get("centerId").toString();
         if(Objects.equals(Shipment.T.AIR, type)) {
             dto.airQty = Integer.parseInt(row.get("totalQty").toString());
             dto.airWeight = Float.parseFloat(row.get("totalWeight").toString());

@@ -13,7 +13,7 @@
 #{flash_alert /}
 
 <div class="row-fluid">
-  <form action="@{ShipmentReports.monthlyShipmentReport()}" method="get" class="search_form" id='search_form'>
+  <form action="@{ShipmentReports.monthlyShipmentPrescription()}" method="get" class="search_form" id='search_form'>
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
@@ -42,35 +42,25 @@
     <div class="span12">
       <table id="shipItemTable" class="table table-condensed table-bordered">
         <tr>
-          <th>Category</th>
-          <th>SKU</th>
-          <th>市场</th>
+          <th>运输单号</th>
+          <th>运输方式</th>
+          <th>Tracking No</th>
           <th>仓库</th>
-          <th>海运PCS</th>
-          <th>空运PCS</th>
-          <th>快递PCS</th>
-          <th>海运kgs</th>
-          <th>空运kgs</th>
-          <th>快递kgs</th>
-          <th>海运cbm</th>
-          <th>空运cbm</th>
-          <th>快递cbm</th>
+          <th>CenterId</th>
+          <th>预计运输时间</th>
+          <th>签收时间</th>
+          <th>时效(day)</th>
         </tr>
-      #{list items:list, as:'dto'}
+      #{list items:list, as:'ship'}
         <tr>
-          <td>${dto.categoryId}</td>
-          <td>${dto.sku}</td>
-          <td>${dto.market}</td>
-          <td>${dto.centerId}</td>
-          <td>${dto.seaQty}</td>
-          <td>${dto.airQty}</td>
-          <td>${dto.expressQty}</td>
-          <td>${dto.seaWeight}</td>
-          <td>${dto.airWeight}</td>
-          <td>${dto.expressWeight}</td>
-          <td>${dto.seaCbm}</td>
-          <td>${dto.airCbm}</td>
-          <td>${dto.expressCbm}</td>
+          <td>${ship.id}</td>
+          <td>${ship.type.label()}</td>
+          <td>${ship.showTrackNo()}</td>
+          <td>${ship.whouse.name}</td>
+          <td>${ship.fetchCenterId()}</td>
+          <td>#{time_tooltip time: ship.dates.planBeginDate/}</td>
+          <td>#{time_tooltip time: ship.dates.receiptDate/}</td>
+          <td>${ship.calPrescription()}</td>
         </tr>
       #{/list}
       </table>
