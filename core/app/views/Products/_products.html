@@ -25,7 +25,9 @@
         </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
-        <td class="span10">${prod.productName}</td>
+        <td class="span10">${prod.productName} #{if prod.origin_sku}<br>
+          <span style="color:red">同ea sku:${prod.origin_sku}</span>#{/if}
+        </td>
           #{set unit: prod.recentlyUnit()/}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
         <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
