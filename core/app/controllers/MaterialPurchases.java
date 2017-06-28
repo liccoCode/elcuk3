@@ -36,14 +36,13 @@ import java.util.stream.Collectors;
 public class MaterialPurchases extends Controller {
 
 
-    @Before(only = {"show", "update", "delunits", "cancel", "confirm"})
+    @Before(only = {"blank", "show", "update", "delunits", "cancel", "confirm"})
     public static void showPageSetUp() {
         String id = request.params.get("id");
-        String brandName = OperatorConfig.getVal("brandname");
         renderArgs.put("records", ElcukRecord.records(id));
         renderArgs.put("shippers", Cooperator.shippers());
         renderArgs.put("buyers", User.openUsers());
-        renderArgs.put("brandName", brandName);
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
     @Before(only = {"index"})
