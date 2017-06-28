@@ -5,6 +5,7 @@ import models.User;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
+import models.whouse.Outbound;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
@@ -142,14 +143,18 @@ public class Material extends Model {
 
 
     /**
-     * 根据物料ID查询库存
+     * 根据物料ID查询可用库存
      *
      * @return
      */
     public int availableQty() {
+        //1 查询出货计划总数
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
                 .find(" material.id=? AND materialPlan.receipt = ?", id, MaterialPlan.R.WAREHOUSE).fetch();
-        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum();
+        //1 查询已确认的出库总数
+        List<MaterialOutboundUnit> materialOutboundUnitList = MaterialOutboundUnit
+                .find(" material.id=? AND materialOutbound.status = ?", id, Outbound.S.Outbound).fetch();
+        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum() - materialOutboundUnitList.stream().mapToInt(unit -> unit.outQty).sum();
     }
 
     /**
