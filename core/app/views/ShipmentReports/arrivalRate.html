@@ -33,7 +33,7 @@
 
           <div class="input-append input-prepend inline">
             <button class="btn btn-primary" data-loading>统计</button>
-            <button class="btn btn-primary" id="exceldown">导出Excel</button>
+            <button class="btn btn-success" id="exceldown">导出Excel</button>
           </div>
         </div>
       </div>
@@ -45,6 +45,7 @@
         <table id="shipItemTable" class="table table-condensed table-bordered">
           <thead>
           <tr>
+            <th>国家</th>
             <th>运输方式</th>
             <th>总票数</th>
             <th>准时票数</th>
@@ -58,6 +59,7 @@
           <tbody>
           #{list items:arrivals, as:'arr'}
           <tr>
+            <td>${arr.market?.name()}</td>
             <td>${arr.shipType}</td>
             <td>${arr.totalShipNum}</td>
             <td>${arr.onTimeShipNum}</td>

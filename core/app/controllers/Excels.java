@@ -813,4 +813,14 @@ public class Excels extends Controller {
         render(order, df);
     }
 
+    public static void exportMonthlyShipment(MonthlyShipmentPost p) {
+        if(p == null) p = new MonthlyShipmentPost();
+        List<MonthlyShipmentDTO> list = p.queryBySku();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月物流发货量报表.xls"));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(list, dateFormat, p);
+    }
+
 }

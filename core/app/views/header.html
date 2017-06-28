@@ -146,6 +146,7 @@
                   <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
                 #{/power.ck}
               <li><a href="@{ShipmentReports.monthlyShipmentReport()}">单月物流发货量报表</a></li>
+              <li><a href="@{ShipmentReports.monthlyShipmentPrescription()}">单月运输时效统计</a></li>
             </ul>
           </li>
         #{/power.ck}
@@ -270,14 +271,10 @@
         #{power.ck "project.change"}
           <select class="inline" style="width:100px;margin-top:6px;" id="changeProject">
               #{list items:models.User.COR.values(), as:'c'}
-                  #{if c.name() != 'MengTop'}
-                    <option value="${c.url()}" #{if c.name()==models.OperatorConfig.getVal("brandname") }
-                            selected#{/if}>${c.label()}</option>
-                  #{/if}
+                <option value="${c.url()}" #{if c.name()==models.OperatorConfig.getVal("brandname") } selected#{/if}>${c.label()}</option>
               #{/list}
           </select>
         #{/power.ck}
-
 
         *{ <li>
             <a href="@{Activitis.index()}" target="_blank">
