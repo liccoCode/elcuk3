@@ -418,6 +418,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public String b2bDescription;
 
+    public String origin_sku;
+
     @Expose
     public WhouseAttrs whouseAttrs = new WhouseAttrs();
 
