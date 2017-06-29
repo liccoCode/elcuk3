@@ -27,16 +27,16 @@
           <tr>
             <th>出库单名称<span style="color:red">*</span></th>
             <td>
-                <input type="text" class="span8" name="dp.name" value="${dp.name}" #{if !qtyEdit}readonly#{/if} required>
+              <input type="text" class="span8" name="dp.name" value="${dp.name}" #{if !qtyEdit}readonly#{/if} required>
             </td>
             <th>收货类型<span style="color:red">*</span></th>
             <td>
             #{if qtyEdit}
-              <select name="dp.receipt" class="inline" required>
+              <select name="dp.receipt" class="inline" required  id="receipt">
                 <option value="">收货类型</option>
-              #{list items:models.material.MaterialPlan.R, as:'c'}
-                <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
-              #{/list}
+                  #{list items:models.material.MaterialPlan.R, as:'c'}
+                    <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
+                  #{/list}
               </select>
             #{/if}
             #{else }
@@ -47,7 +47,7 @@
           <tr>
             <th>供应商</th>
             <td>
-              <input type="hidden" name="dp.cooperator.id"  value="${dp?.cooperator?.id}" #{if !qtyEdit}readonly#{/if} required/>
+              <input type="hidden" name="dp.cooperator.id" value="${dp?.cooperator?.id}" #{if !qtyEdit}readonly#{/if} required/>
               <input type="text" value="${dp?.cooperator?.name}" readonly/>
             </td>
             <th>项目名称<span style="color:red">*</span></th>
@@ -62,25 +62,28 @@
             #{/else}
             </td>
           </tr>
-          <tr>
+
+          <tr  #{if receipt }style="display: none" #{/if} id="receiveTr">
             <th>收货方</th>
-            <td>
+            <td colspan="3">
             #{if qtyEdit}
               <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
-                <option value="">请输入收货供应商代码/品拓</option>
-              #{list items:cooperators, as:'cop'}
-                <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
-              #{/list}
+                <option value="">请输入收货供应商代码</option>
+                  #{list items:cooperators, as:'cop'}
+                    <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+                  #{/list}
               </select>
             #{/if}
-            #{else }
-              <input type="hidden" name="dp.receiveCooperator.id" value="${dp.receiveCooperator?.id}" readonly>
-              <input type="text"  value="${dp.receiveCooperator?.name}" readonly>
-            #{/else}
             </td>
-            <th>目的地</th>
-            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse" #{if !qtyEdit}readonly#{/if}></td>
           </tr>
+          <tr>
+            <th>目的地</th>
+            <td colspan="3">
+              <textarea name="dp.address" rows="1" class="input-block-level" id="whouse"
+                        #{if !qtyEdit}disabled="disabled"#{/if}>${dp?.address}</textarea>
+            </td>
+          </tr>
+
           <tr>
             <th>创建人</th>
             <td>
@@ -164,14 +167,14 @@
     <div class="span12">
 
       <div class="input-append">
-        <button id="delunit_form_submit" class="btn btn-warning"  data-url='@{MaterialPlans.delunits(dp.id)}'   data-method="DELETE"
+        <button id="delunit_form_submit" class="btn btn-warning" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
                 placeHolder="将 DELIVERY 状态的出货计划从出货单中移除出去" data-disable-with='解除中'>
           解除
         </button>
       </div>
-      
+
       <div class="input-append">
-        <input type="text" id="code" placeHolder="物料编码(必须)" >
+        <input type="text" id="code" placeHolder="物料编码(必须)">
         <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>
           快速添加
         </button>
@@ -182,7 +185,7 @@
           确认
         </button>
       </div>
-     
+
     </div>
   </div>
 #{/if}
