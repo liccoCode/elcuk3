@@ -10,10 +10,7 @@ import play.libs.F;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -123,6 +120,28 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
 
     public Long isZero(Long num) {
         return num == 0 ? 1 : num;
+    }
+
+    public Map<String, F.T3<String, String, Double>> calAverageTime(List<Shipment> list) {
+        Map<String, List<Float>> map = new HashMap<>();
+        for(Shipment shipment : list) {
+            String key = String.format("%s:%s", shipment.type.name(), shipment.whouse.market.name());
+            if(map.containsKey(key)) {
+                List<Float> times = map.get(key);
+                times.add(shipment.calPrescription());
+            } else {
+                List<Float> floats = new ArrayList<>();
+                floats.add(shipment.calPrescription());
+                map.put(key, floats);
+            }
+        }
+        Map<String, F.T3<String, String, Double>> time = new HashMap<>();
+        map.keySet().forEach(key -> {
+            List<Float> temp = map.get(key);
+            double total = temp.stream().mapToDouble(num -> num).sum();
+            time.put(key, new F.T3(key.split(":")[0], key.split(":")[1], total / map.get(key).size()));
+        });
+        return time;
     }
 
 }

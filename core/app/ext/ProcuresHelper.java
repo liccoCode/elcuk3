@@ -253,7 +253,7 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#708090";
         }
     }
-    
+
     public static String rgb(MaterialUnit.STAGE stage) {
         switch(stage) {
             case CANCEL:

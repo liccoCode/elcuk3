@@ -182,8 +182,8 @@ public class ShipmentReports extends Controller {
     public static void monthlyShipmentPrescription(ArrivalRatePost p) {
         if(p == null) p = new ArrivalRatePost();
         List<Shipment> list = p.queryMonthlyShipment();
-
-        render(list, p);
+        Map<String, F.T3<String, String, Double>> map = p.calAverageTime(list);
+        render(list, map, p);
     }
 
 }
