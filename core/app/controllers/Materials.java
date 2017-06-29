@@ -12,6 +12,7 @@ import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.SqlSelect;
+import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -28,6 +29,13 @@ import java.util.stream.Collectors;
 @With({GlobalExceptionHandler.class, Secure.class})
 public class Materials extends Controller {
 
+
+    @Before(only = {"blank", "edit"})
+    public static void showPageSetUp() {
+        List<MaterialBom> materialBoms = MaterialBom.findAll();
+        renderArgs.put("materialBoms", materialBoms);
+    }
+
     public static void index(MaterialPost p) {
         if(p == null) p = new MaterialPost();
         List<Material> materials = p.query();
@@ -40,20 +48,36 @@ public class Materials extends Controller {
         render(cooperators);
     }
 
-    public static void create(Material m) {
+    public static void create(Material m ,List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
         m.save();
+        boms.forEach(unit -> {
+            MaterialBom bom = MaterialBom.findById(unit.id);
+            bom.materials.add(m);
+            bom.save();
+        });
         flash.success("新增物料【" + m.code + "】成功！");
         index(new MaterialPost());
     }
 
     public static void edit(Long id) {
         Material material = Material.findById(id);
-        render(material);
+        List<MaterialBom> boms = material.boms;
+        render(material, boms);
     }
 
-    public static void update(Material m) {
-        m.save();
+    public static void update(Material m ,List<MaterialBom> boms) {
+        Material material = Material.findById(m.id);
+        material.boms.forEach(bom -> {
+            bom.materials.remove(material);
+            bom.save();
+        });
+
+        boms.forEach(unit -> {
+            MaterialBom bom = MaterialBom.findById(unit.id);
+            bom.materials.add(m);
+            bom.save();
+        });
         edit(m.id);
     }
 
@@ -62,7 +86,7 @@ public class Materials extends Controller {
         editBom(bom.id);
     }
 
-    public static void deleteMaterial(Long id) {
+    public static void deleteMaterial(Long id ) {
         Material material = Material.findById(id);
         material.isDel = true;
         material.updateDate = new Date();
@@ -105,7 +129,7 @@ public class Materials extends Controller {
     public static void sameMaterial(String search) {
         String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
         List<Material> materials = Material.find("code like ? or name like ? ", word, word).fetch();
-        List<String> names = materials.stream().map(m -> m.name).collect(Collectors.toList());
+        List<String> names = materials.stream().map(m -> m.code).collect(Collectors.toList());
         renderJSON(J.json(names));
     }
 
@@ -169,7 +193,8 @@ public class Materials extends Controller {
      */
     public static void findMaterial(long id) {
         Material material = Material.findById(id);
-        renderJSON(GTs.newMap("code", material.code).put("name", material.name).put("surplusPendingQty", material.surplusPendingQty()).build());
+        renderJSON(GTs.newMap("code", material.code).put("name", material.name)
+                .put("surplusPendingQty", material.surplusPendingQty()).build());
     }
 
 }
