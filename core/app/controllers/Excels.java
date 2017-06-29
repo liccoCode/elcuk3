@@ -826,7 +826,7 @@ public class Excels extends Controller {
     public static void exportMonthlyShipmentPrescription(ArrivalRatePost p) {
         if(p == null) p = new ArrivalRatePost();
         List<Shipment> list = p.queryMonthlyShipment();
-        Map<String, Double> map = p.calAverageTime(list);
+        Map<String, F.T3<String, String, Double>> map = p.calAverageTime(list);
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月运输时效统计.xls"));
         renderArgs.put(RenderExcel.RA_ASYNC, false);

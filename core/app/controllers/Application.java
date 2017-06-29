@@ -2,11 +2,13 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Webs;
+import models.OperatorConfig;
 import models.market.Account;
 import models.market.Feedback;
 import models.market.Orderr;
 import models.view.Ret;
 import models.view.dto.DashBoard;
+import models.view.post.StockPost;
 import models.whouse.Whouse;
 import play.Play;
 import play.cache.Cache;
@@ -17,10 +19,15 @@ import play.utils.FastRuntimeException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
     public static void index() {
+        if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
+            StockRecords.stockIndex(new StockPost());
+        }
+
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         render(dashborad, fbaWhouse);
