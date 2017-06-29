@@ -120,3 +120,29 @@
 <!-- 操作('发给供应商','批量发货','批量签收')form end -->
 
 #{bootstrap_pager pi:p, url:'' /}
+
+
+<!--  修改签收数量 弹出div begin   -->
+<div id="bom_modal" class="modal hide fade">
+  <div class="modal-header">
+    <h4>签收数量修改</h4>
+  </div>
+  <div class="modal-body">
+    <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
+      <input type="hidden" name="unit.id" id="unit_id">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th width="30%">实际签收数量</th>
+          <td>
+            <input type="text" placeHolder="实际签收数量" id="unit_receiptQty" name="unit.receiptQty">
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+  </div>
+</div>
+<!--  修改签收数量 弹出div end   -->

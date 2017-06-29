@@ -35,7 +35,7 @@ import java.util.List;
 public class MaterialPlans extends Controller {
 
 
-    @Before(only = {"show", "blank","indexMaterial"})
+    @Before(only = {"show", "blank", "indexMaterial"})
     public static void showPageSetUp() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
@@ -73,7 +73,7 @@ public class MaterialPlans extends Controller {
                 .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
                         + ".id", units.get(0).id).first();
         MaterialPlan dp = new MaterialPlan();
-        dp.id= MaterialPlan.id();
+        dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;
         dp.name = planName;
         dp.cooperator = cop;
@@ -224,7 +224,11 @@ public class MaterialPlans extends Controller {
     public static void showMaterialPlanUnitList(String id) {
         MaterialPlan plan = MaterialPlan.findById(id);
         List<MaterialPlanUnit> units = plan.units;
-        render("/MaterialPlans/_unit_list.html", units);
+        boolean qtyEdit = false;
+        if(plan.state == MaterialPlan.P.CREATE) {
+            qtyEdit = true;
+        }
+        render("/MaterialPlans/_unit_list.html", units ,qtyEdit);
     }
 
     /**

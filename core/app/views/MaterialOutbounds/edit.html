@@ -1,10 +1,10 @@
 #{extends 'main_full.html' /}
 #{set title:'编辑物料出库单' /}
 #{set 'moreScripts'}
-  #{script 'jquery.filedrop.js'/}
-  #{script 'component/dropUpload.coffee'/}
-  #{script 'materialOutbounds/edit.es6'/} 
-  #{script 'materialOutbounds/blank.js'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'materialOutbounds/edit.es6'/}
+    #{script 'materialOutbounds/blank.js'/}
 #{/set}
 <style>
   .table td{
@@ -34,33 +34,33 @@
         </td>
         <th>出库类型</th>
         <td>
-          #{if qtyEdit}
-            <select name="outbound.type">
-                #{list items:models.material.MaterialOutbound.C, as:'t'}
-                  <option value="${t.name()}" #{if t==outbound.type} selected #{/if}>${t.label()}</option>
-                #{/list}
-            </select>
-          #{/if}
-          #{else }
-            <input type="text" value="${outbound.type.label()}" readonly>
-          #{/else}
+            #{if qtyEdit}
+              <select name="outbound.type">
+                  #{list items:models.material.MaterialOutbound.C, as:'t'}
+                    <option value="${t.name()}" #{if t==outbound.type} selected #{/if}>${t.label()}</option>
+                  #{/list}
+              </select>
+            #{/if}
+            #{else }
+              <input type="text" value="${outbound.type.label()}" readonly>
+            #{/else}
         </td>
       </tr>
 
       <tr>
         <th>收货方</th>
         <td>
-          #{if qtyEdit}
-            <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
-              <option value="">供应商</option>
-                #{list items:cooperators, as:'cop'}
-                  <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
-                #{/list}
-            </select>
-          #{/if}
-          #{else }
-            <input type="text" value="${outbound?.cooperator?.name}" readonly>
-          #{/else}
+            #{if qtyEdit}
+              <select name="outbound.cooperator.id" class="inline selectize" style="width:150px;" id="outCooperator">
+                <option value="">供应商</option>
+                  #{list items:cooperators, as:'cop'}
+                    <option #{if outbound?.cooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+                  #{/list}
+              </select>
+            #{/if}
+            #{else }
+              <input type="text" value="${outbound?.cooperator?.name}" readonly>
+            #{/else}
         </td>
         <th>目的地</th>
         <td><input type="text" class="span8" name="outbound.whouse" id="whouse" value="${outbound?.whouse}"
@@ -70,16 +70,17 @@
 
       <tr>
         <th>发货人</th>
-        <td><input type="text" name="outbound.consignor" value="${outbound?.consignor}" #{if !qtyEdit}readonly#{/if} /></td>
+        <td><input type="text" name="outbound.consignor" value="${outbound?.consignor}" #{if !qtyEdit}readonly#{/if} />
+        </td>
         </td>
         <th>出库日期<span style="color:red">*</span></th>
         <td>
-          #{if qtyEdit}
-            <input type="date" name="outbound.outboundDate" value="${outbound?.outboundDate}" required>
-          #{/if}
-          #{else }
-            <input type="text" value="${outbound?.outboundDate.datetime()}" readonly>
-          #{/else}
+            #{if qtyEdit}
+              <input type="date" name="outbound.outboundDate" value="${outbound?.outboundDate}" required>
+            #{/if}
+            #{else }
+              <input type="text" value="${outbound?.outboundDate.datetime()}" readonly>
+            #{/else}
         </td>
       </tr>
       <tr>
@@ -90,9 +91,9 @@
       </tr>
       <tr>
         <td colspan="6">
-        #{if qtyEdit}
-          <button class="btn btn-primary" name="create_record">更新</button>
-        #{/if}
+            #{if qtyEdit}
+              <button class="btn btn-primary" name="create_record">更新</button>
+            #{/if}
           <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-info inline">
             <i class="icon-list-alt"></i>导出</a>
         </td>
@@ -109,17 +110,25 @@
   </div>
 </div>
 #{if qtyEdit}
-  <div class="row-fluid">
-    <div class="span12">
-      <div class="input-append">
-        <input type="text" id="code" placeHolder="物料编码(必须)" required>
-        <a href="javascript:void(0);"
-           id="addPlanUnitBtn" class="btn btn-primary">
-          快速添加
-        </a>
-      </div>
+<div class="row-fluid">
+  <div class="span12">
+    <div class="input-append">
+      <input type="text" id="code" placeHolder="物料编码(必须)" required>
+      <a href="javascript:void(0);"
+         id="addPlanUnitBtn" class="btn btn-primary">
+        快速添加
+      </a>
     </div>
+      #{if outbound.status.name()=='Create'}
+          #{power.ck 'outbounds.delete'}
+            <div class="input-append">
+              <button class="btn btn-warning" id="deleteBtn">解除</button>
+            </div>
+          #{/power.ck}
+      #{/if}
+
   </div>
+</div>
 #{/if}
 <br>
 
@@ -157,7 +166,6 @@
     </div>
   </form>
 </div>
-
 
 
 <form action="@{MaterialOutbounds.addunits(outbound.id)}" method="post" id="addunits_form">

@@ -162,13 +162,7 @@
 #{if qtyEdit}
   <div class="row-fluid">
     <div class="span12">
-      <div class="input-append">
-        <input type="text" id="code" placeHolder="物料编码(必须)" >
-        <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>
-          快速添加
-        </button>
-      </div>
-      
+
       <div class="input-append">
         <button id="confirmPlanBtn" class="btn btn-primary" data-disable-with='添加中'>
           确认
@@ -179,6 +173,13 @@
         <button id="delunit_form_submit" class="btn btn-warning"  data-url='@{MaterialPlans.delunits(dp.id)}'   data-method="DELETE"
                 placeHolder="将 DELIVERY 状态的出货计划从出货单中移除出去" data-disable-with='解除中'>
           解除
+        </button>
+      </div>
+      
+      <div class="input-append">
+        <input type="text" id="code" placeHolder="物料编码(必须)" >
+        <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>
+          快速添加
         </button>
       </div>
      
