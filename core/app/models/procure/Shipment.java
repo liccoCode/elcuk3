@@ -1734,4 +1734,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return (float) (this.dates.receiptDate.getTime() - this.dates.planBeginDate.getTime()) / (1000 * 60 * 60 * 24);
     }
 
+    public static String showSplitFirst(String key) {
+        return key.split(":")[0];
+    }
+
+    public static String showSplitSecond(String key) {
+        return key.split(":")[1];
+    }
+
 }
