@@ -154,9 +154,9 @@
           <tr>
             <td>${loss.fba}</td>
             <td>${loss.sku}</td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td>${loss.unit?.whouse?.name}</td>
+            <td>${loss.unit?.fba?.centerId}</td>
+            <td>${loss.unit?.shipType?.label()}</td>
             <td>${loss.qty}</td>
             <td>${loss.lossqty}</td>
             <td>${loss.compentype}</td>

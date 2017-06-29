@@ -17,7 +17,7 @@
     <div class="row-fluid">
       <div class="span12">
         <div class="input-prepend input-append inline">
-          <span class="add-on">预计运输时间From:</span>
+          <span class="add-on">签收时间From:</span>
           <input type="date" name="p.from" value="${p.from.date()}">
           <span class="add-on">To:</span>
           <input type="date" name="p.to" value="${p.to.date()}">
@@ -37,6 +37,19 @@
       </div>
     </div>
   </form>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <table id="shipItemTable" class="table table-condensed table-bordered">
+        <tr>
+          <th>运输方式</th>
+          <th>市场</th>
+          <th>平均时效</th>
+        </tr>
+
+      </table>
+    </div>
+  </div>
 
   <div class="row-fluid">
     <div class="span12">
