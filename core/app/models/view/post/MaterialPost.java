@@ -17,12 +17,14 @@ public class MaterialPost extends Post<Material> {
 
     private static final long serialVersionUID = -7336544616312488827L;
     public Material.T type;
+    public Long cooperId;
 
 
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sbd = new StringBuilder("SELECT m FROM Material m WHERE isDel=? ");
+        StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m, IN(m.cooperItems) ci WHERE m"
+                + ".isDel=? ");
         params.add(false);
         if(type != null) {
             sbd.append(" AND m.type = ? ");
@@ -33,6 +35,10 @@ public class MaterialPost extends Post<Material> {
             sbd.append(" OR m.name LIKE ? OR m.specification LIKE ? ");
             sbd.append(" OR m.texture LIKE ? OR m.technology LIKE ? OR m.version LIKE ? )");
             for(int i = 0; i < 6; i++) params.add(this.word());
+        }
+        if(cooperId != null) {
+            sbd.append(" AND ci.cooperator.id = ? ");
+            params.add(cooperId);
         }
         return new F.T2<>(sbd.toString(), params);
     }

@@ -94,17 +94,8 @@ $(() => {
     e.preventDefault();
     $form = $("#confirm_form");
 
-    $.get('/MaterialPlans/confirmValidate', {
-      id: $('#deliverymentId').val()
-    }, function (r) {
-      if (r.flag) {
-        if (confirm(r.message)) {
-          return $form.submit();
-        }
-      } else {
-        return $form.submit();
-      }
-    })
+    return $form.submit();
+    
   });
 
   //快速添加物料编码js处理

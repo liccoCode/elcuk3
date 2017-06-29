@@ -23,7 +23,7 @@
     <td>${unit?.material?.cooperators()}</td> 
     <td>${unit?.material?.availableQty()}</td>
     <td>
-    #{if is_check}
+    #{if is_check && qtyEdit}
       <input type="text" style="width:40px;" name="dtos[${unit_index-1}].outQty" value="${unit.outQty}" data-id="${unit.id}"
              data-origin="${unit?.material?.availableQty()}" >
     #{/if}
