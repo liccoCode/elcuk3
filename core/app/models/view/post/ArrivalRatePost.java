@@ -125,4 +125,12 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         return num == 0 ? 1 : num;
     }
 
+    public Map<String, Float> caluAverageTime() {
+        Map<String, Float> map = new HashMap<>();
+
+
+
+        return map;
+    }
+
 }
