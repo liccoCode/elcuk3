@@ -30,7 +30,7 @@
           <select name="copItem.material.id" class="selectize" style="width:250px;">
             <option value="">请选择</option>
           #{list items:materials, as:'m'}
-            <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.name}</option>
+            <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.code}</option>
           #{/list}
           </select>
           <input type="hidden" name="cooperId" value="${cop.id}">
