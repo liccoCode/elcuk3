@@ -207,6 +207,7 @@ public class MaterialPlan extends GenericModel {
                 .orElse("00");
         return String.format("WDP|%s|%s", dt.toString("yyyyMM"), numStr);
     }
+
     /**
      * 将指定 MaterialPlanUnit 从 出货单 中删除
      */
@@ -234,7 +235,7 @@ public class MaterialPlan extends GenericModel {
     public void confirm() {
         if(!Arrays.asList(P.CREATE).contains(this.state))
             Validation.addError("", "出货单状态非 " + P.CREATE.label() + " 不可以确认");
-        if(this.units.stream().anyMatch(unit -> unit.qty == 0)) 
+        if(this.units.stream().anyMatch(unit -> unit.qty == 0))
             Validation.addError("", "出货单下存在交货数量为0的出货单元 不可以确认");
         if(Validation.hasErrors()) return;
         this.state = P.DONE;
@@ -301,6 +302,5 @@ public class MaterialPlan extends GenericModel {
             plan.financeState = S.APPROVE;
             plan.save();
         }
-
     }
 }
