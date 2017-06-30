@@ -95,8 +95,7 @@ public class MaterialPurchasePost extends Post<MaterialPurchase> {
                 params.add(word);
             }
         }
-
-
+        sbd.append(" ORDER BY m.createDate DESC");
         return new F.T2<>(sbd.toString(), params);
     }
 }
