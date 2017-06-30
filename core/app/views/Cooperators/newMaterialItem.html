@@ -42,7 +42,7 @@
         <td>
           <div class="inline">
             <input class="input input-mini" type="text" name="copItem.price" value="${copItem.price}">
-          #{pickCurrency name:'copItem.currency',  class:'input-mini'/}
+          #{pickCurrency name:'copItem.currency',  class:'input-mini', c:copItem.currency?:helper.Currency.CNY/}
           </div>
         </td>
       </tr>

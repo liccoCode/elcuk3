@@ -212,9 +212,18 @@ public class MaterialPlans extends Controller {
     public static void confirm(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
         dp.confirm();
-
         if(Validation.hasErrors()) {
-            show(id);
+            MaterialPlan plan = MaterialPlan.findById(id);
+            List<MaterialPlanUnit> units = plan.units;
+            boolean qtyEdit = false;
+            if(plan.state == MaterialPlan.P.CREATE) {
+                qtyEdit = true;
+            }
+            boolean receipt = false;
+            if(plan.receipt == MaterialPlan.R.WAREHOUSE) {
+                receipt = true;
+            }
+            render("/MaterialPlans/show.html",dp, units, qtyEdit, receipt);
         } else {
             new ElcukRecord(Messages.get("materialPlans.confirm"), String.format("确认[物料出货单] %s", id), id).save();
             flash.success("物料出货单 %s 确认成功.", id);

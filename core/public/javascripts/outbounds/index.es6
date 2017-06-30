@@ -33,4 +33,10 @@ $(() => {
 
   $("#" + $("#whichPage").val()).click();
 
+  $("#exportExcel").click(function (e) {
+    e.stopPropagation();
+    let $form = $("#search_Form");
+    window.open($(this).data("url") + "?" + $form.serialize(), "_blank");
+  });
+
 });

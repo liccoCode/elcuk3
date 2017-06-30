@@ -66,10 +66,12 @@
         #{list items:materials, as:'m'}
           <tr>
             <td>
+            #{if m.surplusConfirmQty() > 0}
               <label class="checkbox">
                 <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
                        cooperName="${m.cooperators()}">
               </label>
+            #{/if}
             </td>
             <td>${m.code}</td>
             <td>${m.name}</td>
