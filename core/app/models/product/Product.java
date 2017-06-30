@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.WhouseAttrs;
 import models.market.Listing;
@@ -417,6 +418,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     public String b2bItemCode;
 
     public String b2bDescription;
+
+    public String origin_sku;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR origin_project;
 
     @Expose
     public WhouseAttrs whouseAttrs = new WhouseAttrs();

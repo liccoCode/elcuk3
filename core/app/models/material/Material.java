@@ -150,11 +150,13 @@ public class Material extends Model {
     public int availableQty() {
         //1 查询出货计划总数
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
-                .find(" material.id=? AND materialPlan.receipt = ? AND materialPlan.state = ?", id, MaterialPlan.R.WAREHOUSE, MaterialPlan.P.DONE).fetch();
+                .find(" material.id=? AND materialPlan.receipt = ? AND materialPlan.state = ?",
+                        id, MaterialPlan.R.WAREHOUSE, MaterialPlan.P.DONE).fetch();
         //1 查询已确认的出库总数
         List<MaterialOutboundUnit> materialOutboundUnitList = MaterialOutboundUnit
                 .find(" material.id=? AND materialOutbound.status = ?", id, Outbound.S.Outbound).fetch();
-        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum() - materialOutboundUnitList.stream().mapToInt(unit -> unit.outQty).sum();
+        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum()
+                - materialOutboundUnitList.stream().mapToInt(unit -> unit.outQty).sum();
     }
 
     /**

@@ -3,9 +3,22 @@
     <table class="table table-bordered">
       <tr>
         <td>SKU</td>
-        <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+        <td width="600px;">${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
         <td>Category</td>
         <td>${pro.category}</td>
+      </tr>
+      <tr>
+        <th>对应原始SKU</th>
+        <td>
+          <select style="width:100px;" name="pro.origin_project">
+          #{list items:models.User.COR.values(), as:'c'}
+            <option value="${c.name()}" ${pro.origin_project==c?'selected':''}>${c.label()}</option>
+          #{/list}
+          </select>
+          <input type="text" name="pro.origin_sku" value="${pro.origin_sku}">
+        </td>
+        <td></td>
+        <td></td>
       </tr>
 
       <tr>

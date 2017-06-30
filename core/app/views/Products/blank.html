@@ -23,17 +23,17 @@
           <th>Category</th>
           <td>
             <input type="text" id="pro_category" name="pro.category.categoryId" value="${pro.category?.categoryId}" style="width:130px"
-                   data-provide="typeahead" data-source="${categorys}" required="required">
+                   data-provide="typeahead" data-source="${categorys}" required="required" autocomplete="off">
           </td>
 
           <th>Family</th>
           <td>
-            <input type="text" id="pro_family" name="pro.family.family" data-provide="typeahead"
+            <input type="text" id="pro_family" name="pro.family.family" data-provide="typeahead" autocomplete="off"
                    data-source="${families}" value="${pro.family?.family}" style="width:130px" required="required">
           </td>
 
           <th>SKU</th>
-          <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}" required="required"></td>
+          <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}" required="required" autocomplete="off"></td>
         </tr>
 
         <tr>
@@ -46,11 +46,21 @@
           </td>
 
           <th>宽(包材)</th>
-          <td colspan="3">
+          <td>
             <div class="input-append">
               <input type="text" style="width:100px" name="pro.width" value="${pro.width}">
               <span class="add-on">mm</span>
             </div>
+          </td>
+
+          <th>对应原始SKU</th>
+          <td>
+            <select  style="width:100px;" name="pro.origin_project">
+            #{list items:models.User.COR.values(), as:'c'}
+              <option value="${c.name()}">${c.label()}</option>
+            #{/list}
+            </select>
+            <input type="text" name="pro.origin_sku" value="${pro.origin_sku}">
           </td>
         </tr>
 

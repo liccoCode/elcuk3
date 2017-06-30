@@ -108,7 +108,7 @@
               ${dp.financeState?.label()}
               #{/else}
           </td>
-          <td>${dp.deliveryDate.datetime()}</td>
+          <td>#{time_tooltip time:dp.deliveryDate, datetime:true/}</td>
           <td>${dp.handler.username}</td>
           <td>#{time_tooltip time:dp.createDate/}</td>
         </tr>

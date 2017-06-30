@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import helper.*;
 import helper.Currency;
 import models.market.M;
+import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.ProfitDto;
 import models.view.report.LossRate;
@@ -44,16 +45,16 @@ public class LossRatePost extends Post<LossRate> {
         List<Object> params = new ArrayList<>();
         sql.append(
                 "select f.shipmentid,p.sku,(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) as qty,"
-                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype "
+                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype, p.id as unitId "
                         + " From ShipItem s "
-                        + " left join ProcureUnit p on s.unit_id=p.id "
+                        + " LEFT JOIN ProcureUnit p ON s.unit_id=p.id "
                         + " LEFT JOIN CheckTask c ON c.units_id = p.id"
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
-                        + " left join Shipment m on s.shipment_id=m.id "
-                        + " left join FBAShipment f on p.fba_id=f.id "
-                        + " where m.arriveDate >= ? AND m.arriveDate <= ? "
-                        + " and s.lossqty!=0 and s.compenamt != 0 "
-                        + " group by p.fba_id,p.sku order by l.sellingId desc ");
+                        + " LEFT JOIN Shipment m ON s.shipment_id=m.id "
+                        + " LEFT JOIN FBAShipment f ON p.fba_id=f.id "
+                        + " WHERE m.arriveDate >= ? AND m.arriveDate <= ? "
+                        + " AND s.lossqty!=0 and s.compenamt != 0 "
+                        + " GROUP BY p.fba_id,p.sku ORDER BY l.sellingId desc ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
@@ -193,6 +194,8 @@ public class LossRatePost extends Post<LossRate> {
             loss.qty = Integer.parseInt(row.get("qty").toString());
             loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
             loss.compentype = (String) row.get("compentype");
+            loss.unit = row.get("unitId") == null ? null :
+                    ProcureUnit.findById(Long.parseLong(row.get("unitId").toString()));
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");

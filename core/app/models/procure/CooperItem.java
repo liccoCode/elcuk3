@@ -217,8 +217,9 @@ public class CooperItem extends Model {
     }
 
     public void saveMaterialItem(Cooperator cooperator) {
-        Material material = Material.findById(this.material.id);
-        if(cooperator.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, material))) {
+        Material m = Material.findById(this.material.id);
+        if(this.id == null
+                && cooperator.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
             Validation.addError("", "该供应商下已经存在该物料，请选择其他物料!");
             return;
         }

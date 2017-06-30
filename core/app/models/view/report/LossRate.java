@@ -3,6 +3,7 @@ package models.view.report;
 
 import helper.Currency;
 import models.market.M;
+import models.procure.ProcureUnit;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -90,6 +91,8 @@ public class LossRate implements Serializable {
      * 赔偿比例
      */
     public BigDecimal payrate;
+
+    public ProcureUnit unit;
 
     public LossRate(){}
 

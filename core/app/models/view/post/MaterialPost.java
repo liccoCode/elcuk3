@@ -23,7 +23,7 @@ public class MaterialPost extends Post<Material> {
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m, IN(m.cooperItems) ci WHERE m"
+        StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m LEFT JOIN m.cooperItems ci WHERE m"
                 + ".isDel=? ");
         params.add(false);
         if(type != null) {

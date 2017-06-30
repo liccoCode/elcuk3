@@ -98,6 +98,7 @@ public class MaterialPlans extends Controller {
         dp.name = dp.name.trim();
         dp.state = MaterialPlan.P.CREATE;
         dp.financeState = MaterialPlan.S.PENDING_REVIEW;
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) dp.receiveCooperator = null;
         dp.save();
         //3 新增 出货计划单元
         for(Material dto : dtos) {
@@ -132,7 +133,11 @@ public class MaterialPlans extends Controller {
         if(dp.state == MaterialPlan.P.CREATE) {
             qtyEdit = true;
         }
-        render(dp, units, qtyEdit);
+        boolean receipt = false;
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) {
+            receipt = true;
+        }
+        render(dp, units, qtyEdit, receipt);
     }
 
     /**
@@ -144,6 +149,7 @@ public class MaterialPlans extends Controller {
         validation.valid(dp);
         if(Validation.hasErrors())
             show(dp.id);
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) dp.receiveCooperator = null;
         dp.save();
         flash.success("更新成功.");
         show(dp.id);
@@ -228,7 +234,7 @@ public class MaterialPlans extends Controller {
         if(plan.state == MaterialPlan.P.CREATE) {
             qtyEdit = true;
         }
-        render("/MaterialPlans/_unit_list.html", units ,qtyEdit);
+        render("/MaterialPlans/_unit_list.html", units, qtyEdit);
     }
 
     /**
