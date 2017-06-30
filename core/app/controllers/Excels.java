@@ -17,6 +17,7 @@ import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
 import models.whouse.InboundUnit;
+import models.whouse.Outbound;
 import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
@@ -831,6 +832,20 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月运输时效统计.xls"));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(list, map, p);
+    }
+
+    public static void exportOutBoundDetailReport(OutboundPost p) {
+        if(p == null) p = new OutboundPost();
+        List<Outbound> outbounds = p.query();
+        p.flag = "Other";
+        List<Outbound> others = p.query();
+        p.flag = "B2B";
+        List<Outbound> b2bOutbounds = p.queryForB2B();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dateFormat, p, outbounds, others, b2bOutbounds);
     }
 
 }
