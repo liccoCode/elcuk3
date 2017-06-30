@@ -86,6 +86,8 @@
           <a href="javascript:void(0)" class="btn btn-primary" id="confirmOutboundBtn">确认出库</a>
           <a class="btn btn-info" href="javascript:void(0)" id="printBtn" target="_blank">
             <i class="icon-print"></i> 打印出库单</a>
+          <a class="btn btn-success" href="javascript:void(0)" id="exportExcel" target="_blank"
+             data-url="@{Excels.exportOutBoundDetailReport()}"><i class="icon-list-alt"></i>导出Excel</a>
         </div>
       </div>
     </div>
@@ -114,7 +116,7 @@
               <th style="width:15px;">
                 <input type="checkbox" id="checkbox_all" class="checkall">
               </th>
-              <th width="120px;">出库单ID</th>
+              <th width="100px;">出库单ID</th>
               <th>名称</th>
               <th width="80px;">目的国家</th>
               <th>项目名称</th>
@@ -122,7 +124,7 @@
               <th width="80px;">运输方式</th>
               <th width="100px;">出库类型</th>
               <th width="200px;">货代公司</th>
-              <th width="120px;">出库日期</th>
+              <th width="100px;">出库日期</th>
               <th width="80px;">发货人</th>
               <th>创建人</th>
               <th width="200px;">备注</th>
