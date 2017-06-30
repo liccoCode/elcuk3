@@ -233,7 +233,9 @@ public class MaterialPlan extends GenericModel {
      */
     public void confirm() {
         if(!Arrays.asList(P.CREATE).contains(this.state))
-            Validation.addError("", "采购单状态非 " + P.CREATE.label() + " 不可以确认");
+            Validation.addError("", "出货单状态非 " + P.CREATE.label() + " 不可以确认");
+        if(this.units.stream().anyMatch(unit -> unit.qty == 0)) 
+            Validation.addError("", "出货单下存在交货数量为0的出货单元 不可以确认");
         if(Validation.hasErrors()) return;
         this.state = P.DONE;
         this.deliveryDate = new Date();

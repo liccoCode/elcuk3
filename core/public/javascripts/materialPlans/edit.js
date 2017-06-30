@@ -45,6 +45,7 @@ $(() => {
             text: r.message,
             type: 'error'
           });
+          $(this).val(0);
         }
       });
     }
