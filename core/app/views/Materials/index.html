@@ -59,7 +59,7 @@
             <td>${m.specification}</td>
             <td>${m.technology}</td>
             <td>${m.version}</td>
-            <td></td>
+            <td>${m.nowPurchasePlanPrice()}</td>
             <td>
               <a href="@{Materials.edit(m.id)}" class="btn btn-mini btn-primary">编辑</a>
               <a href="@{Materials.deleteMaterial(m.id)}" class="btn btn-mini btn-danger">删除</a>
