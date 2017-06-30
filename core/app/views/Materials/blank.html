@@ -34,9 +34,14 @@
               #{/list}
           </select>
         </td>
-        <th>包装组</th>
+        <th>B0M—ID</th>
         <td>
-          <input type="text"/>
+          <select name="boms[0].id" class="inline selectize" style="width:220px;" >
+            <option value="">请输入包装组</option>
+              #{list items:materialBoms, as:'b'}
+                <option value="${b.id}">${b.number}-${b.name}</option>
+              #{/list}
+          </select>
         </td>
       </tr>
       <tr>

@@ -190,11 +190,13 @@ public class MaterialOutbound extends GenericModel {
     public static void confirmOutBound(List<String> ids) {
         for(String id : ids) {
             MaterialOutbound out = MaterialOutbound.findById(id);
-            for(MaterialOutboundUnit p : out.units) {
-                if(p.outQty > p.material.availableQty()) {
-                    Validation.addError("", "物料出库计划【" + p.id + "】的出库数量大于物料可用库存量，请先检查！");
-                    return;
-                }
+            if(out.units.stream().anyMatch(p -> p.outQty <= 0)){
+                Validation.addError("", "物料出库单【" + out.id + "】的下的出库计划 出库数量不能小于等于0，请先检查！");
+                return;
+            }
+            if(out.units.stream().anyMatch(p -> p.outQty > p.material.availableQty())){
+                Validation.addError("", "物料出库单【" + out.id + "】的下的出库计划 出库数量大于物料可用库存量，请先检查！");
+                return;
             }
             if(Validation.hasErrors()) {
                 return;
