@@ -136,7 +136,7 @@ public class Material extends Model {
      * 返回所有物料信息
      */
     public static List<Material> suppliers() {
-        List<Material> materials = Material.all().fetch();
+        List<Material> materials = Material.findAll();
         materials.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return materials;
     }
