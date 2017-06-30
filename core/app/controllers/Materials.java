@@ -48,13 +48,15 @@ public class Materials extends Controller {
         render(cooperators);
     }
 
-    public static void create(Material m ,List<MaterialBom> boms) {
+    public static void create(Material m, List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
         m.save();
         boms.forEach(unit -> {
-            MaterialBom bom = MaterialBom.findById(unit.id);
-            bom.materials.add(m);
-            bom.save();
+            if(unit.id != null) {
+                MaterialBom bom = MaterialBom.findById(unit.id);
+                bom.materials.add(m);
+                bom.save();
+            }
         });
         flash.success("新增物料【" + m.code + "】成功！");
         index(new MaterialPost());
@@ -66,17 +68,19 @@ public class Materials extends Controller {
         render(material, boms);
     }
 
-    public static void update(Material m ,List<MaterialBom> boms) {
+    public static void update(Material m, List<MaterialBom> boms) {
+        m.save();
         Material material = Material.findById(m.id);
         material.boms.forEach(bom -> {
             bom.materials.remove(material);
             bom.save();
         });
-
         boms.forEach(unit -> {
-            MaterialBom bom = MaterialBom.findById(unit.id);
-            bom.materials.add(m);
-            bom.save();
+            if(unit.id != null ) {
+                MaterialBom bom = MaterialBom.findById(unit.id);
+                bom.materials.add(m);
+                bom.save();
+            }
         });
         edit(m.id);
     }
@@ -86,7 +90,7 @@ public class Materials extends Controller {
         editBom(bom.id);
     }
 
-    public static void deleteMaterial(Long id ) {
+    public static void deleteMaterial(Long id) {
         Material material = Material.findById(id);
         material.isDel = true;
         material.updateDate = new Date();
@@ -134,7 +138,7 @@ public class Materials extends Controller {
     }
 
     public static void quickAddByMaterialName(String name, Long id) {
-        List<Material> materials = Material.find("name like ? ", name).fetch();
+        List<Material> materials = Material.find("code like ? ", name).fetch();
         MaterialBom bom = MaterialBom.findById(id);
         materials.forEach(m -> bom.materials.add(m));
         bom.save();
