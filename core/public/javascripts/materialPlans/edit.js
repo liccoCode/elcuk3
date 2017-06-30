@@ -3,6 +3,32 @@
  */
 
 $(() => {
+  //创建出货单blank预览页面验证出货数量js方法
+  $('#unit_table').on('change', 'td>:input[name$=outQty]', function () {
+      let $input = $(this);
+      let surplusConfirmQty = $input.attr('surplusConfirmQty');
+
+      //交货数量
+      if ($(this).val() < 0) {
+        noty({
+          text: '收货数量不能小于0!',
+          type: 'error'
+        });
+        $(this).val(0);
+        return;
+      }
+    //交货数量
+    if (parseInt($(this).val()) > parseInt(surplusConfirmQty)) {
+      noty({
+        text: '收货数量不能大于采购余量!',
+        type: 'error'
+      });
+      $(this).val(0);
+      return;
+    }
+    });
+
+  //修改出货单 show页面验证出货数量js方法
   $('#unit_table').on('change', 'td>:input[name$=qty]', function () {
     let $input = $(this);
     let id = $(this).parents('tr').find('input[name$=pids]').val();
