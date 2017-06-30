@@ -155,7 +155,7 @@ public class Material extends Model {
         //1 查询已确认的出库总数
         List<MaterialOutboundUnit> materialOutboundUnitList = MaterialOutboundUnit
                 .find(" material.id=? AND materialOutbound.status = ?", id, Outbound.S.Outbound).fetch();
-        return materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum()
+        return materialPlanUnitList.stream().mapToInt(unit -> unit.receiptQty > 0 ? unit.receiptQty : unit.qty).sum()
                 - materialOutboundUnitList.stream().mapToInt(unit -> unit.outQty).sum();
     }
 
@@ -172,7 +172,7 @@ public class Material extends Model {
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
                 .find(" material.id=? AND materialPlan.state = ?", id, MaterialPlan.P.DONE).fetch();
         return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum()
-                - materialPlanUnitList.stream().mapToInt(unit -> unit.receiptQty > 0 ? unit.receiptQty : unit.qty).sum();
+                - materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum();
     }
 
     /**
@@ -201,5 +201,16 @@ public class Material extends Model {
             return buff.substring(1).toString();
         }
         return null;
+    }
+
+    /**
+     * 查询物料的最近采购单价
+     * @return
+     */
+    public String nowPurchasePlanPrice() {
+        MaterialUnit materialUnit = MaterialUnit.find(" material.id=? AND materialPurchase.state = ? ORDER BY " +
+                "createDate DESC ",id, MaterialPurchase.S.CONFIRM).first();
+        return materialUnit == null ? "" : materialUnit.planCurrency.symbol() + " " + materialUnit.planPrice;
+
     }
 }
