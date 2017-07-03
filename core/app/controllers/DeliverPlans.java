@@ -51,7 +51,6 @@ public class DeliverPlans extends Controller {
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 出货单
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
     public static void deliverplan(List<Long> pids, String deliverName) {
