@@ -6,6 +6,7 @@
     <th>物料名称</th>
     <th>采购余量</th>
     <th>交货数量</th>
+    <th>Action_签收数量</th>
     <th>项目名称</th>
     <th>创建人</th>
     <th>创建时间</th>
@@ -17,6 +18,15 @@
     <td>${unit.material?.name}</td>
     <td>${unit.material?.surplusConfirmQty()}</td>
     <td>${unit.qty}</td>
+      #{if unit.receiptQty == 0 && !qtyEdit}
+        <td name="unitUpdateTd">
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
+             uid="${unit.id}">签收异常</a>
+        </td>
+      #{/if}
+      #{else }
+        <td> ${unit.receiptQty} </td>
+      #{/else}
     <td>${unit.material?.projectName}</td>
     <td>${unit.handler?.username}</td>
     <td>#{time_tooltip time:unit.createDate /}</td>
@@ -38,3 +48,5 @@
     <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
   </div>
 </div>
+
+

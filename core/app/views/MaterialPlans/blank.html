@@ -30,7 +30,7 @@
             <td><input type="text" class="span8" name="dp.name" value="${dp.name}" required></td>
             <th>收货类型<span style="color:red">*</span></th>
             <td>
-              <select name="dp.receipt" class="inline" required>
+              <select name="dp.receipt" class="inline" required  id="receipt">
                 <option value="">收货类型</option>
               #{list items:models.material.MaterialPlan.R, as:'c'}
                 <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
@@ -51,33 +51,26 @@
               </select>
             </td>
           </tr>
-          <tr>
+          <tr style="display: none" id="receiveTr">
             <th>收货方</th>
-            <td>
+            <td colspan="3">
               <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
-                <option value="">请输入收货供应商代码/品拓</option>
+                <option value="">请输入收货供应商代码</option>
               #{list items:cooperators, as:'cop'}
                 <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
               #{/list}
               </select>
             </td>
-            <th>目的地</th>
-            <td><input type="text" class="span8" name="dp.address" value="${dp?.address}" id="whouse"></td>
           </tr>
           <tr>
-            <th>创建人</th>
-            <td>
-              <input type="hidden" name="dp.handler.id" value="${dp?.handler?.id}" required/>
-              <input type="text" name="dp.handler.username" value="${dp?.handler?.username}" readonly/>
-            </td>
-            <th>创建日期</th>
-            <td>
-              <input type="text" readonly class="input-medium" value="${dp.createDate.datetime()}">
+            <th>目的地</th>
+            <td colspan="3">
+              <textarea name="dp.address" rows="1" class="input-block-level" id="whouse">${dp?.address}</textarea>
             </td>
           </tr>
           <tr>
             <th>备注</th>
-            <td colspan="5">
+            <td colspan="3">
               <textarea name="dp.memo" rows="4" class="input-block-level">${dp?.memo}</textarea>
             </td>
           </tr>
@@ -115,7 +108,8 @@
           <td>${unit.surplusConfirmQty()}</td>
           <td>${unit.surplusPendingQty()}</td>
           <td>
-            <input type="text" style="width:40px;" data-origin="${unit.availableQty()}" name="dtos[${unit_index-1}].outQty">
+            <input type="text" style="width:40px;" data-origin="${unit.availableQty()}"
+                   surplusConfirmQty="${unit.surplusConfirmQty()}" name="dtos[${unit_index-1}].outQty">
           </td>
           <td>${unit.projectName}</td>
         </tr>

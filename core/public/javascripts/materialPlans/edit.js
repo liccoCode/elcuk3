@@ -3,6 +3,32 @@
  */
 
 $(() => {
+  //创建出货单blank预览页面验证出货数量js方法
+  $('#unit_table').on('change', 'td>:input[name$=outQty]', function () {
+      let $input = $(this);
+      let surplusConfirmQty = $input.attr('surplusConfirmQty');
+
+      //交货数量
+      if ($(this).val() < 0) {
+        noty({
+          text: '收货数量不能小于0!',
+          type: 'error'
+        });
+        $(this).val(0);
+        return;
+      }
+    //交货数量
+    if (parseInt($(this).val()) > parseInt(surplusConfirmQty)) {
+      noty({
+        text: '收货数量不能大于采购余量!',
+        type: 'error'
+      });
+      $(this).val(0);
+      return;
+    }
+    });
+
+  //修改出货单 show页面验证出货数量js方法
   $('#unit_table').on('change', 'td>:input[name$=qty]', function () {
     let $input = $(this);
     let id = $(this).parents('tr').find('input[name$=pids]').val();
@@ -45,6 +71,7 @@ $(() => {
             text: r.message,
             type: 'error'
           });
+          $(this).val(0);
         }
       });
     }
@@ -94,25 +121,16 @@ $(() => {
     e.preventDefault();
     $form = $("#confirm_form");
 
-    $.get('/MaterialPlans/confirmValidate', {
-      id: $('#deliverymentId').val()
-    }, function (r) {
-      if (r.flag) {
-        if (confirm(r.message)) {
-          return $form.submit();
-        }
-      } else {
-        return $form.submit();
-      }
-    })
+    return $form.submit();
+
   });
 
   //快速添加物料编码js处理
   $('#addPlanUnitBtn').click(function (e) {
     var $form;
-      e.preventDefault();
-      $form = $("#addunits_form");
-    let code = $("#code").val() ;
+    e.preventDefault();
+    $form = $("#addunits_form");
+    let code = $("#code").val();
     //实际交货数量
     if (code == '' || code == null) {
       noty({
@@ -126,7 +144,6 @@ $(() => {
     return $form.submit();
 
   });
-
 
   // 切换供应商, 自行查询目的地
   $("#outCooperator").change(function () {
@@ -144,20 +161,38 @@ $(() => {
   });
 
   //解除js处理
-    $("#delunit_form_submit").click(function (e) {
-      e.preventDefault();
+  $("#delunit_form_submit").click(function (e) {
+    e.preventDefault();
 
-      let num = $("input[name='pids']:checked").length;
-      if (num == 0) {
-        noty({
-          text: '请选择需要解除的出货单元!',
-          type: 'error'
-        });
-        returbn
-      } else {
-        $('#bulkpost').attr('action', $(this).data('url')).submit();
-      }
-    });
+    let num = $("input[name='pids']:checked").length;
+    if (num == 0) {
+      noty({
+        text: '请选择需要解除的出货单元!',
+        type: 'error'
+      });
+      returbn
+    } else {
+      $('#bulkpost').attr('action', $(this).data('url')).submit();
+    }
+  });
+
+  // 切换供应商, 自行查询目的地
+  $("#receipt").change(function () {
+    let val = $(this).val();
+    if (val == 'FACTORY') {
+      //工厂代收
+      $("#receiveTr").css('display' ,'');
+      $('#outCooperator').removeAttr("disabled");
+      $("#whouse").val("");
+    } else if (val == 'WAREHOUSE') {
+      //仓库自收
+      $("#receiveTr").css('display' ,'none');
+      $('#outCooperator').attr("disabled",true);
+      $("#whouse").val("深圳市光明新区玉律村第七工业区汉海达科技创新园1栋A区6楼");
+
+    }
+
+  });
 
 });
 

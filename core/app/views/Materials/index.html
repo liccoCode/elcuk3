@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"收货入库列表"  /}
+#{set title:"物料列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
 #{/set}
@@ -43,7 +43,7 @@
             <th>物料编码</th>
             <th>物料名称</th>
             <th>物料类别</th>
-            <th>包装组编号</th>
+            <th>B0M—ID</th>
             <th>规格</th>
             <th width="150px;">工艺</th>
             <th width="150px;">图号/版本</th>
@@ -55,11 +55,11 @@
             <td>${m.code}</td>
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
-            <td></td>
+            <td>${m.boms[0]?.number}</td>
             <td>${m.specification}</td>
             <td>${m.technology}</td>
             <td>${m.version}</td>
-            <td></td>
+            <td>${m.nowPurchasePlanPrice()}</td>
             <td>
               <a href="@{Materials.edit(m.id)}" class="btn btn-mini btn-primary">编辑</a>
               <a href="@{Materials.deleteMaterial(m.id)}" class="btn btn-mini btn-danger">删除</a>

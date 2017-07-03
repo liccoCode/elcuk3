@@ -35,7 +35,7 @@ import java.util.List;
 public class MaterialPlans extends Controller {
 
 
-    @Before(only = {"show", "blank"})
+    @Before(only = {"show", "blank", "indexMaterial"})
     public static void showPageSetUp() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
@@ -73,7 +73,7 @@ public class MaterialPlans extends Controller {
                 .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
                         + ".id", units.get(0).id).first();
         MaterialPlan dp = new MaterialPlan();
-        dp.id= MaterialPlan.id();
+        dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;
         dp.name = planName;
         dp.cooperator = cop;
@@ -98,6 +98,7 @@ public class MaterialPlans extends Controller {
         dp.name = dp.name.trim();
         dp.state = MaterialPlan.P.CREATE;
         dp.financeState = MaterialPlan.S.PENDING_REVIEW;
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) dp.receiveCooperator = null;
         dp.save();
         //3 新增 出货计划单元
         for(Material dto : dtos) {
@@ -132,7 +133,11 @@ public class MaterialPlans extends Controller {
         if(dp.state == MaterialPlan.P.CREATE) {
             qtyEdit = true;
         }
-        render(dp, units, qtyEdit);
+        boolean receipt = false;
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) {
+            receipt = true;
+        }
+        render(dp, units, qtyEdit, receipt);
     }
 
     /**
@@ -144,6 +149,7 @@ public class MaterialPlans extends Controller {
         validation.valid(dp);
         if(Validation.hasErrors())
             show(dp.id);
+        if(dp.receipt == MaterialPlan.R.WAREHOUSE) dp.receiveCooperator = null;
         dp.save();
         flash.success("更新成功.");
         show(dp.id);
@@ -206,9 +212,18 @@ public class MaterialPlans extends Controller {
     public static void confirm(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
         dp.confirm();
-
         if(Validation.hasErrors()) {
-            show(id);
+            MaterialPlan plan = MaterialPlan.findById(id);
+            List<MaterialPlanUnit> units = plan.units;
+            boolean qtyEdit = false;
+            if(plan.state == MaterialPlan.P.CREATE) {
+                qtyEdit = true;
+            }
+            boolean receipt = false;
+            if(plan.receipt == MaterialPlan.R.WAREHOUSE) {
+                receipt = true;
+            }
+            render("/MaterialPlans/show.html",dp, units, qtyEdit, receipt);
         } else {
             new ElcukRecord(Messages.get("materialPlans.confirm"), String.format("确认[物料出货单] %s", id), id).save();
             flash.success("物料出货单 %s 确认成功.", id);
@@ -224,7 +239,11 @@ public class MaterialPlans extends Controller {
     public static void showMaterialPlanUnitList(String id) {
         MaterialPlan plan = MaterialPlan.findById(id);
         List<MaterialPlanUnit> units = plan.units;
-        render("/MaterialPlans/_unit_list.html", units);
+        boolean qtyEdit = false;
+        if(plan.state == MaterialPlan.P.CREATE) {
+            qtyEdit = true;
+        }
+        render("/MaterialPlans/_unit_list.html", units, qtyEdit);
     }
 
     /**
