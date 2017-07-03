@@ -176,12 +176,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
-        PACKAGE {
-            @Override
-            public String label() {
-                return "提货中";
-            }
-        },
+       
 
         BOOKED {
             @Override
@@ -773,7 +768,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         if(date == null) date = new Date();
-        this.state = S.PACKAGE;
         this.dates.pickGoodDate = date;
         this.save();
     }
@@ -784,7 +778,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param date
      */
     public void booking(Date date) {
-        shouldSomeStateValidate(S.PACKAGE, "预约");
+        shouldSomeStateValidate(S.CLEARANCE, "预约");
 
         if(Validation.hasErrors()) return;
 
@@ -928,11 +922,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.state = S.BOOKED;
             this.dates.deliverDate = null;
         } else if(this.state == S.BOOKED) {
-            this.state = S.PACKAGE;
-            this.dates.bookDate = null;
-        } else if(this.state == S.PACKAGE) {
             this.state = S.CLEARANCE;
-            this.dates.pickGoodDate = null;
+            this.dates.bookDate = null;
         } else if(this.state == S.CLEARANCE) {
             this.state = S.SHIPPING;
             this.dates.atPortDate = null;
@@ -990,7 +981,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             result = this.internationExpress.isDelivered(this.iExpressHTML);
             if(result._1)
                 this.beginDeliver(result._2.toDate());
-        } else if(Arrays.asList(S.PACKAGE, S.BOOKED, S.DELIVERYING).contains(this.state)) {
+        } else if(Arrays.asList(S.BOOKED, S.DELIVERYING).contains(this.state)) {
             result = this.internationExpress.isReceipt(this.iExpressHTML);
             if(result._1)
                 this.receipt(result._2.toDate());
