@@ -76,7 +76,7 @@ public class Materials extends Controller {
             bom.save();
         });
         boms.forEach(unit -> {
-            if(unit.id != null ) {
+            if(unit.id != null) {
                 MaterialBom bom = MaterialBom.findById(unit.id);
                 bom.materials.add(m);
                 bom.save();
@@ -201,4 +201,14 @@ public class Materials extends Controller {
                 .put("surplusPendingQty", material.surplusPendingQty()).build());
     }
 
+    /**
+     * 根据BomID查询物料集合
+     *
+     * @param id
+     */
+    public static void showMaterialListByBom(Long id) {
+        MaterialBom bom = MaterialBom.findById(id);
+        List<Material> materials = bom.materials;
+        render("/Materials/_unit_list.html", materials);
+    }
 }
