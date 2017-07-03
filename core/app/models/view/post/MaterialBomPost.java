@@ -1,6 +1,7 @@
 package models.view.post;
 
 import models.material.MaterialBom;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -19,8 +20,14 @@ public class MaterialBomPost extends Post<MaterialBom> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT m FROM MaterialBom m ");
+        StringBuilder sbd = new StringBuilder("SELECT m FROM MaterialBom m where 1=1 ");
         List<Object> params = new ArrayList<>();
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND (m.number LIKE ? ");
+            sbd.append(" OR m.name LIKE ? ").append(")");
+
+            for(int i = 0; i < 2; i++) params.add(this.word());
+        }
 
         return new F.T2<>(sbd.toString(), params);
     }
