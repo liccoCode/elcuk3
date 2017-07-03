@@ -296,6 +296,11 @@ public class Whouse extends Model {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
+                if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
+                    if(Collections.singletonList(M.AMAZON_UK).contains(type)) {
+                        Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                    }
+                }
             } else if(nextBeginDate.getDayOfWeek() == 2) {
                 if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
                     if(type == M.AMAZON_DE) {
@@ -310,11 +315,6 @@ public class Whouse extends Model {
             } else if(nextBeginDate.getDayOfWeek() == 4) {
                 if(Collections.singletonList("EASYACC").contains(OperatorConfig.getVal("brandname"))) {
                     if(Arrays.asList(M.AMAZON_UK, M.AMAZON_DE).contains(type)) {
-                        Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
-                    }
-                }
-                if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
-                    if(Collections.singletonList(M.AMAZON_UK).contains(type)) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
