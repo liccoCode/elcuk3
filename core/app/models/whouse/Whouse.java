@@ -313,6 +313,11 @@ public class Whouse extends Model {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
+                if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
+                    if(Collections.singletonList(M.AMAZON_UK).contains(type)) {
+                        Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                    }
+                }
             } else if(nextBeginDate.getDayOfWeek() == 5) {
                 if(Collections.singletonList("EASYACC").contains(OperatorConfig.getVal("brandname"))) {
                     if(M.AMAZON_IT == type) {
@@ -348,7 +353,6 @@ public class Whouse extends Model {
 
     /**
      * 根据运输商与运输方式来查找仓库
-     *
      */
     public static Whouse findByCooperatorAndShipType(Cooperator cooperator, Shipment.T shiptype) {
         StringBuilder sbd = new StringBuilder("cooperator=?");
@@ -370,7 +374,6 @@ public class Whouse extends Model {
 
     /**
      * 自有仓
-     *
      */
     public static List<Whouse> selfWhouses() {
         return selfWhouses(true);
@@ -378,7 +381,6 @@ public class Whouse extends Model {
 
     /**
      * 自有仓
-     *
      */
     public static List<Whouse> selfWhouses(boolean includeDefective) {
         String sql = "type=?";
@@ -392,7 +394,6 @@ public class Whouse extends Model {
 
     /**
      * 不良品仓库
-     *
      */
     public static Whouse defectiveWhouse() {
         return Whouse.find("type=? AND name Like ?", T.SELF, "%不良品仓%").first();
