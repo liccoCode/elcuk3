@@ -1,0 +1,41 @@
+#{set tr_key: key ? key : 'unit'/}
+<table class="table table-condensed table-bordered" id="data-table">
+  <tr>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>物料类别</th>
+    <th>B0M—ID</th>
+    <th>规格</th>
+    <th width="150px;">工艺</th>
+    <th width="150px;">图号/版本</th>
+    <th width="150px;">最近采购价</th>
+  </tr>
+#{list items:materials, as:'m'}
+  <tr>
+    <td>${m.code}</td>
+    <td>${m.name}</td>
+    <td>${m.type.label()}</td>
+    <td>${m.boms[0]?.number}</td>
+    <td>${m.specification}</td>
+    <td>${m.technology}</td>
+    <td>${m.version}</td>
+    <td>${m.nowPurchasePlanPrice()}</td>
+  </tr>
+#{/list}
+#{if p != null}
+  <tr class="tb_footer">
+    <td colspan="25">
+        #{bootstrap_pager pi:p, url:'' /}
+    </td>
+  </tr>
+#{/if}
+</table>
+
+<!-- Ship To Modal -->
+<div id="fba_ship_to_modal" class="modal hide fade">
+  <div class="modal-body" id="fba_ship_to_body"></div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+  </div>
+</div>
+

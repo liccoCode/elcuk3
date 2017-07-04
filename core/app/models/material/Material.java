@@ -205,11 +205,12 @@ public class Material extends Model {
 
     /**
      * 查询物料的最近采购单价
+     *
      * @return
      */
     public String nowPurchasePlanPrice() {
-        MaterialUnit materialUnit = MaterialUnit.find(" material.id=? AND materialPurchase.state = ? ORDER BY " +
-                "createDate DESC ",id, MaterialPurchase.S.CONFIRM).first();
+        MaterialUnit materialUnit = MaterialUnit.find(" material.id=? AND materialPurchase.state = ? ORDER BY "
+                + "createDate DESC ", id, MaterialPurchase.S.CONFIRM).first();
         return materialUnit == null ? "" : materialUnit.planCurrency.symbol() + " " + materialUnit.planPrice;
 
     }
