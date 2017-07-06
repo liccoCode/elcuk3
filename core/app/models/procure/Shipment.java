@@ -123,6 +123,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "快递";
             }
+        },
+        /**
+         * 专线
+         */
+        DEDICATED {
+            @Override
+            public String label() {
+                return "专线";
+            }
+        },
+        /**
+         * 铁路
+         */
+        RAILWAY {
+            @Override
+            public String label() {
+                return "铁路";
+            }
         };
 
         public abstract String label();
@@ -176,7 +194,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
-       
 
         BOOKED {
             @Override
@@ -1121,6 +1138,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public ElcukConfig config(String dayType) {
         String market = this.whouse.country.toLowerCase();
         String name = String.format("%s_%s_%s", market, this.type.name().toLowerCase(), dayType);
+        ElcukConfig config = ElcukConfig.findByName(name);
+        if(!Optional.ofNullable(config).isPresent()) {
+            ElcukConfig elcuk = new ElcukConfig();
+            elcuk.fullName = String.format("%s %s %s", this.whouse.market.countryName(), this.type.label(), dayType);
+            elcuk.name = name;
+            elcuk.val = String.valueOf(1);
+            return elcuk.save();
+        }
         return ElcukConfig.findByName(name);
     }
 

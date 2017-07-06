@@ -179,6 +179,10 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#468847";
             case SEA:
                 return "#C09853";
+            case RAILWAY:
+                return "#31588A";
+            case DEDICATED:
+                return "#CB8589";
             default:
                 return "#333333";
         }

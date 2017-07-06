@@ -158,19 +158,18 @@ public class SellingSaleAnalyzeJob extends Job {
                         for(ProcureUnit unit : untis) {
                             List<Shipment> shipments = unit.relateShipment();
                             if(shipments != null && shipments.size() > 0) {
-                                if(shipments.get(0).dates.planArrivDate != null &&
-                                        shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
+                                if(shipments.get(0).dates.planArrivDate != null
+                                        && shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
-                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
-                                            ).intValue();
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps))
+                                            .intValue();
                                     outday = outday + arrivday;
                                     time = time.plusDays(arrivday);
                                 }
                             } else
                                 //判断到达仓库日期是否在断货日期之前
-                                if(unit.attrs != null && unit.attrs.planArrivDate != null &&
-                                        unit.attrs.planArrivDate.before(time
-                                                .plusDays(1).toDate())) {
+                                if(unit.attrs != null && unit.attrs.planArrivDate != null
+                                        && unit.attrs.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
                                             .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
                                             ).intValue();
@@ -211,7 +210,6 @@ public class SellingSaleAnalyzeJob extends Job {
             switch(si.shipment.state) {
                 case SHIPPING:
                 case CLEARANCE:
-                case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                 case RECEIPTD:
