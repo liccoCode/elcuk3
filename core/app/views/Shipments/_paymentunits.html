@@ -69,12 +69,22 @@
   <div class="row-fluid">
     <div class="span12">
       <form class="form-inline span6 add_payment" method="GET">
-        <label>费用类型
-            #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
-        </label>
+
+        <div class="input-prepend input-append inline">
+          <select name="fee.feeType.name" class="inline selectize" style="width:120px;">
+            <option value="">费用类型</option>
+              #{list items:feeTypes,as:'f'}
+                <option value="${f.name}">${f.nickName}</option>
+              #{/list}
+          </select>
+        </div>
 
         <label>币种
-            #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+          <select name="fee.currency" class="inline input-small " style="width:120px;">
+              #{list items:helper.Currency.values(),as:'c'}
+                <option value="${c}" ${c.name()=='CNY'?'selected':''}>${c}</option>
+              #{/list}
+          </select>
         </label>
 
         <label>单价
