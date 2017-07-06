@@ -5,6 +5,7 @@ import controllers.Login;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.finance.PaymentUnit;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -187,6 +188,11 @@ public class MaterialPlan extends GenericModel {
     public String memo = " ";
 
     /**
+     * 物料请款单
+     */
+    @ManyToOne
+    public MaterialApply apply;
+    /**
      * 生成ID
      *
      * @return
@@ -302,5 +308,60 @@ public class MaterialPlan extends GenericModel {
             plan.financeState = S.APPROVE;
             plan.save();
         }
+    }
+
+    /**
+     * 是否可以和采购请款单分离?
+     * (采购单向请款单中添加与剥离, 都需要保证这个采购单没有付款完成的付款单)
+     *
+     * @return
+     */
+    public boolean isProcureApplyDepartable() {
+        // 这个采购单的采购计划所拥有的 PaymentUnit(支付信息)没有状态为 PAID 的.
+        for(MaterialPlanUnit unit : this.units) {
+            for(PaymentUnit fee : unit.fees()) {
+                if(fee.state == PaymentUnit.S.PAID)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * material页面获取出货单明细
+     * @return
+     */
+    public List<MaterialPlanUnit> applyUnit() {
+        return MaterialPlanUnit.find("materialPlan.id=? ",this.id).fetch();
+    }
+
+
+
+    /**
+     * 将出货单从其所关联的请款单中剥离开
+     */
+    public void departFromProcureApply() {
+        /**
+         * 1. 剥离没有过成功支付的出货单.
+         * 2. 剥离后原有的 PaymentUnit 自动 remove 标记.
+         */
+        if(this.apply == null)
+            Validation.addError("", "出货单没有添加进入请款单, 不需要剥离");
+        if(!isProcureApplyDepartable()) {
+            Validation.addError("", "当前出货单已经拥有成功支付信息, 无法剥离.");
+            return;
+        }
+        for(MaterialPlanUnit unit : this.units) {
+            for(PaymentUnit fee : unit.fees()) {
+                fee.materialFeeRemove(String.format(
+                        "所属出货单 %s 从原有请款单 %s 中剥离.", this.id, this.apply.serialNumber));
+            }
+        }
+        new ERecordBuilder("materialplan.departApply")
+                .msgArgs(this.id, this.apply.serialNumber)
+                .fid(this.apply.id)
+                .save();
+        this.apply = null;
+        this.save();
     }
 }
