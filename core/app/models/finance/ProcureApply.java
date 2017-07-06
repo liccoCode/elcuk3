@@ -164,8 +164,7 @@ public class ProcureApply extends Apply {
     public void appendDelivery(List<String> deliverymentIds) {
         F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(
                 deliverymentIds);
-        if(dmtAndCop._2.iterator().hasNext() &&
-                !dmtAndCop._2.iterator().next().equals(this.cooperator))
+        if(dmtAndCop._2.iterator().hasNext() && !dmtAndCop._2.iterator().next().equals(this.cooperator))
             Validation.addError("", "合作伙伴不一样, 无法添加");
         if(this.confirm)
             Validation.addError("", "已经确认了, 不允许再向中添加请款");

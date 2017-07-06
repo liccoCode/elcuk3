@@ -48,7 +48,7 @@ public class MaterialPost extends Post<Material> {
     public List<Material> query() {
         F.T2<String, List<Object>> params = params();
         this.count = Material.find(params._1, params._2.toArray()).fetch().size();
-        String sql = params._1 + " ";
+        String sql = params._1 + " ORDER BY m.id DESC";
         return Material.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
     }
 

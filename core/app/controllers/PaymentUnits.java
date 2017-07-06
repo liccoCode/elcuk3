@@ -39,6 +39,16 @@ public class PaymentUnits extends Controller {
     }
 
     @Check("paymentunits.destroy")
+    public static void destroyMaterial(Long id, String reason) {
+        PaymentUnit payUnit = PaymentUnit.findById(id);
+        payUnit.materialFeeRemove(reason);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("删除成功");
+        Applys.material(payUnit.materialPlan.apply.id);
+    }
+    @Check("paymentunits.destroy")
     public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
@@ -63,6 +73,23 @@ public class PaymentUnits extends Controller {
         }
         // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
         Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
+    }
+
+    @Check("paymentunits.fixvalue")
+    public static void fixValueMaterial(Long id, Float fixValue, String reason) {
+        PaymentUnit paymentUnit = PaymentUnit.findById(id);
+        Validation.required("fixValue", fixValue);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Validation.errors().toString()));
+
+        paymentUnit.fixValue(fixValue, reason);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("修正值更新成功.");
+        }
+        // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
+        Applys.material(paymentUnit.materialPlan.apply.id);
     }
 
     @Check("paymentunits.deny")

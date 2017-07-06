@@ -57,8 +57,11 @@
                 #{power.ck "products.index"}
                   <li><a href="@{Products.index()}">产品</a></li>
                 #{/power.ck}
-              <li><a href="@{Materials.index()}">物料</a></li>
-              <li><a href="@{Materials.indexBom()}">包装BOM</a></li>
+
+                #{power.ck "materials.index"}
+                  <li><a href="@{Materials.index()}">物料</a></li>
+                  <li><a href="@{Materials.indexBom()}">包装BOM</a></li>
+                #{/power.ck}
               <li class="divider"></li>
                 #{power.ck "categorys.show"}
                   <li><a href="@{Categorys.show()}">产品类别</a></li>
@@ -92,16 +95,17 @@
                 #{power.ck "deliverplans.index"}
                   <li><a href="@{Deliverplans.index()}">出货单</a></li>
                 #{/power.ck}
-                #{power.ck "cooperators.index"}
-                  <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
-                #{/power.ck}
-              <li class="divider"></li>
 
-                #{power.ck "deliveryments.index"}
+                #{power.ck "materialpurchases.index"}
+                  <li class="divider"></li>
                   <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
                   <li><a href="@{MaterialUnits.index()}">物料采购计划</a></li>
                   <li><a href="@{MaterialPlans.indexMaterial()}">物料采购余量管理</a></li>
                   <li><a href="@{MaterialPlans.index()}">物料出货单</a></li>
+                #{/power.ck}
+              <li class="divider"></li>
+                #{power.ck "cooperators.index"}
+                  <li><a href="@{Cooperators.index()}">合作伙伴</a></li>
                 #{/power.ck}
             </ul>
           </li>
@@ -171,6 +175,10 @@
                 #{power.ck "sku.salecostprofitanalyse"}
                   <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
                 #{/power.ck}
+                #{power.ck "materialoutbounds.index"}
+                  <li class="divider"></li>
+                  <li><a href="@{Applys.materials()}">物料请款单列表</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -216,12 +224,11 @@
                 #{power.ck "whouses.index"}
                   <li><a href="@{Whouses.index()}">仓库</a></li>
                 #{/power.ck}
-              <li class="divider"></li>
-
-              #{power.ck "deliveryments.index"}
-                <li><a href="@{MaterialOutbounds.indexMaterial()}">物料库存管理</a></li>
-                <li><a href="@{MaterialOutbounds.index()}">物料出库</a></li>  
-              #{/power.ck}
+                #{power.ck "materialoutbounds.index"}
+                  <li class="divider"></li>
+                  <li><a href="@{MaterialOutbounds.indexMaterial()}">物料库存管理</a></li>
+                  <li><a href="@{MaterialOutbounds.index()}">物料出库</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
