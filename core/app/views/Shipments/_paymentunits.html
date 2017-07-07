@@ -4,28 +4,28 @@
       <h4 class="alert alert-success">运输单费用信息</h4>
       <table class="table table-bordered table-condensed paymentInfo">
         <tr>
-          <th width="40px;">#</th>
-          <th width="140px;">
+          <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
+          <th width="120px;">
             <abbr rel='tooltip' title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</abbr>
           </th>
-          <th width="60px;">币种</th>
-          <th width="80px;">单价</th>
+          <th width="50px;">币种</th>
+          <th width="100px;">单价</th>
           <th width="80px;">数量</th>
         #{if isExpress}
           <th width="80px;">计费方式</th>
         #{/if}
           <th width="80px;">(3m)均价</th>
           <th width="80px;">(now)均价</th>
-          <th width="80px;">总价</th>
-          <th width="160px">费用关系人</th>
-          <th width="160px">备注</th>
+          <th width="110px;">总价</th>
+          <th width="130px">费用关系人</th>
+          <th width="100px;">备注</th>
           <th width="60px;">申请人</th>
-          <th width="140px;">申请时间</th>
-          <th width="220px;"></th>
+          <th width="100px;">申请时间</th>
+          <th width="240px;"></th>
         </tr>
       #{list items:ship.fees, as:'fee'}
         <tr id='fee_${fee.id}'>
-          <td>${fee.id}</td>
+          <td><input type="checkbox" name="pids" value="${fee.id}"></td>
           <td><span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span></td>
           <td>${fee.currency}</td>
           <td>${fee.currency.symbol()} ${fee.unitPrice.format('#.###')}</td>
