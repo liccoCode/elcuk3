@@ -151,14 +151,7 @@
   </td>
 </tr>
 <tr>
-  <th>专用渠道</th>
-  <td>
-    <label class="checkbox inline">
-      <input type="checkbox" name="unit.isDedicated" value="true" ${unit.isDedicated ? 'checked':''}> 专线
-      <span style="color:red">(如勾选此项，请先和物流部沟通)</span>
-    </label>
-  </td>
-  <td colspan="${unit.stage.name()=='IN_STORAGE'? 2 : 4}">
+  <td colspan="${unit.stage.name()=='IN_STORAGE'? 4 : 6}">
   #{list items: unit.relateShipment()}
     <div>
       <a href="@{Shipments.show(_.id)}" target="_blank">${_.id} (${_.type.label()})</a>

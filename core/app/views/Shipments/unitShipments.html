@@ -17,7 +17,7 @@
       <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
     </td>
     <td>${ship.title}</td>
-    <td style="color:${'#' + ship.type?.rgb()}">${ship.type}</td>
+    <td style="color:${'#' + ship.type?.rgb()}">${ship.type.label()}</td>
     <td>${ship.state?.label()}</td>
     <td>${ship.dates?.planBeginDate?.date()} ${ship.dates?.planBeginDate?.dayOfWeek()}</td>
     <td>

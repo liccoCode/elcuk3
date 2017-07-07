@@ -27,8 +27,8 @@
         <td>${prod.family?.family}</td>
         <td class="span10">${prod.productName}
             #{if prod.origin_sku}<br>
-              <span style="color:red">同${prod.origin_project.name()} sku:
-            <a href="${prod.origin_project.url()}product/${prod.origin_sku}" target="_blank">${prod.origin_sku}</a>
+              <span style="color:red">同${prod.origin_project?.name()} sku:
+            <a href="${prod.origin_project?.url()}product/${prod.origin_sku}" target="_blank">${prod.origin_sku}</a>
           </span>
             #{/if}
         </td>

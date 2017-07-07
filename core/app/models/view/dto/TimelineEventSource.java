@@ -62,8 +62,7 @@ public class TimelineEventSource {
             this(start, end, description, title, true);
         }
 
-        public Event(String start, String end, String description, String title,
-                     boolean durationEvent) {
+        public Event(String start, String end, String description, String title, boolean durationEvent) {
             this.start = start;
             this.end = end;
             this.description = description;
@@ -72,7 +71,9 @@ public class TimelineEventSource {
         }
 
         /**
-         * icon - url. This image will appear next to the title text in the timeline if (no end date) or (durationEvent = false). If a start and end date are supplied, and durationEvent is true, the icon is not shown. If icon attribute is not set, a default icon from the theme is used.
+         * icon - url. This image will appear next to the title text in the timeline if (no end date) or
+         * (durationEvent = false). If a start and end date are supplied, and durationEvent is true, the icon is not
+         * shown.If icon attribute is not set, a default icon from the theme is used.
          */
         @Expose
         public String icon;
@@ -180,8 +181,8 @@ public class TimelineEventSource {
             if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 predictShipFinishDate = shipment.dates.planArrivDate;
-                if(predictShipFinishDate == null &&
-                        !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
+                if(predictShipFinishDate == null
+                        && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
@@ -365,7 +366,6 @@ public class TimelineEventSource {
                     color = "3A87AD";
                     break;
                 case CLEARANCE:
-                case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                     color = "3746B1";

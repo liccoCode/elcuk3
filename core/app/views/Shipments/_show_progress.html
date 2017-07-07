@@ -33,23 +33,7 @@
         </div>
       </li>
     #{/if}
-    #{if ship.state >= models.procure.Shipment.S.PACKAGE}
-      <li class="stripe">
-        <div class="block">
-          <label>平均<abbr>清关</abbr></label>
-            #{set clearance: ship.config("clearance")/}
-          <span>${clearance.toInteger()} 天</span>
-        </div>
-        <div class="block">
-          <label>实际<abbr>清关</abbr></label>
-          <span>${ship.betweenDays(models.procure.Shipment.S.PACKAGE)}</span>
-        </div>
-        <div class="block">
-          <label>提货时间</label>
-          <span>#{time_tooltip time: ship.dates.pickGoodDate/}</span>
-        </div>
-      </li>
-    #{/if}
+   
     #{if ship.state >= models.procure.Shipment.S.BOOKED}
       <li class="stripe">
         <div class="block">
@@ -194,11 +178,7 @@
           开始提货
         </button>
       #{/if}
-      #{if ship.state == models.procure.Shipment.S.PACKAGE}
-        <button class="btn btn-success func" url="@{Shipments.booking(ship.id)}">
-          与 Amazon 预约
-        </button>
-      #{/if}
+     
       #{if ship.state == models.procure.Shipment.S.BOOKED}
         <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
           派送
