@@ -202,6 +202,9 @@ public class MaterialPlanUnit extends Model {
          */
         this.billingValid();
         if(Validation.hasErrors()) return null;
+        if(this.hasTailPay())
+            Validation.addError("", "存在重复申请尾款的物料，请查证！");
+        if(Validation.hasErrors()) return null;
 
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.procurement();

@@ -60,6 +60,7 @@
           </th>
           <th>物料出货单ID</th>
           <th>出货单名称</th>
+          <th>请款单</th>
           <th>供应商</th>
           <th>状态</th>
           <th>收货类型</th>
@@ -87,7 +88,12 @@
             <span>${dp.name}</span>
             <span class="badge badge-info">${dp.units.size()}</span>
           </td>
-
+          <td>
+              #{if dp.apply}
+                <a href="@{Applys.material(dp.apply.id)}">${dp.apply.serialNumber}</a>
+              #{/if}
+              #{else }没有请款单#{/else}
+          </td>
           <td>${dp.cooperator?.name}</td>
           <td>${dp.state.label()}</td>
           <td>${dp.receipt?.label()}</td>
