@@ -9,9 +9,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.AnalyzeDTO;
 import models.view.report.Profit;
-import play.cache.Cache;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -73,7 +71,6 @@ public class MetricQtyService {
             switch(si.shipment.state) {
                 case SHIPPING:
                 case CLEARANCE:
-                case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                 case RECEIPTD:
