@@ -88,7 +88,6 @@
         <th>数量(交货/签收)</th>
         <th>单价</th>
         <th>单价*签收数量</th>
-        <th>剩余请款金额</th>
         <th>出货单状态</th>
       </tr>
         #{list items:dmt.applyUnit(), as:'procureUnit'}
@@ -116,9 +115,7 @@
             <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
             <td class="price" amount="${procureUnit.totalAmount()}">
             ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-            <td>
-            ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-            <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
+            <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.materialPlan.state.label()}</td>
           </tr>
           <tr id="unit_${pid}" style="display:none">
             <td colspan="12">
@@ -175,7 +172,7 @@
                                 <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
                               </td>
                               <td>${fee.feeType.nickName}</td>
-                              <td>${fee.unitQty}</td>
+                              <td>${fee.unitQty.format('#')}</td>
                               <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
                               <td>
                                 <div class="row-fluid">

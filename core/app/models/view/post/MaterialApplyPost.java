@@ -68,14 +68,6 @@ public class MaterialApplyPost extends Post<Apply> {
         sql.append(" LEFT JOIN d.units u WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
-        if(StringUtils.isNotEmpty(this.search)) {
-            if(isNumForSearch() != null) {
-                sql.append(" AND u.id = ? ");
-                params.add(isNumForSearch());
-                return new F.T2<>(sql.toString(), params);
-            }
-        }
-
         if(this.dateType != null) {
             if(this.dateType == ProcreApplyPost.DateType.CREATE) {
                 sql.append(" AND p.createdAt>=?  AND p.createdAt <=?");
@@ -94,9 +86,21 @@ public class MaterialApplyPost extends Post<Apply> {
             sql.append(" AND p.serialNumber like ?");
             params.add(this.word());
         }
+        /** 模糊查询参数 **/
+        if(StringUtils.isNotBlank(this.search)) {
+            String word = this.word();
+            sql.append(" AND (")
+                    .append(" p.serialNumber LIKE ?")
+                    .append(" OR u.material.code LIKE ?")
+                    .append(")");
+            for(int i = 0; i < 2; i++) {
+                params.add(word);
+            }
+        }
 
         sql.append(" AND p.status <> ? ");
         params.add(ProcureApply.S.CLOSE);
+        sql.append(" ORDER BY p.createdAt DESC ");
         return new F.T2<>(sql.toString(), params);
     }
 
