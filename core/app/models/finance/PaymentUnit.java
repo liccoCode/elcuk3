@@ -7,6 +7,8 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.material.MaterialPlan;
+import models.material.MaterialPlanUnit;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Cache;
@@ -101,6 +103,20 @@ public class PaymentUnit extends Model {
         this.payment.save();
     }
 
+
+    public PaymentUnit(MaterialPlanUnit materialPlanUnit) {
+        this();
+        this.materialPlanUnit = materialPlanUnit;
+        this.materialPlan = materialPlanUnit.materialPlan;
+        this.amount = materialPlanUnit.totalAmount();
+        this.unitQty = materialPlanUnit.receiptQty >0 ? materialPlanUnit.receiptQty : materialPlanUnit.qty;
+        this.currency = materialPlanUnit.getCurrency();
+        this.payment = Payment.buildPayment(materialPlanUnit.materialPlan.cooperator, materialPlanUnit.getCurrency(),
+                materialPlanUnit.totalAmount(), materialPlanUnit.materialPlan.apply);
+        this.payee = User.current();
+        this.payment.save();
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Payment payment;
 
@@ -116,7 +132,8 @@ public class PaymentUnit extends Model {
      * 2. 采购单元
      * 3. 运输单
      * 4. 运输单元
-     * 5. 其他
+     * 5. 物料出货单
+     * 6. 物料出货计划
      * 各种不同的关联关系, 由于无法像动态语言那样灵活, 所以将复杂性交给 Hibernate, 手动去选择不同的关联类型
      */
 
@@ -131,6 +148,13 @@ public class PaymentUnit extends Model {
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Shipment shipment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialPlan materialPlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialPlanUnit materialPlanUnit;
+
 
     /**
      * 费用关系人
@@ -233,6 +257,21 @@ public class PaymentUnit extends Model {
         new ERecordBuilder("paymentunit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
                 .fid(this.procureUnit.id) // 取消的操作, 记录在 ProcureUnit 身上, 因为是对采购计划取消请款
+                .save();
+        return this;
+    }
+
+
+    public PaymentUnit materialFeeRemove(String reason) {
+        basicRemoveValidate(reason);
+        if(this.remove)
+            Validation.addError("", "已经删除了");
+        if(Validation.hasErrors()) return null;
+        this.remove = true;
+        this.save();
+        new ERecordBuilder("materialPlanUnit.destroy")
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
+                .fid(this.materialPlanUnit.id) // 取消的操作, 记录在 MaterialPlanUnit 身上, 因为是对采购计划取消请款
                 .save();
         return this;
     }

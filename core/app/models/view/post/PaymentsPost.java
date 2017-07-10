@@ -94,12 +94,12 @@ public class PaymentsPost extends Post<Payment> {
         }
 
         if(this.states != null) {
-            List<String> states = new ArrayList<>();
+            List<String> sts = new ArrayList<>();
             for(Payment.S state : this.states) {
                 if(state == null) continue;
-                states.add(state.name());
+                sts.add(state.name());
             }
-            if(states.size() > 0) sql.append(" AND ").append(SqlSelect.whereIn("state", states));
+            if(sts.size() > 0) sql.append(" AND ").append(SqlSelect.whereIn("state", sts));
         }
 
         if(this.cooperId != null) {

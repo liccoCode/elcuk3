@@ -18,6 +18,9 @@
 #{if payment.tApply}
     #{render './_transportApply.html', payment: payment, units: units, post: post/}
 #{/if}
+#{if payment.mApply}
+    #{render './_materialApply.html', payment: payment, units: units, post: post/}
+#{/if}
 
 <div class="row-fluid">
   <div class="span4">
