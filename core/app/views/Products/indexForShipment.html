@@ -1,0 +1,190 @@
+#{extends 'main_full.html' /}
+#{set title:'Product' /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'products/index.coffee'/}
+#{/set}
+
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+<div style="margin:5px 0 0;" class="row">
+#{flash_alert /}
+#{errorMsgs /}
+</div>
+
+<div class="row-fluid">
+  <form action="#" method="post" class="search_form">
+    <div class="span12">
+      <select name="p.state" class="span1 inline">
+      #{list items:['Active', 'Inactive'], as:'s'}
+        <option ${s == p.state ? 'selected' : ''} value="${s}">${s}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend inline">
+        <select name="p.categories" multiple="multiple" id="categories">
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+        #{/list}
+        </select>
+      </div>
+
+      <label class="checkbox inline">
+        <input type="checkbox" name="p.scope" value="true"#{if p.scope} checked #{/if}> 全局搜索
+      </label>
+
+      <div class="input-prepend input-append inline">
+        <span class="add-on"><i class="icon-search"></i></span>
+        <input type="hidden" name="p.page" value="${p.page}">
+        <input type="text" autocomplete="off" name="p.search" value="${p.search}" style="width:172px;" placeHolder="搜索 SKU、附加属性、条码">
+        <a href="javascript:void(0)" data-href="@{Products.indexforshipment()}" class="btn btn-primary" id="searchBtn"
+           data-loading>搜索</a>
+      </div>
+      <div class="inline">
+        <a href="javascript:void(0)" data-href="@{Excels.exportProductDetailToExcel()}" class="btn btn-primary"
+           target="_blank" id="downloadBtn" content="按照搜索条件导出 Product 基本信息到 Excel" placement='bottom' rel="popover">
+          <i class="icon-download-alt"></i>下载 Excel
+        </a>
+      #{power.ck "products.edit"}
+        <a href="@{Products.blank()}" class="btn btn-success" target="_blank">添加新产品</a>
+      #{/power.ck}
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="prod_list">
+#{if prods.size() == 0}
+  <p class="muted text-center">等待添加新产品.</p>
+#{/if}
+#{else }
+  <table class="table table-condensed table-bordered">
+    <tr>
+      <th style="width:180px;">SKU</th>
+      <th style="width:140px;">Family</th>
+      <th>Name</th>
+      <th style="width:70px;">产品状态</th>
+      <th>HS CODE</th>
+      <th style="width:140px;">属性状态</th>
+    </tr>
+      #{list items:prods, as:'prod'}
+        <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
+          <td><a target="_blank" href="@{Products.showAttr(prod.sku)}">${prod.sku}</a></td>
+          <td>${prod.family?.family}</td>
+          <td class="span10">${prod.productName}</td>
+          <td>
+            <select name='pro.state' class="span1" style="width:90px;" size="1">
+              <option>请选择</option>
+                #{list items: models.product.Product.S.values(), as: 's'}
+                  <option value="${s}" ${prod.state == s? 'selected' : ''}>${s}</option>
+                #{/list}
+            </select>
+          </td>
+          <td>${prod.hs_code}</td>
+          <td>${prod.productAttrs.size()==0 ? '无' : '有'}</td>
+        </tr>
+      #{/list}
+    <tr>
+      <td colspan="6">
+          #{bootstrap_pager pi:p, url:'/products/index'/}
+      </td>
+    </tr>
+  </table>
+#{/else}
+
+  <div id="copy_modal" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3>同步SKU</h3>
+    </div>
+    <div class="modal-body">
+    #{form @Products.copy(), id:'update_form'}
+      <dl class="dl-horizontal">
+        <input type="hidden" id="target_choseid" name="choseid" value="3333"/>
+        <dt>选择SKU</dt>
+        <dd>
+          <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${products}"
+                 name="skuid" value="" style="width:172px;" placeHolder="搜索 SKU">
+        </dd>
+
+        <dt>选择同步的信息:</dt>
+        <dd>
+          <label class="checkbox">
+            <input type="checkbox" name="base" value="1" checked>
+            <a>基本属性</a>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="extend" value="1" checked>
+            <a>扩展属性</a>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="attach" value="1" checked>
+            <a>附件</a>
+          </label>
+        </dd>
+      </dl>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary">同步</button>
+      </div>
+    #{/form}
+    </div>
+  </div>
+
+  <div id="backup_modal" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3>复制SKU</h3>
+    </div>
+    <div class="modal-body">
+    #{form @Products.backup(), id:'update_form'}
+      <input type="hidden" id="backup_choseid" name="choseid" value="0">
+
+      <tr>
+        <th>Family</th>
+        <td>
+          <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
+                 data-source="${families}" value="" autocomplete="off">
+        </td>
+        <th>SKU</th>
+        <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
+      </tr>
+      <dl class="dl-horizontal">
+        <dt>选择复制的信息:</dt>
+        <dd>
+          <label class="checkbox">
+            <input disabled type="checkbox" name="base" value="1" checked>
+            <a>基本属性</a>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="extend" value="1" checked>
+            <a>扩展属性</a>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="attach" value="1" checked>
+            <a>附件</a>
+          </label>
+        </dd>
+      </dl>
+
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary">复制</button>
+      </div>
+    #{/form}
+    </div>
+  </div>
+
+#{include 'Products/_destroyLogForm.html'/}
+
+
+</div>
+#{records records:records, row:true/}
