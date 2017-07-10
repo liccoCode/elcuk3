@@ -20,13 +20,13 @@
       <div class="tab-pane fade active in" id='currentPage'>
         <table class="table table-condensed table-bordered">
           <tr>
-            <th>物料出库单ID</th>
+            <th>物料出货单ID</th>
             <td><input type="text" id="deliverymentId" name="dp.id" value="${dp?.id}" readonly/></td>
             <th>State</th>
             <td><input type="text" value="${dp?.state?.label()}" readonly></td>
           </tr>
           <tr>
-            <th>出库单名称<span style="color:red">*</span></th>
+            <th>出货单名称<span style="color:red">*</span></th>
             <td><input type="text" class="span8" name="dp.name" value="${dp.name}" required></td>
             <th>收货类型<span style="color:red">*</span></th>
             <td>

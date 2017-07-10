@@ -2,6 +2,7 @@ package ext;
 
 import helper.Webs;
 import models.market.M;
+import models.material.MaterialPlan;
 import models.material.MaterialPurchase;
 import models.material.MaterialUnit;
 import models.procure.*;
@@ -270,6 +271,16 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(MaterialPlan.P stage) {
+        switch(stage) {
+            case CREATE:
+                return "#DEFBC2";
+            case DONE:
+            default:
+                return "#88BEF5";
+        }
+    }
+
     public static BaseTemplate.RawData records(FBAShipment fba) {
         String[] lines = StringUtils.splitByWholeSeparator(fba.records, "\n");
         if(lines != null) {
@@ -299,8 +310,8 @@ public class ProcuresHelper extends JavaExtensions {
      * @return
      */
     public static String overdue(ShipItem itm) {
-        if(itm.unit.attrs.planShipDate != null && itm.shipment.dates.planBeginDate != null &&
-                itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
+        if(itm.unit.attrs.planShipDate != null && itm.shipment.dates.planBeginDate != null
+                && itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
             return "#F2DEDE";
         else
             return "#FFFFFF";

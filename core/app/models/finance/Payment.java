@@ -8,6 +8,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.material.MaterialApply;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.highchart.HighChart;
@@ -102,6 +103,12 @@ public class Payment extends Model {
      */
     @ManyToOne
     public TransportApply tApply;
+
+    /**
+     * 与物料出货单管理
+     */
+    @ManyToOne
+    public MaterialApply mApply;
 
     @ManyToOne
     public Cooperator cooperator;
@@ -256,14 +263,25 @@ public class Payment extends Model {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
-            new ERecordBuilder("payment.approval")
-                    .msgArgs(unit.procureUnit.qty(),
-                            unit.procureUnit.sku,
-                            "#" + unit.id,
-                            unit.feeType.nickName,
-                            unit.currency.symbol() + " " + unit.amount())
-                    .fid(this.id)
-                    .save();
+            if(unit.procureUnit != null) {
+                new ERecordBuilder("payment.approval")
+                        .msgArgs(unit.procureUnit.qty(),
+                                unit.procureUnit.sku,
+                                "#" + unit.id,
+                                unit.feeType.nickName,
+                                unit.currency.symbol() + " " + unit.amount())
+                        .fid(this.id)
+                        .save();
+            } else if(unit.materialPlanUnit != null) {
+                new ERecordBuilder("payment.approval")
+                        .msgArgs(unit.unitQty,
+                                unit.materialPlanUnit.material.code,
+                                "#" + unit.id,
+                                unit.feeType.nickName,
+                                unit.currency.symbol() + " " + unit.amount())
+                        .fid(this.id)
+                        .save();
+            }
         }
     }
 
@@ -295,7 +313,7 @@ public class Payment extends Model {
         this.save();
     }
 
-    public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratio_publish_date,
+    public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratioPublishDate,
                       BigDecimal actualPaid) {
         /**
          * 0. 验证
@@ -326,7 +344,7 @@ public class Payment extends Model {
         if(ratio == null || ratio <= 0)
             Validation.addError("", "汇率的值不合法.");
 
-        if(!Dates.date2Date().equals(Dates.date2Date(ratio_publish_date)))
+        if(!Dates.date2Date().equals(Dates.date2Date(ratioPublishDate)))
             Validation.addError("", "汇率时间错误, 并非当前支付的汇率时间.");
 
         if(Validation.hasErrors()) return;
@@ -337,7 +355,7 @@ public class Payment extends Model {
         }
 
         this.rate = ratio;
-        this.ratePublishDate = ratio_publish_date;
+        this.ratePublishDate = ratioPublishDate;
         this.paymentDate = new Date();
         // 切换到最后选择的支付账号
         this.target = paymentTarget;
@@ -363,10 +381,7 @@ public class Payment extends Model {
      * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
     public F.T3<Float, Float, Float> totalFees() {
-        // TODO: 将付款的金额限制在 USD 与 CNY
         float currenctCurrencyAmount = 0;
-        float usd = 0;
-        float cny = 0;
         Currency lastCurrency = this.currency;
         for(PaymentUnit unit : this.units()) {
             if(lastCurrency != this.currency)
@@ -500,13 +515,15 @@ public class Payment extends Model {
             jpql.where("tApply=?").param(apply);
         else if(apply instanceof ProcureApply)
             jpql.where("pApply=?").param(apply);
+        else if(apply instanceof MaterialApply)
+            jpql.where("mApply=?").param(apply);
+
         jpql.orderBy("createdAt DESC");
 
         Payment payment = Payment.find(jpql.toString(), jpql.getParams().toArray()).first();
 
-        if(payment == null ||
-                payment.totalFees()._1 + currency.toUSD(amount) > 230000 ||
-                payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
+        if(payment == null || payment.totalFees()._1 + currency.toUSD(amount) > 230000
+                || payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
             payment = new Payment();
             if(cooper.paymentMethods.size() <= 0)
                 throw new PaymentException(Messages.get("paymenttarget.missing", cooper.fullName));
@@ -537,6 +554,10 @@ public class Payment extends Model {
             count = Payment.count("pApply=?", apply);
             this.pApply = (ProcureApply) apply;
             this.paymentNumber = String.format("[%s]-%02d", this.pApply.serialNumber, count + 1);
+        } else if(apply instanceof MaterialApply) {
+            count = Payment.count("mApply=?", apply);
+            this.mApply = (MaterialApply) apply;
+            this.paymentNumber = String.format("[%s]-%02d", this.mApply.serialNumber, count + 1);
         }
         return this;
     }
