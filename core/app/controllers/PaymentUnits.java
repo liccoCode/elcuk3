@@ -12,6 +12,7 @@ import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -24,7 +25,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 10:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class PaymentUnits extends Controller {
 
     @Check("paymentunits.destroy")
@@ -48,6 +49,7 @@ public class PaymentUnits extends Controller {
             flash.success("删除成功");
         Applys.material(payUnit.materialPlan.apply.id);
     }
+
     @Check("paymentunits.destroy")
     public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
@@ -169,6 +171,19 @@ public class PaymentUnits extends Controller {
         if(Validation.hasErrors())
             renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 批量批准运输单请款
+     *
+     * @param pids
+     */
+    public static void batchApproveFromShipment(Long[] pids) {
+        List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        units.forEach(PaymentUnit::transportApprove);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+        renderJSON(new Ret(true, "批量批准运输单请款成功"));
     }
 
     /**
