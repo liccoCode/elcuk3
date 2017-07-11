@@ -781,7 +781,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+        if(unit.selling != null && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(newUnit.shipType)
+                && shipments.size() <= 0)
             Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                     newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
         if(Validation.hasErrors()) return newUnit;
@@ -897,7 +898,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+        if(unit.selling != null && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(newUnit.shipType)
+                && shipments.size() <= 0)
             Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                     newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
         if(Validation.hasErrors()) return newUnit;
@@ -1066,8 +1068,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
-        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.stage != STAGE.DONE && unit.shipType.name() != "EXPRESS") {
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId) && unit.stage != STAGE.DONE
+                && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1146,7 +1148,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && !unit.shipType.name().equals("EXPRESS")) {
+                && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
