@@ -285,47 +285,48 @@ public class Whouse extends Model {
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
-            M type = M.val(this.name);
-
-            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate(), type));
+            M m = M.val(this.name);
+            Object exist = CollectionUtils.find(planShipments, new PlanDateEqual(nextBeginDate.toDate(), m));
             if(exist != null) continue;
 
             if(nextBeginDate.getDayOfWeek() == 1) {
                 if(Arrays.asList("EASYACC", "Brandworl", "Ecooe").contains(OperatorConfig.getVal("brandname"))) {
-                    if(type == M.AMAZON_US) {
+                    if(m == M.AMAZON_US) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
                 if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
-                    if(Collections.singletonList(M.AMAZON_UK).contains(type)) {
+                    if(Collections.singletonList(M.AMAZON_UK).contains(m)) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
             } else if(nextBeginDate.getDayOfWeek() == 2) {
                 if(Collections.singletonList("Ecooe").contains(OperatorConfig.getVal("brandname"))) {
-                    if(type == M.AMAZON_DE) {
+                    if(m == M.AMAZON_DE) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
             } else if(nextBeginDate.getDayOfWeek() == 3) {
                 if(Arrays.asList(M.AMAZON_DE, M.AMAZON_FR, M.AMAZON_UK, M.AMAZON_US, M.AMAZON_CA, M.AMAZON_IT,
-                        M.AMAZON_JP).contains(type)) {
+                        M.AMAZON_JP).contains(m)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
                 }
             } else if(nextBeginDate.getDayOfWeek() == 4) {
-                if(Collections.singletonList("EASYACC").contains(OperatorConfig.getVal("brandname"))) {
-                    if(Arrays.asList(M.AMAZON_UK, M.AMAZON_DE).contains(type)) {
-                        Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                if(Arrays.asList("EASYACC", "Brandworl").contains(OperatorConfig.getVal("brandname"))) {
+                    if(Arrays.asList(M.AMAZON_UK, M.AMAZON_DE).contains(m)) {
+                        if(Objects.equals("EASYACC", OperatorConfig.getVal("brandname")))
+                            Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                        Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.RAILWAY, this);
                     }
                 }
             } else if(nextBeginDate.getDayOfWeek() == 5) {
                 if(Collections.singletonList("EASYACC").contains(OperatorConfig.getVal("brandname"))) {
-                    if(M.AMAZON_IT == type) {
+                    if(M.AMAZON_IT == m) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
                 if(Collections.singletonList("Brandworl").contains(OperatorConfig.getVal("brandname"))) {
-                    if(Arrays.asList(M.AMAZON_DE, M.AMAZON_UK).contains(type)) {
+                    if(Arrays.asList(M.AMAZON_DE, M.AMAZON_UK).contains(m)) {
                         Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
                     }
                 }
