@@ -182,7 +182,7 @@ public class PaymentUnits extends Controller {
         List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
         units.forEach(PaymentUnit::transportApprove);
         if(Validation.hasErrors())
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         renderJSON(new Ret(true, "批量批准运输单请款成功"));
     }
 
