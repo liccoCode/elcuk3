@@ -114,9 +114,6 @@ $(() => {
 
   function getCurrWhouse () {
     let country = $("#warehouse_select :selected").text().split('_')[1];
-    if ($("input[name='unit.isb2b']").prop("checked")) {
-      country = "B2B";
-    }
     let shipType = $("input[name='unit.shipType']:checked").val();
     $.get("/whouses/autoMatching", {
       country: country,
@@ -147,11 +144,11 @@ $(() => {
       });
       return false;
     }
-    if (shipType == 'EXPRESS') {
-      $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.');
+    if (shipType === 'EXPRESS' || shipType === 'DEDICATED') {
+      $('#shipments').html('因快递单和快递情况变化很多, 选择由物流决定, 可不用选择物流单.');
       return;
     } else {
-      LoadMask.mask(shipment)
+      shipment.mask();
     }
     $.post('/shipments/unitShipments', {
       whouseId: whouseId,
@@ -159,7 +156,7 @@ $(() => {
       planDeliveryDate: planDeliveryDate
     }, function (html) {
       shipment.html(html);
-      LoadMask.unmask();
+      shipment.unmask();
       if ($("#shipmentId").val()) {
         $("#shipments input[type='radio']").each(function () {
           if ($(this).val() == $("#shipmentId").val()) {
@@ -170,7 +167,7 @@ $(() => {
       }
     });
 
-    if (shipType != 'EXPRESS') {
+    if (!(shipType == 'EXPRESS' || shipType == 'DEDICATED')) {
       return;
     }
     let planShipDate = $("[name='unit.attrs.planShipDate']").val();

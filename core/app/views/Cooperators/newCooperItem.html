@@ -45,7 +45,7 @@
       <tr>
         <th>其他价格</th>
         <td>
-          <input class="input input-mini" type="text" name="copItem.otherPrice" value="${copItem.otherPrice}">
+          <input class="input input-mini" type="text" name="copItem.otherPrice" value="${copItem.otherPrice?copItem.otherPrice:0}">
           <select class="input-mini">
             <option value="CNY">CNY</option>
           </select>

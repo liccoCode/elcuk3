@@ -140,12 +140,13 @@ public class PaymentUnitQuery {
                     .from("PaymentUnit p")
                     .leftJoin("ShipItem si ON si.id=p.shipItem_id")
                     .leftJoin("ProcureUnit u ON u.id=si.unit_id")
+                    .leftJoin("Whouse w ON w.id=u.whouse_id")
                     .where("p.createdAt>=?").param(from)
                     .where("p.createdAt<=?").param(to)
                     .where(SqlSelect.whereIn("u.sku", skus))
                     .where("p.feeType_name='transportshipping'")
                     .where("p.currency=?").param(crcy.name())
-                    .where("u.whouse.market=?").param(market)
+                    .where("w.market=?").param(market)
                     .groupBy("u.sku");
 
             List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());

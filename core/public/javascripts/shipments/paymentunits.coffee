@@ -88,7 +88,7 @@ $ ->
   $('table.paymentInfo').on('click', 'button.btn-info:contains(编辑)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
+    id = $(@).data("id")
     LoadMask.mask()
     $.get("/paymentunit/#{id}.json")
       .done((r) ->
@@ -105,7 +105,7 @@ $ ->
   ).on('click', 'button.btn-danger:contains(取消)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
+    id = $(@).data("id")
     fee = JSON.parse(sessionStorage["tr-edit-paymentunit-template-#{id}"])
     label = feeStateLabel(fee['state'])
     trHtml = _.template(
@@ -118,7 +118,7 @@ $ ->
   ).on('click', 'button.btn-success:contains(更新)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
+    id = $(@).data("id")
     LoadMask.mask()
     $.ajax({
     url: "/paymentunit/#{id}.json",
@@ -141,7 +141,7 @@ $ ->
 
     # 删除
   ).on('click', 'button.btn-warning:contains(删除)',(e) ->
-    id = $(@).parents('tr').find('td:eq(0)').text().trim();
+    id = $(@).data("id")
     params =
       id: id
       url: "/paymentunit/#{id}/shipment",
@@ -151,7 +151,7 @@ $ ->
   ).on('click', 'button.btn-success:contains(批准)',(e) ->
     $btn = $(@)
     $tr = $btn.parents('tr')
-    id = $tr.find('td:eq(0)').text().trim();
+    id = $(@).data("id")
     LoadMask.mask()
     $.ajax("/paymentunit/#{id}/approve.json", {type: 'POST', dataType: 'json'})
       .done((r) ->
@@ -177,8 +177,7 @@ $ ->
     false
   ).on('click', 'button.btn-danger:contains(驳回)',(e) ->
     $btn = $(@)
-    $tr = $btn.parents('tr')
-    id = $tr.find('td:eq(0)').text().trim()
+    id = $(@).data("id")
     formParam =
       url: "/paymentunit/#{id}/deny"
       title: "驳回 #{$btn.parents('tr').find('td:eq(1)').text()} 请款项目"

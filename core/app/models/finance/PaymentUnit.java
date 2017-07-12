@@ -34,6 +34,9 @@ import java.util.List;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class PaymentUnit extends Model {
+
+    private static final long serialVersionUID = -8173938871382052744L;
+
     public enum S {
         /**
          * 申请
