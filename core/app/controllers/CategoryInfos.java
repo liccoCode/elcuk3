@@ -63,7 +63,7 @@ public class CategoryInfos extends Controller {
         if(!c.isNameCorrect(c.userName))
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         c.createTaskAssign();
         renderJSON(true);
     }
@@ -73,7 +73,7 @@ public class CategoryInfos extends Controller {
         if(!c.isNameCorrect(c.userName))
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         CategoryAssignManagement.updateTaskAssign(c, id);
         renderJSON(true);
     }

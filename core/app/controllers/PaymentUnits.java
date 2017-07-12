@@ -55,7 +55,7 @@ public class PaymentUnits extends Controller {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
         if(Validation.hasErrors())
-            renderJSON(Webs.VJson(Validation.errors()));
+            renderJSON(Webs.vJson(Validation.errors()));
         else
             renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
     }
@@ -100,7 +100,7 @@ public class PaymentUnits extends Controller {
         paymentUnit.deny(reason);
         if(request.isAjax()) {
             if(Validation.hasErrors())
-                renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.vJson(Validation.errors()));
             else
                 renderJSON(new Ret(true, "成功驳回"));
         } else {
@@ -122,7 +122,7 @@ public class PaymentUnits extends Controller {
         PaymentUnit feeUnit = PaymentUnit.findById(id);
         feeUnit.fixUnitValue(fee);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         }
         renderArgs.put("fee", feeUnit);
         render("PaymentUnits/show.json");
@@ -169,7 +169,7 @@ public class PaymentUnits extends Controller {
         PaymentUnit fee = PaymentUnit.findById(id);
         fee.transportApprove();
         if(Validation.hasErrors())
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
     }
 
@@ -182,7 +182,7 @@ public class PaymentUnits extends Controller {
         List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
         units.forEach(PaymentUnit::transportApprove);
         if(Validation.hasErrors())
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         renderJSON(new Ret(true, "批量批准运输单请款成功"));
     }
 
@@ -215,7 +215,7 @@ public class PaymentUnits extends Controller {
         fee.cooperator = Cooperator.findById(fee.cooperator.id);
         ship.produceFee(fee);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
     }
 
@@ -246,7 +246,7 @@ public class PaymentUnits extends Controller {
         Shipment ship = Shipment.findById(id);
         fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
     }
 }

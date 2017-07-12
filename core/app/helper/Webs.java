@@ -78,7 +78,7 @@ public class Webs {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
+    public static void devLogin(Account acc) throws IOException, ClassNotFoundException {
         File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
         if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(1)))
             jsonFile.delete();
@@ -360,7 +360,7 @@ public class Webs {
      * @param errors
      * @return
      */
-    public static String VJson(List<Error> errors) {
+    public static String vJson(List<Error> errors) {
         List<Map<String, String>> errorList = new ArrayList<>();
         for(Error err : errors) {
             errorList.add(GTs.MapBuilder.map("key", err.getKey()).put("message", err.message()).build());
@@ -406,7 +406,7 @@ public class Webs {
         }
     }
 
-    public static String Md5(String str) {
+    public static String md5(String str) {
         return DigestUtils.md5Hex(str);
     }
 }
