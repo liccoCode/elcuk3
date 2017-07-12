@@ -42,9 +42,6 @@ public class Finances extends Controller {
         render(accs);
     }
 
-    //TODO: del @Check("finances.fixfinance")
-    //TODO: del @Check("finances.reparseorder")
-
     public static void promotion(String orderId, long aid, String m) {
         List<String> orderIds = Arrays.asList(StringUtils.split(orderId, ","));
         Account acc = Account.findById(aid);

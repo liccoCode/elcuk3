@@ -51,7 +51,7 @@ public class Familys extends Controller {
         }
     }
 
-    public static void pro_div(Family f) {
+    public static void proDiv(Family f) {
         List<Product> prods = new ArrayList<>();
 
         // 查找 Family 相关的 Product
@@ -59,7 +59,7 @@ public class Familys extends Controller {
         render("Products/_products.html", prods);
     }
 
-    public static void fam_div(Brand b, Category c) {
+    public static void famDiv(Brand b, Category c) {
         List<Family> fmys = new ArrayList<>();
         if(b != null && b.isPersistent() && c != null && c.isPersistent())
             fmys = Family.bcRelateFamily(b, c);

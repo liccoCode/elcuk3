@@ -178,7 +178,7 @@
 
     <tr>
       <td colspan="4">
-      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM || ship.state == models.procure.Shipment.S.SHIPPING|| ship.state == models.procure.Shipment.S.CLEARANCE|| ship.state == models.procure.Shipment.S.PACKAGE|| ship.state == models.procure.Shipment.S.BOOKED|| ship.state == models.procure.Shipment.S.DELIVERYING/}
+      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM || ship.state == models.procure.Shipment.S.SHIPPING|| ship.state == models.procure.Shipment.S.CLEARANCE|| ship.state == models.procure.Shipment.S.BOOKED|| ship.state == models.procure.Shipment.S.DELIVERYING/}
       #{if isPlanAndConfirm}
         <button class="btn btn-primary">更新</button>
       #{/if}

@@ -516,13 +516,12 @@ public class Shipments extends Controller {
     public static void validCreateOutbound(String[] shipmentIds) {
         String msg = "";
         if(ArrayUtils.isNotEmpty(shipmentIds)) {
-            List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i " +
-                    "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentIds) +
-                    " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
+            List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i "
+                    + "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentIds)
+                    + " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
             if(shipments.size() > 0) {
                 msg += "【" + shipments.get(0).id + "】";
-                renderJSON(new Ret(false, "运输单：" + msg + " " +
-                        "下的采购计划还不是【已入仓】状态，是否继续？"));
+                renderJSON(new Ret(false, "运输单：" + msg + " " + "下的采购计划还不是【已入仓】状态，是否继续？"));
             }
         }
         renderJSON(new Ret(true, ""));
