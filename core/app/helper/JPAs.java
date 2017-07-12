@@ -20,7 +20,8 @@ public class JPAs {
      * <pre>
      * 返回的结果按照 as 作为 key 进行返回 List[Map[key,val]];
      * PS: 从不同的 Modal 中寻找出所需要的 Map 最好用, 使用 key 固定值
-     * ex: new JpqlSelect().select("oi.product.sku as sku, oi.order.orderId as orderId, oi.quantity as qty").from("OrderItem oi").where("oi.createDate>=?").param(DateTime.parse("2012-06-01").toDate()
+     * ex: new JpqlSelect().select("oi.product.sku as sku, oi.order.orderId as orderId, oi.quantity as qty")
+     *                     .from("OrderItem oi").where("oi.createDate>=?").param(DateTime.parse("2012-06-01").toDate()
      * </pre>
      *
      * @param hql

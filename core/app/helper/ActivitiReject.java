@@ -54,13 +54,13 @@ public class ActivitiReject {
         boolean success = false;
         try {
 // 1.
-            StepOne_use_hi_taskinst_to_change_ru_task(sqlSession,
+            stepOneUseHiTaskinstToChangeRuTask(sqlSession,
                     currentTaskEntity, backToHistoricTaskInstanceEntity);
 // 2.
-            StepTwo_change_ru_identitylink(sqlSession, currentTaskEntityId,
+            stepTwoChangeRuIdentitylink(sqlSession, currentTaskEntityId,
                     backToHistoricTaskInstanceEntityId, backToAssignee);
 // 3.
-            StepThree_change_ru_execution(sqlSession, executionId,
+            stepThreeChangeRuExecution(sqlSession, executionId,
                     processDefinitionId, backToTaskDefinitionKey);
 
             success = true;
@@ -80,7 +80,7 @@ public class ActivitiReject {
         return result;
     }
 
-    private static void StepThree_change_ru_execution(SqlSession sqlSession,
+    private static void stepThreeChangeRuExecution(SqlSession sqlSession,
                                                       String executionId, String processDefinitionId,
                                                       String backToTaskDefinitionKey) throws Exception {
         List<ExecutionEntity> currentExecutionEntityList = sqlSession
@@ -98,7 +98,7 @@ public class ActivitiReject {
         }
     }
 
-    private static void StepTwo_change_ru_identitylink(SqlSession sqlSession,
+    private static void stepTwoChangeRuIdentitylink(SqlSession sqlSession,
                                                        String currentTaskEntityId,
                                                        String backToHistoricTaskInstanceEntityId, String backToAssignee)
             throws Exception {
@@ -126,7 +126,7 @@ public class ActivitiReject {
         }
     }
 
-    private static void StepOne_use_hi_taskinst_to_change_ru_task(
+    private static void stepOneUseHiTaskinstToChangeRuTask(
             SqlSession sqlSession, TaskEntity currentTaskEntity,
             HistoricTaskInstanceEntity backToHistoricTaskInstanceEntity)
             throws Exception {

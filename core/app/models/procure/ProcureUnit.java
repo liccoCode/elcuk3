@@ -1990,7 +1990,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public String recordsPageCacheKey() {
-        return Webs.Md5(ElcukRecord.pageCacheKey(ProcureUnit.class, this.id));
+        return Webs.md5(ElcukRecord.pageCacheKey(ProcureUnit.class, this.id));
     }
 
     @Override

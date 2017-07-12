@@ -320,7 +320,7 @@ public class MWSUtils {
             }
 
             CartonContentsRequest.Carton carton = new CartonContentsRequest.Carton();
-            //TODO:: CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
+            //CartonId 有用处 参考: http://docs.developer.amazonservices.com/en_US/fba_guide/FBAGuide_SubmitCartonContentsFeed.html
             carton.setCartonId(String.format("%s%s", fbaShipment.shipmentId, i));
             carton.getItem().add(item);
             request.getCarton().add(carton);
@@ -506,15 +506,13 @@ public class MWSUtils {
         }
 
         boolean isShouldSetDimensions(Dimensions dimensions) {
-            return dimensions.getLength() != null ||
-                    dimensions.getWidth() != null ||
-                    dimensions.getWeight() != null ||
-                    dimensions.getWeight() != null;
+            return dimensions.getLength() != null || dimensions.getWidth() != null
+                    || dimensions.getWeight() != null || dimensions.getWeight() != null;
         }
 
         boolean isShouldBeSetVolumeDimensions() {
-            return StringUtils.isNotBlank(this.unitOfVolume) &&
-                    (this.length != null || this.width != null || this.heigh != null);
+            return StringUtils.isNotBlank(this.unitOfVolume)
+                    && (this.length != null || this.width != null || this.heigh != null);
         }
     }
 
