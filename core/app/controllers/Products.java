@@ -114,7 +114,7 @@ public class Products extends Controller {
         try {
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
             if(Validation.hasErrors()) {
-                renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.vJson(Validation.errors()));
             }
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);

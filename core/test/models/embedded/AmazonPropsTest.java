@@ -111,7 +111,7 @@ public class AmazonPropsTest extends UnitTest {
 
             }
         });
-        Webs.dev_login(selling.account);
+        Webs.devLogin(selling.account);
         selling.deploy();
     }
 }

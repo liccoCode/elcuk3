@@ -80,7 +80,7 @@ public class Application extends Controller {
 
         Account acc = Account.findById(id);
         try {
-            Webs.dev_login(acc);
+            Webs.devLogin(acc);
         } catch(Exception e) {
             throw new FastRuntimeException(e);
         }

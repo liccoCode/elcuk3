@@ -256,8 +256,7 @@ public class Dates {
         //年的最后一天
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date.toDate());
-        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate
-                ();
+        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate();
     }
 
     /**
@@ -361,9 +360,9 @@ public class Dates {
     }
 
     public static String scaleNumber(double number) {
-        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
-        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
-        return df.format(number);
+        java.text.DecimalFormat format = new java.text.DecimalFormat("0.00");
+        format.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        return format.format(number);
     }
 
     /**

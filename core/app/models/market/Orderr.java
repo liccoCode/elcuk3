@@ -254,6 +254,15 @@ public class Orderr extends GenericModel {
     @Column(columnDefinition = "varchar(10) DEFAULT 'no'")
     public String invoiceState;
 
+    /**
+     * 是否使用 商务订单(用于JRockend 发送合同)
+     */
+    public int businessOrder;
+    /**
+     * 是否发送商务合同(用于JRockend 发送合同)
+     */
+    public int sendBusiness;
+
 
     /**
      * 此订单总共卖出的产品数量

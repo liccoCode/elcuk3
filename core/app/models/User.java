@@ -636,7 +636,7 @@ public class User extends Model {
      * @return
      */
     public static String userMd5(String username) {
-        return Webs.Md5(String.format("playelcuk2userauthenticate%s", username));
+        return Webs.md5(String.format("playelcuk2userauthenticate%s", username));
     }
 
     /**

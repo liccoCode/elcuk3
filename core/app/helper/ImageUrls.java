@@ -5,9 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import play.Play;
 import play.templates.JavaExtensions;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by IntelliJ IDEA.
  * User: mac
