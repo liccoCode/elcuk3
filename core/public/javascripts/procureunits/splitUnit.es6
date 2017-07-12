@@ -109,7 +109,7 @@ $(() => {
     let planDeliveryDate = $("[name='newUnit.attrs.planDeliveryDate']").val();
     let shipment = $("#shipments");
     if (planDeliveryDate && whouseId && shipType && shipment) {
-      if (shipType == 'EXPRESS') {
+      if (shipType === 'EXPRESS' || shipType === 'DEDICATED') {
         $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.');
       } else {
         shipment.mask();
@@ -169,7 +169,7 @@ $(() => {
   //快递同步预计到达时间
   $("[name='newUnit.attrs.planShipDate']").change(() => {
     let shipType = $("[name='newUnit.shipType']:checked").val();
-    if (shipType != 'EXPRESS') {
+    if (shipType != 'EXPRESS' && shipType != 'DEDICATED') {
       return;
     }
     let planShipDate = $("[name='newUnit.attrs.planShipDate']").val();

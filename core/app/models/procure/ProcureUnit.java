@@ -682,8 +682,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.product != null) this.sku = this.product.sku;
         Validation.required("procureunit.createDate", this.createDate);
         if(this.attrs != null) this.attrs.validate();
-        if(this.selling != null && this.whouse != null &&
-                this.whouse.account != null && this.whouse.type == Whouse.T.FBA) {
+        if(this.selling != null && this.whouse != null && this.whouse.account != null
+                && this.whouse.type == Whouse.T.FBA) {
             if(!this.selling.market.equals(this.whouse.market)) {
                 Validation.addError("", "procureunit.validate.whouse");
             }
@@ -781,7 +781,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 .similarShipments(newUnit.attrs.planShipDate, newUnit.whouse, newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+        if(unit.selling != null && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(newUnit.shipType)
+                && shipments.size() <= 0)
             Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                     newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
         if(Validation.hasErrors()) return newUnit;
@@ -814,9 +815,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public ProcureUnit stockSplit(ProcureUnit unit, boolean type) {
-        int availableQty = this.availableQty;
+        int available_qty = this.availableQty;
         if(unit.attrs.planQty != null) {
-            if(unit.availableQty > availableQty)
+            if(unit.availableQty > available_qty)
                 Validation.addError("", "因分批交货创建的采购计划的数量不可能大于原来采购计划的数量.");
             if(unit.availableQty <= 0)
                 Validation.addError("", "新创建分批交货的采购计划数量必须大于 0");
@@ -864,7 +865,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.type = T.StockSplit;
         newUnit.sku = unit.product.sku;
-        /**库存分拆需要分析包装信息**/
+        /*库存分拆需要分析包装信息*/
         if(this.lastBox != null && this.mainBox != null && this.mainBox.num != 0
                 && newUnit.availableQty % this.mainBox.num == 0) {
             newUnit.mainBox.boxNum = newUnit.availableQty / this.mainBox.num;
@@ -897,14 +898,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 newUnit.shipType);
         //无selling的手动单不做处理
         //快递不做判断
-        if(unit.selling != null && newUnit.shipType != Shipment.T.EXPRESS && shipments.size() <= 0)
+        if(unit.selling != null && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(newUnit.shipType)
+                && shipments.size() <= 0)
             Validation.addError("", String.format("没有合适的运输单, 请联系运输部门, 创建 %s 之后去往 %s 的 %s 运输单.",
                     newUnit.attrs.planShipDate, newUnit.whouse.name, newUnit.shipType));
         if(Validation.hasErrors()) return newUnit;
         //无selling的手动单不做处理
         Shipment shipment = null;
         if(unit.selling != null && shipments.size() > 0) shipment = shipments.get(0);
-        this.availableQty = availableQty - newUnit.availableQty;
+        this.availableQty = available_qty - newUnit.availableQty;
         this.shipItemQty(this.availableQty);
         // FBA 变更
         if(this.fba != null)
@@ -915,7 +917,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
-        new ERecordBuilder("procureunit.split").msgArgs(this.id, availableQty, newUnit.attrs.planQty, newUnit.id)
+        new ERecordBuilder("procureunit.split").msgArgs(this.id, available_qty, newUnit.attrs.planQty, newUnit.id)
                 .fid(this.id, ProcureUnit.class).save();
         this.createStockRecord(newUnit, newUnit.availableQty, StockRecord.T.Split, newUnit.availableQty,
                 this.availableQty);
@@ -940,15 +942,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         record.recordId = unit.id;
         record.save();
         if(unit.parent != null) {
-            StockRecord parent = new StockRecord();
-            parent.whouse = unit.parent.currWhouse;
-            parent.unit = unit.parent;
-            parent.qty = 0 - qty;
-            parent.type = type;
-            parent.recordId = unit.parent.id;
-            parent.creator = Login.current();
-            parent.currQty = parentCurrQty;
-            parent.save();
+            StockRecord parent_stock = new StockRecord();
+            parent_stock.whouse = unit.parent.currWhouse;
+            parent_stock.unit = unit.parent;
+            parent_stock.qty = 0 - qty;
+            parent_stock.type = type;
+            parent_stock.recordId = unit.parent.id;
+            parent_stock.creator = Login.current();
+            parent_stock.currQty = parentCurrQty;
+            parent_stock.save();
         }
     }
 
@@ -1050,8 +1052,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
          */
         // 1
         //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
-        if(this.fba != null &&
-                (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
+        if(this.fba != null
+                && (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
             Validation.required("procureunit.update.reason", reason);
 
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
@@ -1066,8 +1068,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
-        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && unit.stage != STAGE.DONE && unit.shipType.name() != "EXPRESS") {
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId) && unit.stage != STAGE.DONE
+                && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1146,7 +1148,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
-                && !unit.shipType.name().equals("EXPRESS")) {
+                && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Validation.addError("", "请选择运输单！");
         }
         if(StringUtils.isNotEmpty(shipmentId)) {
@@ -1415,10 +1417,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public synchronized FBAShipment postFbaShipment(CheckTaskDTO dto) {
         this.postFBAValidate(dto);
         if(Validation.hasErrors()) return null;
-        FBAShipment fba = this.planFBA();
-        this.confirmFBA(fba);
+        FBAShipment fbaShipment = this.planFBA();
+        this.confirmFBA(fbaShipment);
         this.submitFBACartonContent(dto);
-        return fba;
+        return fbaShipment;
     }
 
     /**
@@ -1428,8 +1430,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public FBAShipment planFBA() {
         try {
-            FBAShipment fba = FBA.plan(this.selling.account, this);
-            return fba.save();
+            FBAShipment fbaShipment = FBA.plan(this.selling.account, this);
+            return fbaShipment.save();
         } catch(FBAInboundServiceMWSException e) {
             FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat(e);
             Validation.addError("", String.format("向 Amazon 创建 Shipment PLAN 失败, %s", errorType.message()));
@@ -1512,7 +1514,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     public void remove() {
         /*
-         * TODO: 这里需要理清楚
          * 1. 什么时候可以删除采购计划?
          * 2. 如果在拥有 FBA 后仍然可以删除采购计划, 需要如何处理?
          */
@@ -1527,18 +1528,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             this.fees.forEach(PaymentUnit::permanentRemove);
             // 删除 FBA
-            FBAShipment fba = this.fba;
-            if(fba != null) {
-                fba.units.remove(this);
-                fba.removeFBAShipment();
+            FBAShipment fbaShipment = this.fba;
+            if(fbaShipment != null) {
+                fbaShipment.units.remove(this);
+                fbaShipment.removeFBAShipment();
             }
             // 删除运输相关
             this.shipItems.forEach(ShipItem::delete);
 
             //删除采购单关联
-            Deliveryment deliveryment = this.deliveryment;
-            if(deliveryment != null && deliveryment.units != null) {
-                deliveryment.units.remove(this);
+            Deliveryment d = this.deliveryment;
+            if(d != null && d.units != null) {
+                d.units.remove(this);
             }
             //删除出货单关联
             DeliverPlan deliverPlan = this.deliverplan;
@@ -1547,8 +1548,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             }
             this.delete();
         } else {
-            Validation.addError("",
-                    String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
+            Validation.addError("", String.format("只允许 %s, %s 状态的采购计划进行取消", STAGE.PLAN, STAGE.DELIVERY));
         }
     }
 
@@ -1638,7 +1638,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 预付款申请
      */
     public PaymentUnit billingPrePay() {
-        /**
+        /*
          * 0. 基本检查
          * 1. 检查是否此采购计划是否已经存在一个预付款
          * 2. 申请预付款
@@ -1781,7 +1781,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
         float second = this.cooperator.second / 100;
         if(this.parent == null) {
-            if(this.is_parent()) {
+            if(this.ifParent()) {
                 if(this.hasPrePay())
                     appliedAmount += this.attrs.price * this.paidQty() * pre;
                 if(this.hasSecondPay())
@@ -1794,9 +1794,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 }
             }
         } else {
-            ProcureUnit parent = this.parent;
+            ProcureUnit parent_unit = this.parent;
             /*如果父采购计划没有请款,则按照正常请款**/
-            if(parent.hasPrePay() && !parent.hasEqualWithPrePay() && !this.hasPrePay()) {
+            if(parent_unit.hasPrePay() && !parent_unit.hasEqualWithPrePay() && !this.hasPrePay()) {
                 appliedAmount += this.attrs.price * this.paidQty() * pre;
             }
             for(PaymentUnit fee : this.fees()) {
@@ -1913,12 +1913,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
 
     public List<PaymentUnit> fees() {
-        List<PaymentUnit> fees = new ArrayList<>();
+        List<PaymentUnit> units = new ArrayList<>();
         for(PaymentUnit fee : this.fees) {
             if(fee.remove) continue;
-            fees.add(fee);
+            units.add(fee);
         }
-        return fees;
+        return units;
     }
 
     /**
@@ -2008,9 +2008,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        return result;
+        int res = super.hashCode();
+        res = 31 * res + (id != null ? id.hashCode() : 0);
+        return res;
     }
 
     /**
@@ -2232,20 +2232,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 if(shipment.dates.oldPlanArrivDate != null && shipment.dates.planArrivDate != null) {
                     datedesc = "系统备注:运输单最新预计到库时间" + shipment.dates.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.oldPlanArrivDate
-                            + "差异" +
-                            (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime()) /
-                                    (24 * 60 * 60 * 1000)
+                            + "差异"
+                            + (shipment.dates.planArrivDate.getTime() - shipment.dates.oldPlanArrivDate.getTime())
+                            / (24 * 60 * 60 * 1000)
                             + "天";
                 }
             } else {
-                if(this.attrs.planArrivDate != null && shipment.dates.planArrivDate != null && ((this.attrs
-                        .planArrivDate.getTime() - shipment.dates
-                        .planArrivDate.getTime()) != 0)) {
+                if(this.attrs.planArrivDate != null && shipment.dates.planArrivDate != null
+                        && ((this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) != 0)) {
                     datedesc = "系统备注:采购计划单最新预计到库时间" + this.attrs.planArrivDate
                             + "，比原预计到库日期" + shipment.dates.planArrivDate
-                            + "差异" + (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime()) /
-                            (24 * 60 * 60 * 1000)
-                            + "天";
+                            + "差异" + (this.attrs.planArrivDate.getTime() - shipment.dates.planArrivDate.getTime())
+                            / (24 * 60 * 60 * 1000) + "天";
                 }
             }
 
@@ -2368,14 +2366,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public Whouse matchWhouse() {
         Shipment.T shiptype = null;
-        Cooperator cooperator = null;
+        Cooperator c = null;
         if(this.shipItems != null && !this.shipItems.isEmpty()) {
             Shipment shipment = this.shipItems.get(0).shipment;
             shiptype = shipment.type;
-            cooperator = shipment.cooper;
+            c = shipment.cooper;
         }
         return Whouse.findByCooperatorAndShipType(
-                cooperator != null ? cooperator : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
+                c != null ? c : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
                 shiptype != null ? shiptype : this.shipType
         );
     }
@@ -2465,10 +2463,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ten;
     }
 
-    public static List<ProcureUnit> findUnitOrderByShipment(String out_id) {
-        String sql = "Select DISTINCT u FROM ProcureUnit u LEFT JOIN u.shipItems i WHERE u.outbound.id = ? " +
-                "ORDER BY i.shipment.id ";
-        return ProcureUnit.find(sql, out_id).fetch();
+    public static List<ProcureUnit> findUnitOrderByShipment(String outId) {
+        String sql = "Select DISTINCT u FROM ProcureUnit u LEFT JOIN u.shipItems i WHERE u.outbound.id = ? "
+                + "ORDER BY i.shipment.id ";
+        return ProcureUnit.find(sql, outId).fetch();
     }
 
     public String showInboundIds() {
@@ -2508,8 +2506,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         if(this.parent != null) {
             /**如果父采购计划是采购中，入库中才能修改**/
-            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage) &&
-                    T.StockSplit == this.type) {
+            if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage)
+                    && T.StockSplit == this.type) {
                 return false;
             } else if(T.ProcureSplit == this.type && this.stage == STAGE.IN_STORAGE) {
                 return true;
@@ -2541,10 +2539,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsComplete() {
-        return Objects.equals(this.projectName, User.COR.MengTop.name()) && this.mainBox != null &&
-                this.mainBox.num != 0 ||
-                !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                        this.mainBox.height == 0);
+        return Objects.equals(this.projectName, User.COR.MengTop.name()) && this.mainBox != null
+                && this.mainBox.num != 0
+                || !(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0
+                || this.mainBox.height == 0);
     }
 
     public boolean validBoxInfoIsCorrect() {
@@ -2619,7 +2617,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return cooperItem == null ? 0 : cooperItem.otherPrice;
     }
 
-    public boolean is_parent() {
+    public boolean ifParent() {
         return ProcureUnit.count("parent.id=?", this.id) > 0;
     }
 

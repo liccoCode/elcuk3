@@ -19,6 +19,7 @@ import java.util.Objects;
 @Entity
 public class Attribute extends Model {
 
+    private static final long serialVersionUID = 3065159002460834755L;
     /**
      * 名称
      */

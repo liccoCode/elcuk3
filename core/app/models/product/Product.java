@@ -421,6 +421,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public String origin_sku;
 
+    public String hs_code;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     public User.COR origin_project;

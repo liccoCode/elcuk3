@@ -47,16 +47,16 @@
           <td>#{time_tooltip time:fee.createdAt /}</td>
           <td>
               #{power.ck 'paymentunits.fixunitvalue'}
-                <button class="btn btn-mini btn-info">编辑</button>
+                <button class="btn btn-mini btn-info" data-id="${fee.id}">编辑</button>
               #{/power.ck}
               #{power.ck 'paymentunits.destroy'}
-                <button class="btn btn-mini btn-warning">删除</button>
+                <button class="btn btn-mini btn-warning" data-id="${fee.id}">删除</button>
               #{/power.ck}
               #{power.ck 'paymentunits.approve'}
-                <button class="btn btn-mini btn-success">批准</button>
+                <button class="btn btn-mini btn-success" data-id="${fee.id}">批准</button>
               #{/power.ck}
               #{power.ck 'paymentunits.deny'}
-                <button class="btn btn-mini btn-danger">驳回</button>
+                <button class="btn btn-mini btn-danger" data-id="${fee.id}">驳回</button>
               #{/power.ck}
           </td>
         </tr>
