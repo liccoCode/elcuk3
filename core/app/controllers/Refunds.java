@@ -7,10 +7,8 @@ import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
-import models.view.post.ProcurePost;
 import models.view.post.RefundPost;
 import models.view.post.StockPost;
-import models.whouse.InboundUnit;
 import models.whouse.Refund;
 import models.whouse.RefundUnit;
 import models.whouse.Whouse;
@@ -30,7 +28,10 @@ import java.util.*;
 import static play.modules.pdf.PDF.renderPDF;
 
 /**
- * Created by licco on 2016/11/28.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/28
+ * Time: 下午2:15
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Refunds extends Controller {

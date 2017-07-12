@@ -20,7 +20,6 @@ import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,8 +40,8 @@ public class Whouses extends Controller {
     @Before(only = {"updates"})
     public static void setUpSelectData() {
         List<Whouse> cooperators = Cooperator.find("type = ?", Cooperator.T.SHIPPER).fetch();
-        List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName " +
-                "like ?", "%质检%").fetch();
+        List<User> users = User.find("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE 1=1 AND r.roleName "
+                + "like ?", "%质检%").fetch();
 
         renderArgs.put("cooperators", cooperators);
         renderArgs.put("users", users);

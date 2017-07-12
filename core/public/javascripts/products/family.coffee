@@ -12,7 +12,7 @@ $ ->
   loadFamilys = ->
     FAMILYS.mask('加载中...')
     brand = $('li.active a[level=brand]')
-    FAMILYS.load('/familys/fam_div', {'c.categoryId': $(brand).attr('cid'), 'b.name': $(brand).attr('bid')}, (r) ->
+    FAMILYS.load('/familys/famDiv', {'c.categoryId': $(brand).attr('cid'), 'b.name': $(brand).attr('bid')}, (r) ->
       FAMILYS.unmask()
     )
     loadProducts($(brand).attr('fid'))
@@ -20,7 +20,7 @@ $ ->
   # 加载 Family 下的 Product 列表
   loadProducts = (family_id) ->
     PRODUCTS.mask('加载中...')
-    PRODUCTS.load("/familys/pro_div", {'f.family': family_id}, (r) ->
+    PRODUCTS.load("/familys/proDiv", {'f.family': family_id}, (r) ->
       PRODUCTS.unmask()
     )
 
