@@ -1,0 +1,48 @@
+#{extends 'main_full.html'/}
+#{set title:pro.sku /}
+#{set 'moreScripts'}
+    #{script 'products/show.es6'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert /}
+
+#{info_row title:'物流信息'/}
+
+<div class="row-fluid">
+  <div class="input-prepend input-append inline">
+    <span class="add-on">HS CODE:</span>
+    <input type="text" name="hs_code" placeholder="请输入HS CODE" value="${pro.hs_code}" required>
+  </div>
+
+  <div class="input-prepend input-append inline">
+    <span class="add-on">属性:</span>
+    <input type="text" name="input_attr" data-url="@{Attributes.sameAttr()}" placeholder="手动输入属性">
+    <input type="button" class="btn btn-primary" value="添加" id="add_attr_btn">
+  </div>
+
+
+  <div class="input-prepend input-append inline">
+    <select name="templateId" class="inline">
+      <option value="">请选择模板</option>
+    #{list items:templates, as:'template'}
+      <option value="${template.id}">${template.name}</option>
+    #{/list}
+    </select>
+    <input type="hidden" name="sku" value="${pro.sku}">
+    <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+  </div>
+
+#{info_row title:'Attributes'/}
+#{include 'Products/_attrs.html'/}
+</div>
+
+<form action="@{Products.addAttr()}" method="post" id="add_attr_form">
+  <input type="hidden" name="sku" value="${pro.sku}">
+  <input type="hidden" name="attr" id="commit_attr">
+</form>

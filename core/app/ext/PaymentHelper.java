@@ -3,6 +3,7 @@ package ext;
 import models.finance.FeeType;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
+import models.market.M;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
@@ -95,19 +96,20 @@ public class PaymentHelper extends JavaExtensions {
         if(unit.feeType != FeeType.expressFee()) return unit.currency.toCNY(unit.unitPrice);
         if(unit.shipment != null) {
             Shipment.T shipType = unit.shipment.type;
+            M market = unit.shipment.whouse.market;
             PaymentUnitQuery aveFeeQuery = new PaymentUnitQuery();
             DateTime now = DateTime.now();
             DateTime threeMonthAgo = now.minusMonths(3);
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
                 String sku = unit.shipItem.unit.sku;
-                Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), sku)
-                        .get(sku);
+                Float price = aveFeeQuery.avgSkuExpressTransportshippingFee(threeMonthAgo.toDate(), now.toDate(),
+                        market, sku).get(sku);
                 return price == null ? 0 : price;
             } else if(shipType == Shipment.T.SEA) {
-                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+                return aveFeeQuery.avgSkuSEATransportshippingFee(threeMonthAgo.toDate(), now.toDate(), market);
             } else if(shipType == Shipment.T.AIR) {
-                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate());
+                return aveFeeQuery.avgSkuAIRTransportshippingFee(threeMonthAgo.toDate(), now.toDate(), market);
             } else {
                 return unit.currency.toCNY(unit.unitPrice);
             }
@@ -122,7 +124,8 @@ public class PaymentHelper extends JavaExtensions {
             DateTime now = DateTime.now();
 
             if(unit.shipItem != null && shipType == Shipment.T.EXPRESS) {
-                return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) / unit.shipItem.unit.shipmentQty());
+                return unit.shipItem.qty == 0 ? 0 : (unit.currency.toCNY(unit.amount()) /
+                        unit.shipItem.unit.shipmentQty());
             } else if(Arrays.asList(Shipment.T.AIR, Shipment.T.SEA).contains(shipType)) {
                 // 总运输费用平摊到所有产品
                 int sumQty = 0;

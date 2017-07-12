@@ -111,13 +111,13 @@ public class Payments extends Controller {
     @Check("payments.payforit")
     public static void payForIt(Long id, Long paymentTargetId,
                                 Currency currency, BigDecimal actualPaid,
-                                Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratio_publish_date) {
+                                Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishDate) {
 
         Validation.required("供应商支付账号", paymentTargetId);
         Validation.required("币种", currency);
         Validation.required("具体支付金额", actualPaid);
         Validation.required("汇率", ratio);
-        Validation.required("汇率发布日期", ratio_publish_date);
+        Validation.required("汇率发布日期", ratioPublishDate);
         Validation.min("汇率", ratio, 0);
 
         Payment payment = Payment.findById(id);
@@ -126,7 +126,7 @@ public class Payments extends Controller {
             show(id, null);
         }
 
-        payment.payIt(paymentTargetId, currency, ratio, ratio_publish_date, actualPaid);
+        payment.payIt(paymentTargetId, currency, ratio, ratioPublishDate, actualPaid);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -140,7 +140,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         } else {
             renderJSON(new Ret(true, "更新成功"));
         }

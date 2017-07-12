@@ -1,10 +1,10 @@
 package helper;
 
 import models.market.Selling;
-import models.procure.ProcureUnit;
-import models.whouse.*;
+import models.whouse.InboundUnit;
+import models.whouse.RefundUnit;
+import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import play.mvc.Router;
 import play.templates.JavaExtensions;
 
@@ -37,8 +37,10 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_FR:
             case AMAZON_IT:
                 return String.format("http://www.%s/gp/product/%s", s.market, s.asin);
+            default:
+                return "#";
         }
-        return "#";
+
     }
 
     public static String showRecordLink(StockRecord stockRecord) {

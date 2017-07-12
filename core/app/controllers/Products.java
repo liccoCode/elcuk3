@@ -27,7 +27,9 @@ import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -57,6 +59,15 @@ public class Products extends Controller {
      */
     @Check("products.index")
     public static void index(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        List<Product> prods = p.query();
+        render(prods, p);
+    }
+
+    /**
+     * 展示所有的 Product (物流模块用)
+     */
+    public static void indexForShipment(ProductPost p) {
         if(p == null) p = new ProductPost();
         List<Product> prods = p.query();
         render(prods, p);
@@ -94,6 +105,11 @@ public class Products extends Controller {
         render(pro);
     }
 
+    public static void showAttr(String sku) {
+        Product pro = Product.findByMerchantSKU(sku);
+        render(pro);
+    }
+
     public static void copy(String choseid, String skuid, String base, String extend, String attach) {
         Product pro = Product.copyProduct(choseid, skuid, base, extend, attach);
         render("Products/show.html", pro);
@@ -105,8 +121,6 @@ public class Products extends Controller {
     }
 
     /**
-     * TODO:: 重构
-     *
      * @param pro
      */
     @Check("products.update")
@@ -114,7 +128,7 @@ public class Products extends Controller {
         try {
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
             if(Validation.hasErrors()) {
-                renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.vJson(Validation.errors()));
             }
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
@@ -200,17 +214,6 @@ public class Products extends Controller {
         renderJSON(new Ret());
     }
 
-    //------------------------
-
-    public static void p_sqty_u(SellingQTY q) {
-        try {
-            if(q.isPersistent()) q.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
-        }
-        renderJSON(new Ret(true));
-    }
-
     /**
      * 检查 UPC 上架情况
      */
@@ -261,8 +264,8 @@ public class Products extends Controller {
         StringBuffer buff = new StringBuffer();
         buff.append("[");
         for(Cooperator co : cooperatorList) {
-            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append("\"")
+                    .append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
                     .append("\"").append("},");
         }
         buff.append("]");
@@ -320,7 +323,7 @@ public class Products extends Controller {
     /**
      * 保存 product 附加属性
      */
-    public static void saveAttrs(List<ProductAttr> productAttrs) {
+    public static void saveAttrs(List<ProductAttr> productAttrs, String hsCode) {
         try {
             String log = "";
             for(ProductAttr productAttr : productAttrs) {
@@ -332,11 +335,11 @@ public class Products extends Controller {
                         productAttr.save();
                         log = log + "新增属性:" + productAttr.value;
                     }
-
-                    new ElcukRecord(Messages.get("product.update"),
-                            Messages.get("action.base", log),
+                    Product product = Product.findById(productAttr.product.sku);
+                    product.hs_code = hsCode;
+                    product.save();
+                    new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", log),
                             productAttr.product.sku).save();
-
                 }
             }
             renderJSON(new Ret(true, ""));
@@ -362,6 +365,26 @@ public class Products extends Controller {
                 });
         Collections.sort(atts);
         render(pro);
+    }
+
+    public static void addAttr(String sku, String attr) {
+        Product product = Product.findById(sku);
+        Attribute attribute = Attribute.find("name=?", attr).first();
+        if(!Optional.ofNullable(attribute).isPresent()) {
+            Attribute new_bute = new Attribute();
+            new_bute.name = attr;
+            new_bute.createDate = new Date();
+            new_bute.type = Attribute.T.STRING;
+            new_bute.sort = (int) Attribute.count() + 1;
+            new_bute.createUser = Login.current();
+            new_bute.save();
+            attribute = new_bute;
+        }
+        ProductAttr new_attr = new ProductAttr();
+        new_attr.attribute = attribute;
+        new_attr.product = product;
+        new_attr.save();
+        Products.showAttr(sku);
     }
 
     /**
@@ -465,7 +488,7 @@ public class Products extends Controller {
             if(item != null) {
                 renderJSON(J.json(GTs.MapBuilder
                         .map("name", pro.abbreviation).put("price", item.price.toString())
-                        .put("currency",item.currency.name()).put("period", item.period.toString())
+                        .put("currency", item.currency.name()).put("period", item.period.toString())
                         .put("boxSize", item.boxSize.toString()).build()));
             }
         }

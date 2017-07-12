@@ -65,13 +65,13 @@ public class PaymentTargets extends Controller {
         Validation.required("账户", t.accountUser);
 
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
 
         t.cooper = c;
         t.save();
 
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         renderJSON(new Ret(true, t.cooper.name + "的账户更新成功"));
     }
 

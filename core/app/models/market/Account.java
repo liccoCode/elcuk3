@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
-
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
  * User: wyattpan
@@ -53,6 +52,7 @@ public class Account extends Model {
      * 需要过滤掉的 MerchantId
      */
     public final static Map<String, String> OFFER_IDS = new HashMap<>();
+    private static final long serialVersionUID = -5304090358536948808L;
 
     static {
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
@@ -256,8 +256,7 @@ public class Account extends Model {
                 break;
             default:
                 Logger.warn(
-                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
-                                " is not support!");
+                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
         }
     }
 
@@ -366,8 +365,8 @@ public class Account extends Model {
                 Elements inputs = doc.select("#ap_signin_form input");
 
                 if(inputs.size() == 0) {
-                    Logger.info("WebSite [" + market.toString() +
-                            "] Still have the Session with User [" + this.username + "].");
+                    Logger.info("WebSite [" + market.toString()
+                            + "] Still have the Session with User [" + this.username + "].");
                     FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body,
                             FLog.T.HTTP_ERROR);
                     return false;
@@ -401,8 +400,7 @@ public class Account extends Model {
                 this.cookieStore(market).clearExpired(new Date());
                 return loginSucc;
             default:
-                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market +
-                        " is not support!");
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market + " is not support!");
         }
         return false;
     }
@@ -592,13 +590,13 @@ public class Account extends Model {
         Element oldAmazon = doc.select("#navidWelcomeMsg").first();
         if(oldAmazon != null) {
             String navidWelcomeMsgStr = doc.select("#navidWelcomeMsg").outerHtml();
-            return StringUtils.contains(navidWelcomeMsgStr, "sign-out") ||
-                    StringUtils.contains(navidWelcomeMsgStr, "signout");
+            return StringUtils.contains(navidWelcomeMsgStr, "sign-out")
+                    || StringUtils.contains(navidWelcomeMsgStr, "signout");
         } else {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
-            return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
+            return StringUtils.contains(nav_your_account_flyoutStr, "sign-out")
+                    || StringUtils.contains(nav_your_account_flyoutStr, "signout")
+                    || StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
         }
     }
 

@@ -4,28 +4,28 @@
       <h4 class="alert alert-success">运输单费用信息</h4>
       <table class="table table-bordered table-condensed paymentInfo">
         <tr>
-          <th width="40px;">#</th>
-          <th width="140px;">
+          <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
+          <th width="120px;">
             <abbr rel='tooltip' title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</abbr>
           </th>
-          <th width="60px;">币种</th>
-          <th width="80px;">单价</th>
+          <th width="50px;">币种</th>
+          <th width="100px;">单价</th>
           <th width="80px;">数量</th>
         #{if isExpress}
           <th width="80px;">计费方式</th>
         #{/if}
           <th width="80px;">(3m)均价</th>
           <th width="80px;">(now)均价</th>
-          <th width="80px;">总价</th>
-          <th width="160px">费用关系人</th>
-          <th width="160px">备注</th>
+          <th width="110px;">总价</th>
+          <th width="130px">费用关系人</th>
+          <th width="100px;">备注</th>
           <th width="60px;">申请人</th>
-          <th width="140px;">申请时间</th>
-          <th width="220px;"></th>
+          <th width="100px;">申请时间</th>
+          <th width="240px;"></th>
         </tr>
       #{list items:ship.fees, as:'fee'}
         <tr id='fee_${fee.id}'>
-          <td>${fee.id}</td>
+          <td><input type="checkbox" name="pids" value="${fee.id}"></td>
           <td><span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span></td>
           <td>${fee.currency}</td>
           <td>${fee.currency.symbol()} ${fee.unitPrice.format('#.###')}</td>
@@ -47,16 +47,16 @@
           <td>#{time_tooltip time:fee.createdAt /}</td>
           <td>
               #{power.ck 'paymentunits.fixunitvalue'}
-                <button class="btn btn-mini btn-info">编辑</button>
+                <button class="btn btn-mini btn-info" data-id="${fee.id}">编辑</button>
               #{/power.ck}
               #{power.ck 'paymentunits.destroy'}
-                <button class="btn btn-mini btn-warning">删除</button>
+                <button class="btn btn-mini btn-warning" data-id="${fee.id}">删除</button>
               #{/power.ck}
               #{power.ck 'paymentunits.approve'}
-                <button class="btn btn-mini btn-success">批准</button>
+                <button class="btn btn-mini btn-success" data-id="${fee.id}">批准</button>
               #{/power.ck}
               #{power.ck 'paymentunits.deny'}
-                <button class="btn btn-mini btn-danger">驳回</button>
+                <button class="btn btn-mini btn-danger" data-id="${fee.id}">驳回</button>
               #{/power.ck}
           </td>
         </tr>
@@ -69,12 +69,22 @@
   <div class="row-fluid">
     <div class="span12">
       <form class="form-inline span6 add_payment" method="GET">
-        <label>费用类型
-            #{select 'fee.feeType.name', items: feeTypes, labelProperty:'nickName', valueProperty:'name', as:'type', class: 'input-small'}#{/select}
-        </label>
+
+        <div class="input-prepend input-append inline">
+          <select name="fee.feeType.name" class="inline selectize" style="width:120px;">
+            <option value="">费用类型</option>
+              #{list items:feeTypes,as:'f'}
+                <option value="${f.name}">${f.nickName}</option>
+              #{/list}
+          </select>
+        </div>
 
         <label>币种
-            #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', value: 'CNY'}#{/select}
+          <select name="fee.currency" class="inline input-small " style="width:120px;">
+              #{list items:helper.Currency.values(),as:'c'}
+                <option value="${c}" ${c.name()=='CNY'?'selected':''}>${c}</option>
+              #{/list}
+          </select>
         </label>
 
         <label>单价

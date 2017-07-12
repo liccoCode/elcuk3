@@ -6,7 +6,7 @@
 # server 'example.com', user: 'deploy', roles: %w{app db web}, my_property: :my_value
 # server 'example.com', user: 'deploy', roles: %w{app web}, other_property: :other_value
 # server 'db.example.com', user: 'deploy', roles: %w{db}
-set :zone_identifier, '67bb7f5bb1fa7d5944b96838a34e162a'
+set :zone_identifier, 'd442a7b2328bb3d2755d9e83d7c885e8'
 server '45.32.141.39', user: 'root', roles: %w{app}, production: true
 
 

@@ -41,9 +41,10 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Shipments extends Controller {
+
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
-        List<Whouse> whouses = Whouse.findAll();
+        List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
         List<Cooperator> cooperators = Cooperator.shippers();
         renderArgs.put("whouses", whouses);
         renderArgs.put("cooperators", cooperators);
@@ -169,7 +170,7 @@ public class Shipments extends Controller {
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         //TODO 需要添加 FeeType 的数据
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("shippers", Cooperator.shippers());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");

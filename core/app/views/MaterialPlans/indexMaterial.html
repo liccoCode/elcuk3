@@ -2,6 +2,7 @@
 #{set title:"物料库存列表"  /}
 
 #{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
     #{script 'materialPlans/indexMaterial.es6'/}
 #{/set}
 <style>
@@ -26,9 +27,9 @@
 
         <select name="p.cooperId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
-          #{list items:cooperators, as:'sp'}
-            <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-          #{/list}
+        #{list items:cooperators, as:'sp'}
+          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+        #{/list}
         </select>
 
         <div class="input-prepend input-append inline">
@@ -39,8 +40,8 @@
 
         </div>
         <div class="input-prepend input-append inline">
-          <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单
-                   </a>
+          <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单</a>
+        </div>
       </div>
     </div>
   </form>
@@ -66,12 +67,12 @@
         #{list items:materials, as:'m'}
           <tr>
             <td>
-            #{if m.surplusConfirmQty() > 0}
-              <label class="checkbox">
-                <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
-                       cooperName="${m.cooperators()}">
-              </label>
-            #{/if}
+                #{if m.surplusConfirmQty() > 0}
+                  <label class="checkbox">
+                    <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
+                           cooperName="${m.cooperators()}">
+                  </label>
+                #{/if}
             </td>
             <td>${m.code}</td>
             <td>${m.name}</td>
@@ -96,6 +97,6 @@
       </div>
     </div>
 
-    <input type="hidden" id="name_form" name="planName" >
+    <input type="hidden" id="name_form" name="planName">
   </form>
 </div>

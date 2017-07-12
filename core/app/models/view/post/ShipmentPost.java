@@ -37,7 +37,7 @@ public class ShipmentPost extends Post<Shipment> {
         this.from = now.minusDays(7).toDate();
         this.to = now.plusDays(7).toDate();
         this.states = Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM, Shipment.S.SHIPPING,
-                Shipment.S.CLEARANCE, Shipment.S.PACKAGE, Shipment.S.BOOKED, Shipment.S.DELIVERYING,
+                Shipment.S.CLEARANCE, Shipment.S.BOOKED, Shipment.S.DELIVERYING,
                 Shipment.S.RECEIPTD, Shipment.S.RECEIVING, Shipment.S.DONE);
         this.perSize = 50;
     }

@@ -278,7 +278,7 @@ public class ProcureUnits extends Controller {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
 
-        if(unit.shipType == Shipment.T.EXPRESS) {
+        if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
         } else {
             Validation.required("运输单", shipmentId);
@@ -291,10 +291,8 @@ public class ProcureUnits extends Controller {
 
         if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
-        //生成质检任务
-        //unit.triggerCheck();
 
-        if(unit.shipType != Shipment.T.EXPRESS) {
+        if(!Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Shipment ship = Shipment.findById(shipmentId);
             ship.addToShip(unit);
         }
@@ -866,5 +864,4 @@ public class ProcureUnits extends Controller {
         flash.success("操作成功");
         Shipments.show(shipmentId);
     }
-
 }

@@ -58,13 +58,13 @@ public class PDFs {
      * 目前主要是给每月自动生成发票的job用
      * @param folder
      * @param pdfName
-     * @param app_template
+     * @param appTemplate
      * @param args
      */
-    public static void templateAsPDFWithNoRequest(File folder, String pdfName, String app_template, PDF.Options options,
+    public static void templateAsPDFWithNoRequest(File folder, String pdfName, String appTemplate, PDF.Options options,
                                                   Map<String, Object> args) {
         try {
-            String content = TemplateLoader.load(app_template).render(args);
+            String content = TemplateLoader.load(appTemplate).render(args);
             IHtmlToPdfTransformer.PageSize pageSize = options.pageSize;
             pdfName = StringUtils.replace(pdfName, "/", "|");
             OutputStream out = new FileOutputStream(folder.getPath() + "/" + pdfName);

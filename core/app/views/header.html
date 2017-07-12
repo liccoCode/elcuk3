@@ -95,7 +95,9 @@
                 #{power.ck "deliverplans.index"}
                   <li><a href="@{Deliverplans.index()}">出货单</a></li>
                 #{/power.ck}
-
+                #{power.ck "procures.datapanel"}
+                  <li><a href="@{ProcureUnits.dataPanel()}">日均采购计划</a></li>
+                #{/power.ck}
                 #{power.ck "materialpurchases.index"}
                   <li class="divider"></li>
                   <li><a href="@{MaterialPurchases.index()}">物料采购单</a></li>
@@ -148,9 +150,13 @@
                 #{/power.ck}
                 #{power.ck "shipmentreports.lossrate"}
                   <li><a href="@{ShipmentReports.lossRateReport()}">运输丢失率统计报表</a></li>
+                  <li><a href="@{ShipmentReports.monthlyShipmentReport()}">单月物流发货量报表</a></li>
+                  <li><a href="@{ShipmentReports.monthlyShipmentPrescription()}">单月运输时效统计</a></li>
                 #{/power.ck}
-              <li><a href="@{ShipmentReports.monthlyShipmentReport()}">单月物流发货量报表</a></li>
-              <li><a href="@{ShipmentReports.monthlyShipmentPrescription()}">单月运输时效统计</a></li>
+                #{power.ck "products.index"}
+                  <li class="divider"></li>
+                  <li><a href="@{Products.indexForShipment()}">产品属性列表</a></li>
+                #{/power.ck}
             </ul>
           </li>
         #{/power.ck}
@@ -174,6 +180,10 @@
                 #{/power.ck}
                 #{power.ck "sku.salecostprofitanalyse"}
                   <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
+                #{/power.ck}
+                #{power.ck "materialoutbounds.index"}
+                  <li class="divider"></li>
+                  <li><a href="@{Applys.materials()}">物料请款单列表</a></li>
                 #{/power.ck}
             </ul>
           </li>

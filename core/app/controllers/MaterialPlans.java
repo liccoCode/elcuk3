@@ -5,6 +5,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
 import models.material.Material;
+import models.material.MaterialApply;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
 import models.procure.Cooperator;
@@ -14,6 +15,7 @@ import models.view.post.MaterialPlanPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.i18n.Messages;
@@ -44,6 +46,14 @@ public class MaterialPlans extends Controller {
         renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
+    @Before(only = {"index"})
+    public static void beforeIndex(MaterialPost p) {
+        List<Cooperator> suppliers = Cooperator.suppliers();
+        List<MaterialApply> avaliableApplies = MaterialApply
+                .unPaidApplies(p == null ? null : p.cooperId);
+        renderArgs.put("suppliers", suppliers);
+        renderArgs.put("avaliableApplies", avaliableApplies);
+    }
 
     /**
      * 查询物料采购余量信息
@@ -223,7 +233,7 @@ public class MaterialPlans extends Controller {
             if(plan.receipt == MaterialPlan.R.WAREHOUSE) {
                 receipt = true;
             }
-            render("/MaterialPlans/show.html",dp, units, qtyEdit, receipt);
+            render("/MaterialPlans/show.html", dp, units, qtyEdit, receipt);
         } else {
             new ElcukRecord(Messages.get("materialPlans.confirm"), String.format("确认[物料出货单] %s", id), id).save();
             flash.success("物料出货单 %s 确认成功.", id);
@@ -304,5 +314,47 @@ public class MaterialPlans extends Controller {
         }
         flash.success("物料审核成功.");
         index(new MaterialPlanPost());
+    }
+
+
+    /**
+     * 为出货单提交请款单申请
+     */
+    @Check("deliveryments.deliverymenttoapply")
+    public static void materialPlanToApply(List<String> pids, MaterialPlanPost p, Long applyId) {
+        if(pids == null) pids = new ArrayList<>();
+        if(pids.size() <= 0) {
+            flash.error("请选择需纳入请款的出货单(相同供应商).");
+            index(p);
+        }
+        MaterialApply apply = MaterialApply.findById(applyId);
+        if(apply == null) apply = MaterialApply.buildMaterialApply(pids);
+        else apply.appendMaterialApply(pids);
+
+        if(apply == null || Validation.hasErrors()) {
+            for(Error error : Validation.errors()) {
+                flash.error(error.message());
+            }
+            index(p);
+        } else {
+            flash.success("物料请款单 %s 申请成功.", apply.serialNumber);
+            Applys.material(apply.id);
+        }
+    }
+
+    /**
+     * 将出货单从其所关联的请款单中剥离开
+     * @param id
+     */
+    public static void departProcureApply(String id) {
+        MaterialPlan dmt = MaterialPlan.findById(id);
+        long applyId = dmt.apply.id;
+        dmt.departFromProcureApply();
+
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 剥离成功.", id);
+        Applys.material(applyId);
     }
 }

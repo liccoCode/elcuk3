@@ -8,15 +8,12 @@ import models.finance.Apply;
 import models.finance.FeeType;
 import models.finance.ProcureApply;
 import models.finance.TransportApply;
+import models.material.MaterialApply;
 import models.procure.Cooperator;
 import models.procure.Shipment;
 import models.view.Ret;
-import models.view.post.ProcreApplyPost;
-import models.view.post.ShipmentPost;
-import models.view.post.TransApplyShipPost;
-import models.view.post.TransportApplyPost;
+import models.view.post.*;
 import play.data.validation.Validation;
-import play.db.helper.SqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -33,7 +30,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Applys extends Controller {
 
-    @Before(only = {"procures", "transports"})
+    @Before(only = {"procures", "transports", "materials"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);
@@ -114,7 +111,7 @@ public class Applys extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.departFromApply();
         if(Validation.hasErrors())
-            renderJSON(Webs.VJson(Validation.errors()));
+            renderJSON(Webs.vJson(Validation.errors()));
         renderJSON(new Ret(true, "运输单剥离成功"));
     }
 
@@ -153,5 +150,21 @@ public class Applys extends Controller {
         TransportApply apply = TransportApply.findById(applyId);
         notFoundIfNull(apply);
         renderJSON(J.json(apply.pickSource(search)));
+    }
+
+    /**
+     * 采购请款单
+     */
+    @Check("applys.procure")
+    public static void material(Long id) {
+        MaterialApply apply = MaterialApply.findById(id);
+        render(apply);
+    }
+
+    @Check("applys.index")
+    public static void materials(MaterialApplyPost p) {
+        if(p == null) p = new MaterialApplyPost();
+        List<Apply> applyes = p.query();
+        render(applyes, p);
     }
 }

@@ -29,9 +29,6 @@ public class ShipmentsHelper extends JavaExtensions {
         else if(shipment.state == Shipment.S.CLEARANCE) {
             rightDate = new DateTime(shipment.dates.atPortDate)
                     .plusDays(shipment.config("clearance").toInteger());
-        } else if(shipment.state == Shipment.S.PACKAGE) {
-            rightDate = new DateTime(shipment.dates.pickGoodDate)
-                    .plusDays(shipment.config("pick").toInteger());
         } else if(shipment.state == Shipment.S.BOOKED) {
             rightDate = new DateTime(shipment.dates.bookDate)
                     .plusDays(shipment.config("book").toInteger());
@@ -73,11 +70,6 @@ public class ShipmentsHelper extends JavaExtensions {
             lastDate = shipment.dates.atPortDate;
         }
 
-        if(shipment.state.ordinal() >= Shipment.S.PACKAGE.ordinal()) {
-            totalDays -= shipment.config("clearance").toInteger();
-            lastDate = shipment.dates.pickGoodDate;
-        }
-
         if(shipment.state.ordinal() >= Shipment.S.BOOKED.ordinal()) {
             totalDays -= shipment.config("pick").toInteger();
             lastDate = shipment.dates.bookDate;
@@ -107,10 +99,6 @@ public class ShipmentsHelper extends JavaExtensions {
         if(state == Shipment.S.CLEARANCE) {
             if(shipment.dates.atPortDate != null && shipment.dates.beginDate != null) {
                 diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
-            }
-        } else if(state == Shipment.S.PACKAGE) {
-            if(shipment.dates.pickGoodDate != null && shipment.dates.atPortDate != null) {
-                diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
             }
         } else if(state == Shipment.S.BOOKED) {
             if(shipment.dates.bookDate != null && shipment.dates.pickGoodDate != null) {

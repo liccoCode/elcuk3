@@ -378,7 +378,7 @@ public class Attach extends Model {
         BasicCookieStore cookieStore = new BasicCookieStore();
         cookieStore.addCookies((BasicClientCookie[]) Arrays.asList(
                 HTTP.buildCrossDomainCookie("kod_name", "elcuk2"),
-                HTTP.buildCrossDomainCookie("kod_token", Webs.Md5(User.userMd5("elcuk2"))),
+                HTTP.buildCrossDomainCookie("kod_token", Webs.md5(User.userMd5("elcuk2"))),
                 HTTP.buildCrossDomainCookie("kod_user_language", "zh_CN"),
                 HTTP.buildCrossDomainCookie("kod_user_online_version", "check-at-1418867695")
         ).toArray());
