@@ -11,7 +11,6 @@ import models.market.M;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
-import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
