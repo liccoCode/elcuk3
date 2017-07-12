@@ -102,8 +102,8 @@ public class HTTP {
                     case HttpStatus.SC_MOVED_TEMPORARILY:
                         return (method.equalsIgnoreCase(HttpGet.METHOD_NAME)
                                 || method.equalsIgnoreCase(HttpPost.METHOD_NAME)
-                                || method.equalsIgnoreCase(HttpHead.METHOD_NAME)) &&
-                                locationHeader != null;
+                                || method.equalsIgnoreCase(HttpHead.METHOD_NAME))
+                                && locationHeader != null;
                     case HttpStatus.SC_MOVED_PERMANENTLY:
                     case HttpStatus.SC_TEMPORARY_REDIRECT:
                         return method.equalsIgnoreCase(HttpGet.METHOD_NAME)

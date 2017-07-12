@@ -140,7 +140,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         } else {
             renderJSON(new Ret(true, "更新成功"));
         }

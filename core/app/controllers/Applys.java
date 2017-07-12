@@ -111,7 +111,7 @@ public class Applys extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.departFromApply();
         if(Validation.hasErrors())
-            renderJSON(Webs.VJson(Validation.errors()));
+            renderJSON(Webs.vJson(Validation.errors()));
         renderJSON(new Ret(true, "运输单剥离成功"));
     }
 

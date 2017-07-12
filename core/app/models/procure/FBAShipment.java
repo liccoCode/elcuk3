@@ -530,7 +530,7 @@ public class FBAShipment extends Model {
                 feedCountDigest.append(row.get("count"));
             }
         }
-        return Webs.Md5(String.format("%s|%s", Feed.pageCacheKey(FBAShipment.class, this.id),
+        return Webs.md5(String.format("%s|%s", Feed.pageCacheKey(FBAShipment.class, this.id),
                 feedCountDigest.toString()));
     }
 
