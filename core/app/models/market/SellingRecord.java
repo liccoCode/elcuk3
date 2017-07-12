@@ -109,7 +109,7 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Integer units = 0;
 
-    // TODO: 所有与金钱相关的, 币种统一为 USD (按照当天计算时的 google 财经汇率计算)
+    // 所有与金钱相关的, 币种统一为 USD (按照当天计算时的 google 财经汇率计算)
 
     /**
      * 销售额(通过系统计算)
@@ -582,31 +582,31 @@ public class SellingRecord extends GenericModel {
 
     @Override
     public String toString() {
-        return "SellingRecord{" +
-                "selling=" + selling +
-                ", account=" + account +
-                ", market=" + market +
-                ", id='" + id + '\'' +
-                ", sessions=" + sessions +
-                ", pageViews=" + pageViews +
-                ", orders=" + orders +
-                ", salePrice=" + salePrice +
-                ", units=" + units +
-                ", sales=" + sales +
-                ", income=" + income +
-                ", amzFee=" + amzFee +
-                ", fbaFee=" + fbaFee +
-                ", procureCost=" + procureCost +
-                ", procureNumberSum=" + procureNumberSum +
-                ", expressCost=" + expressCost +
-                ", airCost=" + airCost +
-                ", seaCost=" + seaCost +
-                ", profit=" + profit +
-                ", costProfitRatio=" + costProfitRatio +
-                ", saleProfitRatio=" + saleProfitRatio +
-                ", totalSales=" + totalSales +
-                ", totalProfit=" + totalProfit +
-                ", date=" + date +
-                '}';
+        return "SellingRecord{"
+                + "selling=" + selling
+                + ", account=" + account
+                + ", market=" + market
+                + ", id='" + id + '\''
+                + ", sessions=" + sessions
+                + ", pageViews=" + pageViews
+                + ", orders=" + orders
+                + ", salePrice=" + salePrice
+                + ", units=" + units
+                + ", sales=" + sales
+                + ", income=" + income
+                + ", amzFee=" + amzFee
+                + ", fbaFee=" + fbaFee
+                + ", procureCost=" + procureCost
+                + ", procureNumberSum=" + procureNumberSum
+                + ", expressCost=" + expressCost
+                + ", airCost=" + airCost
+                + ", seaCost=" + seaCost
+                + ", profit=" + profit
+                + ", costProfitRatio=" + costProfitRatio
+                + ", saleProfitRatio=" + saleProfitRatio
+                + ", totalSales=" + totalSales
+                + ", totalProfit=" + totalProfit
+                + ", date=" + date
+                + '}';
     }
 }

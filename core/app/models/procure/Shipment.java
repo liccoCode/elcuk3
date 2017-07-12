@@ -1336,8 +1336,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? " +
-                        "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? "
+                        + "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
                 User.COR.valueOf(OperatorConfig.getVal("brandname"))).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
@@ -1367,7 +1367,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @return
      */
-    public static List<iExpress> Express() {
+    public static List<iExpress> express() {
         return Arrays.asList(iExpress.values());
     }
 
@@ -1460,8 +1460,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
                         username, System.getenv(Constant.ROOT_URL), this.id);
                 List<ProcureUnit> punits = ProcureUnit
-                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
-                                " LEFT JOIN si.shipment sp where sp.id=?", this.id).fetch();
+                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si"
+                                + " LEFT JOIN si.shipment sp where sp.id=?", this.id).fetch();
                 for(ProcureUnit pu : punits) {
                     String email = pu.handler.email;
                     if(StringUtils.isNotBlank(email)) {

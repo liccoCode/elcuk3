@@ -230,7 +230,8 @@ public class JobRequest extends Model {
         if(job == null || (System.currentTimeMillis() - job.requestDate.getTime()) > TimeUnit.HOURS.toMillis(interval)) {
             JobRequest njob = new JobRequest();
             njob.account = acc;
-            njob.requestDate = njob.lastUpdateDate = new Date();
+            njob.requestDate = new Date();
+            njob.lastUpdateDate = new Date();
             njob.state = S.NEW;
             njob.type = type;
             njob.marketplaceId = mid;
@@ -343,19 +344,19 @@ public class JobRequest extends Model {
 
     @Override
     public String toString() {
-        return "JobRequest{" +
-                "account=" + account +
-                ", requestDate=" + requestDate +
-                ", lastUpdateDate=" + lastUpdateDate +
-                ", type=" + type +
-                ", state=" + state +
-                ", requestId='" + requestId + '\'' +
-                ", reportId='" + reportId + '\'' +
-                ", procressState='" + procressState + '\'' +
-                ", marketplaceId=" + marketplaceId +
-                ", path='" + path + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                '}';
+        return "JobRequest{"
+                + "account=" + account
+                + ", requestDate=" + requestDate
+                + ", lastUpdateDate=" + lastUpdateDate
+                + ", type=" + type
+                + ", state=" + state
+                + ", requestId='" + requestId + '\''
+                + ", reportId='" + reportId + '\''
+                + ", procressState='" + procressState + '\''
+                + ", marketplaceId=" + marketplaceId
+                + ", path='" + path + '\''
+                + ", startDate=" + startDate
+                + ", endDate=" + endDate
+                + '}';
     }
 }

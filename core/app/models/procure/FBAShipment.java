@@ -256,12 +256,8 @@ public class FBAShipment extends Model {
      * @return
      */
     public boolean afterReceving() {
-        if(this.state == S.RECEIVING || this.state == S.CLOSED ||
-                this.state == S.CANCELLED/*像签收有误差的时候人工取消,会是 CANCEL 状态*/) {
-            return true;
-        } else {
-            return false;
-        }
+        /*像签收有误差的时候人工取消,会是 CANCEL 状态*/
+        return this.state == S.RECEIVING || this.state == S.CLOSED || this.state == S.CANCELLED;
     }
 
 
@@ -385,8 +381,8 @@ public class FBAShipment extends Model {
     }
 
     public F.Option<Date> getEarliestDate() {
-        List<String> records = Arrays.asList(StringUtils.split(this.records, "\n"));
-        return AmazonFBAInventoryReceivedJob.Rows.getEarliestDate(records);
+        List<String> list = Arrays.asList(StringUtils.split(this.records, "\n"));
+        return AmazonFBAInventoryReceivedJob.Rows.getEarliestDate(list);
     }
 
     /**
