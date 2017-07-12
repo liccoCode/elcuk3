@@ -90,7 +90,7 @@
       <td>
         <select name="ship.internationExpress">
           <option value="">选择快递商</option>
-        #{list items:models.procure.Shipment.Express(), as:'i'}
+        #{list items:models.procure.Shipment.express(), as:'i'}
           <option value="${i.name()}" ${i.name()==ship.internationExpress?.name() ? 'selected' : ''}>${i.name()}</option>
         #{/list}
         </select>

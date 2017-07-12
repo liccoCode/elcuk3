@@ -180,9 +180,9 @@ public class DeliverPlan extends GenericModel {
      * 将 PLAN 状态的 ProcureUnit 添加到这个出货单中, 用户制作出货单
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = procureUnits.get(0).cooperator;
+        for(ProcureUnit unit : procureUnits) {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
@@ -191,15 +191,15 @@ public class DeliverPlan extends GenericModel {
         }
         new ElcukRecord(Messages.get("deliverplan.addunit"), Messages.get("deliverplan.addunit.msg", pids, this.id),
                 this.id).save();
-        return units;
+        return procureUnits;
     }
 
     /**
      * 将指定 ProcureUnit 从 出货单 中删除
      */
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : procureUnits) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
             } else {
@@ -207,12 +207,12 @@ public class DeliverPlan extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
+        this.units.removeAll(procureUnits);
         this.save();
 
-        new ElcukRecord(Messages.get("deliverplan.delunit"),
-                Messages.get("deliverplan.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        new ElcukRecord(Messages.get("deliverplan.delunit"), Messages.get("deliverplan.delunit.msg", pids, this.id),
+                this.id).save();
+        return procureUnits;
     }
 
     /**
@@ -222,9 +222,9 @@ public class DeliverPlan extends GenericModel {
         if(this.units.size() == 0) {
             return ProcureUnit.find("planstage=? AND attrs.planQty > 0", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
         } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
+            Cooperator c = this.units.get(0).cooperator;
             return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=? AND attrs.planQty>0",
-                    cooperator, ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY).fetch();
+                    c, ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY).fetch();
         }
     }
 

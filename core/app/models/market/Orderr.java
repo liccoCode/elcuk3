@@ -603,11 +603,7 @@ public class Orderr extends GenericModel {
                 cost = cost + new Float(rowobject.toString());
             }
         }
-        if(rows.size() <= 0 || cost > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(rows.size() <= 0 || cost > 0);
     }
 
     /**
