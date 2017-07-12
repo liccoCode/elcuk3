@@ -257,11 +257,11 @@ public class Orderr extends GenericModel {
     /**
      * 是否使用 商务订单(用于JRockend 发送合同)
      */
-    public int businessOrder;
+    public boolean businessOrder;
     /**
      * 是否发送商务合同(用于JRockend 发送合同)
      */
-    public int sendBusiness;
+    public boolean sendBusiness;
 
 
     /**
@@ -291,16 +291,14 @@ public class Orderr extends GenericModel {
          */
         switch(this.market) {
             case AMAZON_UK:
-                return "Thanks for purchasing from EasyAcc on " +
-                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
-                        this.orderId + ")";
+                return "Thanks for purchasing from EasyAcc on " + JavaExtensions.capFirst(this.market.toString())
+                        + " (Order: " + this.orderId + ")";
             case AMAZON_US:
-                return "Thanks for purchasing from EasyAcc on " +
-                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
-                        this.orderId + ")";
+                return "Thanks for purchasing from EasyAcc on " + JavaExtensions.capFirst(this.market.toString())
+                        + " (Order: " + this.orderId + ")";
             case AMAZON_DE:
-                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: " +
-                        this.orderId + ")";
+                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: "
+                        + this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
@@ -505,8 +503,8 @@ public class Orderr extends GenericModel {
             if(item.quantity == null) item.quantity = 0;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
-                itemamount = itemamount +
-                        new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                itemamount = itemamount
+                        + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
                                 .divide(new BigDecimal(item.quantity), 2, 4)
                                 .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
                                 .setScale(2, 4).floatValue();
@@ -514,8 +512,8 @@ public class Orderr extends GenericModel {
         }
 
         for(SaleFee fee : this.fees) {
-            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
-                    fee.type.name.equals("giftwrap")) && fee.cost > 0) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge")
+                    || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
                 totalamount = totalamount + fee.cost;
                 itemamount = itemamount + new BigDecimal(fee.cost).divide(
                         new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
@@ -605,7 +603,6 @@ public class Orderr extends GenericModel {
                 cost = cost + new Float(rowobject.toString());
             }
         }
-
         if(rows.size() <= 0 || cost > 0) {
             return false;
         } else {
@@ -670,9 +667,9 @@ public class Orderr extends GenericModel {
 
     public String showItemSku() {
         String show = "";
-        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
-        if(items != null && items.size() > 0) {
-            for(OrderItem item : items) {
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
                 show += item.product.sku + ";";
             }
 
@@ -682,9 +679,9 @@ public class Orderr extends GenericModel {
 
     public String showPromotionIDs() {
         String show = "";
-        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
-        if(items != null && items.size() > 0) {
-            for(OrderItem item : items) {
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
                 if(StringUtils.isNotBlank(item.promotionIDs)) {
                     show += item.promotionIDs + ";";
                 }
@@ -695,9 +692,9 @@ public class Orderr extends GenericModel {
 
     public String showDiscountPrice() {
         String show = "";
-        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
-        if(items != null && items.size() > 0) {
-            for(OrderItem item : items) {
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
                 if(item.discountPrice != null) {
                     show += item.discountPrice + ";";
                 }
@@ -735,8 +732,8 @@ public class Orderr extends GenericModel {
 
         if(this.fees != null && this.fees.size() > 0) {
             for(SaleFee fee : this.fees) {
-                if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") ||
-                        fee.type.name.equals("giftwrap") && fee.cost > 0) {
+                if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge")
+                        || fee.type.name.equals("giftwrap") && fee.cost > 0) {
                     invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()), 2,
                             BigDecimal.ROUND_HALF_DOWN).floatValue());
                 }
