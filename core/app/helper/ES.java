@@ -17,6 +17,10 @@ import java.util.concurrent.TimeUnit;
  * Time: 4:19 PM
  */
 public class ES {
+
+    private ES() {
+    }
+
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
         return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search",
                 builder.toString());
