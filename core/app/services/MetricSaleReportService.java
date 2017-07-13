@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -53,7 +53,7 @@ public class MetricSaleReportService {
      * @return
      */
     public Float countSales(Date from, Date to, M market, String sellingId) {
-        SumBuilder builder = AggregationBuilders.sum("quantity").field("quantity");
+        SumAggregationBuilder builder = AggregationBuilders.sum("quantity").field("quantity");
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(filterbuilder(Dates.morning(from), Dates.night(to), market, sellingId))
                 .aggregation(builder)
@@ -70,7 +70,7 @@ public class MetricSaleReportService {
      * @return
      */
     public Float countSalesAmount(Date from, Date to, M market, String sellingId) {
-        SumBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
+        SumAggregationBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query((filterbuilder(Dates.morning(from), Dates.night(to), market, sellingId))
                         .must(QueryBuilders.termQuery("fee_type", "productcharges")))
