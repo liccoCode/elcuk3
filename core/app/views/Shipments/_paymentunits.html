@@ -71,10 +71,10 @@
       <form class="form-inline span6 add_payment" method="GET">
 
         <div class="input-prepend input-append inline">
-          <select name="fee.feeType.name" class="inline selectize" style="width:120px;">
+          <select name="fee.feeType.name" class="inline selectize" style="width:180px;">
             <option value="">费用类型</option>
               #{list items:feeTypes,as:'f'}
-                <option value="${f.name}">${f.nickName}</option>
+                <option value="${f.name}">${f.nickName}#{if f.shortcut} (${f.shortcut}) #{/if}</option>
               #{/list}
           </select>
         </div>

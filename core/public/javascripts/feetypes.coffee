@@ -17,7 +17,6 @@ $ ->
         LoadMask.unmask()
     )
 
-
   $("button.delete").click ->
     return unless confirm('确认删除这个费用类型吗?!')
     self = @
@@ -33,5 +32,11 @@ $ ->
       finally
         LoadMask.unmask()
     )
+
+  $("#show_modal").click ->
+    $("#create_modal").modal('show')
+
+  $("#submitCreateBtn").click ->
+    $("#create_form").submit()
 
 
