@@ -74,13 +74,13 @@ public class SaleReportsJob extends BaseJob {
             Matcher matcher = CATEGORYID.matcher(sid);
             String categoryId = matcher.find() ? matcher.group() : null;
             String sku = Selling.sidToSKU(sid);
-            M market = Selling.sidToMarket(sid);
+            M m = Selling.sidToMarket(sid);
 
-            Float sales = service.countSales(from, to, market, sid);
-            Float salesAmount = service.countSalesAmount(from, to, market, sid);
+            Float sales = service.countSales(from, to, m, sid);
+            Float salesAmount = service.countSalesAmount(from, to, m, sid);
 
             if(sales != 0 || salesAmount != 0) {
-                dtos.add(new SaleReportDTO(categoryId.length() <= 3 ? categoryId : "", sku, sid, market,
+                dtos.add(new SaleReportDTO(categoryId.length() <= 3 ? categoryId : "", sku, sid, m,
                         (float) (Math.round(sales * 100)) / 100, (float) (Math.round(salesAmount * 100)) / 100));
             }
         }

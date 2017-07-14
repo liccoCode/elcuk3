@@ -17,6 +17,10 @@ import java.util.List;
  * Time: 5:55 PM
  */
 public class Reflects {
+
+    private Reflects() {
+    }
+
     public static List<String> updateAndLogChanges(Object instance, String attr, Object value) {
         return updateAndLogChanges(instance, attr, null, value);
     }

@@ -18,6 +18,10 @@ import java.util.Date;
  * Time: 4:43 PM
  */
 public class DBUtils {
+
+    private DBUtils() {
+    }
+
     private static Logger loger = LoggerFactory.getLogger(DBUtils.class);
 
     /**

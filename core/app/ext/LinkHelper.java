@@ -29,8 +29,9 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, market.toString(), r.userid);
+            default:
+                return "#";
         }
-        return "#";
     }
 
     public static String userFeedbackink(Feedback f) {
@@ -46,8 +47,9 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, f.market, f.orderr.userid);
+            default:
+                return "#";
         }
-        return "#";
     }
 
     public static String reviewLink(AmazonListingReview review) {
@@ -75,8 +77,9 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
+            default:
+                return "#";
         }
-        return "#";
     }
 
     public static String searchAsinByUPCLink(M market, String upc) {
@@ -101,8 +104,9 @@ public class LinkHelper extends JavaExtensions {
                 return String.format(baseAmazon, selling.market.toString(), selling.asin);
             case EBAY_UK:
                 return String.format(baseEbay, selling.market.toString(), selling.asin);
+            default:
+                return "#";
         }
-        return "#";
     }
 
     /**
@@ -116,19 +120,20 @@ public class LinkHelper extends JavaExtensions {
         //http://www.ebay.co.uk/itm/170724459305
         String baseEbay = "http://www.%s/itm/%s";
         switch(listing.market) {
-            case AMAZON_CA:
             case AMAZON_US:
             case AMAZON_UK:
             case AMAZON_DE:
             case AMAZON_FR:
+            case AMAZON_CA:
             case AMAZON_ES:
             case AMAZON_JP:
             case AMAZON_IT:
                 return String.format(baseAmazon, listing.market.toString(), listing.asin);
             case EBAY_UK:
                 return String.format(baseEbay, listing.market.toString(), listing.asin);
+            default:
+                return "#";
         }
-        return "#";
     }
 
     public static String asinLink(AnalyzeDTO dto) {
@@ -153,8 +158,8 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_IT:
             case AMAZON_JP:
             case AMAZON_US:
-                return "https://sellercentral." + orderr.market.toString() +
-                        "/gp/orders-v2/details?orderID=" + orderr.orderId;
+                return "https://sellercentral." + orderr.market.toString()
+                        + "/gp/orders-v2/details?orderID=" + orderr.orderId;
             case EBAY_UK:
             default:
                 return "";
@@ -172,9 +177,9 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_IT:
             case AMAZON_JP:
             case AMAZON_US:
-                return "https://sellercentral." + fba.account.type.toString() +
-                        "/gp/fba/inbound-shipment-workflow/index.html#" +
-                        fba.shipmentId+"/summary/tracking";
+                return "https://sellercentral." + fba.account.type.toString()
+                        + "/gp/fba/inbound-shipment-workflow/index.html#"
+                        + fba.shipmentId + "/summary/tracking";
             case EBAY_UK:
             default:
                 return "";

@@ -299,8 +299,8 @@ public class InboundUnit extends Model {
      * @return
      */
     public static String isAllInbound(Long id) {
-        List<Inbound> inbounds = Inbound.find("SELECT DISTINCT i FROM Inbound i LEFT JOIN i.units u " +
-                "WHERE i.status <> ? AND u.unit.id = ? ", Inbound.S.End, id).fetch();
+        List<Inbound> inbounds = Inbound.find("SELECT DISTINCT i FROM Inbound i LEFT JOIN i.units u "
+                + "WHERE i.status <> ? AND u.unit.id = ? ", Inbound.S.End, id).fetch();
         if(inbounds.size() > 0) {
             return inbounds.get(0).id;
         } else {
@@ -333,8 +333,8 @@ public class InboundUnit extends Model {
     }
 
     public boolean validBoxInfoIsComplete() {
-        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0 ||
-                this.mainBox.height == 0)
+        if(this.mainBox == null || this.mainBox.num == 0 || this.mainBox.length == 0 || this.mainBox.width == 0
+                || this.mainBox.height == 0)
             return false;
         int total_main = this.mainBox.num * this.mainBox.boxNum;
         int total_last = this.lastBox.num * this.lastBox.boxNum;

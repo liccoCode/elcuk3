@@ -46,7 +46,7 @@ public class CooperatorPost extends Post<Cooperator> {
             }
             sql.append(" AND c.projectName = ? ");
             params.add(user.projectName);
-        } 
+        }
 
         sql.append(" ORDER BY c.name ASC ");
         return new F.T2<>(sql.toString(), params);

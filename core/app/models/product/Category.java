@@ -6,8 +6,6 @@ import helper.Caches;
 import helper.DBUtils;
 import models.embedded.CategorySettings;
 import models.market.M;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
@@ -83,10 +81,10 @@ public class Category extends GenericModel {
      * @param brandIds
      */
     public void bindBrands(List<String> brandIds) {
-        List<Brand> brands = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
+        List<Brand> brandList = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
         // 过滤出不存在与此 Category 的 brand
-        CollectionUtils.filter(brands, new FilterUnBrands(this.brands));
-        this.brands.addAll(brands);
+        brandList = brandList.stream().filter(brand -> !this.brands.contains(brand)).collect(Collectors.toList());
+        this.brands.addAll(brandList);
         this.save();
     }
 
@@ -96,12 +94,11 @@ public class Category extends GenericModel {
      * @param brandIds
      */
     public void unbindBrands(List<String> brandIds) {
-        List<Brand> brands = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
-        for(Brand brand : brands) {
+        List<Brand> brandList = Brand.find("name IN " + JpqlSelect.inlineParam(brandIds)).fetch();
+        for(Brand brand : brandList) {
             if(Family.bcRelateFamily(brand, this).size() > 0) {
                 Validation.addError("",
-                        String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", brand.name,
-                                this.categoryId));
+                        String.format("Brand %s 与 Category %s 拥有 Family 不允许删除.", brand.name, this.categoryId));
                 return;
             }
             this.brands.remove(brand);
@@ -125,13 +122,10 @@ public class Category extends GenericModel {
 
     /**
      * 没有绑定关系的品牌
-     *
-     * @return
      */
     public List<Brand> unbrands() {
-        List<Brand> brands = Brand.all().fetch();
-        CollectionUtils.filter(brands, new FilterUnBrands(this.brands));
-        return brands;
+        List<Brand> brandList = Brand.all().fetch();
+        return brandList.stream().filter(brand -> !this.brands.contains(brand)).collect(Collectors.toList());
     }
 
 
@@ -140,12 +134,8 @@ public class Category extends GenericModel {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Category category = (Category) o;
-
-        if(categoryId != null ? !categoryId.equals(category.categoryId) :
-                category.categoryId != null) return false;
-        return true;
+        return categoryId != null ? categoryId.equals(category.categoryId) : category.categoryId == null;
     }
 
     @Override
@@ -156,17 +146,15 @@ public class Category extends GenericModel {
     }
 
     public static List<String> categoryIds() {
-        List<Map<String, Object>> rows = DBUtils
-                .rows("SELECT categoryId FROM Category ORDER BY categoryId");
-        List<String> categoryIds = rows.stream().map(row -> row.get("categoryId").toString()).collect(Collectors.toList());
-        return categoryIds;
+        List<Map<String, Object>> rows = DBUtils.rows("SELECT categoryId FROM Category ORDER BY categoryId");
+        return rows.stream().map(row -> row.get("categoryId").toString()).collect(Collectors.toList());
     }
 
     public static boolean exist(String id) {
         return Category.count("categoryId=?", id) > 0;
     }
 
-    public static boolean is_exist_ids(String ids) {
+    public static boolean isExistIds(String ids) {
         Category.count("categoryId in (" + ids + ")");
         return Category.count("categoryId in (" + ids + ")") > 0;
     }
@@ -180,23 +168,6 @@ public class Category extends GenericModel {
     public static String skuToCategoryId(String sku) {
         if(StringUtils.isBlank(sku)) return "";
         return sku.substring(0, 2);
-    }
-
-    /**
-     * 过滤出没有绑定的 Brands
-     */
-    private static class FilterUnBrands implements Predicate {
-        private List<Brand> existBrands;
-
-        private FilterUnBrands(List<Brand> existBrands) {
-            this.existBrands = existBrands;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            Brand brand = (Brand) o;
-            return !existBrands.contains(brand);
-        }
     }
 
     /**

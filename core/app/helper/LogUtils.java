@@ -10,6 +10,9 @@ import org.apache.log4j.Logger;
  */
 public class LogUtils {
 
+    private LogUtils() {
+    }
+
     public static Logger JOBLOG = null;
 
     public static void initLog() {
@@ -19,11 +22,6 @@ public class LogUtils {
     }
 
     public static boolean isslow(long time, String jobname) {
-        Runtime r = Runtime.getRuntime();
-        if(time >= 100000L) {
-            return true;
-        } else {
-            return false;
-        }
+        return time >= 100000L;
     }
 }

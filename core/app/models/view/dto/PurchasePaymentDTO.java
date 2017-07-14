@@ -1,12 +1,14 @@
 package models.view.dto;
 
-import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 
 import java.io.Serializable;
 
 /**
- * Created by licco on 16/5/13.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 16/5/13
+ * Time: 上午11:37
  */
 public class PurchasePaymentDTO implements Serializable {
 

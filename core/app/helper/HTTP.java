@@ -59,6 +59,10 @@ import java.util.concurrent.TimeUnit;
  * Time: 12:02 PM
  */
 public class HTTP {
+
+    private HTTP() {
+    }
+
     private static CloseableHttpClient client;
 
     /**

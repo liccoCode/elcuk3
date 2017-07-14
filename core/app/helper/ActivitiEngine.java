@@ -14,6 +14,10 @@ import org.activiti.engine.impl.context.Context;
 import play.db.DB;
 
 public class ActivitiEngine {
+
+    private ActivitiEngine() {
+    }
+
     public static ProcessEngine processEngine;
 
     public static void initEngine() {

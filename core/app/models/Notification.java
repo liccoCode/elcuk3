@@ -124,9 +124,9 @@ public class Notification extends GenericModel {
      * @param users
      */
     public void notifySomeone(User... users) {
-        for(User user : users) {
-            if(user.equals(this.user)) continue;
-            Notification.newNotyDiffUser(this, user).save();
+        for(User u : users) {
+            if(u.equals(this.user)) continue;
+            Notification.newNotyDiffUser(this, u).save();
         }
     }
 

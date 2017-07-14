@@ -222,8 +222,8 @@ public class Inbound extends GenericModel {
         DateTime nextMonth = dt.plusMonths(1);
         String count = Inbound.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
-                "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("SR|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
@@ -334,10 +334,10 @@ public class Inbound extends GenericModel {
         int count = InboundUnit.find("inbound.id = ? and status NOT IN (?,?)", this.id,
                 InboundUnit.S.Inbound, InboundUnit.S.Abort).fetch().size();
         if(count == 0) {
-            List<InboundUnit> units = this.units;
+            List<InboundUnit> inbound_units = this.units;
             List<InboundUnit> return_units = new ArrayList<>();
             List<InboundUnit> tail_units = new ArrayList<>();
-            for(InboundUnit iunit : units) {
+            for(InboundUnit iunit : inbound_units) {
                 if(iunit.result == InboundUnit.R.Qualified && iunit.handType == InboundUnit.H.Delivery) {
                     tail_units.add(iunit);
                 }
@@ -360,7 +360,7 @@ public class Inbound extends GenericModel {
         }
     }
 
-    private void createTailInbound(List<InboundUnit> tail_units) {
+    private void createTailInbound(List<InboundUnit> tailUnits) {
         Inbound inbound = new Inbound();
         inbound.id = id();
         inbound.name = this.name + "--尾货单";
@@ -372,7 +372,7 @@ public class Inbound extends GenericModel {
         inbound.receiver = this.receiver;
         inbound.projectName = Login.current().projectName;
         inbound.save();
-        tail_units.forEach(i -> {
+        tailUnits.forEach(i -> {
             InboundUnit u = new InboundUnit();
             u.status = InboundUnit.S.Create;
             u.inbound = inbound;

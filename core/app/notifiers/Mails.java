@@ -3,7 +3,6 @@ package notifiers;
 import helper.Webs;
 import models.MailsRecord;
 import models.market.*;
-import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.Play;

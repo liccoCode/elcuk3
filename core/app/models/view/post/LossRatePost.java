@@ -95,14 +95,14 @@ public class LossRatePost extends Post<LossRate> {
     public F.T2<String, List<Object>> totalparams() {
         StringBuffer sql = new StringBuffer("");
         List<Object> params = new ArrayList<>();
-        sql.append("select sum(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) shipqty," +
-                " sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s " +
-                " left join ProcureUnit p on s.unit_id=p.id " +
-                " left join CheckTask c ON c.units_id = p.id" +
-                " left join Shipment m on s.shipment_id=m.id " +
-                " left join FBAShipment f on p.fba_id=f.id " +
-                " where m.arriveDate >= ? AND m.arriveDate <= ? " +
-                " and s.lossqty!=0 ");
+        sql.append("select sum(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) shipqty,"
+                + " sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s "
+                + " left join ProcureUnit p on s.unit_id=p.id "
+                + " left join CheckTask c ON c.units_id = p.id"
+                + " left join Shipment m on s.shipment_id=m.id "
+                + " left join FBAShipment f on p.fba_id=f.id "
+                + " where m.arriveDate >= ? AND m.arriveDate <= ? "
+                + " and s.lossqty!=0 ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
@@ -161,7 +161,7 @@ public class LossRatePost extends Post<LossRate> {
 
 
     public Map<String, Object> lossRateMap(F.T2<String, List<Object>> params, F.T2<String, List<Object>> shipParams) {
-        //TODO: 这里的日志 Logger.info 需要集中清理.
+        //这里的日志 Logger.info 需要集中清理.
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
         List<LossRate> lossrate = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("0.00");
@@ -170,8 +170,8 @@ public class LossRatePost extends Post<LossRate> {
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
-            String cacke_key = "lossrate_" + m.name() + "_" +
-                    new SimpleDateFormat("yyyyMMdd").format(this.from)
+            String cacke_key = "lossrate_" + m.name() + "_"
+                    + new SimpleDateFormat("yyyyMMdd").format(this.from)
                     + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
             Logger.info("::::::xx:::::key:::" + cacke_key);
             String cache_str = Caches.get(cacke_key);
@@ -194,8 +194,8 @@ public class LossRatePost extends Post<LossRate> {
             loss.qty = Integer.parseInt(row.get("qty").toString());
             loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
             loss.compentype = (String) row.get("compentype");
-            loss.unit = row.get("unitId") == null ? null :
-                    ProcureUnit.findById(Long.parseLong(row.get("unitId").toString()));
+            loss.unit = row.get("unitId") == null ? null
+                    : ProcureUnit.findById(Long.parseLong(row.get("unitId").toString()));
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
@@ -220,8 +220,9 @@ public class LossRatePost extends Post<LossRate> {
             else
                 loss.compenusdamt = 0f;
 
-            loss.payrate = new BigDecimal(loss.compenusdamt).divide(new BigDecimal(loss.totallossprice +
-                    loss.totalShipmentprice), 4, 4).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+            loss.payrate = new BigDecimal(loss.compenusdamt).divide(new BigDecimal(loss.totallossprice
+                    + loss.totalShipmentprice), 4, 4).multiply(new BigDecimal(100))
+                    .setScale(2, BigDecimal.ROUND_HALF_UP);
             lossrate.add(loss);
         }
 

@@ -1971,7 +1971,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     @Override
-    public String to_log() {
+    public String toLog() {
         return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
                 this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
                 Dates.date2Date(this.attrs.planArrivDate), this.shipType);
