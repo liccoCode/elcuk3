@@ -1729,10 +1729,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean isPaid() {
-        if(this.fees.size() > 0) {
-            return this.fees.get(0).payment.paymentDate != null;
-        }
-        return false;
+        return this.fees.size() > 0 && this.fees.get(0).payment.paymentDate != null;
     }
 
     public Date getPaidDate() {
