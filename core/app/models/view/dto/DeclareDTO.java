@@ -50,11 +50,8 @@ public class DeclareDTO {
             dto.vatNo = "IT07289420965";
             dto.tel = "+390707040008";
             dto.buyerVATNO = "IT07289420965";
-        } else {
-
         }
         return dto;
     }
-
-
 }
+

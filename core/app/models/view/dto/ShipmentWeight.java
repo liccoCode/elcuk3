@@ -39,10 +39,11 @@ public class ShipmentWeight {
         List<String> skus = Category.getSKUs(this.categoryId);
         if(this.sku != null && StringUtils.isNotBlank(this.sku)) skus.add(this.sku);
         SqlSelect sql = new SqlSelect()
-                .select("s.type as shipType, " +
-                        "pro.sku as sku, " +
-                        "pro.category_categoryId as categoryId, " +
-                        "w.name as name, " +
+                .select("s.type as shipType, "
+                        + "pro.sku as sku, "
+                        + "pro.category_categoryId as categoryId, "
+                        + "w.name as name, "
+                        +
                         "SUM(CASE WHEN pro.weight IS NULL THEN 0 * si.qty WHEN pro.weight >= 0 THEN pro.weight * si.qty END) as weight ")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
@@ -101,12 +102,12 @@ public class ShipmentWeight {
         List<String> skus = Category.getSKUs(this.categoryId);
         if(this.sku != null && StringUtils.isNotBlank(this.sku)) skus.add(this.sku);
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.whouse w " +
-                " LEFT JOIN s.fees f" +
-                " LEFT JOIN s.items i" +
-                " LEFT JOIN i.unit u" +
-                " LEFT JOIN u.product p " +
-                " WHERE s.dates.beginDate>=? AND s.dates.beginDate<=? ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.whouse w "
+                + " LEFT JOIN s.fees f"
+                + " LEFT JOIN s.items i"
+                + " LEFT JOIN i.unit u"
+                + " LEFT JOIN u.product p "
+                + " WHERE s.dates.beginDate>=? AND s.dates.beginDate<=? ");
         params.add(this.from);
         params.add(this.to);
         if(this.market != null) {

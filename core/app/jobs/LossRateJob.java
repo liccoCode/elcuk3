@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * TODO: 需要补充注释
+ * 需要补充注释
  * Created by licco on 15/6/10.
  */
 public class LossRateJob extends BaseJob {
@@ -58,8 +58,8 @@ public class LossRateJob extends BaseJob {
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
-            String cacke_key = "lossrate_" + m.name() +
-                    new SimpleDateFormat("yyyyMMdd").format(this.from)
+            String cacke_key = "lossrate_" + m.name()
+                    + new SimpleDateFormat("yyyyMMdd").format(this.from)
                     + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
             String cache_str = Caches.get(cacke_key);
             if(!StringUtils.isBlank(cache_str)) {
@@ -101,8 +101,9 @@ public class LossRateJob extends BaseJob {
             else
                 loss.compenusdamt = 0f;
 
-            loss.payrate = new BigDecimal(loss.compenusdamt).divide(new BigDecimal(loss.totallossprice +
-                    loss.totalShipmentprice), 4, 4).multiply(new BigDecimal(100)).setScale(2, BigDecimal.ROUND_HALF_UP);
+            loss.payrate = new BigDecimal(loss.compenusdamt).divide(new BigDecimal(loss.totallossprice
+                    + loss.totalShipmentprice), 4, 4).multiply(new BigDecimal(100))
+                    .setScale(2, BigDecimal.ROUND_HALF_UP);
             lossrate.add(loss);
         }
 

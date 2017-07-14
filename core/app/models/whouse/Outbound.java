@@ -173,8 +173,8 @@ public class Outbound extends GenericModel {
         DateTime nextMonth = dt.plusMonths(1);
         String count = Outbound.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
-                "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("PTC|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
@@ -350,15 +350,15 @@ public class Outbound extends GenericModel {
             return ProcureUnit.find("stage=? AND shipType=? AND projectName =? AND outbound.id is null",
                     ProcureUnit.STAGE.IN_STORAGE, this.shipType, this.projectName).fetch();
         } else {
-            return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? " +
-                            "AND outbound.id = null",
-                    ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType, this.projectName).fetch();
+            return ProcureUnit.find("stage=? AND whouse.id=? AND shipType=? AND projectName =? "
+                            + "AND outbound.id = null", ProcureUnit.STAGE.IN_STORAGE, this.whouse.id, this.shipType,
+                    this.projectName).fetch();
         }
     }
 
     public void addUnits(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
-        units.forEach(unit -> {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        procureUnits.forEach(unit -> {
             unit.outbound = this;
             unit.save();
         });

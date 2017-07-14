@@ -59,8 +59,8 @@ public class ShipmentsMonitorJob extends Job {
                         String.format("%s_%s_%s", market, shipType, dayType));
 
                 Shipment.T type = Shipment.T.valueOf(shipType.toUpperCase());
-                List<Shipment> shipments = Shipment.find("whouse.country=? AND type=?" +
-                        " AND state=? AND DATEDIFF(now(), " + checkDate + ")=?",
+                List<Shipment> shipments = Shipment.find("whouse.country=? AND type=?"
+                                + " AND state=? AND DATEDIFF(now(), " + checkDate + ")=?",
                         // (now - beginDate) = 平均时长 - 3(提前3天提醒)
                         market, type, state, (config.toInteger() - beforeDays)).fetch();
 

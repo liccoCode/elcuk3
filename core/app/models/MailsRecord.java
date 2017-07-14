@@ -79,8 +79,8 @@ public class MailsRecord extends Model {
     public MailsRecord(Map<String, Object> infos, T type, String tmpName) {
         this.title = infos.get("subject").toString();
         this.sender = infos.get("from").toString();
-        List<String> recipients = (List<String>) infos.get("recipients");
-        this.recipients = StringUtils.join(recipients, ",");
+        List<String> list = (List<String>) infos.get("recipients");
+        this.recipients = StringUtils.join(list, ",");
         this.templateName = tmpName;
         this.type = type;
     }

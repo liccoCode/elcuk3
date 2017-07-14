@@ -6,9 +6,15 @@ package helper;
  * User: DyLanM
  * Date: 13-9-23
  * Time: 上午11:02
+ *
  * @deprecated 准备废弃
  */
 public class Jitbit {
+
+    private Jitbit() {
+
+    }
+
     /**
      * 分类
      */

@@ -44,7 +44,7 @@ public class ProfitInventorySearch extends Job {
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
         //从ES查找SKU的利润
-        List<Profit> profits = post.Inventory();
+        List<Profit> profits = post.inventory();
         for(Profit p : profits) {
             ProfitInventory inv = new ProfitInventory();
             inv.sku = p.sku;

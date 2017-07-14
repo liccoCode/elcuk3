@@ -73,8 +73,8 @@ public class CostReportDTO implements Serializable {
                     mes = new MetricShipmentService(from, to, type, m);
                     Float weight = mes.countShipWeight();
                     Float freight = mes.countShipFee();
-                    Float vatPrice = vat.get(m.sortName().toUpperCase() + "_" + type.name()) == null ? 0f :
-                            vat.get(m.sortName().toUpperCase() + "_" + type.name());
+                    Float vatPrice = vat.get(m.sortName().toUpperCase() + "_" + type.name()) == null ? 0f
+                            : vat.get(m.sortName().toUpperCase() + "_" + type.name());
                     if(type.name().equals("SEA")) {
                         dto.seaWeight = weight;
                         dto.seaFreight = freight;

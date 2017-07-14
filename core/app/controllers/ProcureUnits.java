@@ -302,7 +302,7 @@ public class ProcureUnits extends Controller {
             unit.remove();
             render("ProcureUnits/blank.html", unit, whouses);
         }
-        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.to_log()), unit.id + "")
+        new ElcukRecord(Messages.get("procureunit.save"), Messages.get("action.base", unit.toLog()), unit.id + "")
                 .save();
         flash.success("创建成功, 并且采购计划同时被指派到运输单 %s", shipmentId);
         Analyzes.index();

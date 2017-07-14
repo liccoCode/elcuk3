@@ -285,13 +285,12 @@ public class User extends Model {
      * @param privilegeId
      */
     public void addPrivileges(List<Long> privilegeId) {
-        List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId))
-                .fetch();
-        if(privilegeId.size() != privileges.size())
+        List<Privilege> privilegeList = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId)).fetch();
+        if(privilegeId.size() != privilegeList.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
         this.privileges = new HashSet<>();
         this.save();
-        this.privileges.addAll(privileges);
+        this.privileges.addAll(privilegeList);
         Privilege.updatePrivileges(this.username, this.privileges);
         this.save();
     }
@@ -317,13 +316,12 @@ public class User extends Model {
             this.save();
             Team.updateTeams(this.username, this.teams);
         } else {
-            List<Team> teams = Team.find("id IN " + JpqlSelect.inlineParam(teamId))
-                    .fetch();
-            if(teamId.size() != teams.size())
+            List<Team> teamList = Team.find("id IN " + JpqlSelect.inlineParam(teamId)).fetch();
+            if(teamId.size() != teamList.size())
                 throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
             this.teams = new HashSet<>();
             this.save();
-            this.teams.addAll(teams);
+            this.teams.addAll(teamList);
             Team.updateTeams(this.username, this.teams);
             this.save();
         }
@@ -341,13 +339,12 @@ public class User extends Model {
             this.save();
             Role.updateRoles(this.username, this.roles);
         } else {
-            List<Role> roles = Role.find("id IN " + JpqlSelect.inlineParam(roleId))
-                    .fetch();
-            if(roleId.size() != roles.size())
+            List<Role> roleList = Role.find("id IN " + JpqlSelect.inlineParam(roleId)).fetch();
+            if(roleId.size() != roleList.size())
                 throw new FastRuntimeException("需要修改的Role数量与系统中存在的不一致, 请确通过 Web 形式修改.");
             this.roles = new HashSet<>();
             this.save();
-            this.roles.addAll(roles);
+            this.roles.addAll(roleList);
             Role.updateRoles(this.username, this.roles);
             this.save();
         }
@@ -381,8 +378,7 @@ public class User extends Model {
      * @return
      */
     public boolean authenticate(String password) {
-        return !StringUtils.isBlank(this.passwordDigest) &&
-                this.passwordDigest.equals(Crypto.encryptAES(password));
+        return !StringUtils.isBlank(this.passwordDigest) && this.passwordDigest.equals(Crypto.encryptAES(password));
     }
 
     /**

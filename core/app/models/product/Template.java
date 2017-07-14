@@ -12,10 +12,9 @@ import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Template 这个 Model 只是用来辅助创建 Attribute 和 Product 之间的关系，不与 Product 产生直接关系
@@ -25,6 +24,7 @@ import java.util.Map;
  */
 @Entity
 public class Template extends Model {
+    private static final long serialVersionUID = 7140344406931626159L;
     /**
      * 模板名称
      */
@@ -134,8 +134,8 @@ public class Template extends Model {
      * @param categoryIds
      */
     public void bindCategorys(List<String> categoryIds) {
-        List<Category> categorys = Category.find("categoryId IN" + JpqlSelect.inlineParam(categoryIds)).fetch();
-        this.categorys.addAll(categorys);
+        List<Category> list = Category.find("categoryId IN" + JpqlSelect.inlineParam(categoryIds)).fetch();
+        this.categorys.addAll(list);
         this.save();
     }
 
@@ -145,8 +145,8 @@ public class Template extends Model {
      * @param categoryIds
      */
     public void unBindCategorys(List<String> categoryIds) {
-        List<Category> categorys = Category.find("categoryId IN" + JpqlSelect.inlineParam(categoryIds)).fetch();
-        for(Category category : categorys) {
+        List<Category> list = Category.find("categoryId IN" + JpqlSelect.inlineParam(categoryIds)).fetch();
+        for(Category category : list) {
             this.categorys.remove(category);
         }
         this.save();
@@ -170,10 +170,9 @@ public class Template extends Model {
      * @return
      */
     public List<Category> getUnBindCategorys() {
-        List<Category> categorys = Category.all().fetch();
-        if(this.categorys == null) return categorys;
-        CollectionUtils.filter(categorys, new FilterUnBindCategorys(this.categorys));
-        return categorys;
+        List<Category> list = Category.all().fetch();
+        if(this.categorys == null) return list;
+        return list.stream().filter(category -> !this.categorys.contains(category)).collect(Collectors.toList());
     }
 
     private static class FilterUnBindAttributes implements Predicate {
@@ -189,18 +188,5 @@ public class Template extends Model {
             return !existAttributes.contains(attribute);
         }
     }
-
-    private static class FilterUnBindCategorys implements Predicate {
-        private List<Category> existCategorys;
-
-        private FilterUnBindCategorys(List<Category> existCategorys) {
-            this.existCategorys = existCategorys;
-        }
-
-        @Override
-        public boolean evaluate(Object o) {
-            Category category = (Category) o;
-            return !existCategorys.contains(category);
-        }
-    }
 }
+

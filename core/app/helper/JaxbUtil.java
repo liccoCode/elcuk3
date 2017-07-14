@@ -16,6 +16,8 @@ import java.io.StringWriter;
  */
 public class JaxbUtil {
 
+    private JaxbUtil() {
+    }
 
     public static String convertToXml(Object obj) {
         return convertToXml(obj, "UTF-8");

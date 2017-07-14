@@ -208,12 +208,14 @@ public class SellingSaleAnalyzeJob extends Job {
         //采购计划的 shipItems
         for(ShipItem si : unit.shipItems) {
             switch(si.shipment.state) {
-                case SHIPPING:
                 case CLEARANCE:
                 case BOOKED:
                 case DELIVERYING:
+                case SHIPPING:
                 case RECEIPTD:
                     way += si.qty;
+                default:
+                    way += 0;
             }
         }
         return way;

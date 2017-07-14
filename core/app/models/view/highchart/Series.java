@@ -10,6 +10,10 @@ import java.util.Comparator;
  * Time: 11:53 PM
  */
 public class Series {
+
+    private Series() {
+    }
+
     public static final String LINE = "line";
     public static final String COLUMN = "column";
     public static final String PIE = "pie";

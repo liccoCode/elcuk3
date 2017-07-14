@@ -33,13 +33,13 @@ public class OrderReportDTO {
     public float percent;
 
     public static List<OrderReportDTO> query(Set<String> orderIds) {
-        String sql = "SELECT r.orderId,r.market,group_concat(DISTINCT f.product_sku) AS sku," +
-                "DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate," +
-                "ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, " +
-                "ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice " +
-                "FROM Orderr r LEFT JOIN SaleFee f ON f.order_orderId = r.orderId " +
-                "WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds) +
-                "GROUP BY r.orderId";
+        String sql = "SELECT r.orderId,r.market,group_concat(DISTINCT f.product_sku) AS sku,"
+                + "DATE_FORMAT(r.paymentDate,'%Y-%m-%d %H:%i:%s') AS paymentDate,"
+                + "ROUND(sum(IF(f.usdCost>0, f.usdCost, 0)), 2) AS positivePrice, "
+                + "ROUND(sum(IF(f.usdCost<0, f.usdCost, 0)), 2)  AS negativePrice "
+                + "FROM Orderr r LEFT JOIN SaleFee f ON f.order_orderId = r.orderId "
+                + "WHERE r.orderId IN " + SqlSelect.inlineParam(orderIds)
+                + "GROUP BY r.orderId";
         List<Map<String, Object>> rows = DBUtils.rows(sql);
         List<OrderReportDTO> dtos = new ArrayList<>();
         for(Map<String, Object> row : rows) {

@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class ListingSchedulJob {
 
+    private ListingSchedulJob() {
+    }
+
     /**
      * 根据 Listing 计算抓取的间隔
      */

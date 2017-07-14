@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Entity
 public class ElcukRecord extends Model {
 
+    private static final long serialVersionUID = 2551918134947636635L;
+
     /**
      * 用来记录 Model 的 Record
      */
@@ -30,7 +32,7 @@ public class ElcukRecord extends Model {
          *
          * @return
          */
-        public String to_log();
+        public String toLog();
     }
 
     public ElcukRecord(String action, String message) {

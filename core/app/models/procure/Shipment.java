@@ -970,7 +970,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
-    public String to_log() {
+    public String toLog() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
         sbd.append("[运输:").append(Dates.date2Date(this.dates.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.dates.planArrivDate)).append("] ");

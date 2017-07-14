@@ -29,6 +29,9 @@ import java.util.List;
  */
 public class MWSUtils {
 
+    private MWSUtils() {
+    }
+
     private static final String CHARACTER_ENCODING = "UTF-8";
     final static String ALGORITHM = "HmacSHA256";
 

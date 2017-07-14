@@ -12,6 +12,10 @@ import play.Logger;
  */
 @Deprecated
 public class Crawl {
+
+    private Crawl() {
+    }
+
     public static JsonElement crawlListing(String market, String asin) {
         Logger.info("crawlListing %s", crawlUrl("listing", market, asin));
         return HTTP.json(crawlUrl("listing", market, asin));
