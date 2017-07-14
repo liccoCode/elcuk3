@@ -29,9 +29,9 @@ public class TransApplyShipPost extends Post<Shipment> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s " +
-                "LEFT JOIN s.items i " +
-                "LEFT JOIN s.fees f WHERE 1 = 1");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s "
+                + "LEFT JOIN s.items i "
+                + "LEFT JOIN s.fees f WHERE 1 = 1");
         List<Object> params = new ArrayList<>();
 
         if(this.applyId != null) {

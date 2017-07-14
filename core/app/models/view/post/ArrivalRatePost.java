@@ -9,8 +9,10 @@ import org.joda.time.DateTime;
 import play.libs.F;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -102,15 +104,15 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
     }
 
     public List<Shipment> queryOverTimeShipment() {
-        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.receiptDate, '%Y-%m-%d') > DATE_FORMAT" +
-                        "(s.dates.planArrivDateForCountRate, '%Y-%m-%d') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?" +
-                        " AND s.state IN (?,?,?) ", Dates.morning(this.from), Dates.night(this.to), Shipment.S.RECEIPTD,
+        return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.receiptDate, '%Y-%m-%d') > DATE_FORMAT"
+                        + "(s.dates.planArrivDateForCountRate, '%Y-%m-%d') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?"
+                        + " AND s.state IN (?,?,?) ", Dates.morning(this.from), Dates.night(this.to), Shipment.S.RECEIPTD,
                 Shipment.S.RECEIVING, Shipment.S.DONE).fetch();
     }
 
     public List<Shipment> queryMonthlyShipment() {
-        return Shipment.find("FROM Shipment s WHERE s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?" +
-                        " AND s.state IN (?,?,?) ",
+        return Shipment.find("FROM Shipment s WHERE s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?"
+                        + " AND s.state IN (?,?,?) ",
                 Dates.morning(this.from),
                 Dates.night(this.to),
                 Shipment.S.RECEIPTD,
@@ -143,5 +145,4 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         });
         return time;
     }
-
 }

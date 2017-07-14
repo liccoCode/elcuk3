@@ -48,11 +48,11 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
 
     private SqlSelect buildSql() {
         SqlSelect sql = new SqlSelect()
-                .select("u.product_sku, i.qty, d.category_categoryId as categoryId, " +
-                        "round(ifnull(sum(i.qty * d.weight),0),2) as totalWeight, " +
-                        "s.type, sum(i.qty) as totalQty, " +
-                        "round(ifnull(sum(d.lengths*d.width*d.heigh*i.qty/1000000),0),2) as totalCbm," +
-                        "w.market, f.centerId ")
+                .select("u.product_sku, i.qty, d.category_categoryId as categoryId, "
+                        + "round(ifnull(sum(i.qty * d.weight),0),2) as totalWeight, "
+                        + "s.type, sum(i.qty) as totalQty, "
+                        + "round(ifnull(sum(d.lengths*d.width*d.heigh*i.qty/1000000),0),2) as totalCbm,"
+                        + "w.market, f.centerId ")
                 .from("ShipItem i ")
                 .leftJoin(" Shipment s ON s.id = i.shipment_id ")
                 .leftJoin(" ProcureUnit u ON i.unit_id= u.id ")

@@ -1848,7 +1848,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean hasEqualWithPrePay() {
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
         double total = this.fees().stream().filter(fee -> fee.feeType == FeeType.cashpledge())
-                .mapToDouble(fee -> fee.amount()).sum();
+                .mapToDouble(PaymentUnit::amount).sum();
         return new BigDecimal(this.attrs.price * this.paidQty() * pre).compareTo(new BigDecimal(total)) == 0;
     }
 
@@ -1971,7 +1971,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     @Override
-    public String to_log() {
+    public String toLog() {
         return String.format("[sid:%s] [仓库:%s] [供应商:%s] [计划数量:%s] [预计到库:%s] [运输方式:%s]",
                 this.sid, this.whouse.name(), this.cooperator.fullName, this.attrs.planQty,
                 Dates.date2Date(this.attrs.planArrivDate), this.shipType);

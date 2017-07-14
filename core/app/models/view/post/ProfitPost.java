@@ -64,19 +64,19 @@ public class ProfitPost {
      * @return
      */
     public Long count(F.T2<String, List<Object>> params) {
-        long count = 0;
+        long flag = 0;
         /**
          * 每个市场遍历
          */
         if(pmarket.equals("market")) {
             M[] marray = models.market.M.values();
             for(M m : marray) {
-                count = calCount(count);
+                flag = calCount(flag);
             }
         } else {
-            count = calCount(count);
+            flag = calCount(flag);
         }
-        return count;
+        return flag;
     }
 
     public long calCount(long count) {
@@ -125,7 +125,7 @@ public class ProfitPost {
 
 
     @SuppressWarnings("unchecked")
-    public List<Profit> Inventory() {
+    public List<Profit> inventory() {
         List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
@@ -341,8 +341,8 @@ public class ProfitPost {
             /**
              * 在途库存占用资金总金额(USD)
              */
-            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
-                    profit.wayqty * profit.vatprice;
+            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice
+                    + profit.wayqty * profit.vatprice;
             profit.wayfee = Webs.scale2Double(profit.wayfee);
             /**
              * (入库+在库)库存占用资金总金额(USD)
@@ -409,8 +409,8 @@ public class ProfitPost {
             /**
              * 在途库存占用资金总金额(USD)
              */
-            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
-                    profit.wayqty * profit.vatprice;
+            profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice
+                    + profit.wayqty * profit.vatprice;
             profit.wayfee = Webs.scale2Double(profit.wayfee);
             /**
              * (入库+在库)库存占用资金总金额(USD)
@@ -483,8 +483,8 @@ public class ProfitPost {
         /**
          * 在途库存占用资金总金额(USD)
          */
-        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice +
-                profit.wayqty * profit.vatprice;
+        profit.wayfee = profit.wayqty * profit.procureprice + profit.wayqty * profit.shipprice
+                + profit.wayqty * profit.vatprice;
         profit.wayfee = Webs.scale2Double(profit.wayfee);
         /**
          * (入库+在库)库存占用资金总金额(USD)

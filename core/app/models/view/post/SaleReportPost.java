@@ -2,7 +2,6 @@ package models.view.post;
 
 import controllers.Login;
 import helper.Caches;
-import helper.LogUtils;
 import jobs.SaleReportsJob;
 import models.User;
 import models.market.M;
@@ -13,9 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.utils.FastRuntimeException;
-import services.MetricSaleReportService;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 @Entity
 public class ProductAttr extends Model implements Comparable {
 
+    private static final long serialVersionUID = -7069181887748292548L;
     /**
      * 属于哪个产品
      */
@@ -45,7 +46,6 @@ public class ProductAttr extends Model implements Comparable {
     @Override
     public int compareTo(Object o) {
         if(o instanceof ProductAttr) {
-            ProductAttr productAttr = (ProductAttr) o;
             if(this.attribute.sort > ((ProductAttr) o).attribute.sort) {
                 return 1;
             }

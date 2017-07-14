@@ -11,7 +11,6 @@ import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.TrafficRatePost;
 import models.view.report.TrafficRate;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -49,14 +48,12 @@ public class Analyzes extends Controller {
         request.args.put("begin", System.currentTimeMillis() + "");
     }
 
-    //
     @After(only = {"analyzes", "ajaxUnit"})
     public static void countAfter() {
         if(Play.mode.isProd()) return;
         Object begin = request.args.get("begin");
         Logger.info("%s past %s ms", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
     }
-
 
     /**
      * 分析页面下方的 sku/sid table
@@ -78,7 +75,6 @@ public class Analyzes extends Controller {
      *
      * @param p
      */
-    @Deprecated
     public static void trafficRate(TrafficRatePost p) {
         try {
             if(p == null) p = new TrafficRatePost();
@@ -155,8 +151,8 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    HighChart chart = SellingRecord.ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong
-                            (p.aid)), p.from, p.to);
+                    HighChart chart = SellingRecord
+                            .ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
                     String sortName = p.countryName(true);
                     chart.series.forEach(se -> se.visible = se.name.contains(sortName));
                     return J.json(chart);

@@ -220,19 +220,19 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             HighChart highChart = new HighChart();
             OrderItemESQuery esQuery = new OrderItemESQuery();
             if(m == null) {
                 HighChart tmphighChart = new HighChart();
                 for(M market : Promises.MARKETS) {
-                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, _from, _to));
+                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, finalFrom, finalTo));
                 }
                 highChart.series(tmphighChart.sumSeries("滑动平均"));
             } else {
-                highChart.series(esQuery.movingAvgFade(type, val, m, _from, _to));
+                highChart.series(esQuery.movingAvgFade(type, val, m, finalFrom, finalTo));
             }
             Cache.add(cacked_key, highChart, "2h");
         }
@@ -258,8 +258,8 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             final HighChart highChart = new HighChart();
             final OrderItemESQuery esQuery = new OrderItemESQuery();
@@ -270,7 +270,7 @@ public class OrderItem extends GenericModel {
             Promises.forkJoin(new Promises.Callback<Object>() {
                 @Override
                 public Object doJobWithResult(Object param) {
-                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", (M) param, _from, _to, false));
+                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", (M) param, finalFrom, finalTo, false));
                     return null;
                 }
 
@@ -281,7 +281,7 @@ public class OrderItem extends GenericModel {
             });
 
             for(M market : Promises.MARKETS) {
-                tmphighChart.series(esQuery.skusMoveingAve("sku", val, market, _from, _to, false));
+                tmphighChart.series(esQuery.skusMoveingAve("sku", val, market, finalFrom, finalTo, false));
             }
 
 
@@ -321,8 +321,8 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             final HighChart highChart = new HighChart();
             final OrderItemESQuery esQuery = new OrderItemESQuery();
@@ -335,12 +335,12 @@ public class OrderItem extends GenericModel {
                     if(StringUtils.isNotBlank(skus[i])) {
                         if(ismoveing != 2) {
                             for(M m : Promises.MARKETS) {
-                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, _from, _to, true));
+                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, finalFrom, finalTo, true));
                             }
                             highChart.series(tmphighChart.sumSeries(sku + "销量"));
                         } else {
                             for(M m : Promises.MARKETS) {
-                                tmphighChart.series(esQuery.skusMoveingAve("sku", sku, m, _from, _to, true));
+                                tmphighChart.series(esQuery.skusMoveingAve("sku", sku, m, finalFrom, finalTo, true));
                             }
                             highChart.series(tmphighChart.sumSeries(sku + "滑动平均"));
                         }
@@ -353,9 +353,9 @@ public class OrderItem extends GenericModel {
                 for(int i = 0; i < skus.length; i++) {
                     if(StringUtils.isNotBlank(skus[i])) {
                         if(ismoveing != 2) {
-                            highChart.series(esQuery.skusSearch("sku", skus[i], m, _from, _to, true));
+                            highChart.series(esQuery.skusSearch("sku", skus[i], m, finalFrom, finalTo, true));
                         } else
-                            highChart.series(esQuery.skusMoveingAve("sku", skus[i], m, _from, _to, true));
+                            highChart.series(esQuery.skusMoveingAve("sku", skus[i], m, finalFrom, finalTo, true));
                     }
                 }
             }

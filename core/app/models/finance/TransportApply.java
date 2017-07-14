@@ -98,7 +98,8 @@ public class TransportApply extends Apply {
         if(Validation.hasErrors()) return null;
         TransportApply apply = new TransportApply();
         apply.serialNumber = apply.generateSerialNumber(shipCoperPair._2.iterator().next());
-        apply.createdAt = apply.updateAt = new Date();
+        apply.createdAt = new Date();
+        apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();
         apply.appendShipment(shipmentIds);
@@ -231,8 +232,8 @@ public class TransportApply extends Apply {
 
         if(StringUtils.isNotBlank(search)) {
             return sources.stream()
-                    .filter(source -> StringUtils.isNotBlank(source) &&
-                            source.toUpperCase().contains(search.toUpperCase()))
+                    .filter(source -> StringUtils.isNotBlank(source)
+                            && source.toUpperCase().contains(search.toUpperCase()))
                     .limit(10)
                     .collect(Collectors.toList());
         }

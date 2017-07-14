@@ -3,7 +3,6 @@ package models.whouse;
 import com.google.gson.annotations.Expose;
 import play.db.jpa.Model;
 
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import java.util.Date;

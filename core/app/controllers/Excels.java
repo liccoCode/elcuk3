@@ -42,7 +42,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -62,8 +61,8 @@ public class Excels extends Controller {
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
 
-        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop) ?
-                models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop) ? models.OperatorConfig
+                .getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
@@ -248,9 +247,9 @@ public class Excels extends Controller {
             } else {
                 sku_key = p.sku;
             }
-            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_" +
-                    new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_" +
-                    new SimpleDateFormat("yyyyMMdd").format(p.end);
+            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_"
+                    + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
+                    + new SimpleDateFormat("yyyyMMdd").format(p.end);
             String cache_str = Caches.get(cacke_key);
 
             if(!StringUtils.isBlank(cache_str)) {
@@ -847,5 +846,4 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dateFormat, p, outbounds, others, b2bOutbounds);
     }
-
 }

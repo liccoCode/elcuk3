@@ -16,6 +16,9 @@ import javax.persistence.Query;
  */
 public class JPAs {
 
+    private JPAs() {
+    }
+
     /**
      * <pre>
      * 返回的结果按照 as 作为 key 进行返回 List[Map[key,val]];
@@ -58,8 +61,9 @@ public class JPAs {
 
     private static <T extends SqlSelect> Query basicCreateQuery(T hql, ResultTransformer transformer) {
         Query query = JPA.em().createQuery(hql.toString());
-        for(int i = 0; i < hql.getParams().size(); i++)
+        for(int i = 0; i < hql.getParams().size(); i++) {
             query.setParameter(i + 1, hql.getParams().get(i));
+        }
         HibernateQuery hquery = (HibernateQuery) query;
         hquery.getHibernateQuery().setResultTransformer(transformer);
         return query;

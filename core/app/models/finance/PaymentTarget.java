@@ -20,6 +20,9 @@ import java.util.List;
  */
 @Entity
 public class PaymentTarget extends Model {
+
+    private static final long serialVersionUID = 8085070713775629056L;
+
     public PaymentTarget() {
     }
 
@@ -41,7 +44,7 @@ public class PaymentTarget extends Model {
      * 银行账号
      */
     @Required
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     public String accountNumber;
 
     /**
@@ -84,9 +87,9 @@ public class PaymentTarget extends Model {
             this.accountUser = target.accountUser;
 
         if(!Validation.current().valid(this).ok) return;
-        Cooperator cooper = Cooperator.findById(target.cooper.id);
-        if(cooper != null)
-            this.cooper = cooper;
+        Cooperator cooperator = Cooperator.findById(target.cooper.id);
+        if(cooperator != null)
+            this.cooper = cooperator;
         this.save();
     }
 

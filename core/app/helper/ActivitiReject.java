@@ -26,6 +26,10 @@ import java.util.Map;
  * @deprecated 无人使用
  */
 public class ActivitiReject {
+
+    private ActivitiReject() {
+    }
+
     public static final int I_NO_OPERATION = 0;
     public static final int I_DONE = 1;
     public static final int I_TASK_NOT_FOUND = 2;
@@ -81,8 +85,8 @@ public class ActivitiReject {
     }
 
     private static void stepThreeChangeRuExecution(SqlSession sqlSession,
-                                                      String executionId, String processDefinitionId,
-                                                      String backToTaskDefinitionKey) throws Exception {
+                                                   String executionId, String processDefinitionId,
+                                                   String backToTaskDefinitionKey) throws Exception {
         List<ExecutionEntity> currentExecutionEntityList = sqlSession
                 .selectList("selectExecution", executionId);
         if(currentExecutionEntityList.size() > 0) {
@@ -99,8 +103,8 @@ public class ActivitiReject {
     }
 
     private static void stepTwoChangeRuIdentitylink(SqlSession sqlSession,
-                                                       String currentTaskEntityId,
-                                                       String backToHistoricTaskInstanceEntityId, String backToAssignee)
+                                                    String currentTaskEntityId,
+                                                    String backToHistoricTaskInstanceEntityId, String backToAssignee)
             throws Exception {
         ListQueryParameterObject para = new ListQueryParameterObject();
         para.setParameter(currentTaskEntityId);

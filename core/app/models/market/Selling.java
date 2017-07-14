@@ -230,7 +230,7 @@ public class Selling extends GenericModel {
 
     /**
      * 临时解决 Amazon 同步时 OrderItem 无法存入数据库， 手动添加 新旧 Selling 映射关系
-     * TODO: 此代码性质为临时代码， 等到 Amazon 那边不再产生旧 Selling 的订单时可移除此代码
+     * 此代码性质为临时代码， 等到 Amazon 那边不再产生旧 Selling 的订单时可移除此代码
      */
     private static final Map<String, String> SELLING_MAPPING = new HashMap<>();
 
@@ -330,8 +330,8 @@ public class Selling extends GenericModel {
      */
     public void partialUpdate(SellingAmzPost p) {
         this.account = Account.findById(this.account.id);
-        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss ||
-                p.productdesc) {
+        if(p.rbns || p.productvolume || p.productWeight || p.weight || p.title || p.keyfeturess || p.searchtermss
+                || p.productdesc) {
             Feed feed = Feed.updateSellingFeed(MWSUtils.buildProductXMLBySelling(this, p), this);
             feed.submit(this.partialUpdateParams());
         }
@@ -678,12 +678,9 @@ public class Selling extends GenericModel {
     }
 
     public Date showDownDate() {
-        Listing listing = this.listing;
-        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? " +
-                " ORDER BY changedDate DESC", listing.listingId, ListingStateRecord.S.DOWN).first();
-        if(record != null)
-            return record.changedDate;
-        return null;
+        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? "
+                + " ORDER BY changedDate DESC", this.listing.listingId, ListingStateRecord.S.DOWN).first();
+        return record == null ? null : record.changedDate;
     }
 
     public Float salePriceWithCurrency() {
@@ -916,8 +913,8 @@ public class Selling extends GenericModel {
                         FLog.T.IMGUPLOAD);
             JsonObject imgRsp = new JsonParser()
                     .parse(Jsoup.parse(body).select("#jsontransport").text()).getAsJsonObject();
-            //		{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
-            //		{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
+            //{"imageUrl":"https://media-service-eu.amazon.com/media/M3SRIZRCNL2O1K+maxw=110+maxh=110","status":"success"}</div>
+            //{"errorMessage":"We are sorry. There are no file(s) specified or the file(s) specified appear to be empty.","status":"failure"}</div>
             if("failure".equals(imgRsp.get("status").getAsString())) {
                 Logger.info("Upload Picture to Amazon Failed.(%s)",
                         imgRsp.get("errorMessage").getAsString());
@@ -939,17 +936,17 @@ public class Selling extends GenericModel {
         this.save();
     }
 
-    public List<NameValuePair> submitGetFeedParams(Feed feed, String feed_submission_id) {
+    public List<NameValuePair> submitGetFeedParams(Feed feed, String feedSubmissionId) {
         Validate.notNull(feed);
         Validate.notNull(this.account);
         Validate.notNull(this.market);
-        Validate.notNull(feed_submission_id);
+        Validate.notNull(feedSubmissionId);
         Validate.notEmpty(this.sellingId);
         List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("account_id", this.account.id.toString()));// 使用哪一个账号
         params.add(new BasicNameValuePair("market", this.market.name()));// 向哪一个市场
         params.add(new BasicNameValuePair("feed_id", feed.id.toString()));// 提交哪一个 Feed ?
-        params.add(new BasicNameValuePair("feed_submission_id", feed_submission_id));
+        params.add(new BasicNameValuePair("feed_submission_id", feedSubmissionId));
         return params;
     }
 
@@ -1027,9 +1024,9 @@ public class Selling extends GenericModel {
         Feed setFulfillmentByAmazonFeed = Feed.getFeedWithSellingAndType(this, Feed.T.FULFILLMENT_BY_AMAZON);
 
         if(saleAmazonFeed != null && assignAmazonListingPriceFeed != null && setFulfillmentByAmazonFeed != null) {
-            if(!saleAmazonFeed.sameHours(assignAmazonListingPriceFeed) ||
-                    !saleAmazonFeed.sameHours(setFulfillmentByAmazonFeed) ||
-                    !assignAmazonListingPriceFeed.sameHours(setFulfillmentByAmazonFeed)) {
+            if(!saleAmazonFeed.sameHours(assignAmazonListingPriceFeed)
+                    || !saleAmazonFeed.sameHours(setFulfillmentByAmazonFeed)
+                    || !assignAmazonListingPriceFeed.sameHours(setFulfillmentByAmazonFeed)) {
                 Validation.addError("", "未匹配到合法的 Feed, 请重新上架!");
             }
         } else {

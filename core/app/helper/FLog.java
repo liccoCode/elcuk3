@@ -1,6 +1,5 @@
 package helper;
 
-
 import org.apache.commons.io.FileUtils;
 import play.Logger;
 
@@ -12,9 +11,15 @@ import java.io.IOException;
  * User: wyattpan
  * Date: 5/20/12
  * Time: 3:13 PM
+ *
  * @deprecated 舍弃
  */
 public class FLog {
+
+    private FLog() {
+
+    }
+
     public enum T {
         /**
          * 上架 Listing 相关的错误

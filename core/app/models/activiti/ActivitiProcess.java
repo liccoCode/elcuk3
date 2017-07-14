@@ -176,7 +176,7 @@ public class ActivitiProcess extends Model {
     /**
      * 是否有权限提交
      *
-     * @param pdId   processDefinitionId
+     * @param processInstanceId
      * @param userid
      */
     public static String privilegeProcess(String processInstanceId, String userid) {
@@ -194,7 +194,6 @@ public class ActivitiProcess extends Model {
      * 流程历史信息
      *
      * @param processInstanceId
-     * @param userid
      */
     public static List<Map<String, String>> processInfo(String processInstanceId) {
         List<Map<String, String>> result = new ArrayList<>();
@@ -251,7 +250,7 @@ public class ActivitiProcess extends Model {
     /**
      * 启动流程后,认领完成第一步流程
      *
-     * @param pdId   processDefinitionId
+     * @param processDefinitionId
      * @param userid
      */
     public static void claimProcess(String processDefinitionId, String userid) {

@@ -5,7 +5,6 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
-import models.OperatorConfig;
 import models.User;
 import models.finance.ProcureApply;
 import models.procure.Cooperator;

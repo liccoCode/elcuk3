@@ -1,7 +1,6 @@
 package models;
 
 import com.google.gson.annotations.Expose;
-import models.market.M;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;

@@ -96,7 +96,7 @@ public class GetAsinJob extends BaseJob {
                         selling.save();
                         // 因为外键约束, 所以这里需要关闭 MySQL 的外键检查, 然后再进行 listingId 切换,
                         // 同时需要将直接关联的 Selling.listing_listingId 外键进行更换.
-                        // TODO: 因为 Listing 可能会涉及到很多其他的外键关联, 是否考虑将 listingId 更换为 UPC_Market?
+                        // 因为 Listing 可能会涉及到很多其他的外键关联, 是否考虑将 listingId 更换为 UPC_Market?
                         DBUtils.execute("SET foreign_key_checks=0");
                         String listingId = String.format("%s_%s", asin, selling.market.toString());
                         DBUtils.execute(String.format(

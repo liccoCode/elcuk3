@@ -14,6 +14,9 @@ import java.util.Arrays;
  */
 public class FeedbackCheckJob {
 
+    private FeedbackCheckJob() {
+    }
+
     /**
      * 检查一次 Feedback
      *

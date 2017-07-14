@@ -15,6 +15,10 @@ import java.util.Map;
  * Time: 11:46 AM
  */
 public class GTs {
+
+    private GTs() {
+    }
+
     public static final String BASE_PATH = "/app/views/gt_templates/%s";
 
     /**

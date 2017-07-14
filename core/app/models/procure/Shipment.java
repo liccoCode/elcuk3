@@ -194,7 +194,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
-
         BOOKED {
             @Override
             public String label() {
@@ -616,7 +615,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public void destroy() {
-        /**
+        /*
          * 0. 检查状态
          * 1. 取消掉关联的运输项目的运输单
          * 2. 删除运输单
@@ -624,8 +623,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.PLAN)
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
-        List<ShipItem> items = ShipItem.find("shipment.id=?", this.id).fetch();
-        items.forEach(GenericModel::delete);
+        List<ShipItem> shipItems = ShipItem.find("shipment.id=?", this.id).fetch();
+        shipItems.forEach(GenericModel::delete);
         this.state = S.CANCEL;
         this.save();
     }
@@ -785,6 +784,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         if(date == null) date = new Date();
+        this.state = S.BOOKED;
         this.dates.pickGoodDate = date;
         this.save();
     }
@@ -970,7 +970,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
-    public String to_log() {
+    public String toLog() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
         sbd.append("[运输:").append(Dates.date2Date(this.dates.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.dates.planArrivDate)).append("] ");
@@ -1336,8 +1336,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? " +
-                        "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? "
+                        + "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
                 User.COR.valueOf(OperatorConfig.getVal("brandname"))).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
@@ -1363,11 +1363,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     * 由于 Play 无法将 models 目录下的 Enumer 加载, 所以通过 model 提供一个暴露方法在 View 中使用
+     * 由于 Play 无法将 models 目录下的 Enum 加载, 所以通过 model 提供一个暴露方法在 View 中使用
      *
      * @return
      */
-    public static List<iExpress> Express() {
+    public static List<iExpress> express() {
         return Arrays.asList(iExpress.values());
     }
 
@@ -1460,10 +1460,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
                         username, System.getenv(Constant.ROOT_URL), this.id);
                 List<ProcureUnit> punits = ProcureUnit
-                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
-                                "  LEFT JOIN " +
-                                " si.shipment " +
-                                " sp where sp.id=?", this.id).fetch();
+                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si"
+                                + " LEFT JOIN si.shipment sp where sp.id=?", this.id).fetch();
                 for(ProcureUnit pu : punits) {
                     String email = pu.handler.email;
                     if(StringUtils.isNotBlank(email)) {
@@ -1486,7 +1484,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void arryParamSetUP(FLAG flag) {
         if(flag.equals(FLAG.ARRAY_TO_STR)) {
-            /**
+            /*
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
             this.trackNo = this.listToStr(this.tracknolist);
@@ -1566,13 +1564,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         String now = formatter.format(this.dates.planBeginDate);
         String maxInvoiceNo = this.fetchMaxInvoiceNoForDB();
-        Integer invoiceNo = 0;
+        Integer invoice = 0;
         if(maxInvoiceNo != null) {
-            invoiceNo = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
+            invoice = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
         }
-        ++invoiceNo;
+        ++invoice;
         this.invoiceNo = String.format("%s%s%s-%s", this.invoiceNOTitle(), now, this.fetchCenterId(),
-                invoiceNo < 10 ? ("0" + invoiceNo) : invoiceNo);
+                invoice < 10 ? ("0" + invoice) : invoice);
         this.save();
         return this.invoiceNo;
     }
@@ -1625,10 +1623,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public String showTrackNo() {
-        String showTrackNo = "";
+        StringBuilder showTrackNo = new StringBuilder();
         this.arryParamSetUP(FLAG.STR_TO_ARRAY);
-        for(String trackNo : this.tracknolist) {
-            showTrackNo += trackNo + ",";
+        for(String track : this.tracknolist) {
+            showTrackNo.append(track).append(",");
         }
         return showTrackNo.substring(0, showTrackNo.length() - 1);
     }
@@ -1702,11 +1700,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
-        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) && this.dates != null &&
-                this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
-            if(StringUtils.isBlank(newShip.reason)) {
-                //Validation.addError("", "修改约定到货时间必须填写原因!");
-            } else {
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) && this.dates != null
+                && this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
+            if(!StringUtils.isBlank(newShip.reason)) {
                 this.reason = newShip.reason;
             }
             this.dates.planArrivDateForCountRate = newShip.dates.planArrivDateForCountRate;
@@ -1733,10 +1729,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean isPaid() {
-        if(this.fees.size() > 0) {
-            return this.fees.get(0).payment.paymentDate != null;
-        }
-        return false;
+        return this.fees.size() > 0 && this.fees.get(0).payment.paymentDate != null;
     }
 
     public Date getPaidDate() {
@@ -1747,7 +1740,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public float calPrescription() {
-        return (float) (this.dates.receiptDate.getTime() - this.dates.planBeginDate.getTime()) / (1000 * 60 * 60 * 24);
+        return (float) (Dates.morning(this.dates.receiptDate).getTime()
+                - Dates.morning(this.dates.planBeginDate).getTime()) / (1000 * 60 * 60 * 24);
     }
 
     public static String showSplitFirst(String key) {

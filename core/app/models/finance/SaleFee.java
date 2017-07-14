@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 @Entity
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class SaleFee extends Model{
+public class SaleFee extends Model {
 
     private static final long serialVersionUID = -8565064073185613540L;
 
@@ -127,7 +127,7 @@ public class SaleFee extends Model{
                 try {
 
                     String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
-                    /**
+                    /*
                      * 1. Order
                      * 2. Refund
                      * 3. Storage Fee
@@ -139,17 +139,12 @@ public class SaleFee extends Model{
                      */
                     String transactionType = params[6].toLowerCase();
                     String orderId = params[7];
-                    if("order".equals(transactionType) ||
-                            "chargeback refund".equals(transactionType) ||
-                            "refund".equals(transactionType) ||
-                            "adjustment".equals(transactionType)) {
+                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType)
+                            || "refund".equals(transactionType) || "adjustment".equals(transactionType)) {
                         M market = M.val(params[11].toLowerCase());
                         if(market == null) market = account.type;
-
                         if(!mapFees.containsKey(orderId))
-                            mapFees.put(orderId,
-                                    new F.T2<>(new AtomicInteger(),
-                                            new ArrayList<>()));
+                            mapFees.put(orderId, new F.T2<>(new AtomicInteger(), new ArrayList<>()));
                         F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
 
                         // 计算数量
@@ -174,13 +169,9 @@ public class SaleFee extends Model{
                         String itemRelateFeeType = params[25].toLowerCase();
                         addOneFee(params[26], params[17], transactionType, orderId, market, fees,
                                 account, itemRelateFeeType);
-                    } else if("storage fee".equals(transactionType) ||
-                            "refund reimbursal".equals(transactionType) ||
-                            "balanceadjustment".equals(transactionType) ||
-                            "subscription fee".equals(transactionType) ||
-                            "removalcomplete".equals(transactionType)) {
-
-                        // Refund Reimbursal, 有订单关联的
+                    } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType)
+                            || "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType)
+                            || "removalcomplete".equals(transactionType)) {
                         if(StringUtils.isNotBlank(orderId)) {
                             if(!mapFees.containsKey(orderId))
                                 mapFees.put(orderId,
@@ -257,7 +248,7 @@ public class SaleFee extends Model{
                                      M market, F.T2<AtomicInteger, List<SaleFee>> fees,
                                      Account acc, String subType) {
         if(StringUtils.isNotBlank(subType)) {
-            FeeType feeType = FeeType(subType, transactionType, orderId);
+            FeeType feeType = feeType(subType, transactionType, orderId);
             SaleFee fee = new SaleFee();
             fee.orderId = orderId;
             fee.market = market;
@@ -274,7 +265,7 @@ public class SaleFee extends Model{
         return false;
     }
 
-    private static FeeType FeeType(String subType, String transactionType, String orderId) {
+    private static FeeType feeType(String subType, String transactionType, String orderId) {
         FeeType feeType = null;
         if(StringUtils.isBlank(subType))
             feeType = FeeType.findById(transactionType);
@@ -299,8 +290,8 @@ public class SaleFee extends Model{
         PreparedStatement ps = null;
         try {
             ps = DB.getConnection().prepareStatement(
-                    "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
-                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) "
+                            + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
                 int i = 1;
                 ps.setString(i++, UUID.randomUUID().toString());
@@ -373,17 +364,16 @@ public class SaleFee extends Model{
 
     @Override
     public String toString() {
-        return "SaleFee" +
-                "{type=" + type +
-                ", id='" + id + '\'' +
-                ", market=" + market +
-                ", memo='" + memo + '\'' +
-                ", orderId='" + orderId + '\'' +
-                ", date=" + date +
-                ", cost=" + cost +
-                ", currency=" + currency +
-                ", usdCost=" + usdCost +
-                ", qty=" + qty +
-                '}';
+        return "SaleFee" + "{type=" + type
+                + ", id='" + id + '\''
+                + ", market=" + market
+                + ", memo='" + memo + '\''
+                + ", orderId='" + orderId + '\''
+                + ", date=" + date
+                + ", cost=" + cost
+                + ", currency=" + currency
+                + ", usdCost=" + usdCost
+                + ", qty=" + qty
+                + '}';
     }
 }
