@@ -104,6 +104,18 @@ public class Cooperator extends Model {
     public String name;
 
     /**
+     * 省
+     */
+    @Expose
+    public String province;
+
+    /**
+     * 市
+     */
+    @Expose
+    public String city;
+
+    /**
      * 地址
      */
     @Required
@@ -236,6 +248,36 @@ public class Cooperator extends Model {
     public User creator;
 
     public Date createDate;
+
+    public enum OP {
+        WorkShop {
+            @Override
+            public String label() {
+                return "作坊";
+            }
+        },
+        Distributor {
+            @Override
+            public String label() {
+                return "经销商";
+            }
+        },
+        Factory {
+            @Override
+            public String label() {
+                return "厂家";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     *
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public OP nature;
 
 
     /**

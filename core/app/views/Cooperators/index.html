@@ -62,7 +62,7 @@
               #{/if}
           </td>
           <td>${c.name}</td>
-          <td>${c.type?.to_s()}</td>
+          <td>${c.type?.label()}</td>
           <td>
               #{if c.type==models.procure.Cooperator.T.SUPPLIER}
                 <a href="@{Deliveryments.indexByCooperId(c.id)}" target="_blank">${c.deliveryments?.size()}</a>

@@ -1,6 +1,5 @@
 package models.view.post;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.Constant;
 import helper.Dates;
@@ -28,6 +27,7 @@ import java.util.regex.Pattern;
  */
 public class OrderPOST extends ESPost<Orderr> {
 
+    private static final long serialVersionUID = -6583404252425758018L;
     // 崩溃: 如果使用 from 其类型变为了 Integer, 所以在 Order Post 中改名为 begin
     public Date begin;
     public Date end;
@@ -190,8 +190,6 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         return new SearchSourceBuilder()
                 .query(QueryBuilders.queryStringQuery(this.search()))
-                .storedField("selling_id")
-                .storedField("order_id")
                 .postFilter(boolQuery)
                 .from(this.getFrom())
                 .size(this.perSize)

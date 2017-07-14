@@ -1848,7 +1848,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean hasEqualWithPrePay() {
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
         double total = this.fees().stream().filter(fee -> fee.feeType == FeeType.cashpledge())
-                .mapToDouble(fee -> fee.amount()).sum();
+                .mapToDouble(PaymentUnit::amount).sum();
         return new BigDecimal(this.attrs.price * this.paidQty() * pre).compareTo(new BigDecimal(total)) == 0;
     }
 
