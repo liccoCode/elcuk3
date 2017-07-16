@@ -8,6 +8,7 @@ import play.Logger;
 import java.util.List;
 
 /**
+ * 账户开启二步验证后已经无法正确拿到 cookie
  * 用来维持不同 Account 登陆网站的 Session;
  * <p/>
  * PS: 这个网站 Session 维护每 29mn 一次
@@ -17,6 +18,8 @@ import java.util.List;
  * User: wyattpan
  * Date: 3/14/12
  * Time: 4:38 PM
+ *
+ * @deprecated
  */
 //@Every("20mn")
 public class KeepSessionJob extends BaseJob {
