@@ -115,16 +115,16 @@ public class FBACenter extends Model {
 
     @Override
     public String toString() {
-        return "FBACenter{" +
-                "centerId='" + centerId + '\'' +
-                ", addressLine1='" + addressLine1 + '\'' +
-                ", addressLine2='" + addressLine2 + '\'' +
-                ", city='" + city + '\'' +
-                ", name='" + name + '\'' +
-                ", countryCode='" + countryCode + '\'' +
-                ", stateOrProvinceCode='" + stateOrProvinceCode + '\'' +
-                ", postalCode='" + postalCode + '\'' +
-                '}';
+        return "FBACenter{"
+                + "centerId='" + centerId + '\''
+                + ", addressLine1='" + addressLine1 + '\''
+                + ", addressLine2='" + addressLine2 + '\''
+                + ", city='" + city + '\''
+                + ", name='" + name + '\''
+                + ", countryCode='" + countryCode + '\''
+                + ", stateOrProvinceCode='" + stateOrProvinceCode + '\''
+                + ", postalCode='" + postalCode + '\''
+                + '}';
     }
 
     public static FBACenter findByCenterId(String centerId) {

@@ -447,8 +447,8 @@ public class BtbOrder extends Model {
 
     public void createLogs(String msg) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        StringBuilder message = new StringBuilder("操作人:" + Login.current().username + " 操作时间:" +
-                formatter.format(new Date())).append(msg);
+        StringBuilder message = new StringBuilder("操作人:" + Login.current().username + " 操作时间:"
+                + formatter.format(new Date())).append(msg);
         new ElcukRecord("B2B订单管理", message.toString(), this.orderNo).save();
     }
 

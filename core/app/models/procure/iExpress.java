@@ -207,9 +207,8 @@ public enum iExpress {
     UPS {
         @Override
         public String trackUrl(String tracNo) {
-            return String.format(
-                    "http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome",
-                    tracNo.trim());
+            return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes"
+                    + "&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo.trim());
         }
 
         @Override

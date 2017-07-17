@@ -38,7 +38,7 @@ public class Cooperator extends Model {
          */
         SUPPLIER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "供应商";
             }
         },
@@ -47,7 +47,7 @@ public class Cooperator extends Model {
          */
         SHIPPER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "运输商";
             }
         };
@@ -57,7 +57,7 @@ public class Cooperator extends Model {
          *
          * @return
          */
-        public abstract String to_s();
+        public abstract String label();
     }
 
     /**

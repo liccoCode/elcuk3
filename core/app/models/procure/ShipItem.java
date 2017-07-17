@@ -183,9 +183,9 @@ public class ShipItem extends GenericModel {
      */
     public F.T2<ShipItem, ProcureUnit> cancel() {
         this.shipment = null;
-        ProcureUnit unit = this.unit;
+        ProcureUnit procureUnit = this.unit;
         this.unit = null;
-        return new F.T2<>(this.delete(), unit);
+        return new F.T2<>(this.delete(), procureUnit);
     }
 
     /**
@@ -265,8 +265,8 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
         if(this.shipment != null && this.shipment.equals(shipment))
             Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
-        if(this.shipment != null && this.shipment.state != Shipment.S.PLAN &&
-                this.unit.revokeStatus != ProcureUnit.REVOKE.CONFIRM)
+        if(this.shipment != null && this.shipment.state != Shipment.S.PLAN
+                && this.unit.revokeStatus != ProcureUnit.REVOKE.CONFIRM)
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
@@ -283,15 +283,10 @@ public class ShipItem extends GenericModel {
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        if(StringUtils.isNotBlank(compentype) &&
-                !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname")
-                        .toLowerCase())) {
+        if(StringUtils.isNotBlank(compentype)
+                && !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
             if((lossqty != 0 && compenamt.intValue() == 0) || (lossqty == 0 && compenamt.intValue() != 0))
                 Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
-        }
-        if(StringUtils.isNotBlank(compentype) &&
-                compenamt.equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
-
         }
         if(Validation.hasErrors()) return;
         int oldQty = this.adjustQty;

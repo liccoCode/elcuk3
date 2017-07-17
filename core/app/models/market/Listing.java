@@ -250,8 +250,7 @@ public class Listing extends GenericModel {
 
         if(needWarnningOffers >= 1) {
             //两天处理时间
-            if(this.closeWarnningTime != null &&
-                    DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
+            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
                 return;
             Mails.moreOfferOneListing(offers, this);
             //标记为被跟踪
@@ -282,9 +281,9 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<F.T2<Long, Integer>> reviewMonthTable() {
-        List<Map<String, Object>> rows = DBUtils
-                .rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')",
-                        this.listingId);
+        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(reviewDate, '%Y-%m') as date,  "
+                + "count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, "
+                + "'%Y-%m')", this.listingId);
         List<F.T2<Long, Integer>> monthTable = rows.stream()
                 .map(row -> new F.T2<>(
                         DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
@@ -422,11 +421,8 @@ public class Listing extends GenericModel {
      */
     public static boolean isSelfBuildListing(String title) {
         title = title.toLowerCase();
-        if(StringUtils.contains(title, "easyacc")) return true;
-        else if(StringUtils.contains(title, "nosson")) return true;
-        else if(StringUtils.contains(title, "fencer")) return true;
-        else if(StringUtils.contains(title, "saner")) return true;
-        else return false;
+        return StringUtils.contains(title, "easyacc") || StringUtils.contains(title, "nosson")
+                || StringUtils.contains(title, "fencer") || StringUtils.contains(title, "saner");
     }
 
     public static String lid(String asin, M market) {
@@ -520,8 +516,8 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<Selling> sellings() {
-        List<Selling> sellings = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
-        return sellings;
+        List<Selling> sellingList = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
+        return sellingList;
     }
 
     public void safeDelete() {

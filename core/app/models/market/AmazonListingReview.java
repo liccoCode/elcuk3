@@ -355,7 +355,7 @@ public class AmazonListingReview extends GenericModel {
             }
 
             long reviewcount = AmazonListingReview.count("alrid=?", this.alrId);
-            if(reviewcount != 1l) {
+            if(reviewcount != 1L) {
                 Logger.info("Review alrId count is not exist!! %s", this.alrId);
                 return;
             }
@@ -486,8 +486,7 @@ public class AmazonListingReview extends GenericModel {
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == M.AMAZON_DE) {
-                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen " +
-                        "helfen??";
+                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen helfen??";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
                 subject = "We would like to address your review!!";
             }
@@ -661,8 +660,8 @@ public class AmazonListingReview extends GenericModel {
                 JSONObject marketResult = result.getJSONObject(m.name());
                 for(Date sunday : sundays) {
                     JSONObject sundayResult = marketResult.getJSONObject(formatter.format(sunday));
-                    long scoreSum = 0l;
-                    long sumCount = 0l;
+                    long scoreSum = 0L;
+                    long sumCount = 0L;
                     if(sundayResult != null) {
                         JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
                         sumCount = sundayResult.getInteger("doc_count");
@@ -783,13 +782,13 @@ public class AmazonListingReview extends GenericModel {
         AmazonListingReview fromDB = AmazonListingReview.findById(this.alrId);
         if(fromDB == null) {
             if(StringUtils.isNotBlank(this.listingId)) {
-                Listing listing = Listing.findById(this.listingId);
-                if(listing == null) {
+                Listing entity = Listing.findById(this.listingId);
+                if(entity == null) {
                     F.T2<String, M> asinAndMarket = Listing.unLid(this.listingId);
-                    listing = Listing.crawl(asinAndMarket._1, asinAndMarket._2);
-                    listing.save();
+                    entity = Listing.crawl(asinAndMarket._1, asinAndMarket._2);
+                    entity.save();
                 }
-                this.listing = listing;
+                this.listing = entity;
                 this.isOwner = this.listing.product != null;
             }
             this.createDate = this.reviewDate;
