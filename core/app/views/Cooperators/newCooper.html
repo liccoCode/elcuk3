@@ -23,7 +23,11 @@
       <tr>
         <th>地址</th>
         <td colspan="3">
-          <input type="text" class="span10" name="cop.address" value="${cop.address}" placeHolder="此合作伙伴所在的地址">
+          <input type="text" name="cop.province" class="input-small" value="${cop.province}" placeholder="省">
+          <input type="text" name="cop.city" class="input-small" value="${cop.city}" placeholder="市">
+          <input type="text" name="cop.address" class="span6" value="${cop.address}" placeholder="详细地址">
+        </td>
+
         </td>
       </tr>
 
@@ -39,11 +43,18 @@
         <td>
           <select name="cop.type">
           #{list items:models.procure.Cooperator.T, as:'t'}
-            <option value="${t.name()}" ${t==cop.type? 'selected' : ''}>${t.to_s()}</option>
+            <option value="${t.name()}" ${t==cop.type? 'selected' : ''}>${t.label()}</option>
           #{/list}
           </select>
         </td>
-        <td colspan="2">&nbsp;</td>
+        <th>经营性质:</th>
+        <td>
+          <select name="cop.nature">
+          #{list items:models.procure.Cooperator.OP, as:'o'}
+            <option value="${o.name()}" ${o==cop.nature?'selected':''}>${o.label()}</option>
+          #{/list}
+          </select>
+        </td>
       </tr>
       <tr>
         <th>Memo</th>
