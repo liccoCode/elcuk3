@@ -1,17 +1,14 @@
 #{extends 'main_full.html'/}
 #{set title:'FeeTypes'/}
-#{set 'moreStyles'}
-    #{stylesheet 'feetypes.css'/}
-#{/set}
 #{set 'moreScripts'}
-    #{script 'feetypes.coffee'/}
+    #{script 'feeTypes/feeTypes.es6'/}
 #{/set}
 
-#{info_row }
-<div style="text-align:center">
-  <h3>请只使用两级</h3>
-</div>
-#{/info_row}
+#{warning_row ''}
+<ol>
+  <li>请只使用两级</li>
+</ol>
+#{/warning_row}
 
 <div class="btn-toolbar">
   <button class="btn btn-success" id="show_modal">新添加 FeeType</button>
@@ -40,7 +37,9 @@
         <td>${top.createdAt.los()}</td>
         <td>${top.updateAt.los()}</td>
         <td>
-          <button class="btn btn-mini btn-primary submit">更新</button>
+          <button class="btn btn-mini btn-primary" name="update_btn" data-name="${top.name}" data-demo="${top.memo}"
+                  data-nick="${top.nickName}" data-short="${top.shortcut}">更新
+          </button>
           <button class="btn btn-mini btn-danger delete">删除</button>
         </td>
       </tr>
@@ -48,26 +47,30 @@
       #{else }
         <td rowspan="${top.children.size()+1}">${top.name}</td>
         <td></td>
-        <td><input type="text" name="nickName" value="${top.nickName}"></td>
+        <td>${top.nickName}</td>
         <td>${top.memo}</td>
         <td>${top.shortcut}</td>
         <td>${top.createdAt.los()}</td>
         <td>${top.updateAt.los()}</td>
         <td>
-          <button class="btn btn-mini btn-primary submit">更新</button>
+          <button class="btn btn-mini btn-primary" name="update_btn" data-name="${top.name}" data-demo="${top.memo}"
+                  data-nick="${top.nickName}" data-short="${top.shortcut}">更新
+          </button>
           <button class="btn btn-mini btn-danger delete">删除</button>
         </td>
         </tr>
           #{list items:top.children, as:'c'}
             <tr>
               <td>${c.name}</td>
-              <td><input type="text" name="nickName" value="${c.nickName}"></td>
+              <td>${c.nickName}</td>
               <td>${c.memo}</td>
               <td>${c.shortcut}</td>
               <td>${c.createdAt.los()}</td>
               <td>${c.updateAt.los()}</td>
               <td>
-                <button class="btn btn-mini btn-primary submit">更新</button>
+                <button class="btn btn-mini btn-primary" name="update_btn" data-name="${c.name}" data-demo="${c.memo}"
+                        data-nick="${c.nickName}" data-short="${c.shortcut}">更新
+                </button>
                 <button class="btn btn-mini btn-danger delete">删除</button>
               </td>
             </tr>
@@ -118,6 +121,38 @@
   <div class="modal-footer">
     <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
     <button class="btn btn-primary" id="submitCreateBtn">创建</button>
+  </div>
+</div>
+
+<div id="update_modal" class="modal hide fade">
+  <div class="modal-header">
+    <h4>修改FeeType信息</h4>
+  </div>
+  <div class="modal-body" style="height:200px;">
+    <form action="@{FeeTypes.update()}" method="post" id="update_form">
+      <table class="table table-condensed table-bordered">
+        <tr>
+          <th>费用名称:</th>
+          <td><input type="text" name="ft.name" readonly></td>
+        </tr>
+        <tr>
+          <th>NickName:</th>
+          <td><input type="text" name="ft.nickName" required></td>
+        </tr>
+        <tr>
+          <th>费用解释:</th>
+          <td><input type="text" name="ft.memo" required></td>
+        </tr>
+        <tr>
+          <th>快捷查询:</th>
+          <td><input type="text" name="ft.shortcut" required></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <button class="btn btn-primary" id="submitUpdateBtn">保存</button>
   </div>
 </div>
 
