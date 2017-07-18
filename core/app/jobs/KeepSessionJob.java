@@ -19,7 +19,6 @@ import java.util.List;
  * Date: 3/14/12
  * Time: 4:38 PM
  */
-@Every("20mn")
 public class KeepSessionJob extends BaseJob {
 
     @Override

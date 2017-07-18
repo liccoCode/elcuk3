@@ -90,9 +90,9 @@ public class Bootstrap extends Job {
          */
         ListingStateRecord.initAllListingRecords();
         Currency.initCurrency();
-        if(Play.mode.isProd()) {
+/*        if(Play.mode.isProd()) {
             Account.initLogin();
-        }
+        }*/
     }
 
     public void validElcuk2ENV() throws Exception {
