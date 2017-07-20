@@ -134,13 +134,12 @@ public class Role extends GenericModel {
      * @param privilegeId
      */
     public void addPrivileges(List<Long> privilegeId) {
-        List<Privilege> privileges = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId))
-                .fetch();
-        if(privilegeId.size() != privileges.size())
+        List<Privilege> privilegeList = Privilege.find("id IN " + JpqlSelect.inlineParam(privilegeId)).fetch();
+        if(privilegeId.size() != privilegeList.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
         this.privileges = new HashSet<>();
         this.save();
-        this.privileges.addAll(privileges);
+        this.privileges.addAll(privilegeList);
         Privilege.updateRolePrivileges(this.roleName, this.privileges);
         this.save();
     }
@@ -160,8 +159,8 @@ public class Role extends GenericModel {
     }
 
     public static boolean isShipmentRole(User user) {
-        List<Role> roles = Role.find("roleName in "+ SqlSelect.inlineParam(Arrays.asList("物流专员", "物流主管"))).fetch();
+        List<Role> roles = Role.find("roleName in " + SqlSelect.inlineParam(Arrays.asList("物流专员", "物流主管"))).fetch();
         return roles != null && user.roles.stream().anyMatch(role -> roles.contains(role));
     }
-    
+
 }

@@ -37,8 +37,8 @@ public class BtbOrderPost extends Post<BtbOrder> {
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbOrder s LEFT JOIN s.btbOrderItemList i " +
-                "WHERE  1 = 1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbOrder s LEFT JOIN s.btbOrderItemList i "
+                + " WHERE  1 = 1 ");
         if(StringUtils.isNotEmpty(from.toString()) && StringUtils.isNotEmpty(to.toString())) {
             sql.append(" AND s.saleDate >= ? AND s.saleDate <= ? ");
             params.add(Dates.morning(from));

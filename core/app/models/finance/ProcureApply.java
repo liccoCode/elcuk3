@@ -213,7 +213,8 @@ public class ProcureApply extends Apply {
         // 生成 ProcureApply
         ProcureApply apply = new ProcureApply();
         apply.serialNumber = apply.generateSerialNumber(dmtAndCop._2.iterator().next());
-        apply.createdAt = apply.updateAt = new Date();
+        apply.createdAt = new Date();
+        apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();
         for(Deliveryment dmt : dmtAndCop._1) {

@@ -80,7 +80,7 @@ public class Finances extends Controller {
                 }
 
                 if(StringUtils.isNotEmpty(p.categories)) {
-                    if(!Category.is_exist_ids(p.categories)) {
+                    if(!Category.isExistIds(p.categories)) {
                         flash.error("系统不存在category:" + p.categories);
                         render(skuProfits, p);
                     }

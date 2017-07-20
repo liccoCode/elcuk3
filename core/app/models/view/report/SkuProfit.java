@@ -6,7 +6,10 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * Created by licco on 15/12/22.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/12/22
+ * Time: 上午11:13
  */
 public class SkuProfit implements Serializable {
 
@@ -90,16 +93,16 @@ public class SkuProfit implements Serializable {
         for(SkuProfit skuProfit : skuProfits) {
             if(skuProfitMap.containsKey(skuProfit.market)) {
                 SkuProfit p = skuProfitMap.get(skuProfit.market);
-                SkuProfit.add_profit(p, skuProfit);
+                SkuProfit.addProfit(p, skuProfit);
                 skuProfitMap.put(skuProfit.market, p);
             } else {
                 SkuProfit temp = new SkuProfit();
                 temp.market = skuProfit.market;
-                SkuProfit.add_profit(temp, skuProfit);
+                SkuProfit.addProfit(temp, skuProfit);
                 skuProfitMap.put(skuProfit.market, temp);
             }
             /**总计**/
-            SkuProfit.add_profit(totalSkuProfit, skuProfit);
+            SkuProfit.addProfit(totalSkuProfit, skuProfit);
         }
 
         Iterator iterator = skuProfitMap.entrySet().iterator();
@@ -113,7 +116,7 @@ public class SkuProfit implements Serializable {
         return total_skuProfits;
     }
 
-    public static void add_profit(SkuProfit origin, SkuProfit profit) {
+    public static void addProfit(SkuProfit origin, SkuProfit profit) {
         origin.quantity += profit.quantity;
         origin.totalfee += profit.totalfee;
         origin.skuSaleCost += profit.skuSaleCost;

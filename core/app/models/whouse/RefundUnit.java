@@ -19,7 +19,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by licco on 2016/11/25.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 2016/11/25
+ * Time: 上午10:49
  */
 @Entity
 @DynamicUpdate

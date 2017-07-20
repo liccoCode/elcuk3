@@ -19,6 +19,9 @@ import java.util.List;
  * @deprecated 落为工具方法
  */
 public class AmazonFinanceCheckJob {
+    private AmazonFinanceCheckJob() {
+    }
+
     public static final String RUNNING = "amazonfinancecheckjob_running";
 
     /**
@@ -34,9 +37,8 @@ public class AmazonFinanceCheckJob {
         PreparedStatement psmt = null;
         try {
             psmt = DB.getConnection().prepareStatement(
-                    "INSERT INTO SaleFee(account_id, order_orderId, type_name, market, memo, orderId, `DATE`, cost, currency, usdCost, qty)" +
-                            " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            );
+                    "INSERT INTO SaleFee(account_id, order_orderId, type_name, market, memo, orderId, `DATE`, cost, currency, usdCost, qty)"
+                            + " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             int i = 1;
             for(SaleFee fee : fees) {

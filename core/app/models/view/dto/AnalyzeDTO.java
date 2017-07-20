@@ -251,8 +251,7 @@ public class AnalyzeDTO implements Serializable {
     public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
-            float diff = Math.abs(_ps - this.ps) /
-                    (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
+            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
             if(diff >= 0.4)
                 color = "E45652";

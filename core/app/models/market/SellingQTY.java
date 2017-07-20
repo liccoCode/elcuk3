@@ -78,7 +78,7 @@ public class SellingQTY extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
-    public String to_log() {
+    public String toLog() {
         return String.format("SellingQTY[%s] [Inbound:%s] [Qty:%s] [Unsellable:%s] [Pending:%s]",
                 this.id, this.inbound, this.qty, this.unsellable, this.pending);
     }

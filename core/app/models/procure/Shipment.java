@@ -970,7 +970,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
-    public String to_log() {
+    public String toLog() {
         StringBuilder sbd = new StringBuilder("[id:").append(this.id).append("] ");
         sbd.append("[运输:").append(Dates.date2Date(this.dates.planBeginDate)).append("] ")
                 .append("[到库:").append(Dates.date2Date(this.dates.planArrivDate)).append("] ");
@@ -1729,10 +1729,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public boolean isPaid() {
-        if(this.fees.size() > 0) {
-            return this.fees.get(0).payment.paymentDate != null;
-        }
-        return false;
+        return this.fees.size() > 0 && this.fees.get(0).payment.paymentDate != null;
     }
 
     public Date getPaidDate() {
@@ -1743,7 +1740,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public float calPrescription() {
-        return (float) (this.dates.receiptDate.getTime() - this.dates.planBeginDate.getTime()) / (1000 * 60 * 60 * 24);
+        return (float) (Dates.morning(this.dates.receiptDate).getTime()
+                - Dates.morning(this.dates.planBeginDate).getTime()) / (1000 * 60 * 60 * 24);
     }
 
     public static String showSplitFirst(String key) {

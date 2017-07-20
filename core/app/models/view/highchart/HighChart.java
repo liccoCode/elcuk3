@@ -85,8 +85,8 @@ public class HighChart implements Serializable {
             s = new Series.Pie(name + "汇总");
         }
 
-        for(AbstractSeries series : this.series) {
-            for(Object[] data : series.data) {
+        for(AbstractSeries abstractSeries : this.series) {
+            for(Object[] data : abstractSeries.data) {
                 s.add((Float) data[1], data[0]);
             }
         }
@@ -111,8 +111,8 @@ public class HighChart implements Serializable {
             s = new Series.Pie(name + "汇总");
         }
 
-        for(AbstractSeries series : this.series) {
-            for(Object[] data : series.data) {
+        for(AbstractSeries abstractSeries : this.series) {
+            for(Object[] data : abstractSeries.data) {
                 s.addWithBigDecimal((Float) data[1], data[0]);
             }
         }

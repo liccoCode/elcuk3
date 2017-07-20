@@ -74,12 +74,12 @@ public class CategoryAssignManagement extends Model {
 
     public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("select c from CategoryAssignManagement c " +
-                " LEFT JOIN c.user u " +
-                " LEFT JOIN u.roles r " +
-                " WHERE c.team.id=? AND c.category.categoryId=?" +
-                " GROUP BY c.id " +
-                " ORDER BY r.roleName");
+        StringBuilder sql = new StringBuilder("select c from CategoryAssignManagement c "
+                + " LEFT JOIN c.user u "
+                + " LEFT JOIN u.roles r "
+                + " WHERE c.team.id=? AND c.category.categoryId=?"
+                + " GROUP BY c.id "
+                + " ORDER BY r.roleName");
         params.add(teamId);
         params.add(categoryId);
         List<CategoryAssignManagement> list = CategoryAssignManagement.find(sql.toString(), params.toArray()).fetch();
@@ -88,12 +88,12 @@ public class CategoryAssignManagement extends Model {
     }
 
     public String showAllRoleName() {
-        String name = "";
+        StringBuilder name = new StringBuilder();
         if(this.user.roles.size() == 0)
             return "";
 
         for(Role role : this.user.roles) {
-            name += role.roleName + ",";
+            name.append(role.roleName).append(",");
         }
         return name.substring(0, name.length() - 1);
     }
@@ -133,8 +133,8 @@ public class CategoryAssignManagement extends Model {
         CategoryAssignManagement c = CategoryAssignManagement.findById(assid);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         new ElcukRecord("部门品线负责人管理",
-                "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId +
-                        "(" + c.category.name + ") 品线负责人：" + c.user.username, String.valueOf(c.id)).save();
+                "操作人:" + c.createrId.username + " 操作时间:" + sdf.format(c.createDate) + " 删除" + c.category.categoryId
+                        + "(" + c.category.name + ") 品线负责人：" + c.user.username, String.valueOf(c.id)).save();
         c.delete();
     }
 
@@ -143,9 +143,9 @@ public class CategoryAssignManagement extends Model {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         StringBuilder message = new StringBuilder();
         if(!old.user.username.equals(c.userName)) {
-            message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                    c.category.categoryId + "(" + c.category.name + ") 品线负责人从：" + old.user.username + "改成 " +
-                    c.userName);
+            message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改"
+                    + c.category.categoryId + "(" + c.category.name + ") 品线负责人从：" + old.user.username + "改成 "
+                    + c.userName);
         }
         if(old.isCharge != c.isCharge) {
             if(message.length() > 0) {
@@ -156,11 +156,11 @@ public class CategoryAssignManagement extends Model {
                 }
             } else {
                 if(c.isCharge) {
-                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                            c.category.categoryId + "(" + c.category.name + ") 品线 " + old.user.username + "为主要负责人。");
+                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改"
+                            + c.category.categoryId + "(" + c.category.name + ") 品线 " + old.user.username + "为主要负责人。");
                 } else {
-                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改" +
-                            c.category.categoryId + "(" + c.category.name + ") 品线" + old.user.username + " 取消其主要负责人。");
+                    message.append("操作人:" + Login.current().username + " 操作时间:" + formatter.format(new Date()) + " 修改"
+                            + c.category.categoryId + "(" + c.category.name + ") 品线" + old.user.username + " 取消其主要负责人。");
                 }
             }
         }

@@ -17,6 +17,9 @@ import play.Play;
  */
 public class J {
 
+    private J() {
+    }
+
     public static String json(Object obj) {
         try {
             return fastjson(obj);

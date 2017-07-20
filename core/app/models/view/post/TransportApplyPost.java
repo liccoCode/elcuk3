@@ -3,7 +3,6 @@ package models.view.post;
 
 import helper.Dates;
 import models.finance.TransportApply;
-import models.procure.ShipItem;
 import org.joda.time.DateTime;
 import play.libs.F;
 

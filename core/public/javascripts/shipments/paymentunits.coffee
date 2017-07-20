@@ -118,7 +118,7 @@ $ ->
   ).on('click', 'button.btn-success:contains(更新)',(e) ->
     e.preventDefault()
     $tr = $(@).parents('tr')
-    id = $(@).data("id")
+    id = $tr.find('td:eq(0)').text().trim()
     LoadMask.mask()
     $.ajax({
     url: "/paymentunit/#{id}.json",

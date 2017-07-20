@@ -239,7 +239,7 @@ public class Shipments extends Controller {
         //向采购计划负责人发送邮件
         old.sendMsgMail(realPlanArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
-        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), old.id)
+        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.toLog()), old.id)
                 .save();
         Shipments.show(shipid);
     }

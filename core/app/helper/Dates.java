@@ -17,6 +17,10 @@ import java.util.*;
  * Time: 2:45 PM
  */
 public class Dates {
+
+    private Dates() {
+    }
+
     private static DatatypeFactory df;
 
     /**

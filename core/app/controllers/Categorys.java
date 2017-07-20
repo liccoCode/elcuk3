@@ -37,7 +37,7 @@ public class Categorys extends Controller {
         }
         Category cat = (Category) renderArgs.get("cates", List.class).get(0);
         if(StringUtils.isNotBlank(id)) cat = Category.findById(id);
-        List<Team> teams = Team.Teams();
+        List<Team> teams = Team.allTeams();
         render(cat, teams);
     }
 
@@ -82,7 +82,7 @@ public class Categorys extends Controller {
 
     public static void blank() {
         Category cat = new Category();
-        List<Team> teams = Team.Teams();
+        List<Team> teams = Team.allTeams();
         render(cat, teams);
     }
 

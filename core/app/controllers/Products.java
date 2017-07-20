@@ -203,7 +203,7 @@ public class Products extends Controller {
         qty.save();
         flash.success("更新成功.");
         new ElcukRecord(Messages.get("sellingqty.update"),
-                Messages.get("action.base", qty.to_log()), qty.product.sku).save();
+                Messages.get("action.base", qty.toLog()), qty.product.sku).save();
         redirect("/Products/show/" + qty.product.sku);
     }
 

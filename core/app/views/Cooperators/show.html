@@ -65,12 +65,22 @@
           <tr>
             <th>Address:</th>
             <td colspan="3">
-              <input type="text" name="cop.address" class="span10" value="${coper.address}">
+              <input type="text" name="cop.province" class="input-small" value="${coper.province}" placeholder="省">
+              <input type="text" name="cop.city" class="input-small" value="${coper.city}" placeholder="市">
+              <input type="text" name="cop.address" class="span6" value="${coper.address}" placeholder="详细地址">
             </td>
           </tr>
           <tr>
+            <th>经营性质:</th>
+            <td>
+              <select name="cop.nature">
+              #{list items:models.procure.Cooperator.OP, as:'o'}
+                <option value="${o.name()}" ${o==coper.nature?'selected':''}>${o.label()}</option>
+              #{/list}
+              </select>
+            </td>
             <th>付款方式:</th>
-            <td colspan="3">
+            <td>
               <div class="input-append">
                 <input type="text" class="input-mini" name="cop.first" value="${coper.first}">
                 <span class="add-on">%</span>

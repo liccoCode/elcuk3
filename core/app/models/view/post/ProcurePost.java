@@ -278,10 +278,10 @@ public class ProcurePost extends Post<ProcureUnit> {
      * @return
      */
     public List<HashMap<String, Object>> queryLogs() {
-        String sql = "SELECT e.createAt as createAt, e.username as username, fid as fid," +
-                "p.selling_sellingId as sellingId,p.isPlaced as isPlaced,f.shipmentId as fba,e.message as message " +
-                "FROM ElcukRecord e LEFT JOIN ProcureUnit p ON e.fid = p.id LEFT JOIN FBAShipment f ON p.fba_id = f.id " +
-                "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
+        String sql = "SELECT e.createAt as createAt, e.username as username, fid as fid,"
+                + "p.selling_sellingId as sellingId,p.isPlaced as isPlaced,f.shipmentId as fba,e.message as message "
+                + "FROM ElcukRecord e LEFT JOIN ProcureUnit p ON e.fid = p.id LEFT JOIN FBAShipment f ON p.fba_id = f.id "
+                + "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
         List<Map<String, Object>> rows = DBUtils
                 .rows(sql, Messages.get("procureunit.deepUpdate"), Dates.morning(this.from), Dates.night(this.to));
         List<HashMap<String, Object>> logs = new ArrayList<>();

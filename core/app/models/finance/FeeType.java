@@ -45,6 +45,11 @@ public class FeeType extends GenericModel {
     @Lob
     public String memo;
 
+    /**
+     * 快捷查询
+     */
+    public String shortcut;
+
     public Date createdAt;
     public Date updateAt;
 
