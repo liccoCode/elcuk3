@@ -23,6 +23,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -231,4 +232,14 @@ public class MaterialPurchases extends Controller {
         List<MaterialUnit> units = materialPurchase.units;
         render("/MaterialUnits/_unit_list.html", units);
     }
+
+    
+    public static void validDmtIsNeedApply(String id) {
+        MaterialPurchase dmt = MaterialPurchase.findById(id);
+        if(Arrays.asList("CONFIRM", "PENDING").contains(dmt.state.name()))
+            renderJSON(new Ret());
+        if(dmt.state == MaterialPurchase.S.CANCEL)
+            renderJSON(new Ret(false, "采购单已取消！"));
+    }
+
 }
