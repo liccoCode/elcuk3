@@ -46,7 +46,10 @@
     <td>${unit.planQty}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
-    <td>${unit.material?.surplusConfirmQty()}</td>
+    <td>
+      <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${unit.material?.surplusConfirmQty()}</a>
+    </td>
+
       #{if materialUnitsIndex}
         <td>
           <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>

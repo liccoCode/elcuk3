@@ -82,7 +82,9 @@
             <td>${m.boms[0]?.number}</td>
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
-            <td>${m.availableQty()}</td>
+            <td>
+              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.availableQty()}</a>
+            </td>
             <td>${m.cooperators()}</td>
             <td>${m.projectName}</td>
           </tr>
