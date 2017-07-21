@@ -103,6 +103,10 @@
           </tr>
           <tr>
             <td colspan="6">
+            #{if dp.apply}
+                <a href="@{Applys.material(dp.apply.id)}" class="btn btn-success">${dp.apply.serialNumber}
+                  请款单</a>
+            #{/if}
               <button class="btn btn-primary" name="create_record">更新</button>
               <a href="@{Excels.materialPlan(dp.id)}" class="btn btn-success" target="_blank"><i
                   class="icon-download-alt"></i>导出物料出货单</a>
