@@ -35,6 +35,7 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -735,6 +736,17 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
+
+        float totalShipWeight = this.totalWeight();
+        this.items.forEach(item -> {
+            float itemWeight = 0f;
+            Float weight = item.unit.product.weight;
+            if(weight != null) {
+                itemWeight += item.qty * weight;
+            }
+            item.weightRatio = BigDecimal.valueOf(itemWeight)
+                    .divide(BigDecimal.valueOf(totalShipWeight), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+        });
         this.save();
     }
 

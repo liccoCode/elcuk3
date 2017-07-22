@@ -135,6 +135,12 @@ public class ShipItem extends GenericModel {
     public String memo;
 
     /**
+     * 占重比
+     * 开始运输之后 赋值
+     */
+    public Float weightRatio;
+
+    /**
      * 采购成本 用于运输丢失率统计报表
      */
     @Transient
