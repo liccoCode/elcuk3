@@ -115,7 +115,7 @@
             <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
             <td class="price" amount="${procureUnit.totalAmount()}">
             ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-            <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.materialPlan.state.label()}</td>
+            <td>${procureUnit.materialPlan.state.label()}</td>
           </tr>
           <tr id="unit_${pid}" style="display:none">
             <td colspan="12">
@@ -123,8 +123,7 @@
                 <div class="span2">
                     #{ifnot procureUnit.hasTailPay()}
                         #{form @MaterialPlanUnits.billingPrePay(pid, apply.id), method:'POST'}
-                          <input type="submit" value="申请尾款" class="btn btn-mini btn-warning"
-                                 rel="tooltip" title="${apply.cooperator.tail}%">
+                          <input type="submit" value="申请尾款" class="btn btn-mini btn-warning" rel="tooltip">
                         #{/form}
                     #{/ifnot}
                   <input type="hidden" name="feesize" id="feesize" value="${procureUnit.fees().size()}">
