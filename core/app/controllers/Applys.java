@@ -80,7 +80,7 @@ public class Applys extends Controller {
         ProcureApply apply = ProcureApply.findById(id);
         apply.confirm = true;
         apply.save();
-        render();
+        render("Applys/procure.html", apply);
     }
 
     /**

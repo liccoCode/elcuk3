@@ -5,6 +5,7 @@ import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Min;
 import play.data.validation.Required;
@@ -226,6 +227,7 @@ public class MaterialUnit extends Model {
 
     /**
      * 将 MaterialUnit 添加到/移出 采购单,状态改变
+     *
      * @param materialPurchase
      */
     public void toggleAssignTodeliveryment(MaterialPurchase materialPurchase, boolean assign) {
@@ -257,5 +259,33 @@ public class MaterialUnit extends Model {
                 .multiply(new BigDecimal(planQty))
                 .setScale(2, 4)
                 .floatValue();
+    }
+    /**
+     * 格式化产品要求，前台 popover 使用
+     */
+    public String formatProductTerms() {
+        StringBuilder message = new StringBuilder();
+        message.append("<span class='label label-info'>规格:</span><br>");
+        if(material.specification != null && StringUtils.isBlank(material.specification)) {
+            String[] messageArray = StringUtils.split(material.specification, "\n");
+            for(String text : messageArray) {
+                message.append("<p>").append(text).append("<p>");
+            }
+        }
+        if(material.texture != null && StringUtils.isNotEmpty(material.texture)) {
+            message.append("<span class='label label-info'>材质:</span><br>");
+            String[] messageArray = StringUtils.split(material.texture, "\n");
+            for(String text : messageArray) {
+                message.append("<p>").append(text).append("<p>");
+            }
+        }
+        if(material.technology != null && StringUtils.isNotEmpty(material.technology)) {
+            message.append("<span class='label label-info'>工艺:</span><br>");
+            String[] messageArray = StringUtils.split(material.technology, "\n");
+            for(String text : messageArray) {
+                message.append("<p>").append(text).append("<p>");
+            }
+        }
+        return message.toString();
     }
 }

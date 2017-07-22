@@ -35,6 +35,7 @@ import play.utils.FastRuntimeException;
 import query.ShipmentQuery;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -735,6 +736,21 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
+
+        float totalShipWeight = this.totalWeight();
+        float totalShipVolume = this.totalVolume();
+        this.items.forEach(item -> {
+            float itemWeight = 0f;
+            Float weight = item.unit.product.weight;
+            Float itemVolume = item.totalVolume();
+            if(weight != null) {
+                itemWeight += item.qty * weight;
+            }
+            item.weightRatio = BigDecimal.valueOf(itemWeight)
+                    .divide(BigDecimal.valueOf(totalShipWeight), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+            item.volumeRatio = BigDecimal.valueOf(itemVolume)
+                    .divide(BigDecimal.valueOf(totalShipVolume), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+        });
         this.save();
     }
 
@@ -1180,9 +1196,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
                     * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
                     * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
-            if(volume != null) {
-                totalVolume += itm.qty * volume / 1000000000;
-            }
+            totalVolume += itm.qty * volume / 1000000000;
         }
         return totalVolume;
     }

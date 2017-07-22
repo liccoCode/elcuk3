@@ -32,5 +32,22 @@ $(() => {
   $("#cancelBtn").click(function () {
     $("#cancelForm").submit();
   });
+  
+
+  //生成代购单Exceljs处理
+  $('#mt_excel_btn').click(function (e) {
+    e.stopPropagation();
+    $.post('/MaterialPurchases/validDmtIsNeedApply', {id: $("input[name='dmt.id']").val()}, (r) => {
+      if (r.flag) {
+        $("#generate_excel").submit();
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+
+  });
 
 });

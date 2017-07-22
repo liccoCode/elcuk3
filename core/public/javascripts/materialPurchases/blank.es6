@@ -105,6 +105,8 @@ $(() => {
     bind_b2b_checkbox();
   });
 
+
+
   
   function init () {
     // 动态绑定事件   新增的明细 切换物料名称  寻找价格
@@ -135,9 +137,17 @@ $(() => {
           calu_box_size();
         }
       });
-
-
     });
+
+
+    $('button[name$="delMt"]').click(function (e) {
+      e.preventDefault();
+      let $input = $(this);
+      $input.parent("td").parent("tr").next("tr").remove();
+      $input.parent("td").parent("tr").next("tr").remove();
+      $input.parent("td").parent("tr").remove();
+    });
+
   }
 
   function validQty () {
@@ -163,5 +173,6 @@ $(() => {
       }
     });
   }
+
 
 });
