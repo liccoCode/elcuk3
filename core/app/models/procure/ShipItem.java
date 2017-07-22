@@ -141,6 +141,11 @@ public class ShipItem extends GenericModel {
     public Float weightRatio;
 
     /**
+     * 体积占比
+     */
+    public Float volumeRatio;
+
+    /**
      * 采购成本 用于运输丢失率统计报表
      */
     @Transient
@@ -201,6 +206,15 @@ public class ShipItem extends GenericModel {
      */
     public float totalWeight() {
         return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
+    }
+
+    public float totalVolume() {
+        float totalVolume = 0f;
+        Float volume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
+                * (this.unit.product.width == null ? 0 : this.unit.product.width)
+                * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
+        totalVolume += this.qty * volume / 1000000000;
+        return totalVolume;
     }
 
 
