@@ -33,12 +33,12 @@
   <div class="span2">
     <div class="btn-toolbar">
     #{if apply.confirm}
-      <button class="btn btn-danger" disabled="">请款单已经确认</button>
-    #{/if}
-    #{else }
-      <a id="confirm_btn" href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
-         data-remote='true' data-method='PUT' data-disable-with='确认中...'>确认请款单</a>
-    #{/else}
+         <button class="btn btn-danger" disabled="">请款单已经确认</button>
+       #{/if}
+       #{else }
+         <a href='@{Applys.materialConfirm(apply.id)}' class="btn btn-success"
+             data-disable-with='确认中...'>确认请款单</a>
+       #{/else}
     </div>
   </div>
 </div>

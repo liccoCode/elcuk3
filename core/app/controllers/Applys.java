@@ -167,4 +167,11 @@ public class Applys extends Controller {
         List<Apply> applyes = p.query();
         render(applyes, p);
     }
+
+    public static void materialConfirm(Long id) {
+        MaterialApply apply = MaterialApply.findById(id);
+        apply.confirm = true;
+        apply.save();
+        render("Applys/material.html", apply);
+    }
 }
