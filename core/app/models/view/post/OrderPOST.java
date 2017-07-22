@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
  */
 public class OrderPOST extends ESPost<Orderr> {
 
+    private static final long serialVersionUID = -6583404252425758018L;
     // 崩溃: 如果使用 from 其类型变为了 Integer, 所以在 Order Post 中改名为 begin
     public Date begin;
     public Date end;
@@ -77,15 +78,14 @@ public class OrderPOST extends ESPost<Orderr> {
         } else {
             result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
         }
-
         Set<String> orderIds = new HashSet<>();
         Optional<JSONObject> topHits = Optional.ofNullable(result.getJSONObject("hits"));
         topHits.map(hits -> hits.getJSONArray("hits"))
                 .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
-                        .map(hit -> hit.getJSONObject("fields"))
-                        .map(fields -> fields.getJSONArray("order_id"))
+                        .map(hit -> hit.getJSONObject("_source"))
+                        .map(field -> field.getString("order_id"))
                         .filter(orderId -> !orderId.isEmpty())
-                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
+                        .forEach(orderIds::add)
                 );
         topHits.ifPresent(hits -> this.count = hits.getLong("total"));
         if(orderIds.isEmpty()) return Collections.emptyList();
@@ -110,10 +110,10 @@ public class OrderPOST extends ESPost<Orderr> {
         Optional.ofNullable(result.getJSONObject("hits"))
                 .map(hits -> hits.getJSONArray("hits"))
                 .ifPresent(hits -> hits.stream().map(hit -> (JSONObject) hit)
-                        .map(hit -> hit.getJSONObject("fields"))
-                        .map(fields -> fields.getJSONArray("order_id"))
+                        .map(hit -> hit.getJSONObject("_source"))
+                        .map(fields -> fields.getString("order_id"))
                         .filter(orderId -> !orderId.isEmpty())
-                        .forEach(orderId -> orderIds.add(orderId.get(0).toString()))
+                        .forEach(orderIds::add)
                 );
         if(orderIds.size() <= 0) throw new FastRuntimeException("没有结果");
         return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
@@ -158,17 +158,6 @@ public class OrderPOST extends ESPost<Orderr> {
         }
 
         return new SearchSourceBuilder()
-                .field("selling_ids")
-                .field("buyer")
-                .field("email")
-                .field("address")
-                .field("order_id")
-                .field("userid")
-                .field("track_no")
-                .field("upc")
-                .field("asin")
-                .field("promotion_ids")
-                .query(QueryBuilders.queryStringQuery(this.search()))
                 .postFilter(boolQuery)
                 .from(this.getFrom())
                 .size(this.perSize)
@@ -201,8 +190,6 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         return new SearchSourceBuilder()
                 .query(QueryBuilders.queryStringQuery(this.search()))
-                .field("selling_id")
-                .field("order_id")
                 .postFilter(boolQuery)
                 .from(this.getFrom())
                 .size(this.perSize)

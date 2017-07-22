@@ -42,9 +42,6 @@ public class Finances extends Controller {
         render(accs);
     }
 
-    //TODO: del @Check("finances.fixfinance")
-    //TODO: del @Check("finances.reparseorder")
-
     public static void promotion(String orderId, long aid, String m) {
         List<String> orderIds = Arrays.asList(StringUtils.split(orderId, ","));
         Account acc = Account.findById(aid);
@@ -83,7 +80,7 @@ public class Finances extends Controller {
                 }
 
                 if(StringUtils.isNotEmpty(p.categories)) {
-                    if(!Category.is_exist_ids(p.categories)) {
+                    if(!Category.isExistIds(p.categories)) {
                         flash.error("系统不存在category:" + p.categories);
                         render(skuProfits, p);
                     }

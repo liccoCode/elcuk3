@@ -253,5 +253,4 @@ public class Cooperators extends Controller {
         Cooperator cop = Cooperator.findById(id);
         renderJSON(GTs.newMap("id", cop.id).put("address", cop.address).build());
     }
-    
 }

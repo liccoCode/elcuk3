@@ -149,9 +149,8 @@ public class FinanceShippedPromise extends Job<List<SaleFee>> {
         if(warnningOrders.size() > 0 || errorMsg.size() > 0) {
             Webs.systemMail(
                     "New Fee Type: " + StringUtils.join(this.missingFeeType, ","),
-                    StringUtils.join(this.warnningOrders, ",") +
-                            "<br><br><br>" +
-                            StringUtils.join(this.errorMsg, "<br>")
+                    StringUtils.join(this.warnningOrders, ",")
+                            + "<br><br><br>" + StringUtils.join(this.errorMsg, "<br>")
             );
             try {
                 Thread.sleep(500);

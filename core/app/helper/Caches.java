@@ -17,6 +17,11 @@ import java.util.Set;
  * Time: 11:01 PM
  */
 public class Caches {
+
+    private Caches() {
+
+    }
+
     /**
      * 借用了 EhCache 的 Lock
      */

@@ -245,8 +245,8 @@ public class Refund extends GenericModel {
         DateTime nextMonth = dt.plusMonths(1);
         String count = Refund.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
-                "";
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("PTT|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
@@ -285,15 +285,15 @@ public class Refund extends GenericModel {
         }
         for(Refund refund : list) {
             if(refund.status != S.Create) {
-                Validation.addError("", "退货单【" + refund.id + "】状态为【" + refund.status.label() + "】" +
-                        "，请选择状态为【已创建】的退货单！");
+                Validation.addError("", "退货单【" + refund.id + "】状态为【" + refund.status.label() + "】"
+                        + "，请选择状态为【已创建】的退货单！");
             }
             for(RefundUnit u : refund.unitList) {
                 ProcureUnit unit = u.unit;
                 if(refund.type == T.After_Inbound) {
                     if(unit.outbound != null) {
-                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单" +
-                                "【" + unit.outbound.id + "】中，请先处理！");
+                        Validation.addError("", "退货单【" + refund.id + "】下的采购计划【" + unit.id + "】在出库单"
+                                + "【" + unit.outbound.id + "】中，请先处理！");
                     }
                 } else {
                     if(u.qty > unit.unqualifiedQty) {
@@ -324,8 +324,8 @@ public class Refund extends GenericModel {
      * @return
      */
     public static String isAllReufund(Long id) {
-        List<Refund> refunds = Refund.find("SELECT DISTINCT r FROM Refund r LEFT JOIN r.unitList u " +
-                "WHERE r.status <> ? AND u.unit.id = ? ", S.Refund, id).fetch();
+        List<Refund> refunds = Refund.find("SELECT DISTINCT r FROM Refund r LEFT JOIN r.unitList u "
+                + "WHERE r.status <> ? AND u.unit.id = ? ", S.Refund, id).fetch();
         if(refunds.size() > 0) {
             return refunds.get(0).id;
         } else {
@@ -439,5 +439,4 @@ public class Refund extends GenericModel {
         refundUnit.qty = unit.availableQty;
         refundUnit.save();
     }
-
 }

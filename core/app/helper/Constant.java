@@ -7,6 +7,10 @@ package helper;
  * Time: 8:35 PM
  */
 public class Constant {
+
+    private Constant() {
+    }
+
     /**
      * 操作系统的 HOME 目录
      */

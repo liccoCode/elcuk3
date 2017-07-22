@@ -31,6 +31,9 @@ import java.util.stream.Collectors;
  */
 public class FBA {
 
+    private FBA() {
+    }
+
     private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<>();
 
     public static FBAShipment plan(Account account, ProcureUnit unit) throws FBAInboundServiceMWSException {
@@ -440,9 +443,9 @@ public class FBA {
         UNKNOWN_SKU {
             @Override
             public String message() {
-                return "请检查 Selling 的 Merchant SKU 属性: " +
-                        " 1. 格式是否正确？(正确的格式应该为 \"SKU,UPC\")" +
-                        " 2. 是否能够在 Amazon sellercentral 上找到对应的产品?";
+                return "请检查 Selling 的 Merchant SKU 属性: "
+                        + " 1. 格式是否正确？(正确的格式应该为 \"SKU,UPC\")"
+                        + " 2. 是否能够在 Amazon sellercentral 上找到对应的产品?";
             }
         },
         MISSING_DIMENSIONS {
@@ -460,9 +463,9 @@ public class FBA {
         NON_SORTABLE {
             @Override
             public String message() {
-                return "请检查 Amazon sellercentral: " +
-                        " 1. FBA 仓库剩余可用容量是否不足?" +
-                        " 2. Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误导致匹配的仓库类型错误.";
+                return "请检查 Amazon sellercentral: "
+                        + " 1. FBA 仓库剩余可用容量是否不足?"
+                        + " 2. Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误导致匹配的仓库类型错误.";
             }
         },
         NOT_ELIGIBLE_FC_FOR_ITEM {
@@ -495,8 +498,8 @@ public class FBA {
      */
     public static FBA_ERROR_TYPE fbaErrorFormat(FBAInboundServiceMWSException e) {
         String errMsg = e.getMessage();
-        if(errMsg.contains("Shipment is locked. No updates allowed") ||
-                errMsg.contains("Shipment is in locked status")) {
+        if(errMsg.contains("Shipment is locked. No updates allowed")
+                || errMsg.contains("Shipment is in locked status")) {
             return FBA_ERROR_TYPE.LOCKED;
         } else if(errMsg.contains("items and quantities that have been previously planned ")) {
             return FBA_ERROR_TYPE.QUANTITIES;

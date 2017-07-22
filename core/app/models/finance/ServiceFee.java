@@ -66,6 +66,4 @@ public class ServiceFee extends Model{
 
     public String memo;
 
-
-
 }

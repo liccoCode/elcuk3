@@ -20,6 +20,11 @@ import java.util.concurrent.TimeUnit;
  * Time: 11:50 AM
  */
 public class JobsSetup {
+
+    private JobsSetup() {
+
+    }
+
     private static int jobs = 0;
 
     public static void init() {

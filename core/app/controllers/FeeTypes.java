@@ -15,7 +15,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 4:25 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class FeeTypes extends Controller {
 
     @Check("feetypes.index")
@@ -24,23 +24,15 @@ public class FeeTypes extends Controller {
         render(types);
     }
 
-    public static void update(String name, String memo, String nickName) {
-        try {
-            FeeType type = FeeType.findById(name);
-            String oldMemo = type.memo;
-            type.memo = memo;
-            type.nickName = nickName;
-            type.save();
-            renderJSON(new Ret(true, String.format("FeeType %s 的 Memo 从 %s 变更为 %s", name, oldMemo,
-                    memo)));
-        } catch(Exception e) {
-            renderJSON(new Ret(false, e.getMessage()));
-        }
+    public static void update(FeeType ft) {
+        ft.save();
+        flash.success("更新成功");
+        index();
     }
 
     public static void create(FeeType ft, String parentName) {
         ft.save();
-        ft.parent(FeeType.<FeeType>findById(parentName));
+        ft.parent(FeeType.findById(parentName));
         flash.success(String.format("成功创建 FeeType %s", ft.name));
         index();
     }

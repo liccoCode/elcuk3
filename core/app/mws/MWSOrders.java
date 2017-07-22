@@ -24,9 +24,14 @@ import java.util.*;
  * User: wyatt
  * Date: 5/24/13
  * Time: 10:24 AM
+ *
  * @deprecated
  */
 public class MWSOrders {
+
+    private MWSOrders() {
+    }
+
     private static final Map<String, MarketplaceWebServiceOrders> CLIENT_CACHE = new HashMap<>();
 
     /**
@@ -109,9 +114,9 @@ public class MWSOrders {
                 orderr.phone = address.getPhone();
                 orderr.province = address.getStateOrRegion();
                 orderr.reciver = address.getName();
-                orderr.address = address.getAddressLine1() +
-                        "\n" + address.getAddressLine2() +
-                        "\n" + address.getAddressLine3();
+                orderr.address = address.getAddressLine1()
+                        + "\n" + address.getAddressLine2()
+                        + "\n" + address.getAddressLine3();
             }
 
             orders.add(orderr);
@@ -185,9 +190,8 @@ public class MWSOrders {
             item.market = item.order.market;
             String mappingSku = Selling.getMappingSKU(amzItem.getSellerSKU());
             if(amzItem.getSellerSKU().contains(",2")) { // 如果包含 ,2 尝试寻找正确的 Selling
-                String likeSellingId = Product.merchantSKUtoSKU(mappingSku) +
-                        "%|" + item.order.market.nickName() +
-                        "|" + acc.id;
+                String likeSellingId = Product.merchantSKUtoSKU(mappingSku)
+                        + "%|" + item.order.market.nickName() + "|" + acc.id;
                 item.selling = Selling.find("sellingId like ?", likeSellingId).first();
             } else {
                 item.selling = Selling.findById(Selling.sid(

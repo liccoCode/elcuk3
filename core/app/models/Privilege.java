@@ -261,7 +261,7 @@ public class Privilege extends Model {
     /**
      * 更新缓存的权限
      *
-     * @param username
+     * @param rolename
      * @param privileges
      */
     public static void updateRolePrivileges(String rolename, Set<Privilege> privileges) {
@@ -272,7 +272,7 @@ public class Privilege extends Model {
     /**
      * 初始化或者获取缓存的权限
      *
-     * @param username
+     * @param rolename
      * @return
      */
     public static Set<Privilege> roleprivileges(String rolename) {

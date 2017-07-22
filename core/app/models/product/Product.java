@@ -513,8 +513,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "UPC已经存在，请重新填写！");
         if(Product.find("partNumber = ? ", this.partNumber).fetch().size() > 0)
             Validation.addError("", "PartNumber已经存在，请重新填写！");
-        if(StringUtils.isNotEmpty(this.partNumberJP) &&
-                Product.find("partNumberJP = ? ", this.partNumberJP).fetch().size() > 0)
+        if(StringUtils.isNotEmpty(this.partNumberJP)
+                && Product.find("partNumberJP = ? ", this.partNumberJP).fetch().size() > 0)
             Validation.addError("", "Part Number(JP)已经存在，请重新填写！");
         if(StringUtils.isNotEmpty(this.upcJP) && Product.find("upcJP = ? ", this.upcJP).fetch().size() > 0)
             Validation.addError("", "UPC(JP)已经存在，请重新填写！");
@@ -571,9 +571,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     }
 
     @Override
-    public String to_log() {
-        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] " +
-                        "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
+    public String toLog() {
+        return String.format("[长:%s mm] [宽:%s mm] [高:%s mm] [重量:%s kg] [申报价格:$ %s] [产品名称:%s] [上架状态:%s] "
+                        + "[采购状态:%s] [生命周期:%s] [销售等级:%s]",
                 this.lengths, this.width, this.heigh, this.weight, this.declaredValue,
                 this.productName, this.marketState.label(), this.procureState.label(), this.productState.label(),
                 this.salesLevel);
@@ -587,8 +587,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 + " lengths,width,heigh,weight,declaredvalue,productname,"
                 + " marketstate,procurestate,productstate,saleslevel,productlengths,"
                 + " productwidth,productheigh,productweight,declaredvalue,declarename,abbreviation,"
-                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber,whColor,whDimensions,whFormat," +
-                "whModel,whProductName,whQty,whSku,whWeight "
+                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber,whColor,whDimensions,whFormat,"
+                + " whModel,whProductName,whQty,whSku,whWeight "
                 + " from Product where sku='" + sku + "'";
         Map<String, Object> map = DBUtils.rows(sql).get(0);
         dbpro.lengths = (Float) map.get("lengths");
@@ -1136,14 +1136,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public static List<String> pickSourceItems(String search) {
-        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value FROM Product p" +
-                " LEFT JOIN ProductAttr pa ON p.sku=pa.product_sku" +
-                " LEFT JOIN Listing l ON p.sku=l.product_sku" +
-                " LEFT JOIN Selling s ON l.listingId=s.listing_listingId" +
-                " WHERE p.sku LIKE ?" +
-                " OR s.fnSku LIKE ?" +
-                " OR pa.value LIKE ?" +
-                " LIMIT 5";
+        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value FROM Product p"
+                + " LEFT JOIN ProductAttr pa ON p.sku=pa.product_sku"
+                + " LEFT JOIN Listing l ON p.sku=l.product_sku"
+                + " LEFT JOIN Selling s ON l.listingId=s.listing_listingId"
+                + " WHERE p.sku LIKE ?"
+                + " OR s.fnSku LIKE ?"
+                + " OR pa.value LIKE ?"
+                + " LIMIT 5";
         String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
         List<Map<String, Object>> rows = DBUtils.rows(sql, Arrays.asList(word, word, word).toArray());
         return rows.stream()
@@ -1164,3 +1164,4 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return this.weight != null ? this.weight * 1000 : 0;
     }
 }
+

@@ -141,7 +141,7 @@ public class SellingRecordCaculateJob extends Job {
 //                record.procureCost = procureCostAndQty._1;
 //                record.procureNumberSum = procureCostAndQty._2;
 //
-//                // TODO: 运输成本的思考: 真的需要每天记录一个值吗? 这样记录的曲线有意义吗?
+//                //  运输成本的思考: 真的需要每天记录一个值吗? 这样记录的曲线有意义吗?
 //
 //                // 海运运输成本
 //                record.seaCost = record.mergeWithLatest(seaCost.get(sid), "seaCost");
@@ -165,7 +165,7 @@ public class SellingRecordCaculateJob extends Job {
 //                record.saleProfitRatio = record.saleProfitRatio();
 //                record.save();
 //
-//                // TODO: 还有总销售额和总利润
+//                //  还有总销售额和总利润
 //                sellingRecords.add(record);
 //            } catch(Exception e) {
 //                Logger.error("SellingRecordCaculateJob Error:" + Webs.S(e));

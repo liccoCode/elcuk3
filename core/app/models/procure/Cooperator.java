@@ -38,7 +38,7 @@ public class Cooperator extends Model {
          */
         SUPPLIER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "供应商";
             }
         },
@@ -47,7 +47,7 @@ public class Cooperator extends Model {
          */
         SHIPPER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "运输商";
             }
         };
@@ -57,7 +57,7 @@ public class Cooperator extends Model {
          *
          * @return
          */
-        public abstract String to_s();
+        public abstract String label();
     }
 
     /**
@@ -102,6 +102,18 @@ public class Cooperator extends Model {
     @Unique
     @Expose
     public String name;
+
+    /**
+     * 省
+     */
+    @Expose
+    public String province;
+
+    /**
+     * 市
+     */
+    @Expose
+    public String city;
 
     /**
      * 地址
@@ -236,6 +248,36 @@ public class Cooperator extends Model {
     public User creator;
 
     public Date createDate;
+
+    public enum OP {
+        WorkShop {
+            @Override
+            public String label() {
+                return "作坊";
+            }
+        },
+        Distributor {
+            @Override
+            public String label() {
+                return "经销商";
+            }
+        },
+        Factory {
+            @Override
+            public String label() {
+                return "厂家";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     *
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public OP nature;
 
 
     /**

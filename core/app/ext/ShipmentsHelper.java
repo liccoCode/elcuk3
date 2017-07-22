@@ -4,7 +4,6 @@ import models.ElcukConfig;
 import models.User;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.templates.BaseTemplate;
 import play.templates.JavaExtensions;
 

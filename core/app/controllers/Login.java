@@ -170,7 +170,7 @@ public class Login extends Secure.Security {
      * @throws java.io.IOException
      */
     public static void code128(String shipmentId) throws IOException {
-        //TODO: 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
         // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
         Code128Bean bean = new Code128Bean();
 
@@ -196,7 +196,7 @@ public class Login extends Secure.Security {
     }
 
     public static void fnSkuCode128(String fnSku) throws IOException {
-        //TODO: 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
         // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
         Code128Bean bean = new Code128Bean();
 

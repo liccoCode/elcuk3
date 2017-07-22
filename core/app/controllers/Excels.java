@@ -46,7 +46,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -62,10 +61,8 @@ public class Excels extends Controller {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
-
         String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
                 ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
@@ -891,4 +888,5 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件！");
         }
     }
+
 }

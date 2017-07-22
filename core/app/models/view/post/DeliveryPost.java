@@ -25,6 +25,9 @@ import java.util.regex.Pattern;
  * Time: 5:09 PM
  */
 public class DeliveryPost extends Post<Deliveryment> {
+
+    private static final long serialVersionUID = -5744913985783292736L;
+
     public DeliveryPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
@@ -228,5 +231,4 @@ public class DeliveryPost extends Post<Deliveryment> {
         });
         return line.sort();
     }
-
 }

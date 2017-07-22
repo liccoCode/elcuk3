@@ -92,12 +92,12 @@ public class SkuProfitPost {
         return skuProfits;
     }
 
-    public SkuProfit redisProfit(Map<String, ProfitDto> profit_map, M market, String pro_sku, String sellingId) {
+    public SkuProfit redisProfit(Map<String, ProfitDto> profitMap, M market, String proSku, String sellingId) {
         try {
-            ProfitDto dto = profit_map.get(pro_sku);
-            if(dto == null) return initProfit(market, pro_sku, sellingId);
+            ProfitDto dto = profitMap.get(proSku);
+            if(dto == null) return initProfit(market, proSku, sellingId);
             SkuProfit skuProfit = new SkuProfit();
-            skuProfit.sku = pro_sku;
+            skuProfit.sku = proSku;
             skuProfit.market = market;
             skuProfit.quantity = dto.qty;
             skuProfit.totalfee = Webs.scale2Double(dto.fee);
@@ -116,7 +116,7 @@ public class SkuProfitPost {
         } catch(Exception e) {
             Logger.error(Webs.S(e));
         }
-        return initProfit(market, pro_sku, sellingId);
+        return initProfit(market, proSku, sellingId);
     }
 
 

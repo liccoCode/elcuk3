@@ -171,9 +171,9 @@ public class Feedback extends GenericModel {
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
 
-        Feedback feedback = (Feedback) o;
+        Feedback feed = (Feedback) o;
 
-        if(orderId != null ? !orderId.equals(feedback.orderId) : feedback.orderId != null)
+        if(orderId != null ? !orderId.equals(feed.orderId) : feed.orderId != null)
             return false;
 
         return true;

@@ -230,8 +230,8 @@ public class Deliveryment extends GenericModel {
         Date end = null;
         List<Date> deliveryDates = new ArrayList<>();
         for(ProcureUnit unit : this.units) {
-            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() &&
-                    unit.stage != ProcureUnit.STAGE.CLOSE)
+            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal()
+                    && unit.stage != ProcureUnit.STAGE.CLOSE)
                 if(unit.attrs.deliveryDate != null) deliveryDates.add(unit.attrs.deliveryDate);
         }
         if(deliveryDates.size() > 2) {
@@ -277,9 +277,8 @@ public class Deliveryment extends GenericModel {
         if(this.units.size() == 0) {
             return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch(100);
         } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN)
-                    .fetch();
+            Cooperator c = this.units.get(0).cooperator;
+            return ProcureUnit.find("cooperator=? AND stage=?", c, ProcureUnit.STAGE.PLAN).fetch();
         }
     }
 
@@ -309,7 +308,7 @@ public class Deliveryment extends GenericModel {
         double totalSeven = this.totalAmountForSevenDay();
         double checkLimit = Double.parseDouble(OperatorConfig.getVal("checklimit"));
         double checkLimitPerWeek = Double.parseDouble(OperatorConfig.getVal("checklimitperweek"));
-        boolean flag = this.units.stream().anyMatch(unit -> ProcureUnit.find("cooperator.id =? and sku=?",this
+        boolean flag = this.units.stream().anyMatch(unit -> ProcureUnit.find("cooperator.id =? and sku=?", this
                 .cooperator.id, unit.sku).fetch().size() < 2);    //判断 该供应商包含第一次下单的sku
         boolean isNeedApply = (totalDmt > checkLimit);
         if(isNeedApply && flag)
@@ -369,13 +368,13 @@ public class Deliveryment extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
         if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
-            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
-                    " 状态的[采购单]添加[采购单元]");
+            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label()
+                    + " 状态的[采购单]添加[采购单元]");
             return new ArrayList<>();
         }
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = procureUnits.get(0).cooperator;
+        for(ProcureUnit unit : procureUnits) {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
@@ -386,7 +385,7 @@ public class Deliveryment extends GenericModel {
         new ElcukRecord(Messages.get("deliveryment.addunit"),
                 Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
 
-        return units;
+        return procureUnits;
     }
 
     /**
@@ -395,8 +394,8 @@ public class Deliveryment extends GenericModel {
      * @param pids
      */
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : procureUnits) {
             if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
             } else if(this.deliveryType == T.MANUAL && unit.selling == null) {
@@ -407,23 +406,21 @@ public class Deliveryment extends GenericModel {
             }
         }
         if(Validation.hasErrors()) return new ArrayList<>();
-        this.units.removeAll(units);
+        this.units.removeAll(procureUnits);
         this.save();
 
         new ElcukRecord(Messages.get("deliveryment.delunit"),
                 Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        return procureUnits;
     }
 
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
         String count = Deliveryment.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"),
                 count.length() == 1 ? "0" + count : count);
     }

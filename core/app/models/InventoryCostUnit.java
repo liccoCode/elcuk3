@@ -79,25 +79,25 @@ public class InventoryCostUnit extends GenericModel {
     public Date date;
 
     public static List<Map<String, Object>> countByCategory(Date target) {
-        String sql = "SELECT categoryId, `date`," +
-                " SUM(productionQty) AS productionQty," +
-                " SUM(productionCost) AS productionCost," +
-                " SUM(transitQty) AS transitQty," +
-                " SUM(transitCost) AS transitCost," +
-                " SUM(stockQty) AS stockQty," +
-                " SUM(stockCost) AS stockCost " +
-                " FROM(" +
-                "  SELECT `date`, categoryId," +
-                "  productionQty AS productionQty," +
-                "  productionQty*procurementPrice AS productionCost," +
-                "  SUM(transitQty) AS transitQty," +
-                "  SUM(transitQty*procurementPrice+transitQty*transportPrice) AS transitCost," +
-                "  SUM(stockQty) AS stockQty," +
-                "  SUM(stockQty*procurementPrice+stockQty*transportPrice+stockQty*taxPrice) AS stockCost" +
-                "  FROM InventoryCostUnit" +
-                "  WHERE date BETWEEN ? AND ?" +
-                "  GROUP BY sku" +
-                ") AS TMP GROUP BY categoryId;";
+        String sql = "SELECT categoryId, `date`,"
+                + " SUM(productionQty) AS productionQty,"
+                + " SUM(productionCost) AS productionCost,"
+                + " SUM(transitQty) AS transitQty,"
+                + " SUM(transitCost) AS transitCost,"
+                + " SUM(stockQty) AS stockQty,"
+                + " SUM(stockCost) AS stockCost "
+                + " FROM("
+                + "  SELECT `date`, categoryId,"
+                + "  productionQty AS productionQty,"
+                + "  productionQty*procurementPrice AS productionCost,"
+                + "  SUM(transitQty) AS transitQty,"
+                + "  SUM(transitQty*procurementPrice+transitQty*transportPrice) AS transitCost,"
+                + "  SUM(stockQty) AS stockQty,"
+                + "  SUM(stockQty*procurementPrice+stockQty*transportPrice+stockQty*taxPrice) AS stockCost"
+                + "  FROM InventoryCostUnit"
+                + "  WHERE date BETWEEN ? AND ?"
+                + "  GROUP BY sku"
+                + ") AS TMP GROUP BY categoryId;";
         return DBUtils.rows(sql, Dates.monthBegin(target), Dates.monthEnd(target));
     }
 }

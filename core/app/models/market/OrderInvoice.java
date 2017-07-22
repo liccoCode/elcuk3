@@ -236,8 +236,8 @@ public class OrderInvoice extends GenericModel {
 
         num = (num == 0) ? 10000 : num;
         for(M m : markets) {
-            List<Orderr> list = Orderr.find("createDate >= ? and createDate <= ? and invoiceState='no' and market = ? " +
-                    "and state <> ? and orderId LIKE '" + regex + "%' ", beginDate, endDate, m, Orderr.S.CANCEL)
+            List<Orderr> list = Orderr.find("createDate >= ? and createDate <= ? and invoiceState='no' and market = ? "
+                    + "and state <> ? and orderId LIKE '" + regex + "%' ", beginDate, endDate, m, Orderr.S.CANCEL)
                     .fetch(1, num);
             if(list != null && list.size() > 0) {
                 for(Orderr ord : list) {

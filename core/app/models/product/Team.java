@@ -86,7 +86,7 @@ public class Team extends Model {
      *
      * @return
      */
-    public static List<Team> Teams() {
+    public static List<Team> allTeams() {
         return Team.findAll();
     }
 

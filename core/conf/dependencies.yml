@@ -22,11 +22,11 @@ require:
         exclude:
           - org.codehaus.woodstox -> *
     # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API
-    - org.elasticsearch -> elasticsearch 2.4.1:
+    - org.elasticsearch -> elasticsearch 5.4.1:
         transitive: false
     - com.fasterxml.jackson.core -> jackson-core 2.8.4
     # 跟随 es 走的 lucene 版本
-    - org.apache.lucene -> lucene-core 5.5.2
+    - org.apache.lucene -> lucene-core 6.5.1
     - org.jsoup -> jsoup 1.8.3
     - org.apache.httpcomponents -> httpclient 4.5
     - org.apache.httpcomponents -> httpmime 4.5
@@ -56,7 +56,7 @@ require:
           - org.apache.ant -> *
           # 不需要命令行执行
           - commons-cli -> *
-
+    - org.apache.logging.log4j -> log4j-api 2.8.2
 
 repositories:
     - factoryBoy:
