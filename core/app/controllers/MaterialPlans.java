@@ -4,10 +4,7 @@ import controllers.api.SystemOperation;
 import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
-import models.material.Material;
-import models.material.MaterialApply;
-import models.material.MaterialPlan;
-import models.material.MaterialPlanUnit;
+import models.material.*;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.Ret;
@@ -41,6 +38,8 @@ public class MaterialPlans extends Controller {
     public static void showPageSetUp() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
+        List<MaterialBom> boms = MaterialBom.findAll();
+        renderArgs.put("boms", boms);
         String id = request.params.get("id");
         renderArgs.put("records", ElcukRecord.records(id));
         renderArgs.put("brandName", OperatorConfig.getVal("brandname"));

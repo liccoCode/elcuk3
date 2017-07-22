@@ -5,6 +5,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
 import models.material.Material;
+import models.material.MaterialBom;
 import models.material.MaterialOutbound;
 import models.material.MaterialOutboundUnit;
 import models.procure.Cooperator;
@@ -37,6 +38,8 @@ public class MaterialOutbounds extends Controller {
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         renderArgs.put("cooperators", cooperators);
+        List<MaterialBom> boms = MaterialBom.findAll();
+        renderArgs.put("boms", boms);
         String id = request.params.get("id");
         if(id != null)
             renderArgs.put("records", ElcukRecord.records(id));
