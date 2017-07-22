@@ -10,6 +10,10 @@ import models.market.BtbOrder;
 import models.market.BtbOrderItem;
 import models.market.M;
 import models.market.OrderItem;
+import models.material.MaterialPlan;
+import models.material.MaterialPlanUnit;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
 import models.procure.*;
 import models.product.Product;
 import models.view.Ret;
@@ -57,12 +61,10 @@ public class Excels extends Controller {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-
         ProcureUnit unit = excel.dmt.units.get(0);
         String currency = unit.attrs.currency.symbol();
-
-        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop) ? models.OperatorConfig
-                .getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
+                ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
@@ -846,4 +848,45 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(dateFormat, p, outbounds, others, b2bOutbounds);
     }
+
+    /**
+     * 下载物料采购单Excel表格
+     *
+     * @param id
+     * @param excel
+     */
+    @Check("excels.deliveryment")
+    public static void materialPurchase(String id, MaterialPurchaseExcel excel) {
+        excel.dmt = MaterialPurchase.findById(id);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+
+        MaterialUnit unit = excel.dmt.units.get(0);
+        String currency = unit.planCurrency.symbol();
+
+        render("Excels/materialPurchases.xls", excel, currency);
+    }
+
+
+    /**
+     * 下载物料出货单综合Excel表格
+     */
+    public static void materialPlan(String id) {
+        MaterialPlan dp = MaterialPlan.findById(id);
+
+        List<MaterialPlanUnit> unitList = dp.units;
+        if(unitList != null && unitList.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s出仓单.xls", dp.id));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dmt", formatter);
+            render(dp, unitList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
 }

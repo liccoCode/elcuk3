@@ -182,8 +182,10 @@ public class MaterialOutbound extends GenericModel {
                     .id)
                     .save();
         }
+        if(outbound.cooperator != null){
         Cooperator cp = Cooperator.findById(outbound.cooperator.id);
         this.cooperator = cp;
+        }
         this.save();
     }
 
