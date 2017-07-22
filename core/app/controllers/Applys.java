@@ -19,6 +19,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -171,6 +172,7 @@ public class Applys extends Controller {
     public static void materialConfirm(Long id) {
         MaterialApply apply = MaterialApply.findById(id);
         apply.confirm = true;
+        apply.updateAt = new Date();
         apply.save();
         render("Applys/material.html", apply);
     }

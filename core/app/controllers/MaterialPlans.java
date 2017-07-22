@@ -348,6 +348,7 @@ public class MaterialPlans extends Controller {
     public static void departProcureApply(String id) {
         MaterialPlan dmt = MaterialPlan.findById(id);
         long applyId = dmt.apply.id;
+        dmt.apply.updateAt(applyId);
         dmt.departFromProcureApply();
 
         if(Validation.hasErrors())
