@@ -1,1 +1,0 @@
-$('#confirm_btn').removeClass('btn-success').addClass('btn-danger').attr('disabled', '').removeAttr('href').text('请款单已经确认');
