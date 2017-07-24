@@ -19,7 +19,7 @@ redis:
   ports:
    - "6379:6379"
 es:
-  image: elasticsearch:2.4.1
+  image: elasticsearch:5.4.2
   container_name: elcuk2-es
   ports:
    - "9200:9200"
