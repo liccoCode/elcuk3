@@ -21,10 +21,7 @@ import java.util.List;
  *
  * @deprecated
  */
-<<<<<<< HEAD
-=======
 //@Every("20mn")
->>>>>>> 2f262e4faa5f859719ef87758d65453edb0a6291
 public class KeepSessionJob extends BaseJob {
 
     @Override
