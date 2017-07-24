@@ -22,8 +22,8 @@
         <th>账户</th>
         <th>账号</th>
         <th>银行地址</th>
-        <th>创建时间</th>
-        <th class="ten"></th>
+        <th width="140px;">创建时间</th>
+        <th width="110px;"></th>
       </tr>
     #{list items:targets, as:'tgt'}
       <tr>
@@ -32,18 +32,15 @@
         <td>${tgt.accountUser}</td>
         <td>${tgt.accountNumber}</td>
         <td>${tgt.accountAddress}</td>
-        <td>${tgt.createdAt}</td>
+        <td>#{time_tooltip time:tgt.createdAt, datetime:true/}</td>
         <td>
             #{power.ck 'paymenttargets.update'}
-              <a href="javascript:void(0);" id="updateBtn" data-url='@{PaymentTargets.showJson(tgt.id)}' class="btn btn-success">
-                <i class="icon-refresh"></i> 编辑
-              </a>
+              <a href="javascript:void(0);" id="updateBtn" class="btn btn-mini btn-success"
+                 data-url='@{PaymentTargets.showJson(tgt.id)}'><i class="icon-refresh"></i> 编辑</a>
             #{/power.ck}
             #{power.ck 'paymenttargets.destroy'}
-              <a href="javascript:void(0);" data-method='delete' class="btn btn-danger"
-                 data-id='${tgt.id}'>
-                <i class="icon-remove"></i> 删除
-              </a>
+              <a href="javascript:void(0);" data-method='delete' class="btn btn-mini btn-danger"
+                 data-id='${tgt.id}'><i class="icon-remove"></i> 删除</a>
             #{/power.ck }
         </td>
       </tr>
@@ -59,10 +56,19 @@
     <h3>添加一个新的支付账号</h3>
   </div>
 
-  <div class="modal-body">
+  <div class="modal-body" style="height:300px;">
       #{errorMsgs /}
       #{flash_alert /}
     <dl class="dl-horizontal">
+      <dt>合作伙伴</dt>
+      <dd>
+        <select class="selectize" name="c.id" style="width:240px;">
+            #{list items:copers, as:'c'}
+              <option value="${c.id}">${c.name}</option>
+            #{/list}
+        </select>
+      </dd>
+
       <dt>账户</dt>
       <dd>
         <input type="text" name="t.accountUser" value="${t.accountUser}">
@@ -76,11 +82,6 @@
       <dt>银行地址</dt>
       <dd>
         <input type="text" name="t.accountAddress" value="${t.accountAddress}">
-      </dd>
-
-      <dt>合作伙伴</dt>
-      <dd>
-          #{select 'c.id', items:copers, valueProperty:'id', labelProperty:'name', style:"margin-bottom:10px"}#{/select}
       </dd>
 
       <dt>备注</dt>
