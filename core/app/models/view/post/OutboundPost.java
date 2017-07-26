@@ -40,6 +40,19 @@ public class OutboundPost extends Post<Outbound> {
         this.page = 1;
     }
 
+    public OutboundPost(OutboundPost p) {
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = p.from;
+        this.to = p.to;
+        this.status = p.status;
+        this. type = p.type;
+        this.shipType = p.shipType;
+        this.search = p.search;
+        this.projectName = p.projectName;
+        this.perSize = 25;
+        this.page = 1;
+    }
+
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o ");
         if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name()))

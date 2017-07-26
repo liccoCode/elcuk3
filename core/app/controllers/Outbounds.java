@@ -54,7 +54,13 @@ public class Outbounds extends Controller {
     public static void index(OutboundPost p) {
         if(p == null) p = new OutboundPost();
         List<Outbound> outbounds = p.query();
-        render(p, outbounds);
+        OutboundPost otherPost = new OutboundPost(p);
+        otherPost.flag = "Other";
+        List<Outbound> others = otherPost.query();
+        OutboundPost b2bPost = new OutboundPost(p);
+        b2bPost.flag = "B2B";
+        List<Outbound> b2bOutbounds = b2bPost.queryForB2B();
+        render(p, outbounds, others, b2bOutbounds, b2bPost, otherPost);
     }
 
     public static void edit(String id) {
