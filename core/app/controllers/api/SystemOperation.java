@@ -1,7 +1,11 @@
 package controllers.api;
 
+import models.OperatorConfig;
+import models.User;
 import play.mvc.Before;
 import play.mvc.Controller;
+
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,5 +18,8 @@ public class SystemOperation extends Controller {
     @Before(unless = {"login", "authenticate", "logout"})
     static void monitBefore() throws Throwable {
         //这里应该是用于记录整个应用所有 Controller 的数据统计信息.
+        boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
+        renderArgs.put("isB2B", isB2B);
     }
 }
+

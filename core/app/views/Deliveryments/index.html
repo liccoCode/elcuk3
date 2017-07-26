@@ -132,7 +132,12 @@
         </tr>
         <tr id="dmt_${dmt_index}" style="display:none;">
           <td colspan="13">
-              #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
+              #{if isB2B}
+                  #{render 'ProcureUnits/_b2b_unit_list.html', units:dmt.units, norecord: true/}
+              #{/if}
+              #{else }
+                  #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
+              #{/else}
           </td>
         </tr>
       #{/list}
