@@ -40,12 +40,25 @@ public class OutboundPost extends Post<Outbound> {
         this.page = 1;
     }
 
+    public OutboundPost(OutboundPost p) {
+        DateTime now = DateTime.now(Dates.timeZone(null));
+        this.from = p.from;
+        this.to = p.to;
+        this.status = p.status;
+        this.type = p.type;
+        this.shipType = p.shipType;
+        this.search = p.search;
+        this.projectName = p.projectName;
+        this.perSize = 25;
+        this.page = 1;
+    }
+
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT o FROM Outbound o ");
         if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name()))
-            sbd.append(" LEFT JOIN o.records u WHERE 1=1");
-        else
             sbd.append(" LEFT JOIN o.units u WHERE 1=1");
+        else
+            sbd.append(" LEFT JOIN o.records u WHERE 1=1");
         List<Object> params = new ArrayList<>();
         sbd.append(" AND o.createDate >= ? AND o.createDate <= ? ");
         params.add(Dates.morning(this.from));
@@ -58,11 +71,15 @@ public class OutboundPost extends Post<Outbound> {
                 return new F.T2<>(sbd.toString(), params);
             }
             if(isNumForSearch() != null) {
-                if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name()))
-                    sbd.append(" AND u.unit.id = ? ");
-                else
+                if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name())) {
                     sbd.append(" AND u.id = ? ");
-                params.add(isNumForSearch());
+                    params.add(isNumForSearch());
+                    sbd.append(" AND o.type = ? ");
+                    params.add(StockRecord.C.valueOf(flag));
+                } else {
+                    sbd.append(" AND u.unit.id = ? ");
+                    params.add(isNumForSearch());
+                }
                 return new F.T2<>(sbd.toString(), params);
             }
             sbd.append(" AND o.unit.sku LIKE ? ");
