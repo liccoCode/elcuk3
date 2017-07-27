@@ -69,8 +69,8 @@ public class Elcuk extends Controller {
     @Check("elcuk.index")
     public static void editShipDayConfigs(String market, Shipment.T shipType, long operatorConfigId) {
 
-        List<ElcukConfig> configs = ElcukConfig
-                .find("name like ?", M.val(market).sortName() + "_" + shipType.toString().toLowerCase() + "_%").fetch();
+        List<ElcukConfig> configs = ElcukConfig.find("name like ?",
+                M.val(market).sortName() + "_" + shipType.toString().toLowerCase() + "_%").fetch();
         render(market, shipType, operatorConfigId, configs);
     }
 
