@@ -41,7 +41,9 @@ public class ElcukConfig extends Model {
         SHIP_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map(Shipment.T.SEA.name().toLowerCase(), "海运")
                         .put(Shipment.T.AIR.name().toLowerCase(), "空运")
-                        .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递").build());
+                        .put(Shipment.T.EXPRESS.name().toLowerCase(), "快递")
+                        .put(Shipment.T.DEDICATED.name().toLowerCase(), "专线")
+                        .put(Shipment.T.RAILWAY.name().toLowerCase(), "铁路").build());
 
         DAY_TYPES = Collections.unmodifiableMap(
                 GTs.MapBuilder.map("atport", "运输到港").put("clearance", "清关").put("pick", "提货")
