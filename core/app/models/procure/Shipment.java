@@ -48,7 +48,6 @@ import java.util.*;
  */
 @Entity
 @DynamicUpdate
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     private static final long serialVersionUID = -608639102102679863L;
