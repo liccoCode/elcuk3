@@ -5,14 +5,14 @@ import helper.*;
 import models.market.M;
 import models.view.highchart.Series;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.range.date.DateRangeBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -152,15 +152,15 @@ public class OrderItemESQuery {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
+                .aggregation(AggregationBuilders.filter("aggs_filters").filter(QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
                                 .must(QueryBuilders.rangeQuery("date")
                                         .gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)))
                                 .mustNot(QueryBuilders.termQuery("state", "cancel"))
                         ).subAggregation(AggregationBuilders.dateHistogram("units")
                                 .field("date")
-                                .dateHistogramInterval(DateHistogramInterval.DAY)
-                                .timeZone(Dates.timeZone(market))
+                                .interval(DateHistogramInterval.DAY)
+                                .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
                                 .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
                         )
                 ).size(0);
@@ -169,7 +169,7 @@ public class OrderItemESQuery {
         } else {
             search.query(QueryBuilders.queryStringQuery(val)
                     .defaultField(type)
-                    .defaultOperator(Operator.AND));
+                    .defaultOperator(QueryStringQueryBuilder.Operator.AND));
         }
 
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
@@ -197,7 +197,7 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeAggregationBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
                 .field("date")
                 .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
@@ -208,14 +208,16 @@ public class OrderItemESQuery {
             datePointer = datePointer.plusDays(1);
         }
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.termQuery("market",
-                        market.name().toLowerCase())).subAggregation(dateRangeBuilder)).size(0);
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                        .subAggregation(dateRangeBuilder)
+                ).size(0);
         if(StringUtils.isBlank(val)) {
             search.query(QueryBuilders.matchAllQuery());
         } else {
             search.query(QueryBuilders.queryStringQuery(val)
                     .defaultField(type)
-                    .defaultOperator(Operator.AND)
+                    .defaultOperator(QueryStringQueryBuilder.Operator.AND)
             );
         }
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
@@ -249,11 +251,12 @@ public class OrderItemESQuery {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(QueryBuilders.matchAllQuery())
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                        .must(QueryBuilders.rangeQuery("date")
-                                .gte(fromD.toString(isoFormat))
-                                .lt(toD.toString(isoFormat))))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat))))
                         .subAggregation(AggregationBuilders.terms("units").field("category_id")
                                 .subAggregation(AggregationBuilders.stats("quantity_stats").field("quantity"))
                                 .size(30)
@@ -297,16 +300,17 @@ public class OrderItemESQuery {
 
 
         SearchSourceBuilder search = new SearchSourceBuilder().aggregation(
-                AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                        .must(QueryBuilders.rangeQuery("date")
-                                .gte(fromD.toString(isoFormat))
-                                .lt(toD.toString(isoFormat)))
-                        .must(skusfilter(type, val))
-                ).subAggregation(AggregationBuilders.dateHistogram("units")
+                AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                                .must(QueryBuilders.rangeQuery("date")
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat)))
+                                .must(skusfilter(type, val))
+                        ).subAggregation(AggregationBuilders.dateHistogram("units")
                         .field("date")
-                        .dateHistogramInterval(DateHistogramInterval.DAY)
-                        .timeZone(Dates.timeZone(market))
+                        .interval(DateHistogramInterval.DAY)
+                        .timeZone(Dates.timeZone(market).getShortName(System.currentTimeMillis()))
                         .subAggregation(AggregationBuilders.sum("quantity").field("quantity")
                         )
                 )
@@ -342,7 +346,7 @@ public class OrderItemESQuery {
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
 
-        DateRangeAggregationBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
+        DateRangeBuilder dateRangeBuilder = AggregationBuilders.dateRange("moving_ave")
                 .field("date")
                 .subAggregation(AggregationBuilders.sum("quantity_sum").field("quantity"));
         DateTime datePointer = new DateTime(fromD);
@@ -352,7 +356,8 @@ public class OrderItemESQuery {
             datePointer = datePointer.plusDays(1);
         }
         SearchSourceBuilder search = new SearchSourceBuilder()
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
                                 .must(skusfilter(type, val))
                         ).subAggregation(dateRangeBuilder)
@@ -394,22 +399,25 @@ public class OrderItemESQuery {
 
     public AggregationBuilder skuSalesBaseSalesAggregation(M market, Date from, Date to, List<String> params,
                                                            String type) {
+        FilterAggregationBuilder aggregation = AggregationBuilders.filter(market.name());
+
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
         //不同的市场需要考虑到时区的问题
         DateTime fromD = market.withTimeZone(Dates.morning(from));
         DateTime toD = market.withTimeZone(Dates.night(to));
 
-        return AggregationBuilders.filter(market.name(), QueryBuilders.boolQuery()
-                //市场
-                .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
-                //日期
-                .must(QueryBuilders.rangeQuery("date")
-                        .gte(fromD.toString(isoFormat))
-                        .lt(toD.toString(isoFormat)))
-                //SKU
-                .must(QueryBuilders.termsQuery(type, params))
-                .mustNot(QueryBuilders.termQuery("state", "cancel"))
-        ).subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
+        return AggregationBuilders.filter(market.name())
+                .filter(QueryBuilders.boolQuery()
+                        //市场
+                        .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
+                        //日期
+                        .must(QueryBuilders.rangeQuery("date")
+                                .gte(fromD.toString(isoFormat))
+                                .lt(toD.toString(isoFormat)))
+                        //SKU
+                        .must(QueryBuilders.termsQuery(type, params))
+                        .mustNot(QueryBuilders.termQuery("state", "cancel"))
+                ).subAggregation(AggregationBuilders.sum("sum_sales").field("quantity"));
     }
 
     /**
@@ -419,18 +427,18 @@ public class OrderItemESQuery {
      */
     public JSONObject skusMonthlyDailySale(Date from, Date to, List<String> skus, List<M> markets) {
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-        FilterAggregationBuilder aggregationBuilder = AggregationBuilders.filter("aggs_filters",
-                QueryBuilders.boolQuery()
+        FilterAggregationBuilder aggregationBuilder = AggregationBuilders.filter("aggs_filters")
+                .filter(QueryBuilders.boolQuery()
                         //SKUs
                         .must(QueryBuilders.termsQuery("sku", skus.stream()
                                 .map(sku -> ES.parseEsString(sku).toLowerCase())
                                 .filter(StringUtils::isNotBlank)
                                 .collect(Collectors.toList())))
                         .mustNot(QueryBuilders.termQuery("state", "cancel"))
-        );
+                );
         //每一个市场都要查询一次
         for(M m : markets) {
-            aggregationBuilder.subAggregation(AggregationBuilders.filter(m.name(), QueryBuilders.boolQuery()
+            aggregationBuilder.subAggregation(AggregationBuilders.filter(m.name()).filter(QueryBuilders.boolQuery()
                     //市场
                     .must(QueryBuilders.termQuery("market", m.name().toLowerCase()))
                     //日期间隔
@@ -441,9 +449,9 @@ public class OrderItemESQuery {
                             .field("sku")
                             .subAggregation(AggregationBuilders.dateHistogram("monthly_avg")
                                     .field("date")
-                                    .timeZone(Dates.timeZone(m))
+                                    .timeZone(Dates.timeZone(m).getShortName(System.currentTimeMillis()))
                                     //时间间隔为每个月
-                                    .dateHistogramInterval(DateHistogramInterval.MONTH)
+                                    .interval(DateHistogramInterval.MONTH)
                                     //求和 quantity 的数量
                                     .subAggregation(AggregationBuilders.sum("sum_sales").field("quantity")
                                     ))));
