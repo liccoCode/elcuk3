@@ -1,0 +1,102 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>
+      <input type="checkbox" class="checkbox_all"/>
+    </th>
+    <th>采购计划</th>
+    <th>阶段</th>
+    <th width="180px;">Sku</th>
+    <th><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
+    <th>采购单</th>
+    <th>预计发货时间</th>
+    <th>预计到库时间</th>
+    <th>预计交货时间</th>
+    <th>实际交货时间</th>
+    <th>供应商</th>
+    <th>总重量(kg)</th>
+    <th>包装信息</th>
+    <th>抵达?</th>
+    <th>质检结果</th>
+    <th>运营创建人</th>
+    <th>采购创建人</th>
+    <th>丢失量/赔偿金额</th>
+  #{power.ck 'paymentunits.postfromtransport'}
+      #{if isExpress}
+        <th>记录运费</th>
+      #{/if}
+  #{/power.ck}
+    <th width="70px;">撤销出库</th>
+  </tr>
+#{list items:items, as:'itm'}
+  <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'
+      data-lossqty='${itm.lossqty}' data-compenamt='${itm.compenamt}'
+      data-currency='${itm.currency?.name()}' data-compentype='${itm.compentype}'>
+        <td>
+          <label class="checkbox">
+            <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
+          </label>
+        </td>
+    <td>
+      <a href="@{Deliveryments.show(itm.unit?.deliveryment?.id)}#${itm.unit?.id}">${itm.unit?.id}</a>
+    </td>
+    <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
+    <td style="word-break:break-all;">
+      <a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
+    ${itm.unit.product?.chineseName}
+    </td>
+    <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
+    ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.shipmentQty()}
+    </td>
+    <td>
+      <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a>
+    </td>
+    <td>#{time_tooltip time: itm.unit.attrs.planShipDate/}</td>
+    <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
+    <td>#{time_tooltip time: itm.unit.attrs.planDeliveryDate/}</td>
+    <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
+    <td>${itm.unit.cooperator?.name}</td>
+    <td>${itm.totalWeight()}</td>
+    <td>
+      <input type="button" class="btn btn-mini btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
+    </td>
+    <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
+    <td>
+        #{if itm.unit.result?.name()=='Qualified'}
+          <i style="color:green" class="icon-ok"></i>
+        #{/if}
+        #{elseif itm.unit.result?.name()=='Unqualified'}
+          <i style="color:red" class="icon-remove"></i>
+        #{/elseif}
+    </td>
+      #{if useCheckbox}
+        <td style="word-break:break-all;">${itm.unit.whouse.name}</td>
+      #{/if}
+    <td>${itm.unit.handler.username}</td>
+    <td>${itm.unit.deliveryment?.handler?.username}</td>
+    <td>${itm.lossqty}/${itm.compenamt}${itm.currency?.name()}</td>
+      #{power.ck 'paymentunits.postfromtransport'}
+          #{if isExpress}
+            <td>
+              <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
+            </td>
+          #{/if}
+      #{/power.ck}
+    <td style="color:red" rel="tooltip" title="${itm.unit.revokeMsg}">
+        #{if itm.unit.revokeStatus?.name()=='READY'}
+          <a class="btn btn-mini btn-danger" href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
+        #{/if}
+        #{else }${itm.unit.revokeStatus?.label()}#{/else}
+    </td>
+  </tr>
+#{/list}
+#{if shipmentId}
+  <tr>
+    <td colspan="${useCheckbox ? 15 : 13}">
+      <input type="hidden" name="id" value="${shipmentId}">
+        #{power.ck "shipments.cancelship"}
+          <button id="cancel_shipitem" class="btn btn-warning">取消运输</button>
+        #{/power.ck}
+    </td>
+  </tr>
+#{/if}
+</table>

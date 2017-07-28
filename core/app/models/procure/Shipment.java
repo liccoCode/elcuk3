@@ -2,22 +2,25 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
-import helper.Currency;
+import controllers.Login;
 import helper.*;
+import helper.Currency;
 import models.ElcukConfig;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.finance.TransportApply;
-import models.product.Whouse;
-import notifiers.Mails;
+import models.whouse.Outbound;
+import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -43,10 +46,11 @@ import java.util.*;
  * Time: 5:32 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
+    private static final long serialVersionUID = -608639102102679863L;
 
     public Shipment() {
         this.createDate = new Date();
@@ -71,7 +75,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         // FBA 不做处理
         this.type = shipment.type;
         this.whouse = shipment.whouse;
-        // TODO effect: source 与 target 可以删除.
         this.source = shipment.source;
         this.target = shipment.target;
     }
@@ -119,6 +122,24 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             @Override
             public String label() {
                 return "快递";
+            }
+        },
+        /**
+         * 专线
+         */
+        DEDICATED {
+            @Override
+            public String label() {
+                return "专线";
+            }
+        },
+        /**
+         * 铁路
+         */
+        RAILWAY {
+            @Override
+            public String label() {
+                return "铁路";
             }
         };
 
@@ -173,13 +194,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
         },
 
-        PACKAGE {
-            @Override
-            public String label() {
-                return "提货中";
-            }
-        },
-
         BOOKED {
             @Override
             public String label() {
@@ -225,10 +239,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 此 Shipment 的运输项
      */
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
-    public List<ShipItem> items = new ArrayList<ShipItem>();
+    public List<ShipItem> items = new ArrayList<>();
 
-    @OneToMany(mappedBy = "shipment", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @OneToMany(mappedBy = "shipment", orphanRemoval = true, cascade = {CascadeType.PERSIST})
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     @ManyToOne
     public TransportApply apply;
@@ -239,7 +254,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Cooperator cooper;
 
-    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.PERSIST)
     public Whouse whouse;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -370,10 +385,60 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String invoiceNo;
 
     /**
+     * 对应出库单
+     * 可能为空
+     */
+    @OneToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    public Outbound out;
+
+    /**
      * 多个traceno
      */
     @Transient
-    public List<String> tracknolist = new ArrayList<String>();
+    public List<String> tracknolist = new ArrayList<>();
+
+    /**
+     * 完成天数
+     * 完成时间 - 开始运输时间
+     */
+    @Transient
+    public Integer realDay;
+
+    /**
+     * 是否专线
+     */
+    public boolean isDedicated = false;
+
+    public enum W {
+        PrePay {
+            @Override
+            public String label() {
+                return "预付";
+            }
+        },
+        ArrivePay {
+            @Override
+            public String label() {
+                return "到付";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 贸易方式
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public W tradeMode;
+
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
 
     public enum FLAG {
         ARRAY_TO_STR,
@@ -385,6 +450,31 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     @Lob
     public String reason = " ";
+
+    /**
+     * 收货人
+     */
+    public String receiver;
+
+    /**
+     * 收货人电话
+     */
+    public String receiverPhone;
+
+
+    public String countryCode;
+
+    public String city;
+
+    public String postalCode;
+
+    public String address;
+
+    @ManyToOne
+    public BtbCustom btbCustom;
+
+    @Transient
+    public Long customId;
 
     /**
      * Shipment 的检查
@@ -407,13 +497,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public boolean calcuPlanArriveDate() {
         if(this.dates.planBeginDate == null || this.type == null)
             throw new FastRuntimeException("必须拥有 预计发货时间 与 运输类型");
-        int plusDay = 7;
-//        if(type == T.EXPRESS) plusDay = 7;
-//        else if(type == T.AIR) plusDay = 15;
-//        else if(type == T.SEA) plusDay = 60;
-        plusDay = shipDay();
-        this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay)
-                .toDate();
+        int plusDay = shipDay();
+        this.dates.planArrivDate = new DateTime(this.dates.planBeginDate).plusDays(plusDay).toDate();
         this.dates.planArrivDateForCountRate = this.dates.planArrivDate;
         return true;
     }
@@ -444,8 +529,35 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
         if(procureUnits.size() != units.size())
             Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
-
         return procureUnits;
+    }
+
+    /**
+     * 创建B2B运输单
+     *
+     * @param units
+     * @return
+     */
+    public Shipment buildB2BFromProcureUnits(List<Long> units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
+        ProcureUnit firstProcureUnit = procureUnits.get(0);
+        Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
+        if(StringUtils.isEmpty(this.id)) {
+            this.id = Shipment.id();
+        }
+        this.dates.planBeginDate = earlyPlanBeginDate;
+        this.creater = Login.current();
+        this.projectName = User.COR.MengTop;
+        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
+            this.isDedicated = true;
+        }
+        this.save();
+        procureUnits.forEach(unit -> {
+            ShipItem shipitem = new ShipItem(unit);
+            shipitem.shipment = this;
+            this.items.add(shipitem.save());
+        });
+        return this;
     }
 
     /**
@@ -454,18 +566,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param units
      */
     public Shipment buildFromProcureUnits(List<Long> units) {
-        /**
-         * 1. 检查采购计划数量是否一致
-         * 2. 检查运输方式是否一致
-         * 3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
+        /*
+          1. 检查采购计划数量是否一致
+          2. 检查运输方式是否一致
+          3. 检查快递仓库是否一致或者 海运/空运 国家是否一致
          */
-
         List<ProcureUnit> procureUnits = multipleUnitValidate(units);
-
         ProcureUnit firstProcureUnit = procureUnits.get(0);
-        Shipment.T firstShipType = firstProcureUnit.shipType;
+        Shipment.T firstShipType = this.type != null ? this.type : firstProcureUnit.shipType;
         Date earlyPlanBeginDate = firstProcureUnit.attrs.planShipDate;
-
         for(ProcureUnit unit : procureUnits) {
             if(unit.selling == null) {
                 Validation.addError("", "采购单的selling为空");
@@ -475,47 +584,38 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 Validation.addError("", "不同运输方式不可以创建到一个运输单.");
                 break;
             }
-            earlyPlanBeginDate = new Date(
-                    Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
+            earlyPlanBeginDate = new Date(Math.min(earlyPlanBeginDate.getTime(), unit.attrs.planShipDate.getTime()));
         }
-
         this.type = firstShipType;
-
+        if(this.whouse == null)
+            this.whouse = firstProcureUnit.whouse;
         for(ProcureUnit unit : procureUnits) {
             if(unit.whouse == null) {
                 Validation.addError("", "采购单仓库为空");
                 break;
             }
-
-            if(this.type == T.EXPRESS) {
-                if(!firstProcureUnit.whouse.id.equals(unit.whouse.id)) {
-                    Validation.addError("", "快递运输, 仓库不一样不可以创建到一个运输单");
-                    break;
-                }
-            } else {
-                if(!firstProcureUnit.whouse.country.equals(unit.whouse.country)) {
-                    Validation.addError("", "海运/空运, 运往国家不一样不可以创建一个运输单");
-                    break;
-                }
+            if(!this.whouse.id.equals(unit.whouse.id)) {
+                Validation.addError("", "去往国家不一样不可以创建到一个运输单");
+                break;
             }
         }
-
         if(Validation.hasErrors()) return this;
-
-        this.id = Shipment.id();
-        this.dates.planBeginDate = earlyPlanBeginDate;
-        this.whouse = firstProcureUnit.whouse;
-        this.calcuPlanArriveDate();
-        this.creater = User.current();
-        this.save();
-        for(ProcureUnit unit : procureUnits) {
-            this.addToShip(unit);
+        if(StringUtils.isEmpty(this.id)) {
+            this.id = Shipment.id();
         }
+        this.dates.planBeginDate = earlyPlanBeginDate;
+        this.calcuPlanArriveDate();
+        this.creater = Login.current();
+        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
+            this.isDedicated = true;
+        }
+        this.save();
+        procureUnits.forEach(this::addToShip);
         return this;
     }
 
     public void destroy() {
-        /**
+        /*
          * 0. 检查状态
          * 1. 取消掉关联的运输项目的运输单
          * 2. 删除运输单
@@ -523,12 +623,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.PLAN)
             Validation.addError("", "运输单不可以在非 " + S.PLAN.label() + " 状态取消.");
         if(Validation.hasErrors()) return;
-
-        for(ShipItem itm : this.items) {
-            itm.shipment = null;
-            itm.save();
-        }
-        this.delete();
+        List<ShipItem> shipItems = ShipItem.find("shipment.id=?", this.id).fetch();
+        shipItems.forEach(GenericModel::delete);
+        this.state = S.CANCEL;
+        this.save();
     }
 
     public void updateShipment() {
@@ -549,7 +647,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public synchronized void addToShip(ProcureUnit unit) {
         if(!Arrays.asList(S.PLAN, S.CONFIRM).contains(this.state))
             Validation.addError("", "只运输向" + S.PLAN.label() + "和" + S.CONFIRM.label() + "添加运输项目");
-        if(!unit.whouse.equals(this.whouse))
+        if(!unit.whouse.market.equals(this.whouse.market))
             Validation.addError("", "运输目的地不一样, 无法添加");
         if(unit.shipType != this.type)
             Validation.addError("", "运输方式不一样, 无法添加.");
@@ -559,8 +657,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         ShipItem shipitem = new ShipItem(unit);
         shipitem.shipment = this;
-        this.items.add(shipitem.<ShipItem>save());
-        //TODO c: 添加日志
+        this.items.add(shipitem.save());
     }
 
 
@@ -576,7 +673,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      *
      * @param datetime
      */
-    public synchronized void beginShip(Date datetime) {
+    public synchronized void beginShip(Date datetime, boolean sync) {
         /**
          * 0. 检查
          *  0.1 运输单状态 CONFIRM
@@ -586,42 +683,52 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          * 2. 触发采购计划阶段, 时间
          * 3. 触发运输单状态, 时间
          */
-        if(this.state != S.CONFIRM)
+        if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
-        if(this.items.size() <= 0)
-            Validation.addError("", "没有运输项目可以运输.");
-        for(ShipItem itm : this.items) {
-            if(Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY,
-                    ProcureUnit.STAGE.CLOSE).contains(itm.unit.stage))
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有交货.");
-
-            if(!itm.unit.isPlaced)
-                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没抵达货代.");
         }
-        if(this.type == T.EXPRESS && this.internationExpress == null)
+        if(this.items.size() <= 0) {
+            Validation.addError("", "没有运输项目可以运输.");
+        }
+        for(ShipItem itm : this.items) {
+            if(itm.unit.stage != ProcureUnit.STAGE.OUTBOUND) {
+                Validation.addError("", "需要运输的采购计划 #" + itm.unit.id + " 还没有出仓.请联系仓库部门");
+            }
+        }
+        if(this.type == T.EXPRESS && this.internationExpress == null) {
             Validation.addError("", "请填写运输单的国际快递商");
-        if(this.cooper == null)
+        }
+        if(this.cooper == null) {
             Validation.addError("", "请填写运输单合作伙伴(货代)");
-        if(this.whouse == null)
+        }
+        if(this.whouse == null) {
             Validation.addError("", "请填写运输单仓库信息");
-        if(StringUtils.isBlank(this.trackNo))
+        }
+        this.arryParamSetUP(FLAG.STR_TO_ARRAY);
+        if(this.tracknolist == null || this.tracknolist.size() == 0) {
             Validation.addError("", "请填写运输单的跟踪号");
-
+        }
 
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
 
-        for(ShipItem shipItem : this.items) {
-            if(shipItem.unit.fba != null) {
-                shipItem.unit.fba.updateFBAShipmentRetry(
-                        3,
-                        // 在测试环境下也不能标记 SHIPPED
+        //只有页面勾选了"同步亚马逊"按钮，才进行亚马逊更新操作
+        if(!sync) {
+            // 在测试环境下也不能标记 SHIPPED
+            this.items.stream().filter(shipItem -> shipItem.unit.fba != null).forEach(shipItem -> {
+                if(!Arrays.asList(T.SEA, T.AIR).contains(this.type)) {
+                    //暂停提交空运和海运的物流跟踪号到 Amazon(Amazon 要求最长为 10, 而空运和海运的跟踪号一般都超过 10 位)
+                    //详情: http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_Datatypes.html#NonPartneredLtlDataInput
+                    shipItem.unit.fba.putTransportContentRetry(3, this);
+                }
+                // 在测试环境下也不能标记 SHIPPED
+                shipItem.unit.fba.updateFBAShipmentRetry(3,
                         Play.mode.isProd() ? FBAShipment.S.SHIPPED : FBAShipment.S.DELETED);
-            }
+            });
         }
 
         for(ShipItem shipItem : this.items) {
             shipItem.shipDate = datetime;
+            shipItem.qty = shipItem.unit.shipmentQty();
             shipItem.save();
         }
         this.changeRelateProcureUnitStage(ProcureUnit.STAGE.SHIPPING);
@@ -655,9 +762,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 到港 (运输单抵达港口, 就开始进行清关状态
      */
     public void landPort(Date date) {
-        if(this.type == T.EXPRESS) {
-            Mails.shipment_clearance(this);
-        } else {
+        if(this.type != T.EXPRESS) {
             shouldSomeStateValidate(S.SHIPPING, "到港");
             if(Validation.hasErrors()) return;
             if(date == null) date = new Date();
@@ -679,7 +784,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(Validation.hasErrors()) return;
 
         if(date == null) date = new Date();
-        this.state = S.PACKAGE;
+        this.state = S.BOOKED;
         this.dates.pickGoodDate = date;
         this.save();
     }
@@ -690,7 +795,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param date
      */
     public void booking(Date date) {
-        shouldSomeStateValidate(S.PACKAGE, "预约");
+        shouldSomeStateValidate(S.CLEARANCE, "预约");
 
         if(Validation.hasErrors()) return;
 
@@ -756,7 +861,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void inboundingByComputor() {
         if(this.state != S.RECEIPTD) return;
-        List<Date> receivingDates = new ArrayList<Date>();
+        List<Date> receivingDates = new ArrayList<>();
         for(FBAShipment fba : this.fbas()) {
             if(!Arrays.asList(FBAShipment.S.RECEIVING, FBAShipment.S.CLOSED).contains(fba.state)) continue;
             F.Option<Date> earliestDate = fba.getEarliestDate();
@@ -834,11 +939,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.state = S.BOOKED;
             this.dates.deliverDate = null;
         } else if(this.state == S.BOOKED) {
-            this.state = S.PACKAGE;
-            this.dates.bookDate = null;
-        } else if(this.state == S.PACKAGE) {
             this.state = S.CLEARANCE;
-            this.dates.pickGoodDate = null;
+            this.dates.bookDate = null;
         } else if(this.state == S.CLEARANCE) {
             this.state = S.SHIPPING;
             this.dates.atPortDate = null;
@@ -896,7 +998,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             result = this.internationExpress.isDelivered(this.iExpressHTML);
             if(result._1)
                 this.beginDeliver(result._2.toDate());
-        } else if(Arrays.asList(S.PACKAGE, S.BOOKED, S.DELIVERYING).contains(this.state)) {
+        } else if(Arrays.asList(S.BOOKED, S.DELIVERYING).contains(this.state)) {
             result = this.internationExpress.isReceipt(this.iExpressHTML);
             if(result._1)
                 this.receipt(result._2.toDate());
@@ -942,7 +1044,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void produceFee(PaymentUnit fee) {
         if(fee.currency == null) Validation.addError("", "币种必须存在");
         if(fee.feeType == null) Validation.addError("", "费用类型必须存在");
-        if(fee.unitQty < 1f) Validation.addError("", "数量必须大于等于 1");
+        if(fee.unitQty <= 0f) Validation.addError("", "数量必须大于等于 0");
         // 海运/空运的运输运费无法绑定运输项目, 只能平摊
         if(this.type == T.EXPRESS && FeeType.expressFee().equals(fee.feeType))
             Validation.addError("", "快递的运输费用需要通过运输项目记录");
@@ -951,7 +1053,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.shipment = this;
         fee.payee = User.current();
         fee.amount = fee.unitQty * fee.unitPrice;
-        fee.save();
+        this.fees.add(fee);
+        this.save();
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
                 .fid(fee.shipment.id)
@@ -993,17 +1096,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
          */
         FeeType duty = FeeType.dutyAndVAT();
         if(duty == null) Validation.addError("", "关税费用类型不存在, 请在 transport 下添加 transportduty 关税类型.");
-        for(PaymentUnit fee : this.fees) {
-            if(fee.feeType.equals(duty)) {
-                if(!fee.currency.equals(crcy))
-                    Validation.addError("", "关税费用应该为统一币种, 请何时关税请款信息.");
-            }
-        }
+        this.fees.stream().filter(fee -> fee.feeType.equals(duty) && !fee.currency.equals(crcy))
+                .forEach(fee -> Validation.addError("", "关税费用应该为统一币种, 请核实关税请款信息."));
 
         if(Validation.hasErrors()) return null;
 
         float paidAmount = 0;
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         // TODO 把 Comment 更换为 record?
         lines.add(String.format("总关税 %s %s 减去 ", crcy, amount));
         for(PaymentUnit fee : this.fees) {
@@ -1022,6 +1121,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         leftDuty.shipment = this;
         leftDuty.state = PaymentUnit.S.APPLY;
         leftDuty.memo = StringUtils.join(lines, ", ");
+        this.fees.add(leftDuty);
+        this.save();
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(leftDuty.currency, leftDuty.amount(), leftDuty.feeType.nickName)
                 .fid(leftDuty.shipment.id)
@@ -1037,6 +1138,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public ElcukConfig config(String dayType) {
         String market = this.whouse.country.toLowerCase();
         String name = String.format("%s_%s_%s", market, this.type.name().toLowerCase(), dayType);
+        ElcukConfig config = ElcukConfig.findByName(name);
+        if(!Optional.ofNullable(config).isPresent()) {
+            ElcukConfig elcuk = new ElcukConfig();
+            elcuk.fullName = String.format("%s %s %s", this.whouse.market.countryName(), this.type.label(), dayType);
+            elcuk.name = name;
+            elcuk.val = String.valueOf(1);
+            return elcuk.save();
+        }
         return ElcukConfig.findByName(name);
     }
 
@@ -1048,18 +1157,34 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 通过产品数据计算出来的这份运输单的总重量
+     * 总重量, 需要根据体积/重量的运输算法来计算
      *
      * @return
      */
     public float totalWeight() {
-        //TODO 总重量, 需要根据体积/重量的运输算法来计算
-        float weight = 0f;
+        float totalWeight = 0f;
         for(ShipItem itm : this.items) {
-            Float product_weight = itm.unit.product.weight;
-            if(product_weight == null) continue;
-            weight += itm.qty * product_weight;
+            if(itm.unit == null) continue;
+            Float weight = itm.unit.product.weight;
+            if(weight != null) {
+                totalWeight += itm.qty * weight;
+            }
         }
-        return weight;
+        return totalWeight;
+    }
+
+    public float totalVolume() {
+        float totalVolume = 0f;
+        for(ShipItem itm : this.items) {
+            if(itm.unit == null) continue;
+            Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
+                    * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
+                    * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
+            if(volume != null) {
+                totalVolume += itm.qty * volume / 1000000000;
+            }
+        }
+        return totalVolume;
     }
 
     /**
@@ -1123,7 +1248,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     @Override
     public String toString() {
-        return String.format("%s 开往 %s", this.id, this.whouse.name);
+        if(Objects.equals(this.projectName, User.COR.MengTop))
+            return String.format("%s 开往 %s", this.id, this.target);
+        else
+            return String.format("%s 开往 %s", this.id, this.whouse.name);
     }
 
     @Override
@@ -1147,7 +1275,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public List<FBAShipment> fbas() {
-        List<FBAShipment> fbas = new ArrayList<FBAShipment>();
+        List<FBAShipment> fbas = new ArrayList<>();
         for(ShipItem item : this.items) {
             if(item.unit.fba == null) continue;
             if(fbas.contains(item.unit.fba)) continue;
@@ -1190,7 +1318,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @param shipType
      * @return
      */
-    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType) {
+    public static List<Shipment> findUnitRelateShipmentByWhouse(Long whouseId, T shipType, Date planDeliveryDate) {
         /**
          * 1. 判断是否有过期的周期型运输单, 有的话自动关闭
          * 2. 判断是否需要创建新的周期型运输单, 有的话自动创建
@@ -1208,55 +1336,56 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
 
         // 自动创建
-        List<Shipment> planedShipments = Shipment
-                .find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=?",
-                        S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate())
-                .fetch();
+        List<Shipment> planedShipments = Shipment.find("state IN(?,?) AND planBeginDate>=? AND planBeginDate<=? "
+                        + "AND projectName = ? ", S.PLAN, S.CONFIRM, new Date(), DateTime.now().plusDays(60).toDate(),
+                User.COR.valueOf(OperatorConfig.getVal("brandname"))).fetch();
         //确定仓库接收的运输单
         List<Whouse> whs = Whouse.find("type=?", Whouse.T.FBA).fetch();
         for(Whouse whouse : whs) {
             whouse.checkWhouseNewShipment(planedShipments);
         }
-
-
         // 加载
         StringBuilder where = new StringBuilder("state IN (?,?)");
-        List<Object> params = new ArrayList<Object>(Arrays.asList(S.PLAN, S.CONFIRM));
+        List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
         if(whouseId != null) {
-            where.append("AND (whouse.id=? OR whouse.id IS NULL)");
-            params.add(whouseId);
+            Whouse whouse = Whouse.findById(whouseId);
+            where.append("AND (whouse.market=? OR whouse.id IS NULL)");
+            params.add(whouse.market);
         } else {
             where.append("AND whouse.id IS NULL");
         }
         where.append(" AND type =?");
         params.add(shipType);
-
+        where.append(" AND dates.planBeginDate >= ?");
+        params.add(Dates.morning(new Date()));
         where.append(" ORDER BY planBeginDate");
-
         return Shipment.find(where.toString(), params.toArray()).fetch();
     }
 
     /**
-     * 由于 Play 无法将 models 目录下的 Enumer 加载, 所以通过 model 提供一个暴露方法在 View 中使用
+     * 由于 Play 无法将 models 目录下的 Enum 加载, 所以通过 model 提供一个暴露方法在 View 中使用
      *
      * @return
      */
-    public static List<iExpress> Express() {
+    public static List<iExpress> express() {
         return Arrays.asList(iExpress.values());
     }
 
     public static List<Shipment> similarShipments(Date planBeginDate, Whouse whouse, T shipType) {
-        return Shipment.find("planBeginDate>=? AND whouse=? AND type=? ORDER BY planBeginDate",
-                planBeginDate, whouse, shipType).fetch();
+        if(whouse == null)
+            return new ArrayList<>();
+        else
+            return Shipment.find("planBeginDate>=? AND whouse.market=? AND type=? ORDER BY planBeginDate",
+                    planBeginDate, whouse.market, shipType).fetch();
     }
 
     public static List<Shipment> findByState(S... state) {
-        return Shipment.find(SqlSelect.whereIn("state", state) + " ORDER BY createDate").fetch();
+        return Shipment.find(SqlSelect.whereIn("state", state) + " ORDER BY createDate DESC").fetch();
     }
 
     public static List<Shipment> findByTypeAndStates(T type, S... state) {
-        return Shipment.find(SqlSelect.whereIn("state", state) + " AND type=? ORDER BY " +
-                "createDate", type).fetch();
+        return Shipment.find(SqlSelect.whereIn("state", state) + " AND type=? ORDER BY createDate", type)
+                .fetch();
     }
 
     /**
@@ -1272,7 +1401,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
-    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<String, Integer>();
+    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
 
     /**
      * 初始化不同运输方式的标准运输量对应关系
@@ -1320,34 +1449,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
-        String subject = "";
-        String content = "";
-        List<String> mailaddress = new ArrayList<String>();
+        if(planArrivDate != null) {
+            String subject = "";
+            String content = "";
+            List<String> mailaddress = new ArrayList<>();
 
-        if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
-            subject = String.format("更改运输单[%s]预计到库时间", this.id);
-            content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:"+models.OperatorConfig.getVal("elcuk2url")+"/shipment/%s"
-                    , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate), username,
-                    this.id);
-            List<ProcureUnit> punits = ProcureUnit.find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si" +
-                    "  LEFT JOIN " +
-                    " si.shipment " +
-                    " sp " +
-                    " where sp.id=?", this.id).fetch();
-            for(ProcureUnit pu : punits) {
-                String email = pu.handler.email;
-                if(StringUtils.isNotBlank(email)) {
-                    if(!mailaddress.contains(email)) {
-                        mailaddress.add(email);
-                        LogUtils.JOBLOG.info("Email:::" + email);
+            if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
+                subject = String.format("更改运输单[%s]预计到库时间", this.id);
+                content = String.format("运输单%s预计到库时间从:%s 更改为:%s,更改人:%s,请确认!运输单地址:%s/shipment/%s"
+                        , this.id, Dates.date2Date(this.dates.planArrivDate), Dates.date2Date(planArrivDate),
+                        username, System.getenv(Constant.ROOT_URL), this.id);
+                List<ProcureUnit> punits = ProcureUnit
+                        .find("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.shipItems si"
+                                + " LEFT JOIN si.shipment sp where sp.id=?", this.id).fetch();
+                for(ProcureUnit pu : punits) {
+                    String email = pu.handler.email;
+                    if(StringUtils.isNotBlank(email)) {
+                        if(!mailaddress.contains(email)) {
+                            mailaddress.add(email);
+                            LogUtils.JOBLOG.info("Email:::" + email);
+                        }
                     }
                 }
+                if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
             }
-            if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
         }
-
     }
-
 
     /**
      * 将产品定位属性转换成 String 存入DB
@@ -1357,7 +1484,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void arryParamSetUP(FLAG flag) {
         if(flag.equals(FLAG.ARRAY_TO_STR)) {
-            /**
+            /*
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
             this.trackNo = this.listToStr(this.tracknolist);
@@ -1370,7 +1497,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     this.trackNo = "[\"" + this.trackNo + "\"]";
                 }
                 try {
-                    this.tracknolist = JSON.parseArray(this.trackNo, String.class);
+                    List<String> trackingNumbers = JSON.parseArray(this.trackNo, String.class);
+                    for(int i = 0; i < trackingNumbers.size(); i++) {
+                        trackingNumbers.set(i, StringUtils.trim(trackingNumbers.get(i)));
+                    }
+                    this.tracknolist = trackingNumbers;
                 } catch(Exception e) {
                     LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
                 }
@@ -1385,13 +1516,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     private List<String> fixNullStr(List<String> target) {
-        Iterator<String> iterator = target.iterator();
-        while(iterator.hasNext()) {
-            String p = iterator.next();
-            if(null == p) {
-                iterator.remove();
-            }
-        }
+        target.removeIf(Objects::isNull);
         return target;
     }
 
@@ -1439,13 +1564,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         String now = formatter.format(this.dates.planBeginDate);
         String maxInvoiceNo = this.fetchMaxInvoiceNoForDB();
-        Integer invoiceNo = 0;
+        Integer invoice = 0;
         if(maxInvoiceNo != null) {
-            invoiceNo = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
+            invoice = NumberUtils.toInt(StringUtils.substring(maxInvoiceNo, maxInvoiceNo.length() - 2));
         }
-        ++invoiceNo;
+        ++invoice;
         this.invoiceNo = String.format("%s%s%s-%s", this.invoiceNOTitle(), now, this.fetchCenterId(),
-                invoiceNo < 10 ? ("0" + invoiceNo) : invoiceNo);
+                invoice < 10 ? ("0" + invoice) : invoice);
         this.save();
         return this.invoiceNo;
     }
@@ -1458,13 +1583,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(shipments == null || shipments.size() == 0) return null;
 
         //开始排序 从小到大
-        Collections.sort(shipments, new Comparator<Shipment>() {
-            @Override
-            public int compare(Shipment o1, Shipment o2) {
-                Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
-                Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
-                return invoiceNo1.compareTo(invoiceNo2);
-            }
+        Collections.sort(shipments, (o1, o2) -> {
+            Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
+            Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
+            return invoiceNo1.compareTo(invoiceNo2);
         });
         return shipments.get(shipments.size() - 1).invoiceNo;
     }
@@ -1501,10 +1623,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public String showTrackNo() {
-        String showTrackNo = "";
+        StringBuilder showTrackNo = new StringBuilder();
         this.arryParamSetUP(FLAG.STR_TO_ARRAY);
-        for(String trackNo : this.tracknolist) {
-            showTrackNo += trackNo + ",";
+        for(String track : this.tracknolist) {
+            showTrackNo.append(track).append(",");
         }
         return showTrackNo.substring(0, showTrackNo.length() - 1);
     }
@@ -1528,6 +1650,108 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 }
             }
         }
-
     }
+
+    /**
+     * 修改运输单
+     *
+     * @param newShip
+     */
+    public void update(Shipment newShip) {
+        if(Objects.equals(this.projectName, User.COR.MengTop)) {
+            this.receiver = newShip.receiver;
+            this.receiverPhone = newShip.receiverPhone;
+            this.countryCode = newShip.countryCode;
+            this.city = newShip.city;
+            this.address = newShip.address;
+            this.postalCode = newShip.postalCode;
+            this.tradeMode = newShip.tradeMode;
+            this.btbCustom = BtbCustom.findById(newShip.customId);
+            this.type = newShip.type;
+        }
+
+        this.cooper = newShip.cooper;
+        this.whouse = newShip.whouse;
+        this.title = newShip.title;
+        this.reason = newShip.reason;
+        this.tracknolist = newShip.tracknolist;
+        this.trackNo = newShip.trackNo;
+        this.memo = newShip.memo;
+        if(newShip.dates != null && newShip.dates.planBeginDate != null) {
+            if(this.dates == null) {
+                this.dates = new ShipmentDates();
+            }
+            this.dates.planBeginDate = newShip.dates.planBeginDate;
+        }
+        this.internationExpress = newShip.internationExpress;
+        this.jobNumber = newShip.jobNumber;
+        this.totalWeightShipment = newShip.totalWeightShipment;
+        this.totalVolumeShipment = newShip.totalVolumeShipment;
+        this.shipmentTpye = newShip.shipmentTpye;
+        this.totalStockShipment = newShip.totalStockShipment;
+        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
+
+        //日期发生改变则记录旧的日期
+        if(this.dates != null && this.dates.planArrivDate != null) {
+            if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0
+                    && this.dates.oldPlanArrivDate == null)
+                this.dates.oldPlanArrivDate = this.dates.planArrivDate;
+            this.dates.planArrivDate = newShip.dates.planArrivDate;
+        }
+
+        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
+        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(this.state) && this.dates != null
+                && this.dates.planArrivDateForCountRate != newShip.dates.planArrivDateForCountRate) {
+            if(!StringUtils.isBlank(newShip.reason)) {
+                this.reason = newShip.reason;
+            }
+            this.dates.planArrivDateForCountRate = newShip.dates.planArrivDateForCountRate;
+            this.dates.beginDate = newShip.dates.beginDate;
+        }
+        this.validate();
+        Validation.current().valid(this);
+    }
+
+    public String showRealDay() {
+        if(this.dates != null && this.dates.beginDate != null && this.dates.arriveDate != null) {
+            long day = (this.dates.arriveDate.getTime() - this.dates.beginDate.getTime()) / 1000 / 3600 / 24;
+            return day + "";
+        }
+        return "";
+    }
+
+    public float totalCNYCost() {
+        Float totalCost = 0f;
+        for(PaymentUnit unit : fees) {
+            totalCost += unit.currency.toCNY(unit.amount());
+        }
+        return totalCost;
+    }
+
+    public boolean isPaid() {
+        if(this.fees.size() > 0) {
+            return this.fees.get(0).payment.paymentDate != null;
+        }
+        return false;
+    }
+
+    public Date getPaidDate() {
+        if(this.fees.size() > 0) {
+            return this.fees.get(0).payment.paymentDate;
+        }
+        return null;
+    }
+
+    public float calPrescription() {
+        return (float) (this.dates.receiptDate.getTime() - this.dates.planBeginDate.getTime()) / (1000 * 60 * 60 * 24);
+    }
+
+    public static String showSplitFirst(String key) {
+        return key.split(":")[0];
+    }
+
+    public static String showSplitSecond(String key) {
+        return key.split(":")[1];
+    }
+
 }

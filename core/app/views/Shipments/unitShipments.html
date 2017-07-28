@@ -17,22 +17,18 @@
       <a href="@{Shipments.show()}/${ship.id}" target="_blank">${ship.id}</a>
     </td>
     <td>${ship.title}</td>
-    <td style="color:${'#' + ship.type.rgb()}">${ship.type}</td>
-    <td>${ship.state.label()}</td>
-    <td>${ship.dates.planBeginDate.date()} ${ship.dates.planBeginDate.dayOfWeek()}</td>
+    <td style="color:${'#' + ship.type?.rgb()}">${ship.type.label()}</td>
+    <td>${ship.state?.label()}</td>
+    <td>${ship.dates?.planBeginDate?.date()} ${ship.dates?.planBeginDate?.dayOfWeek()}</td>
     <td>
     ${ship.totalWeight().format("0.00")}
-          #{set diff: ship.totalWeight() - ship.minimumTraffic() /}
-          #{if ship.type.equals(models.procure.Shipment.T.EXPRESS)}
-        #{if diff>0}
-        ${" 超出"+diff.format("0.00")}
+        #{set diff: ship.totalWeight() - ship.minimumTraffic() /}
+        #{if ship.type?.name() == 'EXPRESS'}
+            #{if diff > 0} 超出${+diff.format("0.00")}#{/if}
         #{/if}
-    #{/if}
-          #{else }
-        #{if diff<0}
-        ${" 差"+(-diff).format("0.00")}
-        #{/if}
-    #{/else}
+        #{else }
+            #{if diff < 0} 差${(-diff).format("0.00")}#{/if}
+        #{/else}
     </td>
     <td>${ship.items.size()}</td>
     <td>${ship.creater?.username}</td>

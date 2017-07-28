@@ -10,12 +10,15 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
 import models.view.post.SellingPost;
+import models.whouse.Whouse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import org.jsoup.helper.Validate;
+import play.data.validation.Error;
+import play.data.validation.Validation;
 import play.jobs.Job;
 import play.libs.F;
 import play.mvc.Controller;
@@ -27,8 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import play.data.validation.Error;
+import java.util.stream.Collectors;
 
 /**
  * 控制 Selling
@@ -80,10 +82,14 @@ public class Sellings extends Controller {
      * @param msku
      */
     public static void sameFamilySellings(String msku) {
-        List<Selling> sellings = Selling
-                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
-        List<String> sids = new ArrayList<String>();
-        for(Selling s : sellings) sids.add(s.sellingId);
+        List<String> sids = new ArrayList<>();
+        Product product = Product.findByMerchantSKU(msku);
+        if(product != null && product.family != null) {
+            List<Selling> sellings = Selling.find("listing.product.family=?", product.family).fetch();
+            if(!sellings.isEmpty()) {
+                sids.addAll(sellings.stream().map(s -> s.sellingId).collect(Collectors.toList()));
+            }
+        }
         renderJSON(J.json(sids));
     }
 
@@ -94,10 +100,8 @@ public class Sellings extends Controller {
      * @param sid
      */
     public static void sameSidSellings(String sid) {
-        List<Selling> sellings = Selling
-                .find("sellingId like '" + sid + "%'").fetch();
-        List<String> sids = new ArrayList<String>();
-        for(Selling s : sellings) sids.add(s.sellingId);
+        List<Selling> sellings = Selling.find("sellingId like '" + sid + "%'").fetch();
+        List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
         renderJSON(J.json(sids));
     }
 
@@ -120,6 +124,7 @@ public class Sellings extends Controller {
                 .put("price", Arrays.asList(s.aps.standerPrice.toString()))
                 .put("type", Arrays.asList(s.aps.itemType))
                 .put("title", Arrays.asList(s.aps.title))
+                .put("rbn", Arrays.asList(s.aps.RBN))
                 .build()));
     }
 
@@ -164,9 +169,9 @@ public class Sellings extends Controller {
     public static void imageUpload(final String sid, final String imgs) {
         if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
         Selling s = Selling.findById(sid);
-        List<Error> errors = new ArrayList<Error>();
+        List<Error> errors = new ArrayList<>();
         try {
-            s.uploadFeedAmazonImg(imgs, false,Secure.Security.connected().toLowerCase());
+            s.uploadFeedAmazonImg(imgs, false, Secure.Security.connected().toLowerCase());
         } catch(Exception e) {
             errors.add(new Error("", Webs.E(e), new String[]{}));
         }
@@ -176,9 +181,6 @@ public class Sellings extends Controller {
             renderJSON(new Ret(true, "正在处理,请查看更新日志"));
         }
     }
-
-
-    /*Play 在绑定内部的 Model 的时候与 JPA 想法不一致, TODO 弄清理 Play 怎么处理 Model 的*/
 
     public static void update(Selling s) {
         if(!s.isPersistent()) renderJSON(new Ret("Selling(" + s.sellingId + ") 不存在!"));
@@ -191,30 +193,19 @@ public class Sellings extends Controller {
         }
     }
 
-    public static void deploy(String id) {
-        //10SMI9300-2200S|A_UK|1
-        Selling s = Selling.findById(id);
-        try {
-            Feed feed = s.deploy();
-            renderJSON(feed);
-        } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
-        }
-    }
-
     /**
-     * 将部分信息同步到AMAZON
+     * 将部分信息同步到 Amazon
      *
      * @param s
      * @param p
      */
-    public static void amazon_update(Selling s, SellingAmzPost p) {
+    public static void partialUpdate(Selling s, SellingAmzPost p) {
         if(p == null) {
             renderJSON(new Ret(false, "请勾选Selling信息更新!"));
         }
         try {
             s.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-            s.syncAndUpdateAmazon(p);
+            s.partialUpdate(p);
             s.save();
             renderJSON(new Ret(true));
         } catch(Exception e) {
@@ -251,6 +242,7 @@ public class Sellings extends Controller {
      * 下载 Selling 的 FBA_
      *
      * @param id sellingId
+     * @deprecated 已转移到 ProcureUnits.fnSkuLable
      */
     public static void sellingLabel(final String id) {
         File file = await(new Job<File>() {
@@ -308,8 +300,8 @@ public class Sellings extends Controller {
      * 批量导入 Selling
      */
     public static void bulkImport(File sellingFile) {
-        List<String> lines = new ArrayList<String>();
-        StringBuffer msg = new StringBuffer();
+        List<String> lines = new ArrayList<>();
+        StringBuilder msg = new StringBuilder();
         // 文件基本属性校验(是否存在、格式、标题行)
         try {
             if(sellingFile == null) Webs.error("文件为空!");
@@ -317,7 +309,7 @@ public class Sellings extends Controller {
             if(!(fileName.substring(fileName.lastIndexOf(".") + 1)).equalsIgnoreCase("txt")) //文件类型校验
                 Webs.error("不支持的文件格式! 请使用 TXT 文档.");
             lines = FileUtils.readLines(sellingFile);
-            if(lines.size() == 0 || !(lines.get(0).toString().contains("SKU\tUPC\tASIN\tMarket\tAccount")))
+            if(lines.size() == 0 || !(lines.get(0).contains("SKU\tUPC\tASIN\tMarket\tAccount")))
                 Webs.error("文件校验失败, 内容为空或标题行不存在!");
         } catch(Exception e) {
             renderText(e.getMessage());
@@ -404,7 +396,7 @@ public class Sellings extends Controller {
 
     public static void deleteImage(String sku, String fileName) {
         try {
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            List<NameValuePair> params = new ArrayList<>();
             params.add(new BasicNameValuePair("sku", sku));
             params.add(new BasicNameValuePair("pic_name", fileName));
             String message = HTTP.post("https://e.easyacc.com:8081/index.php?explorer/erpRemovePicApi", params);
@@ -418,4 +410,24 @@ public class Sellings extends Controller {
         }
     }
 
+    /**
+     * 调用 Rockend 来重新上架
+     */
+    public static void rePushFeedsToAmazon(String sellingId) {
+        Selling s = Selling.findById(sellingId);
+        notFoundIfNull(s, "未找到相关 Selling!");
+        s.rePushFeedsToAmazon();
+        Webs.errorToFlash(flash);
+        if(!Validation.hasErrors()) flash.success("成功提交请求到 Rockend, 请等待 2~5 分钟后查看执行结果!");
+        selling(sellingId);
+    }
+
+    public static void findSellingBySkuAndMarket(String sku, String market, Long id) {
+        Whouse whouse = Whouse.findById(id);
+        List<Selling> list = Selling.find("listing.product.sku=? AND market=? AND state <>? AND account.id = ? ",
+                sku, M.valueOf(market), Selling.S.DOWN, whouse.account.id).fetch();
+        List<String> sids = new ArrayList<>();
+        for(Selling s : list) sids.add(s.sellingId);
+        renderJSON(J.json(sids));
+    }
 }

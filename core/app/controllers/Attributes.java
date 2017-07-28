@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.J;
 import models.User;
 import models.product.Attribute;
 import org.apache.commons.lang.StringUtils;
@@ -10,6 +11,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -65,6 +67,15 @@ public class Attributes extends Controller {
         flash.success("Attribute %s 删除成功", at.name);
         redirect("/attributes/index");
     }
+
+    public static void sameAttr(String name) {
+        List<Attribute> attributes = Attribute.find("name like '%" + name + "%'").fetch();
+        List<String> names = attributes.stream().map(attr -> attr.name).collect(Collectors.toList());
+        renderJSON(J.json(names));
+    }
+
+
+
 }
 
 

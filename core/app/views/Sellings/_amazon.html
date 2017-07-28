@@ -14,12 +14,18 @@
     <button class="btn btn-warning" id="amz-sync" content="从 Amazon 同步回来更新到数据库"
             placement='bottom' rel="popover" title="Sync From Amazon Button">Sync
     </button>
-    <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.amazon_update()}"
+    <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.partialUpdate()}"
             content="AMZ局部更新" placement='bottom' rel="popover">Deploy Part
     </button>
     <button class="btn btn-warning" id="img_cal" content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
             rel="popover">AMZ图片更新
     </button>
+      #{power.ck "sellings.repushfeedstoamazon"}
+        <a class="btn btn-danger" href="@{Sellings.rePushFeedsToAmazon(s.sellingId)}" content="把 DB 内已经存在的 Feed 重新提交给
+        Amazon, 只用于 Rockend 和 Amazon 出现问题后重新上架" placement='bottom' rel="popover">
+          重新提交上架
+        </a>
+      #{/power.ck}
   </div>
 #{/else}
 </div>
@@ -40,10 +46,8 @@
     <div class="span5">
       <input type="hidden" name="s.sellingId" value="${s.sellingId}">
       <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
-        #{text_field id:'msku',name: 's.merchantSKU', readonly: true,
-        label: 'Merchant SKU',
-        value: s.merchantSKU/}
-        #{text_field id:'upc',name: 's.aps.upc', readonly: true, label: 'UPC', value: s.aps.upc /}
+        #{text_field id:'msku',name: 's.merchantSKU', label: 'Merchant SKU', value: s.merchantSKU/}
+        #{text_field id:'upc',name: 's.aps.upc', label: 'UPC', value: s.aps.upc /}
         #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
         #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
         #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
@@ -62,15 +66,15 @@
         #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
 
         #{checkbox_product_volume id:'productvolume',readonly:true,
-        checkboxname: 'p.productvolume', label:'长宽高(产品)',
+        checkboxname: 'p.productvolume', label:'长宽高(包材)',
         id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
         hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
         name1: 'p.productLengths',
-        label1: '长(产品)', value1: s.listing.product.productLengths,
+        label1: '长(包材)', value1: s.listing.product.lengths,
         name2: 'p.productWidth',
-        label2: '宽(产品)', value2: s.listing.product.productWidth,
+        label2: '宽(包材)', value2: s.listing.product.width,
         name3: 'p.productHeigh',
-        label3: '高(产品)', value3: s.listing.product.productHeigh /}
+        label3: '高(包材)', value3: s.listing.product.heigh /}
 
     </div>
     <div class="span5">
@@ -78,13 +82,14 @@
         #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
         #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
         #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-        'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Sports', 'Lighting'], value: s.aps.templateType/}
-        #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps.feedProductType], value: s.aps.feedProductType /}
+        'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Lighting'], value: s.aps.templateType/}
+        #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps
+        .feedProductType], value: s.aps.feedProductType, native: true /}
         #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
         value: s.aps.salePrice /}
         #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
-        #{text_field id:'partNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
-        value: s.listing.product.partNumber /}
+        #{text_field id:'manufacturerPartNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
+        value: s.aps.manufacturerPartNumber /}
         #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
         #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
 
@@ -92,7 +97,7 @@
         ck:false, unitname:'p.productWeightUnit', checkboxname: 'p.productWeight',name: 'p.proWeight',
         label: '重量(产品)', value: s.listing.product.productWeight /}
         #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
-        ck:false, checkboxname: 'p.weight',name: 'p.packWeight',label: '重量(包材)', value: s.listing.product.weight /}
+        ck:true, checkboxname: 'p.weight',name: 'p.packWeight',label: '重量(包材)', value: s.listing.product.weight /}
 
       <label class="control-label" for="sellingCycle">生命周期</label>
 
@@ -145,7 +150,6 @@
 
       #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 15,
       label: '产品详细描述', value: s.aps.productDesc, class: 'span10' /}
-
   </div>
 
 

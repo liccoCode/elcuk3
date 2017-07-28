@@ -1,23 +1,33 @@
 package controllers.api;
 
-import helper.Constant;
+import helper.*;
+import jobs.analyze.SellingProfitJob;
+import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
 import models.ReportRecord;
+import models.market.OrderInvoice;
+import models.market.Orderr;
 import models.view.Ret;
+import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
+import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
+import play.libs.F;
+import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import jobs.analyze.SellingProfitJob;
-
-import models.view.post.ProfitPost;
-import jobs.analyze.SellingProfitSearch;
+import java.util.Map;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -51,8 +61,7 @@ public class ReportDeal extends Controller {
         String end = request.params.get("end");
         p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
         p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
-
-        System.out.println("sku:"+p.sku+" market:"+p.pmarket+" category:"+p.category+" begin:"+p.begin+" end:"+p.end);
+        Logger.info("ProfitPost json: %s", J.json(p));
 
         //利润查询
         new SellingProfitSearch(p).now();
@@ -71,10 +80,117 @@ public class ReportDeal extends Controller {
         String end = request.params.get("end");
         p.begin = DateTime.parse(begin, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
         p.end = DateTime.parse(end, DateTimeFormat.forPattern("yyyy-MM-dd")).toDate();
-        Logger.debug("sku:"+p.sku+" market:"+p.pmarket+" category:" + p.categories + " begin:" +p.begin+" end:"+p.end);
+        Logger.debug("ProfitPost json: %s", J.json(p));
 
         new SkuSaleProfitJob(p).now();
 
         renderJSON(new Ret(true, "调用利润job成功!"));
     }
+
+    /**
+     * Osticket调用,返回订单状态
+     */
+    public static void returnOrderStatus() {
+        String orderId = request.params.get("orderId");
+        if(StringUtils.isNotBlank(orderId)) {
+            Orderr ord = Orderr.findById(orderId);
+            renderJSON(new Ret(true, ord.state.name()));
+        } else {
+            renderJSON(new Ret(false));
+        }
+    }
+
+
+    /**
+     * Osticket 调用生成pdf
+     */
+    public static void returnInvoicePdf() {
+        String orderId = request.params.get("orderId");
+        String taxNumber = request.params.get("taxNumber");
+        String flag = request.params.get("flag");
+
+        Orderr ord = Orderr.findById(orderId);
+        if(ord == null) renderJSON(new Ret(false, "this order is not exist"));
+
+        if(flag == null || !flag.equals("1")) {
+            if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
+                renderJSON(new Ret(true, "this order state is " + ord.state.name()));
+            if(StringUtils.isNotBlank(ord.invoiceState) && ord.invoiceState.equals("yes"))
+                renderJSON(new Ret(true, "this order is send before!"));
+        }
+
+        try {
+            OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
+            OrderInvoice invoice = OrderInvoice.findById(orderId);
+            if(invoice == null) {
+                invoice = ord.createOrderInvoice();
+                invoice.save();
+            }
+            invoice.setprice();
+
+            final PDF.Options options = new PDF.Options();
+            options.pageSize = IHtmlToPdfTransformer.A3P;
+
+            F.T3<Float, Float, Float> amt = ord.amount();
+            Float totalamount = amt._1;
+            Float notaxamount = 0f;
+            if(invoice.europevat == OrderInvoice.VAT.EUROPE) {
+                notaxamount = -1 * totalamount;
+            } else
+                notaxamount = invoice.notaxamount;
+            Float tax = new BigDecimal(-1 * totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4)
+                    .floatValue();
+            Date returndate = ord.returndate();
+
+            String path = Constant.INVOICE_PATH + "/" + new DateTime(new Date()).getMonthOfYear() + "sent";
+            File folder = new File(path);
+            if(!folder.exists()) folder.mkdir();
+
+            String pdfName = invoiceformat.filename + orderId + ".pdf";
+            String template = "Orders/invoiceTaxNumberPDF.html";
+            Map<String, Object> args = new HashMap<>();
+            args.put("invoiceformat", invoiceformat);
+            args.put("ord", ord);
+            args.put("invoice", invoice);
+            args.put("totalamount", totalamount);
+            args.put("notaxamount", notaxamount);
+            args.put("tax", tax);
+            args.put("returndate", returndate);
+            args.put("taxNumber", taxNumber);
+            PDFs.templateAsPDF(folder, pdfName, template, options, args);
+
+            /**订单状态改为已发送**/
+            ord.invoiceState = "yes";
+            ord.save();
+            if(StringUtils.isNotEmpty(taxNumber)) {
+                invoice.invoiceto += "," + taxNumber;
+                invoice.save();
+            }
+            File file = new File(folder + "/" + pdfName);
+            renderBinary(file);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, e.getMessage()));
+        }
+    }
+
+    /**
+     * 增加一个后备调用生成1W张发票的接口
+     * 可以传入时间参数
+     */
+    public static void genreateInvoiceByTime() {
+        String date = request.params.get("date");
+        String num = request.params.get("num");
+        String market = request.params.get("market");
+        String regex = request.params.get("regex");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date time = sdf.parse(date);
+            OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market, regex);
+            renderText("后台正在处理, 请稍后去服务器查看.");
+        } catch(ParseException e) {
+            Logger.error(Webs.S(e));
+        }
+    }
+
 }

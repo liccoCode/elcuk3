@@ -9,12 +9,14 @@
     <th>UserId</th>
     <th>Buyer</th>
     <th>SKU</th>
-    <th>Phone</th>
+    <th style="width:100px;">PromotionIDs</th>
+    <th>DiscountPrice</th>
     <th>Email</th>
     <th name="createDate" class="sortable">Create <i class="icon-sort"></i></th>
     <th name="shipDate" class="sortable">ShipDate <i class="icon-sort"></i></th>
     <th name="paymentDate" class="sortable">Payment <i class="icon-sort"></i></th>
     <th>State</th>
+    <th>Invoice</th>
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
@@ -31,7 +33,7 @@
         #{/else}
         (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
     </td>
-    <td>${ord.address1}</td>
+    <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
     <td>
         <a target="_blank" href="@{Orders.show(ord.orderId)}">
@@ -41,7 +43,8 @@
     <td>${ord.userid}</td>
     <td>${ord.buyer}</td>
     <td>${ord.showItemSku()}</td>
-    <td>${ord.phone}</td>
+    <td>${ord.showPromotionIDs()}</td>
+    <td>${ord.showDiscountPrice()}</td>
     <td>
         <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
     </td>
@@ -49,9 +52,17 @@
     <td>#{time_tooltip time:ord.shipDate/}</td>
     <td>#{time_tooltip time:ord.paymentDate/}</td>
     <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
+    <td>
+    #{if ord.invoiceState=='yes'}
+        <b>sent</b>
+    #{/if}
+    #{else }
+        unsent
+    #{/else}
+    </td>
 </tr>
 <tr style="display:none" id="order_index_${ord_index}">
-    <td colspan="12">
+    <td colspan="17">
         #{render './_order_fees.html', fees: ord.fees/}
     </td>
 </tr>

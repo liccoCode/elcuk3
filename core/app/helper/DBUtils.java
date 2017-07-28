@@ -1,15 +1,15 @@
 package helper;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.db.DB;
+import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
-
-import play.db.helper.SqlSelect;
 
 /**
  * 直接使用 SQL 的工具方法
@@ -38,7 +38,7 @@ public class DBUtils {
      * @return
      */
     public static Map<String, Object> row(Connection conn, String sql, Object... params) {
-        Map<String, Object> row = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<>();
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -64,7 +64,7 @@ public class DBUtils {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                play.Logger.error(Webs.S(e));
             }
         }
         return row;
@@ -79,7 +79,7 @@ public class DBUtils {
      * @throws SQLException
      */
     private static Map<String, Object> mapOneRow(ResultSetMetaData mete, ResultSet rs) throws SQLException {
-        Map<String, Object> row = new HashMap<String, Object>();
+        Map<String, Object> row = new HashMap<>();
         for(int i = 1; i <= mete.getColumnCount(); i++) {
             Object value = rs.getObject(i);
             if(value != null && value.getClass() == Timestamp.class) {
@@ -110,7 +110,7 @@ public class DBUtils {
      * @return
      */
     public static List<Map<String, Object>> rows(Connection conn, String sql, Object... params) {
-        List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> rows = new ArrayList<>();
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(sql);
@@ -131,7 +131,7 @@ public class DBUtils {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                play.Logger.error(Webs.S(e));
             }
         }
         return rows;
@@ -145,6 +145,14 @@ public class DBUtils {
         String value = orlineParam(column, param);
         if(value.length() == 0) return value;
         return value;
+    }
+
+    public static long count(String sql, Object... params) {
+        Map<String, Object> row = row(sql, params);
+        if(row == null || !row.containsKey("count")) {
+            throw new FastRuntimeException("未找到 count 结果, 请检查查询语句是否正确!");
+        }
+        return NumberUtils.toLong(row.get("count").toString());
     }
 
     public static String orlineParam(String column, Object param) {

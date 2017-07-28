@@ -5,15 +5,19 @@ import helper.Currency;
 import helper.J;
 import helper.Webs;
 import models.finance.Payment;
+import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
+import models.view.highchart.HighChart;
+import models.view.post.PaymentUnitPost;
 import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.jobs.Job;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -29,7 +33,7 @@ import java.util.List;
  * Date: 1/24/13
  * Time: 4:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Payments extends Controller {
 
     @Before(only = {"index"})
@@ -42,27 +46,40 @@ public class Payments extends Controller {
 
     @Check("payments.index")
     public static void index(PaymentsPost p) {
-        List<Payment> payments = null;
         if(p == null) p = new PaymentsPost();
-        payments = p.query();
-
+        List<Payment> payments = p.query();
         render(payments, p);
     }
 
     @CacheFor("5mn")
     public static void bocRates() {
-        renderHtml(Currency.bocRatesHtml());
+        String html = await(new Job<String>() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return Currency.bocRatesHtml();
+            }
+        }.now());
+        renderHtml(html);
     }
 
     @CacheFor("5mn")
     public static void xeRates(Currency currency) {
-        renderHtml(Currency.xeRatesHtml(currency));
+        String html = await(new Job<String>() {
+            @Override
+            public String doJobWithResult() throws Exception {
+                return Currency.xeRatesHtml(currency);
+            }
+        }.now());
+        renderHtml(html);
     }
 
     @Check("payments.show")
-    public static void show(Long id) {
+    public static void show(Long id, Integer p) {
+        if(p == null) p = 1;
         Payment payment = Payment.findById(id);
-        render(payment);
+        PaymentUnitPost post = new PaymentUnitPost(id, p);
+        List<PaymentUnit> units = post.query();
+        render(payment, units, p, post);
     }
 
     /**
@@ -75,7 +92,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("成功锁定, 新请款不会再进入这个付款单.");
-        show(id);
+        show(id, null);
     }
 
     public static void unlock(Long id) {
@@ -85,7 +102,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("成功解锁, 新请款可以再次进入这个付款单.");
-        show(id);
+        show(id, null);
     }
 
     /**
@@ -94,28 +111,28 @@ public class Payments extends Controller {
     @Check("payments.payforit")
     public static void payForIt(Long id, Long paymentTargetId,
                                 Currency currency, BigDecimal actualPaid,
-                                Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratio_publish_date) {
+                                Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishDate) {
 
         Validation.required("供应商支付账号", paymentTargetId);
         Validation.required("币种", currency);
         Validation.required("具体支付金额", actualPaid);
         Validation.required("汇率", ratio);
-        Validation.required("汇率发布日期", ratio_publish_date);
+        Validation.required("汇率发布日期", ratioPublishDate);
         Validation.min("汇率", ratio, 0);
 
         Payment payment = Payment.findById(id);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            show(id);
+            show(id, null);
         }
 
-        payment.payIt(paymentTargetId, currency, ratio, ratio_publish_date, actualPaid);
+        payment.payIt(paymentTargetId, currency, ratio, ratioPublishDate, actualPaid);
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
             flash.success("支付成功.");
 
-        show(id);
+        show(id, null);
     }
 
     @Check("payments.shouldpaidupdate")
@@ -123,7 +140,7 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         payment.shouldPaid(shouldPaid);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         } else {
             renderJSON(new Ret(true, "更新成功"));
         }
@@ -155,7 +172,7 @@ public class Payments extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("付款单取消成功.");
-        show(id);
+        show(id, null);
     }
 
 
@@ -169,6 +186,11 @@ public class Payments extends Controller {
         PDF.Options options = new PDF.Options();
         options.filename = "Invoice_" + id + ".pdf";
         PDF.renderPDF(payment, options);
+    }
+
+    public static void queryPerDayAmount() {
+        HighChart lineChart = Payment.queryPerDayAmount();
+        renderJSON(J.json(lineChart));
     }
 
 }

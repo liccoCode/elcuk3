@@ -11,7 +11,10 @@ import play.jobs.Job;
 import java.util.List;
 
 /**
- * Created by licco on 15/12/23.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/12/23
+ * Time: 12:08 PM
  */
 public class SkuSaleProfitJob extends Job {
 

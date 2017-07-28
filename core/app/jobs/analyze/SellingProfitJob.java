@@ -5,9 +5,9 @@ import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.jobs.Job;
-import play.jobs.On;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 周期:
@@ -18,7 +18,7 @@ import java.util.*;
  * Date: 8/13/13
  * Time: 3:06 PM
  */
-@On("0 20 0,7,15 * * ?")
+//@On("0 20 0,7,15 * * ?")
 public class SellingProfitJob extends Job {
 
     private String RUNNING = "profitselling_running";
@@ -39,10 +39,10 @@ public class SellingProfitJob extends Job {
         if(post.pmarket != null) marketkey = post.pmarket;
         if(post.category != null) categorykey = post.category.toLowerCase();
         String postkey = helper.Caches.Q.cacheKey("profitpost", post.begin, post.end, categorykey, skukey, marketkey
-                ,   "excel");
+                , "excel");
         if(isRnning(postkey)) return;
         Cache.add(postkey + RUNNING, postkey + RUNNING);
-        List<Profit> profits = new ArrayList<Profit>();
+        List<Profit> profits = new ArrayList<>();
         //从ES查找SKU的利润
         profits = post.query();
         //计算合计

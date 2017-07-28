@@ -1,6 +1,7 @@
 package jobs.driver;
 
 import helper.LogUtils;
+import helper.Webs;
 import play.Logger;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -30,9 +31,8 @@ public abstract class BaseJob extends Job {
     public void end(String msg) {
         Object jobId = getContext().get("gjobId");
         if(jobId != null) {
-            DB.execute("UPDATE GJob set msg=" + SqlSelect.quote(msg == null ? "" : msg) +
-                    ", state='" + GJob.S.END.name() + "' " +
-                    "where id=" + jobId.toString());
+            DB.execute("UPDATE GJob set msg=" + SqlSelect.quote(msg == null ? "" : msg)
+                    + ", state='" + GJob.S.END.name() + "' " + "where id=" + jobId.toString());
         }
     }
 
@@ -49,9 +49,7 @@ public abstract class BaseJob extends Job {
             doit();
             del();
         } catch(Exception e) {
-            LogUtils.JOBLOG
-                    .info(e.toString());
-            e.printStackTrace();
+            LogUtils.JOBLOG.info(Webs.S(e));
             end(e.getMessage());
         }
     }

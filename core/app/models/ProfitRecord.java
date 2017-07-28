@@ -2,6 +2,7 @@ package models;
 
 import com.google.gson.annotations.Expose;
 import play.db.jpa.Model;
+
 import javax.persistence.Entity;
 
 /**
@@ -69,4 +70,12 @@ public class ProfitRecord extends Model {
     public float diff_last_year_profit;
     @Expose
     public float diff_last_year_profit_rate;
+    @Expose
+    public float theoretical_qty;
+    @Expose
+    public float theoretical_profit;
+    @Expose
+    public float theoretical_profit_rate;
+    @Expose
+    public float total_theoretical_qty;
 }

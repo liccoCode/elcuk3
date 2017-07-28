@@ -14,10 +14,8 @@ import models.view.dto.AnalyzeDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
-import play.jobs.On;
 import play.libs.F;
 import query.*;
 
@@ -32,7 +30,8 @@ import java.util.*;
  * Date: 8/13/13
  * Time: 3:06 PM
  */
-@On("0 20 0,7,15 * * ?")
+@Deprecated
+//@On("0 20 0,7,15 * * ?")
 public class SellingSaleAnalyzeJob extends Job {
     public static final String RUNNING = "analyze_running";
     public static final String AnalyzeDTO_SID_CACHE = "analyze_post_sid";
@@ -92,11 +91,11 @@ public class SellingSaleAnalyzeJob extends Job {
                 dtos = Cache.get(cacke_key, List.class);
                 if(dtos != null) return dtos;
 
-                dtos = new ArrayList<AnalyzeDTO>();
+                dtos = new ArrayList<>();
                 boolean isSku = StringUtils.equalsIgnoreCase("sku", type);
 
                 // 准备计算用的数据容器
-                Map<String, AnalyzeDTO> analyzeMap = new HashMap<String, AnalyzeDTO>();
+                Map<String, AnalyzeDTO> analyzeMap = new HashMap<>();
                 if(isSku) {
                     Map<String, Product.S> products = new ProductQuery().skuAndStates();
                     for(String sku : products.keySet()) {
@@ -159,19 +158,18 @@ public class SellingSaleAnalyzeJob extends Job {
                         for(ProcureUnit unit : untis) {
                             List<Shipment> shipments = unit.relateShipment();
                             if(shipments != null && shipments.size() > 0) {
-                                if(shipments.get(0).dates.planArrivDate != null &&
-                                        shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
+                                if(shipments.get(0).dates.planArrivDate != null
+                                        && shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
-                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
-                                            ).intValue();
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps))
+                                            .intValue();
                                     outday = outday + arrivday;
                                     time = time.plusDays(arrivday);
                                 }
                             } else
                                 //判断到达仓库日期是否在断货日期之前
-                                if(unit.attrs != null && unit.attrs.planArrivDate != null &&
-                                        unit.attrs.planArrivDate.before(time
-                                                .plusDays(1).toDate())) {
+                                if(unit.attrs != null && unit.attrs.planArrivDate != null
+                                        && unit.attrs.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
                                             .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPs_cal() : dto.ps)
                                             ).intValue();
@@ -212,7 +210,6 @@ public class SellingSaleAnalyzeJob extends Job {
             switch(si.shipment.state) {
                 case SHIPPING:
                 case CLEARANCE:
-                case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                 case RECEIPTD:
@@ -242,11 +239,11 @@ public class SellingSaleAnalyzeJob extends Job {
                           final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(1).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
@@ -279,11 +276,11 @@ public class SellingSaleAnalyzeJob extends Job {
                           final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(8).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
@@ -316,11 +313,11 @@ public class SellingSaleAnalyzeJob extends Job {
                            final OrderItemQuery query) {
         List<Map<String, Integer>> results = Promises.forkJoin(new Promises.DBCallback<Map<String, Integer>>() {
             @Override
-            public Map<String, Integer> doJobWithResult(M m) {
+            public Map<String, Integer> doJobWithResult(Object param) {
                 return query.analyzeDaySale(
                         Dates.morning(now.minusDays(31).toDate()),
                         Dates.night(now.minusDays(1).toDate()),
-                        m,
+                        (M) param,
                         isSku,
                         getConnection());
             }
@@ -370,7 +367,7 @@ public class SellingSaleAnalyzeJob extends Job {
     private void pullReviewToDTO(boolean sku, Map<String, AnalyzeDTO> analyzeMap) {
         AmazonListingReviewQuery amazonQuery = new AmazonListingReviewQuery();
         Map<String, F.T2<Integer, Float>> reviewMap;
-        Map<String, F.T2<Float, Date>> latestReviewMap = new HashMap<String, F.T2<Float, Date>>();
+        Map<String, F.T2<Float, Date>> latestReviewMap = new HashMap<>();
         if(sku) {
             reviewMap = amazonQuery.skuRelateReviews(analyzeMap.keySet());
             latestReviewMap = amazonQuery.skusLastRating(analyzeMap.keySet());

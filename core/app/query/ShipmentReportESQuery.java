@@ -37,7 +37,7 @@ public class ShipmentReportESQuery {
             columnChart.title = String
                     .format("From:[%s] To:[%s]运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(from, to, t, "shipFee"));
+                columnChart.series(shipColum(from, to, t.name(), "shipFee"));
             }
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
@@ -49,7 +49,7 @@ public class ShipmentReportESQuery {
     /**
      * 运输费用统计饼图(根据市场)
      */
-    public static HighChart shipFeeByMarketPie(final Date from, final Date to, Shipment.T type) {
+    public static HighChart shipFeeByMarketPie(final Date from, final Date to, String type) {
         String key = Caches.Q.cacheKey(from, to, type, "shipFeeByMarket");
         HighChart pieChart = Cache.get(key, HighChart.class);
         if(pieChart != null) return pieChart;
@@ -58,6 +58,23 @@ public class ShipmentReportESQuery {
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
             pieChart.series(shipPie(from, to, type, "shipFee"));
+            Cache.delete(key);
+            Cache.add(key, pieChart, "4h");
+        }
+        return pieChart;
+    }
+
+    /**
+     * 运输费用统计饼图(根据市场)
+     */
+    public static HighChart shipFeeByMarketPieForDedicated(final Date from, final Date to, String type) {
+        String key = Caches.Q.cacheKey(from, to, type, "shipFeeByMarket");
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+        synchronized(key.intern()) {
+            pieChart = new HighChart(Series.PIE);
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输费用统计(USD)", Dates.date2Date(from), Dates.date2Date(to), type);
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -75,7 +92,7 @@ public class ShipmentReportESQuery {
             columnChart = new HighChart(Series.COLUMN);
             columnChart.title = String.format("From:[%s] To:[%s]运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to));
             for(Shipment.T t : Shipment.T.values()) {
-                columnChart.series(shipColum(from, to, t, "shipWeight"));
+                columnChart.series(shipColum(from, to, t.name(), "shipWeight"));
             }
             Cache.delete(key);
             Cache.add(key, columnChart, "4h");
@@ -94,7 +111,27 @@ public class ShipmentReportESQuery {
             pieChart = new HighChart(Series.PIE);
             pieChart.title = String
                     .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), type);
-            pieChart.series(shipPie(from, to, type, "shipWeight"));
+            pieChart.series(shipPie(from, to, type.name(), "shipWeight"));
+            Cache.delete(key);
+            Cache.add(key, pieChart, "4h");
+        }
+        return pieChart;
+    }
+
+    /**
+     * @param from
+     * @param to
+     * @return
+     */
+    public static HighChart shipWeightByMarketPieForDedicated(final Date from, final Date to) {
+        String key = Caches.Q.cacheKey(from, to, "DEDICATED", "shipWeightByMarket");
+        HighChart pieChart = Cache.get(key, HighChart.class);
+        if(pieChart != null) return pieChart;
+        synchronized(key.intern()) {
+            pieChart = new HighChart(Series.PIE);
+            pieChart.title = String
+                    .format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", Dates.date2Date(from), Dates.date2Date(to), "专线");
+            pieChart.series(shipPie(from, to, "dedicated", "shipWeight"));
             Cache.delete(key);
             Cache.add(key, pieChart, "4h");
         }
@@ -115,9 +152,8 @@ public class ShipmentReportESQuery {
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
             lineChart = new HighChart(Series.LINE);
-            lineChart.title = shipType == null ?
-                    String.format("[%s]年度[%s]准时到货率", year, countType) :
-                    String.format("[%s]年度[%s][%s]准时到货率", year, shipType, countType);
+            lineChart.title = shipType == null ? String.format("[%s]年度[%s]准时到货率", year, countType)
+                    : String.format("[%s]年度[%s][%s]准时到货率", year, shipType, countType);
             if(shipType != null) {
                 lineChart.series(rateLine(year, shipType, countType));
             } else {
@@ -132,13 +168,15 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Column shipColum(Date from, Date to, Shipment.T type, String flag) {
+    public static Series.Column shipColum(Date from, Date to, String string_type, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
+        MetricShipmentService mes;
+        Shipment.T type = Shipment.T.valueOf(string_type);
         Series.Column column = new Series.Column(type.name());
         column.color = ProcuresHelper.rgb(type);
-        float result = 0f;
-        MetricShipmentService mes = new MetricShipmentService(from, to, type);
+        float result;
+        mes = new MetricShipmentService(from, to, type);
         if(StringUtils.equals(flag, "shipFee")) {
             result = mes.countShipFee();
         } else {
@@ -149,9 +187,10 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Pie shipPie(Date from, Date to, Shipment.T type, String flag) {
+    public static Series.Pie shipPie(Date from, Date to, String string_type, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
+        Shipment.T type = Shipment.T.valueOf(string_type);
         Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
         float result = 0f;
         for(M m : M.values()) {
@@ -195,8 +234,8 @@ public class ShipmentReportESQuery {
             float sum = onTime + early + timeOut;
             float rate = sum == 0 ? 0 : (((onTime + early) / (sum)) * 100);
 
-            line.add(rate, i + "月<br/>准时抵达数量: " + onTime + "<br/>提前抵达数量: " + early + "<br/>超时抵达数量: " + timeOut +
-                    "<br/>合计: " + sum + "<br/>准时到达率: " + String.format("%.2f", rate) + "%");
+            line.add(rate, i + "月<br/>准时抵达数量: " + onTime + "<br/>提前抵达数量: " + early + "<br/>超时抵达数量: "
+                    + timeOut + "<br/>合计: " + sum + "<br/>准时到达率: " + String.format("%.2f", rate) + "%");
         }
         return line;
     }

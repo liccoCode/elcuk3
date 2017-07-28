@@ -9,11 +9,11 @@ import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.market.Selling;
-import models.product.ProductAttr;
 import models.product.Template;
-import models.qc.CheckTask;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -23,10 +23,8 @@ import play.libs.F;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 每一个运输单的运输项
@@ -35,7 +33,7 @@ import java.util.Map;
  * Time: 12:24 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class ShipItem extends GenericModel {
     public ShipItem() {
     }
@@ -72,7 +70,7 @@ public class ShipItem extends GenericModel {
     public ShipItem(ProcureUnit unit) {
         this.unit = unit;
         this.qty = unit.realQty();
-        this.fulfillmentNetworkSKU = unit.selling.fnSku;
+        this.fulfillmentNetworkSKU = unit.selling != null ? unit.selling.fnSku : "";
     }
 
     @Id
@@ -89,7 +87,7 @@ public class ShipItem extends GenericModel {
     public ProcureUnit unit;
 
     @OneToMany(mappedBy = "shipItem", orphanRemoval = true, fetch = FetchType.LAZY)
-    public List<PaymentUnit> fees = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> fees = new ArrayList<>();
 
     /**
      * 此次运输的数量; 注意其他与产品有关的信息都从关联的 ProcureUnit 中获取
@@ -115,6 +113,7 @@ public class ShipItem extends GenericModel {
     @Expose
     @Temporal(TemporalType.DATE)
     public Date shipDate;
+
     /**
      * 实际到库时间
      */
@@ -184,9 +183,9 @@ public class ShipItem extends GenericModel {
      */
     public F.T2<ShipItem, ProcureUnit> cancel() {
         this.shipment = null;
-        ProcureUnit unit = this.unit;
+        ProcureUnit procureUnit = this.unit;
         this.unit = null;
-        return new F.T2<ShipItem, ProcureUnit>(this.<ShipItem>delete(), unit);
+        return new F.T2<>(this.delete(), procureUnit);
     }
 
     /**
@@ -207,12 +206,12 @@ public class ShipItem extends GenericModel {
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         List<AnalyzeDTO> dtos = AnalyzeDTO.cachedAnalyzeDTOs("sid");
         if(dtos == null || dtos.size() == 0)
-            return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+            return new F.T4<>(0f, 0f, 0f, 0f);
         for(AnalyzeDTO dto : dtos) {
             if(!dto.fid.equals(this.unit.sid)) continue;
             return dto.getTurnOverT4();
         }
-        return new F.T4<Float, Float, Float, Float>(0f, 0f, 0f, 0f);
+        return new F.T4<>(0f, 0f, 0f, 0f);
     }
 
     /**
@@ -237,32 +236,28 @@ public class ShipItem extends GenericModel {
      */
     public static void adjustShipment(List<Long> ids, Shipment shipment) {
         List<ShipItem> items = ShipItem.find(SqlSelect.whereIn("id", ids)).fetch();
-
         if(ids.size() != items.size())
             Validation.addError("", "提交的属于与系统中的数据不一致.");
-
         if(shipment.state != Shipment.S.PLAN)
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
-
         for(ShipItem itm : items) {
             if(itm.shipment.equals(shipment))
                 Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
             if(itm.shipment.state != Shipment.S.PLAN)
                 Validation.addError("", "当前运输单物流已经确认, 如需调整请联系物流");
         }
-
         if(Validation.hasErrors()) return;
-
-        //TODO 日志
-        for(ShipItem itm : items) {
+        items.forEach(itm -> {
             itm.shipment = shipment;
+            if(shipment.out != null && shipment.out.status == Outbound.S.Create) {
+                itm.unit.outbound = shipment.out;
+                itm.unit.save();
+            } else if(shipment.out == null) {
+                itm.unit.outbound = null;
+                itm.unit.save();
+            }
             itm.save();
-        }
-
-        //更新货代仓库
-        for(ShipItem item : items) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
-        }
+        });
     }
 
     public void adjustShipment(Shipment shipment) {
@@ -270,7 +265,8 @@ public class ShipItem extends GenericModel {
             Validation.addError("", "只有在 %s " + Shipment.S.PLAN.label() + "状态的运输单可以调整");
         if(this.shipment != null && this.shipment.equals(shipment))
             Validation.addError("", "运输项目 %s 需要调整的运输单没有改变.");
-        if(this.shipment != null && this.shipment.state != Shipment.S.PLAN)
+        if(this.shipment != null && this.shipment.state != Shipment.S.PLAN
+                && this.unit.revokeStatus != ProcureUnit.REVOKE.CONFIRM)
             Validation.addError("", "当前运输项目的运输单已经是不可更改");
         if(Validation.hasErrors()) return;
         this.shipment = shipment;
@@ -287,13 +283,10 @@ public class ShipItem extends GenericModel {
                             Float compenamt) {
         if(lossqty == null) lossqty = 0;
         if(compenamt == null) compenamt = 0f;
-        if(StringUtils.isNotBlank(compentype) && !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname")
-                .toLowerCase())) {
+        if(StringUtils.isNotBlank(compentype)
+                && !compentype.toLowerCase().equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
             if((lossqty != 0 && compenamt.intValue() == 0) || (lossqty == 0 && compenamt.intValue() != 0))
                 Validation.addError("", "丢失数量和赔偿金额需同时填写,请检查.");
-        }
-        if(StringUtils.isNotBlank(compentype) && compenamt.equals(models.OperatorConfig.getVal("addressname").toLowerCase())) {
-
         }
         if(Validation.hasErrors()) return;
         int oldQty = this.adjustQty;
@@ -305,6 +298,10 @@ public class ShipItem extends GenericModel {
         this.compentype = compentype;
         this.memo = msg;
         this.save();
+        if(Objects.equals(this.adjustQty, this.qty)) {
+            this.unit.stage = ProcureUnit.STAGE.CLOSE;
+            this.unit.save();
+        }
         new ERecordBuilder("shipitem.receviedQty")
                 .msgArgs(msg, oldQty, adjustQty)
                 .fid(this.id)
@@ -370,7 +367,8 @@ public class ShipItem extends GenericModel {
         fee.feeType = feeType;
         fee.payee = User.current();
         fee.amount = fee.unitPrice * fee.unitQty;
-        fee.save();
+        this.shipment.fees.add(fee);
+        this.shipment.save();
 
         new ERecordBuilder("paymentunit.applynew")
                 .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
@@ -378,35 +376,21 @@ public class ShipItem extends GenericModel {
                 .save();
     }
 
-    public List<CheckTask> checkTasks() {
-        return CheckTask.find("units_id=? ORDER BY creatat DESC", this.unit.id).fetch();
-    }
-
+    /**
+     * 计算运输单件数
+     *
+     * @return
+     */
     public Integer caluTotalUnitByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalBoxNum();
-        } else {
-            return 0;
-        }
+        return this.unit.totalBoxNum();
     }
 
     public Double caluTotalVolumeByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalVolume();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxVolume();
     }
 
     public Double caluTotalWeightByCheckTask() {
-        List<CheckTask> tasks = this.checkTasks();
-        if(tasks.size() > 0) {
-            return tasks.get(0).totalWeight();
-        } else {
-            return 0d;
-        }
+        return this.unit.totalBoxWeight();
     }
 
     public String showDeliverymentId() {
@@ -416,16 +400,16 @@ public class ShipItem extends GenericModel {
 
     public String showDeclare() {
         List<Template> templates = this.unit.product.category.templates;
-        List<String> ids = new ArrayList<String>();
+        List<String> ids = new ArrayList<>();
         if(templates == null || templates.size() == 0) {
             return "";
         } else {
-            for(Template template : templates) {
-                ids.add(template.id.toString());
-            }
+            ids.addAll(templates.stream()
+                    .map(template -> template.id.toString())
+                    .collect(Collectors.toList()));
         }
         String message = "";
-        StringBuilder sql = new StringBuilder("SELECT a.name AS declareName, p.value FROM ProductAttr p ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT a.name AS declareName, p.value FROM ProductAttr p ");
         sql.append(" LEFT JOIN Attribute a ON a.id = p.attribute_id  ");
         sql.append(" LEFT JOIN Template_Attribute t ON p.attribute_id = t.attributes_id ");
         sql.append(" WHERE p.product_sku = '" + this.unit.product.sku + "'");

@@ -1,13 +1,17 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import helper.Dates;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.PaymentUnit;
 import models.finance.ProcureApply;
 import models.product.Category;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -26,8 +30,11 @@ import java.util.*;
  * Time: 4:50 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Deliveryment extends GenericModel {
+
+    private static final long serialVersionUID = -333313078948420021L;
+
     public Deliveryment() {
     }
 
@@ -55,6 +62,33 @@ public class Deliveryment extends GenericModel {
             }
         },
         /**
+         * 待审核
+         */
+        PENDING_REVIEW {
+            @Override
+            public String label() {
+                return "待审核";
+            }
+        },
+        /**
+         * 审核通过
+         */
+        APPROVE {
+            @Override
+            public String label() {
+                return "审核通过";
+            }
+        },
+        /**
+         * 审核不通过
+         */
+        REJECT {
+            @Override
+            public String label() {
+                return "审核不通过";
+            }
+        },
+        /**
          * 完成交货.
          */
         DONE {
@@ -73,8 +107,8 @@ public class Deliveryment extends GenericModel {
         public abstract String label();
     }
 
-    @OneToMany(mappedBy = "deliveryment", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    @OneToMany(mappedBy = "deliveryment", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    public List<ProcureUnit> units = new ArrayList<>();
 
     @ManyToOne
     public ProcureApply apply;
@@ -102,6 +136,8 @@ public class Deliveryment extends GenericModel {
      * 交货时间
      */
     public Date deliveryTime;
+
+    public Date confirmDate;
 
     /**
      * 此采购单的状态
@@ -157,6 +193,13 @@ public class Deliveryment extends GenericModel {
     public T deliveryType;
 
     /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    /**
      * 统计采购单中所有采购计划剩余的没有请款的金额
      *
      * @return CNY 币种下的总金额
@@ -171,8 +214,6 @@ public class Deliveryment extends GenericModel {
 
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
-     *
-     * @return
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;
@@ -187,10 +228,10 @@ public class Deliveryment extends GenericModel {
     public F.T2<Date, Date> firstAndEndDeliveryDate() {
         Date first = null;
         Date end = null;
-        List<Date> deliveryDates = new ArrayList<Date>();
+        List<Date> deliveryDates = new ArrayList<>();
         for(ProcureUnit unit : this.units) {
-            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal() &&
-                    unit.stage != ProcureUnit.STAGE.CLOSE)
+            if(unit.stage.ordinal() >= ProcureUnit.STAGE.DONE.ordinal()
+                    && unit.stage != ProcureUnit.STAGE.CLOSE)
                 if(unit.attrs.deliveryDate != null) deliveryDates.add(unit.attrs.deliveryDate);
         }
         if(deliveryDates.size() > 2) {
@@ -201,7 +242,7 @@ public class Deliveryment extends GenericModel {
             first = deliveryDates.get(0);
             end = first;
         }
-        return new F.T2<Date, Date>(first, end);
+        return new F.T2<>(first, end);
     }
 
     /**
@@ -214,29 +255,30 @@ public class Deliveryment extends GenericModel {
         int delivery = 0;
         int total = 0;
         for(ProcureUnit unit : this.units) {
-            if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
-                delivery += unit.qty();
-            total += unit.qty();
+            if(!Objects.equals(unit.type, ProcureUnit.T.StockSplit)) {
+                if(unit.stage != ProcureUnit.STAGE.PLAN && unit.stage != ProcureUnit.STAGE.DELIVERY)
+                    delivery += unit.qty();
+                total += unit.qty();
+            }
         }
         if(Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state) && delivery == total) {
             this.state = S.DONE;
             this.save();
         }
-        return new F.T2<Integer, Integer>(delivery, total == 0 ? 1 : total);
+        return new F.T2<>(delivery, total == 0 ? 1 : total);
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
+     * 返回可以用来添加的 ProcureUnits
      *
      * @return
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch();
+            return ProcureUnit.find("stage=?", ProcureUnit.STAGE.PLAN).fetch(100);
         } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND stage=?", cooperator, ProcureUnit.STAGE.PLAN)
-                    .fetch();
+            Cooperator c = this.units.get(0).cooperator;
+            return ProcureUnit.find("cooperator=? AND stage=?", c, ProcureUnit.STAGE.PLAN).fetch();
         }
     }
 
@@ -244,25 +286,58 @@ public class Deliveryment extends GenericModel {
      * 确认下采购单
      */
     public void confirm() {
-        if(this.state != S.PENDING)
+        if(!Arrays.asList(S.APPROVE, S.PENDING, S.REJECT).contains(this.state))
             Validation.addError("", "采购单状态非 " + S.PENDING.label() + " 不可以确认");
-        if(this.deliveryTime == null)
-            Validation.addError("", "交货时间必须填写");
-        if(this.orderTime == null)
-            Validation.addError("", "下单时间必须填写");
-        if(Validation.hasErrors()) return;
-
-        this.state = Deliveryment.S.CONFIRM;
+        Ret ret = this.validDmtIsNeedApply();
+        if(ret.flag && this.state != S.APPROVE) {
+            this.state = S.PENDING_REVIEW;
+        } else {
+            if(this.deliveryTime == null)
+                Validation.addError("", "交货时间必须填写");
+            if(this.orderTime == null)
+                Validation.addError("", "下单时间必须填写");
+            if(Validation.hasErrors()) return;
+            this.confirmDate = new Date();
+            this.state = S.CONFIRM;
+        }
         this.save();
+    }
+
+    public Ret validDmtIsNeedApply() {
+        double totalDmt = this.totalPerDeliveryment();
+        double totalSeven = this.totalAmountForSevenDay();
+        double checkLimit = Double.parseDouble(OperatorConfig.getVal("checklimit"));
+        double checkLimitPerWeek = Double.parseDouble(OperatorConfig.getVal("checklimitperweek"));
+        boolean flag = this.units.stream().anyMatch(unit -> ProcureUnit.find("cooperator.id =? and sku=?", this
+                .cooperator.id, unit.sku).fetch().size() < 2);    //判断 该供应商包含第一次下单的sku
+        boolean isNeedApply = (totalDmt > checkLimit);
+        if(isNeedApply && flag)
+            return new Ret(true, "单笔金额超过 ¥ " + checkLimit + "，并且是该供应商第一次下单的sku,需要审核，是否提交审核？");
+        else if((totalSeven + totalDmt) > checkLimitPerWeek && flag)
+            return new Ret(true, "该供应商本周金额超过 ¥ " + checkLimitPerWeek + "，并且是该供应商第一次下单的sku,需要审核，是否提交审核？");
+        else
+            return new Ret(false);
+    }
+
+    /**
+     * 审核采购单
+     */
+    public void review(Boolean result, String msg) {
+        if(this.state != S.PENDING_REVIEW)
+            Validation.addError("", "采购单状态非 " + S.PENDING_REVIEW.label() + " 不可以确认");
+        if(!result && StringUtils.isBlank(msg))
+            Validation.addError("", "请填写审核不通过的原因！");
+        if(Validation.hasErrors()) return;
+        this.state = result ? S.APPROVE : S.REJECT;
+        this.save();
+        new ERecordBuilder("deliveryment.review").msgArgs(this.id, this.state.label(), msg).fid(this.id).save();
     }
 
     /**
      * 获取 Units 的产品类型
-     *
-     * @return
      */
     public Set<Category> unitsCategorys() {
-        Set<Category> categories = new HashSet<Category>();
+        Set<Category> categories = new HashSet<>();
         for(ProcureUnit unit : this.units) {
             categories.add(unit.product.category);
         }
@@ -273,19 +348,15 @@ public class Deliveryment extends GenericModel {
      * 取消采购单
      */
     public void cancel(String msg) {
-        /**
-         * 1. 只允许所有都是 units 都为 PLAN 的才能够取消.
-         */
-        for(ProcureUnit unit : this.units) {
-         //   if(unit.stage != ProcureUnit.STAGE.DELIVERY)
-            //    Validation.addError("deliveryment.units.cancel", "validation.required");
-         //   else
-                unit.toggleAssignTodeliveryment(null, false);
+        // 只允许所有都是 units 都为 采购中 的才能够取消.
+        if(this.units.stream().anyMatch(unit -> unit.stage != ProcureUnit.STAGE.DELIVERY)) {
+            Validation.addError("", "采购计划必须全部都是采购中的才能取消采购单！");
+            return;
         }
         if(Validation.hasErrors()) return;
+        this.units.forEach(unit -> unit.toggleAssignTodeliveryment(null, false));
         this.state = S.CANCEL;
         this.save();
-
         new ElcukRecord(Messages.get("deliveryment.cancel"),
                 Messages.get("deliveryment.cancel.msg", this.id, msg.trim()), this.id).save();
     }
@@ -297,24 +368,24 @@ public class Deliveryment extends GenericModel {
      */
     public List<ProcureUnit> assignUnitToDeliveryment(List<Long> pids) {
         if(!Arrays.asList(S.PENDING, S.CONFIRM).contains(this.state)) {
-            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label() +
-                    " 状态的[采购单]添加[采购单元]");
-            return new ArrayList<ProcureUnit>();
+            Validation.addError("", "只允许 " + S.PENDING.label() + " 或者 " + S.CONFIRM.label()
+                    + " 状态的[采购单]添加[采购单元]");
+            return new ArrayList<>();
         }
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = procureUnits.get(0).cooperator;
+        for(ProcureUnit unit : procureUnits) {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliveryment(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
 
         new ElcukRecord(Messages.get("deliveryment.addunit"),
                 Messages.get("deliveryment.addunit.msg", pids, this.id), this.id).save();
 
-        return units;
+        return procureUnits;
     }
 
     /**
@@ -323,31 +394,33 @@ public class Deliveryment extends GenericModel {
      * @param pids
      */
     public List<ProcureUnit> unAssignUnitInDeliveryment(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : procureUnits) {
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else if(this.deliveryType == T.MANUAL && unit.selling == null) {
+                //手动采购单中的默认的采购计划(没有 Selling)不允许从采购单中移除
+                Validation.addError("", "手动单中默认的采购计划不允许被移除!");
+            } else {
                 unit.toggleAssignTodeliveryment(null, false);
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
-        this.units.removeAll(units);
+        if(Validation.hasErrors()) return new ArrayList<>();
+        this.units.removeAll(procureUnits);
         this.save();
 
         new ElcukRecord(Messages.get("deliveryment.delunit"),
                 Messages.get("deliveryment.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        return procureUnits;
     }
 
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
         String count = Deliveryment.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
+                + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"),
                 count.length() == 1 ? "0" + count : count);
     }
@@ -408,8 +481,7 @@ public class Deliveryment extends GenericModel {
      *
      * @param pids
      */
-    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name,
-                                                               User user) {
+    public synchronized static Deliveryment createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         Deliveryment deliveryment = new Deliveryment(Deliveryment.id());
         if(pids.size() != units.size()) {
@@ -459,7 +531,7 @@ public class Deliveryment extends GenericModel {
      * 查找，属于该采购单的产品要求
      */
     public List<CooperItem> getCopperItems() {
-        List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+        List<CooperItem> cooperItems = new ArrayList<>();
 
         for(ProcureUnit procureUnit : this.units) {
             if(procureUnit.cooperator != null) {
@@ -473,4 +545,26 @@ public class Deliveryment extends GenericModel {
         }
         return cooperItems;
     }
+
+    public List<ProcureUnit> applyUnit() {
+        return ProcureUnit.find("deliveryment.id=? AND (type IS NULL OR type = ?) AND noPayment=?",
+                this.id, ProcureUnit.T.ProcureSplit, false).fetch();
+    }
+
+
+    public double totalAmountForSevenDay() {
+        List<Deliveryment> deliveryments = this.getRelateDelivery();
+        return deliveryments.stream().mapToDouble(Deliveryment::totalPerDeliveryment).sum();
+    }
+
+    public double totalPerDeliveryment() {
+        return this.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+    }
+
+    public List<Deliveryment> getRelateDelivery() {
+        String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
+        return Deliveryment.find(sql, this.cooperator.id,
+                Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+    }
+
 }

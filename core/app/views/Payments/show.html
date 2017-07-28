@@ -1,19 +1,25 @@
 #{extends 'main_full.html'/}
 #{set title:"${payment.paymentNumber?:''}" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.filedrop.js'/}
-    #{script_cdn name: 'component/dropUpload.coffee'/}
-    #{script_cdn name: 'payments/show.coffee'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script  'component/dropUpload.coffee'/}
+    #{script  'payments/show.coffee'/}
 #{/set}
-
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 #{flash_alert /}
 
 #{if payment.pApply}
-    #{render './_procreApply.html', payment: payment/}
+    #{render './_procreApply.html', payment: payment, units: units, post: post/}
 #{/if}
-
 #{if payment.tApply}
-    #{render './_transportApply.html', payment: payment/}
+    #{render './_transportApply.html', payment: payment, units: units, post: post/}
+#{/if}
+#{if payment.mApply}
+    #{render './_materialApply.html', payment: payment, units: units, post: post/}
 #{/if}
 
 <div class="row-fluid">
@@ -26,7 +32,8 @@
       <dt>请款币种</dt>
       <dd id="request_currency">${payment.currency}</dd>
       <dt>批准后总金额(不含驳回)</dt>
-      <dd>${payment.currency.symbol()}<span id='finalAppied'>${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}</span></dd>
+      <dd>${payment.currency.symbol()}
+        <span id='finalAppied'>${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}</span></dd>
       <dt>汇率 <span id='currencyFromTo'>${payment.currency} -> ?</span></dt>
       <dd id='ratioTo'>0</dd>
       <dt>汇率 <span id='currencyToFrom'>? -> ${payment.currency}</span></dt>

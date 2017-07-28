@@ -1,7 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:'用户管理'/}
 #{set 'moreScripts'}
-    #{script_cdn  name: 'accounts/index.coffee'/}
+    #{script 'accounts/index.coffee'/}
 #{/set}
 
 <div class="row-fluid" style="margin-bottom:10px;">
@@ -9,36 +9,5 @@
 </div>
 
 <div class="row-fluid">
-  <ul class="nav nav-tabs">
-    <li class="active"><a href="#sales" data-toggle="tab">Sales</a></li>
-    <li><a href="#unsale_uk" data-toggle="tab">UnSale UK</a></li>
-    <li><a href="#unsale_de" data-toggle="tab">UnSale DE</a></li>
-    <li><a href="#unsale_us" data-toggle="tab">UnSale US</a></li>
-    <li><a href="#unsale_fr" data-toggle="tab">UnSale FR</a></li>
-    <li><a href="#unsale_it" data-toggle="tab">UnSale IT</a></li>
-    <li><a href="#unsale_jp" data-toggle="tab">UnSale JP</a></li>
-  </ul>
-  <div class="tab-content">
-    <div id="sales" class="tab-pane active fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:null/}
-    </div>
-    <div id="unsale_uk" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_UK/}
-    </div>
-    <div id="unsale_de" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_DE/}
-    </div>
-    <div id="unsale_us" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_US/}
-    </div>
-    <div id="unsale_fr" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_FR/}
-    </div>
-    <div id="unsale_it" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_IT/}
-    </div>
-    <div id="unsale_jp" class="tab-pane fade in">
-    #{render 'Accounts/_account.html', accs:accs,amazontype:models.market.M.AMAZON_JP/}
-    </div>
-  </div>
+#{render 'Accounts/_account.html', accs:accs,amazontype:null/}
 </div>

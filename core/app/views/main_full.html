@@ -5,6 +5,8 @@
   <title>#{get 'title' /}</title>
   <meta charset="${_response_encoding}">
   <link rel="shortcut icon" type="image/png" href="@{'/public/images/favicon.png'}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/public/stylesheets/bootstrap-responsive.css" rel="stylesheet">
   <script type="text/javascript">
       #{if play.Play.mode.isDev()}
       window.PLAY_MODE = "DEV";
@@ -13,31 +15,9 @@
       window.PLAY_MODE = "PROD";
       #{/else}
   </script>
-#{stylesheet_cdn name:'bootstrap.min.css'/}
-#{stylesheet_cdn name:'bootstrapSwitch.css'/}
-#{stylesheet_cdn name:'font-awesome.css'/}
-#{stylesheet_cdn name:'jquery.loadmask.css'/}
-#{stylesheet_cdn name:'main.css'/}
-#{stylesheet_cdn name:'dateinput.css'/}
+#{render '_css_header.html' /}
 #{get 'moreStyles' /}
-
-#{script_cdn name:'jquery.1.7.2.min.js'/}
-#{script_cdn name:'underscore-min.js'/}
-#{script_cdn name: 'noty/jquery.noty.js'/}
-#{script_cdn name: 'noty/themes/default.js'/}
-#{script_cdn name: 'noty/layouts/top.js'/}
-#{script_cdn name: 'noty/layouts/topCenter.js'/}
-#{script_cdn name: 'rails.js'/}
-#{script_cdn name: 'jquery.animate-colors-min.js'/}
-#{script_cdn name: 'bootstrap.min.js'/}
-#{script_cdn name: 'bootstrapSwitch.js'/}
-#{script_cdn name: 'jquery.loadmask.min.js'/}
-#{script_cdn name: 'jquery.highlight.js'/}
-#{script_cdn name: 'jquery.form.js'/}
-#{script_cdn name: 'jquery.tools.date.min.js'/}
-#{script_cdn name: 'component/notify.coffee'/}
-#{script_cdn name: 'component/popover.coffee'/}
-#{script_cdn name: 'main.js'/}
+#{render '_js_header.html' /}
 #{get 'moreScripts' /}
 </head>
 <body style="padding-top: 40px;">

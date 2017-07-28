@@ -2,6 +2,7 @@ package models.view.post;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import play.libs.F;
 
 import java.io.Serializable;
@@ -31,6 +32,10 @@ public abstract class Post<T> implements Serializable, Cloneable {
     public int page = 1;
     public int perSize = 50;
     public long count = 1;
+    /**
+     * 是否需要翻页
+     */
+    public boolean pagination = true;
 
     /**
      * 用来计算搜索的条件
@@ -105,7 +110,7 @@ public abstract class Post<T> implements Serializable, Cloneable {
      */
     public List<T> programPager(List<T> dtos) {
         this.count = dtos.size();
-        List<T> afterPager = new ArrayList<T>();
+        List<T> afterPager = new ArrayList<>();
         int index = (this.page - 1) * this.perSize;
         int end = index + this.perSize;
         for(; index < end; index++) {
@@ -113,5 +118,29 @@ public abstract class Post<T> implements Serializable, Cloneable {
             afterPager.add(dtos.get(index));
         }
         return afterPager;
+    }
+
+    /**
+     * 开始与结束日期相差的天数
+     *
+     * @return
+     */
+    public long dateRange() {
+        DateTime fromD = new DateTime(this.from);
+        DateTime toD = new DateTime(this.to);
+        Duration duration = new Duration(fromD, toD);
+        return duration.getStandardDays();
+    }
+
+    /**
+     * 当 count 小于等于 perSize 时(也就是查询出来的结果只够一页输出展示)
+     * 将 page 设置为 1, 避免翻页后用户再进行搜索导致没有数据
+     *
+     * @return
+     */
+    public int page() {
+        this.count = this.count(this.params());
+        if(this.count <= this.perSize) this.page = 1;
+        return this.page;
     }
 }

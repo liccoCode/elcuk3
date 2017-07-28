@@ -29,7 +29,7 @@ public class DeclareDTO {
         dto.buyerVATNO = "GB117317336";
         if(country.equals("DE")) {
             dto.soldTo = "Sold to : TUGGLE ELECTRONIC COMMERCE CO.,LTD ";
-            dto.address = "Rosenstrasse 5,24768 Rendsburg,Germany";
+            dto.address = "DHL Solution Fashion GmbH c/o Amazon FC WRO2 Am Wald 1 Oranienburg, Brandenburg 16515 Germany";
             dto.vatNo = "DE 292695920";
             dto.tel = "+4915211641438";
             dto.buyerVATNO = "DE 292695920";

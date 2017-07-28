@@ -1,28 +1,26 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSON;
-import helper.Caches;
-import helper.DBUtils;
-import helper.Dates;
-import helper.Webs;
+import helper.*;
+import jobs.analyze.SellingSaleAnalyzeJob;
 import models.market.M;
-import models.view.dto.AnalyzeDTO;
+import models.product.Category;
+import models.product.Product;
 import models.view.dto.ProfitDto;
+import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.cache.Cache;
+import play.data.validation.Validation;
 import play.libs.F;
-
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import models.view.report.Profit;
 import services.MetricProfitService;
 import services.MetricQtyService;
-import models.product.Product;
-import models.product.Category;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 利润页面的搜索,不进入数据库
@@ -30,13 +28,16 @@ import models.product.Category;
  * Date: 3/11/14
  * Time: 6:59 PM
  */
-public class ProfitPost extends Post<Profit> {
+public class ProfitPost {
     public Date begin;
     public Date end;
     public String pmarket;
     public String sku;
     public String sellingId;
     public String category;
+    public int page = 1;
+    public int perSize = 50;
+    public long count = 1;
 
     public ProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -53,7 +54,6 @@ public class ProfitPost extends Post<Profit> {
     }
 
 
-    @Override
     public F.T2<String, List<Object>> params() {
         return null;
     }
@@ -63,7 +63,6 @@ public class ProfitPost extends Post<Profit> {
      *
      * @return
      */
-    @Override
     public Long count(F.T2<String, List<Object>> params) {
         long count = 0;
         /**
@@ -112,7 +111,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> query() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -127,7 +126,7 @@ public class ProfitPost extends Post<Profit> {
 
     @SuppressWarnings("unchecked")
     public List<Profit> Inventory() {
-        List<Profit> profitlist = new ArrayList<Profit>();
+        List<Profit> profitlist = new ArrayList<>();
         /**
          * 每个市场遍历
          */
@@ -142,7 +141,7 @@ public class ProfitPost extends Post<Profit> {
     public List<Profit> calTotal(List<Profit> profits) {
 
 
-        List<Profit> newprofits = new ArrayList<Profit>();
+        List<Profit> newprofits = new ArrayList<>();
         /**
          * 计算每个SKU的合计
          */
@@ -265,7 +264,7 @@ public class ProfitPost extends Post<Profit> {
             }
             if(dtos == null) return profitlist;
 
-            Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
+            Map<String, ProfitDto> profitmap = new HashMap<>();
             for(ProfitDto dto : dtos) {
                 profitmap.put(dto.sku, dto);
             }
@@ -278,7 +277,7 @@ public class ProfitPost extends Post<Profit> {
                 }
             } else {
                 Category cat = Category.find("lower(categoryId)=?", category.toLowerCase()).first();
-                for(Product pro : cat.products) { ;
+                for(Product pro : cat.products) {
                     Profit profit = redisProfit(profitmap, begin, end, skumarket, pro.sku, sellingId);
                     if(profit.totalfee != 0 || profit.amazonfee != 0
                             || profit.fbafee != 0 || profit.quantity != 0
@@ -421,8 +420,7 @@ public class ProfitPost extends Post<Profit> {
             profit.inboundfee = Webs.scale2Double(profit.inboundfee);
             return profit;
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.info("profit.esProfit:::" + e.toString());
+            Logger.error(Webs.S(e));
         }
         return initProfit(market,
                 prosku, sellingId);
@@ -498,4 +496,75 @@ public class ProfitPost extends Post<Profit> {
         return profit;
     }
 
+    public void reCalculate() {
+        SimpleDateFormat postParamFormater = new SimpleDateFormat("yyyy-MM-dd");
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("category", this.category()));
+        params.add(new BasicNameValuePair("market", this.pmarket));
+        params.add(new BasicNameValuePair("from", postParamFormater.format(this.begin)));
+        params.add(new BasicNameValuePair("to", postParamFormater.format(this.end)));
+        params.add(new BasicNameValuePair("is_sku", this.isSku() + ""));
+        HTTP.post(String.format("%s/profit_batch_work", System.getenv(Constant.ROCKEND_HOST)), params);
+    }
+
+    public String category() {
+        return StringUtils.isNotBlank(this.sku) ? this.sku : this.category.toLowerCase();
+    }
+
+    public int isSku() {
+        return StringUtils.isNotBlank(this.sku) ? 1 : 0;
+    }
+
+    public List<Profit> fetch() {
+        this.valid();
+        if(Validation.hasErrors()) return Collections.emptyList();
+        List<Profit> profits = Cache.get(this.cacheKey(), List.class);
+        if(profits != null && profits.size() > 0) {
+            return profits;
+        } else {
+            if(StringUtils.isBlank(Caches.get(SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE))) {
+                HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
+            } else if(StringUtils.isBlank(Caches.get(this.runningKey()))) {
+                this.reCalculate();
+            }
+            Validation.addError("", "正在计算中, 请稍后再来查看 :)");
+            return Collections.emptyList();
+        }
+    }
+
+    public void valid() {
+        if(StringUtils.isBlank(this.category) && StringUtils.isBlank(this.sku)) {
+            Validation.addError("", "请选择一个 Category OR SKU.");
+        }
+        if(StringUtils.isNotBlank(this.sku) && !Product.exist(this.sku)) {
+            Validation.addError("", String.format("未找到 Product[%s].", this.sku));
+        }
+        if(StringUtils.isNotBlank(this.category) && !Category.exist(this.category)) {
+            Validation.addError("", String.format("未找到 Category[%s].", this.category));
+        }
+    }
+
+    public String cacheKey() {
+        return helper.Caches.Q.cacheKey("profitpost",
+                this.begin,
+                this.end,
+                this.category != null ? this.category.toLowerCase() : "",
+                this.sku,
+                this.pmarket);
+    }
+
+    public String runningKey() {
+        SimpleDateFormat dateFormater = new SimpleDateFormat("yyyyMMdd");
+        String cate = "";
+        if(StringUtils.isNotBlank(this.sku)) {
+            cate = this.sku;
+        } else if(StringUtils.isNotBlank(this.category)) {
+            cate = this.category.toLowerCase();
+        }
+        return String.format("profitpost_%s_%s_%s_%s",
+                cate,
+                StringUtils.isNotBlank(this.pmarket) ? this.pmarket : "",
+                dateFormater.format(this.begin),
+                dateFormater.format(this.end));
+    }
 }

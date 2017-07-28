@@ -31,8 +31,8 @@ public class ElcukRecordQuery {
                 .where("fid=?").param(lineType)
                 .groupBy("date_format(createAt, '%Y-%m-%d')");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, List<Integer>> line = new HashMap<String, List<Integer>>();
-        List<Integer> points = new ArrayList<Integer>();
+        Map<String, List<Integer>> line = new HashMap<>();
+        List<Integer> points = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             points.add(((Long) row.get("c")).intValue());
         }

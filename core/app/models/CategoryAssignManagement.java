@@ -17,7 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by licco on 15/5/25.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/5/25
+ * Time: 9:48 AM
  */
 @Entity
 public class CategoryAssignManagement extends Model {
@@ -70,10 +73,10 @@ public class CategoryAssignManagement extends Model {
 
 
     public List<CategoryAssignManagement> buildUserList(Long teamId, String categoryId) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("select c from CategoryAssignManagement c " +
-                " LEFT JOIN c.user u "    +
-                " LEFT JOIN u.roles r "  +
+                " LEFT JOIN c.user u " +
+                " LEFT JOIN u.roles r " +
                 " WHERE c.team.id=? AND c.category.categoryId=?" +
                 " GROUP BY c.id " +
                 " ORDER BY r.roleName");
@@ -103,11 +106,11 @@ public class CategoryAssignManagement extends Model {
         return User.findByUserName(name) != null;
     }
 
-    public static List<Long> showCategoryByUserName(String userName) {
+    public static List<String> showCategoryByUserName(String userName) {
         List<CategoryAssignManagement> cList = CategoryAssignManagement.find("user.username = ?", userName).fetch();
-        List<Long> categoryList = new ArrayList<Long>();
+        List<String> categoryList = new ArrayList<>();
         for(CategoryAssignManagement cassign : cList) {
-            categoryList.add(Long.parseLong(cassign.category.categoryId));
+            categoryList.add(cassign.category.categoryId);
         }
         return categoryList;
     }
@@ -175,12 +178,9 @@ public class CategoryAssignManagement extends Model {
      * @return
      */
     public boolean isQCrole() {
-        boolean temp = false;
         for(Role role : this.user.roles) {
-            if(role.roleName.indexOf("质检") >= 0) {
-                temp = true;
-            }
+            if(role.roleName.contains("质检")) return true;
         }
-        return temp;
+        return false;
     }
 }

@@ -67,7 +67,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
     @Test
     public void testTransactionURLsUS() throws IOException, ClassNotFoundException {
         Account account = FactoryBoy.create(Account.class, "us");
-        Webs.dev_login(account);
+        Webs.devLogin(account);
         String orderId = "102-6196603-4956252";
         FinanceShippedPromise promise = new FinanceShippedPromise(account, account.type, null, 8);
 
@@ -170,7 +170,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
@@ -217,7 +217,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
@@ -255,7 +255,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
@@ -295,7 +295,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
@@ -338,7 +338,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);
@@ -379,7 +379,7 @@ public class FinanceShippedPromiseTest extends UnitTest {
         // ref: http://gladness.itpub.net/post/6254/62883
         DB.getConnection().commit();
 
-        Webs.dev_login(account);
+        Webs.devLogin(account);
 
         List<Orderr> orders = new ArrayList<Orderr>();
         orders.add(orderr);

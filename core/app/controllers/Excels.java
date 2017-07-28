@@ -1,27 +1,31 @@
 package controllers;
 
-import com.alibaba.fastjson.JSON;
 import controllers.api.SystemOperation;
-import helper.Caches;
 import helper.*;
 import helper.Currency;
-import jobs.analyze.SellingSaleAnalyzeJob;
+import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
+import models.User;
 import models.market.BtbOrder;
+import models.market.BtbOrderItem;
 import models.market.M;
 import models.market.OrderItem;
 import models.procure.*;
-import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.*;
 import models.view.post.*;
 import models.view.report.*;
+import models.whouse.InboundUnit;
+import models.whouse.Outbound;
+import models.whouse.StockRecord;
+import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -38,8 +42,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
-
 /**
  * Created by IntelliJ IDEA.
  * User: wyattpan
@@ -55,23 +57,20 @@ public class Excels extends Controller {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(excel);
-    }
 
-    @Check("excels.deliveryment")
-    public static void deliverymentbrandworl(String id, DeliveryExcel excel) {
-        excel.dmt = Deliveryment.findById(id);
-        request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
-        renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(excel);
+        ProcureUnit unit = excel.dmt.units.get(0);
+        String currency = unit.attrs.currency.symbol();
+
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop) ? models.OperatorConfig
+                .getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+        render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
     /**
      * 下载采购单综合Excel表格
      */
     public static void deliveryments(DeliveryPost p) {
-        List<Deliveryment> deliverymentList = p.query();
+        List<Deliveryment> deliverymentList = p.queryForExcel();
         if(deliverymentList != null && deliverymentList.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
@@ -187,7 +186,33 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_FILENAME,
                     String.format("运输单发货信息明细表格%s.xls", formatter.format(new Date())));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
-            render(dtos);
+
+            Shipment ship = dtos.get(0);
+            Date date = ship.dates.planBeginDate;
+            Calendar c = Calendar.getInstance();
+            c.setTime(date);
+
+            int month = c.get(Calendar.MONTH) + 1;
+            int day = c.get(Calendar.DATE);
+            long totalQty = 0;
+            long totalUnit = 0;
+            Double totalWeight = 0d;
+            Double totalVolume = 0d;
+            for(Shipment shipment : dtos) {
+                shipment.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+                for(ShipItem item : shipment.items) {
+                    totalQty += item.unit.shipmentQty();
+                    totalUnit += item.caluTotalUnitByCheckTask();
+                    totalWeight += item.caluTotalWeightByCheckTask();
+                    totalVolume += item.caluTotalVolumeByCheckTask();
+                }
+            }
+
+            if(ship.type.name().equals("EXPRESS")) {
+                render("Excels/shipmentDetailsForExpress.xls", dtos, month, day);
+            } else {
+                render(dtos, month, day, totalQty, totalUnit, totalWeight, totalVolume);
+            }
         }
     }
 
@@ -195,68 +220,7 @@ public class Excels extends Controller {
      * 利润下载
      */
     public static void profit(ProfitPost p) {
-        List<Profit> profits = new ArrayList<Profit>();
-        String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
-        // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-        List<AnalyzeDTO> dtos = null;
-        String cache_str = Caches.get(cacke_key);
-        if(!StringUtils.isBlank(cache_str)) {
-            dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
-        }
-        if(dtos == null) {
-            renderText("Analyze后台事务正在执行中,请稍候...");
-        }
-
-        if(StringUtils.isBlank(p.category) && StringUtils.isBlank(p.sku)) {
-            renderText("未选择category或者sku!");
-        } else {
-            if(!StringUtils.isBlank(p.sku)) {
-                if(!Product.exist(p.sku)) {
-                    renderText("系统不存在sku:" + p.sku);
-                }
-            }
-            if(!StringUtils.isBlank(p.category)) {
-                if(!Category.exist(p.category)) {
-                    renderText("系统不存在category:" + p.category);
-                }
-            }
-            String skukey = "";
-            String marketkey = "";
-            String categorykey = "";
-            if(p.pmarket != null) marketkey = p.pmarket;
-            if(p.category != null) categorykey = p.category.toLowerCase();
-
-            String postkey = helper.Caches.Q.cacheKey("profitpost", p.begin, p.end, categorykey, skukey, marketkey,
-                    "excel");
-            profits = Cache.get(postkey, List.class);
-            if(profits == null) {
-                if(StringUtils.isNotBlank(p.sku)) {
-                    categorykey = p.sku;
-                }
-                postkey = "profitpost_" + categorykey + "_" + marketkey + "_"
-                        + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
-                        + new SimpleDateFormat("yyyyMMdd").format(p.end);
-                String postvalue = Caches.get(postkey);
-                if(StringUtils.isBlank(postvalue)) {
-                    String categoryname = "";
-                    int is_sku = 0;
-                    if(StringUtils.isNotBlank(p.sku)) {
-                        categoryname = p.sku;
-                        is_sku = 1;
-                    } else {
-                        categoryname = p.category.toLowerCase();
-                    }
-                    HTTP.get("http://" + models.OperatorConfig.getVal("rockendurl") +
-                            ":4567/profit_batch_work?category=" + categoryname
-                            + "&market=" + marketkey + "&from="
-                            + new SimpleDateFormat("yyyyMMdd").format(p.begin)
-                            + "&to="
-                            + new SimpleDateFormat("yyyyMMdd").format(p.end)
-                            + "&is_sku=" + is_sku);
-                }
-            }
-        }
-
+        List<Profit> profits = p.fetch();
         if(profits != null && profits.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
@@ -266,7 +230,7 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
         } else {
-            renderText("正在后台计算生成Excel文件！");
+            renderText(Webs.V(Validation.errors()));
         }
     }
 
@@ -283,9 +247,9 @@ public class Excels extends Controller {
             } else {
                 sku_key = p.sku;
             }
-            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_" +
-                    new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_" +
-                    new SimpleDateFormat("yyyyMMdd").format(p.end);
+            String cacke_key = "skuprofitmaprunning_" + sku_key + "_" + market_key + "_"
+                    + new SimpleDateFormat("yyyyMMdd").format(p.begin) + "_"
+                    + new SimpleDateFormat("yyyyMMdd").format(p.end);
             String cache_str = Caches.get(cacke_key);
 
             if(!StringUtils.isBlank(cache_str)) {
@@ -296,6 +260,7 @@ public class Excels extends Controller {
                 if(p.categories != null) categories_key = p.categories.replace(" ", "").toLowerCase();
                 String post_key = Caches.Q
                         .cacheKey("skuprofitpost", p.begin, p.end, categories_key, sku_key, market_key);
+                Logger.info("skuprofitpost KEY: " + post_key);
                 List<SkuProfit> dtos = Cache.get(post_key, List.class);
                 if(dtos == null) {
                     String category_names = "";
@@ -306,14 +271,13 @@ public class Excels extends Controller {
                     } else {
                         category_names = p.categories.replace(" ", "").toLowerCase();
                     }
-                    List<NameValuePair> params = new ArrayList<NameValuePair>();
+                    List<NameValuePair> params = new ArrayList<>();
                     params.add(new BasicNameValuePair("categories", category_names));
                     params.add(new BasicNameValuePair("market", market_key));
                     params.add(new BasicNameValuePair("from", new SimpleDateFormat("yyyy-MM-dd").format(p.begin)));
                     params.add(new BasicNameValuePair("to", new SimpleDateFormat("yyyy-MM-dd").format(p.end)));
                     params.add(new BasicNameValuePair("is_sku", String.valueOf(is_sku)));
-                    HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/sku_profit_batch_work",
-                            params);
+                    HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/sku_profit_batch_work", params);
                     renderText("后台事务正在计算中,请稍候...");
                     renderText("后台事务正在计算中,请稍候...");
                 } else {
@@ -528,7 +492,7 @@ public class Excels extends Controller {
                 }.now();
                 renderText("正在处理中...请稍后几分钟再来查看...");
             } else {
-                List<Integer> months = new ArrayList<Integer>();
+                List<Integer> months = new ArrayList<>();
                 for(int i = begin; i <= end; i++) months.add(i);
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
                 request.format = "xls";
@@ -557,15 +521,14 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(dtos, target, formatter);
         } else {
-            HTTP.get(String.format("%s?year=%s&month=%s",
-                    "http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/revenue_and_cost_calculator", year,
-                    month));
+            HTTP.get(String.format("%s/revenue_and_cost_calculator?year=%s&month=%s",
+                    System.getenv(Constant.ROCKEND_HOST), year, month));
             renderText("正在计算中...请稍后再来查看.");
         }
     }
 
     public static void procureUnitSearchExcel(ProcurePost p) {
-        List<ProcureUnit> dtos = p.query();
+        List<ProcureUnit> dtos = p.queryForExcel();
         if(dtos == null || dtos.size() == 0) {
             renderText("没有数据无法生成Excel文件!");
         } else {
@@ -576,27 +539,6 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(dtos, p);
-        }
-    }
-
-    public static void areaGoodsAnalyzeExcel(AreaGoodsAnalyze a) {
-        if(a == null) {
-            a = new AreaGoodsAnalyze();
-            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
-            a.to = DateTime.now().toDate();
-        }
-        List<AreaGoodsAnalyze> dtos = a.query();
-        if(dtos != null && dtos.size() > 0) {
-            a.queryTotalShipmentAnalyze();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, String.format("物流区域货量分析报表%s-%s.xls", dateFormat.format(a.from),
-                    dateFormat.format(a.to)));
-            renderArgs.put(RenderExcel.RA_ASYNC, false);
-
-            render(dtos, a, dateFormat);
-        } else {
-            renderText("没有数据无法生成Excel文件！");
         }
     }
 
@@ -693,8 +635,53 @@ public class Excels extends Controller {
         render(feesCost, from, to, dateFormat);
     }
 
+    /**
+     * 采购付款明细报表
+     */
+    public static void purchasePaymentReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.downloadReport();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("采购付款明细报表%s.xls", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(
+                        DateTime.now().toDate())));
+        render(dtos, dateFormat);
+    }
+
+    /**
+     * 采购应付未付报表
+     *
+     * @param p
+     */
+    public static void purchaseReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.payablesReport();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("采购应付未付报表%s至%s.xls",
+                        new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
+        render(dtos, dateFormat);
+    }
+
+    /**
+     * 物流应付未付
+     *
+     * @param p
+     */
+    public static void shipmentReport(PurchaseOrderPost p) {
+        List<PurchasePaymentDTO> dtos = p.shipmentReport();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("物流应付未付报表%s至%s.xls",
+                        new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
+        render(dtos);
+    }
+
+
     public static void orderReports(OrderPOST p) {
         if(p == null) p = new OrderPOST();
+        //最多只允许导出 10000 个订单的数据,超过了请重新给定搜索范围
+        p.perSize = 10000;
         List<OrderReportDTO> orders = p.queryForExcel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         request.format = "xls";
@@ -703,4 +690,160 @@ public class Excels extends Controller {
         render(orders, p.begin, p.end, dateFormat);
     }
 
+    public static void orderSaleFeeReports(OrderPOST p) {
+        if(p == null) p = new OrderPOST();
+        p.perSize = 10000;
+        List<OrderReportDTO> orders = p.queryForExcel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("订单费用汇总报表%s.xls", dateFormat.format(p.begin)));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(orders, p.begin, p.end, dateFormat);
+    }
+
+    /**
+     * 采购订单明细报表
+     */
+    public static void purchaseOrderDetailReport(PurchaseOrderPost p) {
+        if(p == null) p = new PurchaseOrderPost();
+        List<ProcureUnit> dtos = p.query();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        DecimalFormat df = new DecimalFormat("#.00");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("采购订单明细表%s.xls", format.format(new Date())));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dtos, dateFormat, p, df);
+    }
+
+    public static void stockRecords(StockRecordPost p) {
+        if(p == null) p = new StockRecordPost();
+        if(p.dateRange() > 90) renderText("时间区间过大!");
+
+        p.pagination = false;
+        List<StockRecord> records = p.query();
+        if(records == null || records.isEmpty()) renderText("未找到任何数据!");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存异动记录.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(records, dateFormat, p);
+    }
+
+    public static void whouseItems(WhouseItemPost p) {
+        if(p == null) p = new WhouseItemPost();
+        p.pagination = false;
+        List<WhouseItem> items = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(items);
+    }
+
+    /**
+     * 库存管理列表导出
+     *
+     * @param p
+     */
+    public static void exportInventoryManagement(StockPost p) {
+        if(p == null) p = new StockPost();
+        p.pagination = false;
+        List<ProcureUnit> units = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "库存管理.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(units);
+    }
+
+    public static void shipmentDetailCost(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "物流费用报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(shipments);
+    }
+
+    public static void exportInboundUnitReport(InboundPost p) {
+        if(p == null) p = new InboundPost();
+        p.pagination = false;
+        List<InboundUnit> units = p.queryDetail();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "收货入库明细.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(units);
+    }
+
+    /**
+     * 库存占用资金报表
+     *
+     * @param year
+     * @param month
+     */
+    public static void exportInventoryCostsReport(Integer year, Integer month) {
+        Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
+        List<InventoryCostUnit> units = InventoryCostUnit.find(
+                "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
+                Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+        List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
+        if(units != null && units.size() > 0) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls", dateFormat.format(target)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(units, summaries, dateFormat);
+        } else {
+            renderText("未找到当前日期的数据.");
+        }
+    }
+
+    public static void downloadB2BPi(Long id) {
+        BtbOrder order = BtbOrder.findById(id);
+        int i = 1;
+        for(BtbOrderItem item : order.btbOrderItemList) {
+            item.index = i;
+            i++;
+        }
+        SimpleDateFormat df = new SimpleDateFormat("dd MMMMM, yyyy", Locale.ENGLISH);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s for customs.xls", order.orderNo));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(order, df);
+    }
+
+    public static void exportMonthlyShipment(MonthlyShipmentPost p) {
+        if(p == null) p = new MonthlyShipmentPost();
+        List<MonthlyShipmentDTO> list = p.queryBySku();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月物流发货量报表.xls"));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(list, dateFormat, p);
+    }
+
+    public static void exportMonthlyShipmentPrescription(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<Shipment> list = p.queryMonthlyShipment();
+        Map<String, F.T3<String, String, Double>> map = p.calAverageTime(list);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月运输时效统计.xls"));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(list, map, p);
+    }
+
+    public static void exportOutBoundDetailReport(OutboundPost p) {
+        if(p == null) p = new OutboundPost();
+        List<Outbound> outbounds = p.query();
+        p.flag = "Other";
+        List<Outbound> others = p.query();
+        p.flag = "B2B";
+        List<Outbound> b2bOutbounds = p.queryForB2B();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dateFormat, p, outbounds, others, b2bOutbounds);
+    }
 }

@@ -39,9 +39,9 @@
           <th>运输方式</th>
           <td>
             <select name="ship.type">
-              <option value="">方式</option>
+              <option value="">请选择</option>
             #{list items:models.procure.Shipment.T.values(), as:'t'}
-              <option value="${t.name()}">${t}</option>
+              <option value="${t.name()}">${t.label()}</option>
             #{/list}
             </select>
           </td>
@@ -50,22 +50,23 @@
         <tr>
           <th>预计运输时间</th>
           <td>
-            <input type="date" name="ship.dates.planBeginDate" value="${ship.dates.planBeginDate
-            .date()}">
+            <input type="date" name="ship.dates.planBeginDate" value="${ship.dates.planBeginDate.date()}">
           </td>
           <th>预计到库时间</th>
           <td>
-            <input type="date" name="ship.dates.planArrivDate" value="${ship.dates.planArrivDate
-            .date()}">
+            <input type="date" name="ship.dates.planArrivDate" value="${ship.dates.planArrivDate.date()}">
           </td>
         </tr>
 
         <tr>
           <th>运往仓库</th>
           <td>
-          #{select 'ship.whouse.id', items: whouses, labelProperty:'name', value:ship.whouse?.id}
-              #{option ''}仓库#{/option}
-          #{/select}
+            <select name="ship.whouse.id">
+            #{list items:whouses, as:'w'}
+              <option value="${w.id}" ${w.id==ship.whouse?.id?'selected':''}>${w.name}</option>
+            #{/list}
+
+            </select>
           </td>
           <td colspan="2">&nbsp;</td>
         </tr>

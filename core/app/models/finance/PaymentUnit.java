@@ -7,15 +7,16 @@ import helper.Reflects;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.material.MaterialPlan;
+import models.material.MaterialPlanUnit;
 import models.procure.*;
-import models.qc.CheckTask;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.i18n.Messages;
-import query.PaymentUnitQuery;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -31,7 +32,11 @@ import java.util.List;
  * Time: 11:34 AM
  */
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class PaymentUnit extends Model {
+
+    private static final long serialVersionUID = -8173938871382052744L;
+
     public enum S {
         /**
          * 申请
@@ -101,7 +106,21 @@ public class PaymentUnit extends Model {
         this.payment.save();
     }
 
-    @ManyToOne
+
+    public PaymentUnit(MaterialPlanUnit materialPlanUnit) {
+        this();
+        this.materialPlanUnit = materialPlanUnit;
+        this.materialPlan = materialPlanUnit.materialPlan;
+        this.amount = materialPlanUnit.totalAmount();
+        this.unitQty = materialPlanUnit.receiptQty >0 ? materialPlanUnit.receiptQty : materialPlanUnit.qty;
+        this.currency = materialPlanUnit.getCurrency();
+        this.payment = Payment.buildPayment(materialPlanUnit.materialPlan.cooperator, materialPlanUnit.getCurrency(),
+                materialPlanUnit.totalAmount(), materialPlanUnit.materialPlan.apply);
+        this.payee = User.current();
+        this.payment.save();
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
     public Payment payment;
 
     /**
@@ -116,21 +135,29 @@ public class PaymentUnit extends Model {
      * 2. 采购单元
      * 3. 运输单
      * 4. 运输单元
-     * 5. 其他
+     * 5. 物料出货单
+     * 6. 物料出货计划
      * 各种不同的关联关系, 由于无法像动态语言那样灵活, 所以将复杂性交给 Hibernate, 手动去选择不同的关联类型
      */
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public ProcureUnit procureUnit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Deliveryment deliveryment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public ShipItem shipItem;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     public Shipment shipment;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialPlan materialPlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialPlanUnit materialPlanUnit;
+
 
     /**
      * 费用关系人
@@ -229,7 +256,6 @@ public class PaymentUnit extends Model {
         if(Validation.hasErrors()) return null;
 
         this.remove = true;
-        if(this.feeType == FeeType.rework()) beforeDelete();
         this.save();
         new ERecordBuilder("paymentunit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
@@ -239,24 +265,31 @@ public class PaymentUnit extends Model {
     }
 
 
-    /**
-     * 在删除PaymentUnit的同时将对应的CheckTask质检任务内的关联删除
-     */
-    public void beforeDelete() {
-        List<CheckTask> checks = CheckTask.find("reworkPay=?", this).fetch();
-        for(CheckTask check : checks) {
-            check.reworkPay = null;
-            check.save();
-        }
+    public PaymentUnit materialFeeRemove(String reason) {
+        basicRemoveValidate(reason);
+        if(this.remove)
+            Validation.addError("", "已经删除了");
+        if(Validation.hasErrors()) return null;
+        this.remove = true;
+        this.save();
+        new ERecordBuilder("materialPlanUnit.destroy")
+                .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
+                .fid(this.materialPlanUnit.id) // 取消的操作, 记录在 MaterialPlanUnit 身上, 因为是对采购计划取消请款
+                .save();
+        return this;
     }
 
     public PaymentUnit transportFeeRemove(String reason) {
         basicRemoveValidate(reason);
         if(Validation.hasErrors()) return this;
-        this.delete();
+        this.shipment.fees.remove(this);
+        this.shipment.save();
         String fid;
-        if(this.shipment != null) fid = this.shipment.id;
-        else fid = this.shipItem.shipment.id;
+        if(this.shipment != null) {
+            fid = this.shipment.id;
+        } else {
+            fid = this.shipItem.shipment.id;
+        }
         this.clearRecords();
         new ERecordBuilder("paymentunit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
@@ -345,11 +378,14 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue))).floatValue();
+        return new BigDecimal(String.valueOf(this.amount))
+                .add(new BigDecimal(String.valueOf(this.fixValue)))
+                .floatValue();
     }
 
     public BigDecimal decimalamount() {
-        return new BigDecimal(String.valueOf(this.amount)).add(new BigDecimal(String.valueOf(this.fixValue)));
+        return new BigDecimal(String.valueOf(this.amount))
+                .add(new BigDecimal(String.valueOf(this.fixValue)));
     }
 
     /**
@@ -359,8 +395,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     public float amountForReport() {
-        float amountPrice = amount();
-        return Currency.CNY.toUSD(amountPrice);
+        return Currency.CNY.toUSD(this.amount());
     }
 
     /**
@@ -369,8 +404,7 @@ public class PaymentUnit extends Model {
      * @return
      */
     private boolean isApproval() {
-        return this.state == S.APPROVAL
-                || this.state == S.PAID;
+        return this.state == S.APPROVAL || this.state == S.PAID;
     }
 
     /**
@@ -431,7 +465,7 @@ public class PaymentUnit extends Model {
 
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
-                Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update"));
+                Arrays.asList("paymentunit.fixValue", "paymentunit.deny", "paymentunit.update"), 50);
     }
 
     /**
@@ -468,10 +502,7 @@ public class PaymentUnit extends Model {
         if(this.state == S.DENY)
             this.state = S.APPLY;
         this.save();
-        new ERecordBuilder("paymentunit.fixValue")
-                .msgArgs(reason, oldFixValue, this.fixValue)
-                .fid(this.id)
-                .save();
+        new ERecordBuilder("paymentunit.fixValue").msgArgs(reason, oldFixValue, this.fixValue).fid(this.id).save();
     }
 
     /**
@@ -484,7 +515,7 @@ public class PaymentUnit extends Model {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
         if(Validation.hasErrors()) return this;
         fee.amount = fee.unitPrice * fee.unitQty;
-        List<String> logs = new ArrayList<String>();
+        List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));
         logs.addAll(Reflects.logFieldFade(this, "unitPrice", fee.unitPrice));
         logs.addAll(Reflects.logFieldFade(this, "unitQty", fee.unitQty));

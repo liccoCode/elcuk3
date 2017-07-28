@@ -52,19 +52,18 @@ $ ->
         , interval * 1000)
 
   # 检测 Notification 功能
-  Notify.checkNotify()
+  # Notify.checkNotify()
   # 循环 load 需要进行的通知内容
-  Notify.loopCheck()
+  # Notify.loopCheck()
 
   #统计当前用户的 新通知记录的条数
-  newsCount = ->
-    htmlobj = $.ajax({url: "/Notifications/amount", async: false},{type: 'POST', dataType: 'json'})
-          .done((r) ->
-            if r.count>0
-              $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
-            $("#notifyNumber").html(r.count)
-          )
-  newsCount()
+  # newsCount = ->
+  #  htmlobj = $.ajax({url: "/Notifications/amount"},{type: 'POST', dataType: 'json'}).done((r) ->
+  #    if r.count>0
+  #      $("#notifyimg").append("<img src='/public/images/notify.gif' width='30' height='20' />")
+  #    $("#notifyNumber").html(r.count)
+  #  )
+  # newsCount()
 
   #将选中的通知状态更改成已读
   $("#updateState").on("click", (e) ->
@@ -74,7 +73,7 @@ $ ->
       noty({text: '未选中通知', type: 'error', timeout: 3000})
     else
       updateState($checkbox.serialize(), ->
-         newsCount()
+         # newsCount()
          $('input:checkbox:checked[name="noteID"]').remove()
       )
   )
@@ -84,7 +83,7 @@ $ ->
       $span = $(@)
       updateState({noteID:$span.attr("data-id")}, ->
          $("#notificationBtn").click()
-         newsCount()
+         # newsCount()
       )
     )
 

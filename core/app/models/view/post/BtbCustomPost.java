@@ -16,13 +16,14 @@ public class BtbCustomPost extends Post<BtbCustom>{
 
     @Override
     public F.T2<String, List<Object>> params() {
-        List<Object> params = new ArrayList<Object>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbCustom s WHERE 1 = 1 ");
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM BtbCustom s WHERE isDel = false ");
         if(StringUtils.isNotEmpty(keywords)) {
             sql.append(" AND s.customName like ? ");
             params.add("%"+keywords+"%");
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        sql.append(" ORDER BY s.id DESC");
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<BtbCustom> query() {
@@ -34,12 +35,12 @@ public class BtbCustomPost extends Post<BtbCustom>{
 
     public Long getTotalCount() {
         F.T2<String, List<Object>> params = params();
-        return new Long(BtbCustom.find(params._1, params._2.toArray()).fetch().size());
+        return (long) BtbCustom.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return new Long(BtbCustom.find(params._1, params._2.toArray()).fetch().size());
+        return (long) BtbCustom.find(params._1, params._2.toArray()).fetch().size();
     }
 
 

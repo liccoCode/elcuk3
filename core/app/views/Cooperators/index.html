@@ -1,33 +1,98 @@
 #{extends 'main_full.html'/}
-#{set title:"Cooperators(${coopers.size()})" /}
+#{set title:"Cooperators(${p.totalCount})" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'cooperators/index.coffee'/}
-    #{script_cdn name: 'jquery.validate.min.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'cooperators/index.es6'/}
+
 #{/set}
 
 #{if flash.success}
 <div class="alert alert-success">
-    <button class="close" data-dismiss="alert">×</button>
-    <p>${flash.success}</p>
+  <button class="close" data-dismiss="alert">×</button>
+  <p>${flash.success}</p>
 </div>
 #{/if}
 
 <div class="row-fluid">
-    <div id='nav_bar' class="span3 well">
-        <ul class="nav nav-tabs nav-stacked">
-            <li><label class="label label-success">合作伙伴</label></li>
-        #{list items:coopers, as:'cop'}
-            <li>
-                <a href="#" id="${cop.id}"><span class="badge badge-info">${cop.cooperItems?.size()}</span>
-                ${cop.fullName}
-                </a>
-            </li>
-        #{/list}
-        </ul>
-        <a href="@{Cooperators.newCooper()}" class="btn btn-primary">添加新合作伙伴</a>
-    </div>
+  <form action="@{Cooperators.index()}" method="get" class="search_form" id="search_Form">
+    <div class="row-fluid">
+      <div class="span12">
 
-    <div id='show_cooperator' class="span9 well">
-        Loading...
+        <div class="input-prepend input-append inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <input type="text" style="width:220px;" name="p.search" placeholder="全称 or SKU or 代码" value="${p.search}">
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+        <a href="@{Cooperators.newCooper()}" class="btn btn-success">添加新合作伙伴</a>
+      </div>
     </div>
+  </form>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered" id="data-table">
+        <tr>
+          <th>供应商全称</th>
+          <th width="100px;">SKU</th>
+          <th width="120px;">物料</th>
+          <th>代码</th>
+          <th>供应商类型</th>
+          <th>订单数</th>
+          <th>固定电话</th>
+          <th>联系人</th>
+          <th>手机</th>
+          <th>创建人</th>
+          <th>创建时间</th>
+          <th>操作</th>
+        </tr>
+      #{list items:coopers, as:'c'}
+        <tr>
+          <td>${c.fullName}</td>
+          <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
+            <span><i class="icon-reorder"></i></span>
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <span class="badge badge-info">${c.showItemNum(true)}</span>
+              #{/if}
+          </td>
+          <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showMaterialItem()}">
+            <span><i class="icon-reorder"></i></span>
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <span class="badge badge-info">${c.showItemNum(false)}</span>
+              #{/if}
+          </td>
+          <td>${c.name}</td>
+          <td>${c.type?.to_s()}</td>
+          <td>
+              #{if c.type==models.procure.Cooperator.T.SUPPLIER}
+                <a href="@{Deliveryments.indexByCooperId(c.id)}" target="_blank">${c.deliveryments?.size()}</a>
+              #{/if}
+              #{else }
+                <a href="@{controllers.Shipments.indexByCooperId(c.id)}" target="_blank" rel="tooltip" title="涉及物流单">
+                ${c.shipments?.size()}</a>
+              #{/else}
+          </td>
+          <td>${c.tel}</td>
+          <td>${c.contacter}</td>
+          <td>${c.phone}</td>
+          <td>${c.creator?.username}</td>
+          <td>#{time_tooltip time:c.createDate/}</td>
+          <td><a href="@{Cooperators.show(c.id, true)}" target="_blank" class="btn btn-mini btn-primary">编辑条款</a></td>
+        </tr>
+      #{/list}
+        <tr>
+          <td colspan="12">
+          #{if coopers.size() == 0}
+            暂时还没有入库记录
+          #{/if}
+          #{else }
+              #{bootstrap_pager pi:p, url:'' /}
+          #{/else}
+          </td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+
 </div>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FBA Packing Slips</title>
+  <style>
+    body{
+      font-family:STXihei;
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+
+<table border="0" style="border: none;margin:0 0 0 0;" cellpadding="0" cellspacing="0" width="100%">
+#{list items:1..boxNumber, as: 'i'}
+  <tr style="height: 98.6mm; vertical-align:middle;">
+    <td width="49%" style="vertical-align:middle">
+      <table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0" width="100%">
+        <tr align="center">
+          <td>
+            <table border="1" width="100%" style="border:4px solid #000000;table-layout: fixed;
+            word-wrap:break-word;" cellpadding="0" cellspacing="0">
+              <tr>
+                <td colspan="4" style="text-align:center;">梦拓普技术有限公司</td>
+              </tr>
+              <tr>
+                <td colspan="4" style="text-align:center;font-size: 10pt;">MENGTOP TECHNOLOGY CO., LIMITED PACKING LIST
+                </td>
+              </tr>
+              <tr>
+                <th width="18%">
+                  <span style="font-weight: bold;">供应商编码</span>
+                </th>
+                <th width="16%">
+                  <span style="font-weight: bold;">ID</span>
+                </th>
+                <th width="12%">
+                  <span style="font-weight: bold;">SKU</span>
+                </th>
+                <th width="8%">
+                  <span style="font-weight: bold;">箱数(Ctn)</span>
+                </th>
+              </tr>
+              <tr>
+                <td height="35px;">${procureUnit.cooperator?.name}</td>
+                <td>${procureUnit.id}</td>
+                <td>${procureUnit.product?.sku}</td>
+                <td></td>
+              </tr>
+              <tr>
+                <th>箱号</th>
+                <th>产品名称</th>
+                <th>净重(KG)</th>
+                <th>毛重(KG)</th>
+              </tr>
+              <tr>
+                <td height="50px;"></td>
+                <td>${procureUnit?.product?.abbreviation}</td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td height="100%;" colspan="4" style="vertical-align:top;text-align:left;">
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="font-size: 14px;">Made in China</td>
+        </tr>
+      </table>
+    </td>
+    <td width="2%"></td>
+    <td width="49%" style="vertical-align:middle">
+      <table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0" width="100%">
+        <tr align="center">
+          <td>
+            <table border="1" width="100%" style="border:4px solid #000000;table-layout: fixed;
+                  word-wrap:break-word;" cellpadding="0" cellspacing="0">
+              <tr>
+                <td colspan="4" style="text-align:center;">梦拓普技术有限公司</td>
+              </tr>
+              <tr>
+                <td colspan="4" style="text-align:center;font-size: 10pt;">MENGTOP TECHNOLOGY CO., LIMITED PACKING LIST
+                </td>
+              </tr>
+              <tr>
+                <th width="18%">
+                  <span style="font-weight: bold;">供应商编码</span>
+                </th>
+                <th width="16%">
+                  <span style="font-weight: bold;">ID</span>
+                </th>
+                <th width="12%">
+                  <span style="font-weight: bold;">SKU</span>
+                </th>
+                <th width="8%">
+                  <span style="font-weight: bold;">箱数(Ctn)</span>
+                </th>
+              </tr>
+              <tr>
+                <td height="35px;">${procureUnit.cooperator?.name}</td>
+                <td>${procureUnit.id}</td>
+                <td>${procureUnit.product?.sku}</td>
+                <td></td>
+              </tr>
+              <tr>
+                <th>箱号</th>
+                <th>产品名称</th>
+                <th>净重(KG)</th>
+                <th>毛重(KG)</th>
+              </tr>
+              <tr>
+                <td height="50px;"></td>
+                <td>${procureUnit?.product?.abbreviation}</td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td height="100%;" colspan="4" style="vertical-align:top;text-align:left;">
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="font-size: 14px;">Made in China</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+#{/list}
+</table>
+
+
+</body>
+</html>
+

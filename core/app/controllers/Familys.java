@@ -51,16 +51,16 @@ public class Familys extends Controller {
         }
     }
 
-    public static void pro_div(Family f) {
-        List<Product> prods = new ArrayList<Product>();
+    public static void proDiv(Family f) {
+        List<Product> prods = new ArrayList<>();
 
         // 查找 Family 相关的 Product
         if(f != null && f.isPersistent()) prods = f.products;
         render("Products/_products.html", prods);
     }
 
-    public static void fam_div(Brand b, Category c) {
-        List<Family> fmys = new ArrayList<Family>();
+    public static void famDiv(Brand b, Category c) {
+        List<Family> fmys = new ArrayList<>();
         if(b != null && b.isPersistent() && c != null && c.isPersistent())
             fmys = Family.bcRelateFamily(b, c);
         render(fmys, b, c);
@@ -73,7 +73,7 @@ public class Familys extends Controller {
      */
     public static void categoryRelateFamily(String categoryId) {
         List<Family> families = Family.find("category_categoryId =?", categoryId).fetch();
-        List<String> familieIds = new ArrayList<String>();
+        List<String> familieIds = new ArrayList<>();
         for(Family f : families) familieIds.add(f.family);
         renderJSON(J.json(familieIds));
     }

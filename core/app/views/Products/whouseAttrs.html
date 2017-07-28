@@ -1,0 +1,28 @@
+#{extends 'main_full.html' /}
+#{set title:'Product' /}
+#{set 'moreScripts'}
+    #{script 'mobileBUGFix.mini.js'/}
+    #{script 'localResize.coffee'/}
+    #{script 'localResize.ui.coffee'/}
+    #{script 'jquery.filedrop.js' /}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'products/whouseAttrs.es6'/}
+#{/set}
+
+<div class="row-fluid">
+  <form action="#" method="post" id="search_form">
+    <div class="span12">
+      <div class="input-append inline">
+        <input type="text" autocomplete="off" name="p.search" value="${p.search}" placeHolder="SKU、条码">
+        <a href="javascript:void(0)" data-href="@{Products.whouseAttrs()}" class="btn btn-primary" id="search_btn"
+           data-loading><i class="icon-search"></i></a>
+      </div>
+    </div>
+  </form>
+</div>
+#{if pro}
+    #{include 'Products/_whouseAttrsForm.html'/}
+#{/if}
+#{else}
+<p class="muted text-center">未匹配到相关的 Product.</p>
+#{/else}

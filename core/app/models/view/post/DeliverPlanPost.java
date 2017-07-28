@@ -2,6 +2,7 @@ package models.view.post;
 
 import helper.Dates;
 import models.procure.DeliverPlan;
+import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -34,6 +35,8 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     public Date from;
     public Date to;
 
+    public boolean showAll = false;
+
     public enum DateType {
         /**
          * 创建时间
@@ -63,6 +66,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
     private static final Pattern ID = Pattern.compile("^(\\w{2}\\|\\d{6}\\|\\d*)$");
 
     /**
+     * 纯数字
+     */
+    private static final Pattern NUM = Pattern.compile("^[0-9]*$");
+
+    /**
      * 解析 +N 这样的数字, 解析出含有 N 个 ProcureUnit 的 Deliveryment
      */
     private static final Pattern SIZE = Pattern.compile("^\\+(\\w*)$");
@@ -81,14 +89,14 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
 
         // 针对 Id 的唯一搜索
         if(specialSearch._1)
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3);
+            return new F.T2<>(specialSearch._2, specialSearch._3);
 
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM DeliverPlan d LEFT JOIN d.units u WHERE 1=1 AND");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             sbd.append(" d.createDate>=? AND d.createDate<=?");
@@ -122,13 +130,23 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
         }
 
 
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     public List<DeliverPlan> query() {
         F.T2<String, List<Object>> params = params();
+        this.count = this.count();
         return DeliverPlan.find(params._1 + " ORDER BY d.createDate DESC", params._2.toArray())
-                .fetch();
+                .fetch(this.page, this.perSize);
+    }
+
+    public Long getTotalCount() {
+        return this.count();
+    }
+
+    @Override
+    public Long count(F.T2<String, List<Object>> params) {
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public F.T3<Boolean, String, List<Object>> multiProcureUnit() {
@@ -137,11 +155,11 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             Matcher matcher = SIZE.matcher(this.search);
             if(matcher.find()) {
                 int size = NumberUtils.toInt(matcher.group(1));
-                return new F.T3<Boolean, String, List<Object>>(true, "SIZE(d.units)>=?",
-                        new ArrayList<Object>(Arrays.asList(size)));
+                return new F.T3<>(true, "SIZE(d.units)>=?",
+                        new ArrayList<>(Arrays.asList(size)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
     /**
@@ -155,12 +173,19 @@ public class DeliverPlanPost extends Post<DeliverPlan> {
             Matcher matcher = ID.matcher(this.search);
             if(matcher.find()) {
                 String deliverymentId = matcher.group(1);
-                return new F.T3<Boolean, String, List<Object>>(true,
+                return new F.T3<>(true,
                         "SELECT d FROM DeliverPlan d WHERE d.id=?",
-                        new ArrayList<Object>(Arrays.asList(deliverymentId)));
+                        new ArrayList<>(Arrays.asList(deliverymentId)));
+            }
+            matcher = NUM.matcher(this.search);
+            if(matcher.find()) {
+                Long unitId = Long.parseLong(matcher.group(0));
+                return new F.T3<>(true,
+                        "SELECT DISTINCT d FROM DeliverPlan d LEFT JOIN d.units u WHERE 1=1 AND u.id = ? ",
+                        new ArrayList<>(Arrays.asList(unitId)));
             }
         }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+        return new F.T3<>(false, null, null);
     }
 
 }

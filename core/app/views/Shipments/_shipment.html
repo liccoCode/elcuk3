@@ -2,28 +2,26 @@
 #{authenticityToken /}
   <table class="table table-condensed table-bordered">
     <tr>
-      <th>Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
+      <th width="200px;">Title (Create By ${ship.creater ? ship.creater.username : "System"})</th>
       <td colspan="3">
         <input type="text" name="ship.title" class="span10" value="${ship.title ? ship.title : ship.title()}">
       </td>
     </tr>
+
     <tr>
       <th>运输单号</th>
-      <td>
-      ${ship.id}
-        <input type="hidden" id="shipmentId" name="shipid" value="${ship.id}">
+      <td width="40%;">
+        <input type="text" id="shipmentId" name="shipid" value="${ship.id}" readonly>
       </td>
-      <th>创建时间</th>
-      <td>${ship.createDate.datetime()}</td>
+      <th width="200px;">创建时间</th>
+      <td><input type="date" value="${ship.createDate.datetime()}" readonly></td>
     </tr>
 
     <tr>
       <th>预计运输时间</th>
       <td>
         <input type="date" name="ship.dates.planBeginDate" value="${ship.dates.planBeginDate.date()}">
-      #{ifnot ship.state in [models.procure.Shipment.S.PLAN, models.procure.Shipment.S.CANCEL, models.procure.Shipment.S.CONFIRM]}
-        <span class="pull-right">运输时间 #{time_tooltip time:ship.dates.beginDate/}</span>
-      #{/ifnot}
+        实际运输时间: <input type="date" name="ship.dates.beginDate" value="${ship.dates.beginDate.date()}">
       </td>
       <th>预计到库时间</th>
       <td>
@@ -41,51 +39,45 @@
         <input type="date" name="ship.dates.planArrivDateForCountRate" value="${ship.dates.planArrivDateForCountRate.date()}"
                rel="popover" content="用于计算准时到货率(只有在 '计划' 与 '锁定准备运输' 状态下的运输单才允许修改该字段)" placement="right">
       </td>
-
       <th>晚到货原因</th>
       <td>
-        <input name="ship.reason" class="span8" rel="popover" placement="right" value="${ship.reason}" id="reason"/>
+        <input type="text" name="ship.reason" class="input-xxlarge" value="${ship.reason}" id="reason"/>
       </td>
     </tr>
 
     <tr>
       <th>Track No.</th>
       <td>
-        <div class="input-append">
-
-
-          <table class="table table-hover table-condensed table-bordered" id="trackno_table">
-          #{if ship.tracknolist==null || ship.tracknolist.size()<=0}
-            <tr>
-              <td class="span3">
-                <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
-              </td>
-            </tr>
-          #{/if}
-          #{else }
-
-              #{list items:ship.tracknolist, as:'trackno'}
-                <tr>
-                  <td class="span4">
-                    <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
-                      #{if ship.internationExpress && trackno}
-                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
-                      #{/if}
-                  </td>
-                  <td>
-                    <a class="btn" name='delete_trackno_row'>删除</a>
-                  </td>
-                </tr>
-              #{/list}
-          #{/else}
-          </table>
-          <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-             id="more_trackno_btn" data-table="trackno_table">
-            <i class="icon-plus"></i> More
-          </a>
-
-
-        </div>
+        <table class="table table-hover table-condensed table-bordered" id="trackno_table" style="max-width: 260px;">
+        #{if ship.tracknolist==null || ship.tracknolist.isEmpty()}
+          <tr>
+            <td>
+              <input type="text" class="input-medium" name="ship.tracknolist[${0}]" value="">
+            </td>
+          </tr>
+        #{/if}
+        #{else }
+            #{list items:ship.tracknolist, as:'trackno'}
+              <tr>
+                <td>
+                  <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
+                    #{if ship.internationExpress && trackno}
+                      <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-primary"><i class="icon-external-link"></i></a>
+                    #{/if}
+                  <a class="btn" name='delete_trackno_row'><i class="icon-remove"></i></a>
+                </td>
+              </tr>
+            #{/list}
+        #{/else}
+          <tr>
+            <td>
+              <a class="btn" rel="popover" content="不够?再来一行" placement="right"
+                 id="more_trackno_btn" data-table="trackno_table">
+                <i class="icon-plus"></i>
+              </a>
+            </td>
+          </tr>
+        </table>
       </td>
       <th>工作号</th>
       <td>
@@ -96,9 +88,12 @@
     <tr>
       <th>国际快递商</th>
       <td>
-      #{select 'ship.internationExpress', items: models.procure.Shipment.Express(), value: ship.internationExpress}
-          #{option ''}选择快递商#{/option}
-      #{/select}
+        <select name="ship.internationExpress">
+          <option value="">选择快递商</option>
+        #{list items:models.procure.Shipment.express(), as:'i'}
+          <option value="${i.name()}" ${i.name()==ship.internationExpress?.name() ? 'selected' : ''}>${i.name()}</option>
+        #{/list}
+        </select>
       </td>
       <th>总质量(kg)质检</th>
       <td>${ship.totalWeightQuaTest()}</td>
@@ -107,20 +102,26 @@
     <tr>
       <th>运输商</th>
       <td>
-      #{select 'ship.cooper.id', items: shippers, labelProperty: 'fullName',  value: ship.cooper?.id}
-          #{option ''}选择运输商#{/option}
-      #{/select}
+        <select name="ship.cooper.id">
+          <option value="">选择运输商</option>
+        #{list items:shippers, as:'s'}
+          <option value="${s.id}" ${s.id==ship.cooper?.id ? 'selected' : ''}>${s.fullName}</option>
+        #{/list}
+        </select>
       </td>
       <th>总体积(m³)质检</th>
       <td>${ship.totalVolumeQuaTest().format('#.##')}</td>
     </tr>
 
     <tr>
-      <th>仓库</th>
+      <th>去往国家</th>
       <td>
-      #{select 'ship.whouse.id', items: whouses, labelProperty: 'name', value: ship.whouse?.id}
-          #{option ''}选择仓库#{/option}
-      #{/select}
+        <select name="ship.whouse.id">
+          <option value="">选择仓库</option>
+        #{list items:whouses, as:'w'}
+          <option value="${w.id}" ${w.id==ship.whouse?.id ? 'selected' : ''}>${w.name}</option>
+        #{/list}
+        </select>
       </td>
       <th>总箱数(件)质检</th>
       <td>${ship.totalUnitQuaTest()}</td>
@@ -128,11 +129,13 @@
 
     <tr>
       <th>运输方式</th>
-      <td style="color:${ship?.type?.rgb()}">${ship?.type?.label()}</td>
+      <td style="color:${ship?.type?.rgb()}">
+      ${ship?.type?.label()}<span style="color:red">${ship.isDedicated?'(专线)':''}</span>
+      </td>
       <th>总重量(kg)货代</th>
       <td>
         <input type="text" name="ship.totalWeightShipment" value="${ship.totalWeightShipment}" id="totalWeightShipment"/>
-      <td>
+      </td>
     </tr>
 
     <tr>
@@ -158,8 +161,8 @@
     </tr>
 
     <tr>
-      <th>运输单总重量</th>
-      <td>${ship.totalWeight()} kg</td>
+      <th>运输单总重量/总体积</th>
+      <td>${ship.totalWeight()} kg / ${ship.totalVolume()} m³</td>
       <th>总托盘数(货代)</th>
       <td>
         <input type="text" name="ship.totalStockShipment" value="${ship.totalStockShipment}" id="totalStockShipment"/>
@@ -167,15 +170,15 @@
     </tr>
 
     <tr>
-      <td colspan="4">
-        <h4>Comment</h4>
+      <th><h4>Comment</h4></th>
+      <td colspan="3">
         <textarea rows="4" id="ship_memo" name="ship.memo" class="span12">${ship.memo}</textarea>
       </td>
     </tr>
 
     <tr>
       <td colspan="4">
-      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM || ship.state == models.procure.Shipment.S.SHIPPING|| ship.state == models.procure.Shipment.S.CLEARANCE|| ship.state == models.procure.Shipment.S.PACKAGE|| ship.state == models.procure.Shipment.S.BOOKED|| ship.state == models.procure.Shipment.S.DELIVERYING/}
+      #{set isPlanAndConfirm:ship.state == models.procure.Shipment.S.PLAN || ship.state == models.procure.Shipment.S.CONFIRM || ship.state == models.procure.Shipment.S.SHIPPING|| ship.state == models.procure.Shipment.S.CLEARANCE|| ship.state == models.procure.Shipment.S.BOOKED|| ship.state == models.procure.Shipment.S.DELIVERYING/}
       #{if isPlanAndConfirm}
         <button class="btn btn-primary">更新</button>
       #{/if}

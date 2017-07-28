@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FBA Packing Slips</title>
+  <style>
+    body{
+      font-family:STXihei;
+    }
+
+    .small{
+      font-size:10px;
+
+    }
+  </style>
+</head>
+<body style="margin:0 0 0 0;">
+<table border="0" style="margin:0 0 0 0;width: 160mm; font-size:10px;" cellpadding="0" cellspacing="0">
+#{list items:1..9}
+  <tr style="height: 12mm; vertical-align:bottom;">
+    <td style="vertical-align:middle; text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+    <td style="vertical-align:middle;text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+    <td style="vertical-align:middle;text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="60mm;" height="5mm;" border="0"
+           style="padding-top:10px">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+  </tr>
+  <tr style="height:17mm; vertical-align:top;">
+      #{set title: selling.aps?.title/}
+      #{set length: title?.length()/}
+      #{list items:1..3, as:'num'}
+        <td style="padding-left: 18px;">
+        ${selling.aps?.sortTitle()}
+          <br>
+          <div style="float:left;"><b>NEW</b></div>
+          <div style="float:right;padding-right:10px;"><b>${selling.market?.shortHand()}</b></div><br>
+        </td>
+      #{/list}
+  </tr>
+#{/list}
+</table>
+</body>
+</html>
+

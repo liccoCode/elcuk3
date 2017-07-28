@@ -1,263 +1,296 @@
 <div class="row-fluid">
-<form action="@{Products.update()}" method="post" id="update_product_form">
-<table class="table table-bordered">
-<tr>
-  <td>SKU</td>
-  <td>${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-  <td>Category</td>
-  <td>${pro.category}</td>
-</tr>
-
-<tr>
-  <td>Brand</td>
-  <td>${pro.family?.brand}</td>
-  <td>Family</td>
-  <td>${pro.family?.family}</td>
-</tr>
-
-<tr>
-  <td>长(包材)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-
-  <td>宽(包材)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-</tr>
-<tr>
-  <td>高(包材)</td>
-  <td>
-    <div class="input-append">
-
-      <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-
-  <td>重量(包材)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-      <span class="add-on">Kg</span>
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <td>长(产品)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.productLengths" value="${pro.productLengths}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-
-  <td>宽(产品)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.productWidth" value="${pro.productWidth}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-</tr>
-<tr>
-  <td>高(产品)</td>
-  <td>
-    <div class="input-append">
-
-      <input type="text" class="input-mini" name="pro.productHeigh" value="${pro.productHeigh}">
-      <span class="add-on">mm</span>
-    </div>
-  </td>
-
-  <td>重量(产品)</td>
-  <td>
-    <div class="input-append">
-      <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
-      <span class="add-on">Kg</span>
-    </div>
-  </td>
-</tr>
-
-<tr>
-  <th>申报价格</th>
-  <td>
-    <div class="input-prepend">
-      <span class="add-on">$</span>
-      <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
-    </div>
-  </td>
-  <th>申报品名(运输)</th>
-  <td>
-    <input type="text" name="pro.declareName" value="${pro.declareName}">
-  </td>
-</tr>
-
-<tr>
-  <th>用途(运输)</th>
-  <td><input type="text" name="pro.useWay" value="${pro.useWay}"/></td>
-  <th>中文品名(运输)</th>
-  <td><input type="text" name="pro.chineseName" value="${pro.chineseName}"/></td>
-</tr>
-
-
-<tr>
-  <th>上市时间</th>
-  <td>
-    <input type="date" name="pro.marketTime" value="${pro.marketTime}">
-  </td>
-
-  <th>退市时间</th>
-  <td>
-    <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
-  </td>
-</tr>
-
-<tr>
-  <th>上架状态</th>
-  <td>
-  #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
-  </td>
-
-  <th>采购状态</th>
-  <td>
-  #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
-  </td>
-</tr>
-
-<tr>
-  <th>产品的生命周期</th>
-  <td>
-  #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
-  </td>
-
-  <th>销售等级</th>
-  <td>
-  #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
-  </td>
-</tr>
-
-<tr>
-  <th>产品名称</th>
-  <td colspan="1">
-    <input type="hidden" style="width:95%" name="pro.iscopy" value="${pro.iscopy}">
-    <input type="text" style="width:95%" id="proabbreviation" name="pro.abbreviation" value="${pro.abbreviation}">
-  </td>
-  <th>State(运营)</th>
-  <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
-
-</tr>
-
-<tr>
-  <th><span style="color:red">*</span>UPC</th>
-  <td><input type="text" name="pro.upc" id="upc" value="${pro.upc}" required></td>
-  <th>UPC(JP)</th>
-  <td><input type="text" name="pro.upcJP" id="upc" value="${pro.upcJP}"></td>
-</tr>
-
-<tr>
-  <th><span style="color:red">*</span>Part Number</th>
-  <td><input type="text" name="pro.partNumber" id="partNumber" value="${pro.partNumber}" required></td>
-  <th>Part Number(JP)</th>
-  <td><input type="text" name="pro.partNumberJP" id="upc" value="${pro.partNumberJP}"></td>
-</tr>
-
-<tr>
-  <th>标题</th>
-  <td>
-    <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
-  </td>
-  <th>副标题</th>
-  <td>
-    <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
-  </td>
-</tr>
-
-<tr>
-  <th>产品定位</th>
-  <td colspan="3">
-    <table class="table table-hover table-condensed table-bordered" id="locates_table">
+  <form action="@{Products.update()}" method="post" id="update_product_form">
+    <table class="table table-bordered">
       <tr>
-        <th>Title</th>
-        <th>Content</th>
-        <th>Action</th>
+        <td>SKU</td>
+        <td width="600px;">${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
+        <td>Category</td>
+        <td>${pro.category}</td>
       </tr>
-    #{list items:pro.locate, as:'locate'}
       <tr>
-        <td class="span4">
-          <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].title">${locate.title}</textarea>
-        </td>
+        <th>对应原始SKU</th>
         <td>
-          <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate.content}</textarea>
+          <select style="width:100px;" name="pro.origin_project">
+          #{list items:models.User.COR.values(), as:'c'}
+            <option value="${c.name()}" ${pro.origin_project==c?'selected':''}>${c.label()}</option>
+          #{/list}
+          </select>
+          <input type="text" name="pro.origin_sku" value="${pro.origin_sku}">
         </td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <tr>
+        <td>Brand</td>
+        <td>${pro.family?.brand}</td>
+        <td>Family</td>
+        <td>${pro.family?.family}</td>
+      </tr>
+
+      <tr>
+        <td>长(包材)</td>
         <td>
-          <a class="btn" name='delete_locate_row'>删除</a>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>宽(包材)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
+            <span class="add-on">mm</span>
+          </div>
         </td>
       </tr>
-    #{/list}
+      <tr>
+        <td>高(包材)</td>
+        <td>
+          <div class="input-append">
+
+            <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>重量(包材)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
+            <span class="add-on">Kg</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <td>长(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productLengths" value="${pro.productLengths}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>宽(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productWidth" value="${pro.productWidth}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>高(产品)</td>
+        <td>
+          <div class="input-append">
+
+            <input type="text" class="input-mini" name="pro.productHeigh" value="${pro.productHeigh}">
+            <span class="add-on">mm</span>
+          </div>
+        </td>
+
+        <td>重量(产品)</td>
+        <td>
+          <div class="input-append">
+            <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
+            <span class="add-on">Kg</span>
+          </div>
+        </td>
+      </tr>
+
+      <tr>
+        <th>申报价格</th>
+        <td>
+          <div class="input-prepend">
+            <span class="add-on">$</span>
+            <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
+          </div>
+        </td>
+        <th>申报品名(运输)</th>
+        <td>
+          <input type="text" name="pro.declareName" value="${pro.declareName}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>用途(运输)</th>
+        <td><input type="text" name="pro.useWay" value="${pro.useWay}"/></td>
+        <th>中文品名(运输)</th>
+        <td><input type="text" name="pro.chineseName" value="${pro.chineseName}"/></td>
+      </tr>
+
+
+      <tr>
+        <th>上市时间</th>
+        <td>
+          <input type="date" name="pro.marketTime" value="${pro.marketTime}">
+        </td>
+
+        <th>退市时间</th>
+        <td>
+          <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
+        </td>
+      </tr>
+
+      <tr>
+        <th>上架状态</th>
+        <td>
+        #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
+        </td>
+
+        <th>采购状态</th>
+        <td>
+        #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品的生命周期</th>
+        <td>
+        #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
+        </td>
+
+        <th>销售等级</th>
+        <td>
+        #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel}#{/select}
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品名称</th>
+        <td colspan="1">
+          <input type="hidden" style="width:95%" name="pro.iscopy" value="${pro.iscopy}">
+          <input type="text" style="width:95%" id="proabbreviation" name="pro.abbreviation" value="${pro.abbreviation}">
+        </td>
+        <th>State(运营)</th>
+        <td style="color:${pro.state?.fontcolor()}">${pro.state}</td>
+
+      </tr>
+
+      <tr>
+        <th><span style="color:red">*</span>UPC</th>
+        <td><input type="text" name="pro.upc" id="upc" value="${pro.upc}" required></td>
+        <th>UPC(JP)</th>
+        <td><input type="text" name="pro.upcJP" id="upc" value="${pro.upcJP}"></td>
+      </tr>
+
+      <tr>
+        <th><span style="color:red">*</span>Part Number</th>
+        <td><input type="text" name="pro.partNumber" id="partNumber" value="${pro.partNumber}" required></td>
+        <th>Part Number(JP)</th>
+        <td><input type="text" name="pro.partNumberJP" id="upc" value="${pro.partNumberJP}"></td>
+      </tr>
+
+      <tr>
+        <th>标题</th>
+        <td>
+          <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
+        </td>
+        <th>副标题</th>
+        <td>
+          <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品定位</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered" id="locates_table">
+            <tr>
+              <th>Title</th>
+              <th>Content</th>
+              <th>Action</th>
+            </tr>
+          #{list items:pro.locate, as:'locate'}
+            <tr>
+              <td class="span4">
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].title">${locate.title}</textarea>
+              </td>
+              <td>
+                <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate.content}</textarea>
+              </td>
+              <td>
+                <a class="btn" name='delete_locate_row'>删除</a>
+              </td>
+            </tr>
+          #{/list}
+          </table>
+          <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="more_locate_btn"
+             data-name="locate" data-table="locates_table">
+            <i class="icon-plus"></i> More
+          </a>
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品卖点</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered" id="selling_points_table">
+            <tr>
+              <th>Title</th>
+              <th>Content</th>
+              <th>Action</th>
+            </tr>
+          #{list items:pro.sellingPoint, as:'point'}
+            <tr>
+              <td class="span4">
+          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">
+          ${point.title}</textarea>
+              </td>
+              <td>
+          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">
+          ${point.content}</textarea>
+              </td>
+              <td>
+                <a class="btn" name='delete_selling_point_row'>删除</a>
+              </td>
+            </tr>
+          #{/list}
+          </table>
+          <a class="btn" rel="popover" content="不够?那就再来一行" placement="right"
+             id="more_selling_point_btn" data-name="sellingPoint" data-table="selling_points_table">
+            <i class="icon-plus"></i> More
+          </a>
+        </td>
+      </tr>
+
+      <tr>
+        <th>B2B信息</th>
+        <td colspan="3">
+          <table class="table table-hover table-condensed table-bordered">
+            <tr>
+              <th>Description</th>
+              <th>Item Code</th>
+              <th>Color</th>
+            </tr>
+            <tr>
+              <td><input type="text" name="pro.b2bDescription" value="${pro.b2bDescription}"></td>
+              <td><input type="text" name="pro.b2bItemCode" value="${pro.b2bItemCode}"></td>
+              <td><input type="text" name="pro.b2bColor" value="${pro.b2bColor}"></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <tr>
+      <td colspan="10">
+      #{power.ck "products.update"}
+        <a class="btn btn-primary" id="save_basic_btn">保存</a>
+      #{/power.ck}
+      #{power.ck "products.saleamazonlisting"}
+        <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
+      #{/power.ck}
+      #{power.ck "products.destroy"}
+        <a href="#" data-sku="${pro.sku}" id="deleteBtn" class="btn btn-danger">
+          删除
+        </a>
+      </td>
+      #{/power.ck}
+      </tr>
     </table>
-    <a class="btn" rel="popover" content="不够?那就再来一行" placement="right" id="more_locate_btn"
-       data-name="locate" data-table="locates_table">
-      <i class="icon-plus"></i> More
-    </a>
-  </td>
-</tr>
-
-<tr>
-  <th>产品卖点</th>
-  <td colspan="3">
-    <table class="table table-hover table-condensed table-bordered" id="selling_points_table">
-      <tr>
-        <th>Title</th>
-        <th>Content</th>
-        <th>Action</th>
-      </tr>
-    #{list items:pro.sellingPoint, as:'point'}
-      <tr>
-        <td class="span4">
-          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">${point
-          .title}</textarea>
-        </td>
-        <td>
-          <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point
-          .content}</textarea>
-        </td>
-        <td>
-          <a class="btn" name='delete_selling_point_row'>删除</a>
-        </td>
-      </tr>
-    #{/list}
-    </table>
-    <a class="btn" rel="popover" content="不够?那就再来一行" placement="right"
-       id="more_selling_point_btn" data-name="sellingPoint" data-table="selling_points_table">
-      <i class="icon-plus"></i> More
-    </a>
-  </td>
-</tr>
-
-<tr>
-<td colspan="10">
-  <a class="btn btn-primary" id="save_basic_btn">保存</a>
-#{power.ck "products.saleamazonlisting"}
-  <a href="@{Products.saleAmazon(pro.sku)}" class="btn btn-info">Amazon 上架</a>
-#{/power.ck}
-#{power.ck "products.destroy"}
-  <a href="#" data-sku="${pro.sku}" id="deleteBtn" class="btn btn-danger">
-    删除
-  </a>
-</td>
-#{/power.ck}
-</tr>
-</table>
-</form>
+  </form>
 </div>
 
 #{info_row title:'Product (Selling)QTY'/}

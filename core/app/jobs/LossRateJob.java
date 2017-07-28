@@ -11,7 +11,6 @@ import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import play.cache.Cache;
 import play.libs.F;
-import services.MetricProfitService;
 import services.MetricSaleReportService;
 
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * TODO: 需要补充注释
  * Created by licco on 15/6/10.
  */
 public class LossRateJob extends BaseJob {
@@ -51,10 +51,10 @@ public class LossRateJob extends BaseJob {
         String runningKey = buildKey() + "_running";
         Cache.add(runningKey, runningKey);
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
-        List<LossRate> lossrate = new ArrayList<LossRate>();
+        List<LossRate> lossrate = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("0.00");
 
-        Map<String, ProfitDto> existMap = new HashMap<String, ProfitDto>();
+        Map<String, ProfitDto> existMap = new HashMap<>();
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
@@ -126,7 +126,7 @@ public class LossRateJob extends BaseJob {
             ship.lossCost = ship.purchaseCost.add(ship.shipmentCost);
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("shipItems", shipItems);
         map.put("lossrate", lossrate);
 

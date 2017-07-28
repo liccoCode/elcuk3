@@ -3,13 +3,21 @@ package models.market;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
-import helper.*;
+import helper.Constant;
+import helper.FLog;
+import helper.HTTP;
+import helper.Webs;
+import models.OperatorConfig;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpHeaders;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -28,10 +36,8 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
-
-import models.OperatorConfig;
-
 
 /**
  * 不同的账户, Market Place 可以相同, 但是 Account 不一定相同.
@@ -45,10 +51,10 @@ public class Account extends Model {
     /**
      * 需要过滤掉的 MerchantId
      */
-    public final static Map<String, String> OFFER_IDS;
+    public final static Map<String, String> OFFER_IDS = new HashMap<>();
+    private static final long serialVersionUID = -5304090358536948808L;
 
     static {
-        OFFER_IDS = new HashMap<String, String>();
         OFFER_IDS.put("A2OAJ7377F756P", "Amazon Warehouse Deals"); //UK
         OFFER_IDS.put("A8KICS1PHF7ZO", "Amazon Warehouse Deals"); //DE
         OFFER_IDS.put("A2L77EE7U53NWQ", "Amazon Warehouse Deals"); //US
@@ -60,7 +66,7 @@ public class Account extends Model {
     private static Map<String, BasicCookieStore> COOKIE_STORE_MAP;
 
     public static Map<String, BasicCookieStore> cookieMap() {
-        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<String, BasicCookieStore>();
+        if(COOKIE_STORE_MAP == null) COOKIE_STORE_MAP = new HashMap<>();
         return COOKIE_STORE_MAP;
     }
 
@@ -175,7 +181,6 @@ public class Account extends Model {
     }
 
     public String cookie(String name) {
-
         return cookie(name, null);
     }
 
@@ -199,10 +204,17 @@ public class Account extends Model {
             this.uniqueName = String.format("%s_%s", this.type.toString(), this.username);
     }
 
+    public boolean logged() {
+        String html = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
+        Document doc = Jsoup.parse(html);
+        return doc.select("form[name=signIn]").isEmpty();
+    }
+
     /**
      * 销售账号需要登陆的后台系统
      */
     public void loginAmazonSellerCenter() {
+        if(this.logged()) return;
         switch(this.type) {
             case AMAZON_UK:
             case AMAZON_DE:
@@ -213,33 +225,27 @@ public class Account extends Model {
             case AMAZON_JP:
                 String body = "";
                 try {
-                    /**
-                     * 1. Visit the website, fetch the new Cookie.
-                     * 2. With the website params and user/password to login.
+                    /*
+                      1. Visit the website, fetch the new Cookie.
+                      2. With the website params and user/password to login.
                      */
-                    F.T2<List<NameValuePair>, String> params = loginAmazonSellerCenterStep1();
-
-                    body = HTTP.post(this.cookieStore(), params._2, params._1);
-                    if(Play.mode.isDev()) {
-                        FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
-                                        this.id +
-                                        ".afterLogin.html"),
-                                body
-                        );
-                    }
+                    this.cookieStore().clear();
+                    String uri = this.loginAmazonSellerCenterStep1();
+                    loginAmazonSellerCenterStep2(uri);
+                    F.T3<List<NameValuePair>, List<BasicHeader>, String> params = loginAmazonSellerCenterStep3(uri);
+                    body = HTTP.post(this.cookieStore(), params._3, params._2, params._1,
+                            RequestConfig.custom().setCookieSpec("amazon").build());
 
                     if(haveCorrectCookie()) {
                         Logger.info("%s Seller Central Login Successful!", this.prettyName());
-                        HTTP.clearExpiredCookie();
+                        this.cookieStore().clearExpired(new Date());
                     } else {
                         Logger.warn("%s Seller Central Login Failed!", this.prettyName());
                     }
                 } catch(Exception e) {
                     try {
                         FileUtils.writeStringToFile(
-                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" +
-                                        this.id + ".error.html"),
+                                new File(Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id + ".error.html"),
                                 body
                         );
                     } catch(IOException e1) {
@@ -250,8 +256,7 @@ public class Account extends Model {
                 break;
             default:
                 Logger.warn(
-                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type +
-                                " is not support!");
+                        "Right now, can only login Amazon(UK,DE,FR) Seller Central. " + this.type + " is not support!");
         }
     }
 
@@ -265,40 +270,74 @@ public class Account extends Model {
                 StringUtils.isNotBlank(this.cookie("at-acbjp")); //JP
     }
 
-    public F.T2<List<NameValuePair>, String> loginAmazonSellerCenterStep1() throws IOException {
-        String body = HTTP.get(this.cookieStore(), this.type.sellerCentralHomePage());
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-
-
-        if(Play.mode.isDev()) {
-            FileUtils.writeStringToFile(new File(
-                    Constant.L_LOGIN + "/" + this.type.name() + ".id_" + this.id +
-                            ".homepage.html"),
-                    body
-            );
+    /**
+     * 访问 HomePage, 返回最后一个 Redirect 的 URI
+     *
+     * @return
+     */
+    public String loginAmazonSellerCenterStep1() {
+        HttpClientContext context = HTTP.request(this.cookieStore(), this.type.sellerCentralHomePage());
+        List<URI> uris = context.getRedirectLocations();
+        if(uris != null && uris.size() > 0) {
+            return uris.get(uris.size() - 1).toString();
+        } else {
+            return context.getTargetHost().getAddress().getHostAddress();
         }
+    }
 
+    public void loginAmazonSellerCenterStep2(String uri) {
+        HTTP.get(this.cookieStore(), uri);
+    }
+
+    /**
+     * @param uri
+     * @return
+     * @throws IOException
+     */
+    public F.T3<List<NameValuePair>, List<BasicHeader>, String> loginAmazonSellerCenterStep3(String uri) throws
+            IOException {
+        List<BasicHeader> headers = loginHeaders(uri);
+        List<NameValuePair> params = new ArrayList<>();
+
+        String body = HTTP.get(this.cookieStore(), uri);
         Document doc = Jsoup.parse(body);
-        Elements inputs = doc.select("form:eq(0) input");
-
+        Elements inputs = doc.select("form[name=signIn] input");
         if(inputs.size() == 0) {
-            Logger.info("WebSite [%s] Still have the Session with User [%s].",
-                    this.type.toString(), this.username
-            );
-            return new F.T2<List<NameValuePair>, String>(params, "");
+            Logger.info("WebSite [%s] Still have the Session with User [%s].", this.type.toString(), this.username);
+            return new F.T3<>(params, headers, "");
         }
 
         for(Element el : inputs) {
             String att = el.attr("name");
-            if("username".equals(att))
+            if("email".equals(att)) {
                 params.add(new BasicNameValuePair(att, this.username));
-            else if("password".equals(att))
+            } else if("password".equals(att)) {
                 params.add(new BasicNameValuePair(att, this.password));
-            else
+            } else {
                 params.add(new BasicNameValuePair(att, el.val()));
+            }
         }
-        return new F.T2<List<NameValuePair>, String>(params,
-                doc.select("form:eq(0)").attr("action"));
+        params.add(new BasicNameValuePair("sign-in-button", ""));
+        return new F.T3<>(params, headers, doc.select("form[name=signIn]").attr("action"));
+    }
+
+    /**
+     * Login 需要用到的 Headers
+     *
+     * @return
+     */
+    public List<BasicHeader> loginHeaders(String uri) {
+        List<BasicHeader> headers = new ArrayList<>();
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT,
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"));
+        headers.add(new BasicHeader(HttpHeaders.CACHE_CONTROL, "max-age=0"));
+        headers.add(new BasicHeader("Origin", this.type.sellerCentralHomePage()));
+        headers.add(new BasicHeader("Upgrade-Insecure-Requests", "1"));
+        headers.add(new BasicHeader(HttpHeaders.USER_AGENT,
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36"));
+        headers.add(new BasicHeader(HttpHeaders.REFERER, uri));
+        headers.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4"));
+        return headers;
     }
 
     /**
@@ -326,14 +365,14 @@ public class Account extends Model {
                 Elements inputs = doc.select("#ap_signin_form input");
 
                 if(inputs.size() == 0) {
-                    Logger.info("WebSite [" + market.toString() +
-                            "] Still have the Session with User [" + this.username + "].");
+                    Logger.info("WebSite [" + market.toString()
+                            + "] Still have the Session with User [" + this.username + "].");
                     FLog.fileLog(String.format("%s.Login.html", this.prettyName()), body,
                             FLog.T.HTTP_ERROR);
                     return false;
                 }
 
-                Set<NameValuePair> params = new HashSet<NameValuePair>();
+                Set<NameValuePair> params = new HashSet<>();
                 for(Element el : inputs) {
                     String att = el.attr("name");
                     if("email".equals(att)) params.add(new BasicNameValuePair(att, this.username));
@@ -358,11 +397,10 @@ public class Account extends Model {
                             FLog.T.HTTP_ERROR);
                     loginSucc = false;
                 }
-                HTTP.client().getCookieStore().clearExpired(new Date());
+                this.cookieStore(market).clearExpired(new Date());
                 return loginSucc;
             default:
-                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market +
-                        " is not support!");
+                Logger.warn("Right now, can only login Amazon(UK,DE,FR) Site." + market + " is not support!");
         }
         return false;
     }
@@ -449,7 +487,7 @@ public class Account extends Model {
                 listing.market.amazonAsinLink(listing.asin));
         Document doc = Jsoup.parse(listing_body);
         Elements inputs = doc.select("#handleBuy input");
-        Set<NameValuePair> params = new HashSet<NameValuePair>();
+        Set<NameValuePair> params = new HashSet<>();
         for(Element el : inputs) {
             if(StringUtils.isNotBlank(el.val())) {
                 params.add(new BasicNameValuePair(el.attr("name"), el.val()));
@@ -507,7 +545,7 @@ public class Account extends Model {
         // 只有后面登陆成功了, 才允许记录 Record
         if(loginAndClicks._1) record.save();
         else Logger.warn("Not Login? %s, %s", this.prettyName(), this.password);
-        return new F.T2<AmazonReviewRecord, String>(record, content);
+        return new F.T2<>(record, content);
     }
 
     /**
@@ -539,7 +577,7 @@ public class Account extends Model {
             FLog.fileLog(String.format("%s.URL_NULL.%s.%s.Failed.html", this.prettyName(),
                     review.reviewId, review.listing.market), html, FLog.T.HTTP_ERROR);
 
-        return new F.T3<Boolean, String, String>(isLogin, upAndDownLink[0], upAndDownLink[1]);
+        return new F.T3<>(isLogin, upAndDownLink[0], upAndDownLink[1]);
     }
 
     /**
@@ -552,13 +590,13 @@ public class Account extends Model {
         Element oldAmazon = doc.select("#navidWelcomeMsg").first();
         if(oldAmazon != null) {
             String navidWelcomeMsgStr = doc.select("#navidWelcomeMsg").outerHtml();
-            return StringUtils.contains(navidWelcomeMsgStr, "sign-out") ||
-                    StringUtils.contains(navidWelcomeMsgStr, "signout");
+            return StringUtils.contains(navidWelcomeMsgStr, "sign-out")
+                    || StringUtils.contains(navidWelcomeMsgStr, "signout");
         } else {
             String nav_your_account_flyoutStr = doc.select("#nav_your_account_flyout").outerHtml();
-            return StringUtils.contains(nav_your_account_flyoutStr, "sign-out") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "signout") ||
-                    StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
+            return StringUtils.contains(nav_your_account_flyoutStr, "sign-out")
+                    || StringUtils.contains(nav_your_account_flyoutStr, "signout")
+                    || StringUtils.contains(nav_your_account_flyoutStr, "Sign Out");
         }
     }
 

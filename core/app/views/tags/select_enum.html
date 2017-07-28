@@ -2,8 +2,11 @@
 #{if _class}
     name="${_name}" class="${_class}"
 #{/if}
+#{if _native}
+    native
+#{/if}
 #{else }
-    size="1" name="${_name}" class="${_class}">
+    name="${_name}" class="${_class}">
 #{/else}>
 #{doBody /}
 #{list items:_items}

@@ -66,15 +66,15 @@ public class ListingOffer extends GenericModel {
 
     @Override
     public String toString() {
-        return "ListingOffer{" +
-                "listing=" + listing.listingId +
-                ", name='" + name + '\'' +
-                ", offerId='" + offerId + '\'' +
-                ", price=" + price +
-                ", shipprice=" + shipprice +
-                ", fba=" + fba +
-                ", buybox=" + buybox +
-                '}';
+        return "ListingOffer{"
+                + "listing=" + listing.listingId
+                + ", name='" + name + '\''
+                + ", offerId='" + offerId + '\''
+                + ", price=" + price
+                + ", shipprice=" + shipprice
+                + ", fba=" + fba
+                + ", buybox=" + buybox
+                + '}';
     }
 
     @Override

@@ -1,16 +1,12 @@
 package models.market;
 
-import helper.DBUtils;
 import helper.Dates;
-import helper.GTs;
-import helper.Jitbit;
 import models.product.Category;
 import models.product.Product;
-import notifiers.Mails;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.Duration;
-import play.Logger;
 import play.data.validation.Email;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -29,8 +25,8 @@ import java.util.List;
  * Time: 5:15 PM
  */
 @Entity
+@DynamicUpdate
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
 public class Feedback extends GenericModel {
 
     public static final String FRONT_TABLE = "Feedback.frontPageTable";
@@ -99,23 +95,6 @@ public class Feedback extends GenericModel {
     }
 
     /**
-     * 检查这个 Feedback, 如果 <= 3 则发送警告邮件, 并且没有创建 OsTicket 则去创建 OsTicket;
-     */
-    public void checkMailAndTicket() {
-        /**
-         * 1. 判断是否需要发送警告邮件;
-         * 2. 判断是否需要去 OsTicket 系统中创建 Ticket.
-         */
-        if(this.score <= 3 && this.isSelfBuildListing()) {
-            this.openTicket(null);
-            DBUtils.execute("update Feedback set osTicketId=" + this.osTicketId
-                    + " where orderId='" + this.orderId + "'");
-            Mails.feedbackWarnning(this);
-            this.save();
-        }
-    }
-
-    /**
      * 判断产生这个 Feedback 的 Listing(s) 是否含有自建的 Listing;
      * ps: 因为 Feedback 对应 Order, 而 Order 可以拥有很多 OrderItem
      *
@@ -155,38 +134,6 @@ public class Feedback extends GenericModel {
         return this.save();
     }
 
-    /**
-     * 向 OsTicket 系统开启一个新的 Ticket
-     *
-     * @param title 可以调整的在 OsTicket 中创建的 Ticket 的 title, 回复给客户的邮件 Title 也是如此.
-     */
-    public String openTicket(String title) {
-        if(Feedback.find("orderid=?", this.orderId).fetch().size() <= 0) {
-            Logger.info("feedback orderId is not exist!! %s", this.orderId);
-            return null;
-        }
-
-        if(StringUtils.isNotBlank(this.osTicketId)) {
-            Logger.info("Feedback OsTicket is exist! %s", this.osTicketId);
-            return null;
-        }
-        String name = this.orderId;
-        String email = this.email;
-        String subject = title;
-        String content = GTs.render("OsTicketFeedbackWarn", GTs.newMap("f", this).build());
-
-        if(this.orderr != null)
-            name = String.format("%s - %s", this.orderr.buyer, this.market.toString());
-        if(StringUtils.isBlank(subject)) {
-            if(this.market == M.AMAZON_DE) {
-                subject = "Sie haben einen neutralen/negativen Kommentar bei Amazon hinterlassen. Dürfen wir Ihnen helfen?";
-            } else {
-                subject = "We would like to address your feedback!";
-            }
-        }
-        this.osTicketId = Jitbit.addTicket(email, name, subject, content, Jitbit.Category.FEEDBACK);
-        return this.osTicketId;
-    }
 
     public void comment(String memo) {
         if(!StringUtils.contains(this.memo, memo))
@@ -200,8 +147,7 @@ public class Feedback extends GenericModel {
      * @return
      */
     public boolean isExpired() {
-        return new Duration(this.createDate.getTime(), System.currentTimeMillis())
-                .getStandardDays() >= 60;
+        return new Duration(this.createDate.getTime(), System.currentTimeMillis()).getStandardDays() >= 60;
     }
 
 
@@ -225,9 +171,9 @@ public class Feedback extends GenericModel {
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
 
-        Feedback feedback = (Feedback) o;
+        Feedback feed = (Feedback) o;
 
-        if(orderId != null ? !orderId.equals(feedback.orderId) : feedback.orderId != null)
+        if(orderId != null ? !orderId.equals(feed.orderId) : feed.orderId != null)
             return false;
 
         return true;
@@ -246,7 +192,7 @@ public class Feedback extends GenericModel {
      * @return
      */
     public List<Category> relateCats() {
-        List<Category> cats = new ArrayList<Category>();
+        List<Category> cats = new ArrayList<>();
         for(OrderItem itm : this.orderr.items) {
             cats.add(Product.<Product>findById(
                     Product.merchantSKUtoSKU(itm.selling.merchantSKU)).category);

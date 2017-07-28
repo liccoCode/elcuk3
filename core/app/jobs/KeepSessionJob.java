@@ -4,6 +4,7 @@ import helper.LogUtils;
 import jobs.driver.BaseJob;
 import models.market.Account;
 import play.Logger;
+import play.jobs.Every;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
  * Date: 3/14/12
  * Time: 4:38 PM
  */
+@Every("20mn")
 public class KeepSessionJob extends BaseJob {
 
     @Override
@@ -28,7 +30,7 @@ public class KeepSessionJob extends BaseJob {
             Logger.info(String.format("Login %s with account %s.", ac.type, ac.username));
             ac.loginAmazonSellerCenter();
         }
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"KeepSessionJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "KeepSessionJob")) {
             LogUtils.JOBLOG
                     .info(String.format("KeepSessionJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }

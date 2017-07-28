@@ -25,6 +25,7 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Listing 对应的是不同渠道上 Listing 的信息
@@ -65,9 +66,8 @@ public class Listing extends GenericModel {
     /**
      * 不能级联删除, 并且删除 Listing 的时候需要保证 Selling 都已经处理了
      */
-    @OneToMany(mappedBy = "listing",
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-                    CascadeType.REFRESH})
+    @OneToMany(mappedBy = "listing", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH})
     public List<Selling> sellings;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
@@ -170,6 +170,11 @@ public class Listing extends GenericModel {
      */
     public Date lastReviewCheckDate = new Date();
 
+    /**
+     * Listing 的得分(重要程度)
+     */
+    public Integer score = 0;
+
     public void setAsin(String asin) {
         this.asin = asin;
         if(this.market != null && this.asin != null)
@@ -199,7 +204,8 @@ public class Listing extends GenericModel {
         if(newListing.totalOffers != null) this.totalOffers = newListing.totalOffers;
         if(StringUtils.isNotBlank(newListing.picUrls)) this.picUrls = newListing.picUrls;
         if(newListing.offers != null && newListing.offers.size() > 0) {
-            for(ListingOffer lo : this.offers) lo.delete(); //清理掉原来的 ListingOffers
+            //清理掉原来的 ListingOffers
+            this.offers.forEach(ListingOffer::delete);
             this.offers = newListing.offers;
         }
         this.lastUpdateTime = System.currentTimeMillis();
@@ -244,8 +250,7 @@ public class Listing extends GenericModel {
 
         if(needWarnningOffers >= 1) {
             //两天处理时间
-            if(this.closeWarnningTime != null &&
-                    DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
+            if(this.closeWarnningTime != null && DateTime.now().minusDays(2).isBefore(this.closeWarnningTime.getTime()))
                 return;
             Mails.moreOfferOneListing(offers, this);
             //标记为被跟踪
@@ -267,7 +272,7 @@ public class Listing extends GenericModel {
                 .nonAddWishListAccs(opendAccs, this.listingId);
         if(nonWishListAccs.size() == 0)
             throw new FastRuntimeException("系统内所有的账户都已经添加这个Listing到WishList,请添加新账户");
-        return new F.T2<Account, Integer>(nonWishListAccs.get(0), nonWishListAccs.size());
+        return new F.T2<>(nonWishListAccs.get(0), nonWishListAccs.size());
     }
 
     /**
@@ -276,15 +281,14 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<F.T2<Long, Integer>> reviewMonthTable() {
-        List<Map<String, Object>> rows = DBUtils
-                .rows("select listingId, date_format(reviewDate, '%Y-%m') as date, count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, '%Y-%m')",
-                        this.listingId);
-        List<F.T2<Long, Integer>> monthTable = new ArrayList<F.T2<Long, Integer>>();
-        for(Map<String, Object> row : rows) {
-            monthTable.add(new F.T2<Long, Integer>(
-                    DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
-                    ((Long) row.get("count")).intValue()));
-        }
+        List<Map<String, Object>> rows = DBUtils.rows("select listingId, date_format(reviewDate, '%Y-%m') as date,  "
+                + "count(*) as count from AmazonListingReview where listingId=? group by date_format(reviewDate, "
+                + "'%Y-%m')", this.listingId);
+        List<F.T2<Long, Integer>> monthTable = rows.stream()
+                .map(row -> new F.T2<>(
+                        DateTime.parse(row.get("date").toString(), DateTimeFormat.forPattern("yyyy-MM")).getMillis(),
+                        ((Long) row.get("count")).intValue()))
+                .collect(Collectors.toList());
         return monthTable;
     }
 
@@ -378,7 +382,7 @@ public class Listing extends GenericModel {
         tobeChangeed.likes = lst.get("likes").getAsInt();
 
         if(oldListing != null) { // 如果不为空, 那么保持最新的 LisitngOffer 信息, 删除老的重新记录
-            for(ListingOffer of : tobeChangeed.offers) of.delete();
+            tobeChangeed.offers.forEach(ListingOffer::delete);
         }
         if(fullOffer) {
             try {
@@ -390,7 +394,7 @@ public class Listing extends GenericModel {
             }
         } else {
             JsonArray offers = lst.get("offers").getAsJsonArray();
-            List<ListingOffer> newOffers = new ArrayList<ListingOffer>();
+            List<ListingOffer> newOffers = new ArrayList<>();
             for(JsonElement offerEl : offers) {
                 JsonObject offer = offerEl.getAsJsonObject();
                 ListingOffer off = ListingOffersWork.jsonToOffer(offer);
@@ -417,11 +421,8 @@ public class Listing extends GenericModel {
      */
     public static boolean isSelfBuildListing(String title) {
         title = title.toLowerCase();
-        if(StringUtils.contains(title, "easyacc")) return true;
-        else if(StringUtils.contains(title, "nosson")) return true;
-        else if(StringUtils.contains(title, "fencer")) return true;
-        else if(StringUtils.contains(title, "saner")) return true;
-        else return false;
+        return StringUtils.contains(title, "easyacc") || StringUtils.contains(title, "nosson")
+                || StringUtils.contains(title, "fencer") || StringUtils.contains(title, "saner");
     }
 
     public static String lid(String asin, M market) {
@@ -436,7 +437,7 @@ public class Listing extends GenericModel {
      */
     public static F.T2<String, M> unLid(String lid) {
         String[] args = StringUtils.split(lid, "_");
-        return new F.T2<String, M>(args[0], M.val(args[1]));
+        return new F.T2<>(args[0], M.val(args[1]));
     }
 
     public static boolean exist(String lid) {
@@ -452,7 +453,7 @@ public class Listing extends GenericModel {
         Set<String> asins = Cache.get(cacheKey, Set.class);
         if(asins != null) return asins;
 
-        asins = new HashSet<String>();
+        asins = new HashSet<>();
         List<Listing> listings = Listing.findAll();
         for(Listing li : listings) asins.add(li.asin);
 
@@ -462,6 +463,8 @@ public class Listing extends GenericModel {
 
     /**
      * 获得被跟踪的Listing
+     *
+     * @deprecated
      */
     public static List<Listing> trackedListings() {
         return Listing.find("isTracked = true").fetch();
@@ -498,12 +501,12 @@ public class Listing extends GenericModel {
      * @return
      */
     public static List<String> getAllListingBySKU(String sku) {
-        List<String> listingIds = new ArrayList<String>();
+        List<String> listingIds = new ArrayList<>();
         SqlSelect sql = new SqlSelect().select("listingId").from("Listing").where("product_sku=?").param(sku);
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        for(Map<String, Object> row : rows) {
-            listingIds.add(row.get("listingId").toString());
-        }
+        listingIds.addAll(rows.stream()
+                .map(row -> row.get("listingId").toString())
+                .collect(Collectors.toList()));
         return listingIds;
     }
 
@@ -513,8 +516,8 @@ public class Listing extends GenericModel {
      * @return
      */
     public List<Selling> sellings() {
-        List<Selling> sellings = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
-        return sellings;
+        List<Selling> sellingList = Selling.find("state <> 'DOWN' AND listing_listingId = ?", this.listingId).fetch();
+        return sellingList;
     }
 
     public void safeDelete() {
@@ -522,7 +525,7 @@ public class Listing extends GenericModel {
         if(this.sellings.size() > 0) {
             Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
         }
-        for(ListingStateRecord record : this.stateRecords) record.delete();
+        this.stateRecords.forEach(ListingStateRecord::delete);
         this.delete();
     }
 

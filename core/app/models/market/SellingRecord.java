@@ -10,6 +10,7 @@ import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -29,7 +30,7 @@ import java.util.*;
  * Time: 6:40 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class SellingRecord extends GenericModel {
 
     @Transient
@@ -108,7 +109,7 @@ public class SellingRecord extends GenericModel {
     @Expose
     public Integer units = 0;
 
-    // TODO: 所有与金钱相关的, 币种统一为 USD (按照当天计算时的 google 财经汇率计算)
+    // 所有与金钱相关的, 币种统一为 USD (按照当天计算时的 google 财经汇率计算)
 
     /**
      * 销售额(通过系统计算)
@@ -215,6 +216,8 @@ public class SellingRecord extends GenericModel {
      * ps: 为什么不和采购成本计算一样, 使用长时间的平均值?
      * 答: 因为运输等成本的计算无法获取最细节的运输量, 都是根据体重,重量均等下来的.
      * 同时, 按照现在的算法进行如此的计算, 难度相当大.
+     *
+     * @deprecated
      */
     public float mergeWithLatest(Float currentValue, String name) {
         Logger.info("%s - %s", this.selling.sellingId, name);
@@ -243,6 +246,8 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 将计算出的费用根据 units 数量换算成单个的费用
+     *
+     * @deprecated
      */
     public float totalToSingle(Float totalFee) {
         if(this.units == null || this.units < 0) throw new FastRuntimeException("请先计算 units 的值");
@@ -253,8 +258,6 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 根据已经计算好的 快递/空运/海运 运费, 用于估计计算物流成本
-     *
-     * @return
      */
     public float mergeToShipCost() {
         return (this.expressCost * 0.333f) + (this.seaCost * 0.333f) + (this.airCost * 0.333f);
@@ -262,8 +265,6 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 统计采购物流的单个成本(包括 VAT)
-     *
-     * @return
      */
     public float procureAndShipCost() {
         // 物流 + VAT + 采购
@@ -273,6 +274,8 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 计算单个成本利润率 = 利润 / (采购成本 + 运输成本 + VAT)
+     *
+     * @deprecated
      */
     public float costProfitRatio() {
         if(this.procureAndShipCost() == 0) return 0;
@@ -282,6 +285,8 @@ public class SellingRecord extends GenericModel {
 
     /**
      * 单个销售利润率 = 利润 / 销售额
+     *
+     * @deprecated
      */
     public float saleProfitRatio() {
         if(this.sales == 0) return 0;
@@ -295,14 +300,14 @@ public class SellingRecord extends GenericModel {
      * <p/>
      * 拥有自己的 market 参数是因为为了兼容原来的 Amazon UK 账号在 DE 销售, 而 UK/DE 的数据是分开的
      *
-     * @return
+     * @deprecated
      */
     public static Set<SellingRecord> newRecordFromAmazonBusinessReports(Account acc, M market, Date oneDay) {
         DateTime dt = new DateTime(oneDay).plusDays(1);
         F.T2<DateTime, DateTime> actualDatePair = market
                 .withTimeZone(Dates.morning(oneDay), Dates.morning(dt.toDate()));
 
-        Set<SellingRecord> records = new HashSet<SellingRecord>();
+        Set<SellingRecord> records = new HashSet<>();
         JsonArray rows = null;
         int curentPage = 0;
         synchronized(acc.cookieStore()) {
@@ -321,8 +326,6 @@ public class SellingRecord extends GenericModel {
                             .getAsJsonObject();
                     hasNext = data.get("hasNextPage").getAsInt() > 0;
                 } catch(Exception e) {
-
-                    LogUtils.JOBLOG.info("SellingRecordCheckJob:" + market.toString() + e.getMessage());
 
                     FLog.fileLog(String.format("%s.%s.%s.json", acc.prettyName(), market,
                             Dates.date2Date(oneDay)), rtJson, FLog.T.SELLINGRECORD);
@@ -372,8 +375,6 @@ public class SellingRecord extends GenericModel {
                         records.add(record);
                     } catch(Exception e) {
 
-                        LogUtils.JOBLOG.info("SellingRecordCheckJob1:" + market.toString() + e.getMessage());
-
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
                                 Webs.E(e));
                     }
@@ -403,10 +404,9 @@ public class SellingRecord extends GenericModel {
 
         if(acc == null) {
             List<SellingRecord> dateMixRecords = SellingRecord
-                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from,
-                            to).fetch();
+                    .find("selling.merchantSKU=? AND date>=? AND date<=? ORDER BY date", msku, from, to).fetch();
             // 需要将相同 Date 不同 Market 的全部累计
-            Map<String, SellingRecord> groupByDate = new LinkedHashMap<String, SellingRecord>();
+            Map<String, SellingRecord> groupByDate = new LinkedHashMap<>();
             for(SellingRecord rcd : dateMixRecords) {
                 String key = rcd.date.getTime() + "" + rcd.market;
                 if(groupByDate.containsKey(key)) {
@@ -418,7 +418,7 @@ public class SellingRecord extends GenericModel {
                 } else
                     groupByDate.put(key, rcd);
             }
-            cacheElement = new ArrayList<SellingRecord>(groupByDate.values());
+            cacheElement = new ArrayList<>(groupByDate.values());
         } else {
             //因为对 Amazon 来说, 一个 Account 拥有相同 Msku 是不可能的, 所以没关系
             cacheElement = SellingRecord
@@ -582,31 +582,31 @@ public class SellingRecord extends GenericModel {
 
     @Override
     public String toString() {
-        return "SellingRecord{" +
-                "selling=" + selling +
-                ", account=" + account +
-                ", market=" + market +
-                ", id='" + id + '\'' +
-                ", sessions=" + sessions +
-                ", pageViews=" + pageViews +
-                ", orders=" + orders +
-                ", salePrice=" + salePrice +
-                ", units=" + units +
-                ", sales=" + sales +
-                ", income=" + income +
-                ", amzFee=" + amzFee +
-                ", fbaFee=" + fbaFee +
-                ", procureCost=" + procureCost +
-                ", procureNumberSum=" + procureNumberSum +
-                ", expressCost=" + expressCost +
-                ", airCost=" + airCost +
-                ", seaCost=" + seaCost +
-                ", profit=" + profit +
-                ", costProfitRatio=" + costProfitRatio +
-                ", saleProfitRatio=" + saleProfitRatio +
-                ", totalSales=" + totalSales +
-                ", totalProfit=" + totalProfit +
-                ", date=" + date +
-                '}';
+        return "SellingRecord{"
+                + "selling=" + selling
+                + ", account=" + account
+                + ", market=" + market
+                + ", id='" + id + '\''
+                + ", sessions=" + sessions
+                + ", pageViews=" + pageViews
+                + ", orders=" + orders
+                + ", salePrice=" + salePrice
+                + ", units=" + units
+                + ", sales=" + sales
+                + ", income=" + income
+                + ", amzFee=" + amzFee
+                + ", fbaFee=" + fbaFee
+                + ", procureCost=" + procureCost
+                + ", procureNumberSum=" + procureNumberSum
+                + ", expressCost=" + expressCost
+                + ", airCost=" + airCost
+                + ", seaCost=" + seaCost
+                + ", profit=" + profit
+                + ", costProfitRatio=" + costProfitRatio
+                + ", saleProfitRatio=" + saleProfitRatio
+                + ", totalSales=" + totalSales
+                + ", totalProfit=" + totalProfit
+                + ", date=" + date
+                + '}';
     }
 }

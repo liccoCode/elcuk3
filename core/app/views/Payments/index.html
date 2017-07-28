@@ -1,10 +1,11 @@
 #{extends 'main_full.html' /}
 #{set title:"付款单列表"  /}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name:'payments.css'/}
+    #{stylesheet 'payments.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script_cdn name: 'component/pagination.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'applys/index.es6'/}
 #{/set}
 
 #{form @Payments.index(), class:'search_form', id:'payments_form', method:'POST'}
@@ -21,19 +22,21 @@
 
     <div class="inline">
         #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values() , value: p.dateType /}
-
+    </div>
+    <div class="inline">
         #{select_enum name:'p.states', items:models.finance.Payment.S.values()}
           <option value="">状态</option>
         #{/select_enum}
-
+    </div>
+    <div class="inline">
         #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
             #{option ''}合作伙伴#{/option}
         #{/select}
-
+    </div>
+    <div class="inline">
         #{select name:'p.actualCurrency', items:helper.Currency.values() , value: p.actualCurrency }
             #{option ''}支付币种#{/option}
         #{/select}
-
     </div>
 
     <div class="input-prepend input-append inline">
@@ -42,7 +45,6 @@
       <input type="text" style="width:120px;" name="p.search" placeholder="支付账号" value="${p.search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
-
   </div>
 </div>
 

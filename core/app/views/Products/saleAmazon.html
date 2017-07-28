@@ -1,13 +1,13 @@
 #{extends 'main_full.html'/}
 #{set title: '提交 Feed 创建 Selling' /}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name:'market.css'/}
+    #{stylesheet 'market.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script_cdn name: 'editor/kindeditor-min.js'/}
-    #{script_cdn name: 'editor/lang/zh_CN.js'/}
-    #{script_cdn name: 'component/amazon.coffee'/}
-    #{script_cdn name: 'products/saleAmazon.coffee'/}
+    #{script 'editor/kindeditor-min.js'/}
+    #{script 'editor/lang/zh_CN.js'/}
+    #{script 'component/amazon.coffee'/}
+    #{script 'products/saleAmazon.coffee'/}
 #{/set}
 <div id='check_modal' class="modal hide fade">
   <div class="modal-header">
@@ -42,7 +42,7 @@
   </div>
   <div class="span5">
       #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku/}
-      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc, readonly:true /}
+      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc/}
       #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer',
       value: "${models.OperatorConfig.getVal("addressname")}" /}
       #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: "${models.OperatorConfig.getVal("addressname")}"/}
@@ -62,7 +62,8 @@
       #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
       #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
       'ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports', 'Lighting']/}
-      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null /}
+      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null,
+      native: true /}
       #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
       #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
       #{text_field id:'partNumber',readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: product.partNumber /}

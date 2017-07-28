@@ -1,22 +1,22 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Currency;
 import helper.Webs;
 import models.procure.FBACenter;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.procure.Shipment;
-import models.product.Whouse;
 import models.view.post.ProcureUnitShipPost;
+import models.whouse.Whouse;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import helper.Currency;
 
 import java.util.List;
 
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ShipItems extends Controller {
 
     @Before(only = "index")
@@ -29,6 +29,14 @@ public class ShipItems extends Controller {
         if(p == null)
             p = new ProcureUnitShipPost();
         List<ProcureUnit> units = p.query();
+        List<Shipment> shipments = Shipment.findByState(Shipment.S.PLAN);
+        render(p, units, shipments);
+    }
+
+    public static void indexB2B(ProcureUnitShipPost p) {
+        if(p == null)
+            p = new ProcureUnitShipPost();
+        List<ProcureUnit> units = p.queryB2B();
         render(p, units);
     }
 
@@ -57,15 +65,12 @@ public class ShipItems extends Controller {
             Webs.errorToFlash(flash);
             Shipments.show(shipmentId);
         }
-
         ShipItem.adjustShipment(shipItemId, shipment);
-
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
         } else {
             flash.success("成功调整 %s 个运输项目到 %s 运输单", shipItemId.size(), targetId);
         }
-
         Shipments.show(shipmentId);
     }
 

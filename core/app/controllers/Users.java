@@ -3,14 +3,14 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
-import models.Privilege;
-import models.Role;
-import models.User;
+import models.*;
 import models.product.Team;
 import models.view.Ret;
+import models.view.post.UserPost;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import play.Logger;
 import play.data.validation.Validation;
 import play.libs.Crypto;
 import play.mvc.Before;
@@ -18,10 +18,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User 相关的操作
@@ -33,8 +30,9 @@ import java.util.Set;
 public class Users extends Controller {
 
     @Check("users.index")
-    public static void index() {
-        List<User> users = User.findAll();
+    public static void index(UserPost p) {
+        if(p == null) p = new UserPost();
+        List<User> users = p.query();
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
@@ -45,13 +43,18 @@ public class Users extends Controller {
         renderArgs.put("maps", maps);
         renderArgs.put("modules", modules);
 
-        render(users, privileges, teams, roles);
+        render(users, privileges, teams, roles, p);
     }
 
     @Before(only = {"home", "updates"})
     public static void setHomePage() {
         int page = NumberUtils.toInt(request.params.get("page"), 1);
-        renderArgs.put("notifications", Login.current().notificationFeeds(page));
+        List<Notification> notifications = new ArrayList<>();
+        User user = Login.current();
+        if(user != null) {
+            notifications = user.notificationFeeds(page);
+        }
+        renderArgs.put("notifications", notifications);
     }
 
     public static void home() {
@@ -95,31 +98,33 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
     }
 
-    public static void updates(User user, Long userid, String newPassword, String newPasswordConfirm) {
+    public static void updates(User wuser, Long userid, String newPassword, String newPasswordConfirm) {
 
-        User dbuser = User.findById(userid);
-        user.confirm = user.password;
-        //validation.valid(user);
-
+        User user = User.findById(userid);
+        if(!user.authenticate(wuser.password)) {
+            Validation.addError("", "用户密码错误, 请确认当前用户的密码正确");
+        }
         // 如果填写了新密码, 那么则需要修改密码
         if(StringUtils.isNotBlank(newPassword)) {
-            validation.equals(newPassword, newPasswordConfirm);
+            Validation.equals("Password", newPassword, "Confirm Password", newPasswordConfirm);
         }
         if(Validation.hasErrors())
-            render("Users/home.html", dbuser);
+            render("Users/home.html", user);
 
         try {
-            dbuser.tel = user.tel;
-            dbuser.wangwang = user.wangwang;
-            dbuser.phone = user.phone;
-            dbuser.qq = user.qq;
-            dbuser.update();
-            if(StringUtils.isNotBlank(newPassword))
-                dbuser.changePasswd(newPassword);
+            user.tel = wuser.tel;
+            user.wangwang = wuser.wangwang;
+            user.phone = wuser.phone;
+            user.qq = wuser.qq;
+            if(StringUtils.isNotBlank(newPassword)) {
+                user.changePasswd(newPassword);
+            } else {
+                user.update();
+            }
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
             Validation.addError("", Webs.E(e));
-            render("Users/home.html", dbuser);
+            render("Users/home.html", user);
         }
         flash.success("修改成功.");
         redirect("/users/home");
@@ -173,7 +178,8 @@ public class Users extends Controller {
     }
 
     public static void create() {
-        render();
+        String brandName = OperatorConfig.getVal("brandname");
+        render(brandName);
     }
 
     /**
@@ -189,6 +195,8 @@ public class Users extends Controller {
             if(StringUtils.isBlank(user.password)) Webs.error("密码不能为空");
             if(StringUtils.isBlank(user.confirm)) Webs.error("确认密码不能为空");
             if(!StringUtils.equals(user.password, user.confirm)) Webs.error("密码和确认密码填写不一致");
+            if(User.count("username=?", user.username) > 0) Webs.error("用户名已经存在，请重新输入！");
+            user.username = user.username.toLowerCase();
             user.save();
             flash.success("创建用户成功");
             redirect("/users/index");
@@ -217,7 +225,7 @@ public class Users extends Controller {
              * 清理TEAM的信息
              */
             Team.clearUserTeamsCache(user);
-            user.privileges = new HashSet<Privilege>();
+            user.privileges = new HashSet<>();
             user.password = RandomStringUtils.randomAlphanumeric(15);
             user.closed = true;
             user.save();

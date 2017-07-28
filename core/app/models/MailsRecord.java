@@ -9,6 +9,7 @@ import notifiers.FBAMails;
 import notifiers.Mails;
 import notifiers.SystemMails;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.cache.Cache;
 import play.db.helper.SqlQuery;
@@ -26,9 +27,10 @@ import java.util.*;
  * Time: 下午3:16
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class MailsRecord extends Model {
 
+    private static final long serialVersionUID = 922525941133922956L;
     /**
      * 邮件名称
      */
@@ -95,19 +97,16 @@ public class MailsRecord extends Model {
      * @return
      */
     @Cached("5mn")
-    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates,
-                                         boolean success, String group) {
+    public static HighChart ajaxRecordBy(Date from, Date to, T type, List<String> templates, boolean success,
+                                         String group) {
         DateTime _from = new DateTime(Dates.morning(from));
         DateTime _to = new DateTime(Dates.night(to));
-
-
-        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates,
-                success, group);
+        List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates, success, group);
         HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
 
         //初始化不同邮件类型 模板的使用次数
-        Map<String, Float> counts = new HashMap<String, Float>();
+        Map<String, Float> counts = new HashMap<>();
         if(templates != null)
             for(String t : templates) {
                 counts.put(t, 0f);
@@ -172,12 +171,9 @@ public class MailsRecord extends Model {
         String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, templates);
         List<MailsRecord> records = Cache.get(cacheKey, List.class);
         if(records != null) return records;
-
         synchronized(MailsRecord.class) {
-
-            StringBuilder querystr = new StringBuilder(
-                    "type=? and createdAt between ? and ? and success=?");
-            List<Object> paras = new ArrayList<Object>();
+            StringBuilder querystr = new StringBuilder("type=? and createdAt between ? and ? and success=?");
+            List<Object> paras = new ArrayList<>();
             paras.add(type);
             paras.add(from);
             paras.add(to);
@@ -195,8 +191,6 @@ public class MailsRecord extends Model {
                 Cache.add(cacheKey, records);
             }
         }
-
-
         return records;
     }
 

@@ -9,6 +9,7 @@ import play.data.validation.Validation;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -64,6 +65,7 @@ public class UnitAttrs implements Serializable {
 
     /**
      * 实际交货数量
+     * 目前版本对应 收货数量
      */
     public Integer qty;
 
@@ -101,4 +103,7 @@ public class UnitAttrs implements Serializable {
             Validation.past("procureunit.planShipDate", this.planShipDate, new Date(this.planArrivDate.getTime() + 1));
     }
 
+    public float formatPrice() {
+        return new BigDecimal(this.price).setScale(2, 4).floatValue();
+    }
 }

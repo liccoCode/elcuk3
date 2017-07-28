@@ -4,22 +4,34 @@
 #{else }
 <table class="table table-condensed table-bordered">
   <tr>
-    <th>SKU</th>
-    <th>Family</th>
+    <th width="60px;"></th>
+    <th style="min-width:120px;">SKU</th>
+    <th style="width:100px;">Family</th>
     <th>Name</th>
-    <th>最近采购价格</th>
-    <th>最近采购供应商</th>
-    <th>产品状态</th>
-    <th>销售级别</th>
-    <th>上市时间</th>
-    <th>退市时间</th>
-    <th>Action</th>
+    <th style="width:90px;">最近采购价格</th>
+    <th style="width:120px;">最近采购供应商</th>
+    <th style="width:70px;">产品状态</th>
+    <th style="width:70px;">销售级别</th>
+    <th style="width:80px;">上市时间</th>
+    <th style="width:80px;">退市时间</th>
+    <th style="width:140px;">Action</th>
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
+        <td height="60px;">
+          <a href="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg" target="_blank">
+            <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg">
+          </a>
+        </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
-        <td class="span10">${prod.productName}</td>
+        <td class="span10">${prod.productName}
+            #{if prod.origin_sku}<br>
+              <span style="color:red">同${prod.origin_project?.name()} sku:
+            <a href="${prod.origin_project?.url()}product/${prod.origin_sku}" target="_blank">${prod.origin_sku}</a>
+          </span>
+            #{/if}
+        </td>
           #{set unit: prod.recentlyUnit()/}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
         <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
@@ -41,20 +53,29 @@
         </td>
         <td>#{time_tooltip time:prod.marketTime/}</td>
         <td>#{time_tooltip time:prod.delistingTime/}</td>
-        <td style="width:140px">
-          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-info">
-            <i class="icon-refresh"></i>同步
+        <td>
+          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-success" rel="tooltip" title="同步"
+             data-sku="${prod.sku}">
+            <i class="icon-refresh"></i>
           </a>
-          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info">复制</a>
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info" rel="tooltip" title="复制"
+             data-sku="${prod.sku}" data-family="${prod.family?.family}">
+            <i class="icon-copy"></i>
+          </a>
             #{power.ck "products.destroy"}
-              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger">删除</a>
+              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger" rel="tooltip" title="删除">
+                <i class="icon-trash"></i>
+              </a>
             #{/power.ck}
+          <a href="" class="btn btn-mini btn-warning" rel="tooltip" title="物料配置">
+            <i class="icon-th-list"></i>
+          </a>
         </td>
       </tr>
     #{/list}
     #{if pi}
       <tr>
-        <td colspan="10">
+        <td colspan="11">
             #{bootstrap_pager pi:pi, url:'/products/index'/}
         </td>
       </tr>
@@ -70,9 +91,7 @@
   <div class="modal-body">
   #{form @Products.copy(), id:'update_form'}
     <dl class="dl-horizontal">
-
-      <input type="hidden" id="target_choseid" name="choseid" value="3333">
-
+      <input type="hidden" id="target_choseid" name="choseid" value="3333"/>
       <dt>选择SKU</dt>
       <dd>
         <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${products}"
@@ -125,7 +144,7 @@
       <dt>选择复制的信息:</dt>
       <dd>
         <label class="checkbox">
-          <input disabled="true" type="checkbox" name="base" value="1" checked>
+          <input disabled type="checkbox" name="base" value="1" checked>
           <a>基本属性</a>
         </label>
         <label class="checkbox">
@@ -146,5 +165,4 @@
   #{/form}
   </div>
 </div>
-
 #{include 'Products/_destroyLogForm.html'/}

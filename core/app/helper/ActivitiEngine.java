@@ -7,10 +7,10 @@ package helper;
  * Time: 上午10:09
  */
 
-import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
+import org.activiti.engine.impl.context.Context;
 import play.db.DB;
 
 public class ActivitiEngine {
@@ -22,7 +22,7 @@ public class ActivitiEngine {
                 ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration();
         processEngineConfiguration.setDatabaseSchemaUpdate(
                 ProcessEngineConfiguration.DB_SCHEMA_UPDATE_FALSE);
-        processEngineConfiguration.setDataSource(DB.datasource);
+        processEngineConfiguration.setDataSource(DB.getDataSource());
         processEngineConfiguration.setJobExecutorActivate(true);
 
         processEngineConfiguration.setActivityFontName("微软雅黑");

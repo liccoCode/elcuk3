@@ -1,12 +1,14 @@
 package models.finance;
 
-import helper.*;
 import helper.Currency;
+import helper.Dates;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.market.M;
 import models.procure.Cooperator;
 import models.procure.Shipment;
+import models.view.dto.ApplyPaymentDTO;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
@@ -20,8 +22,8 @@ import javax.persistence.OneToOne;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-
-import models.view.dto.ApplyPaymentDTO;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,10 +43,10 @@ public class TransportApply extends Apply {
     public User applier;
 
     @OneToMany(mappedBy = "apply")
-    public List<Shipment> shipments = new ArrayList<Shipment>();
+    public List<Shipment> shipments = new ArrayList<>();
 
     @OneToMany(mappedBy = "tApply")
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
 
     @Override
@@ -81,7 +83,7 @@ public class TransportApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"));
+        return ElcukRecord.records(this.id + "", Arrays.asList("transportapply.save", "shipment.departFromApply"), 50);
     }
 
 
@@ -96,7 +98,8 @@ public class TransportApply extends Apply {
         if(Validation.hasErrors()) return null;
         TransportApply apply = new TransportApply();
         apply.serialNumber = apply.generateSerialNumber(shipCoperPair._2.iterator().next());
-        apply.createdAt = apply.updateAt = new Date();
+        apply.createdAt = new Date();
+        apply.updateAt = new Date();
         apply.applier = User.current();
         apply.save();
         apply.appendShipment(shipmentIds);
@@ -108,16 +111,16 @@ public class TransportApply extends Apply {
         if(shipments.size() != shipmentId.size())
             Validation.addError("", "提交的运输单参数与系统中的不符.");
 
-        Set<Cooperator> coopers = new HashSet<Cooperator>();
-        for(Shipment ship : shipments) {
-            if(ship.cooper != null) coopers.add(ship.cooper);
-        }
+        Set<Cooperator> coopers = shipments.stream().filter(ship -> ship.cooper != null).map(ship -> ship.cooper)
+                .collect(Collectors.toSet());
 
         if(coopers.size() > 1)
             Validation.addError("", "请仅对同一个运输商.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的运输单.");
-        return new F.T2<List<Shipment>, Set<Cooperator>>(shipments, coopers);
+        if(shipments.stream().anyMatch(shipment -> shipment.apply != null))
+            Validation.addError("", "请全部选择未创建请款单的运输单！");
+        return new F.T2<>(shipments, coopers);
     }
 
     /**
@@ -132,7 +135,7 @@ public class TransportApply extends Apply {
             usd += payment.totalFees()._1;
             cny += payment.totalFees()._2;
         }
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T2<>(usd, cny);
     }
 
     /**
@@ -147,7 +150,7 @@ public class TransportApply extends Apply {
                 cny += payment.actualCurrency.toCNY(payment.actualPaid.floatValue());
             }
         }
-        return new F.T2<Float, Float>(usd, cny);
+        return new F.T2<>(usd, cny);
     }
 
 
@@ -157,7 +160,7 @@ public class TransportApply extends Apply {
      * @return
      */
     public List<ApplyPaymentDTO> currencyFees() {
-        List<ApplyPaymentDTO> apply = new java.util.ArrayList<ApplyPaymentDTO>();
+        List<ApplyPaymentDTO> apply = new java.util.ArrayList<>();
         for(Currency currency : helper.Currency.values()) {
             ApplyPaymentDTO dto = new ApplyPaymentDTO();
             dto.currency = currency;
@@ -197,5 +200,43 @@ public class TransportApply extends Apply {
             if(dto.total_fee.compareTo(new BigDecimal(0)) != 0) apply.add(dto);
         }
         return apply;
+    }
+
+    /**
+     * 最后 10 个运输单
+     *
+     * @return
+     */
+    public List<Shipment> lastShipments() {
+        return this.shipments.stream().limit(10).collect(Collectors.toList());
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source
+     * <p>
+     * 需要支持: 运输单 ID 、TrackNo、FBA、备注
+     *
+     * @return
+     */
+    public List<String> pickSource(String search) {
+        List<String> sources = new ArrayList<>();
+        for(Shipment shipment : this.shipments) {
+            sources.addAll(shipment.fbas().stream().map(fba -> fba.shipmentId).collect(Collectors.toList()));
+            sources.addAll(Stream.concat(Stream.of(shipment.id, shipment.trackNo),
+                    shipment.fees.stream().map(fee -> fee.memo)).collect(Collectors.toList())
+            );
+        }
+        sources.addAll(Arrays.asList(M.amazonVals()).stream()
+                .map(M::marketAndWhouseMapping)
+                .collect(Collectors.toList()));
+
+        if(StringUtils.isNotBlank(search)) {
+            return sources.stream()
+                    .filter(source -> StringUtils.isNotBlank(source)
+                            && source.toUpperCase().contains(search.toUpperCase()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        }
+        return sources.stream().filter(StringUtils::isNotBlank).limit(10).collect(Collectors.toList());
     }
 }

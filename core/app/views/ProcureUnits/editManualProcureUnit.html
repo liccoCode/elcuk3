@@ -1,76 +1,100 @@
 #{extends 'main.html' /}
 #{set title:'手动单采购计划'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'procureunits/blank.coffee'/}
+    #{script 'deliveryments/manual.es6'/}
 #{/set}
+<style>
+  .table td, .table th{
+    vertical-align:middle;
+  }
+</style>
 #{errorMsgs /}
 #{flash_alert/}
-#{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
 
-<h4>手动单采购计划</h4>
-<table class="table table-condensed table-bordered">
-  <tr>
-    <th>SKU</th>
-    <td>
-      <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}"
-                 value="${unit.product?.sku}" id="unit_sku" readonly= true>
-    </td>
+#{info_row title:'手动单采购计划' /}
+<div class="row-fluid">
+  <div class="span12">
+  #{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>SKU</th>
+        <td>
+          <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}" value="${unit.product?.sku}" id="unit_sku" readonly>
+        </td>
 
-    <th>供应商</th>
-    <td>
-        #{select 'unit.cooperator.id', items: unit.product?.cooperators(), labelProperty: 'name', value: unit.cooperator?.id}
-            #{option ''}请选择#{/option}
-        #{/select}
-    </td>
-  </tr>
+        <th>供应商</th>
+        <td>
+          <select name="unit.cooperator.id">
+              #{list items:unit.product?.cooperators(), as:'c'}
+                <option value="${c.id}" #{if c.id == unit.cooperator?.id} selected #{/if}>${c.name}</option>
+              #{/list}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>价格</th>
+        <td>
+          <input type="text" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
+              #{if !Arrays.asList("PLAN","DELIVERY").contains(unit.stage.name())} readonly #{/if}>
+            #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
+        </td>
 
-  <tr>
-    <th>价格</th>
-    <td>
-      <div class="input-append">
-        <input type="text" class="span1" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
-          #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
-      </div>
-    </td>
+        <th>
+            #{if unit.stage.name() == 'IN_STORAGE'}库存数量#{/if}
+            #{else }采购数量#{/else}
+        </th>
+        <td>
+            #{if unit.stage.name() == 'IN_STORAGE'}
+              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
+                     value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}>
+            #{/if}
+            #{else }
+              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
+                  #{if unit.isEditInput()} readonly #{/if}>
+            #{/else}
+          <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isEditInput()} readonly #{/if}>
+          <span class="add-on">箱</span>
+          <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+        </td>
+      </tr>
 
-    <th>采购数量</th>
-    <td>
-      <div class="input-append">
-        <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}">
-        <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-        <span class="add-on">箱</span>
-      </div>
-      <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    </td>
-  </tr>
+      <tr>
+        <th>采购取样</th>
+        <td>
+          <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
+        </td>
+        <th>质检取样</th>
+        <td>
+          <input type="text" value="0" readonly/><span class="add-on">个</span>
+        </td>
+      </tr>
+      <tr>
+        <th>预计交货日期</th>
+        <td>
+          <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
+          ${unit.stage.name()=='DELIVERY'? '' : 'readonly'}>
+          <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
+        </td>
+        <th>所属公司</th>
+        <td>
+          <select name="unit.projectName">
+              #{list items:models.User.COR, as:'c'}
+                  #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                    <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
+                  #{/if}
+              #{/list}
+          </select>
+        </td>
+      </tr>
 
-  <tr>
-    <th>采购取样</th>
-    <td>
-      <div class="input-append">
-        <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
-      </div>
-    </td>
-    <th>质检取样</th>
-    <td>
-      <div class="input-append">
-        <input type="text" value="${unit.fetchCheckTaskQcSample()}" readonly/><span class="add-on">个</span>
-      </div>
-    </td>
-  </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary">保存</button>
+        </td>
+      </tr>
+    </table>
+  #{/form}
+  </div>
+</div>
 
-  <tr>
-    <th>预计交货日期</th>
-    <td colspan="4">
-      <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}">
-      <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
-    </td>
-  </tr>
 
-  <tr>
-    <td colspan="4">
-      <button class="btn btn-primary">保存</button>
-    </td>
-  </tr>
-</table>
-#{/form}

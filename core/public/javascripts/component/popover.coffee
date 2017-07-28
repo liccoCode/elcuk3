@@ -12,14 +12,34 @@ window.$ui =
     for input in $('input[type=date]')
       $input = $(input)
       return if $input.attr('native') != undefined
+
       if $input.attr('format') is undefined
         $input.dateinput(format: 'yyyy-mm-dd')
       else
         $input.dateinput(format: $input.attr('format'))
+  datetimeinput: ->
+    for input in $('input[type=datetime]')
+      $input = $(input)
+      return if $input.attr('native') != undefined
+      if $input.attr('format') is undefined
+        $input.datetimepicker(format: 'yyyy-mm-dd hh:ii:ss')
+      else
+        $input.datetimepicker(format: $input.attr('format'))
+  selectize: ->
+    for select in $('select')
+      $select = $(select)
+      continue unless $select.hasClass('selectize')
+      options = {plugins: ['remove_button']}
+      for key in ['create', 'sortField', 'maxItems']
+        options[key] = $select.data(key) if $select.data(key) != undefined
+      $select.selectize(options)
+
 
 # 初始化 popover, tooltip, dateinput
   init: ->
     @dateinput()
+    @selectize()
+    @datetimeinput()
 
 # popover 与 tooltip 的基础方法
   relBase: (event, func)->

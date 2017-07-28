@@ -11,16 +11,17 @@ import org.activiti.engine.repository.DeploymentBuilder;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
  * User: cary
  * Date: 5/10/14
  * Time: 4:25 PM
+ * @deprecated
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Activitis extends Controller {
 
     public static void index(Long id) {
@@ -32,7 +33,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -47,7 +48,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }
@@ -61,7 +62,7 @@ public class Activitis extends Controller {
             ap = (ActivitiProcess) aps.get(0);
             if(id != null && id != 0L) ap = ActivitiProcess.findById(id);
         } else {
-            aps = new ArrayList<ActivitiProcess>();
+            aps = new ArrayList<>();
         }
         render(aps, ap);
     }

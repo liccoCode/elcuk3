@@ -4,11 +4,14 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
+import models.embedded.WhouseAttrs;
 import models.market.Listing;
 import models.market.M;
 import models.market.OrderItem;
 import models.market.Selling;
+import models.material.Material;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.dto.ProductDTO;
@@ -16,6 +19,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
+import org.hibernate.annotations.DynamicUpdate;
+import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -26,9 +31,9 @@ import query.ProductQuery;
 
 import javax.persistence.*;
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,17 +42,20 @@ import java.util.regex.Pattern;
  * Time: 10:55 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Product extends GenericModel implements ElcukRecord.Log {
+
+    private static final long serialVersionUID = 6155284260375111124L;
+
     public static final Pattern Nub = Pattern.compile("[0-9]*");
+
     /**
      * 此产品所能够符合的上架的货架, 不能够集联删除, 删除 Product 是一个很严重的事情!
      * 需要检测 Product 相关的数据
      */
-    @OneToMany(mappedBy = "product",
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-                    CascadeType.REFRESH}, fetch = FetchType.LAZY)
-    public List<Listing> listings = new ArrayList<Listing>();
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    public List<Listing> listings = new ArrayList<>();
 
     @ManyToOne
     public Category category;
@@ -59,7 +67,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 产品拥有哪些扩展属性
      */
     @OneToMany(mappedBy = "product", cascade = CascadeType.PERSIST)
-    public List<ProductAttr> productAttrs = new ArrayList<ProductAttr>();
+    public List<ProductAttr> productAttrs = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "products", cascade = CascadeType.PERSIST)
+    public List<Material> materials = new ArrayList<>();
 
     /**
      * 唯一的标示
@@ -346,7 +357,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
     @Transient
-    public List<ProductDTO> locate = new ArrayList<ProductDTO>();
+    public List<ProductDTO> locate = new ArrayList<>();
 
     @Lob
     public String locates = "{}";
@@ -356,7 +367,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * Json格式类似为: [{"title":"aaa", "content": "bbb"}]
      */
     @Transient
-    public List<ProductDTO> sellingPoint = new ArrayList<ProductDTO>();
+    public List<ProductDTO> sellingPoint = new ArrayList<>();
 
     @Lob
     public String sellingPoints = "{}";
@@ -402,6 +413,23 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public String upcJP;
 
+    public String b2bColor;
+
+    public String b2bItemCode;
+
+    public String b2bDescription;
+
+    public String origin_sku;
+
+    public String hs_code;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR origin_project;
+
+    @Expose
+    public WhouseAttrs whouseAttrs = new WhouseAttrs();
+
     @Transient
     public int iscopy = 0;
 
@@ -429,6 +457,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.listings != null && this.listings.size() > 0) {
             throw new FastRuntimeException(
                     "Product [" + this.sku + "] have relate Listing, cannot be delete.");
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void prePersist() {
+        if(StringUtils.isNotBlank(this.upc)) {
+            this.upc = this.upc.trim();
+        }
+        if(StringUtils.isNotBlank(this.upcJP)) {
+            this.upcJP = this.upcJP.trim();
         }
     }
 
@@ -548,7 +587,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                 + " lengths,width,heigh,weight,declaredvalue,productname,"
                 + " marketstate,procurestate,productstate,saleslevel,productlengths,"
                 + " productwidth,productheigh,productweight,declaredvalue,declarename,abbreviation,"
-                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber "
+                + " locates,sellingpoints,subtitle,markettime,delistingtime,partNumber,whColor,whDimensions,whFormat," +
+                "whModel,whProductName,whQty,whSku,whWeight "
                 + " from Product where sku='" + sku + "'";
         Map<String, Object> map = DBUtils.rows(sql).get(0);
         dbpro.lengths = (Float) map.get("lengths");
@@ -582,6 +622,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         dbpro.marketTime = (Date) map.get("markettime");
         dbpro.delistingTime = (Date) map.get("delistingtime");
         dbpro.partNumber = (String) map.get("partNumber");
+        dbpro.whouseAttrs.whColor = (String) map.get("whColor");
+        dbpro.whouseAttrs.whDimensions = (String) map.get("whDimensions");
+        dbpro.whouseAttrs.whFormat = (String) map.get("whFormat");
+        dbpro.whouseAttrs.whModel = (String) map.get("whModel");
+        dbpro.whouseAttrs.whProductName = (String) map.get("whProductName");
+        dbpro.whouseAttrs.whQty = (Integer) map.get("whQty");
+        dbpro.whouseAttrs.whSku = (String) map.get("whSku");
+        dbpro.whouseAttrs.whWeight = (Double) map.get("whWeight");
         return dbpro;
     }
 
@@ -589,32 +637,48 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 记录修改之前的记录
      */
     public List<String> beforeDoneUpdate(Product pro) {
-        List<String> logs = new ArrayList<String>();
-        logs.addAll(replace(Reflects.logFieldFade(this, "lengths", pro.lengths), "lengths", "长度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "width", pro.width), "width", "宽度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "heigh", pro.heigh), "heigh", "高度(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "weight", pro.weight), "weight", "重量(包材)"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "declaredValue", pro.declaredValue), "declaredValue", "申报价格"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productName", pro.productName), "productName", "产品名称"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "marketState", pro.marketState), "marketState", "上架状态"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "procureState", pro.procureState), "procureState", "采购状态"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productState", pro.productState), "productState", "生命周期"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "salesLevel", pro.salesLevel), "salesLevel", "销售等级"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productLengths", pro.productLengths), "productLengths", "长度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productWidth", pro.productWidth), "productWidth", "宽度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productHeigh", pro.productHeigh), "productHeigh", "高度"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "productWeight", pro.productWeight), "productWeight", "重量"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "declareName", pro.declareName), "declareName", "产品品名"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "abbreviation", pro.abbreviation), "abbreviation", "产品简称"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "locates", pro.locates), "locates", "产品定位"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "sellingPoints", pro.sellingPoints), "sellingPoints", "产品卖点"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "subtitle", pro.subtitle), "subtitle", "副标题"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "marketTime", pro.marketTime), "marketTime", "上市时间"));
-        logs.addAll(replace(Reflects.logFieldFade(this, "delistingTime", pro.delistingTime), "delistingTime", "退市时间"));
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "lengths", "长度(包材)", pro.lengths));
+        logs.addAll(Reflects.logFieldFade(this, "width", "宽度(包材)", pro.width));
+        logs.addAll(Reflects.logFieldFade(this, "heigh", "高度(包材)", pro.heigh));
+        logs.addAll(Reflects.logFieldFade(this, "weight", "重量(包材)", pro.weight));
+        logs.addAll(Reflects.logFieldFade(this, "declaredValue", "申报价格", pro.declaredValue));
+        logs.addAll(Reflects.logFieldFade(this, "productName", "产品名称", pro.productName));
+        logs.addAll(Reflects.logFieldFade(this, "marketState", "上架状态", pro.marketState));
+        logs.addAll(Reflects.logFieldFade(this, "procureState", "采购状态", pro.procureState));
+        logs.addAll(Reflects.logFieldFade(this, "productState", "生命周期", pro.productState));
+        logs.addAll(Reflects.logFieldFade(this, "salesLevel", "销售等级", pro.salesLevel));
+        logs.addAll(Reflects.logFieldFade(this, "productLengths", "长度", pro.productLengths));
+        logs.addAll(Reflects.logFieldFade(this, "productWidth", "宽度", pro.productWidth));
+        logs.addAll(Reflects.logFieldFade(this, "productHeigh", "高度", pro.productHeigh));
+        logs.addAll(Reflects.logFieldFade(this, "productWeight", "重量", pro.productWeight));
+        logs.addAll(Reflects.logFieldFade(this, "declareName", "产品品名", pro.declareName));
+        logs.addAll(Reflects.logFieldFade(this, "abbreviation", "产品简称", pro.abbreviation));
+        logs.addAll(Reflects.logFieldFade(this, "locates", "产品定位", pro.locates));
+        logs.addAll(Reflects.logFieldFade(this, "sellingPoints", "产品卖点", pro.sellingPoints));
+        logs.addAll(Reflects.logFieldFade(this, "subtitle", "副标题", pro.subtitle));
+        logs.addAll(Reflects.logFieldFade(this, "marketTime", "上市时间", pro.marketTime));
+        logs.addAll(Reflects.logFieldFade(this, "delistingTime", "退市时间", pro.delistingTime));
 
-        this.productAttrs = new java.util.ArrayList<ProductAttr>();
-        logs.addAll(replace(Reflects.logFieldFade(this, "productAttrs", pro.productAttrs), "productAttrs", "扩展属性"));
+        //productAttrs
+        this.productAttrs = new java.util.ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "productAttrs", "扩展属性", pro.productAttrs));
 
+        //whouseAttrs
+        if(this.whouseAttrs != null) {
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whSku", "SKU(仓库)", pro.whouseAttrs.whSku));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whProductName", "产品名称(仓库)",
+                    StringUtils.trimToNull(pro.whouseAttrs.whProductName)));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whModel", "产品型号(仓库)", pro.whouseAttrs.whModel));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whFormat", "产品规格(仓库)", pro.whouseAttrs.whFormat));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whColor", "产品颜色(仓库)", pro.whouseAttrs.whColor));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whQty", "包装内产品数量(仓库)", pro.whouseAttrs.whQty));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDescription", "包装内描述(仓库)",
+                    pro.whouseAttrs.whDescription));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whDimensions", "产品尺寸(仓库)",
+                    StringUtils.trimToNull(pro.whouseAttrs.whDimensions)));
+            logs.addAll(Reflects.logFieldFade(this, "whouseAttrs.whWeight", "产品重量(仓库)", pro.whouseAttrs.whWeight));
+        }
 
         return logs;
     }
@@ -672,7 +736,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 这几个为从 Amazon 解析回来的 SKU 存在, 但不需要在系统中再出现的 SKU, 为 Amazon 与系统中的同步做过滤
      */
-    private static final Map<String, Integer> UN_USE_SKU = new HashMap<String, Integer>();
+    private static final Map<String, Integer> UN_USE_SKU = new HashMap<>();
 
     static {
         UN_USE_SKU.put("15HTCG14-MB2SP", 1);
@@ -731,7 +795,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public static F.T2<List<String>, List<String>> fetchSkusJson() {
         List<String> skus = Product.skus(true);
-        return new F.T2<List<String>, List<String>>(skus, skus);
+        return new F.T2<>(skus, skus);
     }
 
     public static boolean exist(String sku) {
@@ -869,7 +933,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         //扩展信息
         if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
             List<ProductAttr> proattrs = copysku.productAttrs;
-            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            List<ProductAttr> attrs = new ArrayList<>();
             for(ProductAttr p : proattrs) {
                 ProductAttr np = new ProductAttr();
                 np.product = pro;
@@ -913,7 +977,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         FileUtils.copyFile(skuatt.file, new File(skuatt.location));
                         skuatt.save();
                     } catch(Exception e) {
-                        e.printStackTrace();
+                        Logger.error(Webs.S(e));
                     }
                 }
             }
@@ -985,7 +1049,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         //扩展信息
         if(StringUtils.isNotBlank(extend) && extend.equals("1")) {
             List<ProductAttr> proattrs = pro.productAttrs;
-            List<ProductAttr> attrs = new ArrayList<ProductAttr>();
+            List<ProductAttr> attrs = new ArrayList<>();
             for(ProductAttr p : proattrs) {
                 ProductAttr np = new ProductAttr();
                 np.product = backupsku;
@@ -1034,7 +1098,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         if(!Validation.hasErrors())
                             skuatt.save();
                     } catch(Exception e) {
-                        e.printStackTrace();
+                        Logger.error(Webs.S(e));
                     }
                 }
             }
@@ -1066,4 +1130,37 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         }
     }
 
+    /**
+     * 输出给 typeahead 所使用的 source
+     *
+     * @return
+     */
+    public static List<String> pickSourceItems(String search) {
+        String sql = "SELECT p.sku, p.family_family, s.fnSku, pa.value FROM Product p" +
+                " LEFT JOIN ProductAttr pa ON p.sku=pa.product_sku" +
+                " LEFT JOIN Listing l ON p.sku=l.product_sku" +
+                " LEFT JOIN Selling s ON l.listingId=s.listing_listingId" +
+                " WHERE p.sku LIKE ?" +
+                " OR s.fnSku LIKE ?" +
+                " OR pa.value LIKE ?" +
+                " LIMIT 5";
+        String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
+        List<Map<String, Object>> rows = DBUtils.rows(sql, Arrays.asList(word, word, word).toArray());
+        return rows.stream()
+                .filter(row -> row != null && !row.isEmpty())
+                .flatMap(row -> row.values().stream())
+                .filter(Objects::nonNull)
+                .distinct()
+                .limit(10)
+                .map(val -> StringUtils.abbreviate(val.toString(), 20))
+                .collect(Collectors.toList());
+    }
+
+    public String dimensions() {
+        return String.format("%s*%s*%s", this.lengths, this.width, this.heigh);
+    }
+
+    public float weightWithGram() {
+        return this.weight != null ? this.weight * 1000 : 0;
+    }
 }

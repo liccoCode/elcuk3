@@ -1,7 +1,11 @@
 package helper;
 
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import play.Logger;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 简单的集成 ES 的搜索功能. 不是用 ElasticSearch 提供的 API 是因为
@@ -13,36 +17,45 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
  * Time: 4:19 PM
  */
 public class ES {
-    public static final String ELCUK2_ES_HOST = "http://"+models.OperatorConfig.getVal("elcuk2es")+":9200";
-    public static final String ETRACKER_ES_HOST = "http://"+models.OperatorConfig.getVal("etrackeres")+":9200";
-
     public static JSONObject count(String index, String type, SearchSourceBuilder builder) {
-        return HTTP.postJson(ELCUK2_ES_HOST + "/" + index + "/" + type + "/_search", builder.toString());
+        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_search",
+                builder.toString());
     }
-
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
-        return processSearch(index, type, builder, ELCUK2_ES_HOST);
+        Logger.info(builder.toString());
+        return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 
+    /**
+     * @param index
+     * @param type
+     * @param builder
+     * @return
+     * @deprecated
+     */
     public static JSONObject searchOnEtrackerES(String index, String type, SearchSourceBuilder builder) {
-        return processSearch(index, type, builder, ETRACKER_ES_HOST);
+        return null;
     }
 
     public static JSONObject processSearch(String index, String type, SearchSourceBuilder builder, String esHost) {
-        return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search", builder.toString());
+        return HTTP.postJson(esHost + "/" + index + "/" + type + "/_search",
+                builder.toString(),
+                HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(3)));
     }
 
     public static JSONObject get(String index, String type, String id) {
-        return processGet(index, type, id, ELCUK2_ES_HOST);
+        return processGet(index, type, id, System.getenv(Constant.ES_HOST));
     }
 
     public static JSONObject getOnEtrackerES(String index, String type, String id) {
-        return processGet(index, type, id, ETRACKER_ES_HOST);
+        return null;
     }
 
     public static JSONObject processGet(String index, String type, String id, String esHost) {
-        return HTTP.getJson(esHost + "/" + index + "/" + type + "/" + id);
+        return HTTP.getJson(
+                esHost + "/" + index + "/" + type + "/" + id,
+                HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(2)));
     }
 
     /**
@@ -52,9 +65,9 @@ public class ES {
      * @return
      */
     public static String parseEsString(String esfield) {
-        if(esfield == null)
-            return null;
-        esfield = esfield.replace("-", "").replace(",", "").replace("|", "").replace(".", "");
-        return esfield;
+        if(StringUtils.isBlank(esfield)) {
+            return "";
+        }
+        return StringUtils.replaceEach(esfield, new String[]{"-", ",", "|", "."}, new String[]{"", "", "", ""});
     }
 }

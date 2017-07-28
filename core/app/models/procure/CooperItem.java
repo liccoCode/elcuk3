@@ -1,15 +1,25 @@
 package models.procure;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
+import helper.J;
+import models.material.Material;
 import models.product.Product;
+import models.view.dto.CooperItemDTO;
+import org.apache.commons.lang.StringUtils;
 import play.data.validation.Min;
 import play.data.validation.MinSize;
 import play.data.validation.Required;
+import play.data.validation.Validation;
 import play.db.jpa.Model;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,10 +36,12 @@ public class CooperItem extends Model {
     @OneToOne
     public Product product;
 
+    @OneToOne
+    public Material material;
+
     /**
      * 冗余字段
      */
-    @Required
     @MinSize(5)
     @Expose
     public String sku;
@@ -41,6 +53,14 @@ public class CooperItem extends Model {
     @Expose
     @Min(0)
     public Float price;
+
+    /***
+     * 其他价格（包含包材配件价格）
+     */
+    @Required
+    @Expose
+    @Min(0)
+    public Float otherPrice = 0f;
 
     @Required
     @Expose
@@ -60,8 +80,27 @@ public class CooperItem extends Model {
      */
     @Min(0)
     @Expose
-    @Required
     public Integer boxSize;
+
+    /**
+     * 单箱重量
+     */
+    public double singleBoxWeight;
+
+    /**
+     * 单箱长
+     */
+    public double length;
+
+    /**
+     * 单箱宽
+     */
+    public double width;
+
+    /**
+     * 单箱高
+     */
+    public double height;
 
     /**
      * 最低订货量
@@ -80,9 +119,66 @@ public class CooperItem extends Model {
     @Lob
     public String productTerms;
 
+    @Transient
+    public List<CooperItemDTO> items = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public T type;
+
+    public enum T {
+
+        SKU {
+            @Override
+            public String label() {
+                return "SKU";
+            }
+        },
+        MATERIAL {
+            @Override
+            public String label() {
+                return "包材物料";
+            }
+        };
+
+        public abstract String label();
+
+    }
+
+    /**
+     * 方案Json串
+     */
+    public String attributes;
+
+    public Date createDate;
+
     public CooperItem checkAndUpdate() {
         this.check();
+        this.setAttributes();
+        this.setDefaultValue();
         return this.save();
+    }
+
+    public void setAttributes() {
+        this.attributes = J.json(this.items);
+    }
+
+    public void getAttributes() {
+        if(this.items == null || this.items.isEmpty()) {
+            this.items = JSON.parseArray(StringUtils.isNotBlank(this.attributes) ? this.attributes : "[]",
+                    CooperItemDTO.class);
+        }
+    }
+
+    public void setDefaultValue() {
+        if(this.items != null && this.items.size() > 0) {
+            CooperItemDTO dto = this.items.get(0);
+            this.height = dto.height;
+            this.width = dto.width;
+            this.length = dto.length;
+            this.singleBoxWeight = dto.singleBoxWeight;
+            this.boxSize = dto.boxSize;
+        }
     }
 
     /**
@@ -103,16 +199,41 @@ public class CooperItem extends Model {
     public CooperItem checkAndSave(Cooperator cooperator) {
         this.sku = this.sku.trim();
         this.product = Product.findById(this.sku);
+        this.createDate = new Date();
         this.check();
         if(cooperator == null || !cooperator.isPersistent())
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.cooperator = cooperator;
-        for(CooperItem copitm : this.cooperator.cooperItems) {
-            if(copitm.sku.equals(this.sku))
-                throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
-        }
+        this.type = T.SKU;
+
+        if(this.cooperator.cooperItems.stream().filter(item -> Objects.equals(item.type, T.SKU))
+                .anyMatch(item -> Objects.equals(item.sku, this.sku)))
+            throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
+
         cooperator.cooperItems.add(this);
+        this.setAttributes();
+        this.setDefaultValue();
         return this.save();
+    }
+
+    public void saveMaterialItem(Cooperator cooperator) {
+        Material m = Material.findById(this.material.id);
+        List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
+        if(this.id == null
+                && cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
+            Validation.addError("", "供应商下已经存在该物料，请选择其他物料!");
+            return;
+        } else if(this.id != null && cooperItems.stream()
+                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)){
+            Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
+            return;
+        }
+        this.type = T.MATERIAL;
+        this.cooperator = cooperator;
+        this.createDate = new Date();
+        this.setAttributes();
+        this.setDefaultValue();
+        this.save();
     }
 
     /**
@@ -132,5 +253,37 @@ public class CooperItem extends Model {
      */
     public CooperItem checkAndRemove() {
         return this.delete();
+    }
+
+    /**
+     * 主箱箱数
+     *
+     * @param shipedQty
+     * @return
+     */
+    public int boxNum(int shipedQty) {
+        if(this.boxSize == null) return 0;
+        float boxNum = shipedQty / (float) this.boxSize;
+        if(boxNum < 1) {
+            return 1;
+        } else {
+            return (int) Math.floor(boxNum);
+        }
+    }
+
+    /**
+     * 尾箱内的产品数量
+     *
+     * @return
+     */
+    public int lastCartonNum(int shipedQty) {
+        if(this.boxSize == null) return 0;
+        int boxNum = this.boxNum(shipedQty);
+        int lastCartonNum = shipedQty - boxNum * this.boxSize;
+        if(lastCartonNum <= 0) {
+            return 0;
+        } else {
+            return lastCartonNum;
+        }
     }
 }

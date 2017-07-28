@@ -6,21 +6,23 @@ import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
+import models.embedded.ShipmentDates;
 import models.finance.FeeType;
-import models.procure.Cooperator;
-import models.procure.ProcureUnit;
-import models.procure.ShipItem;
-import models.procure.Shipment;
-import models.product.Whouse;
-import models.qc.CheckTask;
+import models.procure.*;
 import models.view.Ret;
+import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
+import models.whouse.Outbound;
+import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
+import play.modules.excel.RenderExcel;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -28,8 +30,6 @@ import play.mvc.Util;
 import play.mvc.With;
 
 import java.util.*;
-
-import org.joda.time.DateTime;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -41,9 +41,10 @@ import static play.modules.pdf.PDF.renderPDF;
  */
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Shipments extends Controller {
+
     @Before(only = {"index", "blank", "save", "shipmentToApply"})
     public static void whouses() {
-        List<Whouse> whouses = Whouse.findAll();
+        List<Whouse> whouses = Whouse.find("type=?", Whouse.T.FBA).fetch();
         List<Cooperator> cooperators = Cooperator.shippers();
         renderArgs.put("whouses", whouses);
         renderArgs.put("cooperators", cooperators);
@@ -51,19 +52,56 @@ public class Shipments extends Controller {
 
     @Check("shipments.index")
     public static void index(ShipmentPost p) {
-        List<Shipment> shipments = null;
-        if(p == null)
-            p = new ShipmentPost();
-        shipments = p.query();
+        if(p == null) p = new ShipmentPost();
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
 
         for(int i = 0; i < shipments.size(); i++) {
             Shipment ship = shipments.get(i);
             ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
             shipments.set(i, ship);
         }
-        Shipment.handleQty1(shipments, null);
+        //Shipment.handleQty1(shipments, null);
         renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
         render(shipments, p);
+    }
+
+    public static void indexByCooperId(Long cooperId) {
+        ShipmentPost p = new ShipmentPost();
+        p.pagination = false;
+        p.cooperId = cooperId;
+        p.dateType = "createDate";
+        List<Shipment> shipments = p.query();
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        List<Whouse> whouses = Whouse.findAll();
+        List<Cooperator> cooperators = Cooperator.shippers();
+        render("Shipments/index.html", shipments, p, whouses, cooperators);
+    }
+
+    public static void indexB2B(ShipmentPost p) {
+        if(p == null) p = new ShipmentPost();
+        p.projectName = User.COR.MengTop;
+        p.pagination = false;
+        List<Shipment> shipments = p.query();
+
+        for(int i = 0; i < shipments.size(); i++) {
+            Shipment ship = shipments.get(i);
+            ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            shipments.set(i, ship);
+        }
+        //Shipment.handleQty1(shipments, null);
+        renderArgs.put("dateTypes", ShipmentPost.DATE_TYPES);
+        render(shipments, p);
+    }
+
+    public static void showProcureUnitList(String id) {
+        Shipment shipment = Shipment.findById(id);
+        List<ShipItem> items = shipment.items;
+        if(Objects.equals(shipment.projectName, User.COR.MengTop)) {
+            render("Shipments/_b2b_shipitem.html", items);
+        } else {
+            render("Shipments/_shipitem.html", items);
+        }
     }
 
     public static void blank() {
@@ -91,16 +129,20 @@ public class Shipments extends Controller {
      * @param units
      */
     @Check("shipments.procureunittoshipment")
-    public static void procureUnitToShipment(List<Long> units) {
+    public static void procureUnitToShipment(List<Long> units, String shipmentId) {
         if(units == null || units.size() <= 0)
             Validation.addError("", "必须选择采购计划");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ShipItems.index(null);
         }
-
-        Shipment shipment = new Shipment().buildFromProcureUnits(units);
-
+        Shipment shipment;
+        if(StringUtils.isNotBlank(shipmentId)) {
+            shipment = Shipment.findById(shipmentId);
+        } else {
+            shipment = new Shipment();
+        }
+        shipment.buildFromProcureUnits(units);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ShipItems.index(null);
@@ -109,10 +151,26 @@ public class Shipments extends Controller {
         show(shipment.id);
     }
 
+    public static void buildB2BFromProcureUnits(List<Long> units, String shipmentId) {
+        Shipment shipment;
+        if(StringUtils.isNotBlank(shipmentId)) {
+            shipment = Shipment.findById(shipmentId);
+            if(!Objects.equals(shipment.projectName, User.COR.MengTop)) {
+                flash.error("非B2B的运输单，不能添加");
+                ShipItems.indexB2B(new ProcureUnitShipPost());
+            }
+        } else {
+            shipment = new Shipment();
+        }
+        shipment.buildB2BFromProcureUnits(units);
+        flash.success("成功为 %s 个采购计划创建B2B运输单 %s", units.size(), shipment.id);
+        show(shipment.id);
+    }
+
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
         //TODO 需要添加 FeeType 的数据
-        renderArgs.put("whouses", Whouse.findAll());
+        renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("shippers", Cooperator.shippers());
         String shipmentId = request.params.get("id");
         if(StringUtils.isBlank(shipmentId)) shipmentId = request.params.get("ship.id");
@@ -129,23 +187,20 @@ public class Shipments extends Controller {
     public static List<FeeType> feeTypes(Shipment.T shipType) {
         List<FeeType> feeTypes = FeeType.transports();
         if(shipType == Shipment.T.EXPRESS) {
-            CollectionUtils.filter(feeTypes, new Predicate() {
-                @Override
-                public boolean evaluate(Object o) {
-                    return !((FeeType) o).name.equals("transportshipping");
-                }
-            });
+            CollectionUtils.filter(feeTypes, o -> !((FeeType) o).name.equals("transportshipping"));
         }
         return feeTypes;
     }
 
     public static void show(String id) {
         Shipment ship = Shipment.findById(id);
+        ship.dates = ship.dates == null ? new ShipmentDates() : ship.dates;
         ship.endShipByComputer();
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
-        render(ship, cooperators);
+        List<BtbCustom> customs = BtbCustom.find(" isDel=?", false).fetch();
+        render(ship, cooperators, customs);
     }
 
     public static void preview(String id) {
@@ -170,69 +225,23 @@ public class Shipments extends Controller {
         show(id);
     }
 
-    //TODO effect: 需要调整
     public static void update(Shipment ship, String shipid) {
-        Shipment dbship = Shipment.findById(shipid);
-        dbship.cooper = ship.cooper;
-        dbship.whouse = ship.whouse;
-        dbship.title = ship.title;
-        dbship.reason = ship.reason;
-        dbship.tracknolist = ship.tracknolist;
-        dbship.trackNo = ship.trackNo;
-        dbship.memo = ship.memo;
-        dbship.dates.planBeginDate = ship.dates.planBeginDate;
-        dbship.internationExpress = ship.internationExpress;
-        dbship.jobNumber = ship.jobNumber;
-        dbship.totalWeightShipment = ship.totalWeightShipment;
-        dbship.totalVolumeShipment = ship.totalVolumeShipment;
-        dbship.shipmentTpye = ship.shipmentTpye;
-        dbship.totalStockShipment = ship.totalStockShipment;
-        dbship.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
         checkAuthenticity();
-        validation.valid(dbship);
-        dbship.validate();
-        String s = Validation.errors().toString();
+        Shipment old = Shipment.findById(shipid);
+        Date realPlanArrivDate = old.dates != null ? old.dates.planArrivDate : null;
+        old.update(ship);
         if(Validation.hasErrors()) {
-            dbship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
-            renderArgs.put("ship", dbship);
+            old.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
+            renderArgs.put("ship", old);
             render("Shipments/show.html");
         }
-
-        dbship.sendMsgMail(ship.dates.planArrivDate, Secure.Security.connected());
-        /**
-         * 日期发生改变则记录旧的日期
-         */
-        if(dbship.dates.planArrivDate.compareTo(ship.dates.planArrivDate) != 0)
-            dbship.dates.oldPlanArrivDate = dbship.dates.planArrivDate;
-        dbship.dates.planArrivDate = ship.dates.planArrivDate;
-
-        //只有 PLAN 与 CONFIRM 状态下的运输单才能够修改计算准时率预计到库时间
-        if(Arrays.asList(Shipment.S.PLAN, Shipment.S.CONFIRM).contains(dbship.state) &&
-                dbship.dates.planArrivDateForCountRate != ship.dates.planArrivDateForCountRate) {
-            if(StringUtils.isBlank(ship.reason)) {
-                //Validation.addError("", "修改约定到货时间必须填写原因!");
-            } else {
-                dbship.reason = ship.reason;
-            }
-            //TODO 需求临时变更,暂时取消对原因的不为空校验,后期如果需求明确后将其挪到 209 行上方即可。
-            dbship.dates.planArrivDateForCountRate = ship.dates.planArrivDateForCountRate;
-        }
-        dbship.updateShipment();
-
-        if(Validation.hasErrors()) {
-            renderArgs.put("ship", dbship);
-            render("Shipments/show.html");
-        }
-        new ElcukRecord(Messages.get("shipment.update"),
-                Messages.get("shipment.update.msg", ship.to_log()), dbship.id).save();
+        old.updateShipment();
+        //向采购计划负责人发送邮件
+        old.sendMsgMail(realPlanArrivDate, Secure.Security.connected());
         flash.success("更新成功.");
-
-        //更新快递单的货代仓库
-        for(ShipItem item : ship.items) {
-            CheckTask.updateExpressWarehouse(item.unit.id);
-        }
-
-        show(shipid);
+        new ElcukRecord(Messages.get("shipment.update"), Messages.get("shipment.update.msg", ship.to_log()), old.id)
+                .save();
+        Shipments.show(shipid);
     }
 
     /**
@@ -272,7 +281,7 @@ public class Shipments extends Controller {
 
 
     @Check("shipments.beginship")
-    public static void beginShip(String id, Date date) {
+    public static void beginShip(String id, Date date, boolean sync) {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.planArrivDate", ship.dates.planArrivDate);
 
@@ -282,7 +291,7 @@ public class Shipments extends Controller {
         }
 
         try {
-            ship.beginShip(date);
+            ship.beginShip(date, sync);
         } catch(Exception e) {
             Validation.addError("", Webs.E(e));
         }
@@ -446,9 +455,9 @@ public class Shipments extends Controller {
      *
      * @param whouseId
      */
-    public static void unitShipments(Long whouseId, Shipment.T shipType) {
+    public static void unitShipments(Long whouseId, Shipment.T shipType, Date planDeliveryDate) {
         List<Shipment> unitRelateShipments = Shipment
-                .findUnitRelateShipmentByWhouse(whouseId, shipType);
+                .findUnitRelateShipmentByWhouse(whouseId, shipType, planDeliveryDate);
         render(unitRelateShipments);
     }
 
@@ -460,11 +469,11 @@ public class Shipments extends Controller {
     public static void invoice(String id) {
         Shipment ship = Shipment.findById(id);
         String shipType = ship.type.name();
-        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<String, List<ProcureUnit>>();
+        Map<String, List<ProcureUnit>> fbaGroupUnits = new HashMap<>();
         for(ShipItem item : ship.items) {
             String centerId = item.unit.fba.centerId;
             if(!fbaGroupUnits.containsKey(centerId))
-                fbaGroupUnits.put(centerId, new ArrayList<ProcureUnit>());
+                fbaGroupUnits.put(centerId, new ArrayList<>());
             fbaGroupUnits.get(centerId).add(item.unit);
         }
         String invoiceNo = ship.buildInvoiceNO();//生成 InvoiceNO
@@ -476,7 +485,7 @@ public class Shipments extends Controller {
 
     public static void dates(String id) {
         Shipment shipment = Shipment.findById(id);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("begin", Dates.date2Date(shipment.dates.planBeginDate));
         dates.put("end", Dates.date2Date(ShipmentsHelper.predictArriveDate(shipment)));
         renderJSON(dates);
@@ -489,9 +498,41 @@ public class Shipments extends Controller {
         shipment.whouse = Whouse.findById(Long.parseLong(warehouseid));
         int day = shipment.shipDay();
         DateTime arrivedate = Dates.cn(planShipDate).plusDays(day);
-        Map<String, String> dates = new HashMap<String, String>();
+        Map<String, String> dates = new HashMap<>();
         dates.put("arrivedate", Dates.date2Date(arrivedate));
         renderJSON(dates);
     }
 
+    /**
+     * 创建出库
+     */
+    @Check("outbounds.index")
+    public static void outbound(List<String> shipmentId) {
+        Outbound.initCreateByShipItem(shipmentId);
+        flash.success("已成功创建出库单!");
+        index(new ShipmentPost());
+    }
+
+    public static void validCreateOutbound(String[] shipmentIds) {
+        String msg = "";
+        if(ArrayUtils.isNotEmpty(shipmentIds)) {
+            List<Shipment> shipments = Shipment.find("SELECT s FROM Shipment s LEFT JOIN s.items i "
+                    + "LEFT JOIN i.unit u WHERE s.id IN " + SqlSelect.inlineParam(shipmentIds)
+                    + " AND u.stage <> ? ", ProcureUnit.STAGE.IN_STORAGE).fetch();
+            if(shipments.size() > 0) {
+                msg += "【" + shipments.get(0).id + "】";
+                renderJSON(new Ret(false, "运输单：" + msg + " " + "下的采购计划还不是【已入仓】状态，是否继续？"));
+            }
+        }
+        renderJSON(new Ret(true, ""));
+    }
+
+    public static void arns(String shipmentId) {
+        Shipment shipment = Shipment.findById(shipmentId);
+        notFoundIfNull(shipment);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s-AmazonReferenceID.xls", shipmentId));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(shipment);
+    }
 }

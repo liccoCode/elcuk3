@@ -3,6 +3,7 @@ package models;
 import helper.GTs;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.db.jpa.JPABase;
 import play.db.jpa.Model;
@@ -11,10 +12,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,7 +21,7 @@ import java.util.Map;
  * Time: AM11:18
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class OperatorConfig extends Model {
     public static final Map<String, T> NAME_Type_MAPS;
     public static final Map<String, String> VALUES_MAPS;
@@ -40,6 +38,7 @@ public class OperatorConfig extends Model {
                         .put("运输天数", T.SHIPMENT)
                         .put("标准断货期天数", T.OPERATIONS)
                         .put("标准断货期天数区间", T.OPERATIONS)
+                        .put("退货率天数", T.OPERATIONS)
                         .build()
         );
         VALUES_MAPS = Collections.unmodifiableMap(
@@ -50,6 +49,7 @@ public class OperatorConfig extends Model {
                         .put("合理库存周转天数", "70")
                         .put("标准断货期天数", "90")
                         .put("标准断货期天数区间", "90-120,121-150,151")
+                        .put("退货率天数", "30")
                         .build()
         );
     }
@@ -114,13 +114,13 @@ public class OperatorConfig extends Model {
         /**
          * 运营报表参数初始化
          */
-/*        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
+        for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
             OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
                     VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
-        }*/
+        }
 
-        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new java.util.HashMap<String, String>();
+        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new HashMap<>();
         List<OperatorConfig> configs = OperatorConfig.findAll();
         for(OperatorConfig config : configs) {
             if(!StringUtils.isBlank(config.paramcode)) {

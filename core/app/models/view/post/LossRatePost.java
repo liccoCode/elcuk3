@@ -4,21 +4,20 @@ import com.alibaba.fastjson.JSON;
 import helper.*;
 import helper.Currency;
 import models.market.M;
+import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.ProfitDto;
+import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
-import models.view.report.LossRate;
 import play.Logger;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +27,7 @@ import java.math.BigDecimal;
  */
 public class LossRatePost extends Post<LossRate> {
 
-
+    private static final long serialVersionUID = -4400684666002811569L;
     public String compenType;
     public Date from;
     public Date to;
@@ -43,23 +42,23 @@ public class LossRatePost extends Post<LossRate> {
     @Override
     public F.T2<String, List<Object>> params() {
         StringBuffer sql = new StringBuffer("");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sql.append(
                 "select f.shipmentid,p.sku,(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) as qty,"
-                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype "
+                        + " s.lossqty, s.compenusdamt, p.currency, p.price, l.market, s.compentype, p.id as unitId "
                         + " From ShipItem s "
-                        + " left join ProcureUnit p on s.unit_id=p.id "
+                        + " LEFT JOIN ProcureUnit p ON s.unit_id=p.id "
                         + " LEFT JOIN CheckTask c ON c.units_id = p.id"
                         + " LEFT JOIN Selling l ON l.sellingId = p.sid "
-                        + " left join Shipment m on s.shipment_id=m.id "
-                        + " left join FBAShipment f on p.fba_id=f.id "
-                        + " where m.arriveDate >= ? AND m.arriveDate <= ? "
-                        + " and s.lossqty!=0 and s.compenamt != 0 "
-                        + " group by p.fba_id,p.sku order by l.sellingId desc ");
+                        + " LEFT JOIN Shipment m ON s.shipment_id=m.id "
+                        + " LEFT JOIN FBAShipment f ON p.fba_id=f.id "
+                        + " WHERE m.arriveDate >= ? AND m.arriveDate <= ? "
+                        + " AND s.lossqty!=0 and s.compenamt != 0 "
+                        + " GROUP BY p.fba_id,p.sku ORDER BY l.sellingId desc ");
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public Map queryDate() {
@@ -67,7 +66,7 @@ public class LossRatePost extends Post<LossRate> {
                 + "_" + new SimpleDateFormat("yyyyMMdd").format(this.to);
         String postvalue = Caches.get(key);
         if(StringUtils.isBlank(postvalue)) {
-            HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/loss_rate_job?from="
+            HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/loss_rate_job?from="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.from)
                     + "&to="
                     + new SimpleDateFormat("yyyy-MM-dd").format(this.to));
@@ -84,18 +83,18 @@ public class LossRatePost extends Post<LossRate> {
     }
 
     public F.T2<String, List<Object>> shipParams() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT s FROM ShipItem s LEFT JOIN s.shipment m ")
                 .append(" WHERE m.state = 'DONE' ")
                 .append(" AND m.dates.arriveDate >= ? AND m.dates.arriveDate <= ? ")
                 .append(" AND s.qty <> s.recivedQty ")
                 .append(" ORDER BY s.unit.sid DESC ");
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public F.T2<String, List<Object>> totalparams() {
         StringBuffer sql = new StringBuffer("");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sql.append("select sum(s.qty-ifnull(p.purchaseSample,0)-ifnull(c.qcSample,0)) shipqty," +
                 " sum(s.lossqty) totalqty,sum(round(s.compenusdamt,3)) totalamt,p.currency, p.price From ShipItem s " +
                 " left join ProcureUnit p on s.unit_id=p.id " +
@@ -107,7 +106,7 @@ public class LossRatePost extends Post<LossRate> {
         if(StringUtils.isNotBlank(this.compenType)) {
             sql.append(" AND s.compenType= '" + this.compenType + "' ");
         }
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public LossRate querytotal() {
@@ -150,11 +149,6 @@ public class LossRatePost extends Post<LossRate> {
         return new LossRate(new BigDecimal(0));
     }
 
-    private BigDecimal ifBlank(BigDecimal b) {
-        return b == null ? new BigDecimal(0) : b;
-    }
-
-
     @Override
     public Long count(F.T2<String, List<Object>> params) {
         return 0L;
@@ -167,11 +161,12 @@ public class LossRatePost extends Post<LossRate> {
 
 
     public Map<String, Object> lossRateMap(F.T2<String, List<Object>> params, F.T2<String, List<Object>> shipParams) {
+        //TODO: 这里的日志 Logger.info 需要集中清理.
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
-        List<LossRate> lossrate = new ArrayList<LossRate>();
+        List<LossRate> lossrate = new ArrayList<>();
         DecimalFormat df = new DecimalFormat("0.00");
 
-        Map<String, ProfitDto> existMap = new HashMap<String, ProfitDto>();
+        Map<String, ProfitDto> existMap = new HashMap<>();
         List<ProfitDto> dtos = null;
         M[] marray = models.market.M.values();
         for(M m : marray) {
@@ -199,6 +194,8 @@ public class LossRatePost extends Post<LossRate> {
             loss.qty = Integer.parseInt(row.get("qty").toString());
             loss.lossqty = Integer.parseInt(row.get("lossqty").toString());
             loss.compentype = (String) row.get("compentype");
+            loss.unit = row.get("unitId") == null ? null :
+                    ProcureUnit.findById(Long.parseLong(row.get("unitId").toString()));
             if(row.get("currency") != null) {
                 loss.currency = Currency.valueOf(row.get("currency").toString());
                 loss.price = (Float) row.get("price");
@@ -250,7 +247,7 @@ public class LossRatePost extends Post<LossRate> {
             ship.lossCost = ship.purchaseCost.add(ship.shipmentCost);
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("shipItems", shipItems);
         map.put("lossrate", lossrate);
         return map;

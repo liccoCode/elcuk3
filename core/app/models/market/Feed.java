@@ -1,14 +1,22 @@
 package models.market;
 
+import helper.Constant;
 import helper.DBUtils;
+import helper.HTTP;
 import models.User;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.hibernate.annotations.DynamicUpdate;
+import play.Play;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -19,12 +27,9 @@ import java.util.concurrent.TimeUnit;
  * Time: 2:27 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Feed extends Model {
     private static final long serialVersionUID = 370209511312724644L;
-
-    public Feed() {
-    }
 
     public String feedId;
 
@@ -56,6 +61,85 @@ public class Feed extends Model {
      * Feed 的创建者
      */
     public String byWho;
+
+    /**
+     * 描述信息
+     */
+    public String memo;
+
+    public enum T {
+        SALE_AMAZON {
+            @Override
+            public String label() {
+                return "上架 Listing 到 Amazon";
+            }
+        },
+        ASSIGN_AMAZON_LISTING_PRICE {
+            @Override
+            public String label() {
+                return "更新 Listing 的 Price 属性";
+            }
+        },
+        POST_IMAGES {
+            @Override
+            public String label() {
+                return "更新产品图片";
+            }
+        },
+        FULFILLMENT_BY_AMAZON {
+            @Override
+            public String label() {
+                return "设置 Listing Fulfillment By Amazon";
+            }
+        },
+        FBA_INBOUND_CARTON_CONTENTS {
+            @Override
+            public String label() {
+                return "提交 FBA 包装信息到 Amazon";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Enumerated(EnumType.STRING)
+    public T type;
+
+    /**
+     * 只用来过期缓存的, 标识属于哪个 Class
+     */
+    @Transient
+    public Class owner;
+
+    public Feed() {
+    }
+
+    /**
+     * @param content
+     * @param memo
+     * @param selling
+     * @deprecated
+     */
+    public Feed(String content, String memo, Selling selling) {
+        this.content = content;
+        this.fid = selling.sellingId;
+        this.memo = memo;
+        this.byWho = User.username();
+    }
+
+    public Feed(String content, T type, Selling selling) {
+        this(content, type, selling.sellingId);
+    }
+
+    public Feed(String content, T type, String fid) {
+        this.content = content;
+        this.type = type;
+        if(this.type != null) {
+            this.memo = this.type.label();
+        }
+        this.fid = fid;
+        this.byWho = User.username();
+    }
 
     /**
      * 因 API 的限制, 所以每一个 Selling 不可以无限制的上传 Feed.
@@ -104,26 +188,56 @@ public class Feed extends Model {
     }
 
     public static Feed newSellingFeed(String content, Selling selling) {
-        Feed feed = new Feed();
-        feed.content = content;
-        feed.fid = selling.sellingId;
-        feed.byWho = User.username();
-        return feed.save();
+        return new Feed(content, T.SALE_AMAZON, selling).save();
+    }
+
+    public static Feed newAssignPriceFeed(String content, Selling selling) {
+        return new Feed(content, T.ASSIGN_AMAZON_LISTING_PRICE, selling).save();
+    }
+
+    public static Feed setFulfillmentByAmazonFeed(String content, Selling selling) {
+        return new Feed(content, T.FULFILLMENT_BY_AMAZON, selling).save();
     }
 
     public static Feed updateSellingFeed(String content, Selling selling) {
-        return newSellingFeed(content, selling);
+        return new Feed(content, T.POST_IMAGES, selling).save();
     }
 
     @PrePersist
     public void beforeSave() {
         this.updatedAt = new Date();
         this.createdAt = new Date();
+
+        if(this.owner != null && StringUtils.isNotBlank(this.fid)) {
+            play.cache.Cache.delete(Feed.pageCacheKey(this.owner, this.fid));
+        }
     }
 
     @PreUpdate
     public void beforeUpdate() {
         this.updatedAt = new Date();
+    }
+
+    /**
+     * 页面缓存所使用的 key
+     *
+     * @param owner
+     * @param fid
+     * @return
+     */
+    public static String pageCacheKey(Class owner, Object fid) {
+        return String.format("%s_%s_%s",
+                StringUtils.lowerCase(owner.getSimpleName()),
+                fid.toString(),
+                StringUtils.lowerCase(Feed.class.getSimpleName()));
+    }
+
+    public static List<Map<String, Object>> countFeedByFid(String fid, T type) {
+        SqlSelect sql = new SqlSelect().select("count(id) AS count").from("Feed")
+                .where("fid=? AND type=? AND analyzeResult IS NOT NULL")
+                .groupBy("analyzeResult")
+                .params(fid, type.name());
+        return DBUtils.rows(sql.toString(), sql.getParams().toArray());
     }
 
     public String checkResult() {
@@ -139,5 +253,31 @@ public class Feed extends Model {
         } else {
             return "Feed 处理成功";
         }
+    }
+
+    public static Feed getFeedWithSellingAndType(Selling selling, T type) {
+        return Feed.find(
+                String.format("fid=? AND (type=? OR memo=?) %s ORDER BY createdAt DESC",
+                        Play.mode.isProd() ? "AND feedId IS NULL" : ""),
+                selling.sellingId, type, type.label()).first();
+    }
+
+    public boolean sameHours(Feed other) {
+        return this.createdAt.getTime() - other.createdAt.getTime() <= TimeUnit.HOURS.toMillis(1);
+    }
+
+    public void submit(List<NameValuePair> params) {
+        params.add(new BasicNameValuePair("feed_id", this.id.toString()));// 提交哪一个 Feed
+        String response = HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_submit_feed",
+                params);
+        if(StringUtils.isBlank(response)) Validation.addError("", "向 Rockend 提交请求: submit_feed 时出现了错误, 请稍后再重试!");
+    }
+
+    public boolean isFailed() {
+        return this.analyzeResult != null && "失败".equalsIgnoreCase(this.analyzeResult);
+    }
+
+    public boolean isSussess() {
+        return this.analyzeResult != null && "成功".equalsIgnoreCase(this.analyzeResult);
     }
 }

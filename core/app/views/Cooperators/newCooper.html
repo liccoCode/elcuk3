@@ -1,8 +1,8 @@
 #{extends 'main.html'/}
 #{set title:"创建新的 CooperItem" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'cooperators/newCooper.coffee'/}
-    #{script_cdn name: 'jquery.validate.min.js'/}
+    #{script 'cooperators/newCooper.coffee'/}
+    #{script 'jquery.validate.min.js'/}
 #{/set}
 
 #{errorMsgs /}
@@ -10,52 +10,53 @@
 #{set isNew:(cop.id == null || cop.id <= 0) /}
 
 <div class="row">
-    <div class="alert alert-info" style="text-align:center">创建新的 Cooperator</div>
-    <form action="/Cooperators/saveCooper" method="post">
-        <table class="table table-condensed table-bordered">
-            <tr>
-                <td>全称</td>
-                <td><input type="text" name="cop.fullName" value="${cop.fullName}" placeHolder="合作伙伴的全称"></td>
+  <div class="alert alert-info" style="text-align:center">创建新的 Cooperator</div>
+  <form action="@{Cooperators.saveCooper()}" method="post">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>全称</th>
+        <td><input type="text" name="cop.fullName" value="${cop.fullName}" placeHolder="合作伙伴的全称"></td>
+        <th>简称</th>
+        <td><input type="text" name="cop.name" value="${cop.name}" placeHolder="便于自己和系统使用的合作伙伴的坚持"></td>
+      </tr>
 
-                <td>简称</td>
-                <td><input type="text" name="cop.name" value="${cop.name}" placeHolder="便于自己和系统使用的合作伙伴的坚持"></td>
-            </tr>
+      <tr>
+        <th>地址</th>
+        <td colspan="3">
+          <input type="text" class="span10" name="cop.address" value="${cop.address}" placeHolder="此合作伙伴所在的地址">
+        </td>
+      </tr>
 
-            <tr>
-                <td>地址</td>
-                <td colspan="3">
-                    <input type="text" class="span10" name="cop.address" value="${cop.address}" placeHolder="此合作伙伴所在的地址">
-                </td>
-            </tr>
+      <tr>
+        <th>联系人</th>
+        <td><input type="text" name="cop.contacter" value="${cop.contacter}" placeHolder="主要的联系人"></td>
+        <th>电话</th>
+        <td><input type="text" name="cop.phone" value="${cop.phone}" placeHolder="联系电话, 如 13292828392"></td>
+      </tr>
 
-            <tr>
-                <td>联系人</td>
-                <td><input type="text" name="cop.contacter" value="${cop.contacter}" placeHolder="主要的联系人"></td>
+      <tr>
+        <th>类型</th>
+        <td>
+          <select name="cop.type">
+          #{list items:models.procure.Cooperator.T, as:'t'}
+            <option value="${t.name()}" ${t==cop.type? 'selected' : ''}>${t.to_s()}</option>
+          #{/list}
+          </select>
+        </td>
+        <td colspan="2">&nbsp;</td>
+      </tr>
+      <tr>
+        <th>Memo</th>
+        <td colspan="3">
+          <textarea rows="8" class="span12" name="cop.memo">${cop.memo}</textarea>
+        </td>
+      </tr>
 
-                <td>电话</td>
-                <td><input type="text" name="cop.phone" value="${cop.phone}" placeHolder="联系电话, 如 13292828392"></td>
-
-            </tr>
-
-            <tr>
-                <td>类型</td>
-                <td>
-                #{pickCooperType name:'cop.type', c:cop.type/}
-                </td>
-                <td colspan="2">&nbsp;</td>
-            </tr>
-            <tr>
-                <td colspan="4">
-                    Memo:
-                    <textarea rows="8" class="span12" name="cop.memo">${cop.memo}</textarea>
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="4">
-                    <button class="btn btn-primary" type="submit">创建</button>
-                </td>
-            </tr>
-        </table>
-    </form>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary" type="submit">创建</button>
+        </td>
+      </tr>
+    </table>
+  </form>
 </div>

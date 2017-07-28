@@ -1,16 +1,15 @@
 package services;
 
 import models.market.M;
-import models.procure.Shipment.T;
 import models.market.OrderItem;
+import models.procure.ProcureUnit;
+import models.procure.Shipment.T;
+import org.joda.time.DateTime;
+import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import models.procure.ProcureUnit;
-import org.joda.time.DateTime;
-import play.libs.F;
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,7 +50,7 @@ public class MetricHopeProfitService {
      * 期望采购价
      */
     public float procurePrice() {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM ProcureUnit d WHERE 1=1 AND");
         sbd.append(" d.sku=?");
@@ -96,8 +95,10 @@ public class MetricHopeProfitService {
         return 0f;
     }
 
-    /*
-    关税和VAT单价
+    /**
+     * 关税和VAT单价
+     *
+     * @return
      */
     public float vatPrice() {
         return profit.esVatPrice();

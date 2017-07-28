@@ -10,24 +10,26 @@ import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.CostReportDTO;
+import models.view.dto.MonthlyShipmentDTO;
 import models.view.dto.ShipmentWeight;
 import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
-import models.view.report.AreaGoodsAnalyze;
+import models.view.post.LossRatePost;
+import models.view.post.MonthlyShipmentPost;
 import models.view.report.ArrivalRate;
-import org.joda.time.DateTime;
-import org.jsoup.helper.StringUtil;
+import models.view.report.LossRate;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 import query.ShipmentReportESQuery;
 
-import java.util.*;
-
-import models.view.post.LossRatePost;
-import models.view.report.LossRate;
-import play.utils.FastRuntimeException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 物流模块报表控制器
@@ -55,7 +57,7 @@ public class ShipmentReports extends Controller {
     public static void cost() {
         Date now = new Date();
         String from = Dates.date2Date(Dates.monthBegin(now));
-        String to =   Dates.date2Date(now);
+        String to = Dates.date2Date(now);
         render(from, to);
     }
 
@@ -79,10 +81,15 @@ public class ShipmentReports extends Controller {
     /**
      * 根据市场统计运输费用
      */
-    public static void countShipFeeByMarket(Date from, Date to, Shipment.T type) {
+    public static void countShipFeeByMarket(Date from, Date to, String type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(from, to, type);
-            renderJSON(J.json(chart));
+            if(StringUtils.equals(type, "专线")) {
+                HighChart chart = ShipmentReportESQuery.shipFeeByMarketPieForDedicated(from, to, type);
+                renderJSON(J.json(chart));
+            } else {
+                HighChart chart = ShipmentReportESQuery.shipFeeByMarketPie(from, to, type);
+                renderJSON(J.json(chart));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -103,10 +110,16 @@ public class ShipmentReports extends Controller {
     /**
      * 根据市场统计运输重量
      */
-    public static void countShipWeightByMarket(Date from, Date to, Shipment.T type) {
+    public static void countShipWeightByMarket(Date from, Date to, String type) {
         try {
-            HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, type);
-            renderJSON(J.json(chart));
+            if(StringUtils.equals(type, "专线")) {
+                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPieForDedicated(from, to);
+                renderJSON(J.json(chart));
+            } else {
+                Shipment.T market = Shipment.T.valueOf(type);
+                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, market);
+                renderJSON(J.json(chart));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
@@ -146,8 +159,8 @@ public class ShipmentReports extends Controller {
 
     public static void lossRateReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
-        List<LossRate> lossrates = new ArrayList<LossRate>();
-        List<ShipItem> shipItems = new ArrayList<ShipItem>();
+        List<LossRate> lossrates = new ArrayList<>();
+        List<ShipItem> shipItems = new ArrayList<>();
         LossRate losstotal = new LossRate();
         try {
             Map<String, Object> map = p.queryDate();
@@ -160,24 +173,17 @@ public class ShipmentReports extends Controller {
         render(lossrates, losstotal, p, shipItems);
     }
 
-    public static void areaGoodsAnalyze(AreaGoodsAnalyze a) {
-        if(a == null) {
-            a = new AreaGoodsAnalyze();
-            a.from = DateTime.now().minusMonths(1).plusDays(1).toDate();
-            a.to = DateTime.now().toDate();
-        }
-        List<AreaGoodsAnalyze> analyzes = a.query();
-        a.queryTotalShipmentAnalyze();
-        render(analyzes, a);
+    public static void monthlyShipmentReport(MonthlyShipmentPost p) {
+        if(p == null) p = new MonthlyShipmentPost();
+        List<MonthlyShipmentDTO> list = p.queryBySku();
+        render(list, p);
     }
 
-    public static void queryCenterIdByCountryCode(AreaGoodsAnalyze a){
-        if(StringUtil.isBlank(a.countryCode)){
-            renderJSON(new Ret());
-        }else{
-            List<String> list = a.queryCenterIdByCountryCode(a.countryCode);
-            renderJSON(J.json(list));
-        }
+    public static void monthlyShipmentPrescription(ArrivalRatePost p) {
+        if(p == null) p = new ArrivalRatePost();
+        List<Shipment> list = p.queryMonthlyShipment();
+        Map<String, F.T3<String, String, Double>> map = p.calAverageTime(list);
+        render(list, map, p);
     }
 
 }

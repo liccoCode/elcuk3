@@ -1,0 +1,195 @@
+#{extends 'main.html'/}
+#{set title:"${copItem.id? '更新':'创建'}CooperItem" /}
+#{set 'moreScripts'}
+    #{script 'cooperators/newCooperItem.coffee'/}
+    #{script 'jquery.validate.min.js'/}
+#{/set}
+<style type="text/css">
+  span.add-on select{
+    width:80px;
+  }
+
+  div.row div.alert span{
+    font-weight:bold;
+    color:#E17800;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="alert alert-info" style="text-align:center">
+    为供应商<span>${cop.fullName}</span>添加其生产的包材物料
+  </div>
+  <form action="@{Cooperators.saveMaterialItem()}" method="post" autocomplete="off">
+    <table class="table table-condensed table-bordered" id="form_table">
+      <tr>
+        <th>物料编码</th>
+        <td>
+          <select name="copItem.material.id" class="selectize" style="width:250px;">
+            <option value="">请选择</option>
+          #{list items:materials, as:'m'}
+            <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.code}</option>
+          #{/list}
+          </select>
+          <input type="hidden" name="cooperId" value="${cop.id}">
+          <input type="hidden" name="copItem.id" value="${copItem.id}">
+        #{authenticityToken /}
+        </td>
+
+        <th>价格</th>
+        <td>
+          <div class="inline">
+            <input class="input input-mini" type="text" name="copItem.price" value="${copItem.price}">
+          #{pickCurrency name:'copItem.currency',  class:'input-mini', c:copItem.currency?:helper.Currency.CNY/}
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <th>其他价格</th>
+        <td>
+          <input class="input input-mini" type="text" name="copItem.otherPrice" value="${copItem.otherPrice}">
+          <select class="input-mini">
+            <option value="CNY">CNY</option>
+          </select>
+        </td>
+        <th></th>
+        <td></td>
+      </tr>
+
+      <tr>
+        <th>生产周期(day)</th>
+        <td><input type="text" class="input-mini" name="copItem.period" value="${copItem.period}"></td>
+        <th>最低采购量</th>
+        <td><input type="text" class="input-mini" name="copItem.lowestOrderNum" value="${copItem.lowestOrderNum}"></td>
+      </tr>
+    #{if copItem != null && copItem.items != null && copItem.items.size() > 0}
+      <tr>
+        <td colspan="4" id="addTd">
+            #{list items: copItem.items, as:'dto'}
+              <div class="alert alert-info" id="add_div_${item_index}"><h4>方案${dto_index}(${dto.schemeName})</h4></div>
+              <table class="table table-condensed table-bordered" id="add_table_${item_index}">
+                <tr>
+                  <th>每箱数量</th>
+                  <td>
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].boxSize" value="${dto.boxSize}">
+                  </td>
+                  <th>单箱重量</th>
+                  <td>
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].singleBoxWeight"
+                           value="${dto.singleBoxWeight}">
+                  </td>
+                </tr>
+                <tr>
+                  <th>箱长</th>
+                  <td>
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].length" value="${dto.length}">
+                  </td>
+                  <th>箱宽</th>
+                  <td>
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].width" value="${dto.width}">
+                  </td>
+                </tr>
+                <tr>
+                  <th>箱高</th>
+                  <td>
+                    <input type="text" class="input-mini" name="copItem.items[${dto_index-1}].height" value="${dto.height}">
+                  </td>
+                  <th>方案名</th>
+                  <td>
+                    <input type="text" name="copItem.items[${dto_index-1}].schemeName" value="${dto.schemeName}">
+                  </td>
+                </tr>
+              </table>
+            #{/list}
+        </td>
+      </tr>
+    #{/if}
+    #{else }
+      <tr>
+        <td colspan="4" id="addTd">
+          <div class="alert alert-info" id="add_div_1"><h4>方案1</h4></div>
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>每箱数量</th>
+              <td><input type="text" class="input-mini" name="copItem.items[0].boxSize" value=""></td>
+              <th>单箱重量</th>
+              <td>
+                <input type="text" class="input-mini" name="copItem.items[0].singleBoxWeight" value="">
+              </td>
+            </tr>
+            <tr>
+              <th>箱长</th>
+              <td><input type="text" class="input-mini" name="copItem.items[0].length" value=""></td>
+              <th>箱宽</th>
+              <td><input type="text" class="input-mini" name="copItem.items[0].width" value=""></td>
+            </tr>
+            <tr>
+              <th>箱高</th>
+              <td><input type="text" class="input-mini" name="copItem.items[0].height" value=""></td>
+              <th>方案名</th>
+              <td>
+                <input type="text" name="copItem.items[0].schemeName" value="">
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    #{/else}
+      <tr>
+        <td colspan="4" style="text-align:right">
+          <input type="button" id="addBtn" class="btn btn-primary" value="添加方案"/>
+          <input type="button" id="delBtn" class="btn btn-danger" value="删除方案"/>
+        </td>
+      </tr>
+
+      <tr>
+        <th>产品要求</th>
+        <td colspan="3">
+          <textarea rows="8" name="copItem.productTerms" class="input input-block-level">${copItem.productTerms}</textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <th>Memo</th>
+        <td colspan="3">
+          <textarea rows="8" name="copItem.memo" class="input input-block-level">${copItem.memo}</textarea>
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="4">
+          <button type="submit" class="btn btn-primary">${copItem.id? '更新':'创建'}</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+
+
+<script type="text/template" id='add_template'>
+  <div class="alert alert-info" id="add_div_<%= num+1%>"><h4>方案<%= num+1%></h4></div>
+  <table class="table table-condensed table-bordered" id="add_table_<%= num+1%>">
+    <tr>
+      <td>每箱数量</td>
+      <td><input type="text" class="input-mini" name="copItem.items[<%= num%>].boxSize"></td>
+      <td>单箱重量</td>
+      <td>
+        <input type="text" class="input-mini" name="copItem.items[<%= num%>].singleBoxWeight">
+      </td>
+    </tr>
+    <tr>
+      <td>箱长</td>
+      <td><input type="text" class="input-mini" name="copItem.items[<%= num%>].length"></td>
+      <td>箱宽</td>
+      <td><input type="text" class="input-mini" name="copItem.items[<%= num%>].width"></td>
+    </tr>
+    <tr>
+      <td>箱高</td>
+      <td><input type="text" class="input-mini" name="copItem.items[<%= num%>].height"></td>
+      <td>方案名</td>
+      <td><input type="text" name="copItem.items[<%= num%>].schemeName"></td>
+    </tr>
+  </table>
+</script>

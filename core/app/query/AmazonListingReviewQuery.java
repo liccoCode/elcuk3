@@ -26,10 +26,10 @@ public class AmazonListingReviewQuery {
                 .where("s.sellingId IN " + SqlSelect.inlineParam(sids))
                 .groupBy("sellingId");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<String, F.T2<Integer, Float>>();
+        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<>();
         for(Map<String, Object> row : rows) {
             reviewT2Map.put(row.get("sellingId").toString(),
-                    new F.T2<Integer, Float>(
+                    new F.T2<>(
                             NumberUtils.toInt(row.get("c").toString()),
                             Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())))
             );
@@ -46,10 +46,10 @@ public class AmazonListingReviewQuery {
                 .where("l.product_sku IN " + SqlSelect.inlineParam(skus))
                 .groupBy("sku");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<String, F.T2<Integer, Float>>();
+        Map<String, F.T2<Integer, Float>> reviewT2Map = new HashMap<>();
         for(Map<String, Object> row : rows) {
             reviewT2Map.put(row.get("sku").toString(),
-                    new F.T2<Integer, Float>(
+                    new F.T2<>(
                             NumberUtils.toInt(row.get("c").toString()),
                             Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())))
             );
@@ -66,7 +66,7 @@ public class AmazonListingReviewQuery {
                 .groupBy("sku");
 
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, F.T2<Float, Date>> latestReviewT2Map = new HashMap<String, F.T2<Float, Date>>();
+        Map<String, F.T2<Float, Date>> latestReviewT2Map = new HashMap<>();
         for(Map<String, Object> row : rows) {
             Object dtObj = row.get("dt");
             if(dtObj == null) continue;
@@ -82,7 +82,7 @@ public class AmazonListingReviewQuery {
                 times = dt.getTime();
             }
             latestReviewT2Map.put(row.get("sku").toString(),
-                    new F.T2<Float, Date>(
+                    new F.T2<>(
                             Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())),
                             new Date(times))
             );
@@ -105,10 +105,10 @@ public class AmazonListingReviewQuery {
                 .orderBy("r.createDate desc").limit(1);
         Map<String, Object> row = DBUtils.row(sql.toString(), sku);
         if(row.get("rating") != null) {
-            return new F.T2<Float, Date>(Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())),
+            return new F.T2<>(Webs.scale2PointUp(NumberUtils.toFloat(row.get("rating").toString())),
                     (Date) row.get("dt"));
         }
-        return new F.T2<Float, Date>(-1f, null);
+        return new F.T2<>(-1f, null);
     }
 
 

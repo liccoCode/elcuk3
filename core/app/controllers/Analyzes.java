@@ -31,7 +31,7 @@ import java.util.List;
  * Date: 1/19/12
  * Time: 2:14 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Analyzes extends Controller {
 
     @Check("analyzes.index")
@@ -48,14 +48,12 @@ public class Analyzes extends Controller {
         request.args.put("begin", System.currentTimeMillis() + "");
     }
 
-    //
     @After(only = {"analyzes", "ajaxUnit"})
     public static void countAfter() {
         if(Play.mode.isProd()) return;
         Object begin = request.args.get("begin");
         Logger.info("%s past %s ms", request.action, System.currentTimeMillis() - NumberUtils.toLong(begin.toString()));
     }
-
 
     /**
      * 分析页面下方的 sku/sid table
@@ -65,7 +63,6 @@ public class Analyzes extends Controller {
     public static void analyzes(final AnalyzePost p) {
         try {
             List<AnalyzeDTO> dtos = p.query();
-            //response.cacheFor(String.valueOf(dtos.hashCode()),"3h",System.currentTimeMillis());
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
@@ -92,19 +89,31 @@ public class Analyzes extends Controller {
     /**
      * 加载指定 Selling 的时间段内的销量与销售额数据
      */
-    public static void ajaxUnit(AnalyzePost p) {
+    public static void ajaxUnit(final AnalyzePost p) {
         try {
-            HighChart chart = OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+                }
+            }.now());
+            String countryName = p.countryName(false);
+            chart.series.forEach(se -> se.visible = se.name.contains(countryName));
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
     }
 
-    public static void ajaxMovingAve(AnalyzePost p) {
+    public static void ajaxMovingAve(final AnalyzePost p) {
         try {
-            M m = M.val(p.market);
-            HighChart chart = OrderItem.ajaxHighChartMovinAvg(p.val, p.type, m, p.from, p.to);
+            final M m = M.val(p.market);
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartMovinAvg(p.val, p.type, m, p.from, p.to);
+                }
+            }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -120,8 +129,11 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartPVAndSS(p.val,
-                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
+                    HighChart chart = SellingRecord
+                            .ajaxHighChartPVAndSS(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
+                    String sortName = p.countryName(true);
+                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                    return J.json(chart);
                 }
             }.now());
             renderJSON(json);
@@ -139,8 +151,11 @@ public class Analyzes extends Controller {
             String json = await(new Job<String>() {
                 @Override
                 public String doJobWithResult() throws Exception {
-                    return J.json(SellingRecord.ajaxHighChartTurnRatio(p.val,
-                            Account.<Account>findById(NumberUtils.toLong(p.aid)), p.from, p.to));
+                    HighChart chart = SellingRecord
+                            .ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
+                    String sortName = p.countryName(true);
+                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                    return J.json(chart);
                 }
             }.now());
             renderJSON(json);

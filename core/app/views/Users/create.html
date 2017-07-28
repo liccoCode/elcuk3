@@ -4,48 +4,58 @@
 #{flash_alert /}
 #{info_row title:'添加新用户'/}
 
-<div class="row">
-  <div class="span12">
-    #{form @Users.addUser(), class: 'form-horizontal'}
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th>用户名</th>
-          <td><input type="text" name="user.username" value="${user?user.username:""}"></td>
+<div class="row-fluid">
+#{form @Users.addUser(), class: 'form-horizontal'}
+  <table class="table table-bordered table-condensed">
+    <tr>
+      <th>用户名</th>
+      <td>
+        <input type="text" name="user.username" value="${user?user.username:""}" placeholder="用户名请输入小写" required>
+      </td>
+      <th>Email</th>
+      <td><input type="text" name="user.email" value="${user?user.email:""}"></td>
+    </tr>
+    <tr>
+      <th>手机</th>
+      <td><input type="text" name="user.phone" value="${user?user.phone:""}"></td>
 
-          <th>Email</th>
-          <td><input type="text" name="user.email"value="${user?user.email:""}"></td>
-        </tr>
+      <th>固定电话</th>
+      <td><input type="text" value="${user?user.tel:""}" name="user.tel"></td>
+    </tr>
 
-        <tr>
-          <th>手机</th>
-          <td><input type="text" name="user.phone" value="${user?user.phone:""}"></td>
+    <tr>
+      <th>QQ</th>
+      <td><input type="text" value="${user?user.qq:""}" name="user.qq"></td>
 
-          <th>固定电话</th>
-          <td><input type="text" value="${user?user.tel:""}" name="user.tel"></td>
-        </tr>
+      <th>阿里旺旺</th>
+      <td><input type="text" value="${user?user.wangwang:""}" name="user.wangwang"></td>
+    </tr>
+    <tr>
+      <th>密码</th>
+      <td><input type="password" name="user.password"></td>
 
-        <tr>
-          <th>QQ</th>
-          <td><input type="text" value="${user?user.qq:""}" name="user.qq"></td>
-
-          <th>阿里旺旺</th>
-          <td><input type="text" value="${user?user.wangwang:""}" name="user.wangwang"></td>
-        </tr>
-
-        <tr>
-          <th>密码</th>
-          <td><input type="password" name="user.password"></td>
-
-          <th>密码确认</th>
-          <td><input type="password" name="user.confirm"></td>
-        </tr>
-
-        <tr>
-          <td colspan="4">
-            <button class="btn btn-success" data-disable-with='提交请求中...'>创建</button>
-          </td>
-        </tr>
-      </table>
-    #{/form}
-  </div>
+      <th>密码确认</th>
+      <td><input type="password" name="user.confirm"></td>
+    </tr>
+    <tr>
+      <th>所属公司</th>
+      <td>
+        <select name="user.projectName">
+            #{list items:models.User.COR, as:'c'}
+              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                <option value="${c.name()}">${c.label()}</option>
+              #{/if}
+            #{/list}
+        </select>
+      </td>
+      <th></th>
+      <td></td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        <button class="btn btn-success" data-disable-with='提交请求中...'>创建</button>
+      </td>
+    </tr>
+  </table>
+#{/form}
 </div>

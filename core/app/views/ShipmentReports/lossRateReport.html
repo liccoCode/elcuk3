@@ -1,8 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'运输丢失率统计报表'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'ShipmentReports/lossRate.coffee'/}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'ShipmentReports/lossRate.coffee'/}
 #{/set}
 
 #{info_row}
@@ -76,10 +76,7 @@
             <td>${itm.unit.sid}</td>
             <td>${itm.unit.fba?.shipmentId}</td>
             <td>${itm.unit.fba?.centerId}</td>
-            <td>
-            ${itm.qty - itm.unit.returnPurchaseSample() - itm.unit.fetchCheckTaskQcSample()}
-              (${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
-            </td>
+            <td>${itm.qty - itm.unit.returnPurchaseSample()}(${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})</td>
             <td>${itm.recivedQty}</td>
             <td>${itm.adjustQty}</td>
             <td>${itm.showDeliverymentId()}</td>
@@ -140,6 +137,9 @@
           <tr>
             <th>FBA</th>
             <th>SKU</th>
+            <th>仓库</th>
+            <th>CenterId</th>
+            <th>运输方式</th>
             <th>运输量</th>
             <th>丢失量</th>
             <th>赔偿类型</th>
@@ -154,6 +154,9 @@
           <tr>
             <td>${loss.fba}</td>
             <td>${loss.sku}</td>
+            <td>${loss.unit?.whouse?.name}</td>
+            <td>${loss.unit?.fba?.centerId}</td>
+            <td>${loss.unit?.shipType?.label()}</td>
             <td>${loss.qty}</td>
             <td>${loss.lossqty}</td>
             <td>${loss.compentype}</td>

@@ -18,9 +18,9 @@
     </div>
     <div class="span1"></div>
 
-    <label class="radio inline" id="amzradio">
+   *{ <label class="radio inline" id="amzradio">
       <input type="radio" name="createtype" value="amz" class="radio"><b>AMZ上架</b>
-    </label>
+    </label>}*
     <label class="radio inline">
       <input type="radio" name="createtype" value="add" class="radio"><b>添加Selling</b>
     </label>
@@ -43,7 +43,7 @@
       <h4 class="text-center">手动添加 Selling</h4>
 
     #{text_field id: 'addSellingSku', name: 'sku', label: 'SKU', readonly: true/}
-    #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code", readonly: true/}
+    #{text_field id: 'upc', name: 'upc', label: 'UPC', placeholder: "Universal Product Code"/}
     #{text_field id: 'asin', name: 'asin', label: 'ASIN', placeholder: "Amazon Standard Identification Number" /}
     #{select_field id:'market_add', name: 'market', items: models.market.M.values(), label: 'Market' /}
     #{select_field id:'acc.id', name: 'acc.id', items: models.market.Account.openedSaleAcc(), label: 'Account' /}

@@ -4,6 +4,7 @@ import models.market.M;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
+import play.Logger;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -37,7 +38,7 @@ public class Dates {
         try {
             df = DatatypeFactory.newInstance();
         } catch(DatatypeConfigurationException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
         }
     }
 
@@ -50,13 +51,13 @@ public class Dates {
     }
 
     /**
-     * 返回一个 Date 日期这一天的开始
+     * 返回一个 Date 日期这一天的开始, 2016-01-01 00:00:00
      *
      * @param date
      * @return
      */
     public static Date morning(Date date) {
-        return date2JDate(date);
+        return new DateTime(date).withTimeAtStartOfDay().toDate();
     }
 
     /**
@@ -79,7 +80,7 @@ public class Dates {
     public static Date date2JDate(Date date) {
         Date tmp = date;
         if(tmp == null) tmp = new Date();
-        return new DateTime(date).withTimeAtStartOfDay().toDate();
+        return new DateTime(tmp).withTimeAtStartOfDay().toDate();
     }
 
     public static String date2Date() {
@@ -169,27 +170,8 @@ public class Dates {
         }
     }
 
-    public static Date listingFromFmt(M m, String dateStr) {
-        switch(m) {
-            case AMAZON_UK:
-            case AMAZON_FR:
-            case AMAZON_ES:
-            case AMAZON_IT:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_DE:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd.MM.yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_US:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            case AMAZON_JP:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("MM/dd/yyyy").withZone(Dates.timeZone(m))).toDate();
-            default:
-                return DateTime.parse(dateStr,
-                        DateTimeFormat.forPattern("dd/MM/yyyy").withZone(Dates.timeZone(m))).toDate();
-        }
+    public static Date listingFromFmt(String dateStr) {
+        return DateTime.parse(dateStr).toDate();
     }
 
     public static Date transactionDate(M m, String dateStr) {
@@ -274,8 +256,7 @@ public class Dates {
         //年的最后一天
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date.toDate());
-        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate
-                ();
+        return date.withDayOfYear(calendar.getActualMaximum(Calendar.DAY_OF_YEAR)).toDate();
     }
 
     /**
@@ -340,7 +321,7 @@ public class Dates {
      * @return
      */
     public static Date getMonthFirst(int month) {
-        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        DateTime dateTime = DateTime.now().withMonthOfYear(month);
         return monthBegin(dateTime.toDate());
     }
 
@@ -350,7 +331,7 @@ public class Dates {
      * @return
      */
     public static Date getMonthLast(int month) {
-        DateTime dateTime = new DateTime().now().withMonthOfYear(month);
+        DateTime dateTime = DateTime.now().withMonthOfYear(month);
         return monthEnd(dateTime.toDate());
     }
 
@@ -379,9 +360,9 @@ public class Dates {
     }
 
     public static String scaleNumber(double number) {
-        java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
-        df.setRoundingMode(java.math.RoundingMode.HALF_UP);
-        return df.format(number);
+        java.text.DecimalFormat format = new java.text.DecimalFormat("0.00");
+        format.setRoundingMode(java.math.RoundingMode.HALF_UP);
+        return format.format(number);
     }
 
     /**
@@ -405,7 +386,7 @@ public class Dates {
             _end = Dates.getSundayOfSpecifyTime(lastWeek.toDate());
         }
         Calendar c = Calendar.getInstance();
-        List<Date> dates = new ArrayList<Date>();
+        List<Date> dates = new ArrayList<>();
         while(_begin.getTime() <= _end.getTime()) {
             dates.add(Dates.night(_begin));
             c.setTime(_begin);
@@ -436,7 +417,7 @@ public class Dates {
             _end = Dates.getMondayOfSpecifyTime(lastWeek.toDate());
         }
         Calendar c = Calendar.getInstance();
-        List<Date> dates = new ArrayList<Date>();
+        List<Date> dates = new ArrayList<>();
         while(_begin.getTime() <= _end.getTime()) {
             //这里还有一个问题 当结束日期刚好是周一时,由于无法找到对应的周日(超出了结束时间)来构成完整的一周,所以需要舍弃该日期
             if(Dates.getSundayOfSpecifyTime(_begin).getTime() <= end.getTime()) {

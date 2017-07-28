@@ -2,6 +2,7 @@ package query;
 
 import helper.Currency;
 import helper.DBUtils;
+import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -34,7 +35,7 @@ public class PaymentUnitQuery {
                 .where(SqlSelect.whereIn("u.sku", skus))
                 .where("p.feeType_name='transportshipping'");
         List<Map<String, Object>> rows = DBUtils.rows(currencySql.toString(), currencySql.getParams().toArray());
-        List<Currency> currencies = new ArrayList<Currency>();
+        List<Currency> currencies = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             try {
                 Currency currency = Currency.valueOf(row.get("currency").toString());
@@ -46,7 +47,7 @@ public class PaymentUnitQuery {
         return currencies;
     }
 
-    public Float avgShipmentTransportshippingFee(Shipment.T shipType, String feeTypeName, Date from, Date to) {
+    public Float avgShipmentTransportshippingFee(Shipment.T shipType, String feeTypeName, Date from, Date to, M market) {
         /**
          * 1. 找到所有币种
          * 2. 每个币种进行统计总额
@@ -65,6 +66,7 @@ public class PaymentUnitQuery {
                 .where("p.createdAt<=?").param(to)
                 .where("p.feeType_name=?").param(feeTypeName)
                 .where("s.type=?").param(shipType.name())
+                .where("s.whouse.market=?").param(market)
                 .groupBy("p.currency");
 
         List<Map<String, Object>> rows = DBUtils.rows(totalAmount.toString(), totalAmount.getParams().toArray());
@@ -72,7 +74,7 @@ public class PaymentUnitQuery {
         float cnyAveFee = 0;
         int totalQty = 0;
 
-        List<String> shipmentIds = new ArrayList<String>();
+        List<String> shipmentIds = new ArrayList<>();
         for(Map<String, Object> row : rows) {
             Currency currency = Currency.valueOf(row.get("currency").toString());
             cnyAveFee += currency.toCNY(NumberUtils.toFloat(row.get("sumFee").toString()));
@@ -94,12 +96,11 @@ public class PaymentUnitQuery {
      *
      * @param from
      * @param to
-     * @param skus
      * @return
      */
-    public Float avgSkuAIRTransportshippingFee(Date from, Date to) {
+    public Float avgSkuAIRTransportshippingFee(Date from, Date to, M market) {
         //TODO transportshipping 的名称需要调整!
-        return avgShipmentTransportshippingFee(Shipment.T.AIR, "transportshipping", from, to);
+        return avgShipmentTransportshippingFee(Shipment.T.AIR, "transportshipping", from, to, market);
     }
 
     /**
@@ -107,11 +108,10 @@ public class PaymentUnitQuery {
      *
      * @param from
      * @param to
-     * @param skus
      * @return
      */
-    public Float avgSkuSEATransportshippingFee(Date from, Date to) {
-        return avgShipmentTransportshippingFee(Shipment.T.SEA, "transportshipping", from, to);
+    public Float avgSkuSEATransportshippingFee(Date from, Date to, M market) {
+        return avgShipmentTransportshippingFee(Shipment.T.SEA, "transportshipping", from, to, market);
     }
 
     /**
@@ -122,33 +122,31 @@ public class PaymentUnitQuery {
      * @param skus
      * @return
      */
-    public Map<String, Float> avgSkuExpressTransportshippingFee(Date from, Date to, String... skus) {
+    public Map<String, Float> avgSkuExpressTransportshippingFee(Date from, Date to, M market, String... skus) {
         /**
          * 1. 找到所有币种
          * 2. 每个币种进行统计总额
          * 3. 统一为 CNY 币种
          */
-        Map<Currency, Map<String, Float>> currencyAvgFeeMap = new HashMap<Currency, Map<String, Float>>();
+        Map<Currency, Map<String, Float>> currencyAvgFeeMap = new HashMap<>();
         List<Currency> currencies = transportshippingCurrencies(from, to, skus);
-        for(Currency currency : currencies) {
-            if(!currencyAvgFeeMap.containsKey(currency))
-                currencyAvgFeeMap.put(currency, new HashMap<String, Float>());
-        }
+        currencies.stream().filter(currency -> !currencyAvgFeeMap.containsKey(currency))
+                .forEach(currency -> currencyAvgFeeMap.put(currency, new HashMap<>()));
 
         // 2
         for(Currency crcy : currencyAvgFeeMap.keySet()) {
-            SqlSelect sql = new SqlSelect()
-                    .select("sum(p.amount + p.fixValue) / sum(si.qty - IFNULL(u.purchaseSample,0) - " +
-                            "IFNULL(c.qcSample,0) ) as avgPrice", "u.sku", "p.currency")
+            SqlSelect sql = new SqlSelect();
+            sql.select("sum(p.amount+p.fixValue)/sum(si.qty-IFNULL(u.purchaseSample,0)) as avgPrice,u.sku,p.currency")
                     .from("PaymentUnit p")
                     .leftJoin("ShipItem si ON si.id=p.shipItem_id")
                     .leftJoin("ProcureUnit u ON u.id=si.unit_id")
-                    .leftJoin("CheckTask c ON c.units_id = u.id")
+                    .leftJoin("Whouse w ON w.id=u.whouse_id")
                     .where("p.createdAt>=?").param(from)
                     .where("p.createdAt<=?").param(to)
                     .where(SqlSelect.whereIn("u.sku", skus))
                     .where("p.feeType_name='transportshipping'")
                     .where("p.currency=?").param(crcy.name())
+                    .where("w.market=?").param(market)
                     .groupBy("u.sku");
 
             List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
@@ -172,8 +170,8 @@ public class PaymentUnitQuery {
      * @return
      */
     private Map<String, Float> mergeSkuDiffCurrencyToCNY(Map<Currency, Map<String, Float>> currencyAvgFeeMap) {
-        Map<String, Float> cnyMap = new HashMap<String, Float>();
-        Map<String, AtomicInteger> crcyChangeTimes = new HashMap<String, AtomicInteger>();
+        Map<String, Float> cnyMap = new HashMap<>();
+        Map<String, AtomicInteger> crcyChangeTimes = new HashMap<>();
 
         for(Currency crcy : currencyAvgFeeMap.keySet()) {
             Map<String, Float> crcyMap = currencyAvgFeeMap.get(crcy);

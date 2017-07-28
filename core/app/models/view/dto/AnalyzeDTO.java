@@ -7,6 +7,7 @@ import models.view.post.AnalyzePost;
 import play.libs.F;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
@@ -164,6 +165,21 @@ public class AnalyzeDTO implements Serializable {
      */
     public String step;
 
+    /**
+     * 退货数
+     */
+    public int returns = 0;
+
+    /**
+     * 正常销量数
+     */
+    public int sales = 0;
+
+    /**
+     * 退货率
+     */
+    public float returnRates = 0;
+
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
@@ -204,7 +220,7 @@ public class AnalyzeDTO implements Serializable {
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
         float ps = this.ps;
-        return new F.T4<Float, Float, Float, Float>(
+        return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
@@ -217,7 +233,7 @@ public class AnalyzeDTO implements Serializable {
         float _ps = this.getPs_cal();
         _ps = _ps < 1 ? 1f : _ps;
         float ps = this.ps;
-        return new F.T4<Float, Float, Float, Float>(
+        return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
@@ -242,9 +258,9 @@ public class AnalyzeDTO implements Serializable {
                 color = "E45652";
             else if(diff >= 0.2 && diff < 0.4)
                 color = "FAAB3B";
-            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
+            return new F.T2<>(Webs.scale2PointUp(diff), color);
         } else {
-            return new F.T2<Float, String>(0f, "fff");
+            return new F.T2<>(0f, "fff");
         }
     }
 
@@ -284,5 +300,13 @@ public class AnalyzeDTO implements Serializable {
     public String prettyDisplayPrice() {
         DecimalFormat df = new DecimalFormat("#.00");
         return df.format(displayPrice);
+    }
+
+    public int totalfive() {
+        return this.working + this.worked + this.way + this.inbound + this.qty;
+    }
+
+    public float day() {
+        return new BigDecimal(this.day30 / 30).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
     }
 }

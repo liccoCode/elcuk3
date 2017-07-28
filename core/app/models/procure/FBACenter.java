@@ -1,13 +1,15 @@
 package models.procure;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
+import play.data.validation.Required;
 import play.db.jpa.Model;
 import play.libs.F;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * FBA 仓库. 每一个 FBAShipment 都会关联的
@@ -16,7 +18,7 @@ import java.util.List;
  * Time: 12:08 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class FBACenter extends Model {
     public FBACenter() {
     }
@@ -56,22 +58,33 @@ public class FBACenter extends Model {
    }
     */
 
+    @Required
     @Column(unique = true, nullable = false)
     public String centerId;
 
+    @Required
     public String addressLine1;
 
     public String addressLine2;
 
+    @Required
     public String city;
 
+    @Required
     public String name;
 
+    @Required
     public String countryCode;
 
     public String stateOrProvinceCode;
 
+    @Required
     public String postalCode;
+
+    /**
+     * 是否使用 Amazon 返回的地址来自动同步数据
+     */
+    public boolean autoSync = false;
 
     /**
      * 向当前 FBA Center 发货的 FBA 数量
@@ -80,11 +93,8 @@ public class FBACenter extends Model {
      */
     public F.T2<Long, List<String>> fbas() {
         List<FBAShipment> shipments = FBAShipment.find("fbaCenter=?", this).fetch();
-        List<String> shipmentIds = new ArrayList<String>();
-        for(FBAShipment shipment : shipments) {
-            shipmentIds.add(shipment.shipmentId);
-        }
-        return new F.T2<Long, List<String>>((long) shipments.size(), shipmentIds);
+        List<String> shipmentIds = shipments.stream().map(shipment -> shipment.shipmentId).collect(Collectors.toList());
+        return new F.T2<>((long) shipments.size(), shipmentIds);
     }
 
     public String codeToCountry() {
@@ -105,20 +115,59 @@ public class FBACenter extends Model {
 
     @Override
     public String toString() {
-        return "FBACenter{" +
-                "centerId='" + centerId + '\'' +
-                ", addressLine1='" + addressLine1 + '\'' +
-                ", addressLine2='" + addressLine2 + '\'' +
-                ", city='" + city + '\'' +
-                ", name='" + name + '\'' +
-                ", countryCode='" + countryCode + '\'' +
-                ", stateOrProvinceCode='" + stateOrProvinceCode + '\'' +
-                ", postalCode='" + postalCode + '\'' +
-                '}';
+        return "FBACenter{"
+                + "centerId='" + centerId + '\''
+                + ", addressLine1='" + addressLine1 + '\''
+                + ", addressLine2='" + addressLine2 + '\''
+                + ", city='" + city + '\''
+                + ", name='" + name + '\''
+                + ", countryCode='" + countryCode + '\''
+                + ", stateOrProvinceCode='" + stateOrProvinceCode + '\''
+                + ", postalCode='" + postalCode + '\''
+                + '}';
     }
 
     public static FBACenter findByCenterId(String centerId) {
         return FBACenter.find("centerId=?", centerId).first();
     }
 
+    public FBACenter createOrUpdate() {
+        FBACenter manager = FBACenter.findByCenterId(this.centerId);
+        if(manager != null) {
+            if(manager.autoSync) {
+                manager.addressLine1 = this.addressLine1;
+                manager.addressLine2 = this.addressLine2;
+                manager.city = this.city;
+                manager.name = this.name;
+                manager.countryCode = this.countryCode;
+                manager.stateOrProvinceCode = this.stateOrProvinceCode;
+                manager.postalCode = this.postalCode;
+                manager.save();
+            }
+            return manager;
+        } else {
+            return this.save();
+        }
+    }
+
+    public void update(FBACenter center) {
+        this.addressLine1 = center.addressLine1;
+        this.addressLine2 = center.addressLine2;
+        this.city = center.city;
+        this.countryCode = center.countryCode;
+        this.name = center.name;
+        this.postalCode = center.postalCode;
+        this.stateOrProvinceCode = center.stateOrProvinceCode;
+        this.save();
+    }
+
+    public void enableAutoSync() {
+        this.autoSync = true;
+        this.save();
+    }
+
+    public void disableAutoSync() {
+        this.autoSync = false;
+        this.save();
+    }
 }

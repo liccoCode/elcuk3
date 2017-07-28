@@ -1,13 +1,11 @@
 package helper;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import models.market.Account;
 import models.market.M;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import play.Logger;
 import play.Play;
@@ -80,7 +78,7 @@ public class Webs {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public static void dev_login(Account acc) throws IOException, ClassNotFoundException {
+    public static void devLogin(Account acc) throws IOException, ClassNotFoundException {
         File jsonFile = Play.getFile("/test/" + acc.prettyName() + ".json");
         if(jsonFile.exists() && (System.currentTimeMillis() - jsonFile.lastModified() > TimeUnit.HOURS.toMillis(1)))
             jsonFile.delete();
@@ -110,44 +108,8 @@ public class Webs {
      * @return
      */
     public static Future<Boolean> systemMail(String subject, String content) {
-//        HtmlEmail email = new HtmlEmail();
-//        try {
-//            email.setCharset("UTF-8");
-//            email.setSubject(subject);
-//            email.addTo("wppurking@gmail.com");
-//            email.setFrom("support@easyacceu.com", "EasyAcc");
-//            email.setHtmlMsg(content);
-//        } catch(EmailException e) {
-//            Logger.warn("Email error: " + e.getMessage());
-//        }
-//        LogUtils.JOBLOG.info(String.format("email subject[%s]", subject));
-//        return Mail.send(email);
-//        rollbar(subject, content);
         return null;
     }
-
-
-    public static void rollbar(String message, String context) {
-        String x = "{\"access_token\":\"380247fd2c4f4845ad511e3544b2e15e\"," +
-                "\"data\":{\"body\":{\"message\":{\"body\":\"" + message + "\"" +
-                "}},\"environment\":\"production\","
-                + "\"timestamp\": " + (System.currentTimeMillis() / 1000) + ","
-                + " \"platform\": \"linux\", \"language\": \"java\",\"framework\": \"play\", "
-                + "\"level\": \"warning\","
-                + "  \"request\": { \"url\": \"http://job.easya.cc\",\"method\": \"GET\","
-                + "   \"headers\": {\"Accept\": \"text/html\", \"Referer\": \"http://job.easya.cc/\"},   "
-                + "   \"params\": {\"controller\": \"project\",\"action\": \"index\"},      "
-                + "    \"GET\": {},\"query_string\": \"\",\"POST\": {},     "
-                + "     \"body\": \"" + context + "\",  "
-                + "     \"user_ip\": \"\" },  "
-
-                + "  \"server\": {\"host\": \"job.easya.cc\",  \"root\": \"/Users/\",\"branch\": \"master\", "
-                + "   \"code_version\": \"\","
-                + " \"sha\": \"\" } "
-                + "} }";
-        JSONObject post = HTTP.postJson("https://api.rollbar.com/api/1/item/", x);
-    }
-
 
     /**
      * 简单的发送 HTML 的系统邮件
@@ -212,15 +174,15 @@ public class Webs {
      * @return
      */
     public static F.T2<M, Float> amzPriceFormat(String priceStr, M defaultMarket) {
-        if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
+        if(StringUtils.isBlank(priceStr)) return new F.T2<>(defaultMarket, 999f);
         String dot = Character.toString(priceStr.charAt(priceStr.length() - 3));
         if(dot.equals(".")) { // uk/us 格式
-            return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
+            return new F.T2<>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
-            return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
+            return new F.T2<>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
         } else {
             Logger.error("Not support price format.");
-            return new F.T2<M, Float>(defaultMarket, 999f);
+            return new F.T2<>(defaultMarket, 999f);
         }
     }
 
@@ -257,7 +219,7 @@ public class Webs {
                 throw new FastRuntimeException("Unsupport dot format on FormatToPrice. [" + dot + "]");
             }
         } catch(ParseException e) {
-            e.printStackTrace();
+            Logger.error(Webs.S(e));
             throw new FastRuntimeException(e);
         }
     }
@@ -398,8 +360,8 @@ public class Webs {
      * @param errors
      * @return
      */
-    public static String VJson(List<Error> errors) {
-        List<Map<String, String>> errorList = new ArrayList<Map<String, String>>();
+    public static String vJson(List<Error> errors) {
+        List<Map<String, String>> errorList = new ArrayList<>();
         for(Error err : errors) {
             errorList.add(GTs.MapBuilder.map("key", err.getKey()).put("message", err.message()).build());
         }
@@ -414,7 +376,7 @@ public class Webs {
 
     public static String intArrayString(int[] results) {
         if(results == null) return "";
-        List<String> intList = new ArrayList<String>();
+        List<String> intList = new ArrayList<>();
         for(int i : results) {
             intList.add(i + "");
         }
@@ -431,16 +393,20 @@ public class Webs {
      */
     public static F.T2<M, Float> amazonPriceNumberAutoJudgeFormat(String priceStr,
                                                                   M defaultMarket) {
-        if(StringUtils.isBlank(priceStr)) return new F.T2<M, Float>(defaultMarket, 999f);
+        if(StringUtils.isBlank(priceStr)) return new F.T2<>(defaultMarket, 999f);
         StringBuilder sbd = new StringBuilder(priceStr);
         String dot = Character.toString(sbd.charAt(sbd.length() - 3));
         if(dot.equals(".")) { // uk/us 格式
-            return new F.T2<M, Float>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
+            return new F.T2<>(M.AMAZON_UK, Webs.amazonPriceNumber(M.AMAZON_UK, priceStr));
         } else if(dot.equals(",")) { // de 格式
-            return new F.T2<M, Float>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
+            return new F.T2<>(M.AMAZON_DE, Webs.amazonPriceNumber(M.AMAZON_DE, priceStr));
         } else {
             Logger.error("Not support price format.");
-            return new F.T2<M, Float>(defaultMarket, 999f);
+            return new F.T2<>(defaultMarket, 999f);
         }
+    }
+
+    public static String md5(String str) {
+        return DigestUtils.md5Hex(str);
     }
 }

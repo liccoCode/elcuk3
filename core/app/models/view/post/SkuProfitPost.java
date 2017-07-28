@@ -11,7 +11,6 @@ import models.view.report.SkuProfit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.libs.F;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -19,7 +18,7 @@ import java.util.*;
 /**
  * Created by licco on 15/12/22.
  */
-public class SkuProfitPost extends Post<SkuProfit> {
+public class SkuProfitPost {
 
     public Date begin;
     public Date end;
@@ -27,6 +26,8 @@ public class SkuProfitPost extends Post<SkuProfit> {
     public String sku;
     public String sellingId;
     public String categories;
+    public int page = 1;
+    public int perSize = 10;
 
     public SkuProfitPost() {
         DateTime now = DateTime.now().withTimeAtStartOfDay();
@@ -34,18 +35,10 @@ public class SkuProfitPost extends Post<SkuProfit> {
         DateTime from = DateTime.now().withDayOfYear(1);
         this.begin = from.toDate();
         this.pmarket = "market";
-        this.perSize = 10;
-        this.page = 1;
     }
-
-    @Override
-    public F.T2<String, List<Object>> params() {
-        return null;
-    }
-
 
     public List<SkuProfit> query() {
-        List<SkuProfit> skuProfits = new ArrayList<SkuProfit>();
+        List<SkuProfit> skuProfits = new ArrayList<>();
 
         /**
          * 每个市场遍历
@@ -72,7 +65,7 @@ public class SkuProfitPost extends Post<SkuProfit> {
             }
             if(dtos == null) return skuProfits;
 
-            Map<String, ProfitDto> profitmap = new HashMap<String, ProfitDto>();
+            Map<String, ProfitDto> profitmap = new HashMap<>();
             for(ProfitDto dto : dtos) {
                 profitmap.put(dto.sku, dto);
             }
@@ -121,8 +114,7 @@ public class SkuProfitPost extends Post<SkuProfit> {
 
             return skuProfit;
         } catch(Exception e) {
-            e.printStackTrace();
-            Logger.info("sku_profit.esProfit:::" + e.toString());
+            Logger.error(Webs.S(e));
         }
         return initProfit(market, pro_sku, sellingId);
     }

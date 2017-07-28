@@ -42,6 +42,7 @@ planQty=\u9884\u8BA1\u91C7\u8D2D\u91CF
 price=\u91C7\u8D2D\u5355\u4EF7
 unit.sku=\u63D0\u4EA4\u7684 SKU
 unit.shipType=\u8FD0\u8F93\u65B9\u5F0F
+currWhouse=\u5f53\u524d\u4ed3\u5e93
 
 copItem.boxSize=\u63A8\u8350\u6BCF\u4E00\u7BB1\u5C01\u88C5\u7684\u6570\u91CF
 
@@ -68,6 +69,7 @@ procureunit.sku=\u91C7\u8D2D\u5355\u5143\u7684 SKU
 procureunit.planQty=\u9884\u8BA1\u91C7\u8D2D\u6570\u91CF
 procureunit.split.state=%s \u72B6\u6001\u4E0D\u5141\u8BB8\u8FDB\u884C[\u91C7\u8D2D\u8BA1\u5212]\u5206\u62C6
 procureunit.validate.whouse=Selling \u4E0D\u5C5E\u4E8E\u76EE\u6807 FBA \u4ED3\u5E93
+procureunit.cooperator=\u4f9b\u5e94\u5546
 procureunit.nextStage.leftQty=\u5269\u4F59\u8FD0\u8F93\u6570\u91CF\u7ADF\u7136\u5C0F\u4E8E 0, \u8BF7\u5C06\u8D1F\u7684\u8FD0\u8F93\u6570\u91CF\u8FDB\u884C\u4FEE\u6B63.
 
 
@@ -79,6 +81,7 @@ deliveryment.units.cancel=\u4E0D\u5141\u8BB8\u5305\u542B\u975E DELIVERY \u72B6\u
 deliveryment.units.create=\u6709\u9519\u8BEF\u7684 ProcureUnit \u8BF7\u4ED4\u7EC6\u68C0\u67E5
 deliveryments.cancel=\u53D6\u6D88\u7684\u539F\u56E0
 deliveryments.confirm=\u53EA\u80FD\u901A\u8FC7 PLAN \u8FDB\u884C Confirm \u72B6\u6001
+deliveryments.review=\u5ba1\u6838\u7ed3\u679c
 
 shipments.confirm.state=\u72B6\u6001\u4E3A PLAN \u7684\u624D\u8FD0\u884C\u786E\u8BA4\u8FD0\u8F93\u5355
 shipments.ensureDone.state=\u72B6\u6001\u4E3A CLEARANCE(\u6E05\u5173) \u72B6\u6001\u7684\u624D\u5141\u8BB8\u8FDB\u884C DONW
@@ -139,6 +142,9 @@ deliveryment.cancel=\u53D6\u6D88[\u91C7\u8D2D\u5355]
 deliveryment.cancel.msg=\u53D6\u6D88[\u91C7\u8D2D\u5355] %s \u539F\u56E0\u662F (%s)
 deliveryment.createFromProcures=[\u91C7\u8D2D\u5355\u5143] \u521B\u5EFA [\u91C7\u8D2D\u5355]
 deliveryment.createFromProcures.msg=[\u91C7\u8D2D\u5355\u5143] %s \u521B\u5EFA\u5230 [\u91C7\u8D2D\u5355] %s
+deliveryment.review=\u91c7\u8d2d\u5355\u5ba1\u6838
+deliveryment.review.msg=\u91c7\u8d2d\u5355\u003a %s %s \u7406\u7531 %s 
+
 deliveryment.confirm=\u786E\u8BA4[\u91C7\u8D2D\u5355]
 deliveryment.departApply=[\u91C7\u8D2D\u5355]\u4ECE[\u8BF7\u6B3E\u5355]\u5265\u79BB
 deliveryment.departApply.msg=[\u91C7\u8D2D\u5355] %s \u4ECE %s [\u8BF7\u6B3E\u5355] \u4E2D\u5265\u79BB.
@@ -171,12 +177,16 @@ procureunit.split=\u5206\u62C6[\u91C7\u8D2D\u8BA1\u5212]
 procureunit.split.msg=\u5206\u62C6 #%s \u8BA1\u5212 %s \u4E2D %s \u5230 #%s
 procureunit.prepay=\u7533\u8BF7\u9884\u4ED8\u6B3E
 procureunit.prepay.msg=\u4E3A %s \u7533\u8BF7 %s \u9884\u4ED8\u6B3E
+procureunit.mediumpay=\u7533\u8bf7\u4e2d\u671f\u4ed8\u6b3e
+procureunit.mediumpay.msg=\u4E3A %s \u7533\u8BF7 %s \u4e2d\u671f\u4ed8\u6b3e
 procureunit.tailpay=\u7533\u8BF7\u5C3E\u6B3E
 procureunit.tailpay.msg=\u4E3A %s \u7533\u8BF7 %s \u5C3E\u6B3E
 procureunit.reworkpay=\u8fd4\u5de5\u8d39\u7528\u7533\u8bf7
 procureunit.reworkpay.msg=\u4E3A %s \u7533\u8BF7 %s \u8fd4\u5de5\u8d39\u7528
 procureunit.stopactiviti=\u7ec8\u6b62\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0b
 procureunit.stopactiviti.msg=\u91c7\u8d2d\u8ba1\u5212\u6d41\u7a0bID[%s],\u91c7\u8d2d\u5bf9\u8c61ID[%s],\u5355\u636eID[%s]
+procureunit.adjuststock=\u5e93\u5b58\u8c03\u6574
+procureunit.adjuststock.msg=\u8c03\u6574\u6570\u91cf %s  \u8c03\u6574\u524d%s \u8c03\u6574\u540e%s \u5907\u6ce8: %s
 
 shipment.update=\u66F4\u65B0[\u8FD0\u8F93\u5355]
 shipment.updateFBA=[\u8FD0\u8F93\u5355]\u66F4\u65B0 FBA
@@ -229,24 +239,35 @@ procureapply.save.msg=\u6DFB\u52A0 %s \u5230\u91C7\u8D2D\u8BF7\u6B3E\u5355 %s
 transportapply.save=[\u8FD0\u8F93\u5355]\u8BF7\u6B3E
 transportapply.save.msg=\u6DFB\u52A0 %s \u5230\u8FD0\u8F93\u8BF7\u6B3E\u5355 %s
 
-saletarget.update=\u66f4\u65b0[\u9500\u552e\u76ee\u6807]
-saletarget.update.msg=%s%s\u76ee\u6807\u0020%s
 saleAmounts=\u9500\u552e\u989d
 profitMargin=\u5229\u6da6\u7387
-
-checktask.doPrints=[CheckTask]\u6253\u5370[CheckList]
-checktask.doPrints.msg=[\u8d28\u68c0\u4efb\u52a1ID:%s]
 
 startTime=\u8d28\u68c0\u5f00\u59cb\u65f6\u95f4
 endTime=\u8d28\u68c0\u5b8c\u6210\u65f6\u95f4
 isship=\u662f\u5426\u53d1\u8d27
 result=\u662f\u5426\u5408\u683c
 pickqty=\u5b9e\u9645\u62bd\u68c0\u6570\u91cf
-qty=\u5b9e\u9645\u4ea4\u8d27\u6570\u91cf
 checknote=\u5907\u6ce8
-
-checktask.update=[CheckTask]\u66f4\u65b0
-checktask.update.msg=\u66f4\u65b0[\u8d28\u68c0\u4efb\u52a1 ID:%s]:%s
 
 btbOrder.update=\u0042\u0032\u0042\u8ba2\u5355\u7ba1\u7406
 btbOrder.update.msg=\u8ba2\u5355\u7f16\u53f7[%s], \u66f4\u65b0\u5185\u5bb9[%s]
+
+
+inbound.update=\u66f4\u65b0[\u5165\u5e93\u8bb0\u5f55]
+inbound.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+inboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u5165\u5e93
+inboundrecord.confirm.msg=ID[%s]
+
+outboundrecord.update=\u66f4\u65b0[\u51fa\u5e93\u8bb0\u5f55]
+outboundrecord.update.msg=\u66f4\u65b0\u51fa\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+outboundrecord.confirm=\u6279\u91cf\u786e\u8ba4\u51fa\u5e93
+outboundrecord.confirm.msg=ID[%s]
+outbound.cancel=\u64a4\u9500\u51fa\u5e93
+outbound.cancel.msg=\u91c7\u8d2d\u8ba1\u5212\u0020 [%s] \u64a4\u9500\u51fa\u5e93\u6570\u91cf [%s]，\u539f\u56e0:[%s] 
+
+refund.update=\u66f4\u65b0\u005b\u9000\u8d27\u4fe1\u606f\u005d
+refund.update.msg=\u66f4\u65b0\u5165\u5e93\u8bb0\u5f55[%s],\u0020\u66f4\u65b0\u5185\u5bb9[%s]
+refund.confirm=\u786e\u8ba4\u9000\u8d27
+refund.confirm.msg=\u9000\u8d27\u6570\u91cf[%s] \u5907\u6ce8\u8bf4\u660e %s
+refund.transfer=\u4e0d\u826f\u54c1\u8f6c\u5165
+refund.transfer.msg=\u8f6c\u5165\u6570\u91cf %s \u5907\u6ce8\u8bf4\u660e %s

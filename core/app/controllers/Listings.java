@@ -1,17 +1,16 @@
 package controllers;
 
 import com.google.gson.JsonElement;
+import controllers.api.SystemOperation;
 import helper.Crawl;
 import helper.J;
 import helper.Webs;
-import models.Server;
 import models.market.Account;
 import models.market.Listing;
 import models.market.M;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
-import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Error;
 import play.data.validation.Validation;
@@ -20,7 +19,6 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
-import controllers.api.SystemOperation;
 
 /**
  * Listing 的引入:
@@ -75,8 +73,6 @@ public class Listings extends Controller {
         validation.required(market);
         validation.required(asin);
         if(Validation.hasErrors()) renderJSON(validation.errorsMap());
-        Logger.info(String.format("%s/listings/%s/%s", Server.server(Server.T.CRAWLER).url, market,
-                asin));
         Listing tobeSave = null;
         try {
             tobeSave = Listing.crawl(asin, M.val(market));
@@ -90,7 +86,6 @@ public class Listings extends Controller {
                     new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
-
         renderJSON(J.G(tobeSave));
     }
 
@@ -107,6 +102,7 @@ public class Listings extends Controller {
 
     /**
      * 获取被跟踪的Lisitng列表
+     * @deprecated
      */
     @Check("listings.trackedlistings")
     public static void trackedListings() {

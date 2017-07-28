@@ -1,14 +1,6 @@
 package controllers;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Cary
- * Date: 14-4-4
- * Time: 上午10:11
- */
-
 import controllers.api.SystemOperation;
-import helper.DBUtils;
 import helper.Webs;
 import models.Privilege;
 import models.Role;
@@ -21,8 +13,6 @@ import play.mvc.With;
 
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 
 /**
  * Created by IntelliJ IDEA.

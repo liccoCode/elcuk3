@@ -204,7 +204,7 @@ public class MWSReports {
     }
 
 
-    private static final Map<String, MarketplaceWebService> cached = new HashMap<String, MarketplaceWebService>();
+    private static final Map<String, MarketplaceWebService> cached = new HashMap<>();
 
     /**
      * 通过 JobRequest 获取缓存了的 MarketplaceWebService 对象
@@ -256,7 +256,6 @@ public class MWSReports {
                         config.setServiceURL("https://mws.amazonservices.ca");
                         break;
                 }
-
                 client = new MarketplaceWebServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);
                 cached.put(key, client);
             }

@@ -54,7 +54,7 @@ public class CategorySettings implements Serializable {
 
     public Map<String, String> amazonNodeMap() {
         String[] nodes = StringUtils.split(amazonNode, ",");
-        Map<String, String> nodeMap = new HashMap<String, String>();
+        Map<String, String> nodeMap = new HashMap<>();
         for(String node : nodes) {
             nodeMap.put(node, node);
         }

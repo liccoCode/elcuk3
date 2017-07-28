@@ -4,7 +4,12 @@ import com.google.gson.annotations.Expose;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.whouse.Inbound;
+import models.whouse.InboundUnit;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
@@ -16,6 +21,8 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,8 +31,10 @@ import java.util.List;
  * Time: 上午10:12
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class DeliverPlan extends GenericModel {
+
+    private static final long serialVersionUID = -5438540657539304801L;
 
     public DeliverPlan() {
     }
@@ -36,7 +45,7 @@ public class DeliverPlan extends GenericModel {
 
 
     @OneToMany(mappedBy = "deliverplan", cascade = {CascadeType.PERSIST})
-    public List<ProcureUnit> units = new ArrayList<ProcureUnit>();
+    public List<ProcureUnit> units = new ArrayList<>();
 
 
     @OneToOne
@@ -105,18 +114,14 @@ public class DeliverPlan extends GenericModel {
      * 通过 ProcureUnit 来创建采购单
      * <p/>
      * ps: 创建 Delivery 不允许并发; 类锁就类锁吧... 反正常见 Delivery 不是经常性操作
-     *
-     * @param pids
      */
-    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name,
-                                                              User user) {
+    public synchronized static DeliverPlan createFromProcures(List<Long> pids, String name, User user) {
         List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
         DeliverPlan deliverplan = new DeliverPlan(DeliverPlan.id());
         if(pids.size() != units.size()) {
             Validation.addError("deliveryment.units.create", "%s");
             return deliverplan;
         }
-
         Cooperator cop = units.get(0).cooperator;
         for(ProcureUnit unit : units) {
             isUnitToDeliverymentValid(unit, cop);
@@ -126,35 +131,33 @@ public class DeliverPlan extends GenericModel {
         deliverplan.handler = user;
         deliverplan.name = name.trim();
         deliverplan.units.addAll(units);
+        // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
         for(ProcureUnit unit : deliverplan.units) {
-            if(unit.deliverplan != null)
-                Validation.addError("", String.format("采购计划单 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
-            // 将 ProcureUnit 添加进入 出货单 , ProcureUnit 进入 采购中 阶段
             unit.toggleAssignTodeliverplan(deliverplan, true);
         }
         deliverplan.state = P.CREATE;
         deliverplan.save();
-
         new ERecordBuilder("deliverplan.createFromProcures")
-                .msgArgs(StringUtils.join(pids, ","), deliverplan.id)
-                .fid(deliverplan.id).save();
+                .msgArgs(StringUtils.join(pids, ","), deliverplan.id).fid(deliverplan.id).save();
         return deliverplan;
     }
-
 
     public static String id() {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
-        String count = DeliverPlan.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
-        return String.format("DP|%s|%s", dt.toString("yyyyMM"),
-                count.length() == 1 ? "0" + count : count);
+        DeliverPlan deliverPlan = DeliverPlan.find("createDate>=? AND createDate<? ORDER BY createDate DESC",
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()
+        ).first();
+        String numStr = Optional.ofNullable(deliverPlan)
+                .map(plan -> StringUtils.split(plan.id, "|"))
+                .filter(charts -> ArrayUtils.isNotEmpty(charts) && charts.length == 3)
+                .map(charts -> NumberUtils.toLong(charts[2]))//00 => 0, 01 => 1
+                .map(num -> num + 1 + "")//0 => 1, 2 => 2, 10 => 11
+                .map(num -> num.length() == 1 ? "0" + num : num)
+                .orElse("00");
+        return String.format("DP|%s|%s", dt.toString("yyyyMM"), numStr);
     }
-
 
     private static boolean isUnitToDeliverymentValid(ProcureUnit unit, Cooperator cop) {
         if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
@@ -162,7 +165,11 @@ public class DeliverPlan extends GenericModel {
             return false;
         }
         if(!cop.equals(unit.cooperator)) {
-            Validation.addError("", "添加一个出库单只能一个供应商!");
+            Validation.addError("", "添加一个出货单只能一个供应商!");
+            return false;
+        }
+        if(unit.deliverplan != null) {
+            Validation.addError("", String.format("采购计划 %s 已经存在出货单 %s", unit.id, unit.deliverplan.id));
             return false;
         }
         return true;
@@ -171,68 +178,58 @@ public class DeliverPlan extends GenericModel {
 
     /**
      * 将 PLAN 状态的 ProcureUnit 添加到这个出货单中, 用户制作出货单
-     *
-     * @return
      */
     public List<ProcureUnit> assignUnitToDeliverplan(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator singleCop = units.get(0).cooperator;
-        for(ProcureUnit unit : units) {
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        Cooperator singleCop = procureUnits.get(0).cooperator;
+        for(ProcureUnit unit : procureUnits) {
             if(isUnitToDeliverymentValid(unit, singleCop)) {
                 unit.toggleAssignTodeliverplan(this, true);
             }
-            if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
+            if(Validation.hasErrors()) return new ArrayList<>();
             unit.save();
         }
-
-        new ElcukRecord(Messages.get("deliverplan.addunit"),
-                Messages.get("deliverplan.addunit.msg", pids, this.id), this.id).save();
-
-        return units;
+        new ElcukRecord(Messages.get("deliverplan.addunit"), Messages.get("deliverplan.addunit.msg", pids, this.id),
+                this.id).save();
+        return procureUnits;
     }
 
     /**
      * 将指定 ProcureUnit 从 出货单 中删除
-     *
-     * @param pids
      */
     public List<ProcureUnit> unassignUnitToDeliverplan(List<Long> pids) {
-        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        for(ProcureUnit unit : units) {
-            if(unit.stage != ProcureUnit.STAGE.DELIVERY)
+        List<ProcureUnit> procureUnits = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        for(ProcureUnit unit : procureUnits) {
+            if(unit.stage != ProcureUnit.STAGE.DELIVERY) {
                 Validation.addError("deliveryment.units.unassign", "%s");
-            else
+            } else {
                 unit.toggleAssignTodeliverplan(null, false);
+            }
         }
-        if(Validation.hasErrors()) return new ArrayList<ProcureUnit>();
-        this.units.removeAll(units);
+        if(Validation.hasErrors()) return new ArrayList<>();
+        this.units.removeAll(procureUnits);
         this.save();
 
-        new ElcukRecord(Messages.get("deliverplan.delunit"),
-                Messages.get("deliverplan.delunit.msg", pids, this.id), this.id).save();
-        return units;
+        new ElcukRecord(Messages.get("deliverplan.delunit"), Messages.get("deliverplan.delunit.msg", pids, this.id),
+                this.id).save();
+        return procureUnits;
     }
 
     /**
-     * 返回此 Deliveryment 可以用来添加的 ProcureUnits
-     *
-     * @return
+     * 返回此 DeliverPlan 可以用来添加的 ProcureUnits
      */
     public List<ProcureUnit> availableInPlanStageProcureUnits() {
         if(this.units.size() == 0) {
-            return ProcureUnit.find("planstage=?", ProcureUnit.PLANSTAGE.DELIVERY).fetch();
+            return ProcureUnit.find("planstage=? AND attrs.planQty > 0", ProcureUnit.PLANSTAGE.DELIVERY).fetch(50);
         } else {
-            Cooperator cooperator = this.units.get(0).cooperator;
-            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=?", cooperator,
-                    ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY)
-                    .fetch();
+            Cooperator c = this.units.get(0).cooperator;
+            return ProcureUnit.find("cooperator=? AND planstage!=? AND stage=? AND attrs.planQty>0",
+                    c, ProcureUnit.PLANSTAGE.DELIVERY, ProcureUnit.STAGE.DELIVERY).fetch();
         }
     }
 
     /**
      * 获取此采购单的供应商, 如果没有采购货物, 则供应商为空, 否则为第一个采购计划的供应商(因为采购单只允许一个供应商)
-     *
-     * @return
      */
     public Cooperator supplier() {
         if(this.units.size() == 0) return null;
@@ -256,5 +253,28 @@ public class DeliverPlan extends GenericModel {
         }
     }
 
+    public String showInbounds() {
+        List<Inbound> list = Inbound.find("plan.id=? AND status<> ? ", this.id, Inbound.S.Cancel).fetch();
+        if(list == null || list.size() == 0) return "";
+        StringBuilder ids = new StringBuilder();
+        for(Inbound inbound : list) {
+            ids.append(inbound.id).append("; ");
+        }
+        return ids.toString();
+    }
 
+    public long showNum(boolean showAll) {
+        if(!showAll)
+            return this.units.size();
+        return this.units.stream()
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY).count();
+    }
+
+    public List<ProcureUnit> showUnits(boolean showAll) {
+        if(!showAll)
+            return this.units;
+        return this.units.stream()
+                .filter(unit -> InboundUnit.validIsCreate(unit.id) && unit.stage == ProcureUnit.STAGE.DELIVERY)
+                .collect(Collectors.toList());
+    }
 }

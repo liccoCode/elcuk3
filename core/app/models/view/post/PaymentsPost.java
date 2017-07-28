@@ -43,7 +43,7 @@ public class PaymentsPost extends Post<Payment> {
 
     public DateType dateType;
 
-    public List<Payment.S> states = new ArrayList<Payment.S>();
+    public List<Payment.S> states = new ArrayList<>();
 
     public Long cooperId;
 
@@ -78,10 +78,8 @@ public class PaymentsPost extends Post<Payment> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-
-
         StringBuffer sql = new StringBuffer(" 1=1 ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
@@ -96,12 +94,12 @@ public class PaymentsPost extends Post<Payment> {
         }
 
         if(this.states != null) {
-            List<String> states = new ArrayList<String>();
+            List<String> sts = new ArrayList<>();
             for(Payment.S state : this.states) {
                 if(state == null) continue;
-                states.add(state.name());
+                sts.add(state.name());
             }
-            if(states.size() > 0) sql.append(" AND ").append(SqlSelect.whereIn("state", states));
+            if(sts.size() > 0) sql.append(" AND ").append(SqlSelect.whereIn("state", sts));
         }
 
         if(this.cooperId != null) {
@@ -118,15 +116,18 @@ public class PaymentsPost extends Post<Payment> {
             sql.append(" AND target.name LIKE ?");
             params.add(this.word());
         }
-
-
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<Payment> query() {
         F.T2<String, List<Object>> params = params();
         this.count = count(params);
-        return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch(this.page, this.perSize);
+        if(pagination)
+            return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return Payment.find(params._1 + " ORDER BY createdAt DESC", params._2.toArray()).fetch();
+
     }
 
     @Override
@@ -136,6 +137,7 @@ public class PaymentsPost extends Post<Payment> {
 
     @Override
     public Long getTotalCount() {
-        return Payment.count();
+        return this.count();
     }
+
 }

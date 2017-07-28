@@ -1,10 +1,7 @@
 package services;
 
 import com.alibaba.fastjson.JSONObject;
-import helper.Currency;
-import helper.DBUtils;
-import helper.Dates;
-import helper.ES;
+import helper.*;
 import models.market.M;
 import models.procure.Shipment;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -52,6 +49,8 @@ public class MetricShipmentService {
      */
     public Shipment.T type;
 
+    public boolean isDedicated = false;
+
     public MetricShipmentService(Date from, Date to, Shipment.T type, M market) {
         this.from = Dates.morning(from);
         this.to = Dates.night(to);
@@ -79,10 +78,11 @@ public class MetricShipmentService {
             qb.must(QueryBuilders.termQuery("market", this.market.name().toLowerCase()));
         }
         //日期过滤
-        qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat))
-                .lt(toD.toString(isoFormat)));
+        qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)));
         // 运输方式不为空时做 type 过滤
         if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name().toLowerCase()));
+        //快递专线 查询
+        qb.must(QueryBuilders.termQuery("is_dedicated", this.isDedicated));
         return qb;
     }
 
@@ -95,7 +95,7 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
-        JSONObject result = ES.search(models.OperatorConfig.getVal("esindex"), "shippayunit", search);
+        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
         return cost.getFloat("value");
@@ -107,18 +107,18 @@ public class MetricShipmentService {
      */
     public Float countShipWeight() {
         //由于ES的 shippayunit 与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为 SUM 统计函数)
-        SqlSelect sql = new SqlSelect()
-                .select("SUM(CASE " +
-                        "WHEN pro.weight IS NULL THEN 0 * si.qty " +
-                        "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
-                        ") weight")
+        SqlSelect sql = new SqlSelect().select("SUM(CASE " +
+                "WHEN pro.weight IS NULL THEN 0 * si.qty " +
+                "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
+                ") weight")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
                 .leftJoin("ProcureUnit pu ON si.unit_id=pu.id")
                 .leftJoin("Product pro on pu.product_sku = pro.sku")
                 .leftJoin("Whouse w ON w.id=s.whouse_id")
                 .where("s.planBeginDate>=?").param(this.from)
-                .andWhere("s.planBeginDate<=?").param(this.to);
+                .andWhere("s.planBeginDate<=?").param(this.to)
+                .andWhere("s.isDedicated=?").param(this.isDedicated);
         if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
         if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
         Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("weight");
@@ -139,13 +139,13 @@ public class MetricShipmentService {
         if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
         sql.groupBy("w.name, s.type, p.currency");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, Float> vat = new HashMap<String, Float>();
+        Map<String, Float> vat = new HashMap<>();
         for(Map<String, Object> objectMap : rows) {
             String market = objectMap.get("name").toString().split("_")[1];
             String type = objectMap.get("type").toString();
             Currency currency = Currency.valueOf(objectMap.get("currency").toString());
             Float vatPrice = Float.valueOf(objectMap.get("vatPrice").toString());
-            String key = market+"_"+type;
+            String key = market + "_" + type;
             if(vat.containsKey(key)) {
                 Float existVatPrice = vat.get(key);
                 vat.put(key, currency.toUSD(vatPrice) + existVatPrice);

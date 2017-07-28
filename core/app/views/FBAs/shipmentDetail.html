@@ -1,81 +1,77 @@
-<table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0"
-       width="100%">
+<table border="0" style="border: none;margin:0 0 0 0;display:inline-block;" cellpadding="0" cellspacing="0" width="100%">
   <tr style="border-bottom: 2px solid black">
-    <td colspan="7" align="center" style="font-weight: bold;font-size: 6pt;border-bottom: 2px solid
-    black">
+    <td colspan="7" align="center" style="font-weight: bold;font-size: 6pt;border-bottom: 2px solid black">
       <div style="float:left;">
-                <span style="font-size: 14pt;">${models.OperatorConfig.getVal("brandname")}</span>
-             </div>
+        <span style="font-size: 14pt;">${models.OperatorConfig.getVal("brandname")}</span>
+      </div>
       <span style="font-weight: bold; font-size: 12pt">${models.OperatorConfig.getVal("shipmentdetaillabel")}</span><br>
       ONLY FOR ${models.OperatorConfig.getVal("companyname")} PACKING LIST
     </td>
   </tr>
 
   <tr valign="center" style="font-size: 7pt;font-weight: bold;">
-     <td>
-       <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
-         <tr>
-           <td width="10%" >
-              供应商:
-           </td>
-           <td width="20%" style="border-bottom: 2px solid black">
-             <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
-           </td>
-           <td width="4%">
-              交期:
-           </td>
-           <td width="18%" style="text-align:left;" COLSPAN="4">
+    <td>
+      <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
+        <tr>
+          <td width="10%">
+            供应商:
+          </td>
+          <td width="20%" style="border-bottom: 2px solid black">
+            <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
+          </td>
+          <td width="4%">
+            交期:
+          </td>
+          <td width="18%" style="text-align:left;" COLSPAN="4">
             <SPAN>${procureUnit?.attrs?.deliveryDate==null?procureUnit?.attrs?.planDeliveryDate?.format("yyyy年MM月dd日")
             :procureUnit?.attrs?.deliveryDate?.format("yyyy年MM月dd日")} </SPAN>
-           </td>
-           <td  width="20%" style="font-weight:bold; font-size:12pt">
-                运输方式
-           </td>
-           <td  style="border-bottom: 2px solid black">
-             <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
-           </td>
-         </tr>
-       </table>
+          </td>
+          <td width="20%" style="font-weight:bold; font-size:12pt">
+            运输方式
+          </td>
+          <td style="border-bottom: 2px solid black">
+            <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
   <tr style="font-size: 7pt" align="center">
     <td>
       <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
         <tr>
-          <td width="8%">
-            籍号
-          </td>
-          <td width="8%" style="border:1px solid #000000; padding-left:6px;">
-
-          </td>
-          <td width="8%" style="text-align:left;">
-            去往国家
-          </td>
+          <td width="8%">箱号</td>
+          <td width="8%" style="border:1px solid #000000; padding-left:6px;">${box_num}</td>
+          <td width="8%" style="text-align:left;">去往国家</td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
-            ${procureUnit?.selling?.market?.countryName()}
+          ${procureUnit?.selling?.market?.countryName()}
           </td>
-          <td width="8%">
-            整箱重量
-          </td>
+          <td width="8%">整箱重量</td>
           <td width="13%" style="border:1px solid #000000; padding-left:6px;">
-          </td>
+          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null}
+                ${procureUnit.fba.dto.singleBoxWeight} ${procureUnit.selling?.market.name()=='AMAZON_US'?'lb.':'kg'}
+            #{/if}
           <td width="10%" style="line-height:0.7em;">
             箱子体积<br>
-            <span style="font-size:3pt">长×宽×高CM</span>
+            <span style="font-size:3pt">长×宽×高</span>
           </td>
           <td style="border:1px solid #000000; padding-left:6px;">
+          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null}
+            <span style="font-size:5pt">${procureUnit.fba.dto?.length} x  ${procureUnit.fba.dto?.width}
+              x ${procureUnit.fba.dto?.height}</span> ${procureUnit.selling?.market.name()=='AMAZON_US'?'in.':'CM'}
+          #{/if}
           </td>
         </tr>
       </table>
     </td>
   </tr>
   <tr align="center">
-    <td >
+    <td>
       <table border="1" width="100%" height="100%" style="border:4px solid #000000;table-layout: fixed;
-      word-wrap:break-word;" cellpadding="0" cellspacing="0" >
-         <tr v>
+      word-wrap:break-word;" cellpadding="0" cellspacing="0">
+        <tr>
           <th width="18%">
-             <span style="font-weight: bold;">产品名称</span>
+            <span style="font-weight: bold;">产品名称</span>
           </th>
           <th width="16%">
             <span style="font-weight: bold;">SKU</span>
@@ -86,32 +82,35 @@
           <th width="8%">
             <span style="font-weight: bold;">数量</span>
           </th>
-         </tr>
-         <tr >
-           <td height="35px;">
-             ${procureUnit?.product?.abbreviation}
-           </td>
-           <td>
-             ${procureUnit?.sku}
-           </td>
-           <td>
-            ${procureUnit?.selling?.fnSku}
-           </td>
-           <td>
-           </td>
-         </tr>
-         <tr>
-           <td height="110px;" colspan="4" style="vertical-align:top;text-align:left;" >
+        </tr>
+        <tr>
+          <td height="35px;">
+          ${procureUnit?.product?.abbreviation}
+          </td>
+          <td>
+          ${procureUnit?.sku}
+          </td>
+          <td>
+          ${procureUnit?.selling?.fnSku}
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td height="100%;" colspan="4" style="vertical-align:top;text-align:left;">
 
-           </td>
-         </tr>
+          </td>
+        </tr>
       </table>
     </td>
   </tr>
   <tr>
-    <td  align="center" style=" font-size: 8px;">
-         INTERNAL USE
-    </td>
+    <td align="center" style="font-size: 8px;">INTERNAL USE</td>
+  </tr>
+  <tr>
+    <td></td>
+  </tr>
+  <tr>
+    <td align="center" style="font-size: 14px;">Made in China</td>
   </tr>
 </table>
 

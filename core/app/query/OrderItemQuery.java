@@ -30,7 +30,7 @@ public class OrderItemQuery {
      * @return
      */
     public Map<String, Integer> analyzeDaySale(Date from, Date to, M market, boolean isSku, Connection conn) {
-        Map<String, Integer> saleMap = new HashMap<String, Integer>();
+        Map<String, Integer> saleMap = new HashMap<>();
         SqlSelect sql = new SqlSelect()
                 .select("sum(oi.quantity) qty", (isSku ? "oi.product_sku" : "oi.selling_sellingId") + " k")
                 .from("OrderItem oi")

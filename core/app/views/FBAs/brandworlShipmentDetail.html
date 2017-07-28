@@ -15,15 +15,9 @@
     <td>
       <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
         <tr>
-          <td width="8%">
-            籍号
-          </td>
-          <td width="8%" style="border:1px solid #000000; padding-left:6px;">
-
-          </td>
-          <td width="8%" style="text-align:left;">
-            目的地
-          </td>
+          <td width="8%">箱号</td>
+          <td width="8%" style="border:1px solid #000000; padding-left:6px;"></td>
+          <td width="8%" style="text-align:left;">目的地</td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
           ${procureUnit?.selling?.market?.countryName()}
           </td>
@@ -31,13 +25,11 @@
             箱子体积<br>
             <span style="font-size:3pt">长×宽×高CM</span>
           </td>
-          <td style="border:1px solid #000000; padding-left:6px;">
-          </td>
+          <td style="border:1px solid #000000; padding-left:6px;"></td>
           <td width="8%">
             整箱重量
           </td>
-          <td width="13%" style="border:1px solid #000000; padding-left:6px;">
-          </td>
+          <td width="13%" style="border:1px solid #000000; padding-left:6px;"></td>
         </tr>
       </table>
     </td>
@@ -83,24 +75,24 @@
   </tr>
 
   <tr valign="center" style="font-size: 7pt;font-weight: bold;">
-      <td>
-        <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
-          <tr>
-            <td width="10%" style="font-weight:bold; font-size:12pt">
-              供应商:
-            </td>
-            <td width="20%" style="border-bottom: 2px solid black">
-              <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
-            </td>
-            <td width="20%" style="font-weight:bold; font-size:12pt">
-              运输方式
-            </td>
-            <td style="border-bottom: 2px solid black">
-              <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
+    <td>
+      <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
+        <tr>
+          <td width="10%" style="font-weight:bold; font-size:12pt">
+            供应商:
+          </td>
+          <td width="20%" style="border-bottom: 2px solid black">
+            <span style="font-size:8pt">${procureUnit?.cooperator?.name}</span>
+          </td>
+          <td width="20%" style="font-weight:bold; font-size:12pt">
+            运输方式
+          </td>
+          <td style="border-bottom: 2px solid black">
+            <span style="font-size:8pt"> ${procureUnit?.shipType?.label()} </span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
 </table>
 

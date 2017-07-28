@@ -1,0 +1,164 @@
+#{extends 'main_full.html' /}
+#{set title:'退货单' /}
+#{set 'moreScripts'}
+    #{script 'refunds/edit.es6'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Refunds.create(), method:'POST', id: 'edit_refund_form'}
+    #{info_row title:'新建退货单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th width="10%;">退货单ID</th>
+        <td width="40%">
+          <input type="text" value="${refund.id}" readonly>
+        </td>
+        <th width="10%;">状态</th>
+        <td width="40%;" style="width: 40%;">${refund.status?.label()}</td>
+      </tr>
+      <tr>
+        <th>退货单名称<span style="color:red">*</span></th>
+        <td><input type="text" name="refund.name" class="input-xxlarge" value="${refund.name}" required></td>
+        <th>供应商</th>
+        <td>
+          <input type="text" value="${refund.cooperator?.name}" readonly/>
+        </td>
+      </tr>
+      <tr>
+        <th>退货类型<span style="color:red">*</span></th>
+        <td><input type="text" value="${refund.type?.label()}" readonly></td>
+        <th>物流信息</th>
+        <td><input type="text" class="input-xxlarge" name="refund.info" value="${refund.info}"></td>
+      </tr>
+
+      <tr>
+        <th>制单人</th>
+        <td>${refund.creator?.username}</td>
+        <th>仓库交接人</th>
+        <td>
+          <select name="refund.whouseUser.id" class="inline selectize" style="width:120px;">
+            <option value=""></option>
+              #{list items:users, as:'u'}
+                <option value="${u.id}" #{if refund.whouseUser?.id==u.id} selected #{/if}>${u.username}</option>
+              #{/list}
+          </select>
+        </td>
+      </tr>
+
+      <tr>
+        <th>退货日期<span style="color:red">*</span></th>
+        <td><input type="date" name="refund.refundDate" value="${refund.refundDate?.date()}" required></td>
+        <th></th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="refund.memo" rows="4" class="input-block-level">${refund.memo}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary" id="update">新建</button>
+          <a href="@{Refunds.index()}" class="btn btn-success">取消</a>
+          <input type="hidden" name="refund.status" value="${refund.status.name()}">
+          <input type="hidden" name="refund.type" value="${refund.type.name()}">
+          <input type="hidden" name="refund.cooperator.id" value="${refund.cooperator.id}">
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+    #{info_row title:'已添加进入【退货单】的【采购单元】'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-condensed table-bordered" id="unit_table">
+      <tr>
+        <th width="20px;">
+          <label class="checkbox">
+            <input type="checkbox" id="checkbox_all" class="checkall">
+          </label>
+        </th>
+        <th style="width:60px;">采购计划</th>
+        <th style="width:60px;">采购单</th>
+        <th style="width:320px;">Selling</th>
+        <th width="200px;">SKU</th>
+        <th>产品名称</th>
+        <th style="width:120px;">FBA-ShipmentId</th>
+        <th style="width:85px;">产品条码</th>
+        <th style="width:80px;">计划退货数量</th>
+        <th style="width:80px;">实际退货数量</th>
+        <th style="width:100px;">去往仓库</th>
+        <th style="width:60px;">运输方式</th>
+        <th style="width:45px;">阶段</th>
+        <th style="width:80px;">项目名称</th>
+      </tr>
+        #{list items:units, as:'unit'}
+          <tr class="text-center" id="unit_${unit.id}">
+            <td>
+              <input type="checkbox" name="ck" value="${unit.id}">
+              <input type="hidden" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
+            </td>
+            <td>${unit.id}</td>
+            <td>${unit.deliveryment?.id}</td>
+            <td>${unit.selling?.sellingId}</td>
+            <td>${unit.product?.sku}</td>
+            <td title="${unit.product?.abbreviation}">${unit.product?.abbreviation?.xxLong()}</td>
+            <td>${unit.fba?.shipmentId}</td>
+            <td>${unit.selling?.fnSku}</td>
+            <td>
+                #{if refund.type.name()=='After_Receive'} ${unit.attrs.qty} #{/if}
+                #{else } ${unit.availableQty} #{/else}
+            </td>
+            <td>
+                #{if refund.type==models.whouse.Refund.T.After_Receive}
+                  <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.attrs.qty}"
+                         data-origin="${unit.attrs.qty}">
+                  <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.attrs.qty}">
+                #{/if}
+                #{else }
+                  <input type="text" style="width:40px;" name="dtos[${unit_index-1}].qty" value="${unit.availableQty}"
+                         data-origin="${unit.availableQty}">
+                  <input type="hidden" name="dtos[${unit_index-1}].planQty" value="${unit.availableQty}">
+                #{/else}
+            </td>
+            <td>${unit.whouse?.name()}</td>
+            <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+            <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+            <td>${unit.projectName}</td>
+          </tr>
+        #{/list}
+    </table>
+  </div>
+</div>
+#{/form}
+
+<input type="hidden" id="cooperId" value="${refund.cooperator?.id}"/>
+
+<div class="input-append">
+  <input type="button" class="btn btn-danger" id="deleteBtnByCreate" value="解除"/>
+</div>
+<div class="input-append">
+  <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
+  <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:800px;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Refunds.updateBoxInfo()}">提交</a>
+  </div>
+</div>
+

@@ -16,6 +16,7 @@ import java.util.ArrayList;
  * User: wyattpan
  * Date: 9/24/12
  * Time: 10:41 AM
+ * @deprecated
  */
 public class ListingOffersWork extends Job<Listing> {
     private Listing listing;
@@ -45,7 +46,7 @@ public class ListingOffersWork extends Job<Listing> {
         Listing lst = Listing.findById(this.listingId);
         JsonElement offersJson = Crawl.crawlOffers(lst.market.name(), lst.asin);
         JsonArray offers = offersJson.getAsJsonArray();
-        if(lst.offers == null) lst.offers = new ArrayList<ListingOffer>();
+        if(lst.offers == null) lst.offers = new ArrayList<>();
         else lst.offers.clear();
         for(JsonElement offer : offers) {
             ListingOffer off = jsonToOffer(offer);
@@ -61,7 +62,7 @@ public class ListingOffersWork extends Job<Listing> {
     private void listingWay() {
         JsonElement offersJson = Crawl.crawlOffers(this.listing.market.name(), this.listing.asin);
         JsonArray offers = offersJson.getAsJsonArray();
-        if(this.listing.offers == null) this.listing.offers = new ArrayList<ListingOffer>();
+        if(this.listing.offers == null) this.listing.offers = new ArrayList<>();
         else this.listing.offers.clear();
         for(JsonElement offer : offers) {
             ListingOffer off = jsonToOffer(offer);

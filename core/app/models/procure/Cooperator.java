@@ -1,25 +1,24 @@
 package models.procure;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
+import models.User;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
+import models.material.Material;
 import models.product.Product;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import play.data.validation.Min;
-import play.data.validation.Phone;
-import play.data.validation.Required;
-import play.data.validation.Unique;
+import play.data.validation.*;
 import play.db.jpa.Model;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.text.Collator;
 import java.text.RuleBasedCollator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 所有与公司一起的合作者;
@@ -31,6 +30,7 @@ import java.util.*;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Cooperator extends Model {
+    private static final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
 
     public enum T {
         /**
@@ -38,7 +38,7 @@ public class Cooperator extends Model {
          */
         SUPPLIER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "供应商";
             }
         },
@@ -47,7 +47,7 @@ public class Cooperator extends Model {
          */
         SHIPPER {
             @Override
-            public String to_s() {
+            public String label() {
                 return "运输商";
             }
         };
@@ -57,33 +57,36 @@ public class Cooperator extends Model {
          *
          * @return
          */
-        public abstract String to_s();
+        public abstract String label();
     }
 
     /**
      * 只有 SUPPLIER 会使用到此字段, 表示这个 SUPPLIER 可以生产的 Item.
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    public List<CooperItem> cooperItems = new ArrayList<CooperItem>();
+    public List<CooperItem> cooperItems = new ArrayList<>();
 
     /**
      * 向这个供应商交易的采购单.
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+    public List<Deliveryment> deliveryments = new ArrayList<>();
 
     /**
      * 这个合作伙伴的所有可用支付方式
      */
     @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
-    public List<PaymentTarget> paymentMethods = new ArrayList<PaymentTarget>();
+    public List<PaymentTarget> paymentMethods = new ArrayList<>();
 
     /**
      * 这个合作伙伴的所有支付信息
      */
     @OneToMany(mappedBy = "cooperator", fetch = FetchType.LAZY)
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "cooper", fetch = FetchType.LAZY)
+    public List<Shipment> shipments = new ArrayList<>();
 
     /**
      * 全称
@@ -171,6 +174,21 @@ public class Cooperator extends Model {
     @Expose
     public T type;
 
+    /**
+     * 首付款
+     */
+    public int first = 30;
+
+    /**
+     * 中期付款
+     */
+    public int second = 0;
+
+    /**
+     * 尾款
+     */
+    public int tail = 70;
+
     public enum L {
         MICRO {
             @Override
@@ -210,6 +228,16 @@ public class Cooperator extends Model {
     @Lob
     public String instructions = " ";
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public User.COR projectName;
+
+    @OneToOne
+    public User creator;
+
+    public Date createDate;
+
+
     /**
      * 运输商的仓库
      */
@@ -218,6 +246,10 @@ public class Cooperator extends Model {
 
     public Cooperator checkAndUpdate() {
         this.check();
+        if(Validation.hasErrors()) return null;
+        this.projectName = Login.current().projectName;
+        this.creator = Login.current();
+        this.createDate = new Date();
         return this.save();
     }
 
@@ -229,8 +261,10 @@ public class Cooperator extends Model {
     private void check() {
         // 基础的字段验证利用 Play 的验证方法处理了.
         if(this.type == T.SHIPPER && this.cooperItems.size() > 0)
-            throw new FastRuntimeException("货物运输商不允许拥有[可生产的商品项目]");
-
+            Validation.addError("", "货物运输商不允许拥有[可生产的商品项目]");
+        if(this.first + this.second + this.tail != 100) {
+            Validation.addError("", "付款方式总和必须等于100%，请重新填写。");
+        }
         this.name = this.name.toUpperCase();
     }
 
@@ -241,7 +275,12 @@ public class Cooperator extends Model {
      * @return
      */
     public CooperItem cooperItem(String sku) {
-        return CooperItem.find("cooperator.id=? AND sku=?", this.id, sku).first();
+        CooperItem item = (CooperItem) CollectionUtils.find(this.cooperItems, o -> {
+            CooperItem ci = (CooperItem) o;
+            return sku.equalsIgnoreCase(ci.sku);
+        });
+        if(item != null) return item;
+        return null;
     }
 
     /**
@@ -264,23 +303,26 @@ public class Cooperator extends Model {
      * @return
      */
     public List<String> frontSkuAutoPopulate() {
-        // 需要一份 Clone, 不能修改缓存中的值
-        List<String> allSkus = new ArrayList<String>(Product.skus(false));
-        final List<String> existSkus = new ArrayList<String>();
-        for(CooperItem itm : this.cooperItems) {
-            existSkus.add(itm.sku);
-        }
-
-        CollectionUtils.filter(allSkus, new Predicate() {
-            @Override
-            public boolean evaluate(Object o) {
-                for(String existSku : existSkus) {
-                    if(existSku.equals(o.toString())) return false;
-                }
-                return true;
+        List<String> allSkus = new ArrayList<>(Product.skus(false));
+        final List<String> existSkus = this.cooperItems.stream()
+                .filter(itm -> Objects.equals(itm.type, CooperItem.T.SKU))
+                .map(itm -> itm.sku).collect(Collectors.toList());
+        CollectionUtils.filter(allSkus, o -> {
+            for(String existSku : existSkus) {
+                if(existSku.equals(o.toString())) return false;
             }
+            return true;
         });
         return allSkus;
+    }
+
+    public List<Material> findMaterialNotExistCooper() {
+        List<Material> materials = Material.findAll();
+        List<CooperItem> items = this.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
+        List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
+                .collect(Collectors.toList());
+        return notExists;
     }
 
     @Override
@@ -308,7 +350,7 @@ public class Cooperator extends Model {
      */
     public static List<Cooperator> suppliers() {
         List<Cooperator> cooperators = Cooperator.find("type=?", T.SUPPLIER).fetch();
-        Collections.sort(cooperators, new PinyinSort());
+        cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return cooperators;
     }
 
@@ -318,9 +360,7 @@ public class Cooperator extends Model {
      * @return
      */
     public static List<String> supplierNames() {
-        List<String> supplierNames = new ArrayList<String>();
-        for(Cooperator co : suppliers()) supplierNames.add(co.name);
-        return supplierNames;
+        return suppliers().stream().map(co -> co.name).collect(Collectors.toList());
     }
 
     /**
@@ -329,17 +369,17 @@ public class Cooperator extends Model {
      * @return
      */
     public static List<Cooperator> shippers() {
-        return Cooperator.find("type=?", T.SHIPPER).fetch();
+        List<Cooperator> cooperators = Cooperator.find("type=?", T.SHIPPER).fetch();
+        cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
+        return cooperators;
     }
 
-    private static class PinyinSort implements Comparator<Object> {
-        RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
 
-        @Override
-        public int compare(Object o1, Object o2) {
-            Cooperator a = (Cooperator) o1;
-            Cooperator b = (Cooperator) o2;
-            return collator.compare(a.name, b.name);
-        }
+    public long showItemNum(boolean flag) {
+        if(flag)
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.SKU)).count();
+        else
+            return this.cooperItems.stream().filter(item -> item.type.equals(CooperItem.T.MATERIAL)).count();
     }
+
 }

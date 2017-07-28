@@ -26,7 +26,7 @@ import java.util.*;
 public class ProcureApply extends Apply {
 
     @OneToMany(mappedBy = "apply", cascade = CascadeType.PERSIST)
-    public List<Deliveryment> deliveryments = new ArrayList<Deliveryment>();
+    public List<Deliveryment> deliveryments = new ArrayList<>();
 
     /**
      * 用来记录 Deliveryment 中指定的 Cooperator. 为方便的冗余数据
@@ -38,7 +38,7 @@ public class ProcureApply extends Apply {
      * 请款单所拥有的支付信息
      */
     @OneToMany(mappedBy = "pApply")
-    public List<Payment> payments = new ArrayList<Payment>();
+    public List<Payment> payments = new ArrayList<>();
 
     /**
      * 请款人
@@ -47,6 +47,37 @@ public class ProcureApply extends Apply {
     public User applier;
 
     public boolean confirm = false;
+
+    public enum S {
+
+        /**
+         * 默认状态
+         */
+        OPEN {
+            @Override
+            public String label() {
+                return "入库中";
+            }
+        },
+        /**
+         * 关闭，请款金额为0
+         */
+        CLOSE {
+            @Override
+            public String label() {
+                return "结束";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(20) DEFAULT 'OPEN'")
+    public S status = S.OPEN;
 
     /**
      * 已经请款的金额(包含 fixValue)
@@ -66,9 +97,8 @@ public class ProcureApply extends Apply {
     public float totalAmount() {
         float totalAmount = 0;
         for(Deliveryment dmt : this.deliveryments) {
-            for(ProcureUnit unit : dmt.units) {
-                totalAmount += unit.totalAmount();
-            }
+            totalAmount += dmt.units.stream().filter(unit -> unit.type != ProcureUnit.T.StockSplit)
+                    .mapToDouble(ProcureUnit::totalAmount).sum();
         }
         return totalAmount;
     }
@@ -122,8 +152,8 @@ public class ProcureApply extends Apply {
     }
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Arrays.asList("procureapply.save","procureunit.editPaySatus",
-                "deliveryment.departApply"));
+        return ElcukRecord.records(this.id + "", Arrays.asList("procureapply.save", "procureunit.editPaySatus",
+                "deliveryment.departApply"), 50);
     }
 
     /**
@@ -134,8 +164,7 @@ public class ProcureApply extends Apply {
     public void appendDelivery(List<String> deliverymentIds) {
         F.T2<List<Deliveryment>, Set<Cooperator>> dmtAndCop = procureAddDeliverymentCheck(
                 deliverymentIds);
-        if(dmtAndCop._2.iterator().hasNext() &&
-                !dmtAndCop._2.iterator().next().equals(this.cooperator))
+        if(dmtAndCop._2.iterator().hasNext() && !dmtAndCop._2.iterator().next().equals(this.cooperator))
             Validation.addError("", "合作伙伴不一样, 无法添加");
         if(this.confirm)
             Validation.addError("", "已经确认了, 不允许再向中添加请款");
@@ -160,7 +189,7 @@ public class ProcureApply extends Apply {
         List<Deliveryment> deliveryments = Deliveryment.find(JpqlSelect.whereIn("id", deliverymentIds)).fetch();
         if(deliverymentIds.size() != deliveryments.size())
             Validation.addError("", "提交的采购单参数与系统内不符.");
-        Set<Cooperator> coopers = new HashSet<Cooperator>();
+        Set<Cooperator> coopers = new HashSet<>();
         for(Deliveryment dmt : deliveryments) {
             if(dmt.cooperator != null) coopers.add(dmt.cooperator);
         }
@@ -168,7 +197,7 @@ public class ProcureApply extends Apply {
             Validation.addError("", "请仅对同一个工厂创建请款单.");
         if(coopers.size() < 1)
             Validation.addError("", "请款单至少需要一个拥有供应商的采购单.");
-        return new F.T2<List<Deliveryment>, Set<Cooperator>>(deliveryments, coopers);
+        return new F.T2<>(deliveryments, coopers);
     }
 
     /**
@@ -210,4 +239,18 @@ public class ProcureApply extends Apply {
             return ProcureApply.find("confirm=false AND cooperator.id=?", cooperatorId).fetch();
         }
     }
+
+    /**
+     * 当前时间前6个月的请款单，如果请款总额为0,则status变为close
+     */
+    public static void initApplyStatus() {
+        Date date = DateTime.now().minusMonths(6).toDate();
+        List<ProcureApply> applies = ProcureApply.find("createdAt>=?", date).fetch();
+        applies.stream().filter(apply -> apply.totalAmount() == 0).forEach(apply -> {
+            apply.status = S.CLOSE;
+            apply.save();
+        });
+    }
+
+
 }

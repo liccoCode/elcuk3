@@ -1,218 +1,138 @@
 #{extends 'main_full.html'/}
 #{set title:'用户管理界面 (' + users.size() + ')'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'users/index.coffee'/}
-    #{script_cdn name: 'component/notify.coffee'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'users/index.js'/}
+    #{script 'component/notify.coffee'/}
 #{/set}
 
 #{flash_alert /}
 #{errorMsgs /}
-<div class="btn-toolbar" id="btns">
-  <div class="btn-group">
-    <a href="@{Users.create()}" class="btn btn-success">添加用户</a>
+
+<form action="@{Users.index()}" method="POST" class="search_form" id='search_form'>
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">用户名</span>
+        <input type="text" style="width:200px;" name="p.search" value="${p.search}" placeHolder="用户名"/>
+        <input type="hidden" name="p.page">
+      </div>
+
+      <div class="input-append input-prepend inline">
+        <input type="submit" value="搜索" class="btn btn-primary" data-disable-with='提交中...'>
+      </div>
+
+      <div class="input-append input-prepend inline">
+        <a href="@{Users.create()}" class="btn btn-success">添加用户</a>
+      </div>
+
+    </div>
   </div>
-</div>
+</form>
+
 <div class="row-fluid">
-<div class="span12">
-<table class="table table-bordered table-condensed">
-<tr>
-  <th>#</th>
-  <th>Username</th>
-  <th>Email</th>
-  <th>Privileges</th>
-  <th>Team</th>
-  <th>Opened</th>
-</tr>
-#{list items:users, as:'user'}
-    #{ifnot user.username == 'root'}
-    <tr>
-      <td>${user.id}</td>
-      <td>${user.username}</td>
-      <td data-toggle="toggle">
-        <i class="icon-reorder"></i> ${user.email}
-      </td>
-      <td data-toggle="toggle" data-target="#${user.username}_privileges">
-        <i class="icon-reorder"></i> ${user.privileges.size()} 个权限(共 ${privileges.size()} 个)
-      </td>
-      <td data-toggle="toggle" data-target="#${user.username}_teams">
-        <i class="icon-reorder"></i> ${user.teams?.size()} 个TEAM(共 ${teams?.size()} 个)
-      </td>
-      <td data-toggle="toggle" data-target="#${user.username}_roles">
-        <i class="icon-reorder"></i> ${user.roles?.size()} 个角色(共 ${roles?.size()} 个)
-      </td>
-      <td>
-          #{yesOrNo f:!user.closed, id:user.id/}
-          #{if user.closed}
-            <a href="#" rel="tooltip" placement="top" title="打开此账户" data-userid="${user.id}" id="openUser">Open</a>
-          #{/if}
-          #{else}
-            <a href="#" rel="tooltip" placement="top" title="关闭此账户" data-userid="${user.id}" id="closeUser">Close</a>
-          #{/else}
-      </td>
-    </tr>
+  <div class="span12">
+    <table class="table table-bordered table-condensed">
+      <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Team</th>
+        <th>Role</th>
+        <th>Opened</th>
+      </tr>
+    #{list items:users, as:'user'}
+        #{ifnot user.username == 'root'}
+          <tr>
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td data-toggle="toggle">${user.email}</td>
+            <td data-toggle="toggle" data-target="#${user.username}_teams">
+              <i class="icon-reorder"></i> ${user.teams?.size()} 个TEAM(共 ${teams?.size()} 个)
+            </td>
+            <td data-toggle="toggle" data-target="#${user.username}_roles">
+              <i class="icon-reorder"></i> ${user.roles?.size()} 个角色(共 ${roles?.size()} 个)
+            </td>
+            <td>
+                #{yesOrNo f:!user.closed, id:user.id/}
+                #{if user.closed}
+                  <a href="#" rel="tooltip" placement="top" title="打开此账户" data-userid="${user.id}" id="openUser">Open</a>
+                #{/if}
+                #{else}
+                  <a href="#" rel="tooltip" placement="top" title="关闭此账户" data-userid="${user.id}" id="closeUser">Close</a>
+                #{/else}
+            </td>
+          </tr>
 
-
-    <tr id="${user.username}_privileges" style="display:none;">
-      <td colspan="5">
-        <form method="post" action="@{Users.privileges()}" class="privilege_form">
-          <table class="table table-condensed table-bordered">
-            <tr>
-              <th colspan="4">模块名称</th>
-              <th colspan="4">菜单名称</th>
-              <th colspan="4">权限</th>
-            </tr>
-              #{list items:modules, as:'module'}
-              <tr>
-                  #{set menucount: maps.get(module.id).size/}
-                  #{list items:maps.get(module.id), as:'function'}
-                      #{if ((List)maps.get(function.id)).size>0}
-                          #{set menucount: menucount + ((List)maps.get(function.id)).size /}
-                      #{/if}
-                      #{else}
-                          #{set menucount: menucount + 1/}
-                      #{/else}
-                  #{/list}
-
-                <td colspan="4" rowspan="${menucount+1}">
-                  <label class="checkbox">
-                    <input type="checkbox" name="privilegeId" data-userid="${user.id}" value="${module.id}" ${user.isHavePrivilege
-                    (module) ?
-                    'checked' : ''}>
-                    <a href="javascript:;" rel="tooltip" title="${module.name}">${module.memo}</a>
-                  </label>
-                </td>
-
-                  #{list items:maps.get(module.id), as:'function'}
-                  <tr id="menu">
-
-                      #{if    ((List)maps.get(function.id)).size>0}
-                      <td colspan="4" rowspan="${((List)maps.get(function.id)).size+1}">
-                      #{/if}
-                      #{else}
-                      <td colspan="4" rowspan="${((List)maps.get(function.id)).size+2}">
-                      #{/else}
-
-                    <label class="checkbox">
-                      <input type="checkbox" id="checkboxmenu" data-userid="${user.id}" class="${user.id}menu${module.id}"
-                             name="privilegeId"
-                             value="${function.id}"
-                      ${user.isHavePrivilege(function) ?
-                      'checked' : ''}>
-                      <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
-                    </label>
-                  </td>
-                      #{if maps.get(function.id)!=null && maps.get(function.id).size()>0}
-                          #{list items:maps.get(function.id), as:'menu'}
-                            <tr>
-                              <td colspan="6">
-                                <label class="checkbox">
-                                  <input type="checkbox" name="privilegeId" data-userid="${user.id}"
-                                         class="${user.id}menu${function.id}"
-                                         value="${menu.id}" ${user.isHavePrivilege(menu) ?
-                                  'checked' : ''}>
-                                  <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
-                                </label>
-                              </td>
-                            </tr>
-                          #{/list}
-                      #{/if}
-                      #{else}
-                        <tr>
-                          <td colspan="6">
-                            <label class="checkbox">
-                              <a href="javascript:;" rel="tooltip" title=""></a>
-                            </label>
-                          </td>
+          <tr id="${user.username}_teams" style="display:none;">
+            <td colspan="6">
+              <form method="post" action="@{Users.teams()}" class="privilege_form">
+                <table class="table table-bordered table-condensed">
+                <tr>
+                    #{list items:teams, as:'up'}
+                      <td colspan="${teams.size() == up_index ? (teams.size() - (up_index % 8)) : '1'}">
+                        <label class="checkbox">
+                          <input type="checkbox" name="teamId" value="${up.id}" ${user.isHaveTeam(up) ? 'checked' : ''}>
+                          <a href="javascript:;" rel="tooltip" title="${up.name}">${up.name}</a>
+                        </label>
+                      </td>
+                        #{if up_index % 8 == 0}
                         </tr>
-                      #{/else}
-
-
-                    </tr>
-                  #{/list}
+                        <tr>
+                        #{/if}
+                    #{/list}
                 </tr>
-              #{/list}
-            <tr>
-              <td colspan="14">
-                <input type="hidden" name="id" value="${user.id}">
-                <button class="btn btn-primary">提交</button>
-              </td>
-            </tr>
-          </table>
-        </form>
-
-
-      </td>
-    </tr>
-
-
-    <tr id="${user.username}_teams" style="display:none;">
-      <td colspan="5">
-        <form method="post" action="@{Users.teams()}" class="privilege_form">
-          <table class="table table-bordered table-condensed">
-          <tr>
-              #{list items:teams, as:'up'}
-                <td colspan="${teams.size() == up_index ? (teams.size() - (up_index % 8)) : '1'}">
-                  <label class="checkbox">
-                    <input type="checkbox" name="teamId" value="${up.id}" ${user.isHaveTeam(up) ? 'checked' : ''}>
-                    <a href="javascript:;" rel="tooltip" title="${up.name}">${up.name}</a>
-                  </label>
-                </td>
-                  #{if up_index % 8 == 0}
-                  </tr>
                   <tr>
-                  #{/if}
-              #{/list}
-          </tr>
-            <tr>
-              <td colspan="8">
-                <input type="hidden" name="id" value="${user.id}">
-                <button class="btn btn-primary">提交</button>
-              </td>
-            </tr>
-          </table>
-        </form>
-      </td>
-    </tr>
-
-
-    <tr id="${user.username}_roles" style="display:none;">
-      <td colspan="5">
-        <form method="post" action="@{Users.roles()}" class="privilege_form">
-          <table class="table table-bordered table-condensed">
-          <tr>
-              #{list items:roles, as:'up'}
-                <td colspan="${roles.size() == up_index ? (teams.size() - (up_index % 8)) : '1'}">
-                  <label class="checkbox">
-                    <input type="checkbox" name="roleId" value="${up.roleId}" ${user.isHaveRole(up) ?
-                    'checked' : ''}>
-                    <a href="javascript:;" rel="tooltip" title="${up.roleName}">${up.roleName}</a>
-                  </label>
-                </td>
-                  #{if up_index % 8 == 0}
+                    <td colspan="8">
+                      <input type="hidden" name="id" value="${user.id}">
+                      <button class="btn btn-primary">提交</button>
+                    </td>
                   </tr>
-                  <tr>
-                  #{/if}
-              #{/list}
+                </table>
+              </form>
+            </td>
           </tr>
-            <tr>
-              <td colspan="8">
-                <input type="hidden" name="id" value="${user.id}">
-                <button class="btn btn-primary">提交</button>
-              </td>
-            </tr>
-          </table>
-        </form>
-      </td>
-    </tr>
 
+          <tr id="${user.username}_roles" style="display:none;">
+            <td colspan="6">
+              <form method="post" action="@{Users.roles()}" class="privilege_form">
+                <table class="table table-bordered table-condensed">
+                <tr>
+                    #{list items:roles, as:'up'}
+                      <td colspan="${roles.size() == up_index ? (teams.size() - (up_index % 8)) : '1'}">
+                        <label class="checkbox">
+                          <input type="checkbox" name="roleId" value="${up.roleId}" ${user.isHaveRole(up) ?
+                          'checked' : ''}>
+                          <a href="javascript:;" rel="tooltip" title="${up.roleName}">${up.roleName}</a>
+                        </label>
+                      </td>
+                        #{if up_index % 8 == 0}
+                        </tr>
+                        <tr>
+                        #{/if}
+                    #{/list}
+                </tr>
+                  <tr>
+                    <td colspan="8">
+                      <input type="hidden" name="id" value="${user.id}">
+                      <button class="btn btn-primary">提交</button>
+                    </td>
+                  </tr>
+                </table>
+              </form>
+            </td>
+          </tr>
+        #{/ifnot}
+    #{/list}
 
+      <tr class="tb_footer">
+        <td colspan="7">
+        #{bootstrap_pager pi:p, url:'' /}
+        </td>
+      </tr>
 
-
-
-    #{/ifnot}
-#{/list}
-</table>
-</div>
+    </table>
+  </div>
 </div>
 
 

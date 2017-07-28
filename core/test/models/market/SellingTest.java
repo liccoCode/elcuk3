@@ -41,7 +41,7 @@ public class SellingTest extends UnitTest {
                 target.aps.upc = "882999934562";
             }
         });
-        Webs.dev_login(selling.account);
+        Webs.devLogin(selling.account);
         selling.syncFromAmazon();
 
         AmazonProps aps = selling.aps;

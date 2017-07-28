@@ -32,7 +32,7 @@ public class SellingQTYQuery {
                 .where(column + " IN " + SqlSelect.inlineParam(columnValues))
                 .groupBy("k");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
-        Map<String, Integer> qtyMap = new HashMap<String, Integer>();
+        Map<String, Integer> qtyMap = new HashMap<>();
         for(Map<String, Object> row : rows) {
             if(row.get("k") == null) continue;
             qtyMap.put(row.get("k").toString(), NumberUtils.toInt(row.get("qty").toString()));

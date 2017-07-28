@@ -1,10 +1,10 @@
 #{extends 'main_full.html'/}
 #{set title:'FeeTypes'/}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name:'feetypes.css'/}
+    #{stylesheet 'feetypes.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script_cdn name: 'feetypes.coffee'/}
+    #{script 'feetypes.coffee'/}
 #{/set}
 
 #{info_row }
@@ -43,39 +43,55 @@
 <div class="row-fluid">
   <table class="table table-bordered table-condensed types">
     <tr>
-      <th>Name</th>
+      <th>Parent_Name</th>
+      <th>Child_Name</th>
       <th>NickName</th>
       <th>解释</th>
       <th>创建时间</th>
       <th>更新时间</th>
+      <th>Action</th>
     </tr>
   #{list items:types, as:'top'}
-    <tr>
-      <td>${top.name}</td>
-      <td>
-        <input type="text" name="nickName" value="${top.nickName}">
-      </td>
-      <td>
-        <input type="text" value="${top.memo}">
-        <button class="btn btn-primary submit">更新</button>
-        <button class="btn btn-danger delete">删除</button>
-      </td>
-      <td>${top.createdAt.los()}</td>
-      <td>${top.updateAt.los()}</td>
-    </tr>
-      #{list items:top.children, as:'sub'}
-        <tr class="level_1">
-          <td><i class="icon-double-angle-right"></i>${sub.name}</td>
-          <td><input type="text" name="nickName" value="${sub.nickName}"></td>
-          <td>
-            <input type="text" value="${sub.memo}">
-            <button class="btn btn-primary submit">更新</button>
-            <button class="btn btn-danger delete">删除</button>
-          </td>
-          <td>${sub.createdAt.los()}</td>
-          <td>${sub.updateAt.los()}</td>
+  <tr>
+      #{if top.children.size()==0}
+        <td>${top.name}</td>
+        <td></td>
+        <td>${top.nickName}</td>
+        <td>${top.memo}</td>
+        <td>${top.createdAt.los()}</td>
+        <td>${top.updateAt.los()}</td>
+        <td>
+          <button class="btn btn-mini btn-primary submit">更新</button>
+          <button class="btn btn-mini btn-danger delete">删除</button>
+        </td>
+      </tr>
+      #{/if}
+      #{else }
+        <td rowspan="${top.children.size()+1}">${top.name}</td>
+        <td></td>
+        <td><input type="text" name="nickName" value="${top.nickName}"></td>
+        <td>${top.memo}</td>
+        <td>${top.createdAt.los()}</td>
+        <td>${top.updateAt.los()}</td>
+        <td>
+          <button class="btn btn-mini btn-primary submit">更新</button>
+          <button class="btn btn-mini btn-danger delete">删除</button>
+        </td>
         </tr>
-      #{/list}
+          #{list items:top.children, as:'c'}
+            <tr>
+              <td>${c.name}</td>
+              <td><input type="text" name="nickName" value="${c.nickName}"></td>
+              <td>${c.memo}</td>
+              <td>${c.createdAt.los()}</td>
+              <td>${c.updateAt.los()}</td>
+              <td>
+                <button class="btn btn-mini btn-primary submit">更新</button>
+                <button class="btn btn-mini btn-danger delete">删除</button>
+              </td>
+            </tr>
+          #{/list}
+      #{/else}
   #{/list}
   </table>
 </div>

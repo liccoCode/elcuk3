@@ -9,6 +9,7 @@ import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
  * Time: 10:18 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Orderr extends GenericModel {
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
@@ -78,7 +79,7 @@ public class Orderr extends GenericModel {
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    public List<OrderItem> items = new ArrayList<OrderItem>();
+    public List<OrderItem> items = new ArrayList<>();
 
     /**
      * 订单所属的市场
@@ -98,7 +99,7 @@ public class Orderr extends GenericModel {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @OrderBy("date ASC,cost DESC")
-    public List<SaleFee> fees = new ArrayList<SaleFee>();
+    public List<SaleFee> fees = new ArrayList<>();
     //-------------- Basic ----------------
 
     /**
@@ -125,6 +126,7 @@ public class Orderr extends GenericModel {
      * 订单创建时间
      */
     public Date createDate;
+    public Date updateDate;
 
     /**
      * 订单的付款时间
@@ -246,6 +248,21 @@ public class Orderr extends GenericModel {
      */
     public boolean synced = false;
 
+    /**
+     * 发票状态(已发送yes,未发送no) 默认no
+     */
+    @Column(columnDefinition = "varchar(10) DEFAULT 'no'")
+    public String invoiceState;
+
+    /**
+     * 是否使用 商务订单(用于JRockend 发送合同)
+     */
+    public boolean businessOrder;
+    /**
+     * 是否发送商务合同(用于JRockend 发送合同)
+     */
+    public boolean sendBusiness;
+
 
     /**
      * 此订单总共卖出的产品数量
@@ -255,9 +272,9 @@ public class Orderr extends GenericModel {
      */
     public Long itemCount() {
         BigDecimal qty = (BigDecimal) DBUtils
-                .row("select sum(quantity) as qty from OrderItem where order_orderId=?",
-                        this.orderId).get("qty");
-        return qty == null ? 0l : qty.longValue();
+                .row("select sum(quantity) as qty from OrderItem where order_orderId=?", this.orderId)
+                .get("qty");
+        return qty == null ? 0L : qty.longValue();
     }
 
     /**
@@ -274,16 +291,14 @@ public class Orderr extends GenericModel {
          */
         switch(this.market) {
             case AMAZON_UK:
-                return "Thanks for purchasing from EasyAcc on " +
-                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
-                        this.orderId + ")";
+                return "Thanks for purchasing from EasyAcc on " + JavaExtensions.capFirst(this.market.toString())
+                        + " (Order: " + this.orderId + ")";
             case AMAZON_US:
-                return "Thanks for purchasing from EasyAcc on " +
-                        JavaExtensions.capFirst(this.market.toString()) + " (Order: " +
-                        this.orderId + ")";
+                return "Thanks for purchasing from EasyAcc on " + JavaExtensions.capFirst(this.market.toString())
+                        + " (Order: " + this.orderId + ")";
             case AMAZON_DE:
-                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: " +
-                        this.orderId + ")";
+                return "Vielen Dank für den Kauf unseres EasyAcc Produkts auf Amazon.de (Bestellung: "
+                        + this.orderId + ")";
             default:
                 Logger.warn(String.format("MailTitle is not support [%s] right now.", this.market));
                 return "";
@@ -361,12 +376,8 @@ public class Orderr extends GenericModel {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Orderr orderr = (Orderr) o;
-
-        if(!orderId.equals(orderr.orderId)) return false;
-
-        return true;
+        return orderId.equals(orderr.orderId);
     }
 
     @Override
@@ -397,7 +408,7 @@ public class Orderr extends GenericModel {
      * @return
      */
     @SuppressWarnings("unchecked")
-    @Cached("1h")
+    @Cached("2h")
     public static DashBoard frontPageOrderTable(int days) {
         DashBoard dashBoard = Cache.get(Orderr.FRONT_TABLE, DashBoard.class);
         if(dashBoard != null) return dashBoard;
@@ -411,10 +422,11 @@ public class Orderr extends GenericModel {
         final DateTime now = DateTime.parse(DateTime.now().toString("yyyy-MM-dd"));
         final Date pre7Day = now.minusDays(Math.abs(days)).toDate();
 
-        List<OrderrVO> vos = new ArrayList<OrderrVO>();
+        List<OrderrVO> vos = new ArrayList<>();
         List<List<OrderrVO>> results = Promises.forkJoin(new Promises.DBCallback<List<OrderrVO>>() {
             @Override
-            public List<OrderrVO> doJobWithResult(M m) {
+            public List<OrderrVO> doJobWithResult(Object param) {
+                M m = (M) param;
                 return new OrderrQuery().dashBoardOrders(
                         m.withTimeZone(pre7Day).toDate(),
                         m.withTimeZone(now.toDate()).toDate(),
@@ -427,9 +439,7 @@ public class Orderr extends GenericModel {
                 return "Orderr.frontPageOrderTable";
             }
         });
-        for(List<OrderrVO> result : results) {
-            vos.addAll(result);
-        }
+        results.forEach(vos::addAll);
 
         for(OrderrVO vo : vos) {
             String key = Dates.date2Date(vo.market.toTimeZone(vo.createDate));
@@ -447,7 +457,7 @@ public class Orderr extends GenericModel {
                 dashBoard.shippeds(key, vo);
         }
         dashBoard.sort();
-        Cache.add(Orderr.FRONT_TABLE, dashBoard, "1h");
+        Cache.add(Orderr.FRONT_TABLE, dashBoard, "2h");
         return dashBoard;
     }
 
@@ -470,8 +480,8 @@ public class Orderr extends GenericModel {
      * @return
      */
     public static List<String> ids(List<Orderr> orderrs) {
-        if(orderrs == null) orderrs = new ArrayList<Orderr>();
-        List<String> orderIds = new ArrayList<String>();
+        if(orderrs == null) orderrs = new ArrayList<>();
+        List<String> orderIds = new ArrayList<>();
         for(Orderr o : orderrs) orderIds.add(o.orderId);
         return orderIds;
     }
@@ -493,20 +503,17 @@ public class Orderr extends GenericModel {
             if(item.quantity == null) item.quantity = 0;
             totalamount = totalamount + new BigDecimal(item.price - item.discountPrice).setScale(2, 4).floatValue();
             if(item.quantity != 0) {
-                itemamount =
-                        itemamount +
-                                new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                        .divide(new
-                                                BigDecimal
-                                                (item.quantity), 2,
-                                                4).divide(new BigDecimal(this.orderrate()), 2,
-                                                java.math.RoundingMode.HALF_DOWN)).setScale(2, 4)
-                                        .floatValue();
+                itemamount = itemamount
+                        + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
+                                .divide(new BigDecimal(item.quantity), 2, 4)
+                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                                .setScale(2, 4).floatValue();
             }
         }
 
         for(SaleFee fee : this.fees) {
-            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge") || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
+            if((fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge")
+                    || fee.type.name.equals("giftwrap")) && fee.cost > 0) {
                 totalamount = totalamount + fee.cost;
                 itemamount = itemamount + new BigDecimal(fee.cost).divide(
                         new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).setScale(2, 4)
@@ -527,7 +534,7 @@ public class Orderr extends GenericModel {
             notaxamount = itemamount;
         }
         Float tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
-        return new F.T3<Float, Float, Float>(totalamount, notaxamount, tax);
+        return new F.T3<>(totalamount, notaxamount, tax);
     }
 
 
@@ -596,12 +603,7 @@ public class Orderr extends GenericModel {
                 cost = cost + new Float(rowobject.toString());
             }
         }
-
-        if(rows.size() <= 0 || cost > 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(rows.size() <= 0 || cost > 0);
     }
 
     /**
@@ -661,9 +663,9 @@ public class Orderr extends GenericModel {
 
     public String showItemSku() {
         String show = "";
-        List<OrderItem> items = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
-        if(items != null && items.size() > 0 ) {
-            for(OrderItem item : items) {
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
                 show += item.product.sku + ";";
             }
 
@@ -671,4 +673,76 @@ public class Orderr extends GenericModel {
         return show;
     }
 
+    public String showPromotionIDs() {
+        String show = "";
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
+                if(StringUtils.isNotBlank(item.promotionIDs)) {
+                    show += item.promotionIDs + ";";
+                }
+            }
+        }
+        return show;
+    }
+
+    public String showDiscountPrice() {
+        String show = "";
+        List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
+        if(orderItems != null && orderItems.size() > 0) {
+            for(OrderItem item : orderItems) {
+                if(item.discountPrice != null) {
+                    show += item.discountPrice + ";";
+                }
+            }
+        }
+        return show;
+    }
+
+    public OrderInvoice createOrderInvoice() {
+        F.T3<Float, Float, Float> amt = this.amount();
+        OrderInvoice invoice = new OrderInvoice();
+        invoice.orderid = this.orderId;
+        invoice.updateDate = new Date();
+        invoice.updator = "auto_reply";
+
+        invoice.invoiceto = this.formataddress(this.country);
+        invoice.address = this.formataddress(invoice.invoiceto);
+        invoice.notaxamount = amt._2;
+        invoice.taxamount = amt._3;
+        invoice.totalamount = amt._1;
+        invoice.price = new ArrayList<>();
+
+        if(this.items != null && this.items.size() > 0) {
+            for(OrderItem item : this.items) {
+                if(item.quantity > 0) {
+                    invoice.price.add(new BigDecimal(item.price - item.discountPrice)
+                            .divide(new BigDecimal(item.quantity), 2, 4)
+                            .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN).floatValue());
+
+                } else {
+                    invoice.price.add(0f);
+                }
+            }
+        }
+
+        if(this.fees != null && this.fees.size() > 0) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.name.equals("shipping") || fee.type.name.equals("shippingcharge")
+                        || fee.type.name.equals("giftwrap") && fee.cost > 0) {
+                    invoice.price.add(new BigDecimal(fee.cost).divide(new BigDecimal(this.orderrate()), 2,
+                            BigDecimal.ROUND_HALF_DOWN).floatValue());
+                }
+            }
+        }
+
+        invoice.saveprice();
+        invoice.europevat = OrderInvoice.VAT.NORMAL;
+        return invoice;
+    }
+
+
+    public boolean canBeProvidedInvoice() {
+        return M.europeMarkets().contains(this.market);
+    }
 }

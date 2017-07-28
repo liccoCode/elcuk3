@@ -1,33 +1,32 @@
 package models.activiti;
 
 import com.google.gson.annotations.Expose;
-
-import javax.persistence.*;
-
 import helper.ActivitiEngine;
 import models.embedded.ERecordBuilder;
 import org.activiti.bpmn.model.BpmnModel;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.history.HistoricVariableInstance;
 import org.activiti.engine.history.HistoricVariableInstanceQuery;
 import org.activiti.engine.impl.bpmn.diagram.ProcessDiagramGenerator;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.helper.SqlSelect;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.history.HistoricTaskInstance;
 import play.db.jpa.Model;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.io.InputStream;
 import java.util.Map;
-
-import org.activiti.engine.history.HistoricVariableInstance;
 
 
 /**
@@ -120,7 +119,7 @@ public class ActivitiProcess extends Model {
      * @return
      */
     public static List<String> userTask(String userid) {
-        List<String> processlist = new ArrayList<String>();
+        List<String> processlist = new ArrayList<>();
 
         TaskService taskService = ActivitiEngine.processEngine.getTaskService(); //活动task服务
         List<Task> tasklist = taskService.createTaskQuery().taskAssignee(userid).list();
@@ -145,7 +144,7 @@ public class ActivitiProcess extends Model {
             List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch();
             return prolist;
         } else {
-            return new java.util.ArrayList<ActivitiProcess>();
+            return new java.util.ArrayList<>();
         }
     }
 
@@ -177,7 +176,7 @@ public class ActivitiProcess extends Model {
     /**
      * 是否有权限提交
      *
-     * @param pdId   processDefinitionId
+     * @param processInstanceId
      * @param userid
      */
     public static String privilegeProcess(String processInstanceId, String userid) {
@@ -195,10 +194,9 @@ public class ActivitiProcess extends Model {
      * 流程历史信息
      *
      * @param processInstanceId
-     * @param userid
      */
     public static List<Map<String, String>> processInfo(String processInstanceId) {
-        List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> result = new ArrayList<>();
         if(StringUtils.isBlank(processInstanceId)) {
             return result;
         }
@@ -213,7 +211,7 @@ public class ActivitiProcess extends Model {
 
         if(list != null && list.size() > 0) {
             for(HistoricTaskInstance t : list) {
-                java.util.HashMap<String, String> map = new java.util.HashMap<String, String>();
+                java.util.HashMap<String, String> map = new java.util.HashMap<>();
                 map.put("name", t.getName());
                 map.put("assignee", t.getAssignee());
                 if(t.getStartTime() != null) {
@@ -252,7 +250,7 @@ public class ActivitiProcess extends Model {
     /**
      * 启动流程后,认领完成第一步流程
      *
-     * @param pdId   processDefinitionId
+     * @param processDefinitionId
      * @param userid
      */
     public static void claimProcess(String processDefinitionId, String userid) {
@@ -277,7 +275,7 @@ public class ActivitiProcess extends Model {
             List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch(100);
             return prolist;
         } else
-            return new ArrayList<ActivitiProcess>();
+            return new ArrayList<>();
     }
 
 
@@ -294,7 +292,7 @@ public class ActivitiProcess extends Model {
             List<ActivitiProcess> prolist = ActivitiProcess.find(sql).fetch();
             return prolist;
         } else
-            return new ArrayList<ActivitiProcess>();
+            return new ArrayList<>();
     }
 
 
@@ -309,7 +307,7 @@ public class ActivitiProcess extends Model {
 
         List<HistoricTaskInstance> list = historyService.createHistoricTaskInstanceQuery().processFinished().
                 taskAssignee(userid).list();
-        List<String> processlist = new ArrayList<String>();
+        List<String> processlist = new ArrayList<>();
         for(HistoricTaskInstance e : list) {
             processlist.add(e.getProcessInstanceId());
         }
@@ -330,7 +328,7 @@ public class ActivitiProcess extends Model {
                 .createProcessInstanceQuery()
                 .involvedUser(userid)
                 .list();
-        List<String> processlist = new ArrayList<String>();
+        List<String> processlist = new ArrayList<>();
         for(ProcessInstance e : processInstances) {
             if(!usertasks.contains(e.getProcessInstanceId())) {
                 processlist.add(e.getProcessInstanceId());

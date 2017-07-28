@@ -1,6 +1,5 @@
 package models.market;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import helper.Currency;
@@ -9,19 +8,15 @@ import models.product.Product;
 import models.view.dto.DailySalesReportsDTO;
 import models.view.highchart.AbstractSeries;
 import models.view.highchart.HighChart;
-import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.joda.time.DateTime;
+import org.hibernate.annotations.DynamicUpdate;
 import play.cache.Cache;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import play.libs.Files;
-import play.utils.FastRuntimeException;
 import query.OrderItemESQuery;
 import query.ProductQuery;
 
@@ -30,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 订单的具体订单项
@@ -38,7 +34,7 @@ import java.util.*;
  * Time: 10:42 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class OrderItem extends GenericModel {
 
     /**
@@ -179,7 +175,7 @@ public class OrderItem extends GenericModel {
      * @param to  @return {series_size, days, series_n}
      */
     @Cached("2h")
-    public static HighChart ajaxHighChartUnitOrder(final String val, final String type, Date from, Date to) {
+    public static HighChart ajaxHighChartUnitOrder(String val, String type, Date from, Date to) {
         String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
         HighChart lines = Cache.get(cacked_key, HighChart.class);
         if(lines != null) return lines;
@@ -188,28 +184,20 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            Date _from = Dates.morning(from);
+            Date _to = Dates.night(to);
 
-            final HighChart highChart = new HighChart();
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            Promises.forkJoin(new Promises.Callback<Object>() {
-                @Override
-                public Object doJobWithResult(M m) {
-                    highChart.series(esQuery.salesFade(type, val, m, _from, _to));
-                    return null;
-                }
+            HighChart highChart = new HighChart();
+            OrderItemESQuery esQuery = new OrderItemESQuery();
 
-                @Override
-                public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
-                }
-            });
+            for(M market : Promises.MARKETS) {
+                highChart.series(esQuery.salesFade(type, val, market, _from, _to));
+            }
             highChart.series(highChart.sumSeries("销量"));
             if(type.equals("sid") && !StringUtils.isBlank(val) && !val.equals("all") && val.length() >= 6) {
                 for(int i = 0; i < highChart.series.size(); i++) {
                     AbstractSeries serie = highChart.series.get(i);
-                    if(serie.name.indexOf("汇总") == -1) {
+                    if(!serie.name.contains("汇总")) {
                         serie.visible = false;
                         highChart.series.set(i, serie);
                     }
@@ -232,72 +220,24 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             HighChart highChart = new HighChart();
             OrderItemESQuery esQuery = new OrderItemESQuery();
             if(m == null) {
                 HighChart tmphighChart = new HighChart();
                 for(M market : Promises.MARKETS) {
-                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, _from, _to));
+                    tmphighChart.series(esQuery.movingAvgFade(type, val, market, finalFrom, finalTo));
                 }
                 highChart.series(tmphighChart.sumSeries("滑动平均"));
             } else {
-                highChart.series(esQuery.movingAvgFade(type, val, m, _from, _to));
+                highChart.series(esQuery.movingAvgFade(type, val, m, finalFrom, finalTo));
             }
             Cache.add(cacked_key, highChart, "2h");
         }
         return Cache.get(cacked_key, HighChart.class);
     }
-
-    /**
-     * 不同 Category 销量的百分比;
-     * TODO 取消销售额饼图
-     *
-     * @param type units/sales
-     * @param from
-     * @param to
-     * @param
-     * @return
-     */
-    public static HighChart categoryPie(String type, final Date from, final Date to, M market) {
-        String key = Caches.Q.cacheKey(type, from, to, market.name());
-        HighChart pieChart = Cache.get(key, HighChart.class);
-        if(pieChart != null) return pieChart;
-
-        synchronized(key.intern()) {
-            pieChart = Cache.get(key, HighChart.class);
-            if(pieChart != null) return pieChart;
-
-            pieChart = new HighChart(Series.PIE);
-
-            final OrderItemESQuery esQuery = new OrderItemESQuery();
-            if("all".equals(type)) {
-                final HighChart finalPieChart = pieChart;
-                Promises.forkJoin(new Promises.Callback<Object>() {
-                    @Override
-                    public Object doJobWithResult(M m) {
-                        finalPieChart.series(esQuery.categoryPie(m, from, to));
-                        return null;
-                    }
-
-                    @Override
-                    public String id() {
-                        return "OrderItem.categoryPie";
-                    }
-                });
-                AbstractSeries pie = pieChart.sumSeries("销量百分比");
-                pieChart.series.clear();
-                pieChart.series.add(pie);
-            } else {
-                pieChart.series(esQuery.categoryPie(market, from, to));
-            }
-            Cache.add(key, pieChart, "8h");
-        }
-        return pieChart;
-    }
-
 
     /**
      * <pre>
@@ -318,8 +258,8 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             final HighChart highChart = new HighChart();
             final OrderItemESQuery esQuery = new OrderItemESQuery();
@@ -329,26 +269,26 @@ public class OrderItem extends GenericModel {
 
             Promises.forkJoin(new Promises.Callback<Object>() {
                 @Override
-                public Object doJobWithResult(M m) {
-                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", m, _from, _to, false));
+                public Object doJobWithResult(Object param) {
+                    highChart.series(esQuery.skusSearch("sku", "\"" + val + "\"", (M) param, finalFrom, finalTo, false));
                     return null;
                 }
 
                 @Override
                 public String id() {
-                    return "OrderItem.ajaxHighChartUnitOrder(ES)";
+                    return "OrderItem.ajaxSkusUnitOrder(ES)";
                 }
             });
 
             for(M market : Promises.MARKETS) {
-                tmphighChart.series(esQuery.skusMoveingAve("sku", val, market, _from, _to, false));
+                tmphighChart.series(esQuery.skusMoveingAve("sku", val, market, finalFrom, finalTo, false));
             }
 
 
             highChart.series(highChart.sumSeries("销量"));
             for(int i = 0; i < highChart.series.size(); i++) {
                 AbstractSeries serie = highChart.series.get(i);
-                if(serie.name.indexOf("汇总") == -1) {
+                if(!serie.name.contains("汇总")) {
                     serie.visible = false;
                     highChart.series.set(i, serie);
                 }
@@ -381,8 +321,8 @@ public class OrderItem extends GenericModel {
             if(lines != null) return lines;
 
             // 做内部参数的容错
-            final Date _from = Dates.morning(from);
-            final Date _to = Dates.night(to);
+            final Date finalFrom = Dates.morning(from);
+            final Date finalTo = Dates.night(to);
 
             final HighChart highChart = new HighChart();
             final OrderItemESQuery esQuery = new OrderItemESQuery();
@@ -395,12 +335,12 @@ public class OrderItem extends GenericModel {
                     if(StringUtils.isNotBlank(skus[i])) {
                         if(ismoveing != 2) {
                             for(M m : Promises.MARKETS) {
-                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, _from, _to, true));
+                                tmphighChart.series(esQuery.skusSearch("sku", sku, m, finalFrom, finalTo, true));
                             }
                             highChart.series(tmphighChart.sumSeries(sku + "销量"));
                         } else {
                             for(M m : Promises.MARKETS) {
-                                tmphighChart.series(esQuery.skusMoveingAve("sku", sku, m, _from, _to, true));
+                                tmphighChart.series(esQuery.skusMoveingAve("sku", sku, m, finalFrom, finalTo, true));
                             }
                             highChart.series(tmphighChart.sumSeries(sku + "滑动平均"));
                         }
@@ -413,9 +353,9 @@ public class OrderItem extends GenericModel {
                 for(int i = 0; i < skus.length; i++) {
                     if(StringUtils.isNotBlank(skus[i])) {
                         if(ismoveing != 2) {
-                            highChart.series(esQuery.skusSearch("sku", skus[i], m, _from, _to, true));
+                            highChart.series(esQuery.skusSearch("sku", skus[i], m, finalFrom, finalTo, true));
                         } else
-                            highChart.series(esQuery.skusMoveingAve("sku", skus[i], m, _from, _to, true));
+                            highChart.series(esQuery.skusMoveingAve("sku", skus[i], m, finalFrom, finalTo, true));
                     }
                 }
             }
@@ -429,7 +369,7 @@ public class OrderItem extends GenericModel {
      * 查询传入的 SKU 的销量信息
      */
     public static List<F.T4<String, Long, Long, Double>> querySalesBySkus(Date from, Date to, String val) {
-        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<F.T4<String, Long, Long, Double>>();
+        List<F.T4<String, Long, Long, Double>> sales = new ArrayList<>();
 
         List<String> selectedSkus = Arrays.asList(val.replace("\"", "").split(","));
         List<String> categories = new ProductQuery().loadCategoriesBySkus(selectedSkus);
@@ -453,7 +393,7 @@ public class OrderItem extends GenericModel {
             JSONObject categoryResult = catgoriesResult.getJSONObject(m.name());
             Long categorySales = categoryResult.getJSONObject("sum_sales").getLongValue("value");
             Float rate = categorySales == 0 ? 0 : ((float) skuSales / (float) categorySales);
-            sales.add(new F.T4<String, Long, Long, Double>(m.name(), skuSales, categorySales,
+            sales.add(new F.T4<>(m.name(), skuSales, categorySales,
                     Webs.scale2Double(rate * 100))
             );
         }
@@ -466,7 +406,7 @@ public class OrderItem extends GenericModel {
             sumCategorySales += item._3;
         }
         Float sumRate = sumCategorySales == 0 ? 0 : ((float) sumSkuSales / (float) sumCategorySales);
-        sales.add(0, new F.T4<String, Long, Long, Double>("ALL", sumSkuSales, sumCategorySales,
+        sales.add(0, new F.T4<>("ALL", sumSkuSales, sumCategorySales,
                 Webs.scale2Double(sumRate * 100))
         );
         return sales;
@@ -474,94 +414,57 @@ public class OrderItem extends GenericModel {
 
     public static void skuMonthlyDailySales(Date from, Date to, M market, String category,
                                             String val) {
-        long begin = System.currentTimeMillis();
-
         String cacheKey = Caches.Q.cacheKey("SkuMonthlyDailySales", from, to, category, market, val);
         String runningKey = String.format("%s_running", cacheKey);
         if(StringUtils.isNotBlank(Cache.get(runningKey, String.class))) return;
 
-        List<DailySalesReportsDTO> dtos = Cache.get(cacheKey, List.class);
-        if(dtos != null && dtos.size() > 0) return;
-
+        if(Cache.get(cacheKey, List.class) != null) return;
         synchronized(cacheKey.intern()) {
-            dtos = Cache.get(cacheKey, List.class);
-            if(dtos != null && dtos.size() > 0) return;
+            if(Cache.get(cacheKey, List.class) != null) return;
 
             try {
                 Cache.add(runningKey, runningKey);
-                List<String> selectedSkus = new ArrayList<String>(Arrays.asList(val.replace("\"", "").split(",")));
-                if(StringUtils.isNotBlank(category)) selectedSkus.addAll(Category.getSKUs(category));
-                List<M> markets = market == null ? Arrays.asList(Promises.MARKETS) : Arrays.asList(market);
+                List<String> selectedSkus = new ArrayList<>(Arrays.asList(val.replace("\"", "").split(",")));
+                if(StringUtils.isNotBlank(category)) {
+                    selectedSkus.addAll(Category.getSKUs(category));
+                }
+                List<M> markets = Optional.ofNullable(market)
+                        .map(Collections::singletonList)
+                        .orElse(Arrays.asList(M.amazonVals()));
 
                 OrderItemESQuery service = new OrderItemESQuery();
                 JSONObject esResult = service.skusMonthlyDailySale(from, to, selectedSkus, markets);
 
-                LogUtils.JOBLOG.info(String
-                        .format("SkuMonthlyDailySales fetch es result.... [%sms]", System.currentTimeMillis() - begin));
-                begin = System.currentTimeMillis();
-
-                HashMap<String, Integer> units = new HashMap<String, Integer>();
-                if(esResult != null) {
-                    for(M m : markets) {
-                        JSONObject marketResult = esResult.getJSONObject(m.name());
-                        for(String sku : selectedSkus) {
-                            if(StringUtils.isBlank(sku)) continue;
-                            JSONObject skuResult = marketResult.getJSONObject(ES.parseEsString(sku).toLowerCase());
-                            JSONArray buckets = skuResult.getJSONObject("monthly_avg").getJSONArray("buckets");
-                            for(Object o : buckets) {
-                                JSONObject entry = (JSONObject) o;
-                                DateTime month = new DateTime(Dates.date2JDate(entry.getDate("key")));
-                                units.put(String.format("%s|%s|%s", sku, m.name(), month.getMonthOfYear()),
-                                        entry.getJSONObject("sum_sales").getIntValue("value"));
-                            }
-                        }
-                    }
+                List<DailySalesReportsDTO> dtos = new ArrayList<>();
+                for(M m : markets) {
+                    //aggregations.aggs_filters.AMAZON_UK.skus
+                    Optional.ofNullable(J.dig(esResult, String.format("aggregations.aggs_filters.%s.skus", m.name())))
+                            .map(skus -> skus.getJSONArray("buckets"))
+                            .ifPresent(buckets -> buckets.stream()
+                                    .map(bucket -> (JSONObject) bucket)
+                                    .forEach(bucket -> dtos.add(DailySalesReportsDTO.buildFromJSONObject(bucket, m)))
+                            );
                 }
-
-                dtos = new ArrayList<DailySalesReportsDTO>();
-                int beginMonth = new DateTime(from).getMonthOfYear();
-                int endMonth = new DateTime(to).getMonthOfYear();
-                DateTime currentYear = new DateTime(from);
                 for(String sku : selectedSkus) {
                     if(StringUtils.isBlank(sku)) continue;
-                    String cate = sku.substring(0, 2);
-                    DailySalesReportsDTO sumDto = new DailySalesReportsDTO(cate, sku, "ALL");
-                    if(market == null) dtos.add(sumDto);
-
-                    for(M m : markets) {
-                        DailySalesReportsDTO dto = new DailySalesReportsDTO(cate, sku, m.name());
-
-                        for(int i = beginMonth; i <= endMonth; i++) {
-                            String key = String.format("%s|%s|%s", sku, m.name(), i);
-                            int days = Dates.getDays(currentYear.withMonthOfYear(i).toDate());
-                            Float unit = units.get(key) == null ? 0 : NumberUtils.toFloat(units.get(key).toString());
-                            dto.sales.put(i, Webs.scalePointUp(0, unit / days));
-
-                            //使用 sumDto 对象临时储存一下汇总的数据
-                            if(sumDto.sales.containsKey(i)) {
-                                sumDto.sales.put(i, sumDto.sales.get(i) + unit);
-                            } else {
-                                sumDto.sales.put(i, unit);
-                            }
-                        }
-                        dtos.add(dto);
-                    }
-
-                    //最后在计算汇总的数据
-                    for(int key : sumDto.sales.keySet()) {
-                        Date month = new DateTime(from).withMonthOfYear(key).toDate();
-                        sumDto.sales.put(key, Webs.scalePointUp(0, sumDto.sales.get(key) / Dates.getDays(month)));
-                    }
+                    List<DailySalesReportsDTO> skuDtos = dtos.stream()
+                            .filter(dto -> dto != null && StringUtils.equalsIgnoreCase(dto.sku, ES.parseEsString(sku)))
+                            .collect(Collectors.toList());
+                    skuDtos.forEach(dto -> dto.sku = sku); //将 ES 化的 SKU 替换成正常的 SKU(70apipgpuenp -> 70APIP-GPUENP)
+                    dtos.add(DailySalesReportsDTO.buildSumDTO(skuDtos, sku));//把计算好的 sku 汇总对象加入到 dtos 结果集
                 }
 
-                LogUtils.JOBLOG.info(String
-                        .format("SkuMonthlyDailySales calculate.... [%sms]", System.currentTimeMillis() - begin));
-
-                Cache.add(cacheKey, dtos, "4h");
+                List<DailySalesReportsDTO> finalDtos = dtos.stream()
+                        .filter(Objects::nonNull)
+                        //计算日平均销量
+                        .map(DailySalesReportsDTO::processDailySales)
+                        //将相同的 SKU 的放到一起, 便于前端输出查看
+                        .sorted((dto1, dto2) -> dto1.sku.compareTo(dto2.sku))
+                        .collect(Collectors.toList());
+                Cache.add(cacheKey, finalDtos, "4h");
                 Cache.delete(runningKey);
-            } catch(Exception e) {
+            } finally {
                 Cache.delete(runningKey);
-                throw new FastRuntimeException(Webs.S(e));
             }
         }
     }

@@ -2,11 +2,15 @@ package models.view.post;
 
 import helper.DBUtils;
 import helper.Dates;
+import models.OperatorConfig;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import models.product.Whouse;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
+import models.whouse.InboundUnit;
+import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
@@ -26,17 +30,18 @@ import java.util.regex.Pattern;
  * Time: 4:32 PM
  */
 public class ProcurePost extends Post<ProcureUnit> {
-    private static final Pattern ID = Pattern.compile("^id:(\\d*)$");
+    private static final Pattern ID = Pattern.compile("^[0-9]*$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
+    public static final List<String> projectNames = new ArrayList<>();
 
     static {
-        DATE_TYPES = new ArrayList<F.T2<String, String>>();
-        DATE_TYPES.add(new F.T2<String, String>("createDate", "创建时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planDeliveryDate", "预计 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.deliveryDate", "实际 [交货] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间"));
-        DATE_TYPES.add(new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"));
+        DATE_TYPES = new ArrayList<>();
+        DATE_TYPES.add(new F.T2<>("createDate", "创建时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planDeliveryDate", "预计 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.deliveryDate", "实际 [交货] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planArrivDate", "预计 [到库] 时间"));
+        DATE_TYPES.add(new F.T2<>("attrs.planShipDate", "预计 [发货] 时间"));
     }
 
     /**
@@ -46,16 +51,14 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Date to;
 
     public long whouseId;
-
     public long cooperatorId;
-
-    public ProcureUnit.STAGE stage;
-
+    public List<ProcureUnit.STAGE> stages = new ArrayList<>();
     public PLACEDSTATE isPlaced;
-
     public Shipment.T shipType;
-
     public String unitIds;
+    public InboundUnit.R result;
+    public List<String> categories = new ArrayList<>();
+
     /**
      * 选择过滤的日期类型
      */
@@ -84,178 +87,164 @@ public class ProcurePost extends Post<ProcureUnit> {
         public abstract String label();
     }
 
-    public enum S {
-        NOSHIPED {
+    public enum C {
+        YES {
             @Override
             public String label() {
-                return "不发货已处理";
+                return "已核单";
             }
         },
-        NOSHIPWAIT {
+        NO {
             @Override
             public String label() {
-                return "不发货待处理";
+                return "未核单";
             }
+
         };
 
         public abstract String label();
     }
 
-    /**
-     * 采购计划的不发货处理状态
-     */
-    public S shipState;
-
-    public enum OPCONFIRM {
-        CONFIRM {
-            @Override
-            public String label() {
-                return "待确认";
-            }
-        },
-
-        CONFIRMED {
-            @Override
-            public String label() {
-                return "已确认";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 运营确认
-     */
-    public OPCONFIRM opConfirm;
-
-    public enum QCCONFIRM {
-        CONFIRM {
-            @Override
-            public String label() {
-                return "待确认";
-            }
-        },
-
-        CONFIRMED {
-            @Override
-            public String label() {
-                return "已确认";
-            }
-        };
-
-        public abstract String label();
-    }
-
-    /**
-     * 质检员确认
-     */
-    public QCCONFIRM qcConfirm;
+    public String projectName;
+    public ProcureUnit.OST isOut;
+    public C isConfirm;
+    public ProcureUnit.T type;
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
-        this.stage = ProcureUnit.STAGE.DONE;
+        this.stages.add(ProcureUnit.STAGE.DONE);
+        this.stages.add(ProcureUnit.STAGE.DELIVERY);
+        this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         this.dateType = "createDate";
+        this.perSize = 70;
+        projectNames.clear();
+        projectNames.add(OperatorConfig.getVal("brandname"));
+        projectNames.add("B2B");
     }
 
     public ProcurePost(ProcureUnit.STAGE stage) {
         this();
-        this.stage = stage;
+        this.stages.add(stage);
+    }
+
+    public Long getTotalCount() {
+        return this.count();
     }
 
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY createDate DESC", params._2.toArray()).fetch();
+        this.count = this.count();
+        if(this.pagination)
+            return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray())
+                    .fetch(this.page, this.perSize);
+        else
+            return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
+
+    }
+
+    public List<ProcureUnit> queryForExcel() {
+        F.T2<String, List<Object>> params = params();
+        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureUnit.count("SELECT COUNT(*) FROM ProcureUnit WHERE " + params._1,
-                params._2.toArray()
-        );
+        return (long) ProcureUnit.find(params._1, params._2.toArray()).fetch().size();
     }
 
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder();
-        List<Object> params = new ArrayList<Object>();
-
+        List<Object> params = new ArrayList<>();
+        sbd.append("SELECT DISTINCT p FROM ProcureUnit p LEFT JOIN p.fba f LEFT JOIN p.selling s ");
+        sbd.append("LEFT JOIN p.deliverplan d LEFT JOIN p.product o WHERE 1=1 ");
         Long procrueId = isSearchForId();
         if(procrueId != null) {
-            sbd.append("id=?");
+            sbd.append(" AND p.id=?");
             params.add(procrueId);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+            return new F.T2<>(sbd.toString(), params);
         }
 
-        String fba = isSearchFBA();
-        if(fba != null) {
-            sbd.append("fba.shipmentId=?");
-            params.add(fba);
-            return new F.T2<String, List<Object>>(sbd.toString(), params);
+        if(StringUtils.isNotEmpty(isSearchForFBA())) {
+            sbd.append(" AND p.fba.shipmentId=?");
+            params.add(this.search);
+            return new F.T2<>(sbd.toString(), params);
         }
 
         if(StringUtils.isBlank(this.dateType)) this.dateType = "attrs.planDeliveryDate";
-        sbd.append(this.dateType).append(">=?").append(" AND ").append(this.dateType)
+        sbd.append(" AND p.").append(this.dateType).append(">=?").append(" AND p.").append(this.dateType)
                 .append("<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
-        if(this.shipState != null) {
-            sbd.append("AND shipState=?");
-            params.add(ProcureUnit.S.valueOf(this.shipState.name()));
-        }
-
-        if(this.opConfirm != null) {
-            sbd.append("AND opConfirm=?");
-            params.add(ProcureUnit.OPCONFIRM.valueOf(this.opConfirm.name()));
-        }
-
-        if(this.qcConfirm != null) {
-            sbd.append("AND qcConfirm=?");
-            params.add(ProcureUnit.QCCONFIRM.valueOf(this.qcConfirm.name()));
-        }
-
         if(this.whouseId > 0) {
-            sbd.append(" AND whouse.id=?");
+            sbd.append(" AND p.whouse.id=?");
             params.add(this.whouseId);
         }
 
         if(this.cooperatorId > 0) {
-            sbd.append(" AND cooperator.id=? ");
+            sbd.append(" AND p.cooperator.id=? ");
             params.add(this.cooperatorId);
         }
 
-        if(this.stage != null) {
-            sbd.append(" AND stage=? ");
-            params.add(this.stage);
+        if(stages.size() > 0) {
+            sbd.append(" AND p.stage IN " + SqlSelect.inlineParam(stages));
         }
-        sbd.append(" AND stage != 'APPROVE'");
 
         if(this.shipType != null) {
-            sbd.append(" AND shipType=? ");
+            sbd.append(" AND p.shipType=? ");
             params.add(this.shipType);
         }
 
+        if(this.isConfirm != null) {
+            sbd.append(" AND p.isConfirm=? ");
+            params.add(this.isConfirm == C.YES);
+        }
+
+        if(categories.size() > 0) {
+            sbd.append(" AND p.product.category.id IN " + SqlSelect.inlineParam(categories));
+        }
+
+        if(StringUtils.isNotEmpty(this.projectName)) {
+            sbd.append(" AND p.projectName=? ");
+            params.add(this.projectName);
+        }
+
+        if(result != null) {
+            sbd.append(" AND p.result = ? ");
+            params.add(this.result);
+        }
+
+        if(type != null) {
+            sbd.append(" AND p.type = ? ");
+            params.add(this.type);
+        }
+
         if(this.isPlaced != null) {
-            sbd.append(" AND isPlaced=? ");
+            sbd.append(" AND p.isPlaced=? ");
             params.add(this.isPlaced == PLACEDSTATE.ARRIVE);
+        }
+
+        if(this.isOut != null) {
+            sbd.append(" AND p.isOut=?");
+            params.add(this.isOut);
         }
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append("product.sku LIKE ? OR ")
-                    .append("selling.sellingId LIKE ?")
-//                        .append("fba.shipmentId LIKE ?")
+                    .append("p.product.sku LIKE ? OR ")
+                    .append("s.sellingId LIKE ? OR ")
+                    .append("d.id LIKE ? OR ")
+                    .append("f.shipmentId LIKE ?  ")
                     .append(") ");
-            for(int i = 0; i < 2; i++) params.add(word);
+            for(int i = 0; i < 4; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
-            sbd.append(" AND id IN " + SqlSelect.inlineParam(unitIdList));
+            sbd.append(" AND p.id IN ").append(SqlSelect.inlineParam(unitIdList));
         }
-        sbd.append(" AND planQty != 0");
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     /**
@@ -266,7 +255,7 @@ public class ProcurePost extends Post<ProcureUnit> {
     private Long isSearchForId() {
         if(StringUtils.isNotBlank(this.search)) {
             Matcher matcher = ID.matcher(this.search);
-            if(matcher.find()) return NumberUtils.toLong(matcher.group(1));
+            if(matcher.find()) return NumberUtils.toLong(matcher.group(0));
         }
         return null;
     }
@@ -276,10 +265,9 @@ public class ProcurePost extends Post<ProcureUnit> {
      *
      * @return
      */
-    private String isSearchFBA() {
-        if(StringUtils.isNotBlank(this.search)) {
-            Matcher matcher = FBA.matcher(this.search);
-            if(matcher.find()) return matcher.group(1);
+    private String isSearchForFBA() {
+        if(StringUtils.isNotBlank(this.search) && this.search.substring(0, 3).equals("FBA")) {
+            return this.search;
         }
         return null;
     }
@@ -296,9 +284,9 @@ public class ProcurePost extends Post<ProcureUnit> {
                 "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
         List<Map<String, Object>> rows = DBUtils
                 .rows(sql, Messages.get("procureunit.deepUpdate"), Dates.morning(this.from), Dates.night(this.to));
-        List<HashMap<String, Object>> logs = new ArrayList<HashMap<String, Object>>();
+        List<HashMap<String, Object>> logs = new ArrayList<>();
         for(Map<String, Object> row : rows) {
-            HashMap<String, Object> log = new HashMap<String, Object>();
+            HashMap<String, Object> log = new HashMap<>();
             log.put("date", row.get("createAt"));
             log.put("user", row.get("username"));
             log.put("fid", row.get("fid"));
@@ -321,7 +309,7 @@ public class ProcurePost extends Post<ProcureUnit> {
      * @return
      */
     public String generatePayInfo(String id) {
-        ProcureUnit unit = ProcureUnit.<ProcureUnit>findById(NumberUtils.toLong(id));
+        ProcureUnit unit = ProcureUnit.findById(NumberUtils.toLong(id));
         if(unit == null) {
             return "";
         } else {
@@ -370,8 +358,16 @@ public class ProcurePost extends Post<ProcureUnit> {
         return this.shipType.label();
     }
 
-    public String returnShipStates() {
-        if(this.shipState == null) return "";
-        return this.shipState.label();
+    public static HighChart perCreateTotalNum() {
+        StringBuilder sql = new StringBuilder("SELECT u.username, count(1) as perNum FROM ProcureUnit p ");
+        sql.append(" LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ");
+        HighChart columnChart = new HighChart(Series.COLUMN);
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            Series.Column column = new Series.Column(row.get("username").toString());
+            column.add(row.get("username").toString(), Float.parseFloat(row.get("perNum").toString()));
+            columnChart.series(column);
+        });
+        return columnChart;
     }
+
 }

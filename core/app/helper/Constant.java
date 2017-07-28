@@ -71,11 +71,42 @@ public class Constant {
 
     public static final String TMP = System.getProperty("java.io.tmpdir");
 
-    public static final String ROOT_PATH = models.OperatorConfig.getVal("elcuk2url");
+    /**
+     * 系统自己的 url
+     */
+    public static final String ROOT_URL = "ROOT_URL";
 
     /**
      * 系统中产生的 "数据" 类型的文件
      */
     public static final String REPORT_PATH = String.format("%s/elcuk2-report", Constant.HOME);
+
+    /**
+     * Rockend HOST 服务器地址
+     */
+    public static final String ROCKEND_HOST = "ROCKEND_HOST";
+
+    /**
+     * Elcuk2 所使用的附件系统 Kod 的 Host
+     */
+    public static final String KOD_HOST = "KOD_HOST";
+    /**
+     * Elcuk2 在 ElasticSearch 的 Host 地址
+     */
+    public static final String ES_HOST = "ES_HOST";
+    /**
+     * Elcuk2 在 ElasticSearch 中的索引 Index 名称.
+     */
+    public static final String ES_INDEX = "ES_INDEX";
+
+    /**
+     * Exchangerate-api Token
+     */
+    public static final String EXCHANGERATE_TOKEN = "EXCHANGERATE_TOKEN";
+
+    /**
+     * 保存发票地址
+     */
+    public static final String INVOICE_PATH = String.format("%s/elcuk2-data/invoices", Constant.HOME);
 
 }

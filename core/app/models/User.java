@@ -5,15 +5,17 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.DBUtils;
+import helper.Webs;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.market.Listing;
 import models.market.Selling;
 import models.product.Category;
 import models.product.Team;
-import models.product.Whouse;
+import models.whouse.Whouse;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.*;
 import play.db.helper.JpqlSelect;
 import play.db.jpa.Model;
@@ -24,7 +26,6 @@ import play.utils.FastRuntimeException;
 import javax.persistence.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.security.MessageDigest;
 
 /**
  * 系统中的用户
@@ -33,7 +34,7 @@ import java.security.MessageDigest;
  * Time: 10:37 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class User extends Model {
     private static final long serialVersionUID = 4195929532608535016L;
 
@@ -48,35 +49,35 @@ public class User extends Model {
      * 用户所拥有的权限
      */
     @ManyToMany
-    public Set<Privilege> privileges = new HashSet<Privilege>();
+    public Set<Privilege> privileges = new HashSet<>();
 
     /**
      * 用户所拥有的TEAM
      */
     @ManyToMany
-    public Set<Team> teams = new HashSet<Team>();
+    public Set<Team> teams = new HashSet<>();
 
     /**
      * 用户所拥有的ROLE
      */
-    @ManyToMany
-    public Set<Role> roles = new HashSet<Role>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    public Set<Role> roles = new HashSet<>();
 
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
-    public List<Payment> paymentPaied = new ArrayList<Payment>();
+    public List<Payment> paymentPaied = new ArrayList<>();
 
     /**
      * 一个人可以拥有很多个请款单元
      */
     @OneToMany(mappedBy = "payee", fetch = FetchType.LAZY)
-    public List<PaymentUnit> pamentApplies = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> pamentApplies = new ArrayList<>();
 
     /**
      * 用户的通知
      */
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    public List<Notification> notifications = new ArrayList<Notification>();
+    public List<Notification> notifications = new ArrayList<>();
 
     @Column(nullable = false, unique = true)
     @Required
@@ -90,6 +91,7 @@ public class User extends Model {
     @Password
     public String passwordDigest;
 
+    @Transient
     public String password;
 
     @Transient
@@ -138,6 +140,87 @@ public class User extends Model {
     @OneToMany
     public List<Whouse> whouses;
 
+    /**
+     * 所属公司
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public COR projectName;
+
+    public enum COR {
+        EASYACC {
+            @Override
+            public String label() {
+                return "EasyAcc";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.easya.cc/";
+            }
+        },
+        Ecooe {
+            @Override
+            public String label() {
+                return "Ecooe";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.ecooe.com/";
+            }
+        },
+        Brandworl {
+            @Override
+            public String label() {
+                return "Brandworl";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.brandworl.com/";
+            }
+        },
+        OUTXE {
+            @Override
+            public String label() {
+                return "Outxe";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.outxe.com/";
+            }
+        },
+        Redimp {
+            @Override
+            public String label() {
+                return "Redimp";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.redimp.com/";
+            }
+        },
+        MengTop {
+            @Override
+            public String label() {
+                return "MengTop";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.mengtop.com/";
+            }
+        };
+
+        public abstract String label();
+
+        public abstract String url();
+    }
+
+
     public User() {
     }
 
@@ -156,6 +239,7 @@ public class User extends Model {
     @PrePersist
     @PreUpdate
     public void prePersist() {
+        this.username = this.username.trim();
         // 密码的加密操作在保存的时候进行; 在程序内部使用时为明文密码
         if(StringUtils.isNotBlank(this.password))
             this.passwordDigest = Crypto.encryptAES(this.password);
@@ -173,7 +257,7 @@ public class User extends Model {
         if(!this.authenticate(this.password))
             throw new FastRuntimeException("密码错误");
         this.save();
-        //Login.updateUserCache(this);
+        Login.updateUserCache(this);
     }
 
     public List<Notification> notificationFeeds(int page) {
@@ -205,7 +289,7 @@ public class User extends Model {
                 .fetch();
         if(privilegeId.size() != privileges.size())
             throw new FastRuntimeException("需要修改的权限数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-        this.privileges = new HashSet<Privilege>();
+        this.privileges = new HashSet<>();
         this.save();
         this.privileges.addAll(privileges);
         Privilege.updatePrivileges(this.username, this.privileges);
@@ -229,7 +313,7 @@ public class User extends Model {
      */
     public void addTeams(List<Long> teamId) {
         if(teamId == null || teamId.size() == 0) {
-            this.teams = new HashSet<Team>();
+            this.teams = new HashSet<>();
             this.save();
             Team.updateTeams(this.username, this.teams);
         } else {
@@ -237,7 +321,7 @@ public class User extends Model {
                     .fetch();
             if(teamId.size() != teams.size())
                 throw new FastRuntimeException("需要修改的Team数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-            this.teams = new HashSet<Team>();
+            this.teams = new HashSet<>();
             this.save();
             this.teams.addAll(teams);
             Team.updateTeams(this.username, this.teams);
@@ -253,7 +337,7 @@ public class User extends Model {
      */
     public void addRoles(List<Long> roleId) {
         if(roleId == null || roleId.size() == 0) {
-            this.roles = new HashSet<Role>();
+            this.roles = new HashSet<>();
             this.save();
             Role.updateRoles(this.username, this.roles);
         } else {
@@ -261,7 +345,7 @@ public class User extends Model {
                     .fetch();
             if(roleId.size() != roles.size())
                 throw new FastRuntimeException("需要修改的Role数量与系统中存在的不一致, 请确通过 Web 形式修改.");
-            this.roles = new HashSet<Role>();
+            this.roles = new HashSet<>();
             this.save();
             this.roles.addAll(roles);
             Role.updateRoles(this.username, this.roles);
@@ -281,14 +365,13 @@ public class User extends Model {
     /**
      * 修改密码
      *
-     * @param passwd
+     * @param password
      */
-    public void changePasswd(String passwd) {
+    public void changePasswd(String password) {
         //  由于 User 会被保存在 Cache 中, 那么 User 则处于游离状态, 为了保持缓存中游离对象, 所以需要将缓存中的游离对象进行一次更新
-        this.password = passwd;
-        this.passwordDigest = Crypto.encryptAES(this.password);
+        this.passwordDigest = Crypto.encryptAES(password);
         this.save();
-        //Login.updateUserCache(this);
+        Login.updateUserCache(this);
     }
 
     /**
@@ -360,7 +443,7 @@ public class User extends Model {
     public static String username() {
         String username = Scope.Session.current().get("username");
         if(StringUtils.isBlank(username)) return "system";
-        else return username;
+        else return StringUtils.lowerCase(username);
     }
 
     public static User current() {
@@ -377,15 +460,6 @@ public class User extends Model {
         return User.find("closed=?", false).fetch();
     }
 
-    /**
-     * TODO: @duan 这里你删除了 isProcure 但是没有搜索到这个地方使用了他, 致使采购页面无法访问, 请思考如何处理.
-     * 思考：考虑采用角色 对用户分配角色 对角色分配属性
-     *
-     * @return
-     */
-    public static List<User> procurers() {
-        return User.find("isProcure=?", true).fetch();
-    }
 
     /**
      * 链接用户(登陆)
@@ -407,6 +481,7 @@ public class User extends Model {
      * 初始化产品线人员
      *
      * @return
+     * @deprecated 这段代码还需要吗?
      */
     public static JsonObject getUsercategor() {
         if(User.USER_CATEGORY == null || User.USER_CATEGORY.isJsonNull()) {
@@ -438,7 +513,7 @@ public class User extends Model {
             }
         }
 
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         for(String name : new String[]{userids}) {
             User user = User.findByUserName(name);
             if(user != null) users.add(user);
@@ -453,7 +528,7 @@ public class User extends Model {
      * @return
      */
     public static Set<User> shipoperations() {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
         for(String name : new String[]{"wendy"}) {
             User user = User.findByUserName(name);
             if(user != null) users.add(user);
@@ -492,7 +567,7 @@ public class User extends Model {
      * @return
      */
     public static List<String> getTeamCategorys(User user) {
-        List<String> categories = new ArrayList<String>();
+        List<String> categories = new ArrayList<>();
         String sql = "select c.categoryid From User_Team u,Category c "
                 + " where u.teams_id=c.team_id"
                 + " and users_id=" + user.id;
@@ -512,10 +587,8 @@ public class User extends Model {
      * @return
      */
     public static List<Category> getObjCategorys(User user) {
-        List<Category> categories = new ArrayList<Category>();
-        Iterator<Team> iterator = user.teams.iterator();
-        while(iterator.hasNext()) {
-            Team team = iterator.next();
+        List<Category> categories = new ArrayList<>();
+        for(Team team : user.teams) {
             List<Category> categoryList = team.getObjCategorys();
             categories.addAll(categoryList);
         }
@@ -538,7 +611,7 @@ public class User extends Model {
      * @return
      */
     public static List<String> getListings(User user) {
-        List<String> listings = new ArrayList<String>();
+        List<String> listings = new ArrayList<>();
         for(String sku : getSkus(user)) {
             listings.addAll(Listing.getAllListingBySKU(sku));
         }
@@ -563,30 +636,7 @@ public class User extends Model {
      * @return
      */
     public static String userMd5(String username) {
-        String userkey = "playelcuk2userauthenticate" + username;
-        return Md5(userkey);
-    }
-
-
-    public  static String Md5(String plainText) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(plainText.getBytes());
-            byte b[] = md.digest();
-            int i;
-            StringBuffer buf = new StringBuffer("");
-            for(int offset = 0; offset < b.length; offset++) {
-                i = b[offset];
-                if(i < 0) i += 256;
-                if(i < 16)
-                    buf.append("0");
-                buf.append(Integer.toHexString(i));
-            }
-            return buf.toString();
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return "";
+        return Webs.md5(String.format("playelcuk2userauthenticate%s", username));
     }
 
     /**
@@ -598,5 +648,22 @@ public class User extends Model {
         return Notification.find("user=? AND state = 'UNCHECKED' ORDER BY createAt", this).fetch();
     }
 
+    /**
+     * 是否含有跨部门查看数据权限
+     *
+     * @return
+     */
+    public boolean isHaveCrossCop() {
+        return Role.isHaveCrossCop(this);
+    }
+
+    /**
+     * 是否物流人员
+     *
+     * @return
+     */
+    public boolean isShipmentRole() {
+        return Role.isShipmentRole(this);
+    }
 
 }

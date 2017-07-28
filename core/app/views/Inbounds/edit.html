@@ -1,0 +1,109 @@
+#{extends 'main_full.html' /}
+#{set title:'采购收货入库单' /}
+#{set 'moreScripts'}
+    #{script 'inbounds/edit.js'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{form @Inbounds.update(), method:'POST', id: 'edit_inbound_form'}
+    #{info_row title:'编辑收货入库单'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>收货入库单ID</th>
+        <td>
+          <input type="text" value="${inbound.id}" readonly>
+          <input type="hidden" name="inboundId" value="${inbound.id}">
+        </td>
+        <th>状态</th>
+        <td style="color:${inbound.status.rgb()}">${inbound.status?.label()}</td>
+      </tr>
+      <tr>
+        <th>出货单</th>
+        <td>${inbound.plan?.id}</td>
+        <th>供应商</th>
+        <td>
+          <input type="text" value="${inbound.cooperator?.name}" readonly/>
+        </td>
+      </tr>
+      <tr>
+        <th>收货入库单名称<span style="color:red">*</span></th>
+        <td><input type="text" class="span8" name="inbound.name" value="${inbound.name}" required></td>
+        <th>收货类型</th>
+        <td>${inbound.type?.label()}</td>
+      </tr>
+      <tr>
+        <th>收货日期<span style="color:red">*</span></th>
+        <td><input type="date" name="inbound.receiveDate" value="${inbound.receiveDate.date()}" required
+                   autocomplete="off"></td>
+        <th></th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>创建日期</th>
+        <td><input type="date" readonly="readonly" value="${inbound.createDate.date()}"></td>
+        <th>创建人</th>
+        <td>${inbound.receiver?.username}</td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea name="inbound.memo" rows="4" class="input-block-level">${inbound.memo}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <input type="hidden" name="record.origin" value="">
+          <input type="hidden" name="record.state" value="">
+            #{if inbound.status.name()!='End'}
+              <button class="btn btn-primary" id="update">更新</button>
+            #{/if}
+          <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+    #{info_row title:'已添加进入【采购收货入库单】的【采购单元】'/}
+<div class="row-fluid">
+  <div class="span12">
+      #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses,
+      is_b2b: inbound.projectName?.name() == "MengTop"/}
+
+      #{if inbound.status?.name()!='End'}
+          #{if inbound.status?.name()=='Create'}
+            <input type="button" class="btn btn-danger" id="deleteBtn" value="解除"/>
+          #{/if}
+        <input type="button" class="btn btn-primary" id="batchUpdateBoxInfoBtn" value="批量更新包装信息">
+
+          #{power.ck 'inbounds.confirmreceivebtn'}
+            <input type="button" class="btn btn-success" id="confirmReceiveBtn" data-url="@{Inbounds.confirmReceive()}" value="确认收货">
+          #{/power.ck}
+          #{power.ck 'inbounds.confirmqcbtn'}
+            <input type="button" class="btn btn-success" id="confirmQCBtn" data-url="@{Inbounds.confirmQC()}" value="确认质检">
+          #{/power.ck}
+      #{/if}
+  </div>
+</div>
+#{/form}
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left:40%;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+  </div>
+</div>
+
+#{records records:logs/}
+

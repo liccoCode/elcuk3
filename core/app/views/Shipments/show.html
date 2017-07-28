@@ -1,14 +1,20 @@
 #{extends 'main_full.html' /}
 #{set title:"运输单 #" + ship.id /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.filedrop.js'/}
-    #{script_cdn name: 'component/dropUpload.coffee'/}
-    #{script_cdn name: 'highstock.js'/}
-    #{script_cdn name: 'timeline/timeline_js/timeline-api.js'/}
-    #{script_cdn name: 'analyzes/timeline.coffee'/}
-    #{script_cdn name: 'shipments/show.coffee'/}
-    #{script_cdn name: 'shipments/paymentunits.coffee'/}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'component/dropUpload.coffee'/}
+    #{script 'highstock.js'/}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
+    #{script 'analyzes/timeline.coffee'/}
+    #{script 'shipments/show.coffee'/}
+    #{script 'shipments/show.es6'/}
+    #{script 'shipments/paymentunits.coffee'/}
 #{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
 
 <ul class="nav nav-tabs" id="below_tab">
   <li class="active">
@@ -25,16 +31,18 @@
 #{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
   <div class="row-fluid">
     <div class="span12">
-    #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{if ship.projectName == models.User.COR.MengTop}
+        #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers, customs:customs/}
+    #{/if}
+      #{else }
+        #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+    #{/else}
     </div>
   </div>
 
 #{flash_alert /}
-
 #{shipmentWorkflow state: ship.state/}
-
 #{render './_show_progress.html', ship: ship/}
-
 #{render './_show_items.html', ship: ship, cooperators: cooperators/}
 
   <!-- 运输单记录信息 -->
@@ -70,7 +78,7 @@
     </div>
   </div>
 
-<!-- 请款信息 -->
+  <!-- 请款信息 -->
 #{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type ==
 models.procure.Shipment.T.EXPRESS/}
 
@@ -88,5 +96,14 @@ models.procure.Shipment.T.EXPRESS/}
       <ul class="thumbnails uploaded"></ul>
       <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
     </div>
+  </div>
+</div>
+
+<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left:40%;">
+  <div class="modal-body">
+    <div id="refresh_div"></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
   </div>
 </div>

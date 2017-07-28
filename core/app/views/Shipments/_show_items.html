@@ -9,24 +9,28 @@
 </div>
 
 #{success_row title:'运输项目' /}
-<form action="@{ShipItems.adjust(ship.id, ship.id)}" method="POST" id="adjust_shipitems">
-
+<form action="@{ShipItems.adjust()}" method="POST" id="adjust_ship_items">
   <div class="row-fluid">
     <div class="span12">
-    #{render './_shipitem.html', items: ship.items, itmRecord: true, isExpress: ship.type == models.procure.Shipment.T.EXPRESS/}
+    #{if ship.projectName == models.User.COR.MengTop}
+        #{render './_b2b_shipitem.html', isExpress: java.util.Arrays.asList('EXPRESS','DEDICATED').contains(ship.type.name()),
+        items: ship.items, itmRecord: true/}
+    #{/if}
+      #{else }
+        #{render './_shipitem.html', isExpress: java.util.Arrays.asList('EXPRESS','DEDICATED').contains(ship.type.name()),
+        items: ship.items, itmRecord: true/}
+    #{/else}
     </div>
   </div>
 #{power.ck 'shipitems.adjust'}
 <div class="row-fluid">
   <div class="span3">
-    <input type="text" name="shipmentId" placeholder="ShipmentId" style="margin-bottom:0">
-
+    <input type="text" name="targetId" placeholder="ShipmentId" style="margin-bottom:0">
+    <input type="hidden" name="shipmentId" value="${ship.id}">
     <div class="btn-group">
       <a class="btn preview"><i class="icon-file-alt"></i> 预览</a>
       <a class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
-        <i class="icon-adjust"></i>
-        调整
-      </a>
+        <i class="icon-adjust"></i>调整</a>
     </div>
   </div>
 #{/power.ck}
@@ -165,9 +169,9 @@
 
         <div class="controls">
           <select name="fee.chargingWay" class="input-small">
-              #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
-                <option value="${way}">${way.label()}</option>
-              #{/list}
+          #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+            <option value="${way}">${way.label()}</option>
+          #{/list}
           </select>
         </div>
       </div>

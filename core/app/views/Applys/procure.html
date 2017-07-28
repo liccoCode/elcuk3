@@ -1,7 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"请款单 ${apply.serialNumber}" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'deliveryments/procure.coffee'/}
+    #{script 'deliveryments/procure.coffee'/}
+    #{script 'deliveryments/procure.es6'/}
 #{/set}
 #{flash_alert /}
 <div class="row-fluid">
@@ -22,6 +23,14 @@
     </dl>
   </div>
   <div class="span4">
+    <dl class="dl-horizontal">
+      <dt>总数量</dt>
+      <dd><span class="totalQty"></span></dd>
+      <dt>总金额</dt>
+      <dd><span class="totalCost"></span></dd>
+    </dl>
+  </div>
+  <div class="span2">
     <div class="btn-toolbar">
     #{if apply.confirm}
       <button class="btn btn-danger" disabled="">请款单已经确认</button>
@@ -35,7 +44,6 @@
 </div>
 
 <hr style="border-top: 1px dashed;">
-
 
 #{list items:apply.deliveryments, as:'dmt'}
     #{set tr_key: key ? key : 'unit'/}
@@ -77,20 +85,22 @@
   <div class="span9">
     <table class="table table-bordered table-condensed">
       <tr>
-        <th><input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall"></th>
+        <th width="15px;">
+          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="checkall">
+        </th>
         <th>#</th>
         <th>SKU</th>
         <th>Selling</th>
-        <th>数量(计划/交货)</th>
+        <th>数量(计划/交货/入库)</th>
         <th>单价</th>
-        <th>单价*数量</th>
+        <th>单价*入库数量</th>
+        <th>剩余请款金额</th>
         <th>阶段</th>
         <th>抵达货代</th>
         <th>FBA</th>
+        <th>Detail</th>
       </tr>
-
-        #{list items:dmt.units, as:'procureUnit'}
-
+        #{list items:dmt.applyUnit(), as:'procureUnit'}
             #{if procureUnit.isNeedPay}
             <tr>
             #{/if}
@@ -104,24 +114,32 @@
           </td>
           <td data-toggle="toggle" data-target="#unit_${pid}">
             <i class="icon-reorder"></i>
+              #{if procureUnit.parent}
+                <i class="icon-retweet" style="color:${procureUnit.type?.name()=='ProcureSplit'?'blue':'orange'}"
+                   rel="tooltip" title="${procureUnit.type?.label()}"></i>
+              #{/if}
           ${procureUnit.id}
           </td>
           <td>
             <a href="@{Products.show(procureUnit.sku)}" target="_blank">${procureUnit.sku}</a>
           </td>
           <td>
-            <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank">${procureUnit.sid}</a>
+            <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank" rel="tooltip"
+               title="${procureUnit.sid}">${procureUnit.sid.overLong()}</a>
               #{list items:procureUnit.fees(), as:'fee'}
                 <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
               #{/list}
           </td>
-          <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}">
-          ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}
+          <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}"
+              inboundQty="${procureUnit.inboundQty}"
+              style="color:${procureUnit.attrs.planQty!=procureUnit.inboundQty && procureUnit.inboundQty>0 ? 'red':''}">
+          ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
           <td class="price" amount="${procureUnit.totalAmount()}">
           ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-          <td style="color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
+          <td>${procureUnit.leftAmount()}</td>
+          <td style="background-color:${procureUnit.stage.rgb()}">${procureUnit.stage.label()}</td>
           <td>#{yesOrNo f:procureUnit.isPlaced /}</td>
           <td>
               #{if procureUnit.fba}
@@ -131,23 +149,36 @@
                 暂时还没有 FBA
               #{/else}
           </td>
+          <td>
+            <a href="@{ProcureUnits.detail(procureUnit.id)}#${procureUnit?.id}" target="_blank"
+               class="btn btn-mini btn-info">变更详情</a>
+          </td>
         </tr>
           <tr id="unit_${pid}" style="display:none">
-            <td colspan="9">
+            <td colspan="12">
               <div class="row-fluid">
                 <div class="span2">
                     #{if procureUnit.isNeedPay}
                         #{power.ck 'procureunits.billingprepay'}
-                            #{ifnot procureUnit.hasPrePay()}
+                            #{ifnot procureUnit.hasPrePay() || (procureUnit.parent != null
+                            && procureUnit.parent.hasPrePay() && !procureUnit.parent.hasEqualWithPrePay())}
                                 #{form @ProcureUnits.billingPrePay(pid, apply.id), method:'POST'}
-                                  <input type="submit" value="申请预付款" class="btn">
+                                  <input type="submit" value="申请预付款" class="btn btn-mini btn-success"
+                                         rel="tooltip" title="${apply.cooperator.first}%">
                                 #{/form}
                             #{/ifnot}
+                            #{if apply.cooperator.second>0 && !procureUnit.hasSecondPay()}
+                                #{form @ProcureUnits.billingMediumPay(pid, apply.id), method:'POST'}
+                                  <input type="submit" value="申请中期付款" class="btn btn-mini btn-inverse"
+                                         rel="tooltip" title="${apply.cooperator.second}%">
+                                #{/form}
+                            #{/if}
                         #{/power.ck}
                         #{power.ck 'procureunits.billingtailpay'}
                             #{ifnot procureUnit.hasTailPay()}
                                 #{form @ProcureUnits.billingTailPay(pid, apply.id), method:'POST'}
-                                  <input type="submit" value="申请尾款" class="btn">
+                                  <input type="submit" value="申请尾款" class="btn btn-mini btn-warning"
+                                         rel="tooltip" title="${apply.cooperator.tail}%">
                                 #{/form}
                             #{/ifnot}
                         #{/power.ck}
@@ -156,16 +187,13 @@
                             id: "billing_rework_pay_form"}
                               <input type="hidden" id="checktask_id_list" name="ids">
                               <a href="javascript:void(0)" id="billing_rework_pay_btn" data-pid="${pid}"
-                                 class="btn">申请返工费用</a>
+                                 class="btn btn btn-mini btn-danger">申请返工费用</a>
                             #{/form}
                         #{/power.ck}
                     #{/if}
-
                     #{power.ck 'procureunits.billingprepay'}
                       <input type="hidden" name="feesize" id="feesize" value="${procureUnit.fees().size()}">
-
                       <label>请款开关:</label>
-
                       <div class="switch" data-on="warning" data-off="danger">
                           #{if procureUnit.isNeedPay}
                             <input id="switch_pay" name="switch_pay" type="checkbox" checked url='@{ProcureUnits.editPaySatus(pid)}'/>
@@ -175,11 +203,10 @@
                           #{/else}
                       </div>
                     #{/power.ck}
-
                 </div>
                 <div class="span10">
                     #{if procureUnit.fees().size() > 0}
-                      <table class="table table-condensed" style="margin-bottom:0">
+                      <table class="table table-bordered table-condensed" style="margin-bottom:0">
                         <tr>
                           <th></th>
                           <th>付款单</th>
@@ -194,9 +221,8 @@
                               <td>
                                   #{power.ck 'paymentunits.destroy'}
                                       #{ifnot fee.remove || fee.isApproval()}
-                                        <button class="paymentUnitCancel btn btn-danger"
-                                                url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>
-                                          取消
+                                        <button class="paymentUnitCancel btn btn-mini btn-danger"
+                                                url='@{PaymentUnits.destroy(fee.id)}?x-http-method-override=DELETE'>取消
                                         </button>
                                       #{/ifnot}
                                   #{/power.ck}
@@ -266,7 +292,7 @@
         <td rel='tooltip' title='汇总美金' class="usd"></td>
         <td rel='tooltip' title="汇总人民币" class="cny"></td>
         <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
-        <td colspan="2"></td>
+        <td colspan="4"></td>
       </tr>
     </table>
   </div>
@@ -280,19 +306,22 @@
   <div class="span9">
     <table class="table table-bordered table-condensed">
       <tr class="table_summary">
-        <td colspan="2">
+        <td class="col-sm-2">
         #{power.ck 'procureunits.billingprepay'}
-          <button id="prepaybtn" class="btn btn-primary">批量申请预付款</button>
+          <button name="applyBtn" data-url="@{ProcureUnits.batchPrePay()}" class="btn btn-primary">批量申请预付款</button>
         #{/power.ck}
         </td>
-
-        <td colspan="3">
+        <td class="col-sm-2">
+        #{if apply.cooperator.second > 0}
+          <button name="applyBtn" data-url="@{ProcureUnits.batchMediumPay()}" class="btn btn-inverse">批量申请中期请款</button>
+        #{/if}
+        </td>
+        <td class="col-sm-2">
           <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
         #{power.ck 'procureunits.billingtailpay'}
-          <button id="tailpaybtn" class="btn btn-primary">批量申请尾款</button>
+          <button name="applyBtn" data-url="@{ProcureUnits.batchTailPay()}" class="btn btn-primary">批量申请尾款</button>
         #{/power.ck}
         </td>
-        <td colspan="4"></td>
       </tr>
     </table>
   </div>
@@ -320,14 +349,6 @@
 </div>
 #{/power.ck }
 
-
-
-
-
-
-
-
-
 #{power.ck 'procureunits.billingprepay'}
 <div class="modal hide fade" id="edit_pay">
   <form action="#" method="POST" id="edit_pay_form">
@@ -350,15 +371,6 @@
   </form>
 </div>
 #{/power.ck }
-
-
-
-
-
-
-
-
-
 
 #{render './_relate_payments.html', payments: apply.payments, showtotal:true/}
 

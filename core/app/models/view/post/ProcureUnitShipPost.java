@@ -1,6 +1,7 @@
 package models.view.post;
 
 import helper.Dates;
+import models.User;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -29,10 +30,10 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
     }
 
     public List<F.T2<String, String>> dateTypes = Arrays.asList(
-            new F.T2<String, String>("createDate", "创建时间"),
-            new F.T2<String, String>("attrs.planShipDate", "预计 [发货] 时间"),
-            new F.T2<String, String>("attrs.planDeliveryDate", "预计 [交货] 时间"),
-            new F.T2<String, String>("attrs.planArrivDate", "预计 [到库] 时间")
+            new F.T2<>("createDate", "创建时间"),
+            new F.T2<>("attrs.planShipDate", "预计 [发货] 时间"),
+            new F.T2<>("attrs.planDeliveryDate", "预计 [交货] 时间"),
+            new F.T2<>("attrs.planArrivDate", "预计 [到库] 时间")
     );
 
     public boolean isHaveShipment = false;
@@ -49,7 +50,7 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
                 .append(" LEFT JOIN p.fba f")
                 .append(" LEFT JOIN p.shipItems si")
                 .append(" WHERE ");
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         sql.append("p.").append(this.dateType).append(">=?").append(" AND ")
                 .append("p.").append(this.dateType).append("<=?");
@@ -70,6 +71,12 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
             params.add(this.centerId);
         }
 
+        this.sameSearch(sql, params);
+
+        return new F.T2<>(sql.toString(), params);
+    }
+
+    private void sameSearch(StringBuilder sql, List<Object> params) {
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             Matcher matcher_all = SHIPITEMS_ALL_NUM_PATTERN.matcher(this.search);
@@ -87,13 +94,30 @@ public class ProcureUnitShipPost extends Post<ProcureUnit> {
                 }
             }
         }
-
-        return new F.T2<String, List<Object>>(sql.toString(), params);
     }
 
     @Override
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = this.params();
         return ProcureUnit.find(params._1, params._2.toArray()).fetch();
+    }
+
+    public List<ProcureUnit> queryB2B() {
+        StringBuilder sql = new StringBuilder("SELECT p FROM ProcureUnit p")
+                .append(" LEFT JOIN p.fba f")
+                .append(" LEFT JOIN p.shipItems si")
+                .append(" WHERE ");
+        List<Object> params = new ArrayList<>();
+        sql.append("p.").append(this.dateType).append(">=?").append(" AND ");
+        sql.append("p.").append(this.dateType).append("<=?");
+        params.add(Dates.morning(this.from));
+        params.add(Dates.night(this.to));
+
+        sql.append(" AND p.projectName = ? ");
+        params.add(User.COR.MengTop.name());
+
+        this.sameSearch(sql, params);
+
+        return ProcureUnit.find(sql.toString(), params.toArray()).fetch();
     }
 }

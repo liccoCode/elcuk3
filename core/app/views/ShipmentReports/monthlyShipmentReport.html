@@ -1,0 +1,81 @@
+#{extends 'main_full.html' /}
+#{set title:'单月物流发货量报表'/}
+#{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'ShipmentReports/monthlyShipment.es6'/}
+#{/set}
+
+#{info_row}
+<ul>
+  <li><strong>单月物流发货量报表</strong></li>
+</ul>
+#{/info_row}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{ShipmentReports.monthlyShipmentReport()}" method="get" class="search_form" id='search_form'>
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">预计运输时间From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <div class="input-append input-prepend inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <button class="btn btn-primary" data-loading>统计</button>
+        </div>
+
+        <div class="input-append input-prepend inline">
+          <span class="add-on"><i class="icon-file"></i></span>
+          <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.exportMonthlyShipment()}"
+                 value="导出Excel"/>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <div class="row-fluid">
+    <div class="span12">
+      <table id="shipItemTable" class="table table-condensed table-bordered">
+        <tr>
+          <th>Category</th>
+          <th>SKU</th>
+          <th>市场</th>
+          <th>仓库</th>
+          <th>海运PCS</th>
+          <th>空运PCS</th>
+          <th>快递PCS</th>
+          <th>海运kgs</th>
+          <th>空运kgs</th>
+          <th>快递kgs</th>
+          <th>海运cbm</th>
+          <th>空运cbm</th>
+          <th>快递cbm</th>
+        </tr>
+      #{list items:list, as:'dto'}
+        <tr>
+          <td>${dto.categoryId}</td>
+          <td>${dto.sku}</td>
+          <td>${dto.market}</td>
+          <td>${dto.centerId}</td>
+          <td>${dto.seaQty}</td>
+          <td>${dto.airQty}</td>
+          <td>${dto.expressQty}</td>
+          <td>${dto.seaWeight}</td>
+          <td>${dto.airWeight}</td>
+          <td>${dto.expressWeight}</td>
+          <td>${dto.seaCbm}</td>
+          <td>${dto.airCbm}</td>
+          <td>${dto.expressCbm}</td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </div>
+</div>
+
+

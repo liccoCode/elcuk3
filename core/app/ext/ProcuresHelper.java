@@ -2,8 +2,15 @@ package ext;
 
 import helper.Webs;
 import models.market.M;
+import models.material.MaterialPlan;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
 import models.procure.*;
 import models.view.dto.AnalyzeDTO;
+import models.whouse.Inbound;
+import models.whouse.InboundUnit;
+import models.whouse.Outbound;
+import models.whouse.Refund;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 import play.templates.BaseTemplate;
@@ -20,20 +27,111 @@ public class ProcuresHelper extends JavaExtensions {
     public static String rgb(ProcureUnit.STAGE stage) {
         switch(stage) {
             case PLAN:
-                return "#B0BFD6";
+                return "#E8ECF1";
             case DELIVERY:
-                return "#006ACC";
+                return "#40B0F9";
             case DONE:
-                return "#3DA4C2";
+                return "#88BEF5";
+            case IN_STORAGE:
+                return "#FBBC05";
+            case OUTBOUND:
+                return "#3BB873";
             case SHIPPING:
-                return "#49A4C6";
+                return "#FFDBC5";
             case SHIP_OVER:
-                return "#108080";
+                return "#FF7676";
             case INBOUND:
-                return "#F9A021";
+                return "#96D373";
             case CLOSE:
             default:
-                return "#5BB75B";
+                return "#42CFC4";
+        }
+    }
+
+    public static String rgb(ProcureUnit.T type) {
+        switch(type) {
+            case ProcureSplit:
+                return "#40B0F9";
+            case StockSplit:
+                return "#FBBC05";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
+    public static String rgb(Outbound.S status) {
+        switch(status) {
+            case Create:
+                return "#DEFBC2";
+            case Outbound:
+                return "#3BB873";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
+    public static String rgb(Inbound.S status) {
+        switch(status) {
+            case Create:
+                return "#DEFBC2";
+            case Handing:
+                return "#FFB37B";
+            case End:
+                return "#42CFC4";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
+    public static String rgb(InboundUnit.S status) {
+        switch(status) {
+            case Create:
+                return "#DEFBC2";
+            case Receive:
+                return "#88BEF5";
+            case Check:
+                return "#73CFF0";
+            case Inbound:
+                return "#FBBC05";
+            case Abort:
+                return "#FF6464";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
+    public static String rgb(Refund.S status) {
+        switch(status) {
+            case Create:
+                return "#DEFBC2";
+            case Refund:
+                return "#FF6464";
+            default:
+                return "#E8ECF1";
+        }
+    }
+
+    public static String overLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 12) {
+                return value.substring(0, 11) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
+        }
+    }
+
+    public static String xxLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 20) {
+                return value.substring(0, 20) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
         }
     }
 
@@ -41,13 +139,19 @@ public class ProcuresHelper extends JavaExtensions {
         switch(state) {
             case PENDING:
                 return "#5CB85C";
+            case PENDING_REVIEW:
+                return "#FF0000";
+            case APPROVE:
+                return "#00FF00";
+            case REJECT:
+                return "#48D1CC";
             case CONFIRM:
                 return "#FAA52C";
             case DONE:
                 return "#4DB2D0";
             case CANCEL:
             default:
-                return "#D14741";
+                return "#708090";
         }
     }
 
@@ -76,6 +180,10 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#468847";
             case SEA:
                 return "#C09853";
+            case RAILWAY:
+                return "#31588A";
+            case DEDICATED:
+                return "#CB8589";
             default:
                 return "#333333";
         }
@@ -108,6 +216,16 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String flag(Inbound.T type) {
+        switch(type) {
+            case Machining:
+                return "icon-wrench";
+            case Purchase:
+            default:
+                return "icon-shopping-cart";
+        }
+    }
+
     public static String rgb(M market) {
         switch(market) {
             case AMAZON_US:
@@ -126,6 +244,40 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#5BB75B";
             default:
                 return "#333333";
+        }
+    }
+
+    public static String rgb(MaterialPurchase.S state) {
+        switch(state) {
+            case PENDING:
+                return "#5CB85C";
+            case CONFIRM:
+                return "#FAA52C";
+            case CANCEL:
+            default:
+                return "#708090";
+        }
+    }
+
+    public static String rgb(MaterialUnit.STAGE stage) {
+        switch(stage) {
+            case CANCEL:
+                return "#708090";
+            case DELIVERY:
+                return "#40B0F9";
+            case CLOSE:
+            default:
+                return "#42CFC4";
+        }
+    }
+
+    public static String rgb(MaterialPlan.P stage) {
+        switch(stage) {
+            case CREATE:
+                return "#DEFBC2";
+            case DONE:
+            default:
+                return "#88BEF5";
         }
     }
 
@@ -158,7 +310,8 @@ public class ProcuresHelper extends JavaExtensions {
      * @return
      */
     public static String overdue(ShipItem itm) {
-        if(itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
+        if(itm.unit.attrs.planShipDate != null && itm.shipment.dates.planBeginDate != null
+                && itm.unit.attrs.planShipDate.getTime() < itm.shipment.dates.planBeginDate.getTime())
             return "#F2DEDE";
         else
             return "#FFFFFF";
@@ -198,7 +351,20 @@ public class ProcuresHelper extends JavaExtensions {
      */
     public static F.T2<Float, Float> amountUSD(ProcureUnit unit) {
         float priceUSD = Webs.scale2PointUp(unit.product.declaredValue);
-        float amountUSD = priceUSD * unit.qty();
-        return new F.T2<Float, Float>(priceUSD, amountUSD);
+        float amountUSD = priceUSD * unit.shipmentQty();
+        return new F.T2<>(priceUSD, amountUSD);
+    }
+
+    public static String bgcolor(F.T2<Integer, Integer> process) {
+        double num = (double) process._1 / process._2;
+        if(num == 1) {
+            return "progress-success";
+        } else if(num >= 0.66 && num < 1) {
+            return "progress-info";
+        } else if(num >= 0.33 && num < 0.66) {
+            return "progress-warning";
+        } else {
+            return "progress-danger";
+        }
     }
 }

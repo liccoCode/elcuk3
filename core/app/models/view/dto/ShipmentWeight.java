@@ -27,7 +27,7 @@ public class ShipmentWeight {
     public String sku;
     public String m;
 
-    public HashMap<String, Float> weights = new HashMap<String, Float>();
+    public HashMap<String, Float> weights = new HashMap<>();
 
     public ShipmentWeight() {
         DateTime now = DateTime.now();
@@ -60,7 +60,7 @@ public class ShipmentWeight {
     }
 
     public Map<String, ShipmentWeight> query() {
-        Map<String, ShipmentWeight> sws = new HashMap<String, ShipmentWeight>();
+        Map<String, ShipmentWeight> sws = new HashMap<>();
         SqlSelect sql = buildSql();
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
 
@@ -88,9 +88,9 @@ public class ShipmentWeight {
     }
 
     public Map<String, ShipmentWeight> sortByKeys(Map<String, ShipmentWeight> map) {
-        List<String> keys = new LinkedList<String>(map.keySet());
+        List<String> keys = new LinkedList<>(map.keySet());
         Collections.sort(keys);
-        Map<String, ShipmentWeight> sortedMap = new LinkedHashMap<String, ShipmentWeight>();
+        Map<String, ShipmentWeight> sortedMap = new LinkedHashMap<>();
         for(String key : keys) {
             sortedMap.put(key, map.get(key));
         }
@@ -100,7 +100,7 @@ public class ShipmentWeight {
     public List<Shipment> queryShipmentCostAndWeight() {
         List<String> skus = Category.getSKUs(this.categoryId);
         if(this.sku != null && StringUtils.isNotBlank(this.sku)) skus.add(this.sku);
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.whouse w " +
                 " LEFT JOIN s.fees f" +
                 " LEFT JOIN s.items i" +
@@ -118,7 +118,7 @@ public class ShipmentWeight {
             params.add(this.shipType.toString());
         }
         if(skus.size() > 0) {
-            sql.append(" AND p.sku IN " + SqlSelect.inlineParam(skus));
+            sql.append(" AND p.sku IN ").append(SqlSelect.inlineParam(skus));
         }
         List<Shipment> list = Shipment.find(sql.toString(), params.toArray()).fetch();
         for(Shipment shipment : list) {

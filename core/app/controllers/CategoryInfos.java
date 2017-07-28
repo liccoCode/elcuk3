@@ -3,8 +3,6 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
-import jobs.PmDashboard.AbnormalFetchJob;
-import jobs.categoryInfo.CategoryInfoFetchJob;
 import models.CategoryAssignManagement;
 import models.ElcukRecord;
 import models.User;
@@ -12,15 +10,12 @@ import models.product.Category;
 import models.view.Ret;
 import models.view.dto.CategoryInfoDTO;
 import org.apache.commons.lang.StringUtils;
-import play.cache.Cache;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,6 +26,10 @@ import java.util.Map;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class CategoryInfos extends Controller {
 
+    /**
+     * @deprecated
+     * @param id
+     */
     @Check("categoryinfos.show")
     public static void show(String id) {
         User user = User.findByUserName(Secure.Security.connected());
@@ -51,7 +50,7 @@ public class CategoryInfos extends Controller {
         User currUser = Login.current();
         categoryAssignManagement.query();
         List<User> userList = User.findAll();
-        List<String> users = new ArrayList<String>();
+        List<String> users = new ArrayList<>();
         for(User u : userList) users.add(u.username);
         renderArgs.put("users", J.json(users));
         List<ElcukRecord> records = ElcukRecord.find("action like '部门品线负责人管理' ORDER BY createAt DESC")
@@ -64,7 +63,7 @@ public class CategoryInfos extends Controller {
         if(!c.isNameCorrect(c.userName))
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         c.createTaskAssign();
         renderJSON(true);
     }
@@ -74,7 +73,7 @@ public class CategoryInfos extends Controller {
         if(!c.isNameCorrect(c.userName))
             Validation.addError("姓名", "用户名输入错误");
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         CategoryAssignManagement.updateTaskAssign(c, id);
         renderJSON(true);
     }

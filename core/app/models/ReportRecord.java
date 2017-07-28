@@ -1,12 +1,15 @@
 package models;
 
 import com.google.gson.annotations.Expose;
+import helper.Constant;
+import helper.HTTP;
+import org.joda.time.DateTime;
 import play.db.jpa.Model;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -176,19 +179,47 @@ public class ReportRecord extends Model {
          */
     }
 
-
-    public String calUrl() {
-        return String.format("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/sku_month_profit_repeat?year=%s"
-                + "&month=%s", this.year, this.month);
-    }
-
     /**
      * 判断是否能够重新计算
      *
      * @return
      */
     public boolean canBeRecalculated() {
-        return Arrays.asList(RT.SKUMONTHALL, RT.SKUMONTHCATEGORY, RT.SALEYEARTOTAL, RT.SALEYEARCATEGORY)
-                .contains(this.reporttype);
+        switch(this.reporttype) {
+            case ANALYZEREPORT:
+            case SKUMONTHALL:
+            case SKUMONTHCATEGORY:
+            case SALEYEARTOTAL:
+            case SALEYEARCATEGORY:
+                return true;
+            case INVRNTORYCOST:
+                return this.year == DateTime.now().getYear();
+            default:
+                return false;
+        }
+    }
+
+    public String recalculateURL() {
+        switch(this.reporttype) {
+            case ANALYZEREPORT:
+            case SKUMONTHALL:
+            case SKUMONTHCATEGORY:
+            case SALEYEARTOTAL:
+            case SALEYEARCATEGORY:
+                return String.format("%s/sku_month_profit_repeat?year=%s&month=%s",
+                        System.getenv(Constant.ROCKEND_HOST), this.year, this.month);
+            case INVRNTORYCOST:
+                return String.format("%s/inventory_costs_report?force=true", System.getenv(Constant.ROCKEND_HOST));
+            default:
+                return null;
+        }
+    }
+
+    public void recalculate() {
+        if(this.canBeRecalculated()) {
+            HTTP.get(this.recalculateURL());
+        } else {
+            throw new FastRuntimeException("当前报表无法重新计算!");
+        }
     }
 }

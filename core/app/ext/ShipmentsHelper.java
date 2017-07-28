@@ -1,6 +1,7 @@
 package ext;
 
 import models.ElcukConfig;
+import models.User;
 import models.procure.Shipment;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -28,9 +29,6 @@ public class ShipmentsHelper extends JavaExtensions {
         else if(shipment.state == Shipment.S.CLEARANCE) {
             rightDate = new DateTime(shipment.dates.atPortDate)
                     .plusDays(shipment.config("clearance").toInteger());
-        } else if(shipment.state == Shipment.S.PACKAGE) {
-            rightDate = new DateTime(shipment.dates.pickGoodDate)
-                    .plusDays(shipment.config("pick").toInteger());
         } else if(shipment.state == Shipment.S.BOOKED) {
             rightDate = new DateTime(shipment.dates.bookDate)
                     .plusDays(shipment.config("book").toInteger());
@@ -56,6 +54,8 @@ public class ShipmentsHelper extends JavaExtensions {
     public static Date predictArriveDate(Shipment shipment) {
         if(shipment.state == Shipment.S.DONE)
             return shipment.dates.arriveDate;
+        if(shipment.projectName == User.COR.MengTop)
+            return null;
 
         int totalDays = 0;
         for(String dayType : ElcukConfig.DAY_TYPES.keySet()) {
@@ -68,11 +68,6 @@ public class ShipmentsHelper extends JavaExtensions {
         if(shipment.state.ordinal() >= Shipment.S.CLEARANCE.ordinal()) {
             totalDays -= shipment.config("atport").toInteger();
             lastDate = shipment.dates.atPortDate;
-        }
-
-        if(shipment.state.ordinal() >= Shipment.S.PACKAGE.ordinal()) {
-            totalDays -= shipment.config("clearance").toInteger();
-            lastDate = shipment.dates.pickGoodDate;
         }
 
         if(shipment.state.ordinal() >= Shipment.S.BOOKED.ordinal()) {
@@ -104,10 +99,6 @@ public class ShipmentsHelper extends JavaExtensions {
         if(state == Shipment.S.CLEARANCE) {
             if(shipment.dates.atPortDate != null && shipment.dates.beginDate != null) {
                 diff = shipment.dates.atPortDate.getTime() - shipment.dates.beginDate.getTime();
-            }
-        } else if(state == Shipment.S.PACKAGE) {
-            if(shipment.dates.pickGoodDate != null && shipment.dates.atPortDate != null) {
-                diff = shipment.dates.pickGoodDate.getTime() - shipment.dates.atPortDate.getTime();
             }
         } else if(state == Shipment.S.BOOKED) {
             if(shipment.dates.bookDate != null && shipment.dates.pickGoodDate != null) {

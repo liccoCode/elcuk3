@@ -1,14 +1,6 @@
 package models.view.post;
 
 
-import com.google.gson.annotations.Expose;
-import org.joda.time.DateTime;
-import play.data.validation.Required;
-
-import javax.persistence.*;
-import java.io.File;
-import java.util.*;
-
 /**
  * 上架需要更新的信息
  * User: cary
@@ -38,7 +30,7 @@ public class SellingAmzPost {
 
 
     public boolean productvolume;
-    public String volumeunit;
+    public String volumeunit;// 长度单位
 
     public Float productLengths;
     public Float productWidth;
@@ -50,6 +42,6 @@ public class SellingAmzPost {
     public boolean productWeight;
     public String productWeightUnit;
     public boolean weight;
-    public String weightUnit;
+    public String weightUnit;// 重量单位
 }
 

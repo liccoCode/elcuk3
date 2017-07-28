@@ -1,8 +1,8 @@
 #{extends 'main_full.html' /}
 #{set title:'转化率统计报表'/}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'analyzes/trafficrate.coffee'/}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'analyzes/trafficrate.coffee'/}
 #{/set}
 
 #{info_row}
@@ -25,7 +25,7 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.market" class="inline span1">
+      <select name="p.market" class="inline">
         <option value="">Market</option>
       #{list items:models.market.M.values(), as:'m'}
         <option ${m == p.market ? 'selected' : ''} value="${m.name()}">${m.name()}</option>

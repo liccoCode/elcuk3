@@ -1,14 +1,10 @@
 package models.product;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.annotations.Expose;
 import exception.PaymentException;
-import helper.Constant;
-import helper.HTTP;
-import helper.J;
+import helper.*;
 import models.User;
 import models.embedded.ERecordBuilder;
 import org.apache.commons.io.FileUtils;
@@ -16,6 +12,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
 import play.db.jpa.Model;
 import play.libs.Codec;
@@ -24,18 +21,18 @@ import play.utils.FastRuntimeException;
 import sun.misc.BASE64Decoder;
 
 import javax.persistence.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import java.io.BufferedInputStream;
-import java.net.URL;
-import java.net.HttpURLConnection;
 
 /**
  * 系统中, 可以附加的附件; 这个 Model 存在这里, 其自己不知道自己附属与谁, 但其拥有者知道(单项关系), 但并非使用 DB 的
@@ -46,7 +43,7 @@ import java.net.HttpURLConnection;
  * Time: 10:34 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Attach extends Model {
 
     /**
@@ -100,7 +97,16 @@ public class Attach extends Model {
         /**
          * 质检的凭证
          */
-        CHECKTASK;
+        CHECKTASK,
+
+        /**
+         * 仓库上传的和产品相关的图片
+         */
+        PRODUCTWHOUSE,
+        /**
+         * 出库单上传附件
+         */
+        OUTBOUND;
 
         /**
          * 默认的附件删除方法.物理删除
@@ -305,22 +311,14 @@ public class Attach extends Model {
         return image;
     }
 
-    public static BasicClientCookie cookie(String name, String value) {
-        BasicClientCookie cookie = new BasicClientCookie(name, value);
-        cookie.setDomain(models.OperatorConfig.getVal("domain"));
-        cookie.setVersion(0);
-        cookie.setPath("/");
-        return cookie;
-    }
-
     /**
      * 获取文件目录的网址
      *
      * @param sku
      * @return
      */
-    public static String attachPathList(String sku) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+":8080/index.php?explorer/pathList&path=SKU/" + sku;
+    public static String attachsLink(String sku) {
+        return System.getenv(Constant.KOD_HOST) + "/index.php?explorer/pathList&path=SKU/" + sku;
     }
 
     /**
@@ -331,12 +329,12 @@ public class Attach extends Model {
      * @return
      */
     public static String attachImage(String sku, String name) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+":8080/data/User/elcuk2/home/SKU/" + sku
+        return System.getenv(Constant.KOD_HOST) + "/data/User/elcuk2/home/SKU/" + sku
                 + "/" + name;
     }
 
     public static String attachImageSend(String sku, String name) {
-        return "http://"+models.OperatorConfig.getVal("kodurl")+"/data/User/elcuk2/home/SKU/" + sku + "/" + name;
+        return System.getenv(Constant.KOD_HOST) + "/data/User/elcuk2/home/SKU/" + sku + "/" + name;
     }
 
     /**
@@ -346,33 +344,45 @@ public class Attach extends Model {
      * @return
      */
     public static List<java.util.Map<String, String>> attachImages(String fid) {
-        JsonArray rows = null;
-        String url = Attach.attachPathList(fid);
-        BasicCookieStore store = new BasicCookieStore();
-        store.addCookie(Attach.cookie("kod_name", "elcuk2"));
-        store.addCookie(Attach.cookie("kod_token", User.Md5(User.userMd5("elcuk2"))));
-        store.addCookie(Attach.cookie("kod_user_language", "zh_CN"));
-        store.addCookie(Attach.cookie("kod_user_online_version", "check-at-1418867696"));
-        String rtJson = HTTP.get(store, url);
-        JsonObject data = null;
-        try {
-            data = new JsonParser().parse(rtJson).getAsJsonObject().get("data")
-                    .getAsJsonObject();
-        } catch(Exception e) {
-        }
-        rows = data.get("filelist").getAsJsonArray();
-        List<java.util.Map<String, String>> imgs = new ArrayList<Map<String, String>>();
-        for(JsonElement row : rows) {
+        List<java.util.Map<String, String>> imgs = new ArrayList<>();
+        JSONObject jsonObject = HTTP.getJson(kodCookieStore(), attachsLink(fid));
+
+        if(jsonObject != null) {
+            JSONArray fileList = null;
             try {
-                String name = row.getAsJsonObject().get("name").getAsString();
-                java.util.Map<String, String> map = new java.util.HashMap<String, String>();
-                map.put("name", name);
-                map.put("href", Attach.attachImage(fid, name));
-                imgs.add(map);
-            } catch(Exception e) {
+                fileList = jsonObject.getJSONObject("data").getJSONArray("filelist");
+            } catch(NullPointerException e) {
+                Logger.error(e.getMessage());
+            }
+            if(fileList == null || fileList.isEmpty()) return imgs;
+
+            for(Object object : fileList) {
+                JSONObject entry = (JSONObject) object;
+                String name = entry.getString("name");
+
+                imgs.add(GTs.MapBuilder.map("name", name)
+                        .put("href", Attach.attachImage(fid, name))
+                        .build()
+                );
             }
         }
         return imgs;
+    }
+
+    /**
+     * KOD 系统所需要的 Cookie
+     *
+     * @return
+     */
+    public static BasicCookieStore kodCookieStore() {
+        BasicCookieStore cookieStore = new BasicCookieStore();
+        cookieStore.addCookies((BasicClientCookie[]) Arrays.asList(
+                HTTP.buildCrossDomainCookie("kod_name", "elcuk2"),
+                HTTP.buildCrossDomainCookie("kod_token", Webs.md5(User.userMd5("elcuk2"))),
+                HTTP.buildCrossDomainCookie("kod_user_language", "zh_CN"),
+                HTTP.buildCrossDomainCookie("kod_user_online_version", "check-at-1418867695")
+        ).toArray());
+        return cookieStore;
     }
 
 
@@ -380,11 +390,11 @@ public class Attach extends Model {
      * 图片网址转为文件
      *
      * @param destUrl
-     * @param fileName
+     * @param imagename
      * @throws IOException
      */
 
-    public static F.T2<String, BufferedInputStream> urlToFile(String destUrl,String imagename){
+    public static F.T2<String, BufferedInputStream> urlToFile(String destUrl, String imagename) {
         try {
             URL url = null;
             BufferedInputStream bis = null;
@@ -397,7 +407,7 @@ public class Attach extends Model {
             // 获取网络输入流
             bis = new BufferedInputStream(httpUrl.getInputStream());
 
-            return new F.T2<String,BufferedInputStream>(imagename, bis);
+            return new F.T2<>(imagename, bis);
         } catch(Exception e) {
 
         }

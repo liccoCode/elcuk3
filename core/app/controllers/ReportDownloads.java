@@ -2,9 +2,9 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.Constant;
-import helper.HTTP;
 import helper.Webs;
 import models.ReportRecord;
+import models.procure.Cooperator;
 import models.view.Ret;
 import models.view.post.ReportPost;
 import play.mvc.Controller;
@@ -55,8 +55,9 @@ public class ReportDownloads extends Controller {
      */
     public static void repeatCalculate(Long id) {
         ReportRecord record = ReportRecord.findById(id);
+        notFoundIfNull(record);
         try {
-            HTTP.get(record.calUrl());
+            record.recalculate();
             renderJSON(new Ret(true, String.valueOf("重新计算请求成功,请稍候!")));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
@@ -71,11 +72,14 @@ public class ReportDownloads extends Controller {
         if(p == null) p = new ReportPost();
         p.reportTypes = ReportPost.applyReportTypes();
         List<ReportRecord> reports = p.query();
-        render(p, reports);
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        render(p, reports, cooperators);
     }
 
     /**
      * 采购报表
+     *
+     * @deprecated
      */
     @Check("report.procurereports")
     public static void procureReportsIndex(ReportPost p) {

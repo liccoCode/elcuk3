@@ -4,17 +4,16 @@ import helper.Caches;
 import helper.Dates;
 import helper.Webs;
 import models.market.M;
+import models.market.SellingRecord;
+import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.cache.Cache;
-
-import java.util.*;
-
-import models.market.SellingRecord;
-
-import models.view.report.TrafficRate;
-import play.db.helper.SqlSelect;
 import play.libs.F;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,7 +58,7 @@ public class TrafficRatePost extends Post<TrafficRate> {
         if(cacheElement != null) return cacheElement;
 
         StringBuilder sbd = new StringBuilder();
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         sbd.append("date").append(">=?").append(" AND ")
                 .append("date<=?");
         params.add(Dates.morning(this.from));
@@ -78,22 +77,18 @@ public class TrafficRatePost extends Post<TrafficRate> {
         List<SellingRecord> dateMixRecords = SellingRecord
                 .find(sbd.toString(), params.toArray()).fetch();
 
-        List<TrafficRate> traffics = new ArrayList<TrafficRate>();
+        List<TrafficRate> traffics = new ArrayList<>();
         for(SellingRecord rcd : dateMixRecords) {
-            try {
-                TrafficRate traffic = new TrafficRate();
-                traffic.sellingId = rcd.selling.sellingId;
-                traffic.sessions = rcd.sessions;
-                traffic.pageViews = rcd.pageViews;
-                traffic.sellDate = rcd.date;
-                traffic.orders = rcd.orders;
-                traffic.units = rcd.units;
-                traffic.market = rcd.market;
-                traffic.turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
-                traffics.add(traffic);
-            } catch(Exception e) {
-
-            }
+            TrafficRate traffic = new TrafficRate();
+            traffic.sellingId = rcd.selling.sellingId;
+            traffic.sessions = rcd.sessions;
+            traffic.pageViews = rcd.pageViews;
+            traffic.sellDate = rcd.date;
+            traffic.orders = rcd.orders;
+            traffic.units = rcd.units;
+            traffic.market = rcd.market;
+            traffic.turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
+            traffics.add(traffic);
         }
 
         Cache.set(cacheKey, traffics, "4h");

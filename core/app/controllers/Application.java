@@ -1,67 +1,40 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Dates;
-import helper.HTTP;
-import helper.J;
 import helper.Webs;
-import jobs.analyze.SellingSaleAnalyzeJob;
-import models.Privilege;
-import models.Role;
-import models.market.*;
-import models.product.Whouse;
+import models.OperatorConfig;
+import models.market.Account;
+import models.market.Feedback;
+import models.market.Orderr;
 import models.view.Ret;
 import models.view.dto.DashBoard;
-import org.h2.engine.User;
-import org.joda.time.DateTime;
+import models.view.post.StockPost;
+import models.whouse.Whouse;
 import play.Play;
 import play.cache.Cache;
-import play.data.validation.Validation;
 import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
-import static models.Role.*;
+import java.util.Objects;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
-
     public static void index() {
-        /**如果是有PM首页权限则跳转到PM首页**/
-        models.User user = Login.current();
-        //Set<Privilege> privileges = Privilege.privileges(user.username, user.roles);
-        //Privilege privilege = Privilege.find("name=?", "pmdashboards.index").first();
-        //if(privileges.contains(privilege)) {
-            //Pmdashboards.index();
-        //}
+        if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
+            StockRecords.stockIndex(new StockPost());
+        }
+
         DashBoard dashborad = Orderr.frontPageOrderTable(11);
-        // Feedback 信息
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
         render(dashborad, fbaWhouse);
     }
 
     public static void oldDashBoard() {
-        DashBoard dashborad = Orderr.frontPageOrderTable(11);
-        // Feedback 信息
-        List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render("Application/index.html", dashborad, fbaWhouse);
-    }
-
-    public static void percent(String type, Date date, String m) {
-        M market = M.val(m);
-        if(market == null) Validation.addError("", "市场填写错误");
-        if(Validation.hasErrors())
-            renderJSON(new Ret(false));
-        String json = J.json(OrderItem
-                .categoryPie(type, Dates.morning(date),
-                        Dates.morning(new DateTime(date).plusDays(1).toDate()), market));
-        renderJSON(json);
+        index();
     }
 
     public static void clearCache() {
@@ -107,7 +80,7 @@ public class Application extends Controller {
 
         Account acc = Account.findById(id);
         try {
-            Webs.dev_login(acc);
+            Webs.devLogin(acc);
         } catch(Exception e) {
             throw new FastRuntimeException(e);
         }
@@ -118,8 +91,4 @@ public class Application extends Controller {
         renderJSON(Orderr.frontPageOrderTable(9));
     }
 
-    public static void aaa() {
-        HTTP.get("http://"+models.OperatorConfig.getVal("rockendurl")+":4567/selling_sale_analyze");
-        renderText("成功执行, 请看后台 Command Line");
-    }
 }

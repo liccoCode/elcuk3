@@ -8,8 +8,6 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,8 +16,13 @@ import java.util.regex.Pattern;
  * Time: 5:56 PM
  */
 public class ProductPost extends Post<Product> {
-    public final Pattern SKU = Pattern.compile("([0-9a-zA-Z]+-[0-9a-zA-Z]+-?[0-9a-zA-Z]*)");
+
+    private static final long serialVersionUID = 9125924809280823169L;
     public String state = "Active";
+
+    public boolean scope = false;
+
+    public List<String> categories = new ArrayList<>();
 
     public ProductPost() {
         this.perSize = 25;
@@ -27,61 +30,62 @@ public class ProductPost extends Post<Product> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return new Long(Product.find(params._1, params._2.toArray()).fetch().size());
+        return (long) Product.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
     public Long getTotalCount() {
-        return Product.count();
+        return this.count();
     }
 
     @Override
     public F.T2<String, List<Object>> params() {
-        F.T3<Boolean, String, List<Object>> specialSearch = skuSearch();
-        if(specialSearch._1) {
-            return new F.T2<String, List<Object>>(specialSearch._2, specialSearch._3); //针对 SKU 的唯一搜索
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM Product p")
+                .append(" LEFT JOIN p.productAttrs a")
+                .append(" LEFT JOIN p.listings l")
+                .append(" LEFT JOIN l.sellings s")
+                .append(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if(categories.size() > 0) {
+            sbd.append(" AND p.category.id IN " + SqlSelect.inlineParam(categories));
         }
 
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM Product p LEFT JOIN p.productAttrs a WHERE 1=1");
-        List<Object> params = new ArrayList<Object>();
-        if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
+        if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append("AND (")
-                    .append(" p.sku LIKE ?")
-                    .append(" OR a.value LIKE ?")
-                    .append(")");
-            for(int i = 0; i < 2; i++) params.add(word);
+            sbd.append("AND (").append(" p.sku LIKE ? OR p.origin_sku LIKE ? ");
+            if(this.scope)
+                sbd.append(" OR p.abbreviation LIKE ?").append("OR p.locates LIKE ?")
+                        .append("OR p.sellingPoints LIKE ?").append(" OR s.asin LIKE ?")
+                        .append(" OR s.aps.title LIKE ? ").append(" OR s.aps.keyFetures LIKE ? ")
+                        .append(" OR s.aps.productDesc LIKE ? ").append(" OR s.aps.searchTerms LIKE ? ");
+            sbd.append(" OR a.value LIKE ?").append(" OR s.fnSku LIKE ?").append(")");
+            if(this.scope)
+                for(int i = 0; i < 12; i++) params.add(word);
+            else
+                for(int i = 0; i < 4; i++) params.add(word);
         }
 
         if(StringUtils.isNotBlank(this.state)) {
-            sbd.append(" AND state IN ");
+            sbd.append(" AND p.state IN ");
             if(StringUtils.equalsIgnoreCase(this.state, "Active")) {
                 sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.NEW, Product.S.SELLING)));
             } else {
                 sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.DOWN)));
             }
         }
-        return new F.T2<String, List<Object>>(sbd.toString(), params);
+        return new F.T2<>(sbd.toString(), params);
     }
 
     @Override
     public List<Product> query() {
         F.T2<String, List<Object>> params = params();
         this.count = this.count(params);
-
         return Product.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
-    private F.T3<Boolean, String, List<Object>> skuSearch() {
-        if(StringUtils.isBlank(this.search))
-            return new F.T3<Boolean, String, List<Object>>(false, null, null);
-
-        Matcher matcher = SKU.matcher(this.search);
-        if(matcher.find()) {
-            String sku = matcher.group(1);
-            return new F.T3<Boolean, String, List<Object>>(true, "sku=?",
-                    new ArrayList<Object>(Arrays.asList(sku)));
-        }
-        return new F.T3<Boolean, String, List<Object>>(false, null, null);
+    public Product pickup() {
+        F.T2<String, List<Object>> params = params();
+        return Product.find(params._1, params._2.toArray()).first();
     }
 }

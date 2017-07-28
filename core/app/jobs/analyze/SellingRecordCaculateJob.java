@@ -1,22 +1,15 @@
 package jobs.analyze;
 
-import helper.Webs;
-import models.market.Selling;
 import models.market.SellingRecord;
 import org.joda.time.DateTime;
 import play.Logger;
-import play.Play;
 import play.jobs.Job;
-import play.jobs.On;
-import play.libs.F;
 import services.MetricAmazonFeeService;
 import services.MetricProcureCostService;
 import services.MetricSalesService;
 import services.MetricShipCostService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 周期:
@@ -28,7 +21,8 @@ import java.util.Map;
  * Date: 8/14/13
  * Time: 4:54 PM
  */
-@On("0 0 0,8,16,23 * * ?")
+@Deprecated
+//@On("0 0 0,8,16,23 * * ?")
 public class SellingRecordCaculateJob extends Job {
 
     private MetricShipCostService shipCostService = new MetricShipCostService();

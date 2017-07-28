@@ -33,14 +33,24 @@ $ ->
           LoadMask.unmask()
           $("#amzDiv").fadeIn()
           $.getScript('../public/javascripts/editor/kindeditor-min.js', ->
-            KindEditor.create('#productDesc', {
+            editor = KindEditor.create('#productDesc', {
               resizeType: 1
               allowPreviewEmoticons: false
               allowImageUpload: false
-              items: [
-                'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
-                'removeformat']
-              afterChange: -> this.sync(); $("#productDesc").find('~ .help-inline').html((2000 - this.count()) + " bytes left")
+              newlineTag: 'br'
+              afterChange: ->
+                div = $('<div>').html($("<div>").html(this.html()).text())
+                div.find('div').replaceWith(->
+                  return $(this).contents()
+                )
+                div.find('span').replaceWith(->
+                  return $(this).contents()
+                )
+                htmlCode = div.html()
+                $('#productDesc').val(htmlCode)
+                $("#productDesc").find('~ .help-inline').html((2000 - htmlCode.length) + " bytes left")
+                $('#previewDesc').html(htmlCode)
+              items: ['source', '|', '|', 'bold']
             })
           )
           $.getScript('../public/javascripts/component/amazon.coffee', ->

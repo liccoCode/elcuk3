@@ -2,34 +2,31 @@ package controllers;
 
 import com.google.common.collect.Lists;
 import controllers.api.SystemOperation;
+import helper.Constant;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import jobs.promise.FinanceShippedPromise;
 import models.ElcukRecord;
 import models.finance.SaleFee;
-import models.market.*;
-
-import java.math.BigDecimal;
-
-import models.procure.BtbCustom;
-import models.product.*;
+import models.market.Account;
+import models.market.OrderInvoice;
+import models.market.Orderr;
+import models.product.Category;
 import models.view.Ret;
-import models.view.post.BtbOrderPost;
 import models.view.post.OrderPOST;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import play.data.validation.Validation;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
-import query.SkuESQuery;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -43,30 +40,33 @@ import static play.modules.pdf.PDF.renderPDF;
 public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
-        List<Account> accs = Account.openedSaleAcc();
+        List<Account> accounts = Account.openedSaleAcc();
+        List<String> categoryIds = Category.categoryIds();
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();
-        render(p, orders, accs);
+        render(p, orders, accounts, categoryIds);
     }
 
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
+        notFoundIfNull(ord, "未找到相关订单,请稍后再来查看 : )");
 
         if(ord.orderrate() != 0) {
             OrderInvoice invoice = OrderInvoice.findById(id);
             if(invoice != null) {
                 invoice.setprice();
-                boolean check = invoice.checkInvoice(ord);
-                if(!check) invoice = null;
+                if(!invoice.checkInvoice(ord)) invoice = null;
             }
-
             F.T3<Float, Float, Float> amt = ord.amount();
             Float totalamount = amt._1;
             Float notaxamount = amt._2;
             Float tax = amt._3;
             if(invoice != null) {
                 notaxamount = invoice.notaxamount;
-                tax = new BigDecimal(totalamount).subtract(new BigDecimal(notaxamount)).setScale(2, 4).floatValue();
+                tax = new BigDecimal(totalamount)
+                        .subtract(new BigDecimal(notaxamount))
+                        .setScale(2, 4)
+                        .floatValue();
             }
             List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
                     + "action like '%orderinvoice.invoice%' ORDER BY "
@@ -100,11 +100,10 @@ public class Orders extends Controller {
         Orderr orderr = Orderr.findById(id);
         orderr.feeflag = 0;
         orderr.save();
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new BasicNameValuePair("market", orderr.market.name()));
         params.add(new BasicNameValuePair("order_id", orderr.orderId));
-        HTTP.post("http://" + models.OperatorConfig.getVal("rockendurl") + ":4567/amazon_finance_find_by_order_id",
-                params);
+        HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_finance_find_by_order_id", params);
         renderJSON(new Ret(true, "后台正在处理，请隔1分钟刷新此页面！"));
     }
 
@@ -142,7 +141,6 @@ public class Orders extends Controller {
         renderPDF(options, ord, totalamount, notaxamount, tax, invoice, invoiceformat);
     }
 
-
     /**
      * 生成退货发票
      */
@@ -176,59 +174,8 @@ public class Orders extends Controller {
 
     @Before(only = {"btbOrderIndex", "createBtbOrderPage", "createBtbOrder", "updateBtbOrder"})
     public static void setUpShowPage() {
-        List<BtbCustom> customList = BtbCustom.findAll();
         List<String> categoryIds = Category.categoryIds();
         renderArgs.put("categorys", categoryIds);
-        renderArgs.put("customList", customList);
-    }
-
-
-    public static void btbOrderIndex(BtbOrderPost p) {
-        if(p == null) p = new BtbOrderPost();
-        List<BtbOrder> orderList = p.query();
-        render(orderList, p);
-    }
-
-    public static void createBtbOrderPage(Long id) {
-        String pageTitle = "新增B2B订单";
-        BtbOrder b = new BtbOrder();
-        if(id != null) {
-            b = BtbOrder.findById(id);
-            pageTitle = "修改B2B订单";
-            List<ElcukRecord> logs = ElcukRecord.records(b.orderNo, "B2B订单管理");
-            renderArgs.put("logs", logs);
-        }
-        render(b, pageTitle);
-    }
-
-    public static void createBtbOrder(BtbOrder b) {
-        if(StringUtils.isEmpty(b.orderNo)) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-            BtbCustom custom = BtbCustom.findById(b.btbCustom.id);
-            b.orderNo = "PO-" + custom.customName + "-" + formatter.format(new Date());
-        }
-        b.validOrder(b);
-        if(Validation.hasErrors()) {
-            render("Orders/createBtbOrderPage.html", b);
-        }
-        b.saveEntity(b);
-        btbOrderIndex(new BtbOrderPost());
-    }
-
-    public static void updateBtbOrder(BtbOrder b, Long id) {
-        if(Validation.hasErrors()) {
-            render("Orders/createBtbOrderPage.html", b);
-        }
-        BtbOrder old = BtbOrder.findById(id);
-        old.saveEntity(b);
-
-        btbOrderIndex(new BtbOrderPost());
-
-    }
-
-    public static void btbOrderItemList(Long id) {
-        BtbOrder order = BtbOrder.findById(id);
-        render(order);
     }
 
 }

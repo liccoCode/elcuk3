@@ -46,8 +46,6 @@
       padding-top:20px;
       width:99.7%;
     }
-
-
   </style>
 </head>
 <body>
@@ -59,8 +57,7 @@
   <tr>
     <td colspan="5" class="td1">
       <div class="div1">
-        <img src="${models.OperatorConfig.getVal("elcuk2url")}/images/common/${models.OperatorConfig.getVal("companyphoto")}"
-             style="height:100%">
+        <img src="http://127.0.0.1:9000/images/common/${models.OperatorConfig.getVal("companyphoto")}" style="height:100%">
       </div>
     </td>
   </tr>
@@ -71,7 +68,6 @@
         #{else}
             #{render 'Shipments/_europe.html',address: address, country: country, invoiceNo: invoiceNo/}
         #{/else}
-
     #{/if}
     #{else }
         #{render 'Shipments/_us.html', address: address, invoiceNo: invoiceNo/}
@@ -116,11 +112,11 @@
     #{set totalAmount: 0 /}
     #{list items: fbaGroupUnits.get(centerId),as : 'unit'}
         #{set amount: unit.amountUSD()/}
-        #{set totalCount: totalCount + unit.realQty()/}
+        #{set totalCount: totalCount + unit.shipmentQty()/}
         #{set totalAmount: totalAmount + amount._2/}
       <tr>
         <td colspan="2" style="height:50px">${unit.product.declareName}</td>
-        <td>${unit.realQty()}</td>
+        <td>${unit.shipmentQty()}</td>
         <td>${helper.Currency.USD.symbol()} ${amount._1.format('#.##')}
         </td>
         <td>${helper.Currency.USD.symbol()} ${amount._2.format('#.##')}</td>
@@ -138,7 +134,7 @@
         <p>${models.OperatorConfig.getVal("companyname")}</p>
 
         <p>SIGNATURE</p>
-        <img src="${models.OperatorConfig.getVal("elcuk2url")}/images/common/${models.OperatorConfig.getVal("signature")}">
+        <img src="${System.getenv(helper.Constant.ROOT_URL)}/images/common/${models.OperatorConfig.getVal("signature")}">
       </div>
     </td>
   </tr>

@@ -2,25 +2,25 @@ package controllers;
 
 
 import controllers.api.SystemOperation;
+import helper.Webs;
 import models.ElcukRecord;
-import models.finance.ProcureApply;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.DeliverPlan;
-import helper.Webs;
-import models.User;
 import models.procure.ProcureUnit;
 import models.view.Ret;
+import models.view.post.DeliverPlanPost;
+import models.view.post.DeliveryPost;
 import models.view.post.ProcurePost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.mvc.Before;
 import play.mvc.Controller;
+import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import models.view.post.*;
-import play.mvc.With;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,7 +28,7 @@ import play.mvc.With;
  * Date: 16-1-21
  * Time: 上午10:40
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class DeliverPlans extends Controller {
 
 
@@ -42,7 +42,7 @@ public class DeliverPlans extends Controller {
         renderArgs.put("records", ElcukRecord.records(deliverymentId));
     }
 
-    @Before(only = {"index"})
+    @Before(only = {"index", "indexWhouse"})
     public static void beforeIndex(DeliveryPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);
@@ -50,11 +50,10 @@ public class DeliverPlans extends Controller {
 
     /**
      * 从 Procrues#index 页面, 通过选择 ProcureUnit 创建 出货单
-     * TODO effect: 需要调整权限
      */
     @Check("procures.createdeliveryment")
-    public static void deliverplan(List<Long> pids, String name) {
-        if(StringUtils.isBlank(name))
+    public static void deliverplan(List<Long> pids, String deliverName) {
+        if(StringUtils.isBlank(deliverName))
             Validation.addError("", "出货单名称必须填写!");
         if(pids == null || pids.size() <= 0)
             Validation.addError("", "必须选择采购计划单!");
@@ -63,7 +62,7 @@ public class DeliverPlans extends Controller {
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
         }
         DeliverPlan deliverplan = DeliverPlan
-                .createFromProcures(pids, name, User.findByUserName(Secure.Security.connected()));
+                .createFromProcures(pids, deliverName, User.findByUserName(Secure.Security.connected()));
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             ProcureUnits.index(new ProcurePost(ProcureUnit.STAGE.PLAN));
@@ -74,16 +73,27 @@ public class DeliverPlans extends Controller {
 
     public static void show(String id) {
         DeliverPlan dp = DeliverPlan.findById(id);
-        render(dp);
+        boolean showAdd = false;
+        if(dp.units.stream().anyMatch(unit -> Arrays.asList(ProcureUnit.STAGE.PLAN, ProcureUnit.STAGE.DELIVERY)
+                .contains(unit.stage) && unit.attrs.planQty != 0)) {
+            showAdd = true;
+        }
+        render(dp, showAdd);
     }
 
     @Check("deliverplans.index")
     public static void index(DeliverPlanPost p, List<String> deliverplanIds) {
-        List<DeliverPlan> deliverplans = null;
-        if(deliverplanIds == null) deliverplanIds = new ArrayList<String>();
+        List<DeliverPlan> deliverplans;
+        if(deliverplanIds == null) deliverplanIds = new ArrayList<>();
         if(p == null) p = new DeliverPlanPost();
         deliverplans = p.query();
         render(deliverplans, p, deliverplanIds);
+    }
+
+    public static void indexWhouse(DeliverPlanPost p) {
+        if(p == null) p = new DeliverPlanPost();
+        List<DeliverPlan> plans = p.query();
+        render(p, plans);
     }
 
 
@@ -107,13 +117,12 @@ public class DeliverPlans extends Controller {
         DeliverPlan dp = DeliverPlan.findById(id);
         Validation.required("deliverplans.addunits", pids);
         if(Validation.hasErrors())
-            render("Deliverplans/show.html", dp);
+            render("DeliverPlans/show.html", dp);
         dp.assignUnitToDeliverplan(pids);
 
         // 再一次检查, 是否有错误
         if(Validation.hasErrors()) {
-            renderArgs.put("plan_units", dp.availableInPlanStageProcureUnits());
-            render("Deliverplans/show.html", dp);
+            render("DeliverPlans/show.html", dp);
         }
         flash.success("成功将 %s 采购计划添加到当前采购单.", StringUtils.join(pids, ","));
         show(dp.id);
@@ -123,18 +132,29 @@ public class DeliverPlans extends Controller {
      * 将 ProcureUnit 从 Deliverplan 中解除
      */
     public static void delunits(String id, List<Long> pids) {
-        DeliverPlan dmt = DeliverPlan.findById(id);
+        DeliverPlan dp = DeliverPlan.findById(id);
+        notFoundIfNull(dp);
+
         Validation.required("deliverplans.delunits", pids);
-        if(Validation.hasErrors())
-            render("Deliverplans/show.html", dmt);
-        dmt.unassignUnitToDeliverplan(pids);
+        if(Validation.hasErrors()) render("DeliverPlans/show.html", dp);
+        dp.unassignUnitToDeliverplan(pids);
+        if(Validation.hasErrors()) render("DeliverPlans/show.html", dp);
 
-        if(Validation.hasErrors())
-            render("Deliverplans/show.html", dmt);
-
-        flash.success("成功将 %s 采购计划从当前采购单中移除.", StringUtils.join(pids, ","));
-        show(dmt.id);
+        flash.success("成功将 %s 采购计划从出货单 %s 中移除.", StringUtils.join(pids, ","), id);
+        if(dp.units.isEmpty()) {
+            dp.delete();
+            index(null, null);
+        } else {
+            show(dp.id);
+        }
     }
 
+    public static void showProcureUnitList(String id) {
+        DeliverPlan plan = DeliverPlan.findById(id);
+        List<ProcureUnit> units = plan.units;
+        boolean deliveryplan = true;
+        boolean norecord = true;
+        render("/ProcureUnits/_unit_list.html", units, deliveryplan, norecord);
+    }
 
 }

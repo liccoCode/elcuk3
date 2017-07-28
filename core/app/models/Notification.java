@@ -2,6 +2,7 @@ package models;
 
 import com.google.gson.annotations.Expose;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.DB;
 import play.db.helper.SqlSelect;
@@ -23,12 +24,12 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Time: 11:55 AM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class Notification extends GenericModel {
     /**
      * 用来记录用户 Notification 的 Queue Map
      */
-    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<String, BlockingQueue<Notification>>();
+    private static final Map<String, BlockingQueue<Notification>> USER_QUEUE_CACHE = new ConcurrentHashMap<>();
 
     public static final String INDEX = "http://e.easya.cc/Notifications/index";
 
@@ -184,9 +185,11 @@ public class Notification extends GenericModel {
      * @return
      */
     public static F.Option<Notification> next(User user) {
-        if(!USER_QUEUE_CACHE.containsKey(user.username))
-            Notification.initUserNotificationQueue(user);
+        if(user == null) return F.Option.None();
 
+        if(!USER_QUEUE_CACHE.containsKey(user.username)) {
+            Notification.initUserNotificationQueue(user);
+        }
         Notification note = USER_QUEUE_CACHE.get(user.username).poll();
         if(note == null) return F.Option.None();
         else {
@@ -200,7 +203,7 @@ public class Notification extends GenericModel {
         if(!USER_QUEUE_CACHE.containsKey(user.username)) {
             synchronized(USER_QUEUE_CACHE) {
                 if(USER_QUEUE_CACHE.containsKey(user.username)) return; // double check
-                BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<Notification>();
+                BlockingQueue<Notification> blockingQueue = new LinkedBlockingQueue<>();
                 List<Notification> notifications = user.unNotifiedNotification();
                 for(Notification note : notifications) {
                     blockingQueue.add(note);

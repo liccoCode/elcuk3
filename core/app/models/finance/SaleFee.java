@@ -36,6 +36,8 @@ import java.util.regex.Pattern;
 @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class SaleFee extends Model {
 
+    private static final long serialVersionUID = -8565064073185613540L;
+
     public SaleFee() {
     }
 
@@ -95,6 +97,14 @@ public class SaleFee extends Model {
 
     public Integer qty = 1;
 
+    public String product_sku;
+
+    public String transaction_type;
+
+    public String md5_id;
+
+    public String orderitem_sku;
+
 
     /**
      * 这个是用来解析 Amazon 每隔 14 天自动生成 FlatV2 的 Payments 的报表; 解析 Flat File 而不是方便的 Flat2 是因为 DE 没有 T.T
@@ -103,21 +113,21 @@ public class SaleFee extends Model {
      * @return missing: order(use order_id)
      */
     public static Map<String, List<SaleFee>> flatFileFinanceParse(File file, Account account) {
-        Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<String, F.T2<AtomicInteger, List<SaleFee>>>();
-        mapFees.put("SYSTEM", new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(1),
-                new ArrayList<SaleFee>()));
+        Map<String, F.T2<AtomicInteger, List<SaleFee>>> mapFees = new HashMap<>();
+        mapFees.put("SYSTEM", new F.T2<>(new AtomicInteger(1),
+                new ArrayList<>()));
 
         try {
             List<String> lines = FileUtils.readLines(file);
             lines.remove(0);
             lines.remove(0);// 删除最上面的 2 行
 
-            List<String> emailLines = new ArrayList<String>();
+            List<String> emailLines = new ArrayList<>();
             for(String line : lines) {
                 try {
 
                     String[] params = StringUtils.splitPreserveAllTokens(line, "\t");
-                    /**
+                    /*
                      * 1. Order
                      * 2. Refund
                      * 3. Storage Fee
@@ -129,17 +139,12 @@ public class SaleFee extends Model {
                      */
                     String transactionType = params[6].toLowerCase();
                     String orderId = params[7];
-                    if("order".equals(transactionType) ||
-                            "chargeback refund".equals(transactionType) ||
-                            "refund".equals(transactionType) ||
-                            "adjustment".equals(transactionType)) {
+                    if("order".equals(transactionType) || "chargeback refund".equals(transactionType)
+                            || "refund".equals(transactionType) || "adjustment".equals(transactionType)) {
                         M market = M.val(params[11].toLowerCase());
                         if(market == null) market = account.type;
-
                         if(!mapFees.containsKey(orderId))
-                            mapFees.put(orderId,
-                                    new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
-                                            new ArrayList<SaleFee>()));
+                            mapFees.put(orderId, new F.T2<>(new AtomicInteger(), new ArrayList<>()));
                         F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
 
                         // 计算数量
@@ -164,18 +169,14 @@ public class SaleFee extends Model {
                         String itemRelateFeeType = params[25].toLowerCase();
                         addOneFee(params[26], params[17], transactionType, orderId, market, fees,
                                 account, itemRelateFeeType);
-                    } else if("storage fee".equals(transactionType) ||
-                            "refund reimbursal".equals(transactionType) ||
-                            "balanceadjustment".equals(transactionType) ||
-                            "subscription fee".equals(transactionType) ||
-                            "removalcomplete".equals(transactionType)) {
-
-                        // Refund Reimbursal, 有订单关联的
+                    } else if("storage fee".equals(transactionType) || "refund reimbursal".equals(transactionType)
+                            || "balanceadjustment".equals(transactionType) || "subscription fee".equals(transactionType)
+                            || "removalcomplete".equals(transactionType)) {
                         if(StringUtils.isNotBlank(orderId)) {
                             if(!mapFees.containsKey(orderId))
                                 mapFees.put(orderId,
-                                        new F.T2<AtomicInteger, List<SaleFee>>(new AtomicInteger(),
-                                                new ArrayList<SaleFee>()));
+                                        new F.T2<>(new AtomicInteger(),
+                                                new ArrayList<>()));
                             F.T2<AtomicInteger, List<SaleFee>> fees = mapFees.get(orderId);
                             if(addOneFee(lastPrice(params), params[17], transactionType, orderId,
                                     account.type, fees, account, transactionType/*不然会自动跳出*/))
@@ -204,7 +205,7 @@ public class SaleFee extends Model {
 
 
         // 在返回前, 还需要将保留再 T2._1 中的 qty 设置到所有的 SaleFee 中
-        Map<String, List<SaleFee>> feesMap = new HashMap<String, List<SaleFee>>();
+        Map<String, List<SaleFee>> feesMap = new HashMap<>();
         for(String key : mapFees.keySet()) {
             F.T2<AtomicInteger, List<SaleFee>> feesTuple = mapFees.get(key);
             if(!"SYSTEM".equals(key)) {
@@ -247,7 +248,7 @@ public class SaleFee extends Model {
                                      M market, F.T2<AtomicInteger, List<SaleFee>> fees,
                                      Account acc, String subType) {
         if(StringUtils.isNotBlank(subType)) {
-            FeeType feeType = FeeType(subType, transactionType, orderId);
+            FeeType feeType = feeType(subType, transactionType, orderId);
             SaleFee fee = new SaleFee();
             fee.orderId = orderId;
             fee.market = market;
@@ -264,7 +265,7 @@ public class SaleFee extends Model {
         return false;
     }
 
-    private static FeeType FeeType(String subType, String transactionType, String orderId) {
+    private static FeeType feeType(String subType, String transactionType, String orderId) {
         FeeType feeType = null;
         if(StringUtils.isBlank(subType))
             feeType = FeeType.findById(transactionType);
@@ -289,8 +290,8 @@ public class SaleFee extends Model {
         PreparedStatement ps = null;
         try {
             ps = DB.getConnection().prepareStatement(
-                    "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) " +
-                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    "INSERT INTO SaleFee(id, cost, currency, `DATE`, market, memo, orderId, qty, usdCost, account_id, order_orderId, type_name) "
+                            + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             for(SaleFee f : fees) {
                 int i = 1;
                 ps.setString(i++, UUID.randomUUID().toString());
@@ -321,7 +322,7 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }
@@ -356,26 +357,23 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         }
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SaleFee");
-        sb.append("{type=").append(type);
-        sb.append(", id='").append(id).append('\'');
-        sb.append(", market=").append(market);
-        sb.append(", memo='").append(memo).append('\'');
-        sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", date=").append(date);
-        sb.append(", cost=").append(cost);
-        sb.append(", currency=").append(currency);
-        sb.append(", usdCost=").append(usdCost);
-        sb.append(", qty=").append(qty);
-        sb.append('}');
-        return sb.toString();
+        return "SaleFee" + "{type=" + type
+                + ", id='" + id + '\''
+                + ", market=" + market
+                + ", memo='" + memo + '\''
+                + ", orderId='" + orderId + '\''
+                + ", date=" + date
+                + ", cost=" + cost
+                + ", currency=" + currency
+                + ", usdCost=" + usdCost
+                + ", qty=" + qty
+                + '}';
     }
 }

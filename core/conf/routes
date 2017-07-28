@@ -35,7 +35,7 @@ GET     /apply/transport/{id}                               Applys.transport
 POST    /apply/transport/{id}/shipment                      Applys.transportAddShipment
 DELETE  /apply/transport/{id}/shipment                      Applys.departShipmentFromApply(format:'json')
 GET     /apply/procure/{id}                                 Applys.procure
-POST     /apply/procure/{id}                                Applys.procure
+POST    /apply/procure/{id}                                 Applys.procure
 PUT     /apply/procure/{id}/confirm                         Applys.procureConfirm
 POST    /apply/transport                                    Applys.shipmentToApply
 
@@ -80,12 +80,14 @@ DELETE  /payment/{id}/lock                                  Payments.unlock
 # ProcureUnits
 GET     /procureunits                                       ProcureUnits.index
 POST    /procureunits                                       ProcureUnits.index
-GET     /sellings/{sid}/procureunit/new/{totalFive}/{day}   ProcureUnits.blank
+GET     /procureunits/indexWhouse                           ProcureUnits.indexWhouse
+POST    /procureunits/indexWhouse                           ProcureUnits.indexWhouse
+GET     /sellings/{sid}/procureunit/new                     ProcureUnits.blank
 POST    /procureunit                                        ProcureUnits.create
 GET     /procureunit/{id}/edit                              ProcureUnits.edit
 PUT     /procureunit/{id}                                   ProcureUnits.update
-POST     /procureunit/{id}                                   ProcureUnits.update
-POST    /procureunits/updateprocess/{id}                     ProcureUnits.updateprocess
+POST    /procureunit/{id}                                   ProcureUnits.update
+POST    /procureunits/updateprocess/{id}                    ProcureUnits.updateprocess
 PUT     /procureunit/{id}/placed                            ProcureUnits.markPlace
 DELETE  /procureunit/{id}                                   ProcureUnits.destroy
 POST    /procureunit/{procureUnitId}/fba                    FBAs.deployToAmazon
@@ -98,10 +100,14 @@ DELETE  /procureunit/{id}/delivery                          ProcureUnits.reverDe
 GET     /procureunits/downloadFBAZIP                        ProcureUnits.downloadFBAZIP
 GET     /procureunits/exportlogs                            ProcureUnits.exportLogs
 
+# Inbounds
+GET     /inbounds/edit/{id}                                 Inbounds.edit
+
 # FBAs
 GET     /fba/{id}/innerlabel                                FBAs.packingSlip
 GET     /fba/{id}/outlabel                                  FBAs.boxLabel
 GET     /code128/{shipmentId}                               Login.code128
+GET     /fnSkuCode128/{fnSku}                               Login.fnSkuCode128
 
 # PaymentUnits
 POST    /paymentunit/shipitem/{id}                          PaymentUnits.fromShipItem
@@ -133,7 +139,6 @@ GET     /product/{id}/amazon                                Products.saleAmazon
 
 # Sellings
 GET     /selling/{id}                                       Sellings.selling
-GET     /selling/{id}/label                                 Sellings.sellingLabel
 
 # Users
 POST    /users/{id}/closeUser                               Users.closeUser
@@ -162,6 +167,7 @@ POST    /shipment/{id}/inbounding                           Shipments.inbounding
 DELETE  /shipment/{id}/state                                Shipments.revertState
 POST    /shipment/{id}/log                                  Shipments.log
 GET     /shipment/{id}/invoice                              Shipments.invoice
+GET     /shipment/{id}/arns                                 Shipments.arns
 
 # ShipItems
 GET     /shipitems                                          ShipItems.index
@@ -170,16 +176,9 @@ POST    /shipitems                                          ShipItems.index
 POST    /shipment/{shipmentId}/adjust/{targetId}            ShipItems.adjust
 PUT     /shipitem/{id}/recevied                             ShipItems.received
 
-# SKUCHECK
-POST    /skuchecks/{id}/update                               Skuchecks.update
-POST    /skuchecks/{id}/delete                               Skuchecks.remove
-
-# CheckTasks
-GET     /checktasks/{id}/prints                              checktasks.prints
-GET     /checktasks/{id}/prints                              checktasks.prints
-GET     /checktasks/{id}/doprints                            checktasks.doprints
-*       /checktasks/{id}/show                                checktasks.show
-GET     /checktasks/{id}/showList                            checktasks.showList
+# FBACenters
+POST    /fbacenters/{id}/enableAutoSync                      FBACenters.enableAutoSync
+POST    /fbacenters/{id}/disableAutoSync                     FBACenters.disableAutoSync
 
 # Elcuk
 GET     /elcuks                                             Elcuk.index

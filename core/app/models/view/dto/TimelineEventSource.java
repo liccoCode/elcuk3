@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import ext.ShipmentsHelper;
 import helper.GTs;
-import helper.LogUtils;
 import helper.Webs;
 import models.procure.ProcureUnit;
 import models.procure.ShipItem;
@@ -43,7 +42,7 @@ public class TimelineEventSource {
     public String dateTimeFormat = "iso8601";
 
     @Expose
-    public List<Event> events = new ArrayList<Event>();
+    public List<Event> events = new ArrayList<>();
 
 
     /**
@@ -63,8 +62,7 @@ public class TimelineEventSource {
             this(start, end, description, title, true);
         }
 
-        public Event(String start, String end, String description, String title,
-                     boolean durationEvent) {
+        public Event(String start, String end, String description, String title, boolean durationEvent) {
             this.start = start;
             this.end = end;
             this.description = description;
@@ -73,7 +71,9 @@ public class TimelineEventSource {
         }
 
         /**
-         * icon - url. This image will appear next to the title text in the timeline if (no end date) or (durationEvent = false). If a start and end date are supplied, and durationEvent is true, the icon is not shown. If icon attribute is not set, a default icon from the theme is used.
+         * icon - url. This image will appear next to the title text in the timeline if (no end date) or
+         * (durationEvent = false). If a start and end date are supplied, and durationEvent is true, the icon is not
+         * shown.If icon attribute is not set, a default icon from the theme is used.
          */
         @Expose
         public String icon;
@@ -175,41 +175,34 @@ public class TimelineEventSource {
             List<Shipment> relateShipments = this.unit.relateShipment();
 
             // 检查运输单的是否可以从签收进入入库状态
-            for(Shipment shipment : relateShipments) shipment.inboundingByComputor();
-            for(Shipment shipment : relateShipments) shipment.endShipByComputer();
+            relateShipments.forEach(Shipment::inboundingByComputor);
+            relateShipments.forEach(Shipment::endShipByComputer);
 
-
-            if(predictShipFinishDate == null && relateShipments.size() > 0) {
+            if(relateShipments.size() > 0) {
                 Shipment shipment = relateShipments.get(0);
                 predictShipFinishDate = shipment.dates.planArrivDate;
-                if(predictShipFinishDate == null && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN,
-                        Shipment.S.CONFIRM).contains(shipment.state))
+                if(predictShipFinishDate == null
+                        && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
             //如果有签收数量则用采购计划的入库时间
-            if(this.unit.inboundingQty() > 0 || predictShipFinishDate == null) {
+            // 修改新规则 现在开始时间都采用运输单的预计到库时间,快递没关联运输单的话,则采用采购计划上的预计到库时间
+            if(predictShipFinishDate == null) {
                 predictShipFinishDate = this.unit.attrs.planArrivDate;
             }
 
-
-            this.lastDays = Webs.scale2PointUp((this.unit.qty() - this.unit.inboundingQty()) / this.ps(type));
+            this.lastDays = Webs.scale2PointUp((this.getUnitQty() - this.unit.inboundingQty()) / this.ps(type));
 
             Float timeLineDays = this.lastDays;
             this.start = add8Hour(predictShipFinishDate);
 
-            if(this.unit.stage == ProcureUnit.STAGE.INBOUND) {
-                // 如果在入库中, 进度条自动缩短
-                timeLineDays = (this.unit.qty() - this.unit.inboundingQty()) / this.ps(type);
-            } else if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
+            if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
                 timeLineDays = 0f;
             }
             // 如果不够卖到第二天, 那么就省略
-            this.end = add8Hour(new DateTime(predictShipFinishDate)
-                    .plusDays(timeLineDays.intValue()).toDate());
+            this.end = add8Hour(new DateTime(predictShipFinishDate).plusDays(timeLineDays.intValue()).toDate());
             this.durationEvent = true;
-
-
             return this;
         }
 
@@ -248,26 +241,29 @@ public class TimelineEventSource {
          */
         public Event titleAndDesc() {
             if(this.lastDays == null) throw new FastRuntimeException("请先计算 LastDays");
-
+            String addTitle = "";
+            if(this.unit.lostQty() > 0)
+                addTitle = "(丢失 " + this.unit.lostQty() + ")";
+            if(this.unit.shipItems.size() > 0 && this.unit.shipItems.get(0) != null
+                    && this.unit.shipItems.get(0).shipment != null
+                    && this.unit.shipItems.get(0).shipment.dates.beginDate != null
+                    && this.unit.attrs.planShipDate.before(this.unit.shipItems.get(0).shipment.dates.beginDate))
+                addTitle += "(超时) ";
             if(this.unit.stage == ProcureUnit.STAGE.CLOSE) {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                        this.unit.id, getunitstage().label(), 0,
-                        0);
+                this.title = String.format("%s#%s 计划 %s状态, 数量 %s 可销售 %s 天", addTitle, this.unit.id,
+                        this.getunitstage().label(), 0, 0);
             } else {
-                this.title = String.format("#%s 计划 %s状态, 数量 %s 可销售 %s 天",
-                        // 这里直接使用 planQty 而不是用 qty() 是因为需要避免
-                        this.unit.id, getunitstage().label(), this.unit.attrs.planQty - this.unit.inboundingQty(),
-                        this.lastDays);
+                this.title = String.format("%s#%s 计划 %s状态, 数量 %s 可销售 %s 天", addTitle, this.unit.id,
+                        this.getunitstage().label(), this.getUnitQty() - this.unit.inboundingQty(), this.lastDays);
             }
             this.description = GTs.render("event_desc", GTs.newMap("unit", this.unit).build());
-            this.link = "/procureunits?p.search=id:" + this.unit.id;
+            this.link = "/procureunits?p.search=" + this.unit.id;
             return this;
         }
 
 
         public ProcureUnit.STAGE getunitstage() {
-            /**如果是入库数量相等则是已入库**/
+            //如果是入库数量相等则是已入库
             ProcureUnit.STAGE unitstage = this.unit.stage;
             if(unitstage != ProcureUnit.STAGE.CLOSE) {
                 int inboundingqty = this.unit.inboundingQty();
@@ -279,6 +275,25 @@ public class TimelineEventSource {
                 }
             }
             return unitstage;
+        }
+
+        public int getUnitQty() {
+            switch(this.unit.stage) {
+                case PLAN:
+                case DELIVERY:
+                    return this.unit.attrs.planQty;
+                case DONE:
+                    return this.unit.attrs.qty;
+                case IN_STORAGE:
+                    return this.unit.availableQty;
+                case OUTBOUND:
+                case SHIPPING:
+                case SHIP_OVER:
+                case INBOUND:
+                    return this.unit.outQty;
+                default:
+                    return this.unit.attrs.planQty;
+            }
         }
 
         /**
@@ -298,7 +313,7 @@ public class TimelineEventSource {
         }
 
         public Event color(ProcureUnit unitunit) {
-            String color = "999999";
+            String color;
             switch(getunitstage()) {
                 case PLAN:
                     color = "A5B600";
@@ -329,7 +344,11 @@ public class TimelineEventSource {
                     color = "B94A48";
             }
             color = fetchShipmentSate(unit, color);
-            this.color = String.format("#%s", color);
+            if(this.unit.lostQty() > 0) {
+                this.color = String.format("#%s", "9690BE");
+            } else {
+                this.color = String.format("#%s", color);
+            }
             return this;
         }
     }
@@ -347,7 +366,6 @@ public class TimelineEventSource {
                     color = "3A87AD";
                     break;
                 case CLEARANCE:
-                case PACKAGE:
                 case BOOKED:
                 case DELIVERYING:
                     color = "3746B1";

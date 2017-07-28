@@ -49,9 +49,9 @@
         <span class="add-on">品线</span>
         <select name="p.categoryid">
           <option value="">ALL</option>
-          #{list items:categorys, as:'c'}
-            <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
-          #{/list}
+        #{list items:categorys, as:'c'}
+          <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
+        #{/list}
         </select>
       </div>
       <div class="input-prepend inline">
@@ -73,22 +73,22 @@
 </form>
 
 <div class="row-fluid" style="overflow-x:auto;">
-  <table class="table table-bordered table-condensed" style="width:1700px;">
+  <table class="table table-bordered table-condensed">
     <tr>
       <th><input type="checkbox" class="checkall"></th>
-      <th>编号</th>
-      <th width="380px;">SellingID</th>
+      <th>#</th>
+      <th width="330px;">SellingID</th>
       <th>SKU</th>
       <th>市场</th>
       <th>实时价格</th>
       <th>ASIN</th>
       <th>生命周期</th>
       <th>系统内上架</th>
-      <th>feed更新时间</th>
+      <th width="130px;">feed更新时间</th>
       <th>feed更新状态</th>
-      <th>创建时间</th>
-      <th>系统内下架时间</th>
-      <th>操作</th>
+      <th width="130px;">创建时间</th>
+      <th width="130px;">系统内下架时间</th>
+      <th width="180px;">操作</th>
     </tr>
   #{list items:sellings , as:'s'}
     <tr>
@@ -98,16 +98,13 @@
           #{/if}
       </td>
       <td>${(p.page-1)*p.perSize + s_index}</td>
-      <td>${s.sellingId}</td>
+      <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
       <td>${s.listing?.product?.sku}</td>
       <td>${s.market.countryName()}</td>
       <td>${s.aps.salePrice}</td>
       <td>${s.asin}</td>
       <td>${s.sellingCycle?.label()}</td>
-      <td>
-          #{if !s.state.name().equals("DOWN")}是#{/if}
-          #{else }否#{/else}
-      </td>
+      <td>${s.state.name().equals("DOWN") ? '否' : '是'}</td>
       <td>#{time_tooltip time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
       <td>${s.recentlyFeed()?.analyzeResult}</td>
       <td>#{time_tooltip time:s.createDate, datetime:true /}</td>
@@ -121,6 +118,8 @@
                     data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
             </button>
           #{/if}
+        <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-mini btn-inverse" rel="popover"
+           title="创建采购计划">Create</a>
       </td>
     </tr>
   #{/list}

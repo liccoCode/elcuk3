@@ -86,13 +86,24 @@
             <li>
               <a href="${unit.fba.fbaLink()}" target="_blank">${unit.fba.shipmentId}</a>
               <abbr rel='tooltip' title='入库数量 / 运输数量'>
-                [${shipItem.recivedQty} / ${shipItem.qty}]
+                [${shipItem.recivedQty} / ${shipItem.unit.outQty}]
               </abbr>
             </li>
           #{/list}
       </ul>
     </td>
   </tr>
+  #{if unit.lostQty() > 0}
+    <tr>
+      <td>丢失数量</td>
+      <td>${unit.lostQty()}</td>
+    </tr>
+    <tr>
+      <td>赔偿金额</td>
+      <td>${unit.showCompensation()}</td>
+    </tr>
+  #{/if}
+
 #{/if}
   <tr>
     <td colspan="2">

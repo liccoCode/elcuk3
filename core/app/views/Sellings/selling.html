@@ -1,16 +1,16 @@
 #{extends 'main_full.html'/}
 #{set title:s.sellingId/}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name:'market.css'/}
+    #{stylesheet 'market.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script_cdn name: 'editor/kindeditor-min.js'/}
-    #{script_cdn name: 'editor/lang/zh_CN.js'/}
-    #{script_cdn name: 'component/amazon.coffee'/}
-    #{script_cdn name: 'sellings/selling.coffee'/}
+    #{script 'editor/kindeditor-min.js'/}
+    #{script 'editor/lang/zh_CN.js'/}
+    #{script 'component/amazon.coffee'/}
+    #{script 'sellings/selling.coffee'/}
 #{/set}
 #{set 'moreStyles'}
-    #{stylesheet_cdn name: 'market.css'/}
+    #{stylesheet 'market.css'/}
 #{/set}
 #{if s.market.isAmazon()}
     #{flash_alert /}
@@ -24,8 +24,6 @@
     SKU:<a href="@{Products.show()}/${s.merchantSKU.split(",")[0]}" style="text-decoration:underline;">${s.merchantSKU.split(",")[0]}</a>&nbsp;
     &nbsp;&nbsp;
     ASIN:<a href="${s.showListingLink()}" target="_blank" style="text-decoration:underline;">${s.asin}</a>&nbsp;&nbsp;&nbsp;
-    <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" title="Create ProcureUnitsButton" style="text-decoration:underline;"
-       content="创建此 Selling 相关采购计划" placement='bottom' rel="popover">采购计划</a>
   </div>
 </div>
 <br>

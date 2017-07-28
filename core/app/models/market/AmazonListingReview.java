@@ -6,10 +6,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.*;
-import models.User;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.cache.Cache;
@@ -36,7 +36,7 @@ import java.util.List;
  * Time: 4:33 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 public class AmazonListingReview extends GenericModel {
 
     /**
@@ -238,7 +238,7 @@ public class AmazonListingReview extends GenericModel {
      * 记录 AmazonListingReview 的点击记录, 一般给前台参看使用
      */
     @OneToMany(mappedBy = "ownerReview")
-    public List<AmazonReviewRecord> reviewRecords = new ArrayList<AmazonReviewRecord>();
+    public List<AmazonReviewRecord> reviewRecords = new ArrayList<>();
 
     /**
      * 主要是为了记录 createDate 日期
@@ -255,7 +255,7 @@ public class AmazonListingReview extends GenericModel {
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
         else if(!this.isSelf()) {
             this.isSelf = false;
-            this.comment(String.format("这个 Review 对应的 Listing 非自建."));
+            this.comment("这个 Review 对应的 Listing 非自建.");
         }
         Logger.warn("AmazonListingReview %s save!", this.reviewId);
         return this.save();
@@ -355,7 +355,7 @@ public class AmazonListingReview extends GenericModel {
             }
 
             long reviewcount = AmazonListingReview.count("alrid=?", this.alrId);
-            if(reviewcount != 1l) {
+            if(reviewcount != 1L) {
                 Logger.info("Review alrId count is not exist!! %s", this.alrId);
                 return;
             }
@@ -442,7 +442,7 @@ public class AmazonListingReview extends GenericModel {
             sb.append(a.id).append("|").append(a.prettyName()).append(",");
         }
         Logger.info("Account List: %s", sb.toString());
-        return new F.T2<Account, Integer>(nonClickAccs.get(0), nonClickAccs.size());
+        return new F.T2<>(nonClickAccs.get(0), nonClickAccs.size());
     }
 
 
@@ -486,8 +486,7 @@ public class AmazonListingReview extends GenericModel {
 
         if(StringUtils.isBlank(subject)) {
             if(this.listing.market == M.AMAZON_DE) {
-                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen " +
-                        "helfen??";
+                subject = "Sie haben eine neutrale/negative Rezension bei Amazon hinterlassen. Dürfen wir Ihnen helfen??";
             } else { // 除了 DE 使用德语其他的默认使用'英语'
                 subject = "We would like to address your review!!";
             }
@@ -555,12 +554,12 @@ public class AmazonListingReview extends GenericModel {
 
     public static Date parseDate(String reviewdate) {
         Date reviewDate = new Date();
-        if(reviewdate != null && reviewdate.length() > 0 && reviewdate.indexOf(",") != -1) {
+        if(reviewdate != null && reviewdate.length() > 0 && reviewdate.contains(",")) {
             java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.ENGLISH);
             try {
                 reviewDate = sdf.parse(reviewdate);
             } catch(Exception e) {
-                e.printStackTrace();
+                Logger.error(Webs.S(e));
             }
         } else {
             if(reviewdate != null && reviewdate.length() > 0) {
@@ -608,7 +607,7 @@ public class AmazonListingReview extends GenericModel {
     public static List<F.T2<String, Integer>> reviewLeftClickTimes(List<String> reviewIds) {
         List<AmazonListingReview> reviews = AmazonListingReview
                 .find("reviewId IN " + JpqlSelect.inlineParam(reviewIds)).fetch();
-        List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<F.T2<String, Integer>>();
+        List<F.T2<String, Integer>> reviewLeftClicks = new ArrayList<>();
         for(AmazonListingReview review : reviews) {
             int leftClick = 0;
             try {
@@ -616,7 +615,7 @@ public class AmazonListingReview extends GenericModel {
             } catch(FastRuntimeException e) {
                 leftClick = 0;
             }
-            reviewLeftClicks.add(new F.T2<String, Integer>(review.reviewId, leftClick));
+            reviewLeftClicks.add(new F.T2<>(review.reviewId, leftClick));
         }
         return reviewLeftClicks;
     }
@@ -654,15 +653,15 @@ public class AmazonListingReview extends GenericModel {
             JSONObject result = service.countReviewRating();
             if(result == null) return new HighChart(Series.LINE);
 
-            HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<Date, F.T2<Long, Long>>();
+            HashMap<Date, F.T2<Long, Long>> sumResults = new HashMap<>();
             for(M m : Promises.MARKETS) {
                 Series.Line line = new Series.Line(m.name(), false);
 
                 JSONObject marketResult = result.getJSONObject(m.name());
                 for(Date sunday : sundays) {
                     JSONObject sundayResult = marketResult.getJSONObject(formatter.format(sunday));
-                    long scoreSum = 0l;
-                    long sumCount = 0l;
+                    long scoreSum = 0L;
+                    long sumCount = 0L;
                     if(sundayResult != null) {
                         JSONArray buckets = sundayResult.getJSONObject("group_by_rating").getJSONArray("buckets");
                         sumCount = sundayResult.getInteger("doc_count");
@@ -682,12 +681,12 @@ public class AmazonListingReview extends GenericModel {
                     //将此次计算出来的 Review 个数与 得分总数储存起来供给计算 SUM 线的时候使用
                     if(sumResults.containsKey(sunday)) {
                         F.T2<Long, Long> sunDayTotal = sumResults.get(sunday);
-                        sumResults.put(sunday, new F.T2<Long, Long>(
+                        sumResults.put(sunday, new F.T2<>(
                                 (sunDayTotal._1 + scoreSum),
                                 (sunDayTotal._2 + sumCount))
                         );
                     } else {
-                        sumResults.put(sunday, new F.T2<Long, Long>(scoreSum, sumCount));
+                        sumResults.put(sunday, new F.T2<>(scoreSum, sumCount));
                     }
                 }
                 lineChart.series(line);
@@ -728,13 +727,13 @@ public class AmazonListingReview extends GenericModel {
             List<Date> sundayList = Dates.getAllSunday(from, to);
             MetricReviewService service = new MetricReviewService(from, to, category);
             JSONObject aggregations = service.countPoorRatingByDateRange();
-            List<String> jsonKeys = new ArrayList<String>();
+            List<String> jsonKeys = new ArrayList<>();
             for(M m : Promises.MARKETS) jsonKeys.add(m.name());
             jsonKeys.add("SUM");
 
             for(String jsonKey : jsonKeys) {
                 Series.Line line = new Series.Line(jsonKey);
-                List<Date> sundayListCopy = new ArrayList<Date>(sundayList);
+                List<Date> sundayListCopy = new ArrayList<>(sundayList);
 
                 if(aggregations != null) {
                     JSONObject countByMarket = aggregations.getJSONObject(jsonKey);
@@ -783,13 +782,13 @@ public class AmazonListingReview extends GenericModel {
         AmazonListingReview fromDB = AmazonListingReview.findById(this.alrId);
         if(fromDB == null) {
             if(StringUtils.isNotBlank(this.listingId)) {
-                Listing listing = Listing.findById(this.listingId);
-                if(listing == null) {
+                Listing entity = Listing.findById(this.listingId);
+                if(entity == null) {
                     F.T2<String, M> asinAndMarket = Listing.unLid(this.listingId);
-                    listing = Listing.crawl(asinAndMarket._1, asinAndMarket._2);
-                    listing.save();
+                    entity = Listing.crawl(asinAndMarket._1, asinAndMarket._2);
+                    entity.save();
                 }
-                this.listing = listing;
+                this.listing = entity;
                 this.isOwner = this.listing.product != null;
             }
             this.createDate = this.reviewDate;

@@ -5,7 +5,6 @@ import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundS
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
 import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
-import helper.Dates;
 import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
@@ -16,6 +15,7 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Amazon FBA 操作
@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class FBA {
 
-    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<String, FBAInboundServiceMWSClient>();
+    private static final Map<String, FBAInboundServiceMWSClient> CLIENT_CACHE = new HashMap<>();
 
     public static FBAShipment plan(Account account, ProcureUnit unit) throws FBAInboundServiceMWSException {
         FBAShipment fbaShipment = new FBAShipment();
@@ -46,8 +46,11 @@ public class FBA {
 
         // 要发送的货物
         plan.setInboundShipmentPlanRequestItems(new InboundShipmentPlanRequestItemList(
-                Arrays.asList(FBA.procureUnitToInboundShipmentPlanItems(unit))
+                Collections.singletonList(FBA.procureUnitToInboundShipmentPlanItems(unit))
         ));
+        //单账户跨市场相关的处理
+        plan.setMarketplace(unit.selling.market.amid().name());
+        plan.setShipToCountryCode(unit.selling.market.country());
 
         CreateInboundShipmentPlanResponse response = client(account).createInboundShipmentPlan(plan);
         CreateInboundShipmentPlanResult result = response.getCreateInboundShipmentPlanResult();
@@ -65,7 +68,7 @@ public class FBA {
             for(InboundShipmentPlan planFba : members) {
                 try {
                     List<InboundShipmentPlanItem> itemMember = planFba.getItems().getMember();
-                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<String, InboundShipmentPlanItem>();
+                    Map<String, InboundShipmentPlanItem> inboundItemMap = new HashMap<>();
                     for(InboundShipmentPlanItem inboundPlanItem : itemMember) {
                         inboundItemMap.put(inboundPlanItem.getSellerSKU(), inboundPlanItem);
                     }
@@ -74,19 +77,18 @@ public class FBA {
                         msg.append("PLAN 不存在 MSKU ").append(unit.selling.merchantSKU);
                     } else {
                         if(StringUtils.isBlank(unit.selling.fnSku)) {
-                            unit.selling.fnSku = inboundItemMap
-                                    .get(fixHistoryMSKU(unit.selling.merchantSKU))
+                            unit.selling.fnSku = inboundItemMap.get(fixHistoryMSKU(unit.selling.merchantSKU))
                                     .getFulfillmentNetworkSKU();
                         }
                         member = planFba;
                     }
-
                 } catch(Exception e) {
                     //ignore
                 }
             }
-            if(member == null)
+            if(member == null) {
                 throw new FastRuntimeException(msg.toString());
+            }
 
             fbaShipment.account = account;
             fbaShipment.shipmentId = member.getShipmentId();
@@ -96,21 +98,13 @@ public class FBA {
             fbaShipment.centerId = member.getDestinationFulfillmentCenterId();
 
             // FBA 仓库自适应
-            FBACenter center = FBACenter.findByCenterId(fbaShipment.centerId);
-            if(center == null) {
-                Address fbaAddress = member.getShipToAddress();
-                center = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
-                        fbaAddress.getAddressLine2(), fbaAddress.getCity(),
-                        fbaAddress.getName(), fbaAddress.getCountryCode(),
-                        fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
-                ).save();
-                Webs.systemMail(String.format("Add a new FC`s %s", center.centerId),
-                        center.toString());
-            }
-            fbaShipment.fbaCenter = center;
+            Address fbaAddress = member.getShipToAddress();
+            fbaShipment.fbaCenter = new FBACenter(fbaShipment.centerId, fbaAddress.getAddressLine1(),
+                    fbaAddress.getAddressLine2(), fbaAddress.getCity(),
+                    fbaAddress.getName(), fbaAddress.getCountryCode(),
+                    fbaAddress.getStateOrProvinceCode(), fbaAddress.getPostalCode()
+            ).createOrUpdate();
         } else {
-            Webs.systemMail("{WARN} FBAShipment Plan Error! " + Dates.date2Date(),
-                    "创建 FBAShipment 失败.");
             throw new FBAInboundServiceMWSException("创建 FBA Plan 失败.");
         }
         return fbaShipment;
@@ -126,19 +120,19 @@ public class FBA {
      * @return
      * @throws FBAInboundServiceMWSException
      */
-    public static FBAShipment.S create(FBAShipment fbashipment)
+    public static FBAShipment.S create(FBAShipment fbashipment, List<ProcureUnit> units)
             throws FBAInboundServiceMWSException {
         if(fbashipment.state != FBAShipment.S.PLAN) return fbashipment.state;
         //TODO effects: 计算 FBA title 算法需要调整
         StringBuilder fbaTitle = new StringBuilder();
-        Set<Shipment> shipments = new HashSet<Shipment>();
+        Set<Shipment> shipments = new HashSet<>();
         int qty = 0;
-        for(ProcureUnit unit : fbashipment.units) {
+        for(ProcureUnit unit : units) {
             for(ShipItem item : unit.shipItems) {
                 if(item.shipment == null) continue;
                 shipments.add(item.shipment);
             }
-            qty += unit.qty();
+            qty += unit.qtyForFba();
         }
         fbaTitle.append("总共运输数量为 ").append(qty);
         if(shipments.size() > 0) {
@@ -152,12 +146,17 @@ public class FBA {
         CreateInboundShipmentRequest create = new CreateInboundShipmentRequest();
         create.setSellerId(fbashipment.account.merchantId);
         create.setShipmentId(fbashipment.shipmentId);
-        create.setInboundShipmentHeader(new InboundShipmentHeader(fbaTitle.toString(),
-                Account.address(fbashipment.account.type), fbashipment.centerId,
-                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType));
+        create.setMarketplace(fbashipment.marketplace());
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaTitle.toString(),
+                Account.address(fbashipment.account.type), fbashipment.centerId, false,
+                FBAShipment.S.WORKING.name(), fbashipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
+        header.setIntendedBoxContentsSource("FEED");
+        create.setInboundShipmentHeader(header);
+
         // 设置 items
         //TODO effect: 创建 FBA 的算法需要调整
-        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbashipment.units);
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(units);
         create.setInboundShipmentItems(new InboundShipmentItemList(items));
 
         CreateInboundShipmentResponse response = client(fbashipment.account).createInboundShipment(create);
@@ -182,23 +181,77 @@ public class FBA {
             FBAInboundServiceMWSException {
         Validate.notNull(state);
         // 只允许 WORKING 与 SHIPPED 状态的进行修改
-        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state))
+        if(Arrays.asList(FBAShipment.S.PLAN, state).contains(fbaShipment.state)) {
             return fbaShipment.state;
-
-        UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
-        update.setSellerId(fbaShipment.account.merchantId);
-        update.setShipmentId(fbaShipment.shipmentId);
-        update.setInboundShipmentHeader(new InboundShipmentHeader(fbaShipment.title,
-                Account.address(fbaShipment.account.type), fbaShipment.centerId, state.name(),
-                fbaShipment.labelPrepType));
-
-        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
-        update.setInboundShipmentItems(new InboundShipmentItemList(items));
-
-        UpdateInboundShipmentResponse response = client(fbaShipment.account).updateInboundShipment(update);
+        }
+        UpdateInboundShipmentResponse response = updateFbaInboundCartonContents(fbaShipment, state);
         if(response.isSetUpdateInboundShipmentResult())
             fbaShipment.state = state;
         return fbaShipment.state;
+    }
+
+    /**
+     * 更新 FBA Shipment
+     *
+     * @param fbaShipment
+     */
+    public static UpdateInboundShipmentResponse updateFbaInboundCartonContents(FBAShipment fbaShipment,
+                                                                               FBAShipment.S state) {
+        UpdateInboundShipmentRequest update = new UpdateInboundShipmentRequest();
+        update.setSellerId(fbaShipment.account.merchantId);
+        update.setShipmentId(fbaShipment.shipmentId);
+        update.setMarketplace(fbaShipment.marketplace());
+        InboundShipmentHeader header = new InboundShipmentHeader(fbaShipment.title,
+                Account.address(fbaShipment.account.type), fbaShipment.centerId, false, state.name(),
+                fbaShipment.labelPrepType);
+        //设置 IntendedBoxContentsSource(FBA 箱内包装数据) 为 FEED(only US)
+        header.setIntendedBoxContentsSource("FEED");
+        update.setInboundShipmentHeader(header);
+
+        List<InboundShipmentItem> items = FBA.procureUnitsToInboundShipmentItems(fbaShipment.units);
+        update.setInboundShipmentItems(new InboundShipmentItemList(items));
+        return client(fbaShipment.account).updateInboundShipment(update);
+    }
+
+    /**
+     * 提交运输信息给 Amazon
+     * <p>
+     * Carrier 和 Tracking numbers 和 ShipmentType
+     *
+     * @return
+     */
+    public static void putTransportContent(FBAShipment fbaShipment, Shipment shipment) throws
+            FBAInboundServiceMWSException {
+        PutTransportContentRequest request = new PutTransportContentRequest();
+        request.setSellerId(fbaShipment.account.merchantId);
+        request.setShipmentId(fbaShipment.shipmentId);
+        request.setIsPartnered(false);
+        request.setShipmentType(shipmentType(shipment.type));
+        request.setTransportDetails(fbaShipment.transportDetails(shipment));
+        PutTransportContentResponse response = client(fbaShipment.account).putTransportContent(request);
+    }
+
+    /**
+     * 提交运输信息时用到的 ShipmentType
+     * <p>
+     * ShipmentType values:
+     * 1. SP – Small Parcel
+     * 2. LTL – Less Than Truckload/Full Truckload (LTL/FTL)
+     *
+     * @param shipType
+     * @return
+     */
+    public static String shipmentType(Shipment.T shipType) {
+        if(shipType == null) return null;
+        switch(shipType) {
+            case EXPRESS:
+                return "SP";
+            case AIR:
+            case SEA:
+                return "LTL";
+            default:
+                return "SP";
+        }
     }
 
     /**
@@ -224,12 +277,12 @@ public class FBA {
         List<InboundShipmentInfo> inbounds = response.getListInboundShipmentsResult()
                 .getShipmentData().getMember();
 
-        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<String, F.T3<String, String, String>>();
+        Map<String, F.T3<String, String, String>> shipmentsT3 = new HashMap<>();
         for(InboundShipmentInfo info : inbounds) {
             // Amazon 对于重复提交的 FBA ShipmentId 不会做限制, 所以有过的信息不需要再记录
             if(shipmentsT3.containsKey(info.getShipmentId()))
                 continue;
-            shipmentsT3.put(info.getShipmentId(), new F.T3<String, String, String>(
+            shipmentsT3.put(info.getShipmentId(), new F.T3<>(
                     info.getShipmentStatus(), info.getDestinationFulfillmentCenterId(), info.getShipmentName())
             );
         }
@@ -250,7 +303,7 @@ public class FBA {
          * item.getQuantityShipped();
          * item.getQuantityReceived();
          */
-        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<String, F.T2<Integer, Integer>>();
+        Map<String, F.T2<Integer, Integer>> fetchItems = new HashMap<>();
         ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest();
         request.setShipmentId(shipmentId);
         request.setSellerId(acc.merchantId);
@@ -260,7 +313,7 @@ public class FBA {
             // 进入系统内 msku 全变成大写
             if(fetchItems.containsKey(item.getSellerSKU().toUpperCase())) continue;
             fetchItems.put(item.getSellerSKU().toUpperCase(),
-                    new F.T2<Integer, Integer>(item.getQuantityReceived(), item.getQuantityShipped())
+                    new F.T2<>(item.getQuantityReceived(), item.getQuantityShipped())
             );
         }
         return fetchItems;
@@ -277,7 +330,9 @@ public class FBA {
                 fixHistoryMSKU(unit.selling.merchantSKU),
                 null,
                 null,
-                unit.qty());
+                unit.qtyForFba(),
+                null
+        );//.withPrepDetailsList(new PrepDetailsList(Collections.singletonList(new PrepDetails("Labeling", "SELLER")))
     }
 
     /**
@@ -287,16 +342,14 @@ public class FBA {
      * @return
      */
     private static List<InboundShipmentItem> procureUnitsToInboundShipmentItems(List<ProcureUnit> units) {
-
-        List<InboundShipmentItem> items = new ArrayList<InboundShipmentItem>();
-        for(ProcureUnit unit : units) {
-            items.add(new InboundShipmentItem(null,
-                    fixHistoryMSKU(unit.selling.merchantSKU),
-                    null,
-                    unit.qty(),
-                    null));
-        }
-        return items;
+        return units.stream().map(unit -> new InboundShipmentItem(
+                null,
+                fixHistoryMSKU(unit.selling.merchantSKU),
+                null,
+                unit.qtyForFba(),
+                null,
+                null,
+                null)).collect(Collectors.toList());
     }
 
 
@@ -355,7 +408,8 @@ public class FBA {
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
                 }
-                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"), "1.0",
+                client = new FBAInboundServiceMWSClient(acc.accessKey, acc.token, OperatorConfig.getVal("brandname"),
+                        "1.0",
                         config);
                 CLIENT_CACHE.put(key, client);
             }
@@ -364,4 +418,105 @@ public class FBA {
     }
 
 
+    public enum FBA_ERROR_TYPE {
+        LOCKED {
+            @Override
+            public String message() {
+                return "FBA 已经被锁定！";
+            }
+        },
+        IN_TRANSIT {
+            @Override
+            public String message() {
+                return "运输商已经向 Amazon fulfillment center 报告接收到了运输信息！";
+            }
+        },
+        INVALID_STATUS_CHANGE {
+            @Override
+            public String message() {
+                return "物流人员没有通过系统进行开始运输而手动在 Amazon 后台操作了 FBA.";
+            }
+        },
+        UNKNOWN_SKU {
+            @Override
+            public String message() {
+                return "请检查 Selling 的 Merchant SKU 属性: " +
+                        " 1. 格式是否正确？(正确的格式应该为 \"SKU,UPC\")" +
+                        " 2. 是否能够在 Amazon sellercentral 上找到对应的产品?";
+            }
+        },
+        MISSING_DIMENSIONS {
+            @Override
+            public String message() {
+                return "Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误.";
+            }
+        },
+        ANDON_PULL_STRIKE_ONE {
+            @Override
+            public String message() {
+                return "Amazon fulfillment center 中有其他 FBA 在入库时出现了错误.";
+            }
+        },
+        NON_SORTABLE {
+            @Override
+            public String message() {
+                return "请检查 Amazon sellercentral: " +
+                        " 1. FBA 仓库剩余可用容量是否不足?" +
+                        " 2. Selling 在 Amazon sellercentral 中对应的产品的尺寸或单位错误导致匹配的仓库类型错误.";
+            }
+        },
+        NOT_ELIGIBLE_FC_FOR_ITEM {
+            @Override
+            public String message() {
+                return "当前 FBA 的 FBACenter 暂时不可用，请等待或更换 FBA.";
+            }
+        },
+        UNKNOWN_ERROR {
+            @Override
+            public String message() {
+                return "出现了一个未知错误，请向开发部报告.";
+            }
+        },
+        QUANTITIES {
+            @Override
+            public String message() {
+                return "收货数量和出货数量不一致，请联系开发部";
+            }
+        };
+
+        public abstract String message();
+    }
+
+    /**
+     * 格式化 Amazon 报告的 FBA 相关的错误
+     *
+     * @param e
+     * @return
+     */
+    public static FBA_ERROR_TYPE fbaErrorFormat(FBAInboundServiceMWSException e) {
+        String errMsg = e.getMessage();
+        if(errMsg.contains("Shipment is locked. No updates allowed") ||
+                errMsg.contains("Shipment is in locked status")) {
+            return FBA_ERROR_TYPE.LOCKED;
+        } else if(errMsg.contains("items and quantities that have been previously planned ")) {
+            return FBA_ERROR_TYPE.QUANTITIES;
+        } else if(errMsg.contains("FBA31004")) {
+            return FBA_ERROR_TYPE.IN_TRANSIT;
+        } else if(errMsg.contains("Invalid Status change")) {
+            return FBA_ERROR_TYPE.INVALID_STATUS_CHANGE;
+        } else if(errMsg.contains("NOT_IN_PRODUCT_CATALOG") || errMsg.contains("UNKNOWN_SKU")) {
+            return FBA_ERROR_TYPE.UNKNOWN_SKU;
+        } else if(errMsg.contains("MISSING_DIMENSIONS") || errMsg.contains("UNFULFILLABLE_IN_DESTINATION_MP")) {
+            return FBA_ERROR_TYPE.MISSING_DIMENSIONS;
+        } else if(errMsg.contains("ANDON_PULL_STRIKE_ONE")) {
+            return FBA_ERROR_TYPE.ANDON_PULL_STRIKE_ONE;
+        } else if(errMsg.contains("NON_SORTABLE") || errMsg.contains("SORTABLE")) {
+            return FBA_ERROR_TYPE.NON_SORTABLE;
+        } else if(errMsg.contains("NOT_ELIGIBLE_FC_FOR_ITEM")) {
+            return FBA_ERROR_TYPE.NOT_ELIGIBLE_FC_FOR_ITEM;
+        } else {
+            Webs.systemMail("FBA 相关操作出现未知错误", Webs.S(e), Arrays.asList("duan@easya.cc", "licco@easya.cc"));
+            return FBA_ERROR_TYPE.UNKNOWN_ERROR;
+        }
+    }
 }

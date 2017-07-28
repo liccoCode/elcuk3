@@ -2,31 +2,40 @@ package models.finance;
 
 import exception.PaymentException;
 import helper.Currency;
+import helper.DBUtils;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.embedded.ERecordBuilder;
+import models.material.MaterialApply;
 import models.procure.Cooperator;
 import models.product.Attach;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.Model;
 import play.i18n.Messages;
 import play.libs.F;
 import play.utils.FastRuntimeException;
 
-import java.math.BigDecimal;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 支付单, 真正用于一次的支付操作.
@@ -78,7 +87,7 @@ public class Payment extends Model {
     }
 
     @OneToMany(mappedBy = "payment")
-    public List<PaymentUnit> units = new ArrayList<PaymentUnit>();
+    public List<PaymentUnit> units = new ArrayList<>();
 
     /**
      * Payment 所关联的采购请款单;
@@ -94,6 +103,12 @@ public class Payment extends Model {
      */
     @ManyToOne
     public TransportApply tApply;
+
+    /**
+     * 与物料出货单管理
+     */
+    @ManyToOne
+    public MaterialApply mApply;
 
     @ManyToOne
     public Cooperator cooperator;
@@ -222,7 +237,7 @@ public class Payment extends Model {
          * 2. 判断软删除的, 软删除的不允许处理
          * 3. 判断状态是允许的
          */
-        List<Long> existIds = new ArrayList<Long>();
+        List<Long> existIds = new ArrayList<>();
         for(PaymentUnit fee : this.units) {
             existIds.add(fee.id);
         }
@@ -248,19 +263,30 @@ public class Payment extends Model {
             unit.state = PaymentUnit.S.APPROVAL;
             unit.save();
             //ex: 批准 1000 个 71SMP5100-BHSPU(#68) 请款, 金额 ¥ 12000.0
-            new ERecordBuilder("payment.approval")
-                    .msgArgs(unit.procureUnit.qty(),
-                            unit.procureUnit.sku,
-                            "#" + unit.id,
-                            unit.feeType.nickName,
-                            unit.currency.symbol() + " " + unit.amount())
-                    .fid(this.id)
-                    .save();
+            if(unit.procureUnit != null) {
+                new ERecordBuilder("payment.approval")
+                        .msgArgs(unit.procureUnit.qty(),
+                                unit.procureUnit.sku,
+                                "#" + unit.id,
+                                unit.feeType.nickName,
+                                unit.currency.symbol() + " " + unit.amount())
+                        .fid(this.id)
+                        .save();
+            } else if(unit.materialPlanUnit != null) {
+                new ERecordBuilder("payment.approval")
+                        .msgArgs(unit.unitQty,
+                                unit.materialPlanUnit.material.code,
+                                "#" + unit.id,
+                                unit.feeType.nickName,
+                                unit.currency.symbol() + " " + unit.amount())
+                        .fid(this.id)
+                        .save();
+            }
         }
     }
 
     private List<PaymentUnit> waitForDealPaymentUnit(List<Long> paymentUnitIds) {
-        List<PaymentUnit> paymentUnits = new ArrayList<PaymentUnit>();
+        List<PaymentUnit> paymentUnits = new ArrayList<>();
         for(Long id : paymentUnitIds) {
             PaymentUnit unit = PaymentUnit.findById(id);
             if(unit.payment.id.equals(this.id))
@@ -287,7 +313,7 @@ public class Payment extends Model {
         this.save();
     }
 
-    public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratio_publish_date,
+    public void payIt(Long paymentTargetId, Currency currency, Float ratio, Date ratioPublishDate,
                       BigDecimal actualPaid) {
         /**
          * 0. 验证
@@ -318,7 +344,7 @@ public class Payment extends Model {
         if(ratio == null || ratio <= 0)
             Validation.addError("", "汇率的值不合法.");
 
-        if(!Dates.date2Date().equals(Dates.date2Date(ratio_publish_date)))
+        if(!Dates.date2Date().equals(Dates.date2Date(ratioPublishDate)))
             Validation.addError("", "汇率时间错误, 并非当前支付的汇率时间.");
 
         if(Validation.hasErrors()) return;
@@ -329,7 +355,7 @@ public class Payment extends Model {
         }
 
         this.rate = ratio;
-        this.ratePublishDate = ratio_publish_date;
+        this.ratePublishDate = ratioPublishDate;
         this.paymentDate = new Date();
         // 切换到最后选择的支付账号
         this.target = paymentTarget;
@@ -355,17 +381,14 @@ public class Payment extends Model {
      * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
     public F.T3<Float, Float, Float> totalFees() {
-        // todo: 将付款的金额限制在 USD 与 CNY
         float currenctCurrencyAmount = 0;
-        float usd = 0;
-        float cny = 0;
         Currency lastCurrency = this.currency;
         for(PaymentUnit unit : this.units()) {
             if(lastCurrency != this.currency)
                 throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
             currenctCurrencyAmount += unit.amount();
         }
-        return new F.T3<Float, Float, Float>(
+        return new F.T3<>(
                 currency.toUSD(currenctCurrencyAmount),
                 currency.toCNY(currenctCurrencyAmount),
                 currenctCurrencyAmount);
@@ -377,27 +400,23 @@ public class Payment extends Model {
      * @param state
      * @return
      */
-    public int unitsStateSize(PaymentUnit.S state) {
-        int size = 0;
-        for(PaymentUnit unit : this.units) {
-            if(!unit.remove && unit.state == state)
-                size++;
-        }
-        return size;
+    public long unitsStateSize(PaymentUnit.S state) {
+        return this.units.stream()
+                .filter(unit -> !unit.remove && unit.state == state)
+                .count();
     }
 
     /**
      * 返回 Payment 没有删除的 PaymentUnit
+     * <p>
+     * 数据量比较大的时候用时间换 CPU 和内存: (scroll: https://dzone.com/articles/bulk-fetching-hibernate)
      *
      * @return
      */
     public List<PaymentUnit> units() {
-        List<PaymentUnit> unRemove = new ArrayList<PaymentUnit>();
-        for(PaymentUnit unit : this.units) {
-            if(unit.remove) continue;
-            unRemove.add(unit);
-        }
-        return unRemove;
+        return this.units.stream()
+                .filter(unit -> !unit.remove)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -408,12 +427,17 @@ public class Payment extends Model {
      * @return
      */
     public List<Cooperator> cooperators() {
-        Set<Cooperator> cooperatorSet = new HashSet<Cooperator>();
-        for(PaymentUnit unit : this.units()) {
-            if(unit.cooperator() == null) continue;
-            cooperatorSet.add(unit.cooperator());
+        String sql = "SELECT DISTINCT(p.cooperator_id) AS cooperator_id FROM PaymentUnit p WHERE p.payment_id=?";
+        List<Map<String, Object>> rows = DBUtils.rows(sql, this.id);
+        List<Long> cooperatorIds = rows.stream().map(row -> row.get("cooperator_id"))
+                .filter(Objects::nonNull)
+                .map(cooperatorId -> NumberUtils.toLong(cooperatorId.toString()))
+                .collect(Collectors.toList());
+        if(cooperatorIds != null && cooperatorIds.size() > 0) {
+            return Cooperator.find("id IN" + SqlSelect.inlineParam(cooperatorIds)).fetch();
+        } else {
+            return Collections.EMPTY_LIST;
         }
-        return new ArrayList<Cooperator>(cooperatorSet);
     }
 
 
@@ -424,7 +448,7 @@ public class Payment extends Model {
      */
     public String approvalAmount() {
         BigDecimal amount = new BigDecimal(0);
-        ArrayList<String> shipments = new java.util.ArrayList<String>();
+        ArrayList<String> shipments = new java.util.ArrayList<>();
         for(PaymentUnit fee : this.units()) {
             if(fee.shipment != null && !shipments.contains(fee.shipment.id)) {
                 shipments.add(fee.shipment.id);
@@ -437,7 +461,7 @@ public class Payment extends Model {
             for(String shipmentid : shipments) {
                 BigDecimal unitamount = new BigDecimal(0);
                 for(PaymentUnit fee : this.units()) {
-                    if(shipmentid == fee.shipment.id) {
+                    if(Objects.equals(shipmentid, fee.shipment.id)) {
                         if(PaymentUnit.S.DENY != fee.state)
                             unitamount = unitamount.add(fee.decimalamount());
                     }
@@ -454,11 +478,17 @@ public class Payment extends Model {
     }
 
     public List<User> applyers() {
-        Set<User> users = new HashSet<User>();
-        for(PaymentUnit unit : this.units()) {
-            users.add(unit.payee);
+        String sql = "SELECT DISTINCT(p.payee_id) AS payee_id FROM PaymentUnit p WHERE p.payment_id=?";
+        List<Map<String, Object>> rows = DBUtils.rows(sql, this.id);
+        List<Long> payeeIds = rows.stream().map(row -> row.get("payee_id"))
+                .filter(Objects::nonNull)
+                .map(payeeId -> NumberUtils.toLong(payeeId.toString()))
+                .collect(Collectors.toList());
+        if(payeeIds != null && payeeIds.size() > 0) {
+            return User.find("id IN" + SqlSelect.inlineParam(payeeIds)).fetch();
+        } else {
+            return Collections.EMPTY_LIST;
         }
-        return new ArrayList<User>(users);
     }
 
 
@@ -478,20 +508,22 @@ public class Payment extends Model {
         jpql.from("Payment")
                 .where("cooperator=?").param(cooper)
                 .where("createdAt>=?").param(now.minusHours(24).toDate())
-                .where("createdAt<=?").param(now.toDate())
+                .where("createdAt<=?").param(Dates.night(now.toDate()))
                 .where("state=?").param(S.WAITING)
                 .where("currency=?").param(currency);
         if(apply instanceof TransportApply)
             jpql.where("tApply=?").param(apply);
         else if(apply instanceof ProcureApply)
             jpql.where("pApply=?").param(apply);
+        else if(apply instanceof MaterialApply)
+            jpql.where("mApply=?").param(apply);
+
         jpql.orderBy("createdAt DESC");
 
         Payment payment = Payment.find(jpql.toString(), jpql.getParams().toArray()).first();
 
-        if(payment == null ||
-                payment.totalFees()._1 + currency.toUSD(amount) > 230000 ||
-                payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
+        if(payment == null || payment.totalFees()._1 + currency.toUSD(amount) > 230000
+                || payment.totalFees()._2 + currency.toCNY(amount) > 1400000) {
             payment = new Payment();
             if(cooper.paymentMethods.size() <= 0)
                 throw new PaymentException(Messages.get("paymenttarget.missing", cooper.fullName));
@@ -499,6 +531,9 @@ public class Payment extends Model {
             payment.target = cooper.paymentMethods.get(0);
             payment.currency = currency;
             payment.generatePaymentNumber(apply).save();
+            Logger.info("新增支付单:" + payment.paymentNumber + " totalUSD:" + payment.totalFees()._1 + currency.toUSD(amount)
+                    + "totalCNY:" + payment.totalFees()._2 + currency.toCNY(amount) + "apply:" + apply
+                    + "createdAt:>=" + now.minusHours(24).toDate() + "createdAt:<=" + now.toDate());
         }
         return payment;
     }
@@ -519,6 +554,10 @@ public class Payment extends Model {
             count = Payment.count("pApply=?", apply);
             this.pApply = (ProcureApply) apply;
             this.paymentNumber = String.format("[%s]-%02d", this.pApply.serialNumber, count + 1);
+        } else if(apply instanceof MaterialApply) {
+            count = Payment.count("mApply=?", apply);
+            this.mApply = (MaterialApply) apply;
+            this.paymentNumber = String.format("[%s]-%02d", this.mApply.serialNumber, count + 1);
         }
         return this;
     }
@@ -540,7 +579,7 @@ public class Payment extends Model {
 
     public List<ElcukRecord> records() {
         return ElcukRecord.records(this.id + "",
-                Arrays.asList("payment.approval", "payment.payit", "payment.uploadDestroy", "payment.cancel"));
+                Arrays.asList("payment.approval", "payment.payit", "payment.uploadDestroy", "payment.cancel"), 50);
     }
 
 
@@ -598,5 +637,28 @@ public class Payment extends Model {
         int result = super.hashCode();
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
+    }
+
+    public static HighChart queryPerDayAmount() {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DATE_FORMAT(p.paymentDate,'%Y-%m-%d') AS per, count(1), sum(u.amount + u.fixValue) as total");
+        sql.append(" ,p.currency FROM Payment p LEFT JOIN PaymentUnit u ON p.id = u.payment_id ");
+        sql.append(" WHERE p.paymentDate IS NOT NULL ");
+        sql.append(" GROUP BY DATE_FORMAT(p.paymentDate,'%Y-%m-%d') ");
+        sql.append(" ORDER BY DATE_FORMAT(p.paymentDate,'%Y-%m-%d') DESC");
+        HighChart lineChart = new HighChart(Series.LINE);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Series.Line line = new Series.Line("支付单");
+        DBUtils.rows(sql.toString()).forEach(row -> {
+            try {
+                line.add(formatter.parse(row.get("per").toString()),
+                        Currency.valueOf(row.get("currency").toString()).toCNY(Float.parseFloat(row.get("total")
+                                .toString())));
+            } catch(ParseException e) {
+                e.printStackTrace();
+            }
+        });
+        lineChart.series(line.sort());
+        return lineChart;
     }
 }

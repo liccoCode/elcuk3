@@ -1,9 +1,6 @@
 package controllers;
 
-import helper.Constant;
-import helper.Dates;
-import helper.GTs;
-import helper.J;
+import helper.*;
 import models.ElcukRecord;
 import models.Privilege;
 import models.User;
@@ -11,6 +8,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.krysalis.barcode4j.HumanReadablePlacement;
 import org.krysalis.barcode4j.impl.code128.Code128Bean;
 import org.krysalis.barcode4j.impl.code128.Code128Constants;
@@ -18,7 +16,6 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.krysalis.barcode4j.tools.MimeTypes;
 import play.Logger;
 import play.data.binding.As;
-import play.mvc.Http;
 import play.mvc.Util;
 
 import java.awt.image.BufferedImage;
@@ -44,7 +41,7 @@ public class Login extends Secure.Security {
     /**
      * 登陆的用户 Cache
      */
-    private static final Map<String, User> USER_CACHE = new ConcurrentHashMap<String, User>();
+    private static final Map<String, User> USER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 登陆
@@ -61,17 +58,15 @@ public class Login extends Secure.Security {
         boolean iscorrect = user.authenticate(password);
         String domain = models.OperatorConfig.getVal("domain");
         if(iscorrect) {
-            Http.Response.current().setCookie("username", username, domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("usermd5", User.userMd5(username), domain, "/", 60 * 60 * 24 * 30,
-                    false);
+            Duration leftTime = Duration.standardDays(30);
+            int timeInSeconds = leftTime.toStandardSeconds().getSeconds();
+            response.setCookie("username", username, domain, "/", timeInSeconds, false);
+            response.setCookie("usermd5", User.userMd5(username), domain, "/", timeInSeconds, false);
 
-            Http.Response.current().setCookie("kod_name", "elcuk2", domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_token", User.Md5(User.userMd5("elcuk2")), domain, "/",
-                    60 * 60 * 24 * 30, false);
-            Http.Response.current()
-                    .setCookie("kod_user_language", "zh_CN", domain, "/", 60 * 60 * 24 * 30, false);
-            Http.Response.current().setCookie("kod_user_online_version", "check-at-1418867695", domain, "/",
-                    60 * 60 * 24 * 30, false);
+            response.setCookie("kod_name", "elcuk2", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_token", Webs.md5(User.userMd5("elcuk2")), domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_language", "zh_CN", domain, "/", timeInSeconds, false);
+            response.setCookie("kod_user_online_version", "check-at-1418867695", domain, "/", timeInSeconds, false);
             new ElcukRecord("login", J.json(
                     GTs.MapBuilder.map("Username", username).put("Ip", request.remoteAddress)
                             .put("UserAgent", request.headers.get("user-agent").toString()).
@@ -96,13 +91,13 @@ public class Login extends Secure.Security {
         String domain = models.OperatorConfig.getVal("domain");
         try {
             Login.current().logout();
-            Http.Response.current().setCookie("username", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("usermd5", "", domain, "/", 0, false);
+            response.setCookie("username", "", domain, "/", 0, false);
+            response.setCookie("usermd5", "", domain, "/", 0, false);
 
-            Http.Response.current().setCookie("kod_name", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_token", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_user_language", "", domain, "/", 0, false);
-            Http.Response.current().setCookie("kod_user_online_version", "", domain, "/", 0, false);
+            response.setCookie("kod_name", "", domain, "/", 0, false);
+            response.setCookie("kod_token", "", domain, "/", 0, false);
+            response.setCookie("kod_user_language", "", domain, "/", 0, false);
+            response.setCookie("kod_user_online_version", "", domain, "/", 0, false);
         } catch(NullPointerException e) {
             Logger.warn("Current User is null. No Cookie.");
         }
@@ -116,12 +111,16 @@ public class Login extends Secure.Security {
          * 将用户信息缓存到 User Cache.
          */
         // 初始化用户缓存中的用户;
-        if(USER_CACHE.get(Secure.Security.connected()) == null) {
-            User user = User.findByUserName(Secure.Security.connected().toLowerCase());
-            user.login();
-            USER_CACHE.put(user.username, user);
+        String username = Secure.Security.connected();
+        if(StringUtils.isNotBlank(username)) {
+            if(USER_CACHE.get(username) == null) {
+                User user = User.findByUserName(username.toLowerCase());
+                user.login();
+                USER_CACHE.put(user.username, user);
+            }
+            return USER_CACHE.get(username.toLowerCase());
         }
-        return USER_CACHE.get(Secure.Security.connected().toLowerCase());
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -171,6 +170,8 @@ public class Login extends Secure.Security {
      * @throws java.io.IOException
      */
     public static void code128(String shipmentId) throws IOException {
+        // 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
         Code128Bean bean = new Code128Bean();
 
         // 尽可能调整到与 Amazon 的规格一样
@@ -188,6 +189,31 @@ public class Login extends Secure.Security {
         BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_JPEG, 600,
                 BufferedImage.TYPE_BYTE_BINARY, false, 0);
         bean.generateBarcode(canvas, shipmentId);
+        canvas.finish();
+        out.close();
+        response.setContentTypeIfNotSet(MimeTypes.MIME_JPEG);
+        renderBinary(file.toURI().toURL().openStream());
+    }
+
+    public static void fnSkuCode128(String fnSku) throws IOException {
+        // 将 barcode4j 使用 zxing 代替, 例子: http://aboutyusata.blogspot.hk/2012/10/generate-code128-qrcode-pdf417-barcode.html
+        // 核心使用到两个 API: MatrixToImageWriter, Code128Writer
+        Code128Bean bean = new Code128Bean();
+
+        // 尽可能调整到与 Amazon 的规格一样
+        bean.setModuleWidth(0.11888);
+        bean.setHeight(8.344);
+        // 控制值内容, CODESET_A 不允许有小写
+        bean.setCodeset(Code128Constants.CODESET_ALL);
+        bean.setMsgPosition(HumanReadablePlacement.HRP_NONE);
+
+        String fileName = String.format("%s.jpeg", fnSku);
+        File file = new File(Constant.TMP, fileName);
+        file.delete(); // 删除原来的, 再写新的
+        OutputStream out = new FileOutputStream(file);
+        BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, MimeTypes.MIME_JPEG, 600,
+                BufferedImage.TYPE_BYTE_BINARY, false, 0);
+        bean.generateBarcode(canvas, fnSku);
         canvas.finish();
         out.close();
         response.setContentTypeIfNotSet(MimeTypes.MIME_JPEG);

@@ -43,27 +43,24 @@ $ ->
   # 初始化图片
   imageInit()
 
-
   # Update 按钮
   $('#amz-update').click ->
-    if !previewBtn.call($("#productDesc"))
-      return false unless imageIndexCal()
-      LoadMask.mask()
-      $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-      .done((r) ->
-        msg = if r.flag is true
-          {text: "#{r.message} Selling 更新成功", type: 'success'}
-        else
-          {text: r.message, type: 'error'}
-        noty(msg)
-        LoadMask.unmask()
-      )
-      .fail((r) ->
-        noty({text: r.responseText, type: 'error'})
-        LoadMask.unmask()
-      )
-      false
-
+    return false unless imageIndexCal()
+    LoadMask.mask()
+    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
+    .done((r) ->
+      msg = if r.flag is true
+        {text: "#{r.message} Selling 更新成功", type: 'success'}
+      else
+        {text: r.message, type: 'error'}
+      noty(msg)
+      LoadMask.unmask()
+    )
+    .fail((r) ->
+      noty({text: r.responseText, type: 'error'})
+      LoadMask.unmask()
+    )
+    false
 
   # AMA局部更新 按钮
   $('#amz-part-update').click ->
@@ -80,36 +77,6 @@ $ ->
     .fail((r) ->
       alert r.responseText
       LoadMask.unmask('#btns')
-    )
-    false
-
-
-  # Deploy 按钮
-  $('#amz-deploy').click ->
-    # check account 与 market 不一样, 要提醒
-    switch $('[name=s\\.account\\.id]').val()
-      when 1
-        if $('[name=s\\.market]').val() != 'AMAZON_UK'
-          return unless confirm("注意! Account 是 UK 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      when 2
-        if $('[name=s\\.market]').val() != 'AMAZON_DE'
-          return unless confirm("注意! Account 是 DE 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      when 131
-        if $('[name=s\\.market]').val() != 'AMAZON_US'
-          return unless confirm("注意! Account 是 US 与 Selling 所在市场不一样, 已经取消这样销售, 确认要提交?")
-      else
-    LoadMask.mask()
-    $.ajax($(@).data('url'), {type: 'POST', data: $('#saleAmazonForm').serialize()})
-    .done((feed) ->
-      if feed.flag is false
-        noty({text: feed.message, type: 'error'})
-      else
-        noty({text: "成功创建 Feed(#{feed.id})", type: 'success'})
-      LoadMask.unmask()
-    )
-    .fail((r) ->
-      noty({text: r.responseText, type: 'error'})
-      LoadMask.unmask()
     )
     false
 
@@ -260,13 +227,14 @@ $ ->
       allowImageUpload: false
       newlineTag: 'br'
       afterChange: ->
-        htmlCode = this.html().toString()
-        re = new RegExp("<span>", "g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("</span>", "g");
-        htmlCode = htmlCode.replace(re, "")
-        re = new RegExp("<br />", "g");
-        htmlCode = htmlCode.replace(re, "<br>")
+        div = $('<div>').html($("<div>").html(this.html()).text())
+        div.find('div').replaceWith(->
+          return $(this).contents()
+        )
+        div.find('span').replaceWith(->
+          return $(this).contents()
+        )
+        htmlCode = div.html()
         count = htmlCode.length
         $('#productDesc').val(htmlCode)
         $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
@@ -274,17 +242,3 @@ $ ->
       items: ['source', '|', '|', 'forecolor', 'bold']
     });
   )
-
-  previewBtn = (e) ->
-    invalidTag = false
-    for tag in $('#previewDesc').html($('#productDesc').val()).find('*')
-      switch tag.nodeName.toString().toLowerCase()
-        when 'br','p','b','#text'
-          break
-        else
-          invalidTag = true
-          $(tag).css('background', 'yellow')
-    noty({text: '使用了 Amazon 不允许使用的 Tag, 请查看预览中黄色高亮部分!', type: 'error', timeout: 3000}) if invalidTag is true
-    invalidTag
-
-

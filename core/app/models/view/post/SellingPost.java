@@ -4,7 +4,6 @@ import models.User;
 import models.market.M;
 import models.market.Selling;
 import org.apache.commons.lang.StringUtils;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
@@ -12,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by licco on 15/8/4.
+ * Created by IntelliJ IDEA.
+ * User: licco
+ * Date: 15/8/4
+ * Time: 5:39 PM
  */
 public class SellingPost extends Post<Selling> {
 
@@ -30,11 +32,10 @@ public class SellingPost extends Post<Selling> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        List<Object> params = new ArrayList<Object>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s WHERE 1 = 1 ");
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s LEFT JOIN s.listing l WHERE 1 = 1 ");
 
         if(StringUtils.isNotBlank(analyzeResult)) {
-
             params.add(analyzeResult);
         }
         if(market != null) {
@@ -61,13 +62,11 @@ public class SellingPost extends Post<Selling> {
             List<String> categorys = User.getTeamCategorys(User.current());
 
             if(categorys != null && categorys.size() > 0) {
-                sql.append(" AND s.listing.product.category.categoryId in " +
-                        SqlSelect.inlineParam(categorys));
+                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
             } else {
-                categorys = new ArrayList<String>();
+                categorys = new ArrayList<>();
                 categorys.add("-1");
-                sql.append(" AND s.listing.product.category.categoryId in " +
-                                       SqlSelect.inlineParam(categorys));
+                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
             }
         }
         if(StringUtils.isNotBlank(keywords)) {
@@ -77,7 +76,7 @@ public class SellingPost extends Post<Selling> {
             params.add("%" + keywords + "%");
         }
         sql.append(" ORDER BY s.createDate DESC ");
-        return new F.T2<String, List<Object>>(sql.toString(), params);
+        return new F.T2<>(sql.toString(), params);
     }
 
     public List<Selling> query() {
@@ -88,12 +87,12 @@ public class SellingPost extends Post<Selling> {
 
     public Long getTotalCount() {
         F.T2<String, List<Object>> params = params();
-        return new Long(Selling.find(params._1, params._2.toArray()).fetch().size());
+        return (long) Selling.find(params._1, params._2.toArray()).fetch().size();
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return new Long(Selling.find(params._1, params._2.toArray()).fetch().size());
+        return (long) Selling.find(params._1, params._2.toArray()).fetch().size();
     }
 
 

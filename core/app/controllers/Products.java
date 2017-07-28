@@ -9,10 +9,12 @@ import models.market.Account;
 import models.market.M;
 import models.market.Selling;
 import models.market.SellingQTY;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.i18n.Messages;
@@ -24,7 +26,11 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 产品模块的基本的类别的基本操作在此
@@ -44,6 +50,7 @@ public class Products extends Controller {
 
     @Before(only = {"index"})
     public static void setIndexLog() {
+        renderArgs.put("categoryIds", Category.categoryIds());
         renderArgs.put("records", ElcukRecord.fid("product.destroy").<ElcukRecord>fetch(50));
     }
 
@@ -54,8 +61,23 @@ public class Products extends Controller {
     public static void index(ProductPost p) {
         if(p == null) p = new ProductPost();
         List<Product> prods = p.query();
-
         render(prods, p);
+    }
+
+    /**
+     * 展示所有的 Product (物流模块用)
+     */
+    public static void indexForShipment(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        List<Product> prods = p.query();
+        render(prods, p);
+    }
+
+    @Check("products.whouseattrs")
+    public static void whouseAttrs(ProductPost p) {
+        if(p == null) p = new ProductPost();
+        Product pro = p.pickup();
+        render(pro, p);
     }
 
     @Before(only = {"show", "update", "delete"})
@@ -83,6 +105,11 @@ public class Products extends Controller {
         render(pro);
     }
 
+    public static void showAttr(String sku) {
+        Product pro = Product.findByMerchantSKU(sku);
+        render(pro);
+    }
+
     public static void copy(String choseid, String skuid, String base, String extend, String attach) {
         Product pro = Product.copyProduct(choseid, skuid, base, extend, attach);
         render("Products/show.html", pro);
@@ -93,21 +120,21 @@ public class Products extends Controller {
         render("Products/show.html", pro);
     }
 
-
+    /**
+     * @param pro
+     */
+    @Check("products.update")
     public static void update(Product pro) {
         try {
-            validation.valid(pro);
             if(!Product.exist(pro.sku)) Validation.addError("", String.format("Sku %s 不存在!", pro.sku));
-
-            if(Validation.hasErrors())
-                renderJSON(Webs.VJson(Validation.errors()));
-
+            if(Validation.hasErrors()) {
+                renderJSON(Webs.vJson(Validation.errors()));
+            }
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);
             pro.save();
-            List<String> logs = new ArrayList<String>();
-            logs.addAll(dbpro.beforeDoneUpdate(pro));
+            List<String> logs = dbpro.beforeDoneUpdate(pro);
             if(logs.size() > 0) {
                 new ElcukRecord(Messages.get("product.update"),
                         Messages.get("action.base", StringUtils.join(logs, "<br>")),
@@ -187,17 +214,6 @@ public class Products extends Controller {
         renderJSON(new Ret());
     }
 
-    //------------------------
-
-    public static void p_sqty_u(SellingQTY q) {
-        try {
-            if(q.isPersistent()) q.save();
-        } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
-        }
-        renderJSON(new Ret(true));
-    }
-
     /**
      * 检查 UPC 上架情况
      */
@@ -234,24 +250,8 @@ public class Products extends Controller {
      * @param market 市场
      */
     public static void showRBNLink(String market) {
-        String suffix = "/catm/classifier/ProductClassifier.amzncatm/classifier/ProductClassifier.amzn?ref=ag_pclasshm_cont_invfile";
-        Ret ret = new Ret("#");
-        if(StringUtils.contains(market, "AMAZON_DE")) {
-            ret = new Ret("https://catalog-mapper-de.amazon.de" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_UK")) {
-            ret = new Ret("https://catalog-mapper-uk.amazon.co.uk" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_US")) {
-            ret = new Ret("https://catalog-mapper-na.amazon.com" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_IT")) {
-            ret = new Ret("https://catalog-mapper-it.amazon.it" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_JP")) {
-            ret = new Ret("https://catalog-mapper-jp.amazon.co.jp" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_FR")) {
-            ret = new Ret("https://catalog-mapper-fr.amazon.fr" + suffix);
-        } else if(StringUtils.contains(market, "AMAZON_CA")) {
-            ret = new Ret("https://catalog-mapper-ca.amazon.ca" + suffix);
-        }
-        renderJSON(ret);
+        renderJSON(new Ret(String.format("https://sellercentral.%s/hz/inventory/classify?ref=ag_pclasshm_cont_invfile&",
+                M.valueOf(market).toString())));
     }
 
     /**
@@ -264,8 +264,8 @@ public class Products extends Controller {
         StringBuffer buff = new StringBuffer();
         buff.append("[");
         for(Cooperator co : cooperatorList) {
-            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append
-                    ("\"").append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append("\"")
+                    .append(",").append("\"").append("name").append("\"").append(":").append("\"").append(co.name)
                     .append("\"").append("},");
         }
         buff.append("]");
@@ -323,7 +323,7 @@ public class Products extends Controller {
     /**
      * 保存 product 附加属性
      */
-    public static void saveAttrs(List<ProductAttr> productAttrs) {
+    public static void saveAttrs(List<ProductAttr> productAttrs, String hsCode) {
         try {
             String log = "";
             for(ProductAttr productAttr : productAttrs) {
@@ -335,11 +335,11 @@ public class Products extends Controller {
                         productAttr.save();
                         log = log + "新增属性:" + productAttr.value;
                     }
-
-                    new ElcukRecord(Messages.get("product.update"),
-                            Messages.get("action.base", log),
+                    Product product = Product.findById(productAttr.product.sku);
+                    product.hs_code = hsCode;
+                    product.save();
+                    new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", log),
                             productAttr.product.sku).save();
-
                 }
             }
             renderJSON(new Ret(true, ""));
@@ -355,17 +355,36 @@ public class Products extends Controller {
         Product pro = Product.findById(sku);
         Template template = Template.findById(templateId);
         List<ProductAttr> atts = pro.productAttrs;
-        for(Attribute attribute : template.attributes) {
-            if(!atts.contains(attribute)) {
-                ProductAttr productAttr = new ProductAttr();
-                productAttr.product = pro;
-                productAttr.attribute = attribute;
-                productAttr.save();
-                atts.add(productAttr);
-            }
-        }
+        template.templateAttributes.stream().filter(templateAttribute -> !atts.contains(templateAttribute.attribute))
+                .forEach(templateAttribute -> {
+                    ProductAttr productAttr = new ProductAttr();
+                    productAttr.product = pro;
+                    productAttr.attribute = templateAttribute.attribute;
+                    productAttr.save();
+                    atts.add(productAttr);
+                });
         Collections.sort(atts);
         render(pro);
+    }
+
+    public static void addAttr(String sku, String attr) {
+        Product product = Product.findById(sku);
+        Attribute attribute = Attribute.find("name=?", attr).first();
+        if(!Optional.ofNullable(attribute).isPresent()) {
+            Attribute new_bute = new Attribute();
+            new_bute.name = attr;
+            new_bute.createDate = new Date();
+            new_bute.type = Attribute.T.STRING;
+            new_bute.sort = (int) Attribute.count() + 1;
+            new_bute.createUser = Login.current();
+            new_bute.save();
+            attribute = new_bute;
+        }
+        ProductAttr new_attr = new ProductAttr();
+        new_attr.attribute = attribute;
+        new_attr.product = product;
+        new_attr.save();
+        Products.showAttr(sku);
     }
 
     /**
@@ -433,13 +452,28 @@ public class Products extends Controller {
 
     /**
      * 模糊匹配SKU
+     *
      * @param sku
      */
     public static void sameSku(String sku) {
         List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
-        List<String> skus = new ArrayList<String>();
-        for(Product p : products) skus.add(p.sku);
+        List<String> skus = products.stream().map(p -> p.sku).collect(Collectors.toList());
         renderJSON(J.json(skus));
+    }
+
+    public static void sameSkuAndCooper(String sku, Long cooperId) {
+        List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
+        List<String> same_sku = products.stream().map(p -> p.sku).collect(Collectors.toList());
+        Cooperator cooperator = Cooperator.findById(cooperId);
+        List<String> existList = cooperator.cooperItems.stream().map(itm -> itm.product.sku)
+                .collect(Collectors.toList());
+        CollectionUtils.filter(same_sku, o -> {
+            for(String exist_sku : existList) {
+                if(exist_sku.equals(o.toString())) return true;
+            }
+            return true;
+        });
+        renderJSON(J.json(existList));
     }
 
     public static void findUPC(String sku) {
@@ -447,8 +481,28 @@ public class Products extends Controller {
         renderJSON(J.json(GTs.MapBuilder.map("upc", pro.upc).put("upcJP", pro.upcJP).build()));
     }
 
-    public static void findProductName(String sku) {
+    public static void findProductName(String sku, Long cooperId) {
         Product pro = Product.findById(sku);
+        if(cooperId != null) {
+            CooperItem item = CooperItem.find("cooperator.id = ? AND sku = ? ", cooperId, sku).first();
+            if(item != null) {
+                renderJSON(J.json(GTs.MapBuilder
+                        .map("name", pro.abbreviation).put("price", item.price.toString())
+                        .put("currency", item.currency.name()).put("period", item.period.toString())
+                        .put("boxSize", item.boxSize.toString()).build()));
+            }
+        }
         renderJSON(J.json(GTs.MapBuilder.map("name", pro.abbreviation).build()));
+    }
+
+    /**
+     * 输出给 typeahead 所使用的 source
+     * <p>
+     * 需要支持: SKU、Family、附加属性、Selling 的 Fnsku
+     *
+     * @param search
+     */
+    public static void source(String search) {
+        renderJSON(J.json(Product.pickSourceItems(search)));
     }
 }

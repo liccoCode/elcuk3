@@ -1,6 +1,6 @@
 {
     "id": "${itm.id}",
-    "qty": "${itm.qty}",
+    "qty": "${itm.unit.shipmentQty()}",
     "recivedQty": "${itm.recivedQty}",
     "shipDate": "${itm.shipDate.format('yyyy-MM-dd HH:mm:ss')}",
     "arriveDate": "${itm.arriveDate.format('yyyy-MM-dd HH:mm:ss')}",

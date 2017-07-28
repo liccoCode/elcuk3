@@ -22,12 +22,12 @@ public class Privilege extends Model {
     /**
      * 将用户的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
      */
-    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+    private static final Map<String, Set<Privilege>> PRIVILEGE_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 将角色的权限缓存起来, 不用每次判断都去 db 取(注:更新权限的时候也需要更新缓存)
      */
-    private static final Map<String, Set<Privilege>> ROLE_PRIVILEGE_CACHE = new ConcurrentHashMap<String, Set<Privilege>>();
+    private static final Map<String, Set<Privilege>> ROLE_PRIVILEGE_CACHE = new ConcurrentHashMap<>();
 
     public Privilege() {
     }
@@ -54,7 +54,7 @@ public class Privilege extends Model {
      * 用户权限的用户
      */
     @ManyToMany(mappedBy = "privileges")
-    public List<User> users = new ArrayList<User>();
+    public List<User> users = new ArrayList<>();
 
     @PrePersist
     @PreUpdate
@@ -88,22 +88,14 @@ public class Privilege extends Model {
     public static void init() {
         // 拥有权限则跳过初始化
         if(Privilege.count() > 1) return;
-        List<Privilege> privileges = new ArrayList<Privilege>();
+        List<Privilege> privileges = new ArrayList<>();
         // 模块
         privileges.add(new Privilege("market", "市场模块"));
         privileges.add(new Privilege("listings.index", "Listing 页面"));
         privileges.add(new Privilege("listings.trackedlistings", "Tracked Listing 页面"));
         privileges.add(new Privilege("orders.index", "订单 页面"));
-        privileges.add(new Privilege("amazonoperations", "Amazon 操作"));
         privileges.add(new Privilege("sellings.delete", "Selling 删除"));
         privileges.add(new Privilege("listings.delete", "Listing 删除"));
-
-        /*
-         * TODO delete
-        privileges.add(new Privilege("support", "售后模块"));
-        privileges.add(new Privilege("tickets.index", "Tickets 工作台 页面"));
-        privileges.add(new Privilege("ticketanalyzes.index", "Ticket 分析 页面"));
-        */
 
         privileges.add(new Privilege("product", "产品模块"));
         privileges.add(new Privilege("products.index", "产品 页面"));
@@ -134,10 +126,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("users.index", "用户管理 页面"));
         privileges.add(new Privilege("mailsrecords.index", "邮件管理 页面"));
         privileges.add(new Privilege("categoryinfos.show", "Category 信息"));
-
-        // 首页
-        // TODO delete
-        privileges.add(new Privilege("application.categorypercent", "首页销售额数据"));
 
         // Analyzes 页面
         privileges.add(new Privilege("analyzes.index", "销量分析 页面"));
@@ -194,13 +182,6 @@ public class Privilege extends Model {
         privileges.add(new Privilege("deliveryments.deliverymenttoapply", "采购单生成请款单"));
 
 
-        //销售目标控制器
-        privileges.add(new Privilege("saletarget", "目标模块"));
-        privileges.add(new Privilege("saletargets.index", "年度目标页面"));
-        privileges.add(new Privilege("saletargets.create", "创建年度目标"));
-        privileges.add(new Privilege("saletargets.split", "Category目标月度分解"));
-
-
         // ProcureUnits
         privileges.add(new Privilege("procureunits.billingprepay", "采购计划预付款申请"));
         privileges.add(new Privilege("procureunits.billingtailpay", "采购计划尾款申请"));
@@ -242,7 +223,7 @@ public class Privilege extends Model {
         Set<Privilege> privileges = PRIVILEGE_CACHE.get(username);
         if(privileges == null) {
             PRIVILEGE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<Privilege>(User.findByUserName(username).privileges));
+                    new HashSet<>(User.findByUserName(username).privileges));
             privileges = PRIVILEGE_CACHE.get(username);
         }
 
@@ -298,7 +279,7 @@ public class Privilege extends Model {
         Set<Privilege> privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
         if(privileges == null) {
             ROLE_PRIVILEGE_CACHE.put(rolename, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<Privilege>(Role.findByRoleName(rolename).privileges));
+                    new HashSet<>(Role.findByRoleName(rolename).privileges));
             privileges = ROLE_PRIVILEGE_CACHE.get(rolename);
         }
         return privileges;
@@ -310,7 +291,7 @@ public class Privilege extends Model {
      * @return
      */
     public static Map<Long, List<Privilege>> getMenuMap(List<Privilege> modules) {
-        Map<Long, List<Privilege>> maps = new HashMap<Long, List<Privilege>>();
+        Map<Long, List<Privilege>> maps = new HashMap<>();
         for(Privilege module : modules) {
             List<Privilege> functions = Privilege.find("pid=?", module.id).fetch();
             maps.put(module.id, functions);

@@ -1,11 +1,11 @@
 package models;
 
-import helper.DBUtils;
 import helper.GTs;
 import models.procure.Shipment;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.db.jpa.Model;
@@ -24,7 +24,7 @@ import java.util.Map;
  * Time: 3:01 PM
  */
 @Entity
-@org.hibernate.annotations.Entity(dynamicUpdate = true)
+@DynamicUpdate
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class ElcukConfig extends Model {
     public static final Map<String, String> MARKETS;
@@ -129,7 +129,7 @@ public class ElcukConfig extends Model {
     }
 
     public static List<String> multiUpdate(Map<String, String> valsMap) {
-        List<String> errorMsg = new ArrayList<String>();
+        List<String> errorMsg = new ArrayList<>();
         for(String key : valsMap.keySet()) {
             ElcukConfig config = ElcukConfig.findById(NumberUtils.toLong(key));
             if(config != null) {
@@ -154,7 +154,7 @@ public class ElcukConfig extends Model {
     private synchronized void editShipMentArriveDay() {
         if(this.name != null && this.name.length() > 0) {
             String[] names = this.name.split("_");
-            if(names != null && names.length >= 2) {
+            if(names.length >= 2) {
                 Shipment.T shipt = null;
                 for(Shipment.T t : Shipment.T.values()) {
                     if(t.name().toLowerCase().equals(names[1])) {
@@ -163,8 +163,8 @@ public class ElcukConfig extends Model {
                     }
                 }
                 List<Shipment> ments = Shipment
-                        .find("lower(whouse.country)=? and type=? and dates.planBeginDate>=?", names[0],
-                                shipt, DateTime.now().toDate()).fetch();
+                        .find("lower(whouse.country)=? and type=? and dates.planBeginDate>=?", names[0], shipt,
+                                DateTime.now().toDate()).fetch();
                 for(Shipment ment : ments) {
                     ment.calcuPlanArriveDate();
                     ment.save();

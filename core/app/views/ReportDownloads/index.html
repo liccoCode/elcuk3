@@ -1,8 +1,8 @@
 #{extends 'main_full.html'/}
 #{set title:"运营报表下载" /}
 #{set 'moreScripts'}
-    #{script_cdn name: 'jquery.dataTables.js'/}
-    #{script_cdn name: 'ReportDownloads/index.coffee'/}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'ReportDownloads/index.coffee'/}
 #{/set}
 
 #{info_row}
@@ -18,9 +18,9 @@
   <div class="span12">
     <div class="input-prepend input-append inline">
       <span class="add-on">年:</span>
-        #{select_year  name: "p.year", value: p.year/}
+        #{select_year  name: "p.year", value: p.year, native: true/}
       <span class="add-on">月:</span>
-        #{select_all_month  name: "p.month", value: p.month/}
+        #{select_all_month  name: "p.month", value: p.month, native: true/}
     </div>
 
     <div class="inline">

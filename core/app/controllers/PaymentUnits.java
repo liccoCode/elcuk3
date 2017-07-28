@@ -12,6 +12,7 @@ import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.view.Ret;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -24,7 +25,7 @@ import java.util.List;
  * Date: 1/28/13
  * Time: 10:43 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class PaymentUnits extends Controller {
 
     @Check("paymentunits.destroy")
@@ -39,11 +40,22 @@ public class PaymentUnits extends Controller {
     }
 
     @Check("paymentunits.destroy")
+    public static void destroyMaterial(Long id, String reason) {
+        PaymentUnit payUnit = PaymentUnit.findById(id);
+        payUnit.materialFeeRemove(reason);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("删除成功");
+        Applys.material(payUnit.materialPlan.apply.id);
+    }
+
+    @Check("paymentunits.destroy")
     public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
         if(Validation.hasErrors())
-            renderJSON(Webs.VJson(Validation.errors()));
+            renderJSON(Webs.vJson(Validation.errors()));
         else
             renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
     }
@@ -65,13 +77,30 @@ public class PaymentUnits extends Controller {
         Applys.procure(paymentUnit.procureUnit.deliveryment.apply.id);
     }
 
+    @Check("paymentunits.fixvalue")
+    public static void fixValueMaterial(Long id, Float fixValue, String reason) {
+        PaymentUnit paymentUnit = PaymentUnit.findById(id);
+        Validation.required("fixValue", fixValue);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Validation.errors().toString()));
+
+        paymentUnit.fixValue(fixValue, reason);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("修正值更新成功.");
+        }
+        // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
+        Applys.material(paymentUnit.materialPlan.apply.id);
+    }
+
     @Check("paymentunits.deny")
     public static void deny(Long id, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         paymentUnit.deny(reason);
         if(request.isAjax()) {
             if(Validation.hasErrors())
-                renderJSON(Webs.VJson(Validation.errors()));
+                renderJSON(Webs.vJson(Validation.errors()));
             else
                 renderJSON(new Ret(true, "成功驳回"));
         } else {
@@ -79,7 +108,7 @@ public class PaymentUnits extends Controller {
                 Webs.errorToFlash(flash);
             else
                 flash.success("成功驳回");
-            Payments.show(paymentUnit.payment.id);
+            Payments.show(paymentUnit.payment.id, null);
         }
     }
 
@@ -93,7 +122,7 @@ public class PaymentUnits extends Controller {
         PaymentUnit feeUnit = PaymentUnit.findById(id);
         feeUnit.fixUnitValue(fee);
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         }
         renderArgs.put("fee", feeUnit);
         render("PaymentUnits/show.json");
@@ -118,7 +147,7 @@ public class PaymentUnits extends Controller {
             Validation.addError("", "请选择需要批准的请款");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-            Payments.show(id);
+            Payments.show(id, null);
         }
 
         payment.unitsApproval(paymentUnitIds);
@@ -127,7 +156,7 @@ public class PaymentUnits extends Controller {
             Webs.errorToFlash(flash);
         else
             flash.success("批复成功");
-        Payments.show(id);
+        Payments.show(id, null);
     }
 
     /**
@@ -140,8 +169,21 @@ public class PaymentUnits extends Controller {
         PaymentUnit fee = PaymentUnit.findById(id);
         fee.transportApprove();
         if(Validation.hasErrors())
-            renderJSON(new Ret(false, Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 批量批准运输单请款
+     *
+     * @param pids
+     */
+    public static void batchApproveFromShipment(Long[] pids) {
+        List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        units.forEach(PaymentUnit::transportApprove);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
+        renderJSON(new Ret(true, "批量批准运输单请款成功"));
     }
 
     /**
@@ -173,7 +215,7 @@ public class PaymentUnits extends Controller {
         fee.cooperator = Cooperator.findById(fee.cooperator.id);
         ship.produceFee(fee);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
     }
 
@@ -204,7 +246,7 @@ public class PaymentUnits extends Controller {
         Shipment ship = Shipment.findById(id);
         fee = ship.calculateDuty(fee.currency, fee.unitQty * fee.unitPrice);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.VJson(Validation.errors())));
+            renderJSON(new Ret(Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);
     }
 }

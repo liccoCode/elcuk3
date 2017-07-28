@@ -1,0 +1,63 @@
+#{extends 'main.html' /}
+#{set title:'库存调整' /}
+#{set 'moreScripts'}
+    #{script 'stockrecords/adjust.es6'/}
+#{/set}
+<style>
+  .table td, .table th{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert/}
+
+#{info_row title:'库存调整'/}
+<div class="row-fluid">
+  <div class="span12">
+    <table class="table table-bordered">
+      <tr>
+        <th>库存调整ID</th>
+        <td>
+          <input type="text" name="record.id" value="${record.id}" readonly>
+        </td>
+        <th>采购计划ID</th>
+        <td width="300px;"><input type="text" name="record.unit.id" value="${record?.unit.id}" readonly></td>
+      </tr>
+      <tr>
+        <th>SKU</th>
+        <td><input type="text" value="${record?.unit.sku}" readonly/></td>
+        <th>产品名称</th>
+        <td>
+          <input type="text" class="input-xxlarge" value="${record?.unit.product?.abbreviation}" readonly/>
+        </td>
+      </tr>
+      <tr>
+        <th>调整前库存</th>
+        <td><input type="text" value="${record?.currQty - record?.qty}" readonly></td>
+        <th>调整类型</th>
+        <td>
+          <select name="record.category" readonly="readonly">
+          #{list items:models.whouse.StockRecord.C, as:'c'}
+            <option value="${c.name()}" ${record.category == c ? 'selected' : ''}>${c.label()}</option>
+          #{/list}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>调整数量<i class="icon-asterisk" style="color:red"></i></th>
+        <td colspan="3">
+          <input type="text" name="record.qty" value="${record.qty}" readonly>
+        </td>
+      </tr>
+      <tr>
+        <th>备注</th>
+        <td colspan="4">
+          <textarea rows="4" class="input-block-level" readonly>${record.memo}</textarea>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
