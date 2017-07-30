@@ -187,6 +187,9 @@ public class Payment extends Model {
      */
     public String actualAccountNumber = "";
 
+    @ManyToOne
+    public BatchReviewApply batchReviewApply;
+
     @PrePersist
     public void beforeSave() {
         this.createdAt = new Date();

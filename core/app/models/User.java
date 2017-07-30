@@ -220,6 +220,34 @@ public class User extends Model {
         public abstract String url();
     }
 
+    public enum D {
+        Brand {
+            @Override
+            public String label() {
+                return "品牌部";
+            }
+        },
+        Audit {
+            @Override
+            public String label() {
+                return "审计部";
+            }
+        },
+        Finance {
+            @Override
+            public String label() {
+                return "财务部";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 所属部门
+     */
+    @Enumerated(EnumType.STRING)
+    public D department;
 
     public User() {
     }

@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class BtbCustomPost extends Post<BtbCustom>{
 
+    private static final long serialVersionUID = -1348061646691032722L;
+    
     public String keywords;
 
     @Override
