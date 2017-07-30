@@ -4,12 +4,15 @@ import controllers.api.SystemOperation;
 import helper.Currency;
 import helper.J;
 import helper.Webs;
+import models.finance.BatchReviewApply;
+import models.finance.BatchReviewHandler;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
 import models.view.highchart.HighChart;
+import models.view.post.BatchApplyPost;
 import models.view.post.PaymentUnitPost;
 import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
@@ -17,6 +20,7 @@ import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -39,10 +43,8 @@ public class Payments extends Controller {
     @Before(only = {"index"})
     public static void beforIndex() {
         List<Cooperator> cooperator = Cooperator.findAll();
-
         renderArgs.put("cooperator", cooperator);
     }
-
 
     @Check("payments.index")
     public static void index(PaymentsPost p) {
@@ -82,6 +84,61 @@ public class Payments extends Controller {
         render(payment, units, p, post);
     }
 
+    public static void batchApply(List<Long> pids) {
+        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        BatchReviewApply apply = new BatchReviewApply();
+        apply.status = BatchReviewApply.S.Pending;
+        apply.cooperator = payments.get(0).cooperator;
+        render(payments, apply);
+    }
+
+    public static void saveBatchApply(List<Long> pids, BatchReviewApply apply) {
+        apply.cooperator = Cooperator.findById(apply.cooperator.id);
+        apply.id = apply.id();
+        apply.status = BatchReviewApply.S.Pending;
+        apply.createDate = new Date();
+        apply.creator = Login.current();
+        apply.save();
+        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        payments.forEach(payment -> {
+            payment.batchReviewApply = apply;
+            payment.save();
+        });
+        batchApplyIndex(new BatchApplyPost());
+    }
+
+    public static void batchApplyIndex(BatchApplyPost p) {
+        if(p == null) p = new BatchApplyPost();
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        List<BatchReviewApply> applies = p.query();
+        render(p, cooperators, applies);
+    }
+
+    public static void showBatchApply(String id) {
+        BatchReviewApply apply = BatchReviewApply.findById(id);
+
+        render(apply);
+    }
+
+    public static void submitBatchResult(BatchReviewHandler handler) {
+        handler.createDate = new Date();
+        handler.handler = Login.current();
+        handler.save();
+        BatchReviewApply apply = BatchReviewApply.findById(handler.apply.id);
+        apply.status = BatchReviewApply.S.Brand;
+        apply.save();
+        flash.success("审核操作成功！");
+        showBatchApply(handler.apply.id);
+    }
+
+    public static void transferNextDepartment(String applyId, String status) {
+        BatchReviewApply apply = BatchReviewApply.findById(applyId);
+        apply.status = BatchReviewApply.S.valueOf(status);
+        apply.save();
+        flash.success("操作成功！");
+        showBatchApply(applyId);
+    }
+
     /**
      * 锁定付款单
      */
@@ -109,10 +166,8 @@ public class Payments extends Controller {
      * 为当前付款单付款
      */
     @Check("payments.payforit")
-    public static void payForIt(Long id, Long paymentTargetId,
-                                Currency currency, BigDecimal actualPaid,
+    public static void payForIt(Long id, Long paymentTargetId, Currency currency, BigDecimal actualPaid,
                                 Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishDate) {
-
         Validation.required("供应商支付账号", paymentTargetId);
         Validation.required("币种", currency);
         Validation.required("具体支付金额", actualPaid);
