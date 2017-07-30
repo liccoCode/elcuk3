@@ -12,6 +12,7 @@ import models.market.M;
 import models.market.OrderItem;
 import models.market.Selling;
 import models.material.Material;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.view.dto.ProductDTO;
@@ -548,9 +549,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 获取拥有这个 SKU 的所有供应商
      */
     public List<Cooperator> cooperators() {
-        return Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id", this.sku)
-                .fetch();
+        return Cooperator.find("SELECT c FROM Cooperator c INNER JOIN c.cooperItems ci "
+                + " WHERE ci.sku=? AND ci.status=? ORDER BY ci.id", this.sku, CooperItem.S.Agree).fetch();
     }
 
     /**
@@ -727,8 +727,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 //                if("609132508189".equals(t_msku)) t_msku = "71-HPTOUCH-B2PG"; //对历史错误数据的修复 @_@
 //                if("8Z-0JR3-1BHG".equals(t_msku.toUpperCase())) t_msku = "80-QW1A56-BE"; // Power Bank 的销售还是需要囊括进来的
         String sku = StringUtils.split(merchantSKU, ",")[0].toUpperCase();
-        if("609132508189".equals(sku)) sku = "71-HPTOUCH-B2PG";
-        else if("8Z-0JR3-1BHG".equals(sku)) sku = "80-QW1A56-BE";
+        if("609132508189" .equals(sku)) sku = "71-HPTOUCH-B2PG";
+        else if("8Z-0JR3-1BHG" .equals(sku)) sku = "80-QW1A56-BE";
         return sku;
     }
 
