@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.embedded.ERecordBuilder;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -177,6 +178,8 @@ public class Cooperators extends Controller {
         CooperatorPost p = new CooperatorPost();
         p.search = item.cooperator.fullName;
         List<Cooperator> coopers = p.query();
+        new ERecordBuilder("copItem.examine")
+                .msgArgs(item.cooperator.name, item.sku, item.status.label()).fid(item.id).save();
         render("/Cooperators/index.html", p, coopers);
     }
 
@@ -188,6 +191,8 @@ public class Cooperators extends Controller {
         CooperatorPost p = new CooperatorPost();
         p.search = item.cooperator.fullName;
         List<Cooperator> coopers = p.query();
+        new ERecordBuilder("copItem.examine")
+                .msgArgs(item.cooperator.name, item.sku, item.status.label()).fid(item.id).save();
         render("/Cooperators/index.html", p, coopers);
     }
 
