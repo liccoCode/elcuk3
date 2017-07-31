@@ -30,7 +30,7 @@
     </div>
     <div class="inline">
         #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId,
-            style:'height:28px;' }
+        style:'height:28px;' }
             #{option ''}合作伙伴#{/option}
         #{/select}
     </div>
@@ -60,7 +60,8 @@
       <th class="ten">涉及的请款人</th>
       <th class="ten">支付人</th>
       <th>合作伙伴</th>
-      <th class="ten">状态</th>
+      <th width="90px;">汇签状态</th>
+      <th width="100px;">状态</th>
       <th class="ten">总请款金额</th>
       <th class="ten">总实际支付金额</th>
       <th>最近更新时间</th>
@@ -69,9 +70,9 @@
       #{list items:payments, as:'pay'}
         <tr>
           <td>
-            #{if !pay.batchReviewApply}
-              <input type="checkbox" name="pids" value="${pay.id}" data-cooperId="${pay.cooperator?.id}">
-            #{/if}
+              #{if !pay.batchReviewApply}
+                <input type="checkbox" name="pids" value="${pay.id}" data-cooperId="${pay.cooperator?.id}">
+              #{/if}
           </td>
           <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
           <td>
@@ -84,8 +85,8 @@
               #{list items:pay.cooperators(), as:'cop'}
             ${cop.fullName}
           #{/list}
-
           </td>
+          <td>${pay.batchReviewApply?.status?.label()}</td>
           <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
           <td>
               #{set totalFees: pay.totalFees()/}
@@ -101,7 +102,6 @@
           <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
         </tr>
       #{/list}
-
   </table>
 </div>
 #{/form}

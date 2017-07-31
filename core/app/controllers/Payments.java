@@ -114,9 +114,14 @@ public class Payments extends Controller {
         render(p, cooperators, applies);
     }
 
+    public static void showPaymentList(String id) {
+        BatchReviewApply apply = BatchReviewApply.findById(id);
+        List<Payment> payments = apply.paymentList;
+        render("/Payments/_payments.html", payments);
+    }
+
     public static void showBatchApply(String id) {
         BatchReviewApply apply = BatchReviewApply.findById(id);
-
         render(apply);
     }
 

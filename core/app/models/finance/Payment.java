@@ -384,17 +384,15 @@ public class Payment extends Model {
      * @return _.1: USD; _.2: CNY; _.3: 当前 Currency
      */
     public F.T3<Float, Float, Float> totalFees() {
-        float currenctCurrencyAmount = 0;
+        float currentCurrencyAmount = 0;
         Currency lastCurrency = this.currency;
         for(PaymentUnit unit : this.units()) {
             if(lastCurrency != this.currency)
                 throw new FastRuntimeException("付款单中的币种不可能不一样, 数据有错误, 请联系开发人员.");
-            currenctCurrencyAmount += unit.amount();
+            currentCurrencyAmount += unit.amount();
         }
-        return new F.T3<>(
-                currency.toUSD(currenctCurrencyAmount),
-                currency.toCNY(currenctCurrencyAmount),
-                currenctCurrencyAmount);
+        return new F.T3<>(currency.toUSD(currentCurrencyAmount), currency.toCNY(currentCurrencyAmount),
+                currentCurrencyAmount);
     }
 
     /**
