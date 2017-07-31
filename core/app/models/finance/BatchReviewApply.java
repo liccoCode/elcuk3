@@ -139,7 +139,7 @@ public class BatchReviewApply extends GenericModel {
         if(Objects.equals(S.Finance, this.status) && Objects.equals(user.department, User.D.Finance)) {
             flag = true;
         }
-        return !this.handlers.stream().allMatch(handler -> Objects.equals(handler.handler, user) && handler.result.name()
+        return !this.handlers.stream().anyMatch(handler -> Objects.equals(handler.handler, user) && handler.result.name()
                 .equals("Agree")) && flag;
     }
 
