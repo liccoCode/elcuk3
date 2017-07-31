@@ -169,6 +169,28 @@ public class Cooperators extends Controller {
         redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
+    public static void agreeCooperItem(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.status = CooperItem.S.Agree;
+        item.save();
+        flash.success("操作成功");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
+    }
+
+    public static void disAgreeCooperItem(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.status = CooperItem.S.Disagree;
+        item.save();
+        flash.success("操作成功");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        render("/Cooperators/index.html", p, coopers);
+    }
+
     public static void updateCooperItem(CooperItem copItem) {
         checkAuthenticity();
         validation.valid(copItem);

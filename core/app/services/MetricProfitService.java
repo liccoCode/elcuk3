@@ -12,7 +12,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramBuilder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
@@ -119,9 +119,10 @@ public class MetricProfitService {
     public Float esSaleFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
-                        //销售费用项目
-                        .must(QueryBuilders.termQuery("fee_type", "productcharges")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.termQuery("fee_type", "productcharges")))
                         .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
@@ -133,9 +134,10 @@ public class MetricProfitService {
     public Float esAmazonFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
-                        //销售费用项目
-                        .must(QueryBuilders.termQuery("fee_type", "commission")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.termQuery("fee_type", "commission")))
                         .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
@@ -147,9 +149,10 @@ public class MetricProfitService {
     public Float esFBAFee() {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(querybuilder())
-                .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
-                        //销售费用项目
-                        .must(QueryBuilders.prefixQuery("fee_type", "fba")))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(QueryBuilders.boolQuery()
+                                //销售费用项目
+                                .must(QueryBuilders.prefixQuery("fee_type", "fba")))
                         .subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(0);
         return getEsTermsTotal(search, "salefee");
@@ -164,7 +167,8 @@ public class MetricProfitService {
 
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(qb)
-                .aggregation(AggregationBuilders.filter("aggs_filters", this.filterbuilder(true))
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(true))
                         .subAggregation(AggregationBuilders.stats("units").field("quantity"))
                 ).size(0);
         return getEsTermsTotal(search, "orderitem");
@@ -285,7 +289,8 @@ public class MetricProfitService {
                 .postFilter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
                         .must(this.filterbuilder(false)))
-                .aggregation(AggregationBuilders.filter("aggs_filters", this.filterbuilder(false)
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(false)
                                 .must(QueryBuilders.termsQuery("ship_type", "sea", "express", "air"))
                                 .must(QueryBuilders.termQuery("sku", this.parseEsSku().toLowerCase()))
                         ).subAggregation(AggregationBuilders.terms("units").field("ship_type")
@@ -346,7 +351,8 @@ public class MetricProfitService {
         F.T2<Float, Integer> seainfo = new F.T2<>(seafee, seavolume._3);
         F.T2<Float, Integer> airinfo = new F.T2<>(airfee, airvolume._3);
         F.T2<Float, Integer> expressinfo = new F.T2<>(expressfee, expressvolume._3);
-        return new F.T3<>(seainfo, airinfo, expressinfo);
+        return new F.T3<>
+                (seainfo, airinfo, expressinfo);
     }
 
     /**
@@ -357,7 +363,8 @@ public class MetricProfitService {
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .postFilter(QueryBuilders.boolQuery()
                         .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat")))
-                .aggregation(AggregationBuilders.filter("aggs_filters", this.filterbuilder(false)
+                .aggregation(AggregationBuilders.filter("aggs_filters")
+                        .filter(this.filterbuilder(false)
                                 .must(QueryBuilders.termsQuery("fee_type", "banlancedutyandvat", "dutyandvat"))
                         ).subAggregation(AggregationBuilders.stats("units").field("cost_in_usd"))
                 ).size(10000);
@@ -679,10 +686,10 @@ public class MetricProfitService {
      */
     public JSONArray dashboardDateAvg(String tablename, String fieldname, boolean categoryFilter) {
 
-        DateHistogramAggregationBuilder builder = AggregationBuilders.
+        DateHistogramBuilder builder = AggregationBuilders.
                 dateHistogram("units")
                 .field("date")
-                .dateHistogramInterval(DateHistogramInterval.WEEK)
+                .interval(DateHistogramInterval.WEEK)
                 .subAggregation(AggregationBuilders.sum("fieldvalue").field(fieldname));
 
         BoolQueryBuilder qb = querybuilder(true, categoryFilter);
@@ -690,7 +697,12 @@ public class MetricProfitService {
         if(tablename.equals("salefee"))
             qb = qb.must(QueryBuilders.termQuery("fee_type", "productcharges"));
 
-        SearchSourceBuilder search = new SearchSourceBuilder().query(qb).aggregation(builder).size(0);
+
+        SearchSourceBuilder search = new SearchSourceBuilder()
+                .query(qb)
+                .aggregation(builder
+                )
+                .size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), tablename, search);
         if(result == null) {
             throw new FastRuntimeException("ES连接异常!");
@@ -749,8 +761,10 @@ public class MetricProfitService {
         BoolQueryBuilder qb = QueryBuilders
                 .boolQuery().must(QueryBuilders.termQuery("sku", this.parseEsSku()));
 
-        DateHistogramAggregationBuilder builder = AggregationBuilders.
-                dateHistogram("units").field("date").dateHistogramInterval(DateHistogramInterval.DAY);
+        DateHistogramBuilder builder = AggregationBuilders.
+                dateHistogram("units")
+                .field("date")
+                .interval(DateHistogramInterval.DAY);
         /**
          * 求平均值
          */

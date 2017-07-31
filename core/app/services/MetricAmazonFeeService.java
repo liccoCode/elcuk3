@@ -201,19 +201,20 @@ public class MetricAmazonFeeService {
             .build();
 
     public Map<String, Map<String, BigDecimal>> orderFeesCost() {
-        FilterAggregationBuilder dateAndMarketAggregation = AggregationBuilders.filter("date_and_market_filters",
-                dateAndmarketFilters());
+        FilterAggregationBuilder dateAndMarketAggregation = AggregationBuilders.filter("date_and_market_filters")
+                .filter(dateAndmarketFilters());
         //Orders & Refunds Fees
         for(Orderr.S state : Arrays.asList(Orderr.S.SHIPPED, Orderr.S.REFUNDED)) {
-            FilterAggregationBuilder feeCategoryAggregation = AggregationBuilders.filter(stateToFeeCategory(state),
-                    QueryBuilders.matchAllQuery());
+            FilterAggregationBuilder feeCategoryAggregation = AggregationBuilders.filter(stateToFeeCategory(state))
+                    .filter(QueryBuilders.matchAllQuery());
             for(String feeType : Arrays.asList("productcharges", "promorebates", "commission", "other")) {
                 //使用 cost 的正负来判断是属于 Order 还是 Refunds
                 feeCategoryAggregation.subAggregation(
-                        AggregationBuilders.filter(feeType, QueryBuilders.boolQuery()
-                                .must(QueryBuilders.termsQuery("fee_type", TypeMaps.get(feeType)))
-                                .must(costRangeFilter(state, feeType))
-                        ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost")));
+                        AggregationBuilders.filter(feeType)
+                                .filter(QueryBuilders.boolQuery()
+                                        .must(QueryBuilders.termsQuery("fee_type", TypeMaps.get(feeType)))
+                                        .must(costRangeFilter(state, feeType))
+                                ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost")));
             }
             dateAndMarketAggregation.subAggregation(feeCategoryAggregation);
         }
@@ -221,10 +222,11 @@ public class MetricAmazonFeeService {
         //REVERSAL_REIMBURSEMENT
         //Selling Fees 好像 Amazon 统计的是 ServiceFees
         dateAndMarketAggregation.subAggregation(
-                AggregationBuilders.filter("selling_fees", QueryBuilders.termsQuery("fee_type",
-                        Arrays.asList("fbaweightbasedfee", "fbaperorderfulfilmentfee",
-                                "fbaperunitfulfillmentfee"))
-                ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"))
+                AggregationBuilders.filter("selling_fees")
+                        .filter(QueryBuilders.termsQuery("fee_type",
+                                Arrays.asList("fbaweightbasedfee", "fbaperorderfulfilmentfee",
+                                        "fbaperunitfulfillmentfee"))
+                        ).subAggregation(AggregationBuilders.sum("order_fees_cost").field("cost"))
         );
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .size(0)
@@ -247,15 +249,15 @@ public class MetricAmazonFeeService {
     public RangeQueryBuilder costRangeFilter(Orderr.S state, String feeType) {
         RangeQueryBuilder costRangeFilter = QueryBuilders.rangeQuery("cost");
         if(state == Orderr.S.SHIPPED) {
-            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType)
-                    || "other".equalsIgnoreCase(feeType)) {
+            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType) ||
+                    "other".equalsIgnoreCase(feeType)) {
                 costRangeFilter.gt(0);
             } else {
                 costRangeFilter.lt(0);
             }
         } else if(state == Orderr.S.REFUNDED) {
-            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType)
-                    || "other".equalsIgnoreCase(feeType)) {
+            if("productcharges".equalsIgnoreCase(feeType) || "principal".equals(feeType) ||
+                    "other".equalsIgnoreCase(feeType)) {
                 costRangeFilter.lt(0);
             } else {
                 costRangeFilter.gt(0);

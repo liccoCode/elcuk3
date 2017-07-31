@@ -29,12 +29,13 @@
         #{/select_enum}
     </div>
     <div class="inline">
-        #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId }
+        #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId,
+            style:'height:28px;' }
             #{option ''}合作伙伴#{/option}
         #{/select}
     </div>
     <div class="inline">
-        #{select name:'p.actualCurrency', items:helper.Currency.values() , value: p.actualCurrency }
+        #{select name:'p.actualCurrency', items:helper.Currency.values(), value: p.actualCurrency, style:'height:28px;' }
             #{option ''}支付币种#{/option}
         #{/select}
     </div>
@@ -45,12 +46,16 @@
       <input type="text" style="width:120px;" name="p.search" placeholder="支付账号" value="${p.search}">
       <button class="btn btn-primary" data-loading>搜索</button>
     </div>
+
+    <input type="button" class="btn btn-warning" id="batchApplyBtn" value="请款核单" data-url="@{Payments.batchApply()}">
+
   </div>
 </div>
 
 <div class="row-fluid">
   <table class="table table-bordered table-condensed">
     <tr>
+      <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
       <th class="">请款单编号</th>
       <th class="ten">涉及的请款人</th>
       <th class="ten">支付人</th>
@@ -63,6 +68,11 @@
     </tr>
       #{list items:payments, as:'pay'}
         <tr>
+          <td>
+            #{if !pay.batchReviewApply}
+              <input type="checkbox" name="pids" value="${pay.id}" data-cooperId="${pay.cooperator?.id}">
+            #{/if}
+          </td>
           <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
           <td>
               #{list items:pay.applyers(), as:'applyer'}

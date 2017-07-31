@@ -41,7 +41,7 @@
     </td>
     <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
     <td style="word-break:break-all;">
-      <a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
+      <a href="@{Products.showAttr(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
     ${itm.unit.product?.chineseName}
     </td>
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">

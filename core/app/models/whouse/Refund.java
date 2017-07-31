@@ -172,18 +172,6 @@ public class Refund extends GenericModel {
                 return "特采入库";
             }
         },
-        Machining {
-            @Override
-            public String label() {
-                return "加工入库";
-            }
-        },
-        Pick {
-            @Override
-            public String label() {
-                return "挑选入库";
-            }
-        },
         Exchange {
             @Override
             public String label() {

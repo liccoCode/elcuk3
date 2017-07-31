@@ -62,25 +62,26 @@ public class MetricReviewService {
             List<String> listingIds = Category.listingIds(this.category, m, true);
 
             //市场的 aggregation 过滤
-            FilterAggregationBuilder marketAggregation = AggregationBuilders
-                    .filter(m.name(), QueryBuilders.termQuery("market", m));
+            FilterAggregationBuilder marketAggregation = AggregationBuilders.filter(m.name()).filter(
+                    QueryBuilders.termQuery("market", m)
+            );
             // 每一个时间点作为一个单独的 Aggregation
             for(Date sunday : sundays) {
                 List<String> filteredAsins = filterAsinsByDateRange(asins, listingIds, sunday);
                 //未找到合法的 ASIN 跳过此日期(取值时会取出 null,直接设置为 0 即可)
                 if(filteredAsins == null || filteredAsins.isEmpty()) continue;
-                marketAggregation.subAggregation(AggregationBuilders.filter(formatter.format(sunday), QueryBuilders
-                        .boolQuery()
-                        //ASIN 过滤
-                        .must(QueryBuilders.termsQuery("listing_asin", filteredAsins))
-                        //时间过滤
-                        .must(QueryBuilders.rangeQuery("review_date")
-                                .gte(formatter.format(firstReviewDate))
-                                .lte(formatter.format(sunday)))
-                ).subAggregation(
-                        // 按照 Review 的 rating 分组
-                        AggregationBuilders.terms("group_by_rating").field("rating")
-                ));
+                marketAggregation.subAggregation(AggregationBuilders.filter(formatter.format(sunday))
+                        .filter(QueryBuilders.boolQuery()
+                                //ASIN 过滤
+                                .must(QueryBuilders.termsQuery("listing_asin", filteredAsins))
+                                //时间过滤
+                                .must(QueryBuilders.rangeQuery("review_date")
+                                        .gte(formatter.format(firstReviewDate))
+                                        .lte(formatter.format(sunday)))
+                        ).subAggregation(
+                                // 按照 Review 的 rating 分组
+                                AggregationBuilders.terms("group_by_rating").field("rating")
+                        ));
             }
             search.aggregation(marketAggregation);
         }
@@ -121,14 +122,17 @@ public class MetricReviewService {
                 .must(QueryBuilders.rangeQuery("review_date").gte(formatter.format(this.from))
                         .lte(formatter.format(this.to)));
         if(m != null) boolQuery.must(QueryBuilders.termQuery("market", m));
-        return AggregationBuilders.filter(name, boolQuery)
+        return AggregationBuilders.filter(name)
+                .filter(boolQuery)
                 //日期单位为 周 分组展现数据 aggregation
                 .subAggregation(AggregationBuilders.dateHistogram("count_by_review_date")
                         .field("review_date")
-                        .dateHistogramInterval(DateHistogramInterval.WEEK)
+                        .interval(DateHistogramInterval.WEEK)
                         //负评分 aggregation
-                        .subAggregation(AggregationBuilders.filter("poor_rating_review",
-                                QueryBuilders.rangeQuery("rating").gte(1).lte(3))));
+                        .subAggregation(AggregationBuilders.filter("poor_rating_review")
+                                .filter(QueryBuilders.rangeQuery("rating").gte(1).lte(3))
+                        )
+                );
     }
 
     /**

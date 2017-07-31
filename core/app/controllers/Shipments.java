@@ -299,11 +299,9 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
             show(id);
         }
-
-        new ElcukRecord(Messages.get("shipment.beginShip"),
-                Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
+        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id), ship.id)
+                .save();
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
-
         show(id);
     }
 
