@@ -2,10 +2,13 @@ package models.finance;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
+import play.libs.F;
+import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -120,8 +123,17 @@ public class BatchReviewApply extends GenericModel {
         return String.format("QKSH-%s-%s", this.cooperator.name, count.length() == 1 ? "0" + count : count);
     }
 
-    public double totalApplyAmount() {
-        return this.paymentList.stream().mapToDouble(payment -> payment.totalFees()._3).sum();
+    public F.T3<Float, Float, Float> totalApplyAmount() {
+        float currentUSDAmount = 0;
+        float currentCNYAmount = 0;
+        float currentCurrencyAmount = 0;
+        for(Payment payment : this.paymentList) {
+            F.T3<Float, Float, Float> t3 = payment.totalFees();
+            currentUSDAmount += t3._1;
+            currentCNYAmount += t3._2;
+            currentCurrencyAmount += t3._3;
+        }
+        return new F.T3<>(currentUSDAmount, currentCNYAmount, currentCurrencyAmount);
     }
 
     /**
@@ -139,7 +151,7 @@ public class BatchReviewApply extends GenericModel {
         if(Objects.equals(S.Finance, this.status) && Objects.equals(user.department, User.D.Finance)) {
             flag = true;
         }
-        return !this.handlers.stream().allMatch(handler -> Objects.equals(handler.handler, user) && handler.result.name()
+        return !this.handlers.stream().anyMatch(handler -> Objects.equals(handler.handler, user) && handler.result.name()
                 .equals("Agree")) && flag;
     }
 

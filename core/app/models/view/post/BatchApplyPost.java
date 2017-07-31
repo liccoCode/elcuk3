@@ -1,6 +1,7 @@
 package models.view.post;
 
 import models.finance.BatchReviewApply;
+import org.apache.commons.lang.StringUtils;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -30,9 +31,27 @@ public class BatchApplyPost extends Post<BatchReviewApply> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT DISTINCT a FROM BatchReviewApply a ");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT a FROM BatchReviewApply a LEFT JOIN a.paymentList p");
+        sbd.append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
-
+        if(status != null) {
+            sbd.append(" AND a.status = ? ");
+            params.add(status);
+        }
+        if(way != null) {
+            sbd.append(" AND a.way = ? ");
+            params.add(way);
+        }
+        if(cooperatorId != null) {
+            sbd.append(" AND a.cooperator.id = ? ");
+            params.add(cooperatorId);
+        }
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND (a.id LIKE ? OR a.name LIKE ? OR p.paymentNumber LIKE ? )");
+            params.add(this.word());
+            params.add(this.word());
+            params.add(this.word());
+        }
         sbd.append(" ORDER BY a.createDate DESC ");
         return new F.T2<>(sbd.toString(), params);
     }

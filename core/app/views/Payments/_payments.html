@@ -1,0 +1,43 @@
+<table class="table table-bordered table-condensed">
+  <tr>
+    <th class="">请款单编号</th>
+    <th class="ten">涉及的请款人</th>
+    <th class="ten">支付人</th>
+    <th>合作伙伴</th>
+    <th class="ten">状态</th>
+    <th class="ten">总请款金额</th>
+    <th class="ten">总实际支付金额</th>
+    <th>最近更新时间</th>
+    <th>创建时间</th>
+  </tr>
+#{list items:payments, as:'pay'}
+  <tr>
+    <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
+    <td>
+        #{list items:pay.applyers(), as:'applyer'}
+        ${applyer.username} &nbsp;
+        #{/list}
+    </td>
+    <td>${pay.payer?.username}</td>
+    <td>
+        #{list items:pay.cooperators(), as:'cop'}
+            ${cop.fullName}
+          #{/list}
+
+    </td>
+    <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
+    <td>
+        #{set totalFees: pay.totalFees()/}
+      <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
+      ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
+      </a>
+    </td>
+    <td>
+    ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
+      <i class="badge badge-info">${pay.units().size()}</i>
+    </td>
+    <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
+    <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+  </tr>
+#{/list}
+</table>

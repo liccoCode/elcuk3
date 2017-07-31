@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"付款单列表"  /}
+#{set title:"汇签审核详情"  /}
 #{set 'moreScripts'}
     #{script 'applys/index.es6'/}
 #{/set}
@@ -31,7 +31,12 @@
           <th>供应商</th>
           <td><input type="text" readonly value="${apply.cooperator?.name}"></td>
           <th>总请款金额</th>
-          <td>${apply.totalApplyAmount()}</td>
+          <td>
+            <input type="text" value="${apply.totalApplyAmount()._3}" class="span2" readonly>
+            <select class="span2">
+              <option value="CNY">CNY</option>
+            </select>
+          </td>
         </tr>
         <tr>
           <th>备注</th>
