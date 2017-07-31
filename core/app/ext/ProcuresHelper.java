@@ -247,6 +247,19 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(CooperItem.S status) {
+        switch(status) {
+            case Pending:
+                return "#F39C12";
+            case Agree:
+                return "#00A65A";
+            case Disagree:
+                return "#F56954";
+            default:
+                return "#111111";
+        }
+    }
+
     public static String rgb(MaterialPurchase.S state) {
         switch(state) {
             case PENDING:

@@ -7,7 +7,7 @@
     <th>每箱数量</th>
     <th>最低采购量</th>
     <th>状态</th>
-    <th width="120px;"></th>
+    <th width="120px;">Action</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr>
@@ -17,17 +17,19 @@
     <td>${itm.period}</td>
     <td>${itm.boxSize}</td>
     <td>${itm.lowestOrderNum}</td>
-    <td>${itm.status?.label()}</td>
+    <td style="color:${itm.status.rgb()}">${itm.status?.label()}</td>
     <td>
       <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
       <button copItemId='${itm.id}' class="btn btn-mini delelte" rel="tooltip" title="删除">
         <i class="icon-trash"></i></button>
-        #{if itm.status?.name() != 'Agree'}
-          <a class="btn btn-mini" style="color:green;" rel="tooltip" title="审核通过"
-             href="@{Cooperators.agreeCooperItem(itm.id)}"><i class="icon-ok"></i></a>
-          <a class="btn btn-mini" style="color:red;" rel="tooltip" title="审核通过"
-             href="@{Cooperators.disAgreeCooperItem(itm.id)}"><i class="icon-remove"></i></a>
-        #{/if}
+        #{power.ck 'cooperitem.skuauditing'}
+            #{if itm.status?.name() != 'Agree'}
+              <a class="btn btn-mini" style="color:green;" rel="tooltip" title="审核通过"
+                 href="@{Cooperators.agreeCooperItem(itm.id)}"><i class="icon-ok"></i></a>
+              <a class="btn btn-mini" style="color:red;" rel="tooltip" title="审核通过"
+                 href="@{Cooperators.disAgreeCooperItem(itm.id)}"><i class="icon-remove"></i></a>
+            #{/if}
+        #{/power.ck}
     </td>
   </tr>
 #{/list}

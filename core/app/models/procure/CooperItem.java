@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
+import models.embedded.ERecordBuilder;
 import models.material.Material;
 import models.product.Product;
 import models.view.dto.CooperItemDTO;
@@ -236,11 +237,13 @@ public class CooperItem extends Model {
         if(this.cooperator.cooperItems.stream().filter(item -> Objects.equals(item.type, T.SKU))
                 .anyMatch(item -> Objects.equals(item.sku, this.sku)))
             throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
-
         cooperator.cooperItems.add(this);
         this.setAttributes();
         this.setDefaultValue();
-        return this.save();
+        CooperItem item = this.save();
+        new ERecordBuilder("copItem.save")
+                .msgArgs(this.cooperator.name, this.sku, this.currency.symbol() + this.price).fid(item.id).save();
+        return item;
     }
 
     public void saveMaterialItem(Cooperator cooperator) {
