@@ -2,6 +2,7 @@
 #{set title:"会签审核列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
+    #{script 'applys/index.es6'/}
 #{/set}
 <style>
   .table td{
@@ -64,21 +65,27 @@
             <th width="115px;">请款审核ID</th>
             <th width="250px;">请款项</th>
             <th width="60px;">付款方式</th>
+            <th width="90px;">审核阶段</th>
             <th width="100px;">供应商</th>
             <th width="100px;">核单金额</th>
             <th width="180px;">创建人/创建时间</th>
-            <th width="150px;">品牌部审核意见/人</th>
-            <th width="150px;">审计部审核意见/人</th>
-            <th width="150px;">财务部审核意见/人</th>
-            <th width="250px;">备注</th>
+            <th width="200px;">品牌部审核意见/人</th>
+            <th width="200px;">审计部审核意见/人</th>
+            <th width="200px;">财务部审核意见/人</th>
+            <th width="200px;">备注</th>
           </tr>
         #{list items: applies, as: 'a'}
           <tr>
             <td><a href="@{Payments.showBatchApply(a.id)}">${a.id}</a></td>
-            <td>${a.name}</td>
+            <td style="cursor:pointer;" name="clickTd" data-id="${a.id}" data-url="@{Payments.showPaymentList()}">
+              <span><i class="icon-reorder"></i></span>
+              <span>${a.name}</span>
+              <span class="badge badge-info">${a.paymentList.size()}</span>
+            </td>
             <td>${a.way?.label()}</td>
+            <td>${a.status?.label()}</td>
             <td>${a.cooperator?.name}</td>
-            <td></td>
+            <td rel="tooltip" title="$ ${a.totalApplyAmount()._1}">¥ ${a.totalApplyAmount()._3}</td>
             <td>${a.creator.username}/#{time_tooltip time:a.createDate, datetime:true/}</td>
             <td>
                 #{list items:a.getHandlers(models.User.D.Brand),as:'b'}
@@ -99,7 +106,7 @@
           </tr>
         #{/list}
           <tr>
-            <td colspan="12">
+            <td colspan="11">
             #{if applies.size() == 0}
               暂时还没有入库记录
             #{/if}
