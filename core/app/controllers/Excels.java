@@ -897,7 +897,7 @@ public class Excels extends Controller {
         List<BatchReviewApply> applies = p.query();
         if(applies != null && applies.size() != 0) {
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, "汇签审核报表");
+            renderArgs.put(RenderExcel.RA_FILENAME, "汇签审核报表.xls");
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(applies);
         } else {
