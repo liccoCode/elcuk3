@@ -47,4 +47,6 @@ public class BatchReviewHandler extends Model {
 
     public String memo;
 
+    public boolean effective = true;
+
 }

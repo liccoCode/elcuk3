@@ -45,6 +45,11 @@ $(() => {
     $("#transfer_form").submit();
   });
 
+  $("#endBtn").click(function (e) {
+    $("#status_input").val('End');
+    $("#transfer_form").submit();
+  });
+
   $("td[name='clickTd']").click(function () {
     let tr = $(this).parent("tr");
     let id = $(this).data("id");
