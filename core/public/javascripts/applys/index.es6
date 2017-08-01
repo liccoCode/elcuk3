@@ -19,15 +19,34 @@ $(() => {
       });
       return;
     }
-    cbs.each(function () {
-      ids.push($(this).val());
+    let firstCooperId = $("#payments_form input[name='pids']:checked").first().attr("cooperId");
+    let i = 0;
+    $("input[name='pids']:checked").each(function () {
+      if ($(this).attr("cooperId") != firstCooperId) {
+        noty({
+          text: '请选择【供应商】一致的支付单！',
+          type: 'error'
+        });
+        i++;
+        return false;
+      }
     });
-    $("#payments_form").attr("action", $(this).data("url"));
-    $("#payments_form").submit();
+    if (i == 0) {
+      cbs.each(function () {
+        ids.push($(this).val());
+      });
+      $("#payments_form").attr("action", $(this).data("url"));
+      $("#payments_form").submit();
+    }
   });
 
   $("#apply_form input[name='transferBtn']").click(function (e) {
     $("#status_input").val($(this).data("status"));
+    $("#transfer_form").submit();
+  });
+
+  $("#endBtn").click(function (e) {
+    $("#status_input").val('End');
     $("#transfer_form").submit();
   });
 
@@ -49,6 +68,11 @@ $(() => {
         });
       });
     }
+  });
+
+  $("#printBtn").click(function (e) {
+    let $form = $("#search_Form");
+    window.open('/Excels/exportBatchReviewApply?' + $form.serialize(), "_blank")
   });
 
 });

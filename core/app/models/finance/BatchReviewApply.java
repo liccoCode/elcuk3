@@ -2,19 +2,14 @@ package models.finance;
 
 import com.google.gson.annotations.Expose;
 import controllers.Login;
-import helper.Currency;
 import models.User;
 import models.procure.Cooperator;
 import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 import play.libs.F;
-import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -131,7 +126,7 @@ public class BatchReviewApply extends GenericModel {
             F.T3<Float, Float, Float> t3 = payment.totalFees();
             currentUSDAmount += t3._1;
             currentCNYAmount += t3._2;
-            currentCurrencyAmount += t3._3;
+            currentCurrencyAmount += t3._2;
         }
         return new F.T3<>(currentUSDAmount, currentCNYAmount, currentCurrencyAmount);
     }
@@ -142,7 +137,7 @@ public class BatchReviewApply extends GenericModel {
     public boolean showSubmitBtn() {
         User user = Login.current();
         boolean flag = false;
-        if(Objects.equals(S.Pending, this.status) && Objects.equals(user.department, User.D.Brand)) {
+        if(Arrays.asList(S.Pending, S.Brand).contains(this.status) && Objects.equals(user.department, User.D.Brand)) {
             flag = true;
         }
         if(Objects.equals(S.Audit, this.status) && Objects.equals(user.department, User.D.Audit)) {
@@ -157,7 +152,8 @@ public class BatchReviewApply extends GenericModel {
 
     public List<BatchReviewHandler> getHandlers(User.D department) {
         return this.handlers.stream()
-                .filter(handler -> handler.handler.department == department).collect(Collectors.toList());
+                .filter(handler -> handler.handler.department == department && handler.effective)
+                .collect(Collectors.toList());
     }
 
 }

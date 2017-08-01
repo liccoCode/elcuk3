@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.Currency;
 import helper.J;
 import helper.Webs;
+import models.User;
 import models.finance.BatchReviewApply;
 import models.finance.BatchReviewHandler;
 import models.finance.Payment;
@@ -30,6 +31,7 @@ import play.mvc.With;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Payments Controller
@@ -122,15 +124,26 @@ public class Payments extends Controller {
 
     public static void showBatchApply(String id) {
         BatchReviewApply apply = BatchReviewApply.findById(id);
-        render(apply);
+        String currDepart = Login.current().department.name();
+        render(apply, currDepart);
     }
 
     public static void submitBatchResult(BatchReviewHandler handler) {
+        BatchReviewApply apply = BatchReviewApply.findById(handler.apply.id);
+        User currUser = Login.current();
+        apply.handlers.forEach(hand -> {
+            if(Objects.equals(hand.handler, currUser) && hand.result.name().equals("Disagree")) {
+                hand.effective = false;
+                hand.save();
+            }
+        });
         handler.createDate = new Date();
         handler.handler = Login.current();
         handler.save();
-        BatchReviewApply apply = BatchReviewApply.findById(handler.apply.id);
-        apply.status = BatchReviewApply.S.Brand;
+
+        if(Objects.equals(apply.status, BatchReviewApply.S.Pending)) {
+            apply.status = BatchReviewApply.S.Brand;
+        }
         apply.save();
         flash.success("审核操作成功！");
         showBatchApply(handler.apply.id);
@@ -138,6 +151,10 @@ public class Payments extends Controller {
 
     public static void transferNextDepartment(String applyId, String status) {
         BatchReviewApply apply = BatchReviewApply.findById(applyId);
+        if(apply.handlers.stream().anyMatch(handler -> handler.effective && handler.result.name().equals("Disagree"))) {
+            flash.error("当前有审核不通过人员，请先确认审核通过，再转移到下一个部门审核!");
+            showBatchApply(applyId);
+        }
         apply.status = BatchReviewApply.S.valueOf(status);
         apply.save();
         flash.success("操作成功！");

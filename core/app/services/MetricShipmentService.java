@@ -8,7 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.metrics.sum.SumBuilder;
+import org.elasticsearch.search.aggregations.metrics.sum.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -90,7 +90,7 @@ public class MetricShipmentService {
      * 统计运输费用(市场 或者 运输方式)
      */
     public Float countShipFee() {
-        SumBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
+        SumAggregationBuilder builder = AggregationBuilders.sum("cost_in_usd").field("cost_in_usd");
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .query(filterbuilder())
                 .aggregation(builder)
@@ -107,10 +107,9 @@ public class MetricShipmentService {
      */
     public Float countShipWeight() {
         //由于ES的 shippayunit 与查询要求不符 故放弃使用ES而采用直接查询DB(考虑到数据量不是很大且查询语句为 SUM 统计函数)
-        SqlSelect sql = new SqlSelect().select("SUM(CASE " +
-                "WHEN pro.weight IS NULL THEN 0 * si.qty " +
-                "WHEN pro.weight >= 0 THEN pro.weight * si.qty END" +
-                ") weight")
+        SqlSelect sql = new SqlSelect().select("SUM(CASE WHEN pro.weight IS NULL THEN 0 * si.qty "
+                + "WHEN pro.weight >= 0 THEN pro.weight * si.qty END"
+                + ") weight")
                 .from("ShipItem si")
                 .leftJoin("Shipment s ON si.shipment_id=s.id")
                 .leftJoin("ProcureUnit pu ON si.unit_id=pu.id")
@@ -141,11 +140,11 @@ public class MetricShipmentService {
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Float> vat = new HashMap<>();
         for(Map<String, Object> objectMap : rows) {
-            String market = objectMap.get("name").toString().split("_")[1];
-            String type = objectMap.get("type").toString();
+            String row_market = objectMap.get("name").toString().split("_")[1];
+            String row_type = objectMap.get("type").toString();
             Currency currency = Currency.valueOf(objectMap.get("currency").toString());
             Float vatPrice = Float.valueOf(objectMap.get("vatPrice").toString());
-            String key = market + "_" + type;
+            String key = row_market + "_" + row_type;
             if(vat.containsKey(key)) {
                 Float existVatPrice = vat.get(key);
                 vat.put(key, currency.toUSD(vatPrice) + existVatPrice);
