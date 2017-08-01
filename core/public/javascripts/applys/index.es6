@@ -70,4 +70,9 @@ $(() => {
     }
   });
 
+  $("#printBtn").click(function (e) {
+    let $form = $("#search_Form");
+    window.open('/Excels/exportBatchReviewApply?' + $form.serialize(), "_blank")
+  });
+
 });

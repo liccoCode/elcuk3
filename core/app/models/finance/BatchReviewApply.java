@@ -152,7 +152,8 @@ public class BatchReviewApply extends GenericModel {
 
     public List<BatchReviewHandler> getHandlers(User.D department) {
         return this.handlers.stream()
-                .filter(handler -> handler.handler.department == department && handler.effective).collect(Collectors.toList());
+                .filter(handler -> handler.handler.department == department && handler.effective)
+                .collect(Collectors.toList());
     }
 
 }

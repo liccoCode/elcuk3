@@ -51,7 +51,7 @@
           <input type="hidden" name="p.page" value="${p.page}">
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
-        <a class="btn btn-info" href="javascript:void(0)" id="printBtn" target="_blank">
+        <a class="btn btn-info" href="javascript:void(0)" id="printBtn" target="_blank" data-url="@{Excels.exportBatchReviewApply()}">
           <i class="icon-print"></i> 审计部Excel导出</a>
       </div>
     </div>
@@ -89,17 +89,17 @@
             <td>${a.creator.username}/#{time_tooltip time:a.createDate, datetime:true/}</td>
             <td>
                 #{list items:a.getHandlers(models.User.D.Brand),as:'b'}
-                  ${b.result?.label()} / ${b.handler.username} <br>
+                ${b.result?.label()} / ${b.handler.username} <br>
                 #{/list}
             </td>
             <td>
                 #{list items:a.getHandlers(models.User.D.Audit),as:'b'}
-                  ${b.result?.label()} / ${b.handler.username} <br>
+                ${b.result?.label()} / ${b.handler.username} <br>
                 #{/list}
             </td>
             <td>
                 #{list items:a.getHandlers(models.User.D.Finance),as:'b'}
-                  ${b.result?.label()} / ${b.handler.username} <br>
+                ${b.result?.label()} / ${b.handler.username} <br>
                 #{/list}
             </td>
             <td>${a.memo}</td>
