@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.Currency;
 import helper.J;
 import helper.Webs;
+import models.OperatorConfig;
 import models.User;
 import models.finance.BatchReviewApply;
 import models.finance.BatchReviewHandler;
@@ -95,13 +96,17 @@ public class Payments extends Controller {
     }
 
     public static void saveBatchApply(List<Long> pids, BatchReviewApply apply) {
+        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        double limit = Double.parseDouble(OperatorConfig.getVal("batchtriallimit"));
+        double total = payments.stream().mapToDouble(payment -> payment.totalFees()._2).sum();
+        apply.type = total > limit ? BatchReviewApply.T.StrongTrial : BatchReviewApply.T.PumpingTrial;
         apply.cooperator = Cooperator.findById(apply.cooperator.id);
         apply.id = apply.id();
         apply.status = BatchReviewApply.S.Pending;
         apply.createDate = new Date();
         apply.creator = Login.current();
         apply.save();
-        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+
         payments.forEach(payment -> {
             payment.batchReviewApply = apply;
             payment.save();

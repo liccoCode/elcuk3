@@ -920,6 +920,29 @@ public enum M {
         }
     }
 
+    public String marketTransferEUR() {
+        switch(this) {
+            case AMAZON_CA:
+                return "'FBA_CA'";
+            case AMAZON_DE:
+                return "'FBA_DE'";
+            case AMAZON_US:
+                return "'FBA_US'";
+            case AMAZON_UK:
+                return "'FBA_UK','EUR_UK'";
+            case AMAZON_IT:
+                return "'FBA_IT','EUR_IT'";
+            case AMAZON_JP:
+                return "'FBA_JP'";
+            case AMAZON_FR:
+                return "'FBA_FR','EUR_FR'";
+            case AMAZON_ES:
+                return "'FBA_ES','EUR_ES'";
+            default:
+                return null;
+        }
+    }
+
 
     public static String listingPostPage(M market, String jsessionId) {
         //EU: https://catalog-sc.amazon.co.uk/abis/product/ProcessEditProduct
