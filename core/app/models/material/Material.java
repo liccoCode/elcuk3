@@ -87,7 +87,7 @@ public class Material extends Model {
     public String technology;
 
     /**
-     * 图号/版本
+     * 工厂物料代码
      */
     public String version;
 
