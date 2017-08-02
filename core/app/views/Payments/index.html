@@ -71,7 +71,7 @@
         <tr>
           <td>
               #{if !pay.batchReviewApply}
-                <input type="checkbox" name="pids" value="${pay.id}" data-cooperId="${pay.cooperator?.id}">
+                <input type="checkbox" name="pids" value="${pay.id}" cooperId="${pay.cooperator?.id}">
               #{/if}
           </td>
           <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>

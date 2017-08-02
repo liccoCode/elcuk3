@@ -6,6 +6,7 @@ import helper.Currency;
 import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
 import models.User;
+import models.finance.BatchReviewApply;
 import models.market.BtbOrder;
 import models.market.BtbOrderItem;
 import models.market.M;
@@ -874,16 +875,31 @@ public class Excels extends Controller {
      */
     public static void materialPlan(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
-
         List<MaterialPlanUnit> unitList = dp.units;
         if(unitList != null && unitList.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s出仓单.xls", dp.id));
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dmt", formatter);
             render(dp, unitList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 下载汇签报表
+     * @param p
+     */
+    public static void exportBatchReviewApply(BatchApplyPost p) {
+        if(p == null) p = new BatchApplyPost();
+        List<BatchReviewApply> applies = p.query();
+        if(applies != null && applies.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "汇签审核报表.xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(applies);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }

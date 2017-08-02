@@ -13,7 +13,7 @@
   #{if !is_b2b}
     <th width="160px;">Selling</th>
   #{/if}
-    <th width="220px;">SKU<br>产品名称</th>
+    <th width="230px;">SKU<br>产品名称</th>
     <th width="140px;">预计交货时间/<br>预计运输时间</th>
     <th style="width:45px;">计划交货数量</th>
     <th style="width:50px;">实际交货数量</th>
@@ -46,7 +46,7 @@
           #{/if}
         <td title="${unit.unit?.product.abbreviation}">
           <a href="@{Products.show(unit.unit?.product?.sku)}" target="_blank">${unit.unit?.product?.sku}</a><br>
-          (${unit.unit?.product.abbreviation?.xxLong()})
+          ${unit.unit?.product.abbreviation?.xxLong()}
         </td>
         <td>
           预计交货:#{time_tooltip time:unit.unit?.attrs.planDeliveryDate/}<br>
