@@ -156,4 +156,12 @@ public class BatchReviewApply extends GenericModel {
                 .collect(Collectors.toList());
     }
 
+    public String showExcelResult(String depart) {
+        StringBuilder sb = new StringBuilder();
+        this.handlers.stream().filter(handler -> handler.handler.department == User.D.valueOf(depart))
+                .forEach(handler -> sb.append(handler.handler.username).append(" ").append(handler.result.label())
+                        .append("; "));
+        return sb.toString();
+    }
+
 }

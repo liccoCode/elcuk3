@@ -49,8 +49,6 @@ public class MetricShipmentService {
      */
     public Shipment.T type;
 
-    public boolean isDedicated = false;
-
     public MetricShipmentService(Date from, Date to, Shipment.T type, M market) {
         this.from = Dates.morning(from);
         this.to = Dates.night(to);
@@ -81,8 +79,6 @@ public class MetricShipmentService {
         qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)));
         // 运输方式不为空时做 type 过滤
         if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name().toLowerCase()));
-        //快递专线 查询
-        qb.must(QueryBuilders.termQuery("is_dedicated", this.isDedicated));
         return qb;
     }
 
@@ -116,10 +112,9 @@ public class MetricShipmentService {
                 .leftJoin("Product pro on pu.product_sku = pro.sku")
                 .leftJoin("Whouse w ON w.id=s.whouse_id")
                 .where("s.planBeginDate>=?").param(this.from)
-                .andWhere("s.planBeginDate<=?").param(this.to)
-                .andWhere("s.isDedicated=?").param(this.isDedicated);
+                .andWhere("s.planBeginDate<=?").param(this.to);
         if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
-        if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
+        if(this.market != null) sql.andWhere("w.name IN (" + this.market.marketTransferEUR() + ")");
         Object result = DBUtils.row(sql.toString(), sql.getParams().toArray()).get("weight");
         return result == null ? 0 : NumberUtils.toFloat(result.toString());
     }
@@ -135,7 +130,7 @@ public class MetricShipmentService {
                 .where("s.planBeginDate>=?").param(this.from)
                 .andWhere("s.planBeginDate<=?").param(this.to);
         if(this.type != null) sql.andWhere("s.type=?").param(this.type.toString());
-        if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
+        if(this.market != null) sql.andWhere("w.name= IN (" + this.market.marketTransferEUR() + ")");
         sql.groupBy("w.name, s.type, p.currency");
         List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());
         Map<String, Float> vat = new HashMap<>();

@@ -112,14 +112,9 @@ public class ShipmentReports extends Controller {
      */
     public static void countShipWeightByMarket(Date from, Date to, String type) {
         try {
-            if(StringUtils.equals(type, "专线")) {
-                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPieForDedicated(from, to);
-                renderJSON(J.json(chart));
-            } else {
-                Shipment.T market = Shipment.T.valueOf(type);
-                HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, market);
-                renderJSON(J.json(chart));
-            }
+            Shipment.T market = Shipment.T.valueOf(type);
+            HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, market);
+            renderJSON(J.json(chart));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }

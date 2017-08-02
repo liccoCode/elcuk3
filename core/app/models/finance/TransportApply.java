@@ -226,9 +226,8 @@ public class TransportApply extends Apply {
                     shipment.fees.stream().map(fee -> fee.memo)).collect(Collectors.toList())
             );
         }
-        sources.addAll(Arrays.asList(M.amazonVals()).stream()
-                .map(M::marketAndWhouseMapping)
-                .collect(Collectors.toList()));
+        sources.addAll(
+                Arrays.asList(M.amazonVals()).stream().map(M::marketAndWhouseMapping).collect(Collectors.toList()));
 
         if(StringUtils.isNotBlank(search)) {
             return sources.stream()
