@@ -47,7 +47,7 @@
           <th>操作</th>
         </tr>
       #{list items:coopers, as:'c'}
-        <tr>
+        <tr style="background:#{if c.showRed()} red #{/if}">
           <td>${c.fullName}</td>
           <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
             <span><i class="icon-reorder"></i></span>
