@@ -52,7 +52,7 @@ public class ShipmentWeight {
                 .leftJoin("Whouse w ON w.id=s.whouse_id")
                 .where("s.planBeginDate>=?").param(this.from)
                 .andWhere("s.planBeginDate<=?").param(this.to);
-        if(this.market != null) sql.andWhere("w.name=?").param(this.market.marketAndWhouseMapping());
+        if(this.market != null) sql.andWhere("w.name IN (" + this.market.marketTransferEUR() + ")");
         if(this.shipType != null) sql.andWhere("s.type=?").param(this.shipType.toString());
         if(skus.size() > 0) sql.andWhere("pro.sku IN " + SqlSelect.inlineParam(skus));
         sql.groupBy("pro.sku, s.type, w.name");
@@ -111,8 +111,7 @@ public class ShipmentWeight {
         params.add(this.from);
         params.add(this.to);
         if(this.market != null) {
-            sql.append(" AND w.name=?");
-            params.add(this.market.marketAndWhouseMapping());
+            sql.append(" AND w.name IN (" + this.market.marketTransferEUR() + ")");
         }
         if(this.shipType != null) {
             sql.append(" AND s.type=?");

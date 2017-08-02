@@ -26,7 +26,7 @@
             #{if itm.status?.name() != 'Agree'}
               <a class="btn btn-mini" style="color:green;" rel="tooltip" title="审核通过"
                  href="@{Cooperators.agreeCooperItem(itm.id)}"><i class="icon-ok"></i></a>
-              <a class="btn btn-mini" style="color:red;" rel="tooltip" title="审核通过"
+              <a class="btn btn-mini" style="color:red;" rel="tooltip" title="审核不通过"
                  href="@{Cooperators.disAgreeCooperItem(itm.id)}"><i class="icon-remove"></i></a>
             #{/if}
         #{/power.ck}

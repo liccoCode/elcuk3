@@ -31,6 +31,29 @@ public class BatchReviewApply extends GenericModel {
 
     public String name;
 
+    public enum T {
+        StrongTrial {
+            @Override
+            public String label() {
+                return "强审";
+            }
+        },
+        PumpingTrial {
+            @Override
+            public String label() {
+                return "抽审";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     *
+     */
+    @Enumerated(EnumType.STRING)
+    public T type;
+
 
     public enum W {
         PREPAY {
@@ -154,6 +177,21 @@ public class BatchReviewApply extends GenericModel {
         return this.handlers.stream()
                 .filter(handler -> handler.handler.department == department && handler.effective)
                 .collect(Collectors.toList());
+    }
+
+    public String showExcelResult(String depart) {
+        StringBuilder sb = new StringBuilder();
+        this.handlers.stream().filter(handler -> handler.handler.department == User.D.valueOf(depart))
+                .forEach(handler -> sb.append(handler.handler.username).append(" ").append(handler.result.label())
+                        .append("; "));
+        return sb.toString();
+    }
+
+    public String showExcelMemo(String depart) {
+        StringBuilder sb = new StringBuilder();
+        this.handlers.stream().filter(handler -> handler.handler.department == User.D.valueOf(depart))
+                .forEach(handler -> sb.append(handler.handler.username).append(":").append(handler.memo).append("; "));
+        return sb.toString();
     }
 
 }
