@@ -116,7 +116,7 @@ POST    /paymentunit/shipment/{id}/calDuty                  PaymentUnits.calShip
 DELETE  /paymentunit/{id}                                   PaymentUnits.destroy
 DELETE  /paymentunit/{id}/shipment                          PaymentUnits.destroyByShipment
 POST    /paymentunit/{id}/fixValue                          PaymentUnits.fixValue
-POST    /paymentunit/{id}/approve.json                      PaymentUnits.approveFromShipment
+POST    /paymentunit/{id}/apply.json                        PaymentUnits.applyFromShipment
 POST    /paymentunit/payment/{id}/approval                  PaymentUnits.approveFromDeliveryment
 GET     /paymentunit/{id}.json                              PaymentUnits.show(format:'json')
 GET     /paymentunit/{id}/records.json                      PaymentUnits.records(format:'json')

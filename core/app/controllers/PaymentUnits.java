@@ -149,9 +149,28 @@ public class PaymentUnits extends Controller {
             Webs.errorToFlash(flash);
             Payments.show(id, null);
         }
-
         payment.unitsApproval(paymentUnitIds);
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("批复成功");
+        Payments.show(id, null);
+    }
 
+    /**
+     * 物流批准请款功能
+     *
+     * @param id
+     */
+    public static void approvePaymentFromShipment(Long id, List<Long> paymentUnitIds) {
+        if(paymentUnitIds == null || paymentUnitIds.size() <= 0)
+            Validation.addError("", "请选择需要批准的请款");
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            Payments.show(id, null);
+        }
+        List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(paymentUnitIds)).fetch();
+        units.forEach(unit -> unit.transportApprove());
         if(Validation.hasErrors())
             Webs.errorToFlash(flash);
         else
@@ -168,6 +187,20 @@ public class PaymentUnits extends Controller {
     public static void approveFromShipment(Long id) {
         PaymentUnit fee = PaymentUnit.findById(id);
         fee.transportApprove();
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
+        render("PaymentUnits/show.json", fee);
+    }
+
+    /**
+     * 申请运输单请款
+     *
+     * @param id
+     */
+    @Check("paymentunits.approve")
+    public static void applyFromShipment(Long id) {
+        PaymentUnit fee = PaymentUnit.findById(id);
+        fee.transportApply();
         if(Validation.hasErrors())
             renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
         render("PaymentUnits/show.json", fee);

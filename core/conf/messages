@@ -231,6 +231,8 @@ paymentunit.applynew.msg=\u521B\u5EFA %s %s %s \u8BF7\u6B3E
 
 payment.approval=\u8BF7\u6B3E\u6279\u51C6
 payment.approval.msg=\u6279\u51C6 %s \u4E2A %s(%s) %s\u8BF7\u6B3E, \u91D1\u989D %s
+payment.apply=\u8bf7\u6b3e\u7533\u8bf7
+payment.apply.msg=\u6279\u51C6 %s \u4E2A %s(%s) %s\u8BF7\u6B3E, \u91D1\u989D %s
 payment.payit=\u4ED8\u6B3E\u5355\u4ED8\u6B3E
 payment.payit.msg=\u652F\u4ED8\u7ED9 %s \u603B\u91D1\u989D %s (\u6C47\u7387: %s at %s);
 payment.uploadDestroy=\u5220\u9664\u9644\u4EF6
