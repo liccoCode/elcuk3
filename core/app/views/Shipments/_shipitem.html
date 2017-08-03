@@ -11,7 +11,7 @@
     <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
   #{/if}
     <th>采购计划</th>
-    <th>阶段</th>
+    <th width="30px;">阶段</th>
     <th width="130px;">Sku</th>
     <th width="150px;">Selling</th>
   #{if useCheckbox}
@@ -56,7 +56,7 @@
     </td>
     <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
     <td style="word-break:break-all;">
-      <a href="@{Products.show(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
+      <a href="@{Products.showAttr(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
     ${itm.unit.product?.chineseName}
     </td>
     <td style="word-break:break-all;"><a id="unitbutton">${itm.unit.sid}</a></td>

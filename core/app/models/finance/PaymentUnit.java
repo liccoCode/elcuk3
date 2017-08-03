@@ -112,7 +112,7 @@ public class PaymentUnit extends Model {
         this.materialPlanUnit = materialPlanUnit;
         this.materialPlan = materialPlanUnit.materialPlan;
         this.amount = materialPlanUnit.totalAmount();
-        this.unitQty = materialPlanUnit.receiptQty >0 ? materialPlanUnit.receiptQty : materialPlanUnit.qty;
+        this.unitQty = materialPlanUnit.receiptQty > 0 ? materialPlanUnit.receiptQty : materialPlanUnit.qty;
         this.currency = materialPlanUnit.getCurrency();
         this.payment = Payment.buildPayment(materialPlanUnit.materialPlan.cooperator, materialPlanUnit.getCurrency(),
                 materialPlanUnit.totalAmount(), materialPlanUnit.materialPlan.apply);
@@ -308,11 +308,32 @@ public class PaymentUnit extends Model {
         }
     }
 
+    public void transportApply() {
+        if(this.cooperator == null)
+            this.cooperator = this.shipment.cooper;
+        if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
+        if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
+            Validation.addError("", "请添加合作伙伴" + this.cooperator.name + "的支付方式信息");
+        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
+            Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
+        if(Validation.hasErrors()) return;
+        if(this.payment == null) {
+            this.payment = Payment.buildPayment(this.cooperator, this.currency, this.amount(), this.shipment.apply)
+                    .save();
+        }
+        this.state = S.APPLY;
+        this.save();
+        new ERecordBuilder("payment.apply").msgArgs(this.unitQty, this.shipItem == null ? "" : this.shipItem.unit.sku,
+                this.id, this.feeType.nickName, this.currency.symbol() + " " + this.amount())
+                .fid(this.payment.id).save();
+    }
+
     /**
      * 批准运输单请款项目
      */
     public void transportApprove() {
-        /**
+        /*
          * 1. 判断是否拥有请款单
          * 2. 判断状态是否软删除, 软删除不允许处理
          * 3. 判断状态是否允许
@@ -320,7 +341,6 @@ public class PaymentUnit extends Model {
          */
         if(this.cooperator == null)
             this.cooperator = this.shipment.cooper;
-
         if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
         if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
         if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
@@ -334,16 +354,12 @@ public class PaymentUnit extends Model {
         }
         this.state = S.APPROVAL;
         this.save();
-        new ERecordBuilder("payment.approval")
-                .msgArgs(this.unitQty,
-                        this.shipItem == null ? "" : this.shipItem.unit.sku,
-                        this.id,
-                        this.feeType.nickName,
-                        this.currency.symbol() + " " + this.amount())
-                .fid(this.payment.id)
-                .save();
+        new ERecordBuilder("payment.approval").msgArgs(this.unitQty, this.shipItem == null ? "" : this.shipItem.unit.sku,
+                this.id,
+                this.feeType.nickName,
+                this.currency.symbol() + " " + this.amount())
+                .fid(this.payment.id).save();
     }
-
 
     /**
      * 驳回

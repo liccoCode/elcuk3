@@ -323,7 +323,7 @@ public class Products extends Controller {
     /**
      * 保存 product 附加属性
      */
-    public static void saveAttrs(List<ProductAttr> productAttrs, String hsCode) {
+    public static void saveAttrs(List<ProductAttr> productAttrs) {
         try {
             String log = "";
             for(ProductAttr productAttr : productAttrs) {
@@ -335,9 +335,6 @@ public class Products extends Controller {
                         productAttr.save();
                         log = log + "新增属性:" + productAttr.value;
                     }
-                    Product product = Product.findById(productAttr.product.sku);
-                    product.hs_code = hsCode;
-                    product.save();
                     new ElcukRecord(Messages.get("product.update"), Messages.get("action.base", log),
                             productAttr.product.sku).save();
                 }
@@ -346,6 +343,19 @@ public class Products extends Controller {
         } catch(Exception e) {
             renderJSON(new Ret(Webs.E(e)));
         }
+    }
+
+    public static void saveShipmentInfo(Product pro) {
+        pro.save();
+        flash.success("修改成功！");
+        showAttr(pro.sku);
+    }
+
+    public static void removeAttr(String sku, Long id){
+        ProductAttr attr = ProductAttr.findById(id);
+        attr.delete();
+        flash.success("删除成功");
+        showAttr(sku);
     }
 
     /**
