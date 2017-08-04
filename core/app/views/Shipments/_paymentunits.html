@@ -18,10 +18,11 @@
           <th width="80px;">(now)均价</th>
           <th width="110px;">总价</th>
           <th width="130px">费用关系人</th>
+          <th width="220px;">支付单</th>
           <th width="100px;">备注</th>
           <th width="60px;">申请人</th>
-          <th width="120px;">申请时间</th>
-          <th width="240px;">Action</th>
+          <th width="90px;">申请时间</th>
+          <th width="230px;">Action</th>
         </tr>
       #{list items:ship.fees, as:'fee'}
         <tr id='fee_${fee.id}'>
@@ -42,6 +43,7 @@
               #{/if}
           </td>
           <td>${fee.cooperator?.name}</td>
+          <td><a href="@{Payments.show(fee.payment?.id)}" target="_blank">${fee.payment?.paymentNumber}</a></td>
           <td>${fee.memo}</td>
           <td>${fee.payee.username}</td>
           <td>#{time_tooltip time:fee.createdAt /}</td>
@@ -171,6 +173,7 @@
       <% } %>
     </td>
     <td><%= fee.cooperator.name %></td>
+    <td></td>
     <td><%= fee.memo %></td>
     <td><%= fee.payee.username %></td>
     <td><%= fee.createdAt %></td>

@@ -342,6 +342,7 @@ public class PaymentUnit extends Model {
         if(this.cooperator == null)
             this.cooperator = this.shipment.cooper;
         if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
+        if(this.payment == null) Validation.addError("", this.feeType.nickName + "没有请款, 不能进行批准操作.");
         if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
         if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
             Validation.addError("", "请添加合作伙伴" + this.cooperator.name + "的支付方式信息");
