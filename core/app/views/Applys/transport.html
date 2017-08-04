@@ -30,8 +30,12 @@
       </form>
     </div>
     <div class="span3">
-      <input type="button" class="btn btn-success" id="batch_approve_btn" value="批量请款"
+      <input type="button" class="btn btn-success" id="batch_apply_btn" value="批量请款"
              data-url="@{PaymentUnits.batchApplyFromShipment()}">
+    #{power.ck 'paymentunits.approve'}
+      <input type="button" class="btn btn-warning" id="batch_approve_btn" value="批量批准"
+             data-url="@{PaymentUnits.batchApproveFromShipment()}">
+    #{/power.ck}
     </div>
   </div>
 </div>
@@ -41,55 +45,59 @@
 <div id='shipments'>
 #{list items: shipments, as:'ship'}
   <div class="row-fluid" id="shipment_${ship.id}">
-    <div class="span3">
+    <div class="span2">
       <div class="row-fluid">
-        <div class="span7">
-          <dl class="dl-horizontal">
-            <dt>运输单</dt>
-            <dd>
-              <a href="@{Shipments.show(ship.id)}">${ship.id}</a>
-            </dd>
-            <dt>运输方式</dt>
-            <dd>${ship.type.label()}</dd>
-            <dt>国际快递</dt>
-            <dd>
+        <h4 class="alert alert-info">运输单详情</h4>
+        <table class="table table-bordered table-condensed">
+          <tr>
+            <td colspan="2">
+                #{power.ck 'applys.handlshipment'}
+                  <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
+                    从当前请款单中剔除
+                  </button>
+                #{/power.ck}
+            </td>
+          </tr>
+          <tr>
+            <th>运输单</th>
+            <td><a href="@{Shipments.show(ship.id)}">${ship.id}</a></td>
+          </tr>
+          <tr>
+            <th>运输方式</th>
+            <td>${ship.type.label()}</td>
+          </tr>
+          <tr>
+            <th>国际快递</th>
+            <td>
                 #{if ship.internationExpress}
-                ${ship.internationExpress}#{/if}
+                ${ship.internationExpress}
+                #{/if}
                 #{else }&nbsp;#{/else}
-            </dd>
-            <dt>TrackNo:</dt>
-            <dd>${ship.trackNo}
+            </td>
+          </tr>
+          <tr>
+            <th>TrackNo</th>
+            <td>
                 #{if ship.trackNo}
                   <a href="${ship.internationExpress?.trackUrl(ship.trackNo)}" target="_blank">
                     <i class="icon-external-link"></i>
                   </a>
                 #{/if}
                 #{else }&nbsp;#{/else}
-            </dd>
-            <dt>FBAs:</dt>
-            <dd>
+            </td>
+          </tr>
+          <tr>
+            <th>FBAs</th>
+            <td>
                 #{list items:ship.fbas(), as:'fba'}
                   <span>${fba.shipmentId} ${fba.centerId}</span>
                 #{/list}
-            </dd>
-          </dl>
-        </div>
-
-        <div class="span5">
-          <dl class="dl-horizontal">
-            <dt>
-                #{power.ck 'applys.handlshipment'}
-                  <button data-id='${ship.id}' class="btn btn-mini btn-danger delete">
-                    从当前请款单中剔除
-                  </button>
-                #{/power.ck}
-            </dt>
-            <dd>&nbsp;</dd>
-          </dl>
-        </div>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
-    <div class="span9">
+    <div class="span10">
         #{render 'Shipments/_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators/}
     </div>
   </div>

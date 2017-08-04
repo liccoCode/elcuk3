@@ -39,6 +39,36 @@ $(() => {
     EF.colorAnimate(targetTr);
   }
 
+  $("#batch_apply_btn").click(function (e) {
+    if ($("input[name='pids']:checked").length === 0) {
+      noty({
+        text: "请选择请款的费用记录",
+        type: "error"
+      });
+    } else {
+      let pids = [];
+      $("input[name='pids']:checked").each(function () {
+        pids.push($(this).val());
+      });
+      $.post($(this).data("url"), {pids: pids}, function (r) {
+        if (r.flag) {
+          noty({
+            text: r.message,
+            type: 'success',
+            timeout: 3000
+          });
+          window.location.reload();
+        } else {
+          noty({
+            text: r.message,
+            type: 'error',
+            timeout: 3000
+          });
+        }
+      });
+    }
+  });
+
   $("#batch_approve_btn").click(function (e) {
     if ($("input[name='pids']:checked").length === 0) {
       noty({
@@ -57,6 +87,7 @@ $(() => {
             type: 'success',
             timeout: 3000
           });
+          window.location.reload();
         } else {
           noty({
             text: r.message,
