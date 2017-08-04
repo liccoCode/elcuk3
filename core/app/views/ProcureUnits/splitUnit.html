@@ -16,20 +16,13 @@
     #{/error_row}
 #{/if}
 
-#{if unit.parent && type}
-    #{danger_row  title:'分拆注意事项'}
-    <ul>
-      <li>改采购计划已经是子采购计划，父节点为 <a href="@{ProcureUnits.detail(unit.parent.id)}#${unit.id}">${unit.parent.id}</a></li>
-    </ul>
-    #{/danger_row}
-#{/if}
-#{else }
-    #{warning_row title:'分拆注意事项'}
-    <ul>
-      <li>如需分拆为其它SKU，只能分拆为同一个供应商下的其它SKU！</li>
-    </ul>
-    #{/warning_row}
-    #{info_row title:'原始采购计划' /}
+
+#{warning_row title:'分拆注意事项'}
+<ul>
+  <li>如需分拆为其它SKU，只能分拆为同一个供应商下的其它SKU！</li>
+</ul>
+#{/warning_row}
+#{info_row title:'原始采购计划' /}
 <div class="row-fluid">
   <div class="span12">
     <table class="table table-bordered">
@@ -82,43 +75,43 @@
         <td>${unit.projectName}</td>
         <td colspan="2"></td>
       </tr>
-        #{if unit.stage.name()=='IN_STORAGE'}
-          <tr>
-            <th>入库时FBA</th>
-            <td>${unit.fba?.shipmentId}</td>
-            <th>当前仓库</th>
-            <td>${unit.currWhouse?.name}</td>
-            <th></th>
-            <td></td>
-          </tr>
-          <tr>
-            <th>收货数</th>
-            <td>${unit.attrs.qty}</td>
-            <th>入库数</th>
-            <td>${unit.inboundQty}</td>
-            <th>可用库存</th>
-            <td>
-            ${unit.availableQty}
-            (主箱数:${unit.mainBox?.boxNum} 每箱个数:${unit.mainBox?.num} 尾箱数:${unit.lastBox?.boxNum} 每箱个数:${unit.lastBox?.num})
-            </td>
-          </tr>
-        #{/if}
+    #{if unit.stage.name()=='IN_STORAGE'}
+      <tr>
+        <th>入库时FBA</th>
+        <td>${unit.fba?.shipmentId}</td>
+        <th>当前仓库</th>
+        <td>${unit.currWhouse?.name}</td>
+        <th></th>
+        <td></td>
+      </tr>
+      <tr>
+        <th>收货数</th>
+        <td>${unit.attrs.qty}</td>
+        <th>入库数</th>
+        <td>${unit.inboundQty}</td>
+        <th>可用库存</th>
+        <td>
+        ${unit.availableQty}
+          (主箱数:${unit.mainBox?.boxNum} 每箱个数:${unit.mainBox?.num} 尾箱数:${unit.lastBox?.boxNum} 每箱个数:${unit.lastBox?.num})
+        </td>
+      </tr>
+    #{/if}
     </table>
   </div>
 </div>
 <input type="hidden" id="cooperId" value="${unit.cooperator?.id}">
-    #{success_row title:'子采购计划'/}
+#{success_row title:'子采购计划'/}
 <div class="row-fluid">
   <div class="span12">
     <form action="@{ProcureUnits.doSplitUnit(unit.id)}" method="POST" id="splitUnitForm">
-        #{authenticityToken /}
+    #{authenticityToken /}
       <table class="table ta table-bordered">
-          #{if type}
-              #{include 'ProcureUnits/_splitOnSelling.html'/}
-          #{/if}
-          #{else }
-              #{include 'ProcureUnits/_splitOnNoSelling.html'/}
-          #{/else}
+      #{if type}
+          #{include 'ProcureUnits/_splitOnSelling.html'/}
+      #{/if}
+      #{else }
+          #{include 'ProcureUnits/_splitOnNoSelling.html'/}
+      #{/else}
         <tr>
           <td colspan="6">
             <h4>Comment</h4>
@@ -129,11 +122,11 @@
           <td colspan="6">
             <input type="hidden" name="newUnit.attrs.deliveryDate" value="${newUnit.attrs.deliveryDate.date()}">
             <a href="@{Deliveryments.show(unit.deliveryment.id)}" class="btn btn-success">回到采购单</a>
-              #{power.ck "procures.dosplitunit"}
-                <button data-confirm="确认分拆前, 请再确认一次分拆的数量,地址等信息" class="btn btn-primary">
-                  分拆
-                </button>
-              #{/power.ck}
+          #{power.ck "procures.dosplitunit"}
+            <button data-confirm="确认分拆前, 请再确认一次分拆的数量,地址等信息" class="btn btn-primary">
+              分拆
+            </button>
+          #{/power.ck}
           </td>
         </tr>
       </table>
@@ -142,4 +135,3 @@
   </div>
 </div>
 
-#{/else}
