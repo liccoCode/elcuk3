@@ -114,7 +114,11 @@ public class Attach extends Model {
         /**
          * 物料出货单上传附件
          */
-        MATERIALPLAN;
+        MATERIALPLAN,
+        /**
+         * 汇签审核
+         */
+        BATCHAPPLY;
 
 
         /**
