@@ -30,8 +30,8 @@
       </form>
     </div>
     <div class="span3">
-      <input type="button" class="btn btn-warning" id="batch_approve_btn" value="批量批准"
-             data-url="@{PaymentUnits.batchApproveFromShipment()}">
+      <input type="button" class="btn btn-success" id="batch_approve_btn" value="批量请款"
+             data-url="@{PaymentUnits.batchApplyFromShipment()}">
     </div>
   </div>
 </div>
@@ -96,6 +96,7 @@
   <hr style="border-top: 1px dashed;">
 #{/list}
 </div>
+#{bootstrap_pager pi:p, url: ''/}
 
 #{render './_relate_fees.html', apply: apply/}
 

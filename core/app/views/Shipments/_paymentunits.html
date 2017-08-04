@@ -52,9 +52,11 @@
               #{power.ck 'paymentunits.destroy'}
                 <button class="btn btn-mini btn-warning" data-id="${fee.id}">删除</button>
               #{/power.ck}
-              #{power.ck 'paymentunits.approve'}
-                <button class="btn btn-mini btn-success" data-id="${fee.id}">请款</button>
-              #{/power.ck}
+              #{if !fee.payment}
+                  #{power.ck 'paymentunits.approve'}
+                    <button class="btn btn-mini btn-success" data-id="${fee.id}">请款</button>
+                  #{/power.ck}
+              #{/if}
               #{power.ck 'paymentunits.deny'}
                 <button class="btn btn-mini btn-danger" data-id="${fee.id}">驳回</button>
               #{/power.ck}

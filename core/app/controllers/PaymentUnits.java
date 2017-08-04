@@ -206,6 +206,14 @@ public class PaymentUnits extends Controller {
         render("PaymentUnits/show.json", fee);
     }
 
+    public static void batchApplyFromShipment(Long[] pids) {
+        List<PaymentUnit> units = PaymentUnit.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        units.forEach(PaymentUnit::transportApply);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(false, Webs.vJson(Validation.errors())));
+        renderJSON(new Ret(true, "批量请款运输单请款成功"));
+    }
+
     /**
      * 批量批准运输单请款
      *
