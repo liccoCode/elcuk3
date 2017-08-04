@@ -1,10 +1,14 @@
+#{form @PaymentUnits.approvePaymentFromShipment(payment.id)}
 <div class="row-fluid">
   <div class="btn-toolbar">
+      #{power.ck 'paymentunits.approve'}
+        <input type="submit" class="btn btn-info" value="批准"/>
+      #{/power.ck}
     <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
   <table class="table table-bordered table-condensed">
     <tr>
-      <th></th>
+      <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
       <th width="200px;">关联运输资料</th>
       <th width="150px;">实际到货时间</th>
       <th width="150px;">费用类型</th>
@@ -17,39 +21,44 @@
       <th width="100px;">状态</th>
       <th width="240px;">#</th>
     </tr>
-  #{list items: units, as:'fee'}
-    <tr>
-      <td></td>
-      <td>
-          #{if fee.shipItem}
-            <a href="@{Shipments.show(fee.shipment.id)}#${fee.shipItem.id}" target="_blank">
-            ${fee.shipment.id} #${fee.shipItem.id}
+      #{list items: units, as:'fee'}
+        <tr>
+          <td>
+              #{if fee.state.name()=='APPLY'}
+                <input type="checkbox" name="paymentUnitIds" value="${fee.id}">
+              #{/if}
+          </td>
+          <td>
+              #{if fee.shipItem}
+                <a href="@{Shipments.show(fee.shipment.id)}#${fee.shipItem.id}" target="_blank">
+                ${fee.shipment.id} #${fee.shipItem.id}
+                </a>
+              #{/if}
+              #{else }
+                <a href="@{Shipments.show(fee.shipment.id)}" target="_blank">${fee.shipment.id}</a>
+              #{/else}
+          </td>
+          <td>#{time_tooltip time:fee.shipment.dates.receiptDate/}</td>
+          <td>${fee.feeType.nickName}</td>
+          <td>${fee.currency}</td>
+          <td>${fee.unitPrice}</td>
+          <td>${fee.unitQty}</td>
+          <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
+          <td>${fee.amount()}</td>
+          <td>${fee.procureUnit?.result?.label()}</td>
+          <td>
+            <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+          </td>
+          <td>
+            <a href="@{Applys.transport(payment.tApply.id)}#${fee.id}" target="_blank">
+            ${payment.tApply.serialNumber} #${fee.id}
             </a>
-          #{/if}
-          #{else }
-            <a href="@{Shipments.show(fee.shipment.id)}" target="_blank">${fee.shipment.id}</a>
-          #{/else}
-      </td>
-      <td>#{time_tooltip time:fee.shipment.dates.receiptDate/}</td>
-      <td>${fee.feeType.nickName}</td>
-      <td>${fee.currency}</td>
-      <td>${fee.unitPrice}</td>
-      <td>${fee.unitQty}</td>
-      <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice()}</td>
-      <td>${fee.amount()}</td>
-      <td>${fee.procureUnit?.result?.label()}</td>
-      <td>
-        <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
-      </td>
-      <td>
-        <a href="@{Applys.transport(payment.tApply.id)}#${fee.id}" target="_blank">
-        ${payment.tApply.serialNumber} #${fee.id}
-        </a>
-      </td>
-    </tr>
-  #{/list}
+          </td>
+        </tr>
+      #{/list}
     <tr>
       <td colspan="12">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
     </tr>
   </table>
 </div>
+#{/form}

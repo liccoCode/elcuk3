@@ -75,4 +75,14 @@ $(() => {
     window.open('/Excels/exportBatchReviewApply?' + $form.serialize(), "_blank")
   });
 
+  function fidCallBack () {
+    return {
+      fid: $("input[name='applyId']").val(),
+      p: 'BATCHAPPLY'
+    }
+  }
+  let dropbox = $('#dropbox');
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
+  window.dropUpload.iniDropbox(fidCallBack, dropbox);
+
 });

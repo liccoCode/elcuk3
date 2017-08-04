@@ -17,7 +17,7 @@
             <input type="hidden" name="productAttrs[${att_index - 1}].product.sku" value="${att.product.sku}">
             <input type="hidden" name="productAttrs[${att_index - 1}].attribute.id" value="${att.attribute.id}">
           </td>
-          <td><a class="btn btn-danger" id="remove_attr_btn" data-attr="${att.id}" data-sku="${pro.sku}">删除</a></td>
+          <td><a class="btn btn-danger" href="@{Products.removeAttr(pro.sku, att.id)}">删除</a></td>
         </tr>
       #{/list}
   </table>

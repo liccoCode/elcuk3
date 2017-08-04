@@ -138,7 +138,6 @@ $ ->
       noty({text: '服务器发生错误!', type: 'error', timeout: 5000})
       LoadMask.unmask()
     )
-
     # 删除
   ).on('click', 'button.btn-warning:contains(删除)',(e) ->
     id = $(@).data("id")
@@ -148,12 +147,12 @@ $ ->
     $('#popModal').html(_.template($('#form-destroyfee-model-template').html())({fee: params})).modal('show')
 
     # 批准
-  ).on('click', 'button.btn-success:contains(批准)',(e) ->
+  ).on('click', 'button.btn-success:contains(请款)',(e) ->
     $btn = $(@)
     $tr = $btn.parents('tr')
     id = $(@).data("id")
     LoadMask.mask()
-    $.ajax("/paymentunit/#{id}/approve.json", {type: 'POST', dataType: 'json'})
+    $.ajax("/paymentunit/#{id}/apply.json", {type: 'POST', dataType: 'json'})
       .done((r) ->
         if r.flag == false
           try
@@ -164,7 +163,7 @@ $ ->
             text = r.message
           noty({text: text, type: 'error'})
         else
-          noty({text: "请款项目 ##{r['id']} 通过审核.", type: 'success', timeout: 3000})
+          noty({text: "请款项目 ##{r['id']} 请款成功.", type: 'success', timeout: 3000})
           label = feeStateLabel(r['state'])
           nickName = $tr.find('td:eq(1)').text()
           $tr.find('td:eq(1)').html("<span class='label label-#{label}'>#{nickName}</span>")
@@ -182,7 +181,6 @@ $ ->
       url: "/paymentunit/#{id}/deny"
       title: "驳回 #{$btn.parents('tr').find('td:eq(1)').text()} 请款项目"
       id: id
-
     $('#popModal')
       .html(_.template($('#form-deny-paymentunit-template').html())({form: formParam}))
       .modal('show')
