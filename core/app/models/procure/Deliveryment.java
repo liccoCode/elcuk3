@@ -181,6 +181,15 @@ public class Deliveryment extends GenericModel {
             public String label() {
                 return "手动单";
             }
+        },
+        /**
+         * 挪货单
+         */
+        MOVE {
+            @Override
+            public String label() {
+                return "挪货单";
+            }
         };
 
         public abstract String label();
@@ -423,6 +432,11 @@ public class Deliveryment extends GenericModel {
                 + "";
         return String.format("DL|%s|%s", dt.toString("yyyyMM"),
                 count.length() == 1 ? "0" + count : count);
+    }
+
+    public static String b2bName() {
+        String count = Deliveryment.count("deliveryType=? ", T.MOVE) + 1 + "";
+        return String.format("YZ-%s", count.length() == 1 ? "00" + count : count.length() == 2 ? "0" + count : count);
     }
 
     /**

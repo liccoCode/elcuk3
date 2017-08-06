@@ -30,8 +30,10 @@ import java.util.stream.Collectors;
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Cooperator extends Model {
-    private static final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
+
     private static final long serialVersionUID = -6185353048205737293L;
+
+    private static final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(Locale.CHINA);
 
     public enum T {
         /**
@@ -427,6 +429,10 @@ public class Cooperator extends Model {
 
     public boolean showRed() {
         return this.cooperItems.stream().anyMatch(item -> Objects.equals(item.status, CooperItem.S.Pending));
+    }
+
+    public static Cooperator findB2bCooperator() {
+       return Cooperator.findById(208L);
     }
 
 }

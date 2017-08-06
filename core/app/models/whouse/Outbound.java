@@ -1,12 +1,15 @@
 package models.whouse;
 
+import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
+import helper.HTTP;
 import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
 public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
+
+    public static final String MengTopUrl = "http://45.32.141.39:9000";
 
     @Id
     @Column(length = 30)
@@ -276,46 +281,73 @@ public class Outbound extends GenericModel {
         });
     }
 
-    public static void confirmOutBound(List<String> ids) {
+    public static Ret confirmOutBound(List<String> ids) {
         for(String id : ids) {
             Outbound out = Outbound.findById(id);
             for(ProcureUnit p : out.units) {
                 if(Arrays.asList("DELIVERY", "DONE").contains(p.stage.name())) {
-                    Validation.addError("", "出库单【" + id + "】下的采购计划" + p.id + "不是已入仓状态，请查证");
-                    return;
+                    return new Ret(false, "出库单【" + id + "】下的采购计划" + p.id + "不是已入仓状态，请查证");
                 }
                 String msg = ProcureUnit.validRefund(p);
                 if(StringUtils.isNotEmpty(msg)) {
-                    Validation.addError("", "出库单【" + id + "】下的" + msg);
-                    return;
+                    return new Ret(false, "出库单【" + id + "】下的" + msg);
                 }
                 if(!p.validBoxInfoIsComplete()) {
-                    Validation.addError("", "采购计划【" + p.id + "】的包装信息没填，请先填写！");
-                    return;
+                    return new Ret(false, "采购计划【" + p.id + "】的包装信息没填，请先填写！");
                 }
                 if(p.availableQty < p.totalOutBoundQty()) {
-                    Validation.addError("", "采购计划【" + p.id + "】的包装信息的总数量大于可用库存量，请先检查！");
-                    return;
+                    return new Ret(false, "采购计划【" + p.id + "】的包装信息的总数量大于可用库存量，请先检查！");
                 }
             }
-            if(Validation.hasErrors()) {
-                return;
-            }
-            out.status = S.Outbound;
-            out.outboundDate = new Date();
-            out.save();
-            out.units.forEach(p -> {
-                if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
-                    p.stage = ProcureUnit.STAGE.OUTBOUND;
+            if(Objects.equals(out.type, StockRecord.C.B2B) && !OperatorConfig.getVal("brandname").equals("MengTop")) {
+                StringBuilder sku = new StringBuilder();
+                StringBuilder qty = new StringBuilder();
+                StringBuilder currency = new StringBuilder();
+                StringBuilder price = new StringBuilder();
+                out.units.forEach(unit -> {
+                    sku.append(unit.product.sku).append(",");
+                    qty.append(unit.attrs.qty).append(",");
+                    currency.append(unit.attrs.currency).append(",");
+                    price.append(unit.attrs.price).append(",");
+                });
+
+                StringBuilder url = new StringBuilder(Outbound.MengTopUrl + "/api/StockApiDeal/checkIsOutBoundB2b");
+                url.append("?auth_token=baef851cab745d3441d4bc7ff6f27b28&sku=").append(sku.toString());
+                String result = HTTP.get(url.toString());
+                Ret ret = JSON.parseObject(result, Ret.class);
+                if(ret.flag) {
+                    finalConfirm(out);
+                    url = new StringBuilder(Outbound.MengTopUrl + "/api/StockApiDeal/createProcureUnit");
+                    url.append("?auth_token=baef851cab745d3441d4bc7ff6f27b28&sku=").append(sku.toString());
+                    url.append("&qty=").append(qty.toString()).append("&currency=").append(currency.toString());
+                    url.append("&price=").append(price.toString());
+                    result = HTTP.get(url.toString());
+                    return JSON.parseObject(result, Ret.class);
+                } else {
+                    return ret;
                 }
-                int total_main = p.mainBox.num * p.mainBox.boxNum;
-                int total_last = p.lastBox == null ? 0 : p.lastBox.num * p.lastBox.boxNum;
-                p.outQty = total_main + total_last;
-                p.availableQty = p.availableQty - p.outQty;
-                p.save();
-                createStockRecord(p, p.availableQty);
-            });
+            } else {
+                finalConfirm(out);
+            }
         }
+        return new Ret(false, "找不到出库单元");
+    }
+
+    private static void finalConfirm(Outbound out) {
+        out.status = S.Outbound;
+        out.outboundDate = new Date();
+        out.save();
+        out.units.forEach(p -> {
+            if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
+                p.stage = ProcureUnit.STAGE.OUTBOUND;
+            }
+            int total_main = p.mainBox.num * p.mainBox.boxNum;
+            int total_last = p.lastBox == null ? 0 : p.lastBox.num * p.lastBox.boxNum;
+            p.outQty = total_main + total_last;
+            p.availableQty = p.availableQty - p.outQty;
+            p.save();
+            createStockRecord(p, p.availableQty);
+        });
     }
 
     public static void createStockRecord(ProcureUnit unit, int currQty) {

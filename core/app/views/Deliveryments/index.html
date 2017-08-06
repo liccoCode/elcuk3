@@ -132,7 +132,7 @@
         </tr>
         <tr id="dmt_${dmt_index}" style="display:none;">
           <td colspan="13">
-              #{if isB2B}
+              #{if isB2B || dmt.deliveryType.name()=='MOVE'}
                   #{render 'ProcureUnits/_b2b_unit_list.html', units:dmt.units, norecord: true/}
               #{/if}
               #{else }
