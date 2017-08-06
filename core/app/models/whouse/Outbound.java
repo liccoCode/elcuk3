@@ -299,7 +299,7 @@ public class Outbound extends GenericModel {
                     return new Ret(false, "采购计划【" + p.id + "】的包装信息的总数量大于可用库存量，请先检查！");
                 }
             }
-            if(Objects.equals(out.type, StockRecord.C.B2B)) {
+            if(Objects.equals(out.type, StockRecord.C.B2B) && !OperatorConfig.getVal("brandname").equals("MengTop")) {
                 StringBuilder sku = new StringBuilder();
                 StringBuilder qty = new StringBuilder();
                 StringBuilder currency = new StringBuilder();
@@ -326,6 +326,8 @@ public class Outbound extends GenericModel {
                 } else {
                     return ret;
                 }
+            } else {
+                finalConfirm(out);
             }
         }
         return new Ret(false, "找不到出库单元");
