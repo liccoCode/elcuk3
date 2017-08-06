@@ -727,8 +727,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 //                if("609132508189".equals(t_msku)) t_msku = "71-HPTOUCH-B2PG"; //对历史错误数据的修复 @_@
 //                if("8Z-0JR3-1BHG".equals(t_msku.toUpperCase())) t_msku = "80-QW1A56-BE"; // Power Bank 的销售还是需要囊括进来的
         String sku = StringUtils.split(merchantSKU, ",")[0].toUpperCase();
-        if("609132508189" .equals(sku)) sku = "71-HPTOUCH-B2PG";
-        else if("8Z-0JR3-1BHG" .equals(sku)) sku = "80-QW1A56-BE";
+        if("609132508189".equals(sku)) sku = "71-HPTOUCH-B2PG";
+        else if("8Z-0JR3-1BHG".equals(sku)) sku = "80-QW1A56-BE";
         return sku;
     }
 
@@ -1162,6 +1162,14 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public float weightWithGram() {
         return this.weight != null ? this.weight * 1000 : 0;
+    }
+
+    public static Product findSkuForB2b(String sku) {
+        List<Product> products = Product.find("origin_sku=?", sku).fetch();
+        if(products.size() == 0)
+            return null;
+        else
+            return products.get(0);
     }
 }
 
