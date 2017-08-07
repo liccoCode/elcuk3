@@ -1,5 +1,7 @@
 package controllers;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
@@ -38,6 +40,7 @@ import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
+import play.utils.FastRuntimeException;
 import services.MetricAmazonFeeService;
 
 import java.io.File;
@@ -889,4 +892,45 @@ public class Excels extends Controller {
         }
     }
 
+    public static void skuShipmentReport(LossRatePost p) {
+        if(p == null) p = new LossRatePost();
+        if(p.from == null || p.to == null) {
+            renderText("未选择开始时间或者结束时间!");
+        } else {
+            String beginDate = new SimpleDateFormat("yyyyMMdd").format(p.from);
+            String endDate = new SimpleDateFormat("yyyyMMdd").format(p.to);
+            String redisIngKey = "shipmentReportExecuting" + beginDate + "_" + endDate;
+            String redisKey = "shipmentReport" + beginDate + "_" + endDate;
+            String postvalue = Caches.get(redisKey);
+
+            /** 验证报表结果是否在缓存中生成 **/
+            if(StringUtils.isBlank(postvalue)) {
+                /**  若报表结果未生成,那么验证是否已经在执行当前条件的 后台任务 **/
+                String ingValue = Caches.get(redisIngKey);
+                if(StringUtils.isBlank(ingValue)) {
+                    //若redis没有 JRockend 正在执行任务的 标志位,那么通过 aws 发送消息队列调用任务执行
+                    Map map = new HashMap();
+                    map.put("jobName", "shipmentReportJob");  //  任务ID
+                    map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
+                    String message = JSONObject.toJSONString(map);
+                    AmazonSQS.sendMessage(message);
+                    renderText("单个sku物流费年均价报表已经在后台计算中，请于 10min 后再来查看结果~");
+                } else {
+                    renderText("单个sku物流费年均价报表已经在后台计算中，请于 10min 后再来查看结果~");
+                }
+            } else {
+                List<Map> list = JSONArray.parseArray(postvalue, Map.class);
+                if(list != null && list.size() != 0) {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    request.format = "xls";
+                    renderArgs.put(RenderExcel.RA_FILENAME, String.format("单个sku物流费年均价表%s.xls",beginDate + "_" + endDate));
+                    renderArgs.put(RenderExcel.RA_ASYNC, false);
+                    renderArgs.put("dmt", formatter);
+                    render(list);
+                } else {
+                    renderText("没有数据无法生成Excel文件！");
+                }
+            }
+        }
+    }
 }

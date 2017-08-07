@@ -57,6 +57,7 @@ require:
           # 不需要命令行执行
           - commons-cli -> *
     - org.apache.logging.log4j -> log4j-api 2.8.2
+    - com.amazonaws -> aws-java-sdk-sqs 1.11.18
 
 repositories:
     - factoryBoy:
