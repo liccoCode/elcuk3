@@ -213,6 +213,17 @@ public class User extends Model {
             public String url() {
                 return "https://e.mengtop.com/";
             }
+        },
+        Lecone {
+            @Override
+            public String label() {
+                return "Lecone";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.ilecone.com/";
+            }
         };
 
         public abstract String label();
