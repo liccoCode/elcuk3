@@ -51,7 +51,7 @@ $(() => {
 
   function fidCallBack () {
     return {
-      fid: $('#deliverymentId').val(),
+      fid: $('#deliverymentId').text(),
       p: 'MATERIALPURCHASES'
     }
   }
