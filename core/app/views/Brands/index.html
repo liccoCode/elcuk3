@@ -2,14 +2,7 @@
 #{set title:'Brand' /}
 #{set 'moreScripts'}
 #{/set}
-#{if brands.size() == 0}
-<div class="row-fluid">
-  <div>
-    等待添加新品牌
-  </div>
-</div>
-#{/if}
-#{else }
+
 <div class="row-fluid">
   <form method="post" action="@{Brands.create()}">
     <div class="span3 well well-small">
@@ -122,4 +115,3 @@
     </div>
   </div>
 </div>
-#{/else}
