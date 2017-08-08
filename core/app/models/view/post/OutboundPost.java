@@ -119,12 +119,18 @@ public class OutboundPost extends Post<Outbound> {
     public List<Outbound> query() {
         this.count = this.count();
         F.T2<String, List<Object>> params = params();
-        return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination)
+            return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        else
+            return Outbound.find(params._1, params._2.toArray()).fetch();
     }
 
     public List<Outbound> queryForB2B() {
         F.T2<String, List<Object>> params = params();
-        return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        if(this.pagination)
+            return Outbound.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
+        else
+            return Outbound.find(params._1, params._2.toArray()).fetch();
     }
 
     @Override
