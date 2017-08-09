@@ -255,11 +255,6 @@ public class Orderr extends GenericModel {
     public String invoiceState;
 
     /**
-     * osticket调用发票的时间
-     */
-    public Date invoiceDate;
-
-    /**
      * 是否使用 商务订单(用于JRockend 发送合同)
      */
     public boolean businessOrder;
