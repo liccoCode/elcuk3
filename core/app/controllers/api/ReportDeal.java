@@ -161,6 +161,7 @@ public class ReportDeal extends Controller {
 
             /**订单状态改为已发送**/
             ord.invoiceState = "yes";
+            ord.invoiceDate = new Date();
             ord.save();
             if(StringUtils.isNotEmpty(taxNumber)) {
                 invoice.invoiceto += "," + taxNumber;
