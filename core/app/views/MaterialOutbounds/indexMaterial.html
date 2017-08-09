@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"物料库存列表"  /}
+#{set title:"物料库存列表(${size})"  /}
 
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -27,9 +27,9 @@
 
         <select name="p.cooperId" class="inline selectize" style="width:150px;">
           <option value="">供应商</option>
-          #{list items:cooperators, as:'sp'}
-            <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-          #{/list}
+        #{list items:cooperators, as:'sp'}
+          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+        #{/list}
         </select>
 
         <select name="p.number" class="inline selectize" style="width:150px;">
@@ -46,7 +46,7 @@
           <button class="btn btn-primary" data-loading>搜索</button>
         </div>
         <a href="javascript:void(0)" data-url="@{MaterialOutbounds.blank()}" class="btn btn-success inline"
-                     id="createOutboundBtn"><i class="icon-plane"> </i>创建物料出库单</a>
+           id="createOutboundBtn"><i class="icon-plane"> </i>创建物料出库单</a>
       </div>
     </div>
   </form>
@@ -57,9 +57,7 @@
         <table class="table table-condensed table-bordered" id="data-table">
           <tr>
             <th width="20px;">
-              <label class="checkbox">
-                <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-              </label>
+              <input type="checkbox" id="checkbox_all" class="checkall" value="">
             </th>
             <th>物料编码</th>
             <th>B0M—ID</th>
@@ -72,33 +70,19 @@
         #{list items:materials, as:'m'}
           <tr>
             <td>
-              <label class="checkbox">
-                <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
-                       data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                       data-width="" data-height="">
-              </label>
+              <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}">
             </td>
             <td>${m.code}</td>
-            <td>${m.boms[0]?.number}</td>
+            <td>${m.number}</td>
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
             <td>
-              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.availableQty()}</a>
+              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.availableQty}</a>
             </td>
-            <td>${m.cooperators()}</td>
+            <td>${m.cooperName}</td>
             <td>${m.projectName}</td>
           </tr>
         #{/list}
-          <tr>
-            <td colspan="10">
-            #{if materials.size() == 0}
-              暂时还没有物料信息
-            #{/if}
-            #{else }
-                #{bootstrap_pager pi:p, url:'' /}
-            #{/else}
-            </td>
-          </tr>
         </table>
       </div>
     </div>
