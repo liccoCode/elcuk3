@@ -32,7 +32,7 @@
         #{/else}
         (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
     </td>
-    <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
+    <td rel="tooltip" title="${ord.address1}">${ord.address1.overLong()}</td>
     <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
     <td>
         <a target="_blank" href="@{Orders.show(ord.orderId)}">
