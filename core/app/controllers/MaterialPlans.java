@@ -62,7 +62,8 @@ public class MaterialPlans extends Controller {
     public static void indexMaterial(MaterialPost p) {
         if(p == null) p = new MaterialPost();
         List<Material> materials = p.query();
-        render(p, materials);
+        int size = materials.size();
+        render(p, materials, size);
     }
 
     /**

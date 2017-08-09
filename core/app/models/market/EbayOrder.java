@@ -51,6 +51,13 @@ public class EbayOrder extends GenericModel {
     @Enumerated(EnumType.STRING)
     public Orderr.S state;
 
+    public enum T {
+        EBAY,
+        MANUAL
+    }
+
+    public T type;
+
     /**
      * 订单的付款时间
      */
@@ -62,13 +69,13 @@ public class EbayOrder extends GenericModel {
     public boolean replacementOrder = false;
 
     /**
-     *  订单里面包含的产品个数
+     * 订单里面包含的产品个数
      */
     public int numberOfItemsShipped;
 
 
     /**
-     *  订单里面的没运输产品个数
+     * 订单里面的没运输产品个数
      */
     public int numberOfItemsUnShipped;
 
@@ -78,7 +85,7 @@ public class EbayOrder extends GenericModel {
     public String shipServiceLevel;
 
     public String salesChannel;
-    
+
     public boolean businessOrder = false;
 
     public String marketplaceId;
