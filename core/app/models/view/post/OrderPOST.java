@@ -101,6 +101,12 @@ public class OrderPOST extends ESPost<Orderr> {
             public String label() {
                 return "Email";
             }
+        },
+        userid {
+            @Override
+            public String label() {
+                return "User Id";
+            }
         };
 
         public abstract String label();
@@ -126,14 +132,7 @@ public class OrderPOST extends ESPost<Orderr> {
                 );
         topHits.ifPresent(hits -> this.count = hits.getLong("total"));
         if(orderIds.isEmpty()) return Collections.emptyList();
-
-        if(StringUtils.isNotEmpty(invoiceState)) {
-            return Orderr.find("invoiceState=? AND orderId IN (:orderIds)", invoiceState)
-                    .bind("orderIds", orderIds)
-                    .fetch();
-        }
         return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
-
     }
 
     public List<OrderReportDTO> queryForExcel() {
@@ -193,6 +192,9 @@ public class OrderPOST extends ESPost<Orderr> {
         if(this.accountId != null) {
             boolQuery.must(QueryBuilders.termQuery("account_id", this.accountId));
         }
+        if(StringUtils.isNotBlank(this.invoiceState)) {
+            boolQuery.must(QueryBuilders.termQuery("invoice_state", this.invoiceState));
+        }
         if(StringUtils.isNotBlank(this.search)) {
             boolQuery.must(QueryBuilders.matchPhraseQuery(this.field, this.search));
         }
@@ -226,6 +228,9 @@ public class OrderPOST extends ESPost<Orderr> {
         }
         if(StringUtils.isNotBlank(this.category)) {
             boolQuery.must(QueryBuilders.prefixQuery("sku", this.category));
+        }
+        if(StringUtils.isNotBlank(this.invoiceState)) {
+            boolQuery.must(QueryBuilders.termQuery("invoice_state", this.invoiceState));
         }
         return new SearchSourceBuilder()
                 .query(QueryBuilders.queryStringQuery(this.search()))
