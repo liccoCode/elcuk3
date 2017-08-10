@@ -127,7 +127,7 @@ public class MaterialPlans extends Controller {
         MaterialPlans.show(dp.id);
     }
 
-    @Check("deliverplans.index")
+    @Check("materialpurchases.index")
     public static void index(MaterialPlanPost p) {
         List<MaterialPlan> materialPlans;
         if(p == null) p = new MaterialPlanPost();
@@ -320,7 +320,7 @@ public class MaterialPlans extends Controller {
     /**
      * 为出货单提交请款单申请
      */
-    @Check("deliveryments.deliverymenttoapply")
+    @Check("materialpurchases.index")
     public static void materialPlanToApply(List<String> pids, MaterialPlanPost p, Long applyId) {
         if(pids == null) pids = new ArrayList<>();
         if(pids.size() <= 0) {

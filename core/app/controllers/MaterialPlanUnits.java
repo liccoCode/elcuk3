@@ -31,7 +31,6 @@ public class MaterialPlanUnits extends Controller {
      *
      * @param id
      */
-    @Check("procureunits.billingprepay")
     public static void billingPrePay(Long id, Long applyId) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(id);
         try {
@@ -53,8 +52,6 @@ public class MaterialPlanUnits extends Controller {
      * @param pid
      * @param applyId
      */
-
-    @Check("procureunits.billingprepay")
     public static void editPaySatus(Long pid, Long applyId, String reason) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(pid);
         try {
