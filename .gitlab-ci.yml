@@ -1,14 +1,18 @@
 image: zen9073/play:1.4.2
 
 before_script:
+  - export JAVA_HOME=/opt/jdk1.8.0_112
+  - export CLASSPATH=.:$JAVA_HOME/lib
+  - export PATH=.:$JAVA_HOME/bin:$PATH
+  - export PLAY_HOME=/opt/play-1.4.2
+  - export PATH=.:$PLAY_HOME:$PATH
+
   - cd core
-  - bash
   - play dependencies  --sync
 
 test:
   script:
     - cd core
-    - bash
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml core/app/controllers
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/exception
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/ext
