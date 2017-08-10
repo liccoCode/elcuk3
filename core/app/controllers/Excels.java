@@ -840,6 +840,7 @@ public class Excels extends Controller {
 
     public static void exportOutBoundDetailReport(OutboundPost p) {
         if(p == null) p = new OutboundPost();
+        p.pagination = false;
         List<Outbound> outbounds = p.query();
         p.flag = "Other";
         List<Outbound> others = p.query();

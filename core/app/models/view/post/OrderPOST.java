@@ -71,9 +71,52 @@ public class OrderPOST extends ESPost<Orderr> {
 
     public String category;
 
+    public enum F {
+        order_id {
+            @Override
+            public String label() {
+                return "Order Id";
+            }
+        },
+        sku {
+            @Override
+            public String label() {
+                return "SKU";
+            }
+        },
+        promotion_ids {
+            @Override
+            public String label() {
+                return "Promotion IDs";
+            }
+        },
+        buyer {
+            @Override
+            public String label() {
+                return "Buyer";
+            }
+        },
+        email {
+            @Override
+            public String label() {
+                return "Email";
+            }
+        },
+        userid {
+            @Override
+            public String label() {
+                return "User Id";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    public String field;
+
     public List<Orderr> query() {
         JSONObject result;
-        if(StringUtils.isEmpty(this.sku) && StringUtils.isEmpty(this.category)) {
+        if(!Objects.equals(field, F.sku.name()) && StringUtils.isEmpty(this.category)) {
             result = ES.search(System.getenv(Constant.ES_INDEX), "order", this.params());
         } else {
             result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", this.skuParams());
@@ -89,14 +132,7 @@ public class OrderPOST extends ESPost<Orderr> {
                 );
         topHits.ifPresent(hits -> this.count = hits.getLong("total"));
         if(orderIds.isEmpty()) return Collections.emptyList();
-
-        if(StringUtils.isNotEmpty(invoiceState)) {
-            return Orderr.find("invoiceState=? AND orderId IN (:orderIds)", invoiceState)
-                    .bind("orderIds", orderIds)
-                    .fetch();
-        }
         return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
-
     }
 
     public List<OrderReportDTO> queryForExcel() {
@@ -156,7 +192,12 @@ public class OrderPOST extends ESPost<Orderr> {
         if(this.accountId != null) {
             boolQuery.must(QueryBuilders.termQuery("account_id", this.accountId));
         }
-
+        if(StringUtils.isNotBlank(this.invoiceState)) {
+            boolQuery.must(QueryBuilders.termQuery("invoice_state", this.invoiceState));
+        }
+        if(StringUtils.isNotBlank(this.search)) {
+            boolQuery.must(QueryBuilders.matchPhraseQuery(this.field, this.search));
+        }
         return new SearchSourceBuilder()
                 .postFilter(boolQuery)
                 .from(this.getFrom())
@@ -183,10 +224,13 @@ public class OrderPOST extends ESPost<Orderr> {
             boolQuery.must(QueryBuilders.termQuery("state", this.state.name().toLowerCase()));
         }
         if(StringUtils.isNotBlank(this.sku)) {
-            boolQuery.must(QueryBuilders.termQuery("sku", ES.parseEsString(sku).toLowerCase()));
+            boolQuery.must(QueryBuilders.matchPhraseQuery("sku", ES.parseEsString(sku).toLowerCase()));
         }
         if(StringUtils.isNotBlank(this.category)) {
             boolQuery.must(QueryBuilders.prefixQuery("sku", this.category));
+        }
+        if(StringUtils.isNotBlank(this.invoiceState)) {
+            boolQuery.must(QueryBuilders.termQuery("invoice_state", this.invoiceState));
         }
         return new SearchSourceBuilder()
                 .query(QueryBuilders.queryStringQuery(this.search()))

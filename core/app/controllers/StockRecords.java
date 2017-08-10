@@ -1,6 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import models.OperatorConfig;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -15,6 +17,7 @@ import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 库存异动控制器
@@ -42,7 +45,12 @@ public class StockRecords extends Controller {
     public static void stockIndex(StockPost p) {
         if(p == null) p = new StockPost();
         List<ProcureUnit> units = p.query();
-        render(p, units);
+        boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
+        if(isB2B) {
+            render("/StockRecords/stockIndexB2B.html", p, units);
+        } else {
+            render(p, units);
+        }
     }
 
     public static void indexHistoryStock(StockPost p) {

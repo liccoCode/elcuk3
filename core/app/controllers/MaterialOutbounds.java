@@ -52,8 +52,9 @@ public class MaterialOutbounds extends Controller {
      */
     public static void indexMaterial(MaterialPost p) {
         if(p == null) p = new MaterialPost();
-        List<Material> materials = p.query();
-        render(p, materials);
+        List<Material> materials = p.outBoundQuery();
+        int size = materials.size();
+        render(p, materials, size);
     }
 
     public static void index(MaterialOutboundPost p) {
