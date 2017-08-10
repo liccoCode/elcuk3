@@ -2,11 +2,13 @@ image: zen9073/play:1.4.2
 
 before_script:
   - cd core
+  - bash
   - play dependencies  --sync
 
 test:
   script:
     - cd core
+    - bash
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml core/app/controllers
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/exception
     - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/ext
