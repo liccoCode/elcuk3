@@ -1,0 +1,25 @@
+image: zen9073/play:1.4.2
+
+before_script:
+  - cd core
+  - play dependencies  --sync
+
+test:
+  script:
+    - cd core
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml core/app/controllers
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/exception
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/ext
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/helper
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/jobs
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/models
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/mws
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/notifiers
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/query
+    - java -jar conf/checkstyle-8.1-all.jar -c conf/Erp_checkStyle.xml app/services
+
+  tags:
+    - efk
+  only:
+    - master
+
