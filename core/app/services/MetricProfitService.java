@@ -793,9 +793,10 @@ public class MetricProfitService {
                 .aggregation(AggregationBuilders.stats("units").field("quantity"))
                 .size(0);
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "procurepayunit", search);
+        if(result == null)
+            return 0f;
         return Optional.of(J.dig(result, "aggregations.units"))
-                .map(units -> units.getFloat("sum"))
-                .orElse(0f);
+                .map(units -> units.getFloat("sum")).orElse(0f);
     }
 
 

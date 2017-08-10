@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.GTs;
 import helper.J;
 import helper.Webs;
+import models.embedded.ERecordBuilder;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.view.Ret;
@@ -167,6 +168,32 @@ public class Cooperators extends Controller {
         copItem.checkAndSave(cop);
         flash.success("创建成功.");
         redirect("/cooperators/index#" + copItem.cooperator.id);
+    }
+
+    public static void agreeCooperItem(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.status = CooperItem.S.Agree;
+        item.save();
+        flash.success("操作成功");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        new ERecordBuilder("copItem.examine")
+                .msgArgs(item.cooperator.name, item.sku, item.status.label()).fid(item.id).save();
+        render("/Cooperators/index.html", p, coopers);
+    }
+
+    public static void disAgreeCooperItem(Long id) {
+        CooperItem item = CooperItem.findById(id);
+        item.status = CooperItem.S.Disagree;
+        item.save();
+        flash.success("操作成功");
+        CooperatorPost p = new CooperatorPost();
+        p.search = item.cooperator.fullName;
+        List<Cooperator> coopers = p.query();
+        new ERecordBuilder("copItem.examine")
+                .msgArgs(item.cooperator.name, item.sku, item.status.label()).fid(item.id).save();
+        render("/Cooperators/index.html", p, coopers);
     }
 
     public static void updateCooperItem(CooperItem copItem) {

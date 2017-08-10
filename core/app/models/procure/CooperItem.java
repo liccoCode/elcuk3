@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
+import models.embedded.ERecordBuilder;
 import models.material.Material;
 import models.product.Product;
 import models.view.dto.CooperItemDTO;
@@ -145,6 +146,32 @@ public class CooperItem extends Model {
 
     }
 
+    public enum S {
+        Pending {
+            @Override
+            public String label() {
+                return "待审核";
+            }
+        },
+        Agree {
+            @Override
+            public String label() {
+                return "审核通过";
+            }
+        },
+        Disagree {
+            @Override
+            public String label() {
+                return "审核不通过";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Enumerated(EnumType.STRING)
+    public S status;
+
     /**
      * 方案Json串
      */
@@ -205,15 +232,18 @@ public class CooperItem extends Model {
             throw new FastRuntimeException("CooperItem 必须有关联的 Cooperator");
         this.cooperator = cooperator;
         this.type = T.SKU;
+        this.status = S.Pending;
 
         if(this.cooperator.cooperItems.stream().filter(item -> Objects.equals(item.type, T.SKU))
                 .anyMatch(item -> Objects.equals(item.sku, this.sku)))
             throw new FastRuntimeException(this.sku + " 已经绑定了, 不需要重复绑定.");
-
         cooperator.cooperItems.add(this);
         this.setAttributes();
         this.setDefaultValue();
-        return this.save();
+        CooperItem item = this.save();
+        new ERecordBuilder("copItem.save")
+                .msgArgs(this.cooperator.name, this.sku, this.currency.symbol() + this.price).fid(item.id).save();
+        return item;
     }
 
     public void saveMaterialItem(Cooperator cooperator) {
@@ -224,7 +254,7 @@ public class CooperItem extends Model {
             Validation.addError("", "供应商下已经存在该物料，请选择其他物料!");
             return;
         } else if(this.id != null && cooperItems.stream()
-                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)){
+                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)) {
             Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
             return;
         }

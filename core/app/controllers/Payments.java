@@ -4,12 +4,17 @@ import controllers.api.SystemOperation;
 import helper.Currency;
 import helper.J;
 import helper.Webs;
+import models.OperatorConfig;
+import models.User;
+import models.finance.BatchReviewApply;
+import models.finance.BatchReviewHandler;
 import models.finance.Payment;
 import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.product.Attach;
 import models.view.Ret;
 import models.view.highchart.HighChart;
+import models.view.post.BatchApplyPost;
 import models.view.post.PaymentUnitPost;
 import models.view.post.PaymentsPost;
 import org.apache.commons.lang.math.NumberUtils;
@@ -17,6 +22,7 @@ import play.Logger;
 import play.cache.CacheFor;
 import play.data.binding.As;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -26,6 +32,7 @@ import play.mvc.With;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Payments Controller
@@ -39,10 +46,8 @@ public class Payments extends Controller {
     @Before(only = {"index"})
     public static void beforIndex() {
         List<Cooperator> cooperator = Cooperator.findAll();
-
         renderArgs.put("cooperator", cooperator);
     }
-
 
     @Check("payments.index")
     public static void index(PaymentsPost p) {
@@ -82,6 +87,85 @@ public class Payments extends Controller {
         render(payment, units, p, post);
     }
 
+    public static void batchApply(List<Long> pids) {
+        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        BatchReviewApply apply = new BatchReviewApply();
+        apply.status = BatchReviewApply.S.Pending;
+        apply.cooperator = payments.get(0).cooperator;
+        render(payments, apply);
+    }
+
+    public static void saveBatchApply(List<Long> pids, BatchReviewApply apply) {
+        List<Payment> payments = Payment.find("id IN " + SqlSelect.inlineParam(pids)).fetch();
+        double limit = Double.parseDouble(OperatorConfig.getVal("batchtriallimit"));
+        double total = payments.stream().mapToDouble(payment -> payment.totalFees()._2).sum();
+        apply.type = total > limit ? BatchReviewApply.T.StrongTrial : BatchReviewApply.T.PumpingTrial;
+        apply.cooperator = Cooperator.findById(apply.cooperator.id);
+        apply.id = apply.id();
+        apply.status = BatchReviewApply.S.Pending;
+        apply.createDate = new Date();
+        apply.creator = Login.current();
+        apply.save();
+
+        payments.forEach(payment -> {
+            payment.batchReviewApply = apply;
+            payment.save();
+        });
+        batchApplyIndex(new BatchApplyPost());
+    }
+
+    public static void batchApplyIndex(BatchApplyPost p) {
+        if(p == null) p = new BatchApplyPost();
+        List<Cooperator> cooperators = Cooperator.suppliers();
+        List<BatchReviewApply> applies = p.query();
+        render(p, cooperators, applies);
+    }
+
+    public static void showPaymentList(String id) {
+        BatchReviewApply apply = BatchReviewApply.findById(id);
+        List<Payment> payments = apply.paymentList;
+        render("/Payments/_payments.html", payments);
+    }
+
+    public static void showBatchApply(String id) {
+        BatchReviewApply apply = BatchReviewApply.findById(id);
+        String currDepart = Login.current().department.name();
+        render(apply, currDepart);
+    }
+
+    public static void submitBatchResult(BatchReviewHandler handler) {
+        BatchReviewApply apply = BatchReviewApply.findById(handler.apply.id);
+        User currUser = Login.current();
+        apply.handlers.forEach(hand -> {
+            if(Objects.equals(hand.handler, currUser) && hand.result.name().equals("Disagree")) {
+                hand.effective = false;
+                hand.save();
+            }
+        });
+        handler.createDate = new Date();
+        handler.handler = Login.current();
+        handler.save();
+
+        if(Objects.equals(apply.status, BatchReviewApply.S.Pending)) {
+            apply.status = BatchReviewApply.S.Brand;
+        }
+        apply.save();
+        flash.success("审核操作成功！");
+        showBatchApply(handler.apply.id);
+    }
+
+    public static void transferNextDepartment(String applyId, String status) {
+        BatchReviewApply apply = BatchReviewApply.findById(applyId);
+        if(apply.handlers.stream().anyMatch(handler -> handler.effective && handler.result.name().equals("Disagree"))) {
+            flash.error("当前有审核不通过人员，请先确认审核通过，再转移到下一个部门审核!");
+            showBatchApply(applyId);
+        }
+        apply.status = BatchReviewApply.S.valueOf(status);
+        apply.save();
+        flash.success("操作成功！");
+        showBatchApply(applyId);
+    }
+
     /**
      * 锁定付款单
      */
@@ -109,10 +193,8 @@ public class Payments extends Controller {
      * 为当前付款单付款
      */
     @Check("payments.payforit")
-    public static void payForIt(Long id, Long paymentTargetId,
-                                Currency currency, BigDecimal actualPaid,
+    public static void payForIt(Long id, Long paymentTargetId, Currency currency, BigDecimal actualPaid,
                                 Float ratio, @As("yyyy-MM-dd HH:mm:ss") Date ratioPublishDate) {
-
         Validation.required("供应商支付账号", paymentTargetId);
         Validation.required("币种", currency);
         Validation.required("具体支付金额", actualPaid);

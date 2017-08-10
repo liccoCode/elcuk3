@@ -105,7 +105,8 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
 
     public List<Shipment> queryOverTimeShipment() {
         return Shipment.find("FROM Shipment s WHERE DATE_FORMAT(s.dates.receiptDate, '%Y-%m-%d') > DATE_FORMAT"
-                        + "(s.dates.planArrivDateForCountRate, '%Y-%m-%d') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?"
+                        +
+                        "(s.dates.planArrivDateForCountRate, '%Y-%m-%d') AND s.dates.receiptDate >= ? AND s.dates.receiptDate <= ?"
                         + " AND s.state IN (?,?,?) ", Dates.morning(this.from), Dates.night(this.to), Shipment.S.RECEIPTD,
                 Shipment.S.RECEIVING, Shipment.S.DONE).fetch();
     }
@@ -141,7 +142,9 @@ public class ArrivalRatePost extends Post<ArrivalRate> {
         map.keySet().forEach(key -> {
             List<Float> temp = map.get(key);
             double total = temp.stream().mapToDouble(num -> num).sum();
-            time.put(key, new F.T3(key.split(":")[0], key.split(":")[1], total / map.get(key).size()));
+            double average = new BigDecimal(total).divide(new BigDecimal(map.get(key).size()), 2,
+                    BigDecimal.ROUND_HALF_DOWN).doubleValue();
+            time.put(key, new F.T3(key.split(":")[0], key.split(":")[1], average));
         });
         return time;
     }

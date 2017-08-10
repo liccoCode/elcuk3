@@ -1,0 +1,86 @@
+#{extends 'main_full.html' /}
+#{set title:"付款单列表"  /}
+#{set 'moreScripts'}
+    #{script 'applys/index.es6'/}
+#{/set}
+
+<form action="@{Payments.saveBatchApply()}" method="post">
+#{info_row title:'请款审核单'/}
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-bordered">
+        <tr>
+          <th width="10%;">请款审核ID</th>
+          <td width="40%;"><input type="text" value="" readonly placeholder="系统自动生成"></td>
+          <th width="10%;">请款项:</th>
+          <td width="40%;"><input type="text" name="apply.name" class="input-xxlarge" autocomplete="off" required></td>
+        </tr>
+        <tr>
+          <th>付款方式</th>
+          <td>
+            <select name="apply.way">
+            #{list items:models.finance.BatchReviewApply.W, as:'w'}
+              <option value="${w.name()}">${w.label()}</option>
+            #{/list}
+            </select>
+          <th>审核状态</th>
+          <td><input type="text" readonly value="${apply.status.label()}"></td>
+        </tr>
+        <tr>
+          <th>供应商</th>
+          <td>
+            <input type="text" value="${apply.cooperator.name}" readonly>
+            <input type="hidden" name="apply.cooperator.id" value="${apply.cooperator.id}">
+          </td>
+          <th></th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>备注</th>
+          <td colspan="3">
+            <textarea name="apply.memo" rows="4" class="input-block-level"></textarea>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <button class="btn btn-warning" id="update">确认并提交</button>
+            <a href="@{Payments.index()}" class="btn btn-success">取消</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+#{success_row title:'请款审核明细'/}
+  <div class="row-fluid">
+    <div class="span12">
+      <table class="table table-condensed table-bordered" id="unit_table">
+        <tr>
+          <th width="20px;"></th>
+          <th>请款单编号</th>
+          <th>涉及的请款人</th>
+          <th>总请款金额</th>
+          <th>最近更新时间</th>
+          <th>创建时间</th>
+        </tr>
+      #{list items:payments, as:'pay'}
+        <tr>
+          <td>
+            <input type="checkbox" value="${pay.id}">
+            <input type="hidden" name="pids" value="${pay.id}">
+          </td>
+          <td><a target="_blank" href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
+          <td>
+              #{list items:pay.applyers(), as:'applyer'}
+              ${applyer.username} &nbsp;
+              #{/list}
+          </td>
+          <td>${pay.currency.symbol()}  ${pay.totalFees()._3}</td>
+          <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
+          <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </div>
+</form>

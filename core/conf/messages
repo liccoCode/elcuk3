@@ -35,6 +35,12 @@ copItem.period=\u4F9B\u5E94\u5546\u751F\u4EA7\u5468\u671F(day)
 copItem.lowestOrderNum=\u4F9B\u5E94\u5546\u7684\u6700\u4F4E\u91C7\u8D2D\u91CF
 copItem=\u5408\u4F5C\u4F19\u4F34
 
+copItem.save=\u4f9b\u5e94\u5546\u65b0\u589e\u0053\u004b\u0055
+copItem.save.msg=\u4f9b\u5e94\u5546 [%s], \u65b0\u589e\u0053\u004b\u0055 [%s], \u4ef7\u683c [%s]
+
+copItem.examine=\u4f9b\u5e94\u5546\u5ba1\u6838
+copItem.examine.msg=\u4f9b\u5e94\u5546 [%s], \u0053\u004b\u0055 [%s], \u5ba1\u6838\u7ed3\u679c [%s]
+
 planShipDate=\u9884\u8BA1\u8FD0\u8F93\u65F6\u95F4
 planDeliveryDate=\u9884\u8BA1\u53D1\u8D27\u65F6\u95F4
 planArrivDate=\u9884\u8BA1\u5230\u8FBE\u65F6\u95F4
@@ -225,6 +231,8 @@ paymentunit.applynew.msg=\u521B\u5EFA %s %s %s \u8BF7\u6B3E
 
 payment.approval=\u8BF7\u6B3E\u6279\u51C6
 payment.approval.msg=\u6279\u51C6 %s \u4E2A %s(%s) %s\u8BF7\u6B3E, \u91D1\u989D %s
+payment.apply=\u8bf7\u6b3e\u7533\u8bf7
+payment.apply.msg=\u8bf7\u6b3e %s \u4E2A %s(%s) %s\u8BF7\u6B3E, \u91D1\u989D %s
 payment.payit=\u4ED8\u6B3E\u5355\u4ED8\u6B3E
 payment.payit.msg=\u652F\u4ED8\u7ED9 %s \u603B\u91D1\u989D %s (\u6C47\u7387: %s at %s);
 payment.uploadDestroy=\u5220\u9664\u9644\u4EF6

@@ -8,6 +8,7 @@ import helper.Currency;
 import models.InventoryCostUnit;
 import models.RevenueAndCostDetail;
 import models.User;
+import models.finance.BatchReviewApply;
 import models.market.BtbOrder;
 import models.market.BtbOrderItem;
 import models.market.M;
@@ -40,7 +41,6 @@ import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Controller;
 import play.mvc.With;
-import play.utils.FastRuntimeException;
 import services.MetricAmazonFeeService;
 
 import java.io.File;
@@ -858,7 +858,6 @@ public class Excels extends Controller {
      * @param id
      * @param excel
      */
-    @Check("excels.deliveryment")
     public static void materialPurchase(String id, MaterialPurchaseExcel excel) {
         excel.dmt = MaterialPurchase.findById(id);
         request.format = "xls";
@@ -877,13 +876,11 @@ public class Excels extends Controller {
      */
     public static void materialPlan(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
-
         List<MaterialPlanUnit> unitList = dp.units;
         if(unitList != null && unitList.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s出仓单.xls", dp.id));
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dmt", formatter);
             render(dp, unitList);
@@ -891,6 +888,7 @@ public class Excels extends Controller {
             renderText("没有数据无法生成Excel文件！");
         }
     }
+
 
     public static void skuShipmentReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
@@ -933,4 +931,22 @@ public class Excels extends Controller {
             }
         }
     }
+
+    /**
+     * 下载汇签报表
+     * @param p
+     */
+    public static void exportBatchReviewApply(BatchApplyPost p) {
+        if(p == null) p = new BatchApplyPost();
+        List<BatchReviewApply> applies = p.query();
+        if(applies != null && applies.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "汇签审核报表.xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(applies);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
 }

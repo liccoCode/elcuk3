@@ -145,7 +145,12 @@
 <form method="post" id="create_deliveryment">
   <div class="row-fluid">
     <div class="span12">
-    #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
+      #{if isB2B}
+        #{render 'ProcureUnits/_b2b_unit_list.html', units: p.query(), p:p, checkbox:true/}
+      #{/if}
+      #{else }
+        #{render 'ProcureUnits/_unit_list.html', units: p.query(), p:p, checkbox:true/}
+      #{/else}
     </div>
   </div>
 

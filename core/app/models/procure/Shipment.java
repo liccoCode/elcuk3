@@ -48,7 +48,6 @@ import java.util.*;
  */
 @Entity
 @DynamicUpdate
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     private static final long serialVersionUID = -608639102102679863L;
@@ -736,7 +735,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         this.dates.beginDate = datetime;
         this.state = S.SHIPPING;
+        this.calculationRatio();
+        this.save();
+    }
 
+    public void calculationRatio() {
         float totalShipWeight = this.totalWeight();
         float totalShipVolume = this.totalVolume();
         this.items.forEach(item -> {
@@ -746,12 +749,14 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             if(weight != null) {
                 itemWeight += item.qty * weight;
             }
-            item.weightRatio = BigDecimal.valueOf(itemWeight)
+            if(totalShipWeight > 0)
+                item.weightRatio = BigDecimal.valueOf(itemWeight)
                     .divide(BigDecimal.valueOf(totalShipWeight), 2, BigDecimal.ROUND_HALF_UP).floatValue();
-            item.volumeRatio = BigDecimal.valueOf(itemVolume)
+            if(totalShipVolume > 0)
+                item.volumeRatio = BigDecimal.valueOf(itemVolume)
                     .divide(BigDecimal.valueOf(totalShipVolume), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+            item.save();
         });
-        this.save();
     }
 
     private void shouldSomeStateValidate(S state, String action) {

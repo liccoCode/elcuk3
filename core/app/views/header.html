@@ -166,9 +166,12 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">财务模块<b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="@{Applys.procures()}">采购请款单列表</a></li>
-              <li><a href="@{Applys.transports()}">物流请款单列表</a></li>
-              <li><a href="@{Payments.index()}">付款单列表</a></li>
+                #{power.ck 'applys.index'}
+                  <li><a href="@{Applys.procures()}">采购请款单列表</a></li>
+                  <li><a href="@{Applys.transports()}">物流请款单列表</a></li>
+                  <li><a href="@{Payments.index()}">付款单列表</a></li>
+                  <li><a href="@{Payments.batchApplyIndex()}">会签审核列表</a></li>
+                #{/power.ck}
               <li><a href="@{PaymentTargets.index()}">支付方式</a></li>
                 #{power.ck "finances.index"}
                   <li><a href="@{Finances.index()}">系统内修复</a></li>
@@ -182,7 +185,7 @@
                 #{power.ck "sku.salecostprofitanalyse"}
                   <li><a href="@{Finances.skuProfitAnalyse()}">SKU销售利润成本分析报表</a></li>
                 #{/power.ck}
-                #{power.ck "materialoutbounds.index"}
+                #{power.ck 'applys.index'}
                   <li class="divider"></li>
                   <li><a href="@{Applys.materials()}">物料请款单列表</a></li>
                 #{/power.ck}

@@ -6,7 +6,8 @@
     <th>生产周期(day)</th>
     <th>每箱数量</th>
     <th>最低采购量</th>
-    <th width="70"></th>
+    <th>状态</th>
+    <th width="120px;">Action</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr>
@@ -16,15 +17,25 @@
     <td>${itm.period}</td>
     <td>${itm.boxSize}</td>
     <td>${itm.lowestOrderNum}</td>
+    <td style="color:${itm.status.rgb()}">${itm.status?.label()}</td>
     <td>
       <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
-      <button copItemId='${itm.id}' class="btn btn-mini delelte"><i class="icon-remove"></i></button>
+      <button copItemId='${itm.id}' class="btn btn-mini delelte" rel="tooltip" title="删除">
+        <i class="icon-trash"></i></button>
+        #{power.ck 'cooperitem.skuauditing'}
+            #{if itm.status?.name() != 'Agree'}
+              <a class="btn btn-mini" style="color:green;" rel="tooltip" title="审核通过"
+                 href="@{Cooperators.agreeCooperItem(itm.id)}"><i class="icon-ok"></i></a>
+              <a class="btn btn-mini" style="color:red;" rel="tooltip" title="审核不通过"
+                 href="@{Cooperators.disAgreeCooperItem(itm.id)}"><i class="icon-remove"></i></a>
+            #{/if}
+        #{/power.ck}
     </td>
   </tr>
 #{/list}
   <!-- 为此供应商关联新的产品 -->
   <tr>
-    <td colspan="7">
+    <td colspan="8">
       <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-primary">
         为[${coper.fullName}]添加新的生产的产品</a>
     </td>

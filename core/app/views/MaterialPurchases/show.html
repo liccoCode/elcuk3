@@ -5,7 +5,7 @@
     #{script 'component/dropUpload.coffee'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'materialPurchases/show.es6'/}
-    #{script 'deliveryments/show.coffee'/}
+    #{script 'materialPurchases/show.coffee'/}
 #{/set}
 
 #{errorMsgs /}
@@ -15,16 +15,6 @@
 #{info_row title:'物料采购单信息'/}
 
 <div class="row-fluid">
-#{if dmt.state.name().equals("PENDING_REVIEW")}
-  <ul class="nav nav-tabs">
-    <li class="active" id="below_tab">
-      <a href="#currentPage" data-toggle='tab'>待审采购单</a>
-    </li>
-    <li>
-      <a href="#relateDelivery" data-toggle='tab'>相关采购单</a>
-    </li>
-  </ul>
-#{/if}
   <div class="tab-content">
     <div class="tab-pane fade active in" id='currentPage'>
       <form action="@{MaterialPurchases.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">

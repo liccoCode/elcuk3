@@ -109,7 +109,6 @@ public class Whouses extends Controller {
         List<Product> products = Product.find("sku like '" + search + "%'").fetch();
         List<String> skus = new ArrayList<>();
         for(Product p : products) skus.add(p.sku);
-        //TODO 物料编码查询
         renderJSON(J.json(skus));
     }
 

@@ -228,4 +228,10 @@ public class MaterialApply extends Apply {
         return ElcukRecord.records(this.id + "", Arrays.asList("materialapply.save", "procureunit.editPaySatus",
                 "deliveryment.departApply"), 50);
     }
+
+    public void updateAt(long applyId ){
+        MaterialApply materialApply = MaterialApply.findById(applyId);
+        materialApply.updateAt = new Date();
+        materialApply.save();
+    }
 }

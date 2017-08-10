@@ -82,10 +82,6 @@ public class MaterialApplyPost extends Post<Apply> {
             params.add(this.supplierId);
         }
 
-        if(this.search != null && !"".equals(this.search.trim())) {
-            sql.append(" AND p.serialNumber like ?");
-            params.add(this.word());
-        }
         /** 模糊查询参数 **/
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();

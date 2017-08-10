@@ -38,13 +38,21 @@
       <td><input type="password" name="user.confirm"></td>
     </tr>
     <tr>
+      <th>所属部门</th>
+      <td>
+        <select name="user.department">
+            #{list items:models.User.D, as:'d'}
+              <option value="${d.name()}">${d.label()}</option>
+            #{/list}
+        </select>
+      </td>
       <th>所属公司</th>
       <td>
         <select name="user.projectName">
             #{list items:models.User.COR, as:'c'}
-              #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
-                <option value="${c.name()}">${c.label()}</option>
-              #{/if}
+                #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                  <option value="${c.name()}">${c.label()}</option>
+                #{/if}
             #{/list}
         </select>
       </td>
