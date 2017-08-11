@@ -1,9 +1,8 @@
-#{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered dataTable" id="unit_table">
-
   <tr>
     <th>物料编码</th>
     <th>物料名称</th>
+    <th>工厂物料代码</th>
     <th>采购余量</th>
     <th>交货数量</th>
     <th>Action_签收数量</th>
@@ -11,16 +10,16 @@
     <th>创建人</th>
     <th>创建时间</th>
   </tr>
-
 #{list items:units, as:'unit'}
   <tr class="text-center">
     <td>${unit.material?.code}</td>
     <td>${unit.material?.name}</td>
+    <td>${unit.material?.version}</td>
     <td>${unit.material?.surplusConfirmQty()}</td>
     <td>${unit.qty}</td>
       #{if unit.receiptQty == 0 && !qtyEdit}
         <td name="unitUpdateTd">
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" id="qs_${unit.id}"
              uid="${unit.id}">签收异常</a>
         </td>
       #{/if}
@@ -34,7 +33,7 @@
 #{/list}
 #{if p != null}
   <tr class="tb_footer">
-    <td colspan="25">
+    <td colspan="8">
         #{bootstrap_pager pi:p, url:'' /}
     </td>
   </tr>

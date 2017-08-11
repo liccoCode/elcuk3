@@ -55,7 +55,7 @@ public class MaterialPost extends Post<Material> {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT m.id, m.code, mb.number, m.name, m.type, c.name as cooperName,");
         sbd.append(" m.projectName, SUM(IF(p.state='CONFIRM', u.planQty - IF(mp.state='DONE', mu.qty, 0), 0)) AS qty, ");
-        sbd.append(" SUM(IF(p.state='PENDING',u.planQty, 0)) AS pendingQty ");
+        sbd.append(" SUM(IF(p.state='PENDING',u.planQty, 0)) AS pendingQty, m.version ");
         sbd.append(" FROM Material m LEFT JOIN MaterialBom_Material b ON b.materials_id = m.id ");
         sbd.append(" LEFT JOIN MaterialBom mb ON mb.id = b.boms_id ");
         sbd.append(" LEFT JOIN CooperItem i ON i.material_id = m.id ");
@@ -92,7 +92,7 @@ public class MaterialPost extends Post<Material> {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT m.id, m.code, mb.number, m.name, m.type, c.name as cooperName,");
         sbd.append(" m.projectName, SUM(IF(p.state='DONE', IF(u.receiptQty>0, u.receiptQty, u.qty), 0)) AS total, ");
-        sbd.append(" SUM(IF(o.status ='Outbound', ou.outQty, 0)) AS outQty ");
+        sbd.append(" SUM(IF(o.status ='Outbound', ou.outQty, 0)) AS outQty, m.version ");
         sbd.append(" FROM Material m LEFT JOIN MaterialBom_Material b ON b.materials_id = m.id ");
         sbd.append(" LEFT JOIN MaterialBom mb ON mb.id = b.boms_id ");
         sbd.append(" LEFT JOIN CooperItem i ON i.material_id = m.id ");
@@ -149,6 +149,7 @@ public class MaterialPost extends Post<Material> {
             material.projectName = User.COR.valueOf(row.get("projectName").toString());
             material.qty = Integer.parseInt(row.get("qty").toString());
             material.pendingQty = Integer.parseInt(row.get("pendingQty").toString());
+            material.version = row.get("version").toString();
             materials.add(material);
         }
         return materials;
@@ -164,6 +165,7 @@ public class MaterialPost extends Post<Material> {
             material.code = row.get("code").toString();
             material.name = row.get("name").toString();
             material.number = row.get("number").toString();
+            material.version = row.get("version").toString();
             material.type = Material.T.valueOf(row.get("type").toString());
             material.cooperName = row.get("cooperName").toString();
             material.projectName = User.COR.valueOf(row.get("projectName").toString());

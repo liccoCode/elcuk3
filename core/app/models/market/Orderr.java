@@ -255,6 +255,16 @@ public class Orderr extends GenericModel {
     public String invoiceState;
 
     /**
+     * osticket调用发票的时间
+     */
+    public Date invoiceDate;
+
+    /**
+     * 销售总额
+     */
+    public Float totalSale;
+
+    /**
      * 是否使用 商务订单(用于JRockend 发送合同)
      */
     public boolean businessOrder;
@@ -317,6 +327,22 @@ public class Orderr extends GenericModel {
                 if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
                 if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name))
                     totalSales += fee.usdCost;
+            }
+        }
+        return totalSales;
+    }
+
+    /**
+     * 这个订单的当前币种销售额.
+     *
+     */
+    public float totalCurrencySales() {
+        float totalSales = 0;
+        if(this.market.name().startsWith("AMAZON")) {
+            for(SaleFee fee : this.fees) {
+                if(fee.type.parent != null && !"amazon".equals(fee.type.parent.name)) continue;
+                if("principal".equals(fee.type.name) || "productcharges".equals(fee.type.name))
+                    totalSales += fee.cost;
             }
         }
         return totalSales;
@@ -505,9 +531,9 @@ public class Orderr extends GenericModel {
             if(item.quantity != 0) {
                 itemamount = itemamount
                         + new BigDecimal(item.quantity).multiply(new BigDecimal(item.price - item.discountPrice)
-                                .divide(new BigDecimal(item.quantity), 2, 4)
-                                .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
-                                .setScale(2, 4).floatValue();
+                        .divide(new BigDecimal(item.quantity), 2, 4)
+                        .divide(new BigDecimal(this.orderrate()), 2, java.math.RoundingMode.HALF_DOWN))
+                        .setScale(2, 4).floatValue();
             }
         }
 
