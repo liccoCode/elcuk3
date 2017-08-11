@@ -84,7 +84,7 @@ public class MaterialPost extends Post<Material> {
             sbd.append(" AND b.number = ? ");
             params.add(this.number);
         }
-        sbd.append(" GROUP BY m.id HAVING qty>0 || pendingQty>0 ");
+        sbd.append(" GROUP BY m.id HAVING confirmQty>0 || pendingQty>0 ");
         return new F.T2<>(sbd.toString(), params);
     }
 
