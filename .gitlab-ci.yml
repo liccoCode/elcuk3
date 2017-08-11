@@ -12,6 +12,7 @@ before_script:
 
 test:
   script:
+    - ls
     - java -jar lib/checkstyle-8.1.jar -c conf/Erp_checkStyle.xml core/app/controllers
     - java -jar lib/checkstyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
     - java -jar lib/checkstyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
