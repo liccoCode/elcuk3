@@ -34,7 +34,7 @@ $(() => {
   });
   
 
-  //生成代购单Exceljs处理
+  //生成代购单Excel处理
   $('#mt_excel_btn').click(function (e) {
     e.stopPropagation();
     $.post('/MaterialPurchases/validDmtIsNeedApply', {id: $("input[name='dmt.id']").val()}, (r) => {

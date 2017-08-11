@@ -75,6 +75,9 @@
                   #{/list}
               </select>
             #{/if}
+              #{else }
+                <input type="text" value="${dp.receiveCooperator.name}" readonly>
+              #{/else}
             </td>
           </tr>
           <tr>
@@ -125,9 +128,10 @@
     <div class="span12" id="unit_list">
       <table class="table table-condensed table-bordered" id="unit_table">
         <tr>
-          <th>#</th>
+          <th width="15px;">#</th>
           <th>物料编码</th>
           <th>物料名称</th>
+          <th>工厂物料代码</th>
           <th>采购余量</th>
           <th>交货数量</th>
           <th>Action_签收数量</th>
@@ -138,12 +142,11 @@
       #{list items:units, as:'unit'}
         <tr class="text-center">
           <td>
-            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                   data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                   data-width="" data-height="">
+            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}">
           </td>
           <td>${unit.material?.code}</td>
           <td>${unit.material?.name}</td>
+          <td>${unit.material?.version}</td>
           <td>${unit.material?.surplusConfirmQty()}</td>
           <td>
               #{if qtyEdit}
@@ -153,7 +156,7 @@
           </td>
           <td>
               #{if unit.receiptQty == 0 && !qtyEdit}
-                <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" id="qs_${unit.id}"
+                <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" id="qs_${unit.id}"
                    uid="${unit.id}">签收异常</a>
               #{/if}
               #{else } ${unit.receiptQty} #{/else}
