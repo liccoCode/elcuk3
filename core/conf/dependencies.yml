@@ -58,6 +58,7 @@ require:
           - commons-cli -> *
     - org.apache.logging.log4j -> log4j-api 2.8.2
     - com.amazonaws -> aws-java-sdk-sqs 1.11.18
+    - checkStyle -> checkStyle 8.1
 
 repositories:
     - factoryBoy:
@@ -100,6 +101,6 @@ repositories:
 
     - checkStyle:
         type: HTTP
-        artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/8.1/checkstyle-8.1-all.jar"
+        artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/[revision]/checkstyle-[revision]-all.jar"
         contains:
             - checkStyle -> *
