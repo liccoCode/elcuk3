@@ -98,7 +98,6 @@ repositories:
         contains:
             - com.elcuk2 -> *
             - elcuk -> *
-
     - checkStyle:
         type: HTTP
         artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/[revision]/checkstyle-[revision]-all.jar"
