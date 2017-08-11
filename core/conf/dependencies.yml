@@ -97,3 +97,9 @@ repositories:
         contains:
             - com.elcuk2 -> *
             - elcuk -> *
+
+    - checkStyle:
+        type: HTTP
+        artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/8.1/checkstyle-8.1-all.jar"
+        contains:
+            - checkStyle -> *
