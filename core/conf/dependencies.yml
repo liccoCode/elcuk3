@@ -57,6 +57,8 @@ require:
           # 不需要命令行执行
           - commons-cli -> *
     - org.apache.logging.log4j -> log4j-api 2.8.2
+    - com.amazonaws -> aws-java-sdk-sqs 1.11.18
+    - checkStyle -> checkStyle 8.1
 
 repositories:
     - factoryBoy:
@@ -96,3 +98,9 @@ repositories:
         contains:
             - com.elcuk2 -> *
             - elcuk -> *
+
+    - checkStyle:
+        type: HTTP
+        artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/[revision]/checkstyle-[revision]-all.jar"
+        contains:
+            - checkStyle -> *
