@@ -1,0 +1,70 @@
+#{extends 'main_full.html' /}
+#{set title:'单月物流发货量报表'/}
+#{set 'moreScripts'}
+    #{script 'jquery.dataTables.js'/}
+    #{script 'ShipmentReports/monthlyShipment.es6'/}
+#{/set}
+
+#{info_row}
+<ul>
+  <li><strong>单月运输时效统计</strong></li>
+</ul>
+#{/info_row}
+#{flash_alert /}
+
+<div class="row-fluid">
+  <form action="@{ShipmentReports.shipmentReport()}" method="get" class="search_form" id='search_form'>
+    <div class="row-fluid">
+      <div class="span12">
+        <div class="input-prepend input-append inline">
+          <span class="add-on">开始时间From:</span>
+          <input type="date" name="p.from" value="${p.from.date()}">
+          <span class="add-on">To:</span>
+          <input type="date" name="p.to" value="${p.to.date()}">
+        </div>
+
+        <div class="input-append input-prepend inline">
+          <span class="add-on"><i class="icon-search"></i></span>
+          <button class="btn btn-primary" data-loading>统计</button>
+        </div>
+
+        <div class="input-append input-prepend inline">
+          <span class="add-on"><i class="icon-file"></i></span>
+          <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.skuShipmentReport()}"
+                 value="导出Excel"/>
+        </div>
+
+      </div>
+    </div>
+  </form>
+  
+  <div class="row-fluid">
+    <div class="span12">
+      <b style="color:#0e90d2">单个sku物流费年均价报表</b>
+      <table id="shipItemTable" class="table table-condensed table-bordered">
+        <tr>
+          <th>SKU</th>
+          <th>海运年均价</th>
+          <th>空运年均价</th>
+          <th>快递年均价</th>
+          <th>海运税金年均价</th>
+          <th>空运税金年均价</th>
+          <th>快递税金年均价</th>
+        </tr>
+      #{list items:list, as:'ship'}
+        <tr>
+          <td>${ship.SKU}</td>
+          <td>${ship.SEA_P}</td>   
+          <td>${ship.AIR_P}</td>
+          <td>${ship.EXPRESS_P}</td>
+          <td>${ship.SEA_V}</td>
+          <td>${ship.AIR_V}</td>
+          <td>${ship.EXPRESS_V}</td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
+  </div>
+</div>
+
+
