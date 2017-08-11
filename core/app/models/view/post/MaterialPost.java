@@ -54,7 +54,9 @@ public class MaterialPost extends Post<Material> {
     public F.T2<String, List<Object>> planParams() {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT m.id, m.code, mb.number, m.name, m.type, c.name as cooperName,");
-        sbd.append(" m.projectName, SUM(IF(p.state='CONFIRM', u.planQty - IF(mp.state='DONE', mu.qty, 0), 0)) AS qty, ");
+        sbd.append(" m.projectName, SUM(IF(p.state='CONFIRM', u.planQty, 0)) AS confirmQty, ");
+        sbd.append(" IFNULL((SELECT sum(mu.qty) FROM MaterialPlanUnit mu LEFT JOIN  MaterialPlan mp ON ");
+        sbd.append(" mp.id = mu.materialUnit_id WHERE mu.material_id = m.id AND mp.state='DONE'),0) AS planQty,");
         sbd.append(" SUM(IF(p.state='PENDING',u.planQty, 0)) AS pendingQty, m.version ");
         sbd.append(" FROM Material m LEFT JOIN MaterialBom_Material b ON b.materials_id = m.id ");
         sbd.append(" LEFT JOIN MaterialBom mb ON mb.id = b.boms_id ");
@@ -62,8 +64,6 @@ public class MaterialPost extends Post<Material> {
         sbd.append(" LEFT JOIN Cooperator c ON c.id = i.cooperator_id ");
         sbd.append(" LEFT JOIN MaterialUnit u ON m.id = u.material_id ");
         sbd.append(" LEFT JOIN MaterialPurchase p ON p.id = u.materialPurchase_id ");
-        sbd.append(" LEFT JOIN MaterialPlanUnit mu ON mu.material_id = m.id ");
-        sbd.append(" LEFT JOIN MaterialPlan mp ON mp.id = mu.materialPlan_id ");
         sbd.append(" WHERE m.isDel= ? ");
         params.add(false);
         if(type != null) {
@@ -147,7 +147,8 @@ public class MaterialPost extends Post<Material> {
             material.type = Material.T.valueOf(row.get("type").toString());
             material.cooperName = row.get("cooperName").toString();
             material.projectName = User.COR.valueOf(row.get("projectName").toString());
-            material.qty = Integer.parseInt(row.get("qty").toString());
+            material.qty = Integer.parseInt(row.get("confirmQty").toString())
+                    - Integer.parseInt(row.get("planQty").toString());
             material.pendingQty = Integer.parseInt(row.get("pendingQty").toString());
             material.version = row.get("version").toString();
             materials.add(material);
