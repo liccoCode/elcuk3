@@ -38,7 +38,6 @@
         <th width="30px;">记录运费</th>
       #{/if}
   #{/power.ck}
-    <th width="70px;">撤销出库</th>
   </tr>
 #{list items:items, as:'itm'}
   <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'
@@ -83,6 +82,10 @@
       #{/if}
     <td style="${itm.qty != itm.unit.qty() ? 'background:#F2DEDE' : ''}">
     ${itm.unit.attrs.planQty}/${itm.unit.attrs.qty}/${itm.unit.shipmentQty()}
+        #{if itm.unit.revokeStatus?.name()=='READY'}
+          <a class="btn btn-mini btn-danger" href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
+        #{/if}
+        #{else }${itm.unit.revokeStatus?.label()}#{/else}
     </td>
       #{if itmRecord}
         <td style="#{if itm.recivedQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
@@ -147,12 +150,6 @@
             </td>
           #{/if}
       #{/power.ck}
-    <td style="color:red" rel="tooltip" title="${itm.unit.revokeMsg}">
-        #{if itm.unit.revokeStatus?.name()=='READY'}
-          <a class="btn btn-mini btn-danger" href="@{ProcureUnits.confirmCancelAMZOutbound(itm.unit?.id,itm.shipment.id)}">同意撤销</a>
-        #{/if}
-        #{else }${itm.unit.revokeStatus?.label()}#{/else}
-    </td>
   </tr>
 #{/list}
 #{if shipmentId}
