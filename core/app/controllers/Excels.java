@@ -879,12 +879,13 @@ public class Excels extends Controller {
         MaterialPlan dp = MaterialPlan.findById(id);
         List<MaterialPlanUnit> unitList = dp.units;
         if(unitList != null && unitList.size() != 0) {
+            int totalQty = unitList.stream().mapToInt(unit -> unit.qty).sum();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dmt", formatter);
-            render(dp, unitList);
+            render(dp, unitList, totalQty);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
