@@ -1,7 +1,6 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Webs;
 import models.OperatorConfig;
 import models.User;
 import models.procure.Cooperator;
@@ -13,7 +12,6 @@ import models.whouse.StockRecord;
 import models.whouse.Whouse;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
-import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.modules.pdf.PDF;
@@ -104,9 +102,9 @@ public class Outbounds extends Controller {
     }
 
     public static void confirmOutBound(List<String> ids) {
-        Outbound.confirmOutBound(ids);
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
+        Ret ret = Outbound.confirmOutBound(ids);
+        if(!ret.flag) {
+            flash.error(ret.message);
             index(new OutboundPost());
         }
         flash.success(SqlSelect.inlineParam(ids) + "出库成功!");

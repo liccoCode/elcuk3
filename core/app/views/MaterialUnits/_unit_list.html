@@ -1,32 +1,28 @@
-#{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered dataTable" id="unit_table">
   <tr>
   #{if materialUnitsIndex}
     <th width="20px;">
-      <label class="checkbox">
-        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-      </label>
+      <input type="checkbox" id="checkbox_all" class="checkall" value="">
     </th>
   #{/if}
-    <th>#</th>
+    <th width="40px;">#</th>
     <th width="40px;">阶段</th>
-    <th width="100px;">物料编码</th>
+    <th width="200px;">物料编码</th>
     <th width="250px;">物料名称</th>
-    <th>物料采购单</th>
-    <th>供应商</th>
-    <th>采购数</th>
-    <th>单价</th>
-    <th>总价</th>
-    <th>采购余量</th>
+    <th>工厂物料代码</th>
+    <th width="80px;">物料采购单</th>
+    <th width="80px;">供应商</th>
+    <th width="70px;">采购数</th>
+    <th width="80px;">单价</th>
+    <th width="80px;">总价</th>
+    <th width="70px;">采购余量</th>
   #{if materialUnitsIndex}
-  <th>Action
+    <th>Action</th>
   #{/if}
-    <th>项目名称</th>
-    <th>创建人</th>
-    <th>创建时间</th>
+    <th width="70px;">项目名称</th>
+    <th width="60px;">创建人</th>
+    <th width="80px;">创建时间</th>
   </tr>
-
-
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
 
@@ -41,6 +37,7 @@
     <td style="background:${unit.stage?.rgb()}">${unit.stage.label()}</td>
     <td>${unit.material?.code}${str}</td>
     <td>${unit.material?.name}</td>
+    <td>${unit.material?.version}</td>
     <td>${unit.materialPurchase?.id}</td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.planQty}</td>

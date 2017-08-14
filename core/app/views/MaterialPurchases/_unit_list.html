@@ -4,9 +4,7 @@
   <tr>
   #{if checkbox}
     <th width="20px;">
-      <label class="checkbox">
-        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-      </label>
+      <input type="checkbox" id="checkbox_all" class="checkall" value="">
     </th>
   #{/if}
   #{if relationPage}
@@ -18,6 +16,7 @@
     <th width="40px;">阶段</th>
     <th>物料编码</th>
     <th>物料名称</th>
+    <th>工厂物料代码</th>
     <th>采购数</th>
     <th>采购余量</th>
     <th>单价</th>
@@ -29,25 +28,18 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
-    <td>
-      <label class="checkbox">
-        <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-               data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-               data-width="" data-height="">
-      </label>
-    </td>
-    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-    ${unit.id}
-    </td>
+    <td><input type="checkbox" name="pids" value="${unit.id}" id="checkbox_${unit.id}"></td>
+    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">${unit.id}</td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td>${unit.material?.code}</td>
     <td>${unit.material?.name}</td>
+    <td>${unit.material?.version}</td>
     <td>${unit.planQty}</td>
     <td>${unit.material?.surplusConfirmQty()}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
     <td>
-      <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>
+      <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" uid="${unit.id}">修改</a>
     </td>
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}</td>

@@ -54,9 +54,7 @@
       <table class="table table-condensed table-bordered" id="data-table">
         <tr>
           <th width="20px;">
-            <label class="checkbox">
-              <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-            </label>
+            <input type="checkbox" id="checkbox_all" class="checkall" value="">
           </th>
           <th>物料出货单ID</th>
           <th>出货单名称</th>
@@ -73,11 +71,7 @@
       #{list items:materialPlans, as:'dp'}
         <tr>
           <td>
-            <label class="checkbox">
-              <input type="checkbox" name="pids" value="${dp.id}" class="${tr_key}" id="checkbox_${dp.id}"
-                     data-boxnum="" data-num="" data-lastcartonnum="" data-singleboxweight="" data-length=""
-                     data-width="" data-height="" financeState="${dp.financeState}">
-            </label>
+            <input type="checkbox" name="pids" value="${dp.id}" id="checkbox_${dp.id}" financeState="${dp.financeState}">
           </td>
           <td>
             <a href="@{MaterialPlans.show(dp.id)}" target="_blank">${dp.id}</a>
@@ -102,7 +96,7 @@
               #{if dp.financeState.name() == financeState.name()}
                 <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
                 <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
-                   class="btn btn-small btn-warning" uid="${dp.id}">审核</a>
+                   class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
               #{/if}
               #{else}
               ${dp.financeState?.label()}
@@ -134,7 +128,6 @@
     </div>
   </div>
 </form>
-
 
 
 <!--  修改签收数量 弹出div begin   -->

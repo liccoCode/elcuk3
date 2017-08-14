@@ -1,0 +1,31 @@
+image: zen9073/play:1.4.2
+
+before_script:
+  - export JAVA_HOME=/opt/jdk1.8.0_112
+  - export CLASSPATH=.:$JAVA_HOME/lib
+  - export PATH=.:$JAVA_HOME/bin:$PATH
+  - export PLAY_HOME=/opt/play-1.4.2
+  - export PATH=.:$PLAY_HOME:$PATH
+
+  - cd core
+  - play dependencies  --sync
+
+test:
+  script:
+    - ls lib
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/helper
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/jobs
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/models
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/mws
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
+
+  tags:
+    - efk
+  only:
+    - master
+

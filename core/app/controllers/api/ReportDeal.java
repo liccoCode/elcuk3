@@ -159,8 +159,11 @@ public class ReportDeal extends Controller {
             args.put("taxNumber", taxNumber);
             PDFs.templateAsPDF(folder, pdfName, template, options, args);
 
-            /**订单状态改为已发送**/
+            /*订单状态改为已发送*/
             ord.invoiceState = "yes";
+            if(ord.invoiceDate == null)
+                ord.invoiceDate = new Date();
+            ord.totalSale = ord.totalCurrencySales();
             ord.save();
             if(StringUtils.isNotEmpty(taxNumber)) {
                 invoice.invoiceto += "," + taxNumber;

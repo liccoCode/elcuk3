@@ -1,9 +1,9 @@
 package controllers;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
-import helper.Dates;
-import helper.J;
-import helper.Webs;
+import helper.*;
 import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.product.Category;
@@ -26,10 +26,8 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.ShipmentReportESQuery;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 物流模块报表控制器
@@ -179,6 +177,45 @@ public class ShipmentReports extends Controller {
         List<Shipment> list = p.queryMonthlyShipment();
         Map<String, F.T3<String, String, Double>> map = p.calAverageTime(list);
         render(list, map, p);
+    }
+
+    /**
+     * @param p
+     */
+    public static void shipmentReport(LossRatePost p) {
+        List<Map> list = new ArrayList<Map>();
+        if(p == null) {
+            p = new LossRatePost();
+        } else {
+            try {
+                String beginDate = new SimpleDateFormat("yyyyMMdd").format(p.from);
+                String endDate = new SimpleDateFormat("yyyyMMdd").format(p.to);
+                String redisIngKey = "shipmentReportExecuting" + beginDate + "_" + endDate;
+                String redisKey = "shipmentReport" + beginDate + "_" + endDate;
+                String postvalue = Caches.get(redisKey);
+                /** 验证报表结果是否在缓存中生成 **/
+                if(StringUtils.isBlank(postvalue)) {
+                    /**  若报表结果未生成,那么验证是否已经在执行当前条件的 后台任务 **/
+                    String ingValue = Caches.get(redisIngKey);
+                    if(StringUtils.isBlank(ingValue)) {
+                        //若redis没有 JRockend 正在执行任务的 标志位,那么通过 aws 发送消息队列调用任务执行
+                        Map map = new HashMap();
+                        map.put("jobName", "shipmentReportJob");  //  任务ID
+                        map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
+                        String message = JSONObject.toJSONString(map);
+                        AmazonSQS.sendMessage(message);
+                        throw new FastRuntimeException("单个sku物流费年均价报表已经在后台计算中，请于 10min 后再来查看结果~");
+                    } else {
+                        throw new FastRuntimeException("单个sku物流费年均价报表已经在后台计算中，请稍后后再来查看结果~");
+                    }
+                } else {
+                    list = JSONArray.parseArray(postvalue, Map.class);
+                }
+            } catch(FastRuntimeException e) {
+                flash.error(Webs.E(e));
+            }
+        }
+        render(list, p);
     }
 
 }

@@ -1,5 +1,5 @@
 #{extends 'main_full.html' /}
-#{set title:"物料库存列表"  /}
+#{set title:"物料库存列表(${size})"  /}
 
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -9,8 +9,8 @@
   .table td{
     vertical-align:middle;
   }
-
 </style>
+
 #{errorMsgs /}
 #{flash_alert /}
 
@@ -59,9 +59,7 @@
         <table class="table table-condensed table-bordered" id="data-table">
           <tr>
             <th width="20px;">
-              <label class="checkbox">
-                <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-              </label>
+              <input type="checkbox" id="checkbox_all" class="checkall" value="">
             </th>
             <th>物料编码</th>
             <th>B0M—ID</th>
@@ -75,35 +73,23 @@
         #{list items:materials, as:'m'}
           <tr>
             <td>
-                #{if m.surplusConfirmQty() > 0}
-                  <label class="checkbox">
-                    <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
-                           cooperName="${m.cooperators()}">
-                  </label>
+                #{if m.qty > 0}
+                  <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
+                         cooperName="${m.cooperators()}">
                 #{/if}
             </td>
             <td>${m.code}</td>
-            <td>${m.boms[0]?.number}</td>
+            <td>${m.number}</td>
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
             <td>
-              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.surplusConfirmQty()}</a>
+              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.qty}</a>
             </td>
-            <td>${m.surplusPendingQty()}</td>
-            <td>${m.cooperators()}</td>
+            <td>${m.pendingQty}</td>
+            <td>${m.cooperName}</td>
             <td>${m.projectName}</td>
           </tr>
         #{/list}
-          <tr>
-            <td colspan="10">
-            #{if materials.size() == 0}
-              暂时还没有物料信息
-            #{/if}
-            #{else }
-                #{bootstrap_pager pi:p, url:'' /}
-            #{/else}
-            </td>
-          </tr>
         </table>
       </div>
     </div>

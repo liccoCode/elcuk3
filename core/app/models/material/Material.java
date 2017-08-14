@@ -132,6 +132,30 @@ public class Material extends Model {
     @Transient
     public int outQty;
 
+    @Transient
+    public String number;
+
+    @Transient
+    public String cooperName;
+
+    /**
+     *  采购余量
+     */
+    @Transient
+    public int qty;
+
+    /**
+     *采购未确认数量
+     */
+    @Transient
+    public int pendingQty;
+
+    /**
+     * 仓库可用库存
+     */
+    @Transient
+    public int availableQty;
+
     /**
      * 返回所有物料信息
      */
