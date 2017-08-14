@@ -842,15 +842,16 @@ public class Excels extends Controller {
         if(p == null) p = new OutboundPost();
         p.pagination = false;
         List<Outbound> outbounds = p.query();
-        p.flag = "Other";
-        List<Outbound> others = p.query();
-        p.flag = "B2B";
-        List<Outbound> b2bOutbounds = p.queryForB2B();
+        Map<String, InventoryTurnoverDTO> map = Outbound.inventoryTurnover(outbounds);
+        List<InventoryTurnoverDTO> dtos = new ArrayList<>();
+        for(String categoryId : map.keySet()) {
+            dtos.add(map.get(categoryId));
+        }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(dateFormat, p, outbounds, others, b2bOutbounds);
+        render(dateFormat, p, outbounds, dtos);
     }
 
     /**
@@ -879,12 +880,13 @@ public class Excels extends Controller {
         MaterialPlan dp = MaterialPlan.findById(id);
         List<MaterialPlanUnit> unitList = dp.units;
         if(unitList != null && unitList.size() != 0) {
+            int totalQty = unitList.stream().mapToInt(unit -> unit.qty).sum();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dmt", formatter);
-            render(dp, unitList);
+            render(dp, unitList, totalQty);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
@@ -922,7 +924,8 @@ public class Excels extends Controller {
                 if(list != null && list.size() != 0) {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                     request.format = "xls";
-                    renderArgs.put(RenderExcel.RA_FILENAME, String.format("单个sku物流费年均价表%s.xls",beginDate + "_" + endDate));
+                    renderArgs.put(RenderExcel.RA_FILENAME,
+                            String.format("单个sku物流费年均价表%s.xls", beginDate + "_" + endDate));
                     renderArgs.put(RenderExcel.RA_ASYNC, false);
                     renderArgs.put("dmt", formatter);
                     render(list);
@@ -935,6 +938,7 @@ public class Excels extends Controller {
 
     /**
      * 下载汇签报表
+     *
      * @param p
      */
     public static void exportBatchReviewApply(BatchApplyPost p) {

@@ -10,6 +10,7 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.view.Ret;
+import models.view.dto.InventoryTurnoverDTO;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
@@ -394,6 +395,60 @@ public class Outbound extends GenericModel {
             unit.outbound = this;
             unit.save();
         });
+    }
+
+
+    public static Map<String, InventoryTurnoverDTO> inventoryTurnover(List<Outbound> outbounds) {
+        Map<String, InventoryTurnoverDTO> map = new HashMap<>();
+        outbounds.forEach(out -> out.units.forEach(unit -> {
+            int day = (int) ((out.createDate.getTime() - unit.attrs.deliveryDate.getTime()) / (1000 * 3600 * 24));
+            if(day == 0) {
+                unit.warehouseStage = ProcureUnit.WS.SAME_DAY;
+            } else if(day > 0 && day <= 7) {
+                unit.warehouseStage = ProcureUnit.WS.IN_SEVEN;
+            } else if(day > 7 && day <= 15) {
+                unit.warehouseStage = ProcureUnit.WS.TWO_WEEK;
+            } else if(day > 15 && day <= 30) {
+                unit.warehouseStage = ProcureUnit.WS.IN_MONTH;
+            } else {
+                unit.warehouseStage = ProcureUnit.WS.UP_MONTH;
+            }
+            unit.turnOverDay = day;
+            Outbound.groupByCategoryMap(map, unit);
+        }));
+        return map;
+    }
+
+    private static void groupByCategoryMap(Map<String, InventoryTurnoverDTO> map, ProcureUnit unit) {
+        String categoryId = unit.product.category.categoryId;
+        InventoryTurnoverDTO dto;
+        if(map.containsKey(categoryId)) {
+            dto = map.get(categoryId);
+        } else {
+            dto = new InventoryTurnoverDTO();
+            dto.categoryId = categoryId;
+        }
+        switch(unit.warehouseStage) {
+            case SAME_DAY:
+                dto.sameDayUnitNum++;
+                dto.sameDayQty += unit.outQty;
+            case IN_SEVEN:
+                dto.inSevenUnitNum++;
+                dto.inSevenQty += unit.outQty;
+            case TWO_WEEK:
+                dto.twoWeekUnitNum++;
+                dto.twoWeekQty += unit.outQty;
+            case IN_MONTH:
+                dto.inMonthUnitNum++;
+                dto.inMonthQty += unit.outQty;
+            case UP_MONTH:
+                dto.upMonthUnitNum++;
+                dto.upMonthQty += unit.outQty;
+            default:
+        }
+        dto.totalUnitNum ++;
+        dto.totalQty += unit.outQty;
+        map.put(categoryId, dto);
     }
 
 }

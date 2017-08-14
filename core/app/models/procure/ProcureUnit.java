@@ -645,6 +645,50 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isDedicated = false;
 
+    public enum WS {
+        SAME_DAY {
+            @Override
+            public String label() {
+                return "当天发货";
+            }
+        },
+        IN_SEVEN {
+            @Override
+            public String label() {
+                return "7天内";
+            }
+        },
+        TWO_WEEK {
+            @Override
+            public String label() {
+                return "7-15天";
+            }
+        },
+        IN_MONTH {
+            @Override
+            public String label() {
+                return "一个月内";
+            }
+        },
+        UP_MONTH {
+            @Override
+            public String label() {
+                return "一个月以上";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 仓库周转天数
+     */
+    @Transient
+    public int turnOverDay;
+
+    @Transient
+    public WS warehouseStage;
+
     /**
      * 用来标识采购计划是否需要计入正常库存(当前只会用于 Rockend 内的 InventoryCostsReport 报表)
      * <p>
