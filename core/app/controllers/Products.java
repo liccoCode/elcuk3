@@ -107,7 +107,8 @@ public class Products extends Controller {
 
     public static void showAttr(String sku) {
         Product pro = Product.findByMerchantSKU(sku);
-        render(pro);
+        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
+        render(pro, qtys);
     }
 
     public static void copy(String choseid, String skuid, String base, String extend, String attach) {
