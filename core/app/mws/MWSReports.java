@@ -36,12 +36,15 @@ import java.util.*;
  */
 public class MWSReports {
 
+    private MWSReports() {
+    }
+
     /**
      * 年/月/日/文件名
      */
     public static final String REPORT_BASE_PATH = Constant.E_DATE + "/%s/%s/%s/%s";
 
-    public static void requestReport_step1(JobRequest job) {
+    public static void requestReportStep1(JobRequest job) {
         if(job.state != JobRequest.S.NEW) {
             Logger.info("The JobRequest State is wrong! It`s must NEW State.");
             throw new FastRuntimeException("The JobRequest State is wrong! It`s must NEW State.");
@@ -84,11 +87,11 @@ public class MWSReports {
                     job.lastUpdateDate = new Date();
                     job.save();
                 } catch(MarketplaceWebServiceException e) {
-                    Logger.warn("requestReport_step1 has error:{" + e.getMessage() + "}");
+                    Logger.warn("requestReportStep1 has error:{" + e.getMessage() + "}");
                 } catch(DatatypeConfigurationException e) {
                     // can not be happed.
                     Logger.warn(
-                            "DatatypeConfigurationException Can not be happed in MWSReports.requestReport_step1!");
+                            "DatatypeConfigurationException Can not be happed in MWSReports.requestReportStep1!");
                 }
                 return;
             default:
@@ -97,7 +100,7 @@ public class MWSReports {
     }
 
 
-    public static void requestState_step2(JobRequest job) {
+    public static void requestStateStep2(JobRequest job) {
         if(job.state != JobRequest.S.REQUEST && job.state != JobRequest.S.PROCRESS) {
             Logger.info("The JobRequest State is wrong! It`s must REQUEST State.");
             throw new FastRuntimeException(
@@ -127,12 +130,12 @@ public class MWSReports {
             job.lastUpdateDate = new Date();
             job.save();
         } catch(MarketplaceWebServiceException e) {
-            Logger.warn("requestState_step2 has error:{" + e.getMessage() + "}");
+            Logger.warn("requestStateStep2 has error:{" + e.getMessage() + "}");
         }
 
     }
 
-    public static void requestReportId_step3(JobRequest job) {
+    public static void requestReportIdStep3(JobRequest job) {
         if(job.state != JobRequest.S.DONE) {
             Logger.info("The JobRequest State is wrong! It`s must be DONE State.");
             throw new FastRuntimeException("The JobRequest State is wrong! It`s must DONE State.");
@@ -152,11 +155,11 @@ public class MWSReports {
             job.procressState = "_END_";
             job.save();
         } catch(MarketplaceWebServiceException e) {
-            Logger.warn("requestReportId_step3 has error:{" + e.getMessage() + "}");
+            Logger.warn("requestReportIdStep3 has error:{" + e.getMessage() + "}");
         }
     }
 
-    public static void requestReportDown_step4(JobRequest job) {
+    public static void requestReportDownStep4(JobRequest job) {
         if(job.state != JobRequest.S.DOWN) {
             Logger.info("The JobRequest State is wrong! It`s must be DOWN State.");
             throw new FastRuntimeException(
@@ -190,6 +193,8 @@ public class MWSReports {
                 case MANAGE_FBA_INVENTORY_ARCHIVED:
                     filename += ".csv";
                     break;
+                default:
+                    break;
             }
             FileUtils.write(new File(filename), byteBuffer.toString("UTF-8"));
             job.path = filename;
@@ -197,9 +202,9 @@ public class MWSReports {
             job.lastUpdateDate = new Date();
             job.save();
         } catch(MarketplaceWebServiceException e) {
-            Logger.warn("requestReportDown_step4 has error:{" + e.getMessage() + "}");
+            Logger.warn("requestReportDownStep4 has error:{" + e.getMessage() + "}");
         } catch(IOException e) {
-            Logger.warn("requestReportDown_step4 has error:{" + e.getMessage() + "}");
+            Logger.warn("requestReportDownStep4 has error:{" + e.getMessage() + "}");
         }
     }
 
@@ -254,6 +259,8 @@ public class MWSReports {
                         config.setServiceURL("https://mws.amazonservices.jp");
                     case AMAZON_CA:
                         config.setServiceURL("https://mws.amazonservices.ca");
+                        break;
+                    default:
                         break;
                 }
                 client = new MarketplaceWebServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);

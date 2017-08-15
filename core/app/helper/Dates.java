@@ -42,7 +42,7 @@ public class Dates {
         try {
             df = DatatypeFactory.newInstance();
         } catch(DatatypeConfigurationException e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
     }
 

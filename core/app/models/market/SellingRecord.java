@@ -376,7 +376,7 @@ public class SellingRecord extends GenericModel {
                     } catch(Exception e) {
 
                         Logger.warn("SellingRecord.newRecordFromAmazonBusinessReports (%s)",
-                                Webs.E(e));
+                                Webs.e(e));
                     }
                 }
             } while(hasNext);

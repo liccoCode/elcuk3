@@ -60,7 +60,7 @@ public class ReportDownloads extends Controller {
             record.recalculate();
             renderJSON(new Ret(true, String.valueOf("重新计算请求成功,请稍候!")));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 

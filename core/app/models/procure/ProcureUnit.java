@@ -1497,8 +1497,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.save();
             new ERecordBuilder("shipment.createFBA").msgArgs(this.id, this.sku, this.fba.shipmentId).fid(this.id).save();
         } catch(FBAInboundServiceMWSException e) {
-            Logger.error(Webs.S(e));
-            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.E(e));
+            Logger.error(Webs.s(e));
+            Validation.addError("", "向 Amazon 创建 Shipment 错误 " + Webs.e(e));
         }
         return fba;
     }
@@ -2106,8 +2106,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     }
                 }
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
-                Validation.addError("", "向 Amazon 创建 Shipment 因 " + Webs.E(e) + " 原因失败.");
+                Logger.error(Webs.s(e));
+                Validation.addError("", "向 Amazon 创建 Shipment 因 " + Webs.e(e) + " 原因失败.");
             }
         }
     }
@@ -2139,7 +2139,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     fba.postFbaInboundCartonContents();
                 }
             } catch(Exception e) {
-                Validation.addError("", Webs.E(e));
+                Validation.addError("", Webs.e(e));
             }
         }
     }

@@ -250,7 +250,7 @@ public class Shipments extends Controller {
     public static void comment(String id, String cmt, String track, String jobNumber, Float totalWeightShipment,
                                Float totalVolumeShipment, Float totalStockShipment, String reason) {
         validation.required(id);
-        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.v(Validation.errors())));
         Shipment ship = Shipment.findById(id);
         ship.memo = cmt;
         if(StringUtils.isNotBlank(track))
@@ -260,7 +260,7 @@ public class Shipments extends Controller {
         if(StringUtils.isNotBlank(reason))
             ship.reason = reason;
         ship.save();
-        renderJSON(new Ret(true, Webs.V(Validation.errors())));
+        renderJSON(new Ret(true, Webs.v(Validation.errors())));
     }
 
     /**
@@ -293,7 +293,7 @@ public class Shipments extends Controller {
         try {
             ship.beginShip(date, sync);
         } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
+            Validation.addError("", Webs.e(e));
         }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

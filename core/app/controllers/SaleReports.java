@@ -31,7 +31,7 @@ public class SaleReports extends Controller {
             if(p == null) p = new SaleReportPost();
             dtos = p.query();
         } catch(FastRuntimeException e) {
-            flash.error(Webs.E(e));
+            flash.error(Webs.e(e));
         }
         render(p, dtos);
     }

@@ -25,12 +25,12 @@ public class SkuESQuery {
      * SKU销售额、销量、利润曲线图
      *
      * @param type
-     * @param Sku
+     * @param sku
      * @param calType
      * @return
      */
-    public static HighChart esSaleLine(final String type, final String Sku, final String calType) {
-        String key = Caches.Q.cacheKey(type, Sku);
+    public static HighChart esSaleLine(final String type, final String sku, final String calType) {
+        String key = Caches.Q.cacheKey(type, sku);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
@@ -50,9 +50,9 @@ public class SkuESQuery {
 
             for(M market : M.values()) {
                 if(calType.equals("profit")) {
-                    lineChart.series(esSaleProfitLine(market, Sku));
+                    lineChart.series(esSaleProfitLine(market, sku));
                 } else
-                    lineChart.series(esSaleFeeLine(market, Sku, calType));
+                    lineChart.series(esSaleFeeLine(market, sku, calType));
             }
             Cache.add(key, lineChart, "8h");
         }
@@ -134,12 +134,12 @@ public class SkuESQuery {
      * SKU采购价格曲线图
      *
      * @param type
-     * @param Sku
+     * @param sku
      * @param calType
      * @return
      */
-    public static HighChart esProcureLine(final String type, final String Sku, final String calType) {
-        String key = Caches.Q.cacheKey(type, Sku);
+    public static HighChart esProcureLine(final String type, final String sku, final String calType) {
+        String key = Caches.Q.cacheKey(type, sku);
         HighChart lineChart = Cache.get(key, HighChart.class);
         if(lineChart != null) return lineChart;
         synchronized(key.intern()) {
@@ -148,11 +148,11 @@ public class SkuESQuery {
             lineChart = new HighChart(Series.LINE);
             if(calType.equals("price")) {
                 lineChart.title = "采购价格($)";
-                lineChart.series(esProcureDate(Sku, "采购价格", "procurepayunit", "unit_price", "avg"));
+                lineChart.series(esProcureDate(sku, "采购价格", "procurepayunit", "unit_price", "avg"));
             }
             if(calType.equals("qty")) {
                 lineChart.title = "采购数量";
-                lineChart.series(esProcureDate(Sku, "采购数量", "procurepayunit", "quantity", "sum"));
+                lineChart.series(esProcureDate(sku, "采购数量", "procurepayunit", "quantity", "sum"));
             }
             Cache.add(key, lineChart, "8h");
         }

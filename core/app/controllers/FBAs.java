@@ -81,7 +81,7 @@ public class FBAs extends Controller {
                         .build());
             }
         }
-        renderMap.put("message", Webs.V(Validation.errors()));
+        renderMap.put("message", Webs.v(Validation.errors()));
         renderJSON(J.json(renderMap));
     }
 
@@ -104,7 +104,7 @@ public class FBAs extends Controller {
             //由于用户会重试多次来得到想要的 FBA(与 FBACenter 相关), 所以这里还是需要删除掉 DB 内的
             fba.delete();
         }
-        renderJSON(new Ret(!Validation.hasErrors(), Webs.V(Validation.errors())));
+        renderJSON(new Ret(!Validation.hasErrors(), Webs.v(Validation.errors())));
     }
 
     /**
@@ -241,7 +241,7 @@ public class FBAs extends Controller {
                 FileUtils.writeStringToFile(new File(dirfile, "采购计划ID列表.txt"),
                         java.net.URLDecoder.decode(StringUtils.join(pids, ","), "UTF-8"), "UTF-8");
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             } finally {
                 File zip = new File(Constant.TMP + "/FBA.zip");
                 Files.zip(dirfile, zip);

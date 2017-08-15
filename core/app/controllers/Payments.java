@@ -238,9 +238,9 @@ public class Payments extends Controller {
 
             Payment.<Payment>findById(NumberUtils.toLong(a.fid)).upload(a);
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
-        renderJSON(J.G(a));
+        renderJSON(J.g(a));
     }
 
     /**

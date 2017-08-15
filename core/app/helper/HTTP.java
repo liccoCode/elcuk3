@@ -218,7 +218,7 @@ public class HTTP {
         try {
             if(response != null) response.close();
         } catch(IOException e) {
-            Logger.warn("关闭 Response 时出现错误!", Webs.E(e));
+            Logger.warn("关闭 Response 时出现错误!", Webs.e(e));
         }
     }
 
@@ -259,7 +259,7 @@ public class HTTP {
             response = doRequest(get, getContextWithCookieStore(cookieStore), requestConfig);
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch(IOException e) {
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.s(e));
             return "";
         } finally {
             closeResponse(response);
@@ -284,7 +284,7 @@ public class HTTP {
             response = doRequest(new HttpGet(url), context, requestConfig);
             return context;
         } catch(IOException e) {
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.s(e));
             return null;
         } finally {
             closeResponse(response);
@@ -298,7 +298,7 @@ public class HTTP {
             response = doRequest(new HttpGet(url), context);
             return context;
         } catch(IOException e) {
-            Logger.warn("HTTP.get[%s] [%s]", url, Webs.S(e));
+            Logger.warn("HTTP.get[%s] [%s]", url, Webs.s(e));
             return null;
         } finally {
             closeResponse(response);
@@ -352,7 +352,7 @@ public class HTTP {
             response = doRequest(post, getContextWithCookieStore(cookieStore), requestConfig);
             return EntityUtils.toString(response.getEntity(), Consts.UTF_8);
         } catch(Exception e) {
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.e(e));
             return "";
         } finally {
             closeResponse(response);
@@ -424,7 +424,7 @@ public class HTTP {
             response = doRequest(get, downloadRequestConfig());
             return EntityUtils.toByteArray(response.getEntity());
         } catch(Exception e) {
-            Logger.warn("HTTP.getDown[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.getDown[%s] [%s]", url, Webs.e(e));
             return new byte[]{};
         } finally {
             closeResponse(response);
@@ -441,7 +441,7 @@ public class HTTP {
                     new FileOutputStream(file));
             return F.Option.Some(file);
         } catch(IOException e) {
-            Logger.warn("HTTP.getDownFile[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.getDownFile[%s] [%s]", url, Webs.e(e));
             return F.Option.None();
         } finally {
             closeResponse(response);
@@ -466,7 +466,7 @@ public class HTTP {
             response = doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig());
             return EntityUtils.toByteArray(response.getEntity());
         } catch(Exception e) {
-            Logger.warn("HTTP.postDown[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.postDown[%s] [%s]", url, Webs.e(e));
             return new byte[]{};
         } finally {
             closeResponse(response);
@@ -502,7 +502,7 @@ public class HTTP {
             response = doRequest(post, getContextWithCookieStore(cookieStore), downloadRequestConfig());
             return EntityUtils.toString(response.getEntity());
         } catch(Exception e) {
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.S(e));
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.s(e));
             return "";
         } finally {
             closeResponse(response);
@@ -524,7 +524,7 @@ public class HTTP {
             response = doRequest(post, requestConfig);
             return EntityUtils.toString(response.getEntity());
         } catch(Exception e) {
-            Logger.warn("HTTP.post[%s] [%s]", url, Webs.E(e));
+            Logger.warn("HTTP.post[%s] [%s]", url, Webs.e(e));
             return "";
         } finally {
             closeResponse(response);

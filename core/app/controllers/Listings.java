@@ -56,7 +56,7 @@ public class Listings extends Controller {
         try {
             Cache.delete("listings#index");
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
         renderJSON(new Ret(true, "缓存重新加载"));
     }
@@ -86,7 +86,7 @@ public class Listings extends Controller {
                     new String[]{}));
         if(sku != null) tobeSave.product = Product.find("sku=?", sku).first();
         tobeSave.save();
-        renderJSON(J.G(tobeSave));
+        renderJSON(J.g(tobeSave));
     }
 
     public static void reCrawl(String asin, String m) {
@@ -132,7 +132,7 @@ public class Listings extends Controller {
             listing.safeDelete();
             renderJSON(new Ret(true, "成功删除"));
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 }

@@ -25,6 +25,7 @@ import java.util.List;
  * Date: 7/11/12
  * Time: 4:22 PM
  */
+//BEGIN GENERATED CODE
 public class TimelineEventSource {
 
     @SerializedName("wiki-url")
@@ -182,7 +183,8 @@ public class TimelineEventSource {
                 Shipment shipment = relateShipments.get(0);
                 predictShipFinishDate = shipment.dates.planArrivDate;
                 if(predictShipFinishDate == null
-                        && !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
+                        &&
+                        !Arrays.asList(Shipment.S.CANCEL, Shipment.S.PLAN, Shipment.S.CONFIRM).contains(shipment.state))
                     predictShipFinishDate = ShipmentsHelper.predictArriveDate(shipment);
             }
 
@@ -216,7 +218,7 @@ public class TimelineEventSource {
         }
 
         private Float skuPS() {
-            return this.analyzeDTO.getPs_cal();
+            return this.analyzeDTO.getPsCal();
         }
 
         private Float sidPS() {
@@ -313,41 +315,41 @@ public class TimelineEventSource {
         }
 
         public Event color(ProcureUnit unitunit) {
-            String color;
+            String c;
             switch(getunitstage()) {
                 case PLAN:
-                    color = "A5B600";
+                    c = "A5B600";
                     break;
                 case DELIVERY:
-                    color = "C09853";
+                    c = "C09853";
                     break;
                 case DONE:
                     // warnning
-                    color = "FE502A";
+                    c = "FE502A";
                     break;
                 case SHIPPING:
                     // info
-                    color = "3A87AD";
+                    c = "3A87AD";
                     break;
                 case SHIP_OVER:
                     //mute
-                    color = "F9AB3A";
+                    c = "F9AB3A";
                     break;
                 case INBOUND:
-                    color = "CC6615";
+                    c = "CC6615";
                     break;
                 case CLOSE:
-                    color = "999999";
+                    c = "999999";
                     break;
                 default:
                     // error
-                    color = "B94A48";
+                    c = "B94A48";
             }
-            color = fetchShipmentSate(unit, color);
+            c = fetchShipmentSate(unit, c);
             if(this.unit.lostQty() > 0) {
                 this.color = String.format("#%s", "9690BE");
             } else {
-                this.color = String.format("#%s", color);
+                this.color = String.format("#%s", c);
             }
             return this;
         }
@@ -373,6 +375,8 @@ public class TimelineEventSource {
                 case RECEIPTD:
                     color = "5437B1";
                     break;
+                default:
+                    break;
             }
         } else if(shipItems.size() > 1) {
             //有多个对应的运输单，表示出现异常
@@ -382,13 +386,10 @@ public class TimelineEventSource {
     }
 
     public static String getRandomColorCode() {
-        //颜色代码位数  
+        //颜色代码位数
         int colorLength = 6;
-
-        //颜色代码数组  
-        char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F',
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-
+        //颜色代码数组
+        char[] codeSequence = {'A', 'B', 'C', 'D', 'E', 'F', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         // 需要线程安全, 所以使用 StringBuffer
         StringBuilder sb = new StringBuilder();
         JVMRandom random = new JVMRandom();
@@ -408,7 +409,7 @@ public class TimelineEventSource {
     public static Event currentQtyEvent(AnalyzeDTO analyzeDTO, String type) {
         Event currenEvent = new Event();
         currenEvent.start = currenEvent.add8Hour(new Date());
-        float validPs = ("sku".equals(type) ? analyzeDTO.getPs_cal() : analyzeDTO.ps);
+        float validPs = ("sku".equals(type) ? analyzeDTO.getPsCal() : analyzeDTO.ps);
         float days = Webs
                 .scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
         currenEvent.end = currenEvent

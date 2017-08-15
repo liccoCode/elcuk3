@@ -44,7 +44,7 @@ public class SystemMails extends Mailer {
             send(reviews);
             mr.success = true;
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.warn(Webs.e(e));
             return false;
         } finally {
             if(mr != null)
@@ -75,7 +75,7 @@ public class SystemMails extends Mailer {
             send(feedbacks);
             mr.success = true;
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.warn(Webs.e(e));
             return false;
         } finally {
             if(mr != null)
@@ -96,7 +96,7 @@ public class SystemMails extends Mailer {
             send(productAndSellT2s);
             mr.success = true;
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.warn(Webs.e(e));
             return false;
         } finally {
             if(mr != null)

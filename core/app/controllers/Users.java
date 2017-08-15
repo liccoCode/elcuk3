@@ -68,7 +68,7 @@ public class Users extends Controller {
         try {
             user.addPrivileges(privilegeId);
         } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
+            renderJSON(new Ret(false, Webs.e(e)));
         }
         int size = user.privileges.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
@@ -80,7 +80,7 @@ public class Users extends Controller {
         try {
             user.addTeams(teamId);
         } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
+            renderJSON(new Ret(false, Webs.e(e)));
         }
         int size = user.teams.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Team", size)));
@@ -92,7 +92,7 @@ public class Users extends Controller {
         try {
             user.addRoles(roleId);
         } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
+            renderJSON(new Ret(false, Webs.e(e)));
         }
         int size = user.roles.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Role", size)));
@@ -122,8 +122,8 @@ public class Users extends Controller {
                 user.update();
             }
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
-            Validation.addError("", Webs.E(e));
+            Logger.error(Webs.s(e));
+            Validation.addError("", Webs.e(e));
             render("Users/home.html", user);
         }
         flash.success("修改成功.");
@@ -137,7 +137,7 @@ public class Users extends Controller {
         try {
             user.update();
         } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
+            Validation.addError("", Webs.e(e));
             render("Users/index.html", user);
         }
         flash.success("修改成功.");
@@ -167,9 +167,9 @@ public class Users extends Controller {
     public static void showJson(long id) {
         try {
             User user = User.findById(id);
-            renderJSON(J.G(user));
+            renderJSON(J.g(user));
         } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
+            renderJSON(new Ret(false, Webs.e(e)));
         }
     }
 
@@ -230,7 +230,7 @@ public class Users extends Controller {
             user.closed = true;
             user.save();
         } catch(Exception e) {
-            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.e(e)));
         }
         renderJSON(new Ret(true, "关闭用户成功"));
     }
@@ -259,7 +259,7 @@ public class Users extends Controller {
             user.closed = false;
             user.save();
         } catch(Exception e) {
-            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.E(e)));
+            renderJSON(new Ret("oOh~出现了一个错误: " + Webs.e(e)));
         }
         renderJSON(new Ret(true, String.format("打开用户成功,初始密码为 %s ,请联系管理员添加权限", user.password)));
     }

@@ -44,7 +44,7 @@ public class Mails extends Mailer {
             send(offers, lst);
             mr.success = true;
         } catch(Exception e) {
-            Logger.warn(title + ":" + Webs.E(e));
+            Logger.warn(title + ":" + Webs.e(e));
         } finally {
             if(mr != null)
                 mr.save();

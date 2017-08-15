@@ -143,7 +143,7 @@ public class LinkHelper extends JavaExtensions {
                             .toLowerCase());
             return String.format("http://www.%s/dp/%s", market.toString(), dto.asin);
         } catch(Exception e) {
-            return Webs.E(e);
+            return Webs.e(e);
         }
     }
 

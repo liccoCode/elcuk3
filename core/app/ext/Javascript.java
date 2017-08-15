@@ -17,6 +17,8 @@ import java.util.Map;
  * Time: 6:16 PM
  */
 public class Javascript extends FastTags {
+
+    //BEGIN GENERATED CODE
     public static void _js(Map<?, ?> args, Closure body, PrintWriter out,
                            GroovyTemplate.ExecutableTemplate template, int fromLine) {
         if(!args.containsKey("arg") || args.get("arg") == null) {
@@ -44,5 +46,6 @@ public class Javascript extends FastTags {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         }
     }
+    //END GENERATED CODE
 
 }

@@ -222,7 +222,7 @@ public class Cooperators extends Controller {
         validation.required(id);
         validation.required(sku);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.V(Validation.errors())));
+            renderJSON(new Ret(Webs.v(Validation.errors())));
 
         CooperItem copItem = CooperItem.find("sku=? AND cooperator.id=?", sku, id).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
@@ -241,7 +241,7 @@ public class Cooperators extends Controller {
         validation.required(sku);
         validation.required(size);
 
-        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.V(Validation.errors())));
+        if(Validation.hasErrors()) renderJSON(new Ret(false, Webs.v(Validation.errors())));
 
         CooperItem copi = CooperItem.find("cooperator.id=? AND product.sku=?", coperId, sku).first();
         renderJSON(new Ret(true, copi.boxToSize(size) + ""));

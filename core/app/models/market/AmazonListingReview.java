@@ -250,7 +250,7 @@ public class AmazonListingReview extends GenericModel {
             throw new FastRuntimeException("Not Valid, more details see Validation.errors()");
         if(this.createDate == null) this.createDate = new Date();
         // 将初始的 Review 数据全部记录下来
-        this.originJson = J.G(this);
+        this.originJson = J.g(this);
         if(this.listing == null)
             Logger.warn("AmazonListingReview %s have no relate listing!", this.reviewId);
         else if(!this.isSelf()) {
@@ -559,7 +559,7 @@ public class AmazonListingReview extends GenericModel {
             try {
                 reviewDate = sdf.parse(reviewdate);
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             }
         } else {
             if(reviewdate != null && reviewdate.length() > 0) {

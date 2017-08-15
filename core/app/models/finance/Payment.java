@@ -46,6 +46,8 @@ import java.util.stream.Collectors;
 @Entity
 public class Payment extends Model {
 
+    private static final long serialVersionUID = 4422642625850089104L;
+
     public enum S {
         /**
          * 等待支付

@@ -18,6 +18,7 @@ import java.util.Locale;
  * Date: 5/16/12
  * Time: 4:24 PM
  */
+//BEGIN GENERATED CODE
 public class vExtensions extends JavaExtensions {
 
     /**

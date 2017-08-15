@@ -77,7 +77,7 @@ public class J {
      * @param obj
      * @return
      */
-    public static String G(Object obj) {
+    public static String g(Object obj) {
         return dateTimeFormatGsonBuilder().excludeFieldsWithoutExposeAnnotation().create().toJson(obj);
     }
 
