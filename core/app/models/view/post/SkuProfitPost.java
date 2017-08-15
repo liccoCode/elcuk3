@@ -114,7 +114,7 @@ public class SkuProfitPost {
 
             return skuProfit;
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
         return initProfit(market, proSku, sellingId);
     }

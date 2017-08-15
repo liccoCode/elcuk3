@@ -88,7 +88,7 @@ public class Roles extends Controller {
         try {
             role.addPrivileges(privilegeId);
         } catch(Exception e) {
-            renderJSON(new Ret(false, Webs.E(e)));
+            renderJSON(new Ret(false, Webs.e(e)));
         }
         int size = role.privileges.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));

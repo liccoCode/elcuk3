@@ -51,9 +51,9 @@ public class Attachs extends Controller {
             FileUtils.copyFile(a.file, new File(a.location));
             a.save();
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
-        renderJSON(J.G(a));
+        renderJSON(J.g(a));
     }
 
     public static void uploadForBase64(Attach.P p, String fid, String base64File, String originName) {
@@ -64,7 +64,7 @@ public class Attachs extends Controller {
             FileUtils.copyFile(a.file, new File(a.location));
             a.save();
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
         renderJSON(new Ret("上传成功!"));
     }
@@ -75,7 +75,7 @@ public class Attachs extends Controller {
         try {
             attach.rm();
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
         renderJSON(new Ret());
     }
@@ -83,13 +83,13 @@ public class Attachs extends Controller {
     public static void images(String fid, String p) {
         // 如果 fid 能够唯一定位则可以只使用 fid, 如果 fid 无法直接定位, 则需要借助
         List<Attach> imgs = Attach.attaches(fid, p);
-        renderJSON(J.G(imgs));
+        renderJSON(J.g(imgs));
     }
 
 
     public static void explorerImages(String fid) {
         List<java.util.Map<String, String>> imgs = Attach.attachImages(fid);
-        renderJSON(J.G(imgs));
+        renderJSON(J.g(imgs));
     }
 
 }

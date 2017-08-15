@@ -124,7 +124,7 @@ public class Listing extends GenericModel {
     public String productDescription;
 
     /**
-     * 抓取的图片的 URLs, 使用 Webs.SPLIT(|-|) 进行分割
+     * 抓取的图片的 URLs, 使用 Webs.sPLIT(|-|) 进行分割
      */
     @Lob
     @Expose

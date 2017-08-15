@@ -168,7 +168,7 @@ public class SellingRecordCaculateJob extends Job {
 //                //  还有总销售额和总利润
 //                sellingRecords.add(record);
 //            } catch(Exception e) {
-//                Logger.error("SellingRecordCaculateJob Error:" + Webs.S(e));
+//                Logger.error("SellingRecordCaculateJob Error:" + Webs.s(e));
 //            }
 //        }
 //        Logger.info("Selling Loop: %s ms", System.currentTimeMillis() - begin);

@@ -113,4 +113,9 @@ public class Attribute extends Model {
         }
         return super.equals(other);
     }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

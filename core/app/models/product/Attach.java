@@ -18,8 +18,9 @@ import play.db.jpa.Model;
 import play.libs.Codec;
 import play.libs.F;
 import play.utils.FastRuntimeException;
+//BEGIN GENERATED CODE
 import sun.misc.BASE64Decoder;
-
+//END GENERATED CODE
 import javax.persistence.*;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -258,7 +259,7 @@ public class Attach extends Model {
         else if(StringUtils.isNotBlank(a.outName))
             rtAttach = Attach.findByOutName(a.outName);
         else
-            Logger.warn("Attach[%s] is Not found.", J.G(a));
+            Logger.warn("Attach[%s] is Not found.", J.g(a));
 
         return rtAttach;
     }

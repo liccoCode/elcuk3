@@ -42,7 +42,7 @@ public class JaxbUtil {
             marshaller.marshal(obj, writer);
             result = writer.toString();
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
 
         return result;
@@ -63,7 +63,7 @@ public class JaxbUtil {
             Unmarshaller unmarshaller = context.createUnmarshaller();
             t = (T) unmarshaller.unmarshal(new StringReader(xml));
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
         return t;
     }

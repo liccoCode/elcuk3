@@ -143,7 +143,7 @@ public class Products extends Controller {
             }
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
 
     }
@@ -221,9 +221,9 @@ public class Products extends Controller {
     public static void upcCheck(String upc) {
         try {
             List<Selling> upcSellings = Selling.find("aps.upc=?", upc).fetch();
-            renderJSON(J.G(upcSellings));
+            renderJSON(J.g(upcSellings));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -239,7 +239,7 @@ public class Products extends Controller {
             mkt = M.AMAZON_DE;
         }
         if(product != null) {
-            renderJSON(J.G(product.sellingCountWithMarket(mkt)));
+            renderJSON(J.g(product.sellingCountWithMarket(mkt)));
         } else {
             renderJSON(new Ret("SKU: [" + sku + "] 不存在!"));
         }
@@ -342,7 +342,7 @@ public class Products extends Controller {
             }
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -415,7 +415,7 @@ public class Products extends Controller {
 
             renderJSON(new Ret(true, productAttr.attribute.name));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 

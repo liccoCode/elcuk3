@@ -25,6 +25,9 @@ import java.util.Date;
  */
 public class ShipmentReportESQuery {
 
+    private ShipmentReportESQuery() {
+    }
+
     /**
      * 运输费用统计柱状图(根据运输方式)
      */
@@ -168,11 +171,11 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Column shipColum(Date from, Date to, String string_type, String flag) {
+    public static Series.Column shipColum(Date from, Date to, String stringType, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
         MetricShipmentService mes;
-        Shipment.T type = Shipment.T.valueOf(string_type);
+        Shipment.T type = Shipment.T.valueOf(stringType);
         Series.Column column = new Series.Column(type.name());
         column.color = ProcuresHelper.rgb(type);
         float result;
@@ -187,10 +190,10 @@ public class ShipmentReportESQuery {
     }
 
 
-    public static Series.Pie shipPie(Date from, Date to, String string_type, String flag) {
+    public static Series.Pie shipPie(Date from, Date to, String stringType, String flag) {
         from = Dates.morning(from);
         to = Dates.night(to);
-        Shipment.T type = Shipment.T.valueOf(string_type);
+        Shipment.T type = Shipment.T.valueOf(stringType);
         Series.Pie pie = new Series.Pie(String.format("From:[%s] To:[%s] [%s]各市场运输重量统计(Kg)", from, to, type));
         float result = 0f;
         for(M m : M.values()) {

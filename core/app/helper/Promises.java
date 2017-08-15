@@ -74,7 +74,7 @@ public class Promises {
                 }
             } catch(Exception e) {
                 throw new FastRuntimeException(
-                        String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.E(e)));
+                        String.format("[%s] 因为 %s 问题, 请然后重新尝试搜索.", callback.id(), Webs.e(e)));
             }
         } finally {
             Logger.info("[%s:#%s] End of Fork fetch. Passed: %s ms",

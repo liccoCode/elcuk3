@@ -12,7 +12,6 @@ import play.mvc.With;
  */
 @With({APIChecker.class})
 public class AttachLog extends Controller {
-    
     public static void attachAction() {
         String action = request.params.get("action");
         String filename = request.params.get("filename");

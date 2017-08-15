@@ -71,7 +71,7 @@ public class ListingReviewsWork extends Job<Listing> {
                         review.createReview();// 创建新的
                         review.checkMailAndTicket();
                     } catch(Exception fe) {
-                        Logger.warn(Webs.E(fe) + "|" + J.json(Validation.errors()));
+                        Logger.warn(Webs.e(fe) + "|" + J.json(Validation.errors()));
                     }
                 } else {
                     //加上捕捉，防止报错数据库回滚
@@ -79,12 +79,12 @@ public class ListingReviewsWork extends Job<Listing> {
                         fromDB.updateAttr(review); // 更新
                         fromDB.checkMailAndTicket();
                     } catch(Exception fe) {
-                        Logger.warn(Webs.E(fe) + "||" + J.json(Validation.errors()));
+                        Logger.warn(Webs.e(fe) + "||" + J.json(Validation.errors()));
                     }
                 }
             }
         } catch(Exception e) {
-            Logger.warn("Listing Review have [%s].", Webs.E(e));
+            Logger.warn("Listing Review have [%s].", Webs.e(e));
         } finally {
             listing.lastReviewCheckDate = new Date();
             listing.save();

@@ -251,7 +251,7 @@ public class Account extends Model {
                     } catch(IOException e1) {
                         //ignore
                     }
-                    Logger.warn(Webs.E(e));
+                    Logger.warn(Webs.e(e));
                 }
                 break;
             default:
@@ -418,7 +418,7 @@ public class Account extends Model {
             HTTP.get(this.cookieStore(), url);
         } catch(Exception e) {
             throw new FastRuntimeException(
-                    String.format("Invoke %s with error.[%s]", url, Webs.E(e)));
+                    String.format("Invoke %s with error.[%s]", url, Webs.e(e)));
         }
     }
 

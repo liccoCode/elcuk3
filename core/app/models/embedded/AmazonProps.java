@@ -67,7 +67,7 @@ public class AmazonProps implements Serializable {
     @Expose
     public String manufacturer;
     /**
-     * 使用  Webs.SPLIT 进行分割, 最多 5 行
+     * 使用  Webs.sPLIT 进行分割, 最多 5 行
      */
     @Expose
     @Lob
@@ -141,7 +141,7 @@ public class AmazonProps implements Serializable {
     public String productDesc;
 
     /**
-     * 使用 Webs.SPLIT 进行分割, 5 行
+     * 使用 Webs.sPLIT 进行分割, 5 行
      */
     @Lob
     @Expose
@@ -151,7 +151,7 @@ public class AmazonProps implements Serializable {
     public List<String> searchTermss = new ArrayList<>();
 
     /**
-     * 使用 Webs.SPLIT 进行分割, 5 行
+     * 使用 Webs.sPLIT 进行分割, 5 行
      */
     @Lob
     @Expose
@@ -164,7 +164,7 @@ public class AmazonProps implements Serializable {
     public String upc;
 
     /**
-     * 此 Selling 所对应的图片名字与顺序. 使用 Webs.SPLIT 进行分割
+     * 此 Selling 所对应的图片名字与顺序. 使用 Webs.sPLIT 进行分割
      * after mysql 5.0.3 varchar can be 0..65535 length;
      * need more size to store the imageName.
      * alter table Selling modify column imageName varchar(600);
@@ -206,7 +206,7 @@ public class AmazonProps implements Serializable {
 
 
     /**
-     * 使用 Webs.SPLIT 进行分割, 5 行
+     * 使用 Webs.sPLIT 进行分割, 5 行
      * Games模板特有字段，硬件相关
      */
     @Lob

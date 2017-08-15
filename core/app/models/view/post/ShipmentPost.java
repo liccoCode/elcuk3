@@ -126,12 +126,12 @@ public class ShipmentPost extends Post<Shipment> {
         }
 
         if(this.states != null && this.states.size() > 0) {
-            List<String> states = new ArrayList<>();
+            List<String> list = new ArrayList<>();
             for(Shipment.S state : this.states) {
                 if(state == null) continue;
-                states.add(state.name());
+                list.add(state.name());
             }
-            if(states.size() > 0) sql.append(" AND s.state IN ").append(SqlSelect.inlineParam(states));
+            if(list.size() > 0) sql.append(" AND s.state IN ").append(SqlSelect.inlineParam(list));
         }
 
         if(this.iExpress != null) {

@@ -105,7 +105,7 @@ public class DeliverPlans extends Controller {
             dp.save();
             renderJSON(new Ret(true, ""));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 

@@ -35,7 +35,7 @@ public class Familys extends Controller {
             f.checkAndCreate();
             renderJSON(new Ret(true, "创建成功."));
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
 
         }
     }
@@ -47,7 +47,7 @@ public class Familys extends Controller {
             fa.safeDestroy();
             renderJSON(new Ret(true, "成功删除"));
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 

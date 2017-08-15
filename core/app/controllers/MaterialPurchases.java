@@ -153,7 +153,7 @@ public class MaterialPurchases extends Controller {
     public static void price(long cooperId, Long materialId) {
         validation.required(cooperId);
         if(Validation.hasErrors())
-            renderJSON(new Ret(Webs.V(Validation.errors())));
+            renderJSON(new Ret(Webs.v(Validation.errors())));
         Material m = Material.findById(materialId);
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
@@ -233,7 +233,6 @@ public class MaterialPurchases extends Controller {
         render("/MaterialUnits/_unit_list.html", units);
     }
 
-    
     public static void validDmtIsNeedApply(String id) {
         MaterialPurchase dmt = MaterialPurchase.findById(id);
         if(Arrays.asList("CONFIRM", "PENDING").contains(dmt.state.name()))

@@ -1052,7 +1052,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         } catch(Exception e) {
             FLog.fileLog(String.format("%s.%s.%s.html", this.id, onetrackno,
                     this.internationExpress.name()), html, FLog.T.HTTP_ERROR);
-            throw new FastRuntimeException(Webs.S(e));
+            throw new FastRuntimeException(Webs.s(e));
         }
         return this.iExpressHTML;
     }

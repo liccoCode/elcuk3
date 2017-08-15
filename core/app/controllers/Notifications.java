@@ -92,7 +92,7 @@ public class Notifications extends Controller {
     public static void nextNotification() {
         F.Option<Notification> notification = Notification.next(Login.current());
         if(notification.isDefined())
-            renderJSON(J.G(notification.get()));
+            renderJSON(J.g(notification.get()));
         else
             renderJSON(new Ret(false));
     }

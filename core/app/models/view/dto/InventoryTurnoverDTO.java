@@ -35,5 +35,4 @@ public class InventoryTurnoverDTO {
 
     public int upMonthQty;
 
-    
 }

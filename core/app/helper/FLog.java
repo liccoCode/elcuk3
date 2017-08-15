@@ -83,7 +83,7 @@ public class FLog {
             Logger.info("FLog.fileLog to %s", path);
             FileUtils.writeStringToFile(new File(path), content, "UTF-8");
         } catch(IOException e) {
-            Logger.warn("FLog.fileLog write file error.", Webs.E(e));
+            Logger.warn("FLog.fileLog write file error.", Webs.e(e));
         }
     }
 }

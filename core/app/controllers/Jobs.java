@@ -59,7 +59,7 @@ public class Jobs extends Controller {
         try {
             job.now();
         } catch(Exception e) {
-            flash.error("Job %s 因 [%s] 执行失败.", job.className, Webs.E(e));
+            flash.error("Job %s 因 [%s] 执行失败.", job.className, Webs.e(e));
         }
         flash.success("Job %s 执行成功", job.className);
         redirect("/Jobs/index");
