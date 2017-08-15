@@ -1,6 +1,6 @@
 package jobs.perform;
 
-import com.amazonaws.mws.MarketplaceWebServiceException;
+import com.amazonservices.mws.reports.MarketplaceWebServiceException;
 import helper.LogUtils;
 import jobs.driver.BaseJob;
 import jobs.driver.GJob;
