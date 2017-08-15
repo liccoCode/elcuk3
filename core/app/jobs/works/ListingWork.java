@@ -58,7 +58,7 @@ public class ListingWork extends Job<Listing> {
             needCheckListing.save();
             needCheckListing.checkAndSaveOffers();
         } catch(Exception e) {
-            Logger.warn("ListingDriverlJob[%s]: %s", this.listingId, Webs.E(e));
+            Logger.warn("ListingDriverlJob[%s]: %s", this.listingId, Webs.e(e));
         }
     }
 }

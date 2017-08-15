@@ -80,7 +80,7 @@ public class Reflects {
                 return Reflects.updateAndLogChanges(instance, attr, message, value);
             }
         } catch(Exception e) {
-            throw new FastRuntimeException(Webs.E(e));
+            throw new FastRuntimeException(Webs.e(e));
         }
     }
 }

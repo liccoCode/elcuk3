@@ -48,7 +48,7 @@ public class OrderItemESQuery {
                 throw new FastRuntimeException("不支持的类型!");
             }
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
         return null;
     }

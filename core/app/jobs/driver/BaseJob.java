@@ -49,7 +49,7 @@ public abstract class BaseJob extends Job {
             doit();
             del();
         } catch(Exception e) {
-            LogUtils.JOBLOG.info(Webs.S(e));
+            LogUtils.JOBLOG.info(Webs.s(e));
             end(e.getMessage());
         }
     }

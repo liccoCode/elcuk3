@@ -19,7 +19,6 @@ public class BatchReviewHandler extends Model {
 
     @ManyToOne
     public BatchReviewApply apply;
-    
     @OneToOne
     public User handler;
 

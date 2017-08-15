@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Entity
 public class JobRequest extends Model {
+    private static final long serialVersionUID = 4807027375196504252L;
+
     public interface AmazonJob {
         /**
          * 回掉的处理函数
@@ -265,7 +267,7 @@ public class JobRequest extends Model {
         if(checkAvailableType()) {
             Logger.debug("(step1)JobRequest request " + this.type + " REQUEST Job.");
             try {
-                MWSReports.requestReport_step1(this);
+                MWSReports.requestReportStep1(this);
             } catch(Exception e) {
                 Logger.warn("JobRequest Request Report Error. " + e.getMessage());
             }
@@ -282,7 +284,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("(step2)JobRequest request " + job.type + " UPDATE_STATE Job.");
                 try {
-                    MWSReports.requestState_step2(job);
+                    MWSReports.requestStateStep2(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest Update State Error. " + e.getMessage());
                 }
@@ -300,7 +302,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " UPDATE_REPORTID Job.");
                 try {
-                    MWSReports.requestReportId_step3(job);
+                    MWSReports.requestReportIdStep3(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest Update Report Error. " + e.getMessage());
                 }
@@ -318,7 +320,7 @@ public class JobRequest extends Model {
             if(job.checkAvailableType()) {
                 Logger.debug("JobRequest request " + job.type + " DOWNLOAD Job.");
                 try {
-                    MWSReports.requestReportDown_step4(job);
+                    MWSReports.requestReportDownStep4(job);
                 } catch(Exception e) {
                     Logger.warn("JobRequest DownLoad Error. " + e.getMessage());
                 }
@@ -337,7 +339,7 @@ public class JobRequest extends Model {
                 job.state = S.CLOSE;
                 job.save();
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             }
         }
     }

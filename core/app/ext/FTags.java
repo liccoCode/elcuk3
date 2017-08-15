@@ -24,6 +24,7 @@ import java.util.Map;
 @FastTags.Namespace("power")
 public class FTags extends FastTags {
 
+    //BEGIN GENERATED CODE
     /**
      * 自定义的用来在页面上检查是否有权限显示页面内容的 FastTag
      */
@@ -38,10 +39,11 @@ public class FTags extends FastTags {
         } catch(TemplateNotFoundException e) {
             throw new TemplateNotFoundException(e.getPath(), template.template, fromLine);
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
             throw new TemplateNotFoundException("FastTag", template.template, fromLine);
         }
     }
+
 
     /**
      * 必须的参数:
@@ -84,8 +86,7 @@ public class FTags extends FastTags {
                 .append("' ")
                 .append("type='").append(type).append("' ")
                 .append("name='").append(name).append("' ")
-                .append(StringUtils.isNotBlank(placeHolder) ?
-                        "placeHolder='" + placeHolder + "' " : "")
+                .append(StringUtils.isNotBlank(placeHolder) ? "placeHolder='" + placeHolder + "' " : "")
                 .append("value='").append(value).append("'>")
                 .append("</div>");
         if(StringUtils.isNotBlank(help))
@@ -112,4 +113,5 @@ public class FTags extends FastTags {
         else
             return val;
     }
+    //END GENERATED CODE
 }

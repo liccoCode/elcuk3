@@ -48,7 +48,7 @@ public class PDFs {
             RenderPDFTemplate renderer = new RenderPDFTemplate(new PDF.MultiPDFDocuments().add(singleDoc), args);
             renderer.writePDF(out, Http.Request.current(), Http.Response.current());
         } catch(Exception e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
     }
 
@@ -72,7 +72,7 @@ public class PDFs {
                     new ByteArrayInputStream(content.getBytes("UTF-8")), "", pageSize,
                     new ArrayList(), new HashMap(), out);
         } catch(UnsupportedEncodingException | IHtmlToPdfTransformer.CConvertException | FileNotFoundException e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
     }
 

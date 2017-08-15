@@ -420,7 +420,7 @@ public class FBA {
         return client;
     }
 
-
+    //BEGIN GENERATED CODE
     public enum FBA_ERROR_TYPE {
         LOCKED {
             @Override
@@ -489,6 +489,7 @@ public class FBA {
 
         public abstract String message();
     }
+    //END GENERATED CODE
 
     /**
      * 格式化 Amazon 报告的 FBA 相关的错误
@@ -518,7 +519,7 @@ public class FBA {
         } else if(errMsg.contains("NOT_ELIGIBLE_FC_FOR_ITEM")) {
             return FBA_ERROR_TYPE.NOT_ELIGIBLE_FC_FOR_ITEM;
         } else {
-            Webs.systemMail("FBA 相关操作出现未知错误", Webs.S(e), Arrays.asList("duan@easya.cc", "licco@easya.cc"));
+            Webs.systemMail("FBA 相关操作出现未知错误", Webs.s(e), Arrays.asList("duan@easya.cc", "licco@easya.cc"));
             return FBA_ERROR_TYPE.UNKNOWN_ERROR;
         }
     }

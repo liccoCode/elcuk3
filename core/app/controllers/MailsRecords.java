@@ -42,7 +42,7 @@ public class MailsRecords extends Controller {
         try {
             renderJSON(J.json(MailsRecord.ajaxRecordBy(from, to, type, templates, success, group)));
         } catch(Exception e) {
-            String errMsg = Webs.S(e);
+            String errMsg = Webs.s(e);
             Logger.error(errMsg);
             renderJSON(errMsg);
         }

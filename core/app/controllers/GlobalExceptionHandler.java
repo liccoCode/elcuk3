@@ -22,7 +22,7 @@ public class GlobalExceptionHandler extends Controller {
      */
     @Catch(value = FastRuntimeException.class, priority = 1)
     public static void fastRuntimeExceptionCatch(FastRuntimeException e) {
-        renderJSON(new Ret(Webs.E(e)));
+        renderJSON(new Ret(Webs.e(e)));
     }
 
     @Catch(value = TemplateExecutionException.class, priority = 2)

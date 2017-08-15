@@ -12,7 +12,6 @@ import play.utils.FastRuntimeException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.lang.Override;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -38,37 +37,31 @@ public class MWSUtils {
 
     public enum T {
         UPLOAD_PRODUCT {
-            @Override
             public String toString() {
                 return "_POST_FLAT_FILE_LISTINGS_DATA_";
             }
         },
         PRODUCT_FEED {
-            @Override
             public String toString() {
                 return "_POST_PRODUCT_DATA_";
             }
         },
         PRICING_FEED {
-            @Override
             public String toString() {
                 return "_POST_PRODUCT_PRICING_DATA_";
             }
         },
         PRODUCT_IMAGES_FEED {
-            @Override
             public String toString() {
                 return "_POST_PRODUCT_IMAGE_DATA_";
             }
         },
         PRODUCT_INVENTORY_FEED {
-            @Override
             public String toString() {
                 return "_POST_INVENTORY_AVAILABILITY_DATA_";
             }
         },
         FBA_INBOUND_CARTON_CONTENTS {
-            @Override
             public String toString() {
                 return "_POST_FBA_INBOUND_CARTON_CONTENTS_";
             }
@@ -217,7 +210,7 @@ public class MWSUtils {
         price.setSKU(selling.merchantSKU);
         OverrideCurrencyAmount amount = new OverrideCurrencyAmount();
         amount.setValue(new BigDecimal(selling.aps.standerPrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
-        amount.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
+        amount.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.m(selling.market).toString()));
         price.setStandardPrice(amount);
 
 
@@ -238,7 +231,7 @@ public class MWSUtils {
         sale.setEndDate(dataTypeFactory.newXMLGregorianCalendar(gc));
         OverrideCurrencyAmount salePrice = new OverrideCurrencyAmount();
         salePrice.setValue(new BigDecimal(selling.aps.salePrice).setScale(2, BigDecimal.ROUND_HALF_DOWN));
-        salePrice.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.M(selling.market).toString()));
+        salePrice.setCurrency(BaseCurrencyCodeWithDefault.fromValue(Currency.m(selling.market).toString()));
         sale.setSalePrice(salePrice);
         price.setSale(sale);
 
@@ -564,7 +557,7 @@ public class MWSUtils {
                 }
                 return this.productData;
             } catch(FastRuntimeException e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
                 throw new FastRuntimeException(String.format(
                         "您所选择的 Feed Product Type 字段[%s]可能是不被支持的, 请更换该字段后再重试一次. ERROR:[%s]",
                         this.feedProductType, e.getMessage()));

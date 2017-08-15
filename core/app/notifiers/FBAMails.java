@@ -44,7 +44,7 @@ public class FBAMails extends Mailer {
             send(fba, oldState, newState);
             mr.success = true;
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.warn(Webs.e(e));
             return false;
         } finally {
             mr.save();
@@ -67,7 +67,7 @@ public class FBAMails extends Mailer {
         try {
             send(ships, state);
         } catch(Exception e) {
-            Logger.error(Webs.E(e));
+            Logger.error(Webs.e(e));
             return false;
         }
         return true;

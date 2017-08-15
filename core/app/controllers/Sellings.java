@@ -147,7 +147,7 @@ public class Sellings extends Controller {
             selling.patchToListing();
             renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -173,7 +173,7 @@ public class Sellings extends Controller {
         try {
             s.uploadFeedAmazonImg(imgs, false, Secure.Security.connected().toLowerCase());
         } catch(Exception e) {
-            errors.add(new Error("", Webs.E(e), new String[]{}));
+            errors.add(new Error("", Webs.e(e), new String[]{}));
         }
         if(errors.size() > 0) {
             renderJSON(new Ret(false, errors.toString()));
@@ -189,7 +189,7 @@ public class Sellings extends Controller {
             s.save();
             renderJSON(new Ret(true, s.sellingId));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -209,7 +209,7 @@ public class Sellings extends Controller {
             s.save();
             renderJSON(new Ret(true));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -221,7 +221,7 @@ public class Sellings extends Controller {
             s.remove();
             renderJSON(new Ret(true, "成功删除"));
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -234,7 +234,7 @@ public class Sellings extends Controller {
             selling.syncFromAmazon();
             renderJSON(new Ret());
         } catch(FastRuntimeException e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -292,7 +292,7 @@ public class Sellings extends Controller {
             selling.listing.recordingListingState(DateTime.now().toDate());
             renderJSON(new Ret(true, sellingId));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -350,7 +350,7 @@ public class Sellings extends Controller {
             selling.sellingCycle(cycle);
             renderJSON(new Ret(true, sellingId));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -390,7 +390,7 @@ public class Sellings extends Controller {
             }
             renderJSON(new Ret(true, sellingIds.toString()));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -406,7 +406,7 @@ public class Sellings extends Controller {
                 renderJSON(new Ret(false, message));
             }
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 

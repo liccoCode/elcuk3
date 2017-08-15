@@ -192,7 +192,7 @@ public class ReportDeal extends Controller {
             OrderInvoice.createInvoicePdf(Integer.parseInt(num), time, market, regex);
             renderText("后台正在处理, 请稍后去服务器查看.");
         } catch(ParseException e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         }
     }
 

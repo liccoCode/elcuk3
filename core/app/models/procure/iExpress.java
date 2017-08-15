@@ -28,6 +28,7 @@ import java.util.*;
  * Date: 6/26/12
  * Time: 4:31 PM
  */
+//BEGIN GENERATED CODE
 public enum iExpress {
     DHL {
         @Override

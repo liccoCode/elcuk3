@@ -193,7 +193,7 @@ public class SaleFee extends Model {
                     }
                 } catch(Exception e) {
                     emailLines.add(line);
-                    Logger.error("%s parse error. [%s]", Webs.E(e), line);
+                    Logger.error("%s parse error. [%s]", Webs.e(e), line);
                 }
             }
             if(emailLines.size() > 0)
@@ -252,7 +252,7 @@ public class SaleFee extends Model {
             SaleFee fee = new SaleFee();
             fee.orderId = orderId;
             fee.market = market;
-            fee.currency = Currency.M(fee.market);
+            fee.currency = Currency.m(fee.market);
             fee.cost = NumberUtils.toFloat(cost);
             fee.account = acc;
             fee.usdCost = fee.currency.toUSD(fee.cost);
@@ -322,7 +322,7 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             }
         }
     }
@@ -357,7 +357,7 @@ public class SaleFee extends Model {
             try {
                 if(ps != null) ps.close();
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             }
         }
     }

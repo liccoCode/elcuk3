@@ -228,7 +228,7 @@ public class ProcureUnits extends Controller {
                         unit.id, unit.attrs.planQty, unit.attrs.qty);
             }
         } catch(Exception e) {
-            Validation.addError("", Webs.E(e));
+            Validation.addError("", Webs.e(e));
             render("../views/ProcureUnits/deliveryUnit.html", unit, attrs);
         }
 

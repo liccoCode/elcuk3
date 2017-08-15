@@ -427,6 +427,7 @@ public class Outbound extends GenericModel {
         } else {
             dto = new InventoryTurnoverDTO();
             dto.categoryId = categoryId;
+            map.put(categoryId, dto);
         }
         switch(unit.warehouseStage) {
             case SAME_DAY:
@@ -448,7 +449,6 @@ public class Outbound extends GenericModel {
         }
         dto.totalUnitNum ++;
         dto.totalQty += unit.outQty;
-        map.put(categoryId, dto);
     }
 
 }

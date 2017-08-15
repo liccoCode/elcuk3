@@ -59,12 +59,12 @@ public class AmazonFinanceCheckJob {
             }
             psmt.executeBatch();
         } catch(SQLException e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
         } finally {
             try {
                 if(psmt != null) psmt.close();
             } catch(Exception e) {
-                Logger.error(Webs.S(e));
+                Logger.error(Webs.s(e));
             }
         }
     }

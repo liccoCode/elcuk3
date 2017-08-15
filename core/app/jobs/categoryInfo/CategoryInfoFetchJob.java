@@ -1,3 +1,4 @@
+//BEGIN GENERATED CODE
 package jobs.categoryInfo;
 
 import helper.DBUtils;

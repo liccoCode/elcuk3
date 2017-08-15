@@ -70,7 +70,7 @@ public class Whouses extends Controller {
         validation.valid(wh);
         wh.validate();
         if(Validation.hasErrors()) {
-            renderJSON(new Ret(Webs.V(Validation.errors())));
+            renderJSON(new Ret(Webs.v(Validation.errors())));
         }
 
 

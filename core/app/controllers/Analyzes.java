@@ -101,7 +101,7 @@ public class Analyzes extends Controller {
             chart.series.forEach(se -> se.visible = se.name.contains(countryName));
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -116,7 +116,7 @@ public class Analyzes extends Controller {
             }.now());
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -138,7 +138,7 @@ public class Analyzes extends Controller {
             }.now());
             renderJSON(json);
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
+            renderJSON(new Ret(Webs.s(e)));
         }
     }
 
@@ -160,7 +160,7 @@ public class Analyzes extends Controller {
             }.now());
             renderJSON(json);
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -171,13 +171,13 @@ public class Analyzes extends Controller {
      * @param val
      */
     public static void ajaxProcureUnitTimeline(String type, String val) {
-        renderJSON(J.G(AnalyzePost.timelineEvents(type, val)));
+        renderJSON(J.g(AnalyzePost.timelineEvents(type, val)));
     }
 
     public static void ps(String sid, Float ps) {
         Selling sell = Selling.findById(sid);
         if(sell == null || !sell.isPersistent()) throw new FastRuntimeException("Selling 不合法.");
-        renderJSON(J.G(sell.ps(ps)));
+        renderJSON(J.g(sell.ps(ps)));
     }
 
 }

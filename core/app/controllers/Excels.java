@@ -235,7 +235,7 @@ public class Excels extends Controller {
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
         } else {
-            renderText(Webs.V(Validation.errors()));
+            renderText(Webs.v(Validation.errors()));
         }
     }
 
@@ -508,7 +508,7 @@ public class Excels extends Controller {
                 renderBinary(fileOut);
             }
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.S(e)));
+            renderJSON(new Ret(Webs.s(e)));
         }
     }
 
@@ -625,7 +625,7 @@ public class Excels extends Controller {
                         try {
                             return service.orderFeesCost();
                         } catch(Exception e) {
-                            renderText(Webs.S(e));
+                            renderText(Webs.s(e));
                         }
                         return null;
                     }

@@ -12,6 +12,10 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
  * Time: 10:23 PM
  */
 public class AmazonSQS {
+
+    private AmazonSQS(){
+    }
+
     private static final String SQS_QUEUE = String.format("https://sqs.us-west-2.amazonaws.com/866320605929/%s",
             System.getenv("AWS_SQS_QUEUE"));
     private volatile static AmazonSQSAsyncClient instance;

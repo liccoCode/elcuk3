@@ -390,7 +390,7 @@ public enum Currency {
             Logger.info("[1 %s TO %s %s]", from, body, to);
             return NumberUtils.toFloat(body.trim());
         } catch(Exception e) {
-            Logger.warn(Webs.E(e));
+            Logger.warn(Webs.e(e));
         }
         return -1f;
     }
@@ -401,7 +401,7 @@ public enum Currency {
      * @param market
      * @return
      */
-    public static Currency M(M market) {
+    public static Currency m(M market) {
         switch(market) {
             case AMAZON_CA:
                 return CAD;

@@ -977,7 +977,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         FileUtils.copyFile(skuatt.file, new File(skuatt.location));
                         skuatt.save();
                     } catch(Exception e) {
-                        Logger.error(Webs.S(e));
+                        Logger.error(Webs.s(e));
                     }
                 }
             }
@@ -1098,7 +1098,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
                         if(!Validation.hasErrors())
                             skuatt.save();
                     } catch(Exception e) {
-                        Logger.error(Webs.S(e));
+                        Logger.error(Webs.s(e));
                     }
                 }
             }

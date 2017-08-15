@@ -33,6 +33,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Webs {
 
+    private Webs() {
+    }
+
     public static final String SPLIT = "|-|";
     /**
      * 分隔符号: '|'
@@ -219,7 +222,7 @@ public class Webs {
                 throw new FastRuntimeException("Unsupport dot format on FormatToPrice. [" + dot + "]");
             }
         } catch(ParseException e) {
-            Logger.error(Webs.S(e));
+            Logger.error(Webs.s(e));
             throw new FastRuntimeException(e);
         }
     }
@@ -313,7 +316,7 @@ public class Webs {
      *
      * @return
      */
-    public static <E extends Throwable> String E(E e) {
+    public static <E extends Throwable> String e(E e) {
         if(Play.mode.isDev()) e.printStackTrace();
         return e.getMessage() + "|" + e.getClass().getSimpleName();
     }
@@ -333,7 +336,7 @@ public class Webs {
      * @param e
      * @return
      */
-    public static <E extends Throwable> String S(E e) {
+    public static <E extends Throwable> String s(E e) {
         StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         // 便与前台查看异常
@@ -346,7 +349,7 @@ public class Webs {
      * @param errors
      * @return
      */
-    public static String V(List<play.data.validation.Error> errors) {
+    public static String v(List<play.data.validation.Error> errors) {
         StringBuilder sbd = new StringBuilder();
         for(Error err : errors) {
             sbd.append(err.getKey()).append("=>").append(err.message()).append("<br>");

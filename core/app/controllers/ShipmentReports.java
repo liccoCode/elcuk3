@@ -72,7 +72,7 @@ public class ShipmentReports extends Controller {
             HighChart chart = ShipmentReportESQuery.shipFeeByTypeColumn(from, to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -89,7 +89,7 @@ public class ShipmentReports extends Controller {
                 renderJSON(J.json(chart));
             }
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -101,7 +101,7 @@ public class ShipmentReports extends Controller {
             HighChart chart = ShipmentReportESQuery.shipWeightByTypeColumn(from, to);
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -114,7 +114,7 @@ public class ShipmentReports extends Controller {
             HighChart chart = ShipmentReportESQuery.shipWeightByMarketPie(from, to, market);
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -146,7 +146,7 @@ public class ShipmentReports extends Controller {
             HighChart chart = ShipmentReportESQuery.arrivalRateLine(year, shipType, countType);
             renderJSON(J.json(chart));
         } catch(Exception e) {
-            renderJSON(new Ret(Webs.E(e)));
+            renderJSON(new Ret(Webs.e(e)));
         }
     }
 
@@ -161,7 +161,7 @@ public class ShipmentReports extends Controller {
             shipItems = (List<ShipItem>) map.get("shipItems");
             losstotal = p.buildTotalLossRate(lossrates);
         } catch(FastRuntimeException e) {
-            flash.error(Webs.E(e));
+            flash.error(Webs.e(e));
         }
         render(lossrates, losstotal, p, shipItems);
     }
@@ -212,7 +212,7 @@ public class ShipmentReports extends Controller {
                     list = JSONArray.parseArray(postvalue, Map.class);
                 }
             } catch(FastRuntimeException e) {
-                flash.error(Webs.E(e));
+                flash.error(Webs.e(e));
             }
         }
         render(list, p);
