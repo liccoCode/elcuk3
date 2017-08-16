@@ -1,5 +1,9 @@
 image: zen9073/play:1.4.2
 
+cache:
+  paths:
+    - /opt/.m2/repository/
+
 before_script:
   - export JAVA_HOME=/opt/jdk1.8.0_112
   - export CLASSPATH=.:$JAVA_HOME/lib
