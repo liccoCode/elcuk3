@@ -13,6 +13,7 @@ import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -46,6 +47,8 @@ public class SellingRecord extends GenericModel {
 
     @Transient
     private static final long serialVersionUID = 897305328219999830L;
+
+    public static final String EAR_URL_API = "http://go.ear-data.com/api/v1/amazon/pvss";
 
     public SellingRecord(Selling sell, Date date) {
         this.id = SellingRecord.id(sell.sellingId, date);
@@ -443,37 +446,32 @@ public class SellingRecord extends GenericModel {
     public static void main(String[] args) {
         final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
         try {
-            try {
-                HighChart chart = new HighChart();
-                for(M market : M.values()) {
-                    URI uri = new URIBuilder(url)
-                            .addParameter("sku", "71SMTA101-BFITPU,701948729014")
-                            .addParameter("channel_id", market.earChannel())
-                            .addParameter("from", "2017-07-06")
-                            .addParameter("to", "2017-08-06").build();
-                    HttpGet get = new HttpGet(uri);
-                    get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
-                    CloseableHttpResponse response = HTTP.client().execute(get);
-                    String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-                    JSONObject json = JSON.parseObject(result);
-                    Optional.ofNullable(json).ifPresent(j -> {
-                        JSONArray objects = j.getJSONArray("bbps");
-                        objects.forEach(object -> {
-                            JSONObject o = (JSONObject) object;
-                            JSONArray array = o.getJSONArray("data");
-                            array.forEach(a -> {
-                                JSONArray value = (JSONArray) a;
-                                SellingRecord
-                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                                value.get(1).toString());
-                            });
+            HighChart chart = new HighChart();
+            for(M market : M.values()) {
+                URI uri = new URIBuilder(url)
+                        .addParameter("sku", "71SMTA101-BFITPU,701948729014")
+                        .addParameter("channel_id", market.earChannel())
+                        .addParameter("from", "2017-07-06")
+                        .addParameter("to", "2017-08-06").build();
+                HttpGet httpGet = new HttpGet(uri);
+                httpGet.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+                String result = HTTP.get(httpGet);
+                JSONObject json = JSON.parseObject(result);
+                Optional.ofNullable(json).ifPresent(j -> {
+                    JSONArray objects = j.getJSONArray("bbps");
+                    objects.forEach(object -> {
+                        JSONObject o = (JSONObject) object;
+                        JSONArray array = o.getJSONArray("data");
+                        array.forEach(a -> {
+                            JSONArray value = (JSONArray) a;
+                            SellingRecord
+                                    .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                            value.get(1).toString());
                         });
                     });
-                }
-                System.out.println(chart);
-            } catch(IOException e) {
-                e.printStackTrace();
+                });
             }
+            System.out.println(chart);
         } catch(URISyntaxException e) {
             e.printStackTrace();
         }
@@ -492,66 +490,48 @@ public class SellingRecord extends GenericModel {
          * ]
          */
         HighChart chart = new HighChart();
-        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            if(acc != null) {
-                URI uri = new URIBuilder(url)
-                        .addParameter("sku", msku)
-                        .addParameter("channel_id", acc.type.earChannel())
-                        .addParameter("from", formatter.format(from))
-                        .addParameter("to", formatter.format(to)).build();
-                HttpGet get = new HttpGet(uri);
-                get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
-                CloseableHttpResponse response = HTTP.client().execute(get);
-                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-                JSONObject json = JSON.parseObject(result);
-                Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONArray("bbps");
-                    objects.forEach(object -> {
-                        JSONObject o = (JSONObject) object;
-                        JSONArray array = o.getJSONArray("data");
-                        array.forEach(a -> {
-                            JSONArray value = (JSONArray) a;
-                            SellingRecord
-                                    .buildChart(chart, acc.type, o.get("name").toString(), value.get(0).toString(),
-                                            value.get(1).toString());
-                        });
-                    });
-                });
-            } else {
-                for(M market : M.values()) {
-                    URI uri = new URIBuilder(url)
-                            .addParameter("sku", msku)
-                            .addParameter("channel_id", market.earChannel())
-                            .addParameter("from", formatter.format(from))
-                            .addParameter("to", formatter.format(to)).build();
-                    HttpGet get = new HttpGet(uri);
-                    CloseableHttpResponse response = HTTP.client().execute(get);
-                    String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-                    Logger.info(result);
-                    JSONObject json = JSON.parseObject(result);
-                    Optional.ofNullable(json).ifPresent(j -> {
-                        JSONArray objects = j.getJSONArray("bbps");
-                        objects.forEach(object -> {
-                            JSONObject o = (JSONObject) object;
-                            JSONArray array = o.getJSONArray("data");
-                            array.forEach(a -> {
-                                JSONArray value = (JSONArray) a;
-                                SellingRecord
-                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                                value.get(1).toString());
-                            });
-                        });
-                    });
-                }
+        if(acc != null) {
+            getEarDataBymMarket(chart, acc.type, msku, from, to);
+        } else {
+            for(M market : M.values()) {
+                getEarDataBymMarket(chart, market, msku, from, to);
             }
-        } catch(URISyntaxException e) {
-            Logger.error(Webs.s(e));
-        } catch(IOException e) {
-            Logger.error(Webs.s(e));
         }
         return chart;
+    }
+
+    private static void getEarDataBymMarket(HighChart chart, M market, String msku, Date from, Date to) {
+        try {
+            HttpGet get = new HttpGet();
+            get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            URI uri = new URIBuilder(EAR_URL_API)
+                    .addParameter("sku", msku)
+                    .addParameter("channel_id", market.earChannel())
+                    .addParameter("from", formatter.format(from))
+                    .addParameter("to", formatter.format(to)).build();
+            get.setURI(uri);
+            String result = HTTP.get(get);
+            JSONObject json = JSON.parseObject(result);
+            Optional.ofNullable(json).ifPresent(j -> {
+                JSONArray objects = j.getJSONArray("bbps");
+                objects.forEach(object -> {
+                    JSONObject o = (JSONObject) object;
+                    JSONArray array = o.getJSONArray("data");
+                    if(!Objects.equals(o.get("name").toString(), "转换率(%)")) {
+                        array.forEach(a -> {
+                            JSONArray value = (JSONArray) a;
+                            SellingRecord.buildChart(chart, market, o.get("name").toString(),
+                                    value.get(0).toString(),
+                                    value.get(1).toString());
+                        });
+                    }
+
+                });
+            });
+        } catch(URISyntaxException e) {
+            Logger.error(Webs.s(e));
+        }
     }
 
     private static void buildChart(HighChart chart, M m, String name, String date, String value) {
@@ -560,6 +540,9 @@ public class SellingRecord extends GenericModel {
         }
         if(Objects.equals(name, "PageView")) {
             chart.series("PageView(" + m.sortName() + ")").add(new Date(Long.parseLong(date)), Float.parseFloat(value));
+        }
+        if(Objects.equals(name, "转换率(%)")) {
+            chart.series("TurnRatio(" + m.sortName() + ")").add(new Date(Long.parseLong(date)), Float.parseFloat(value));
         }
     }
 
@@ -570,28 +553,38 @@ public class SellingRecord extends GenericModel {
      */
     public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
         HighChart chart = new HighChart();
-        List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
-        for(SellingRecord rcd : records) {
-            float turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
-            if(rcd.sessions <= 0) turnRatio = 0f;
-            if(rcd.market == M.AMAZON_UK)
-                chart.series("TurnRatio(uk)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_DE)
-                chart.series("TurnRatio(de)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_FR)
-                chart.series("TurnRatio(fr)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_US)
-                chart.series("TurnRatio(us)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_IT)
-                chart.series("TurnRatio(it)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_JP)
-                chart.series("TurnRatio(jp)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_ES)
-                chart.series("TurnRatio(es)").add(rcd.date, turnRatio);
-            else if(rcd.market == M.AMAZON_CA)
-                chart.series("TurnRatio(ca)").add(rcd.date, turnRatio);
-            else
-                Logger.info("Skip One Makret %s.", rcd.market);
+        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        HttpGet get = new HttpGet();
+        get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+        for(M market : M.values()) {
+            URI uri = null;
+            try {
+                uri = new URIBuilder(url)
+                        .addParameter("sku", msku)
+                        .addParameter("channel_id", market.earChannel())
+                        .addParameter("from", formatter.format(from))
+                        .addParameter("to", formatter.format(to)).build();
+            } catch(URISyntaxException e) {
+                Logger.error(Webs.s(e));
+            }
+            get.setURI(uri);
+            String result = HTTP.get(get);
+            JSONObject json = JSON.parseObject(result);
+            Optional.ofNullable(json).ifPresent(j -> {
+                JSONArray objects = j.getJSONArray("bbps");
+                objects.forEach(object -> {
+                    JSONObject o = (JSONObject) object;
+                    JSONArray array = o.getJSONArray("data");
+                    if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
+                        array.forEach(a -> {
+                            JSONArray value = (JSONArray) a;
+                            SellingRecord.buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                    value.get(1).toString());
+                        });
+                    }
+                });
+            });
         }
         return chart;
     }
