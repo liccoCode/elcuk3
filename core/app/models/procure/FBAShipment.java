@@ -38,6 +38,8 @@ import java.util.*;
 @DynamicUpdate
 public class FBAShipment extends Model {
 
+    private static final long serialVersionUID = 4358998736151999142L;
+
     public enum S {
         /**
          * 还在 FBAShipment 的 PLAN 阶段, Amazon 还没有具体的 FBA Shipment
@@ -502,7 +504,6 @@ public class FBAShipment extends Model {
         inputList.setMember(member);
         return inputList;
     }
-
 
     private NonPartneredLtlDataInput ltlDataInput(Shipment shipment) {
         return new NonPartneredLtlDataInput("Other", shipment.tracknolist.get(0));

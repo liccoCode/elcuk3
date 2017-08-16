@@ -14,7 +14,6 @@ import org.joda.time.DateTime;
 import play.utils.FastRuntimeException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,6 +21,7 @@ import java.util.List;
  * User: wyatt
  * Date: 12/17/13
  * Time: 4:01 PM
+ *
  * @deprecated
  */
 public class GetFeedJob extends BaseJob {
@@ -63,9 +63,7 @@ public class GetFeedJob extends BaseJob {
             if("create".equals(action)) {
                 GJob.perform(GetAsinJob.class.getName(), getContext(), DateTime.now().plusMinutes(1).toDate());
             }
-        } catch(IOException e) {
-            throw new FastRuntimeException(e);
-        } catch(MarketplaceWebServiceException e) {
+        } catch(Exception e) {
             /**
              * 如果发生异常( Amazon 未处理好数据就会返回一个错误 ),重新发起请求(两分钟之后)
              */
@@ -82,7 +80,7 @@ public class GetFeedJob extends BaseJob {
             if(file != null) FileUtils.deleteQuietly(file);
         }
 
-        if(LogUtils.isslow(System.currentTimeMillis() - begin,"GetFeedJob")) {
+        if(LogUtils.isslow(System.currentTimeMillis() - begin, "GetFeedJob")) {
             LogUtils.JOBLOG.info(String.format("GetFeedJob calculate.... [%sms]", System.currentTimeMillis() - begin));
         }
     }
