@@ -1,8 +1,8 @@
 package mws.v2;
 
-import com.amazonservices.mws.reports.MarketplaceWebService;
-import com.amazonservices.mws.reports.MarketplaceWebServiceException;
-import com.amazonservices.mws.reports.model.*;
+import com.amazonaws.mws.MarketplaceWebService;
+import com.amazonaws.mws.MarketplaceWebServiceException;
+import com.amazonaws.mws.model.*;
 import com.google.common.collect.Lists;
 import helper.Constant;
 import models.market.Account;

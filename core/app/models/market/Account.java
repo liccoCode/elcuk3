@@ -1,6 +1,6 @@
 package models.market;
 
-import com.amazonservices.mws.FulfillmentInboundShipment.model.Address;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.Address;
 import com.google.gson.annotations.Expose;
 import ext.LinkHelper;
 import helper.Constant;

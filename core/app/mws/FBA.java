@@ -1,10 +1,10 @@
 package mws;
 
-import com.amazonservices.mws.FulfillmentInboundShipment.FBAInboundServiceMWSClient;
-import com.amazonservices.mws.FulfillmentInboundShipment.FBAInboundServiceMWSConfig;
-import com.amazonservices.mws.FulfillmentInboundShipment.FBAInboundServiceMWSException;
-import com.amazonservices.mws.FulfillmentInboundShipment.MWSEndpoint;
-import com.amazonservices.mws.FulfillmentInboundShipment.model.*;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSClient;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSConfig;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.MWSEndpoint;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import helper.Webs;
 import models.OperatorConfig;
 import models.market.Account;
