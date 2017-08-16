@@ -131,7 +131,7 @@ public class SellingSaleAnalyzeJob extends Job {
                     }
                     dto.difference = dto.day1 - dto.day7 / 7;
                     dto.difference = Webs.scale2PointUp(dto.difference);
-                    dto.displayPrice = dto.getDisPrice();
+                    dto.displayPrice = dto.getDis_Price();
                     dtos.add(dto);
                 }
 
@@ -141,7 +141,7 @@ public class SellingSaleAnalyzeJob extends Job {
                 //断货天数
                 if(!isSku) {
                     for(AnalyzeDTO dto : analyzeMap.values()) {
-                        int outday = Webs.scalePointUp(0, dto.qty / (dto.ps == 0 ? dto.getPsCal() : dto.ps))
+                        int outday = Webs.scalePointUp(0, dto.qty / (dto.ps == 0 ? dto.getDis_Price() : dto.ps))
                                 .intValue();
                         DateTime time = DateTime.now();
                         time = time.plusDays(outday);
@@ -162,7 +162,7 @@ public class SellingSaleAnalyzeJob extends Job {
                                 if(shipments.get(0).dates.planArrivDate != null
                                         && shipments.get(0).dates.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
-                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPsCal() : dto.ps))
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getDis_Price() : dto.ps))
                                             .intValue();
                                     outday = outday + arrivday;
                                     time = time.plusDays(arrivday);
@@ -172,7 +172,7 @@ public class SellingSaleAnalyzeJob extends Job {
                                 if(unit.attrs != null && unit.attrs.planArrivDate != null
                                         && unit.attrs.planArrivDate.before(time.plusDays(1).toDate())) {
                                     int arrivday = Webs
-                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getPsCal() : dto.ps)
+                                            .scalePointUp(0, unit.qty() / (dto.ps == 0 ? dto.getDis_Price() : dto.ps)
                                             ).intValue();
                                     outday = outday + arrivday;
                                     time = time.plusDays(arrivday);

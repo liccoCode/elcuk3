@@ -180,7 +180,8 @@ public class AnalyzeDTO implements Serializable {
      */
     public float returnRates = 0;
 
-    public float getPsCal() {
+    //BEGIN GENERATED CODE
+    public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float percent = this.day7 / 7f;
             this.ps_cal = ps <= 0 ? 0.1f : percent;
@@ -189,7 +190,7 @@ public class AnalyzeDTO implements Serializable {
         return this.ps_cal;
     }
 
-    public float getDisPrice() {
+    public float getDis_Price() {
         try {
             Selling sell = Selling.findById(this.fid);
             if(sell != null) {
@@ -201,7 +202,7 @@ public class AnalyzeDTO implements Serializable {
         }
         return 0;
     }
-
+    //END GENERATED CODE
 
     /**
      * 计算系数内的两个 Turnover 值<br/>
@@ -218,7 +219,7 @@ public class AnalyzeDTO implements Serializable {
      * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
-        float _ps = this.getPsCal();
+        float _ps = this.getPs_cal();
         float percent = this.ps;
         return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
@@ -230,7 +231,7 @@ public class AnalyzeDTO implements Serializable {
     }
 
     public F.T4<Float, Float, Float, Float> getSidTurnOverT4() {
-        float _ps = this.getPsCal();
+        float _ps = this.getPs_cal();
         _ps = _ps < 1 ? 1f : _ps;
         float percent = this.ps;
         return new F.T4<>(
@@ -249,7 +250,7 @@ public class AnalyzeDTO implements Serializable {
      * .2: 前台使用的颜色代码
      */
     public F.T2<Float, String> getPsDiffer() {
-        float _ps = this.getPsCal();
+        float _ps = this.getPs_cal();
         if(_ps >= 5) {
             float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
