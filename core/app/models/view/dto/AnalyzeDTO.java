@@ -179,7 +179,8 @@ public class AnalyzeDTO implements Serializable {
      * 退货率
      */
     public float returnRates = 0;
-
+    
+    //BEGIN GENERATED CODE
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
             float ps = this.day7 / 7f;
@@ -220,7 +221,7 @@ public class AnalyzeDTO implements Serializable {
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
         float ps = this.ps;
-        return new F.T4<Float, Float, Float, Float>(
+        return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
@@ -233,7 +234,7 @@ public class AnalyzeDTO implements Serializable {
         float _ps = this.getPs_cal();
         _ps = _ps < 1 ? 1f : _ps;
         float ps = this.ps;
-        return new F.T4<Float, Float, Float, Float>(
+        return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
                 Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
@@ -251,16 +252,15 @@ public class AnalyzeDTO implements Serializable {
     public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
-            float diff = Math.abs(_ps - this.ps) /
-                    (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
+            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
             if(diff >= 0.4)
                 color = "E45652";
             else if(diff >= 0.2 && diff < 0.4)
                 color = "FAAB3B";
-            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
+            return new F.T2<>(Webs.scale2PointUp(diff), color);
         } else {
-            return new F.T2<Float, String>(0f, "fff");
+            return new F.T2<>(0f, "fff");
         }
     }
 
