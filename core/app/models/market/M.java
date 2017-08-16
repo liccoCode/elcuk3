@@ -1146,6 +1146,29 @@ public enum M {
         }
     }
 
+    public String earChannel() {
+        switch(this) {
+            case AMAZON_UK:
+                return "54e730c8-050f-4fa4-a3af-7cb9c9d82e67";
+            case AMAZON_DE:
+                return "157b5c2a-5200-42ec-a188-54658aab2b87";
+            case AMAZON_ES:
+                return "f526190b-9d16-46d9-9e10-d1ce4c302496";
+            case AMAZON_FR:
+                return "8a8a61f7-f271-4107-9284-8f40c0ef68b4";
+            case AMAZON_IT:
+                return "1baa0d1b-2198-48a7-8131-2755c135ab8f";
+            case AMAZON_JP:
+                return "f5dcf784-e65e-4daf-8c64-234b96fd70ba";
+            case AMAZON_CA:
+                return "71909a7d-1eb3-4e86-8724-2ac83395235f";
+            case AMAZON_US:
+                return "0478117a-076d-4857-bbb5-781ac38d6bb3";
+            default:
+                return null;
+        }
+    }
+
     public static List<M> europeMarkets() {
         return Arrays.asList(M.AMAZON_DE, M.AMAZON_UK, M.AMAZON_IT, M.AMAZON_FR, M.AMAZON_ES);
     }

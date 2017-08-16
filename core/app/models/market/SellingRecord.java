@@ -1,5 +1,8 @@
 package models.market;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,6 +13,10 @@ import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -21,6 +28,10 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -429,12 +440,48 @@ public class SellingRecord extends GenericModel {
         return cacheElement;
     }
 
+    public static void main(String[] args) {
+        String url = "http://go.ear-data.com/api/v1/amazon/pvss";
+        HttpGet get = new HttpGet();
+        get.addHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+        try {
+            URI uri = new URIBuilder(url)
+                    .addParameter("sku", "71APNIP-BFITPU,709998125534")
+                    .addParameter("channel_id", "17eebf95-596d-4899-8afa-4a83c6145921")
+                    .addParameter("from", "2017-03-01").build();
+            get.setURI(uri);
+            try {
+                CloseableHttpResponse response = HTTP.client().execute(get);
+                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                JSONObject json = JSON.parseObject(result);
+                JSONArray objects = json.getJSONArray("bbps");
+
+                Map<String, String> groupByDate = new LinkedHashMap<>();
+
+                objects.forEach(object -> {
+                    JSONObject o = (JSONObject) object;
+                    JSONArray array = o.getJSONArray("data");
+                    System.out.println(o.get("name").toString());
+                    array.forEach(a -> {
+                        JSONArray value = (JSONArray) a;
+                        groupByDate.put(value.get(0).toString(), value.get(1).toString());
+                    });
+                });
+                System.out.println(result);
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 加载出一段时间内指定 Selling 的 PageView 与 Session 数据, 给前台的 HighChar 使用
      * // TODO 这个方 HighChar 是不是需要挪到 view package 中的 object 去?
      */
     public static HighChart ajaxHighChartPVAndSS(String msku, Account acc, Date from, Date to) {
-        /**
+        /*
          * 格式 map[lineName, datas]
          * datas -> [
          * [1262304000000, 29.9],
@@ -442,38 +489,67 @@ public class SellingRecord extends GenericModel {
          * ]
          */
         HighChart chart = new HighChart();
-
-        List<SellingRecord> records = SellingRecord.accountMskuRelateRecords(acc, msku, from, to);
-        for(SellingRecord rcd : records) {
-            if(rcd.market == M.AMAZON_UK) {
-                chart.series("PageView(uk)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(uk)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_DE) {
-                chart.series("PageView(de)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(de)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_FR) {
-                chart.series("PageView(fr)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(fr)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_US) {
-                chart.series("PageView(us)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(us)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_JP) {
-                chart.series("PageView(jp)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(jp)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_IT) {
-                chart.series("PageView(it)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(it)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_ES) {
-                chart.series("PageView(es)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(es)").add(rcd.date, rcd.sessions.floatValue());
-            } else if(rcd.market == M.AMAZON_CA) {
-                chart.series("PageView(ca)").add(rcd.date, rcd.pageViews.floatValue());
-                chart.series("Session(ca)").add(rcd.date, rcd.sessions.floatValue());
+        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            if(acc != null) {
+                URI uri = new URIBuilder(url)
+                        .addParameter("sku", msku)
+                        .addParameter("channel_id", acc.type.earChannel())
+                        .addParameter("from", formatter.format(from))
+                        .addParameter("to", formatter.format(to)).build();
+                HttpGet get = new HttpGet(uri);
+                CloseableHttpResponse response = HTTP.client().execute(get);
+                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                JSONObject json = JSON.parseObject(result);
+                JSONArray objects = json.getJSONArray("bbps");
+                objects.forEach(object -> {
+                    JSONObject o = (JSONObject) object;
+                    JSONArray array = o.getJSONArray("data");
+                    array.forEach(a -> {
+                        JSONArray value = (JSONArray) a;
+                        SellingRecord.buildChart(chart, acc.type, o.get("name").toString(), value.get(0).toString(),
+                                value.get(1).toString());
+                    });
+                });
             } else {
-                Logger.info("Skip one Market %s.", rcd.market);
+                for(M market : M.values()) {
+                    URI uri = new URIBuilder(url)
+                            .addParameter("sku", msku)
+                            .addParameter("channel_id", market.earChannel())
+                            .addParameter("from", formatter.format(from))
+                            .addParameter("to", formatter.format(to)).build();
+                    HttpGet get = new HttpGet(uri);
+                    CloseableHttpResponse response = HTTP.client().execute(get);
+                    String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                    JSONObject json = JSON.parseObject(result);
+                    JSONArray objects = json.getJSONArray("bbps");
+                    objects.forEach(object -> {
+                        JSONObject o = (JSONObject) object;
+                        JSONArray array = o.getJSONArray("data");
+                        array.forEach(a -> {
+                            JSONArray value = (JSONArray) a;
+                            SellingRecord.buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                    value.get(1).toString());
+                        });
+                    });
+                }
             }
+        } catch(URISyntaxException e) {
+            Logger.error(Webs.s(e));
+        } catch(IOException e) {
+            Logger.error(Webs.s(e));
         }
         return chart;
+    }
+
+    private static void buildChart(HighChart chart, M m, String name, String date, String value) {
+        if(Objects.equals(name, "Session")) {
+            chart.series("Session(" + m.sortName() + ")").add(new Date(Long.parseLong(date)), Float.parseFloat(value));
+        }
+        if(Objects.equals(name, "PageView")) {
+            chart.series("PageView(" + m.sortName() + ")").add(new Date(Long.parseLong(date)), Float.parseFloat(value));
+        }
     }
 
 
