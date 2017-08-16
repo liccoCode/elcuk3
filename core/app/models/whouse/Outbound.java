@@ -433,27 +433,21 @@ public class Outbound extends GenericModel {
             case SAME_DAY:
                 dto.sameDayUnitNum++;
                 dto.sameDayQty += unit.outQty;
-                break;
             case IN_SEVEN:
                 dto.inSevenUnitNum++;
                 dto.inSevenQty += unit.outQty;
-                break;
             case TWO_WEEK:
                 dto.twoWeekUnitNum++;
                 dto.twoWeekQty += unit.outQty;
-                break;
             case IN_MONTH:
                 dto.inMonthUnitNum++;
                 dto.inMonthQty += unit.outQty;
-                break;
             case UP_MONTH:
                 dto.upMonthUnitNum++;
                 dto.upMonthQty += unit.outQty;
-                break;
             default:
-                break;
         }
-        dto.totalUnitNum++;
+        dto.totalUnitNum ++;
         dto.totalQty += unit.outQty;
     }
 

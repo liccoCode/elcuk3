@@ -1,7 +1,7 @@
 package mws.v2;
 
-import com.amazonservices.mws.reports.MarketplaceWebService;
-import com.amazonservices.mws.reports.model.*;
+import com.amazonaws.mws.MarketplaceWebService;
+import com.amazonaws.mws.model.*;
 import helper.Constant;
 import models.market.JobRequest;
 import org.apache.commons.io.FileUtils;
@@ -24,7 +24,9 @@ public class MWSReports {
 
     public JobRequest requestReport(JobRequest request) {
         MarketplaceWebService service = mws.MWSReports.client(request.account);
+
         try {
+
             RequestReportRequest reportRequest = new RequestReportRequest()
                     .withMerchant(request.account.merchantId)
                     .withReportType(request.type.toString());

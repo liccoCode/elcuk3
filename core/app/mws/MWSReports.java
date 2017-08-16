@@ -1,10 +1,10 @@
 package mws;
 
-import com.amazonservices.mws.reports.MarketplaceWebService;
-import com.amazonservices.mws.reports.MarketplaceWebServiceClient;
-import com.amazonservices.mws.reports.MarketplaceWebServiceConfig;
-import com.amazonservices.mws.reports.MarketplaceWebServiceException;
-import com.amazonservices.mws.reports.model.*;
+import com.amazonaws.mws.MarketplaceWebService;
+import com.amazonaws.mws.MarketplaceWebServiceClient;
+import com.amazonaws.mws.MarketplaceWebServiceConfig;
+import com.amazonaws.mws.MarketplaceWebServiceException;
+import com.amazonaws.mws.model.*;
 import helper.Constant;
 import models.market.Account;
 import models.market.JobRequest;
@@ -147,7 +147,8 @@ public class MWSReports {
                 .withReportRequestIdList(new IdList(Arrays.asList(job.requestId)));
 
         try {
-            ReportInfo info = client.getReportList(req).getGetReportListResult().getReportInfoList().get(0);
+            ReportInfo info = client.getReportList(req).getGetReportListResult().getReportInfoList()
+                    .get(0);
             job.reportId = info.getReportId();
             job.state = JobRequest.S.DOWN;
             job.lastUpdateDate = new Date();

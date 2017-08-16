@@ -45,7 +45,7 @@ public class MWSOrders {
 
         ListOrdersRequest request = new ListOrdersRequest();
         request.setSellerId(account.merchantId);
-        request.setMarketplaceId(Arrays.asList(account.type.amid().name()));
+        request.setMarketplaceId(new MarketplaceIdList(Arrays.asList(account.type.amid().name())));
 
         nMinutesAgo = nMinutesAgo < 10 ? 10 : (nMinutesAgo > 360 ? 360 : nMinutesAgo);
         DateTime dt = DateTime.now().minusMinutes(nMinutesAgo);
@@ -86,10 +86,11 @@ public class MWSOrders {
      * @param account
      * @return
      */
-    private static List<Orderr> responseToOrders(List<Order> orderList, Account account) {
+    private static List<Orderr> responseToOrders(OrderList orderList, Account account) {
+        List<Order> amazonOrders = orderList.getOrder();
         List<Orderr> orders = new ArrayList<>();
 
-        for(Order amzOrder : orderList) {
+        for(Order amzOrder : amazonOrders) {
             Orderr orderr = new Orderr();
             orderr.account = account;
             orderr.orderId = amzOrder.getAmazonOrderId();
@@ -131,9 +132,10 @@ public class MWSOrders {
         ListOrderItemsResult result = response.getListOrderItemsResult();
 
         String token = result.getNextToken();
-        List<OrderItem>  orderItemList = result.getOrderItems();
+        OrderItemList orderItemList = result.getOrderItems();
 
-        List<models.market.OrderItem> orderItems = responseToOrderItems(orderItemList, orderId, account
+        List<models.market.OrderItem> orderItems = responseToOrderItems(
+                orderItemList, orderId, account
         );
 
         while(StringUtils.isNotBlank(token)) {
@@ -168,10 +170,13 @@ public class MWSOrders {
      * @param orderItemList
      * @return 注意缺失 Selling
      */
-    private static List<models.market.OrderItem> responseToOrderItems(List<OrderItem> orderItemList,
-                                                                      String orderId, Account acc) {
+    private static List<models.market.OrderItem> responseToOrderItems(OrderItemList orderItemList,
+                                                                      String orderId,
+                                                                      Account acc) {
+        List<OrderItem> items = orderItemList.getOrderItem();
         List<models.market.OrderItem> orderItems = new ArrayList<>();
-        for(OrderItem amzItem : orderItemList) {
+
+        for(OrderItem amzItem : items) {
             models.market.OrderItem item = new models.market.OrderItem();
 
             if(!Product.validSKU(Product.merchantSKUtoSKU(amzItem.getSellerSKU()))) {
@@ -211,7 +216,9 @@ public class MWSOrders {
                         amzItem.getPromotionDiscount().getAmount());
             }
             if(amzItem.getPromotionIds() != null) {
-                item.promotionIDs = StringUtils.join(amzItem.getPromotionIds(), ",");
+                item.promotionIDs = StringUtils.join(
+                        amzItem.getPromotionIds().getPromotionId(), ","
+                );
             }
 
             if(amzItem.getGiftWrapPrice() != null) {
@@ -225,23 +232,25 @@ public class MWSOrders {
             item.calUsdCose();
             // 临时使用(这里知道 SKU, SellingId, 与 Account), 使用后删除.(AmazonOrderItemDiscover)
             item.memo = Selling.sid(amzItem.getSellerSKU(), item.order.market, acc);
+
             orderItems.add(item);
         }
+
         return orderItems;
     }
 
 
-    private static Orderr.S parseOrderState(String orderState) {
+    private static Orderr.S parseOrderState(OrderStatusEnum orderState) {
         // {"Pending"=>226233, "Shipped"=>1284685, "Cancelled"=>28538, "Shipping"=>1342}, 半年的更新文件
         switch(orderState) {
-            case "PENDING":
+            case PENDING:
                 return Orderr.S.PENDING;
-            case "PARTIALLY_SHIPPED":
-            case "UNSHIPPED":
+            case PARTIALLY_SHIPPED:
+            case UNSHIPPED:
                 return Orderr.S.PAYMENT;
-            case "SHIPPED":
+            case SHIPPED:
                 return Orderr.S.SHIPPED;
-            case "CANCELED":
+            case CANCELED:
                 return Orderr.S.CANCEL;
             default:
                 return Orderr.S.PENDING;

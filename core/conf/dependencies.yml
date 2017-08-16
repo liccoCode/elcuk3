@@ -18,7 +18,9 @@ require:
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
-    - com.github.kenyonduan -> amazon-mws 1.6
+    - elcuk -> mws 1.3.1:
+        exclude:
+          - org.codehaus.woodstox -> *
     # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API
     - org.elasticsearch -> elasticsearch 5.4.1:
         transitive: false
@@ -101,8 +103,3 @@ repositories:
         artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/[revision]/checkstyle-[revision]-all.jar"
         contains:
             - checkStyle -> *
-    - jitpack:
-        type : iBiblio
-        root: "https://jitpack.io/"
-        contains:
-            - com.github.kenyonduan -> *

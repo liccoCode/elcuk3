@@ -1,8 +1,8 @@
 package models.procure;
 
 import com.alibaba.fastjson.JSON;
-import com.amazonservices.mws.FulfillmentInboundShipment.FBAInboundServiceMWSException;
-import com.amazonservices.mws.FulfillmentInboundShipment.model.*;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.FBAInboundServiceMWSException;
+import com.amazonservices.mws.FulfillmentInboundShipment._2010_10_01.model.*;
 import com.google.gson.annotations.Expose;
 import helper.J;
 import helper.MWSUtils;
