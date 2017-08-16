@@ -180,11 +180,10 @@ public class AnalyzeDTO implements Serializable {
      */
     public float returnRates = 0;
 
-    //BEGIN GENERATED CODE
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
-            float percent = this.day7 / 7f;
-            this.ps_cal = ps <= 0 ? 0.1f : percent;
+            float ps = this.day7 / 7f;
+            this.ps_cal = ps <= 0 ? 0.1f : ps;
         }
         this.ps_cal = Webs.scale2PointUp(this.ps_cal);
         return this.ps_cal;
@@ -202,7 +201,7 @@ public class AnalyzeDTO implements Serializable {
         }
         return 0;
     }
-    //END GENERATED CODE
+
 
     /**
      * 计算系数内的两个 Turnover 值<br/>
@@ -214,32 +213,32 @@ public class AnalyzeDTO implements Serializable {
      * - onwork
      *
      * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     * ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     * ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
-     * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
+     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
-        float percent = this.ps;
-        return new F.T4<>(
+        float ps = this.ps;
+        return new F.T4<Float, Float, Float, Float>(
                 Webs.scale2PointUp(this.qty / _ps),
-                Webs.scale2PointUp(this.qty / (percent == 0 ? _ps : percent)),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
-                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked)
-                        / (percent == 0 ? _ps : percent))
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
     public F.T4<Float, Float, Float, Float> getSidTurnOverT4() {
         float _ps = this.getPs_cal();
         _ps = _ps < 1 ? 1f : _ps;
-        float percent = this.ps;
-        return new F.T4<>(
+        float ps = this.ps;
+        return new F.T4<Float, Float, Float, Float>(
                 Webs.scale2PointUp(this.qty / _ps),
-                Webs.scale2PointUp(this.qty / (percent == 0 ? _ps : percent)),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
-                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked)
-                        / (percent == 0 ? _ps : percent))
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
@@ -247,20 +246,21 @@ public class AnalyzeDTO implements Serializable {
      * 比较此 Selling 中自行设计的 ps 与计算出来的 _ps 之间的差值
      *
      * @return .1: 差据的大小
-     * .2: 前台使用的颜色代码
+     *         .2: 前台使用的颜色代码
      */
     public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
         if(_ps >= 5) {
-            float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
+            float diff = Math.abs(_ps - this.ps) /
+                    (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
             if(diff >= 0.4)
                 color = "E45652";
             else if(diff >= 0.2 && diff < 0.4)
                 color = "FAAB3B";
-            return new F.T2<>(Webs.scale2PointUp(diff), color);
+            return new F.T2<Float, String>(Webs.scale2PointUp(diff), color);
         } else {
-            return new F.T2<>(0f, "fff");
+            return new F.T2<Float, String>(0f, "fff");
         }
     }
 
