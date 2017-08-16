@@ -441,33 +441,36 @@ public class SellingRecord extends GenericModel {
     }
 
     public static void main(String[] args) {
-        String url = "http://go.ear-data.com/api/v1/amazon/pvss";
-        HttpGet get = new HttpGet();
-        get.addHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
         try {
-            URI uri = new URIBuilder(url)
-                    .addParameter("sku", "71APNIP-BFITPU,709998125534")
-                    .addParameter("channel_id", "17eebf95-596d-4899-8afa-4a83c6145921")
-                    .addParameter("from", "2017-03-01").build();
-            get.setURI(uri);
             try {
-                CloseableHttpResponse response = HTTP.client().execute(get);
-                String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-                JSONObject json = JSON.parseObject(result);
-                JSONArray objects = json.getJSONArray("bbps");
-
-                Map<String, String> groupByDate = new LinkedHashMap<>();
-
-                objects.forEach(object -> {
-                    JSONObject o = (JSONObject) object;
-                    JSONArray array = o.getJSONArray("data");
-                    System.out.println(o.get("name").toString());
-                    array.forEach(a -> {
-                        JSONArray value = (JSONArray) a;
-                        groupByDate.put(value.get(0).toString(), value.get(1).toString());
+                HighChart chart = new HighChart();
+                for(M market : M.values()) {
+                    URI uri = new URIBuilder(url)
+                            .addParameter("sku", "71SMTA101-BFITPU,701948729014")
+                            .addParameter("channel_id", market.earChannel())
+                            .addParameter("from", "2017-07-06")
+                            .addParameter("to", "2017-08-06").build();
+                    HttpGet get = new HttpGet(uri);
+                    get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+                    CloseableHttpResponse response = HTTP.client().execute(get);
+                    String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                    JSONObject json = JSON.parseObject(result);
+                    Optional.ofNullable(json).ifPresent(j -> {
+                        JSONArray objects = j.getJSONArray("bbps");
+                        objects.forEach(object -> {
+                            JSONObject o = (JSONObject) object;
+                            JSONArray array = o.getJSONArray("data");
+                            array.forEach(a -> {
+                                JSONArray value = (JSONArray) a;
+                                SellingRecord
+                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                                value.get(1).toString());
+                            });
+                        });
                     });
-                });
-                System.out.println(result);
+                }
+                System.out.println(chart);
             } catch(IOException e) {
                 e.printStackTrace();
             }
@@ -499,17 +502,21 @@ public class SellingRecord extends GenericModel {
                         .addParameter("from", formatter.format(from))
                         .addParameter("to", formatter.format(to)).build();
                 HttpGet get = new HttpGet(uri);
+                get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
                 CloseableHttpResponse response = HTTP.client().execute(get);
                 String result = EntityUtils.toString(response.getEntity(), "UTF-8");
                 JSONObject json = JSON.parseObject(result);
-                JSONArray objects = json.getJSONArray("bbps");
-                objects.forEach(object -> {
-                    JSONObject o = (JSONObject) object;
-                    JSONArray array = o.getJSONArray("data");
-                    array.forEach(a -> {
-                        JSONArray value = (JSONArray) a;
-                        SellingRecord.buildChart(chart, acc.type, o.get("name").toString(), value.get(0).toString(),
-                                value.get(1).toString());
+                Optional.ofNullable(json).ifPresent(j -> {
+                    JSONArray objects = j.getJSONArray("bbps");
+                    objects.forEach(object -> {
+                        JSONObject o = (JSONObject) object;
+                        JSONArray array = o.getJSONArray("data");
+                        array.forEach(a -> {
+                            JSONArray value = (JSONArray) a;
+                            SellingRecord
+                                    .buildChart(chart, acc.type, o.get("name").toString(), value.get(0).toString(),
+                                            value.get(1).toString());
+                        });
                     });
                 });
             } else {
@@ -522,15 +529,19 @@ public class SellingRecord extends GenericModel {
                     HttpGet get = new HttpGet(uri);
                     CloseableHttpResponse response = HTTP.client().execute(get);
                     String result = EntityUtils.toString(response.getEntity(), "UTF-8");
+                    Logger.info(result);
                     JSONObject json = JSON.parseObject(result);
-                    JSONArray objects = json.getJSONArray("bbps");
-                    objects.forEach(object -> {
-                        JSONObject o = (JSONObject) object;
-                        JSONArray array = o.getJSONArray("data");
-                        array.forEach(a -> {
-                            JSONArray value = (JSONArray) a;
-                            SellingRecord.buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                    value.get(1).toString());
+                    Optional.ofNullable(json).ifPresent(j -> {
+                        JSONArray objects = j.getJSONArray("bbps");
+                        objects.forEach(object -> {
+                            JSONObject o = (JSONObject) object;
+                            JSONArray array = o.getJSONArray("data");
+                            array.forEach(a -> {
+                                JSONArray value = (JSONArray) a;
+                                SellingRecord
+                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                                value.get(1).toString());
+                            });
                         });
                     });
                 }
