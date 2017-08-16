@@ -18,7 +18,8 @@ require:
     - factoryBoy -> factory-boy 1.0:
         id: test
     # jars...
-    - com.github.kenyonduan -> amazon-mws 1.6
+    - com.github.kenyonduan -> amazon-mws 1.6:
+        transitive: false
     # 取消 es 的所有依赖, 因为只使用到 es 的搜索 Builder API
     - org.elasticsearch -> elasticsearch 5.4.1:
         transitive: false
