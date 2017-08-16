@@ -13,11 +13,8 @@ import models.view.highchart.HighChart;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -29,7 +26,6 @@ import play.libs.F;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
@@ -441,40 +437,6 @@ public class SellingRecord extends GenericModel {
         }
         Cache.add(cacheKey, cacheElement, "4h");
         return cacheElement;
-    }
-
-    public static void main(String[] args) {
-        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
-        try {
-            HighChart chart = new HighChart();
-            for(M market : M.values()) {
-                URI uri = new URIBuilder(url)
-                        .addParameter("sku", "71SMTA101-BFITPU,701948729014")
-                        .addParameter("channel_id", market.earChannel())
-                        .addParameter("from", "2017-07-06")
-                        .addParameter("to", "2017-08-06").build();
-                HttpGet httpGet = new HttpGet(uri);
-                httpGet.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
-                String result = HTTP.get(httpGet);
-                JSONObject json = JSON.parseObject(result);
-                Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONArray("bbps");
-                    objects.forEach(object -> {
-                        JSONObject o = (JSONObject) object;
-                        JSONArray array = o.getJSONArray("data");
-                        array.forEach(a -> {
-                            JSONArray value = (JSONArray) a;
-                            SellingRecord
-                                    .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                            value.get(1).toString());
-                        });
-                    });
-                });
-            }
-            System.out.println(chart);
-        } catch(URISyntaxException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
