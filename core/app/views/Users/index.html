@@ -1,13 +1,18 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'用户管理界面 (' + users.size() + ')'/}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'users/index.js'/}
     #{script 'component/notify.coffee'/}
+    #{script 'users/index.js'/}
 #{/set}
 
 #{flash_alert /}
 #{errorMsgs /}
+
+<div class="row">
+
+
+</div>
 
 <form action="@{Users.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
@@ -127,7 +132,7 @@
 
       <tr class="tb_footer">
         <td colspan="7">
-        #{bootstrap_pager pi:p, url:'' /}
+        #{bootstrap_pager_v3 pi:p, url:'' /}
         </td>
       </tr>
 
