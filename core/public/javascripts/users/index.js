@@ -1,7 +1,7 @@
 $(() => {
-  $('.privilege_form').ajaxForm({
+  $("form[name='data-form']").ajaxForm({
     dataType: 'json',
-    success(r) {
+    success (r) {
       alert(r.message);
     }
   });
@@ -71,7 +71,7 @@ $(() => {
             buttons: [{
               addClass: 'btn btn-link',
               text: 'close',
-              onClick($noty) {
+              onClick ($noty) {
                 return $noty.close();
               }
             }]

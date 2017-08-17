@@ -12,7 +12,10 @@ import java.util.List;
  */
 public class UserPost extends Post<User> {
 
+    private static final long serialVersionUID = 8537899224904638147L;
     public int perSize = 20;
+    public boolean closed = false;
+
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -22,23 +25,24 @@ public class UserPost extends Post<User> {
             sql.append(" AND s.username like ? ");
             params.add("%" + this.search + "%");
         }
+        sql.append(" AND s.closed = ? ");
+        params.add(closed);
         return new F.T2<>(sql.toString(), params);
     }
 
     public List<User> query() {
         F.T2<String, List<Object>> params = params();
-        this.count = this.count(params);
+        this.count = (long) User.find(params._1, params._2.toArray()).fetch().size();
         return User.find(params._1, params._2.toArray()).fetch(this.page, this.perSize);
     }
 
     public Long count(F.T2<String, List<Object>> params) {
-        return (long) User.find(params._1, params._2.toArray()).fetch().size();
+        return this.count;
     }
-
 
     public Long getTotalCount() {
         F.T2<String, List<Object>> params = params();
-        return (long) User.find(params._1, params._2.toArray()).fetch().size();
+        return this.count;
     }
 
 }

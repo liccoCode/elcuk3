@@ -63,6 +63,9 @@ public class User extends Model {
     @ManyToMany(fetch = FetchType.EAGER)
     public Set<Role> roles = new HashSet<>();
 
+    @ManyToMany
+    public List<Category> categories = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
     public List<Payment> paymentPaied = new ArrayList<>();
@@ -344,6 +347,10 @@ public class User extends Model {
         return this.teams.contains(team);
     }
 
+    public boolean isHaveCategory(Category category) {
+        return this.categories.contains(category);
+    }
+
     /**
      * 增加Team;(删除原来的, 重新添加现在的)
      *
@@ -366,6 +373,22 @@ public class User extends Model {
         }
     }
 
+    public void addCategories(List<String> categoryId) {
+        if(categoryId == null || categoryId.size() == 0) {
+            this.categories = new ArrayList<>();
+            Category.updateCategory(this.username, this.categories);
+            this.save();
+        } else {
+            List<Category> categoryList = Category.find("categoryId IN " + JpqlSelect.inlineParam(categoryId)).fetch();
+            if(categoryList.size() != categoryList.size())
+                throw new FastRuntimeException("需要修改的Category数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.categories = new ArrayList<>();
+            this.save();
+            this.categories.addAll(categoryList);
+            Category.updateCategory(this.username, this.categories);
+            this.save();
+        }
+    }
 
     /**
      * 增加Role;(删除原来的, 重新添加现在的)
