@@ -15,7 +15,7 @@ before_script:
 cache:
   key: ${CI_BUILD_REF_NAME}
   paths:
-    - node_modules/
+    - node_modules
   
 job0:
   stage: init
@@ -31,17 +31,9 @@ job0:
 job1:
   stage: test
   script:
+    - cd core
     - pwd
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/helper
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/jobs
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/models
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/mws
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
-    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
+    - java -jar /node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app -e app/views
   tags:
     - efk
   only:
