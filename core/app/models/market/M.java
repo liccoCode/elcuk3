@@ -1165,7 +1165,7 @@ public enum M {
             case AMAZON_US:
                 return "0478117a-076d-4857-bbb5-781ac38d6bb3";
             default:
-                return null;
+                return "";
         }
     }
 

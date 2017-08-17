@@ -456,7 +456,9 @@ public class SellingRecord extends GenericModel {
             getEarDataBymMarket(chart, acc.type, msku, from, to);
         } else {
             for(M market : M.values()) {
-                getEarDataBymMarket(chart, market, msku, from, to);
+                if(!Objects.equals(market, M.EBAY_UK)) {
+                    getEarDataBymMarket(chart, market, msku, from, to);
+                }
             }
         }
         return chart;
@@ -520,33 +522,36 @@ public class SellingRecord extends GenericModel {
         HttpGet get = new HttpGet();
         get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
         for(M market : M.values()) {
-            URI uri = null;
-            try {
-                uri = new URIBuilder(url)
-                        .addParameter("sku", msku)
-                        .addParameter("channel_id", market.earChannel())
-                        .addParameter("from", formatter.format(from))
-                        .addParameter("to", formatter.format(to)).build();
-            } catch(URISyntaxException e) {
-                Logger.error(Webs.s(e));
-            }
-            get.setURI(uri);
-            String result = HTTP.get(get);
-            JSONObject json = JSON.parseObject(result);
-            Optional.ofNullable(json).ifPresent(j -> {
-                JSONArray objects = j.getJSONArray("bbps");
-                objects.forEach(object -> {
-                    JSONObject o = (JSONObject) object;
-                    JSONArray array = o.getJSONArray("data");
-                    if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
-                        array.forEach(a -> {
-                            JSONArray value = (JSONArray) a;
-                            SellingRecord.buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                    value.get(1).toString());
-                        });
-                    }
+            if(!Objects.equals(market, M.EBAY_UK)) {
+                URI uri = null;
+                try {
+                    uri = new URIBuilder(url)
+                            .addParameter("sku", msku)
+                            .addParameter("channel_id", market.earChannel())
+                            .addParameter("from", formatter.format(from))
+                            .addParameter("to", formatter.format(to)).build();
+                } catch(URISyntaxException e) {
+                    Logger.error(Webs.s(e));
+                }
+                get.setURI(uri);
+                String result = HTTP.get(get);
+                JSONObject json = JSON.parseObject(result);
+                Optional.ofNullable(json).ifPresent(j -> {
+                    JSONArray objects = j.getJSONArray("bbps");
+                    objects.forEach(object -> {
+                        JSONObject o = (JSONObject) object;
+                        JSONArray array = o.getJSONArray("data");
+                        if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
+                            array.forEach(a -> {
+                                JSONArray value = (JSONArray) a;
+                                SellingRecord
+                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                                value.get(1).toString());
+                            });
+                        }
+                    });
                 });
-            });
+            }
         }
         return chart;
     }
