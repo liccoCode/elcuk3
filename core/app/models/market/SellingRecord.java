@@ -478,7 +478,7 @@ public class SellingRecord extends GenericModel {
             String result = HTTP.get(get);
             JSONObject json = JSON.parseObject(result);
             Optional.ofNullable(json).ifPresent(j -> {
-                JSONArray objects = j.getJSONArray("bbps");
+                JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
                 objects.forEach(object -> {
                     JSONObject o = (JSONObject) object;
                     JSONArray array = o.getJSONArray("data");
@@ -537,7 +537,7 @@ public class SellingRecord extends GenericModel {
                 String result = HTTP.get(get);
                 JSONObject json = JSON.parseObject(result);
                 Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONArray("bbps");
+                    JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
                     objects.forEach(object -> {
                         JSONObject o = (JSONObject) object;
                         JSONArray array = o.getJSONArray("data");
