@@ -15,7 +15,7 @@ before_script:
 cache:
   key: ${CI_BUILD_REF_NAME}
   paths:
-    - node_modules
+    - node_modules/
   
 job0:
   stage: init
@@ -33,7 +33,8 @@ job1:
   script:
     - cd core
     - pwd
-    - java -jar /node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app -e app/views
+    - ls
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app -e app/views
   tags:
     - efk
   only:
