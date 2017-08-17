@@ -1,7 +1,7 @@
 image: zen9073/play:1.4.2
 
 stages:
-  - setup
+  - init
   - test
 
 before_script:
@@ -17,8 +17,8 @@ cache:
   paths:
     - node_modules/
   
-prepare:
-  stage: setup
+job0:
+  stage: init
   script:
     - cd core
     - play dependencies  --sync
@@ -27,7 +27,7 @@ prepare:
   only:
     - master
     
-rspec:
+job1:
   stage: test
   script:
     - ls lib
