@@ -22,6 +22,7 @@ job0:
   script:
     - cd core
     - play dependencies  --sync
+    - pwd
   tags:
     - efk
   only:
@@ -30,17 +31,17 @@ job0:
 job1:
   stage: test
   script:
-    - ls lib
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/helper
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/jobs
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/models
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/mws
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
+    - pwd
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/helper
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/jobs
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/models
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/mws
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
+    - java -jar node_modules/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
   tags:
     - efk
   only:
