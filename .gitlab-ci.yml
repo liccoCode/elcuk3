@@ -1,33 +1,34 @@
 image: zen9073/play:1.4.2
 
+stages:
+  - setup
+  - test
+
 before_script:
   - export JAVA_HOME=/opt/jdk1.8.0_112
   - export CLASSPATH=.:$JAVA_HOME/lib
   - export PATH=.:$JAVA_HOME/bin:$PATH
   - export PLAY_HOME=/opt/play-1.4.2
   - export PATH=.:$PLAY_HOME:$PATH
-  
-stages:
-  - setup
-  - test
 
+
+cache:
+  key: ${CI_BUILD_REF_NAME}
+  paths:
+    - node_modules/
+  
 prepare:
   stage: setup
-  cache:
-    key: gems
-    paths:
-      - vendor/bundle
   script:
     - cd core
     - play dependencies  --sync
+  tags:
+    - efk
+  only:
+    - master
     
 rspec:
   stage: test
-  cache:
-    key: gems
-    paths:
-      - vendor/bundle
-    policy: pull
   script:
     - ls lib
     - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
@@ -40,7 +41,6 @@ rspec:
     - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
     - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
     - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
-
   tags:
     - efk
   only:
