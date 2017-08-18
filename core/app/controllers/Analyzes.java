@@ -141,6 +141,8 @@ public class Analyzes extends Controller {
                     }
                 }.now());
                 renderJSON(json);
+            } else {
+                renderJSON(J.json(new HighChart()));
             }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.s(e)));
@@ -167,6 +169,8 @@ public class Analyzes extends Controller {
                     }
                 }.now());
                 renderJSON(json);
+            } else {
+                renderJSON(J.json(new HighChart()));
             }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
