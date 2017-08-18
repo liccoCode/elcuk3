@@ -457,9 +457,11 @@ public class SellingRecord extends GenericModel {
         if(chart != null && chart.series != null && chart.series.size() > 0) {
             return chart;
         } else {
+            chart = new HighChart();
             if(acc != null) {
                 getEarDataBymMarket(chart, acc.type, msku, from, to);
             } else {
+
                 for(M market : M.values()) {
                     if(!Objects.equals(market, M.EBAY_UK)) {
                         getEarDataBymMarket(chart, market, msku, from, to);
@@ -529,44 +531,49 @@ public class SellingRecord extends GenericModel {
         if(chart != null && chart.series != null && chart.series.size() > 0) {
             return chart;
         } else {
-            final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-            HttpGet get = new HttpGet();
-            get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
-            for(M market : M.values()) {
-                if(!Objects.equals(market, M.EBAY_UK)) {
-                    URI uri = null;
-                    try {
-                        uri = new URIBuilder(url)
-                                .addParameter("sku", msku)
-                                .addParameter("channel_id", market.earChannel())
-                                .addParameter("from", formatter.format(from))
-                                .addParameter("to", formatter.format(to)).build();
-                    } catch(URISyntaxException e) {
-                        Logger.error(Webs.s(e));
-                    }
-                    get.setURI(uri);
-                    String result = HTTP.get(get);
-                    JSONObject json = JSON.parseObject(result);
-                    Optional.ofNullable(json).ifPresent(j -> {
-                        JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
-                        objects.forEach(object -> {
-                            JSONObject o = (JSONObject) object;
-                            JSONArray array = o.getJSONArray("data");
-                            if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
-                                array.forEach(a -> {
-                                    JSONArray value = (JSONArray) a;
-                                    SellingRecord
-                                            .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                                    value.get(1).toString());
-                                });
-                            }
-                        });
-                    });
-                }
-            }
+            chart = new HighChart();
+            getEarTurnRatioData(chart, msku, from, to);
             Cache.add(cacheKey, chart, "4h");
             return chart;
+        }
+    }
+
+    private static void getEarTurnRatioData(HighChart chart, String msku, Date from, Date to) {
+        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        HttpGet get = new HttpGet();
+        get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+        for(M market : M.values()) {
+            if(!Objects.equals(market, M.EBAY_UK)) {
+                URI uri = null;
+                try {
+                    uri = new URIBuilder(url)
+                            .addParameter("sku", msku)
+                            .addParameter("channel_id", market.earChannel())
+                            .addParameter("from", formatter.format(from))
+                            .addParameter("to", formatter.format(to)).build();
+                } catch(URISyntaxException e) {
+                    Logger.error(Webs.s(e));
+                }
+                get.setURI(uri);
+                String result = HTTP.get(get);
+                JSONObject json = JSON.parseObject(result);
+                Optional.ofNullable(json).ifPresent(j -> {
+                    JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
+                    objects.forEach(object -> {
+                        JSONObject o = (JSONObject) object;
+                        JSONArray array = o.getJSONArray("data");
+                        if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
+                            array.forEach(a -> {
+                                JSONArray value = (JSONArray) a;
+                                SellingRecord.buildChart(chart, market, o.get("name").toString(),
+                                        value.get(0).toString(),
+                                        value.get(1).toString());
+                            });
+                        }
+                    });
+                });
+            }
         }
     }
 
