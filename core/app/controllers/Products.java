@@ -260,9 +260,9 @@ public class Products extends Controller {
      */
     public static void cooperators(String sku) {
         List<Cooperator> cooperatorList = Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? ORDER BY ci.id", sku)
-                .fetch();
-        StringBuffer buff = new StringBuffer();
+                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.sku=? AND ci.status=? "
+                        + " ORDER BY ci.id", sku, CooperItem.S.Agree).fetch();
+        StringBuilder buff = new StringBuilder();
         buff.append("[");
         for(Cooperator co : cooperatorList) {
             buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(co.id).append("\"")

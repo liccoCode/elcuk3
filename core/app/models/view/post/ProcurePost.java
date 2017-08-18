@@ -145,7 +145,8 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public List<ProcureUnit> queryForExcel() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
+        String sql = params._1 + " AND (p.type = 'ProcureSplit' OR p.type IS  NULL) ";
+        return ProcureUnit.find(sql + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override
@@ -188,7 +189,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         }
 
         if(stages.size() > 0) {
-            sbd.append(" AND p.stage IN " + SqlSelect.inlineParam(stages));
+            sbd.append(" AND p.stage IN ").append(SqlSelect.inlineParam(stages));
         }
 
         if(this.shipType != null) {
@@ -202,7 +203,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         }
 
         if(categories.size() > 0) {
-            sbd.append(" AND p.product.category.id IN " + SqlSelect.inlineParam(categories));
+            sbd.append(" AND p.product.category.id IN ").append(SqlSelect.inlineParam(categories));
         }
 
         if(StringUtils.isNotEmpty(this.projectName)) {
