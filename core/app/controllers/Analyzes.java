@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.User;
 import models.market.*;
 import models.product.Category;
 import models.view.Ret;
@@ -23,6 +24,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 数据分析页面的控制器
@@ -63,7 +65,15 @@ public class Analyzes extends Controller {
     public static void analyzes(final AnalyzePost p) {
         try {
             List<AnalyzeDTO> dtos = p.query();
-            render("Analyzes/" + p.type + ".html", dtos, p);
+            User user = Login.current();
+            List<String> categories =
+                    user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
+            if(categories.size() == 0) {
+                render("Analyzes/" + p.type + ".html", p);
+            } else {
+                dtos = dtos.stream().filter(dto -> dto.containsCategory(categories)).collect(Collectors.toList());
+                render("Analyzes/" + p.type + ".html", dtos, p);
+            }
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
