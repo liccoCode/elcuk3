@@ -451,17 +451,24 @@ public class SellingRecord extends GenericModel {
          * [1282304000000, 99.9]
          * ]
          */
-        HighChart chart = new HighChart();
-        if(acc != null) {
-            getEarDataBymMarket(chart, acc.type, msku, from, to);
+        HighChart chart;
+        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
+        chart = Cache.get(cacheKey, HighChart.class);
+        if(chart != null && chart.series != null && chart.series.size() > 0) {
+            return chart;
         } else {
-            for(M market : M.values()) {
-                if(!Objects.equals(market, M.EBAY_UK)) {
-                    getEarDataBymMarket(chart, market, msku, from, to);
+            if(acc != null) {
+                getEarDataBymMarket(chart, acc.type, msku, from, to);
+            } else {
+                for(M market : M.values()) {
+                    if(!Objects.equals(market, M.EBAY_UK)) {
+                        getEarDataBymMarket(chart, market, msku, from, to);
+                    }
                 }
             }
+            Cache.add(cacheKey, chart, "4h");
+            return chart;
         }
-        return chart;
     }
 
     private static void getEarDataBymMarket(HighChart chart, M market, String msku, Date from, Date to) {
@@ -516,44 +523,51 @@ public class SellingRecord extends GenericModel {
      * // TODO 这个方 HighChar 是不是需要挪到 view package 中的 object 去?
      */
     public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
-        HighChart chart = new HighChart();
-        final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        HttpGet get = new HttpGet();
-        get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
-        for(M market : M.values()) {
-            if(!Objects.equals(market, M.EBAY_UK)) {
-                URI uri = null;
-                try {
-                    uri = new URIBuilder(url)
-                            .addParameter("sku", msku)
-                            .addParameter("channel_id", market.earChannel())
-                            .addParameter("from", formatter.format(from))
-                            .addParameter("to", formatter.format(to)).build();
-                } catch(URISyntaxException e) {
-                    Logger.error(Webs.s(e));
-                }
-                get.setURI(uri);
-                String result = HTTP.get(get);
-                JSONObject json = JSON.parseObject(result);
-                Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
-                    objects.forEach(object -> {
-                        JSONObject o = (JSONObject) object;
-                        JSONArray array = o.getJSONArray("data");
-                        if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
-                            array.forEach(a -> {
-                                JSONArray value = (JSONArray) a;
-                                SellingRecord
-                                        .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
-                                                value.get(1).toString());
-                            });
-                        }
+        HighChart chart;
+        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
+        chart = Cache.get(cacheKey, HighChart.class);
+        if(chart != null && chart.series != null && chart.series.size() > 0) {
+            return chart;
+        } else {
+            final String url = "http://go.ear-data.com/api/v1/amazon/pvss";
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            HttpGet get = new HttpGet();
+            get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
+            for(M market : M.values()) {
+                if(!Objects.equals(market, M.EBAY_UK)) {
+                    URI uri = null;
+                    try {
+                        uri = new URIBuilder(url)
+                                .addParameter("sku", msku)
+                                .addParameter("channel_id", market.earChannel())
+                                .addParameter("from", formatter.format(from))
+                                .addParameter("to", formatter.format(to)).build();
+                    } catch(URISyntaxException e) {
+                        Logger.error(Webs.s(e));
+                    }
+                    get.setURI(uri);
+                    String result = HTTP.get(get);
+                    JSONObject json = JSON.parseObject(result);
+                    Optional.ofNullable(json).ifPresent(j -> {
+                        JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
+                        objects.forEach(object -> {
+                            JSONObject o = (JSONObject) object;
+                            JSONArray array = o.getJSONArray("data");
+                            if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
+                                array.forEach(a -> {
+                                    JSONArray value = (JSONArray) a;
+                                    SellingRecord
+                                            .buildChart(chart, market, o.get("name").toString(), value.get(0).toString(),
+                                                    value.get(1).toString());
+                                });
+                            }
+                        });
                     });
-                });
+                }
             }
+            Cache.add(cacheKey, chart, "4h");
+            return chart;
         }
-        return chart;
     }
 
     /**
