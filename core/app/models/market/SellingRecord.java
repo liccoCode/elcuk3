@@ -487,19 +487,15 @@ public class SellingRecord extends GenericModel {
             String result = HTTP.get(get);
             JSONObject json = JSON.parseObject(result);
             Optional.ofNullable(json).ifPresent(j -> {
-                JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
-                objects.forEach(object -> {
-                    JSONObject o = (JSONObject) object;
-                    JSONArray array = o.getJSONArray("data");
-                    if(!Objects.equals(o.get("name").toString(), "转换率(%)")) {
-                        array.forEach(a -> {
-                            JSONArray value = (JSONArray) a;
-                            SellingRecord.buildChart(chart, market, o.get("name").toString(),
-                                    value.get(0).toString(),
-                                    value.get(1).toString());
-                        });
-                    }
-
+                JSONObject object = j.getJSONObject("series");
+                object.getJSONArray("ss").forEach(a -> {
+                    JSONArray value = (JSONArray) a;
+                    SellingRecord.buildChart(chart, market, "Session", value.get(0).toString(), value.get(1).toString());
+                });
+                object.getJSONArray("pv").forEach(a -> {
+                    JSONArray value = (JSONArray) a;
+                    SellingRecord
+                            .buildChart(chart, market, "PageView", value.get(0).toString(), value.get(1).toString());
                 });
             });
         } catch(URISyntaxException e) {
@@ -559,18 +555,11 @@ public class SellingRecord extends GenericModel {
                 String result = HTTP.get(get);
                 JSONObject json = JSON.parseObject(result);
                 Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONObject("bbps").getJSONArray("series");
-                    objects.forEach(object -> {
-                        JSONObject o = (JSONObject) object;
-                        JSONArray array = o.getJSONArray("data");
-                        if(Objects.equals(o.get("name").toString(), "转换率(%)")) {
-                            array.forEach(a -> {
-                                JSONArray value = (JSONArray) a;
-                                SellingRecord.buildChart(chart, market, o.get("name").toString(),
-                                        value.get(0).toString(),
-                                        value.get(1).toString());
-                            });
-                        }
+                    JSONArray objects = j.getJSONObject("series").getJSONArray("conversions");
+                    objects.forEach(a -> {
+                        JSONArray value = (JSONArray) a;
+                        SellingRecord.buildChart(chart, market, "转换率(%)",
+                                value.get(0).toString(), value.get(1).toString());
                     });
                 });
             }
