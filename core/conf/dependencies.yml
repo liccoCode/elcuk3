@@ -102,3 +102,8 @@ repositories:
         artifact: "https://nchc.dl.sourceforge.net/project/checkstyle/checkstyle/[revision]/checkstyle-[revision]-all.jar"
         contains:
             - checkStyle -> *
+    - jitpack:
+        type : iBiblio
+        root: "https://jitpack.io/"
+        contains:
+            - com.github.kenyonduan -> *
