@@ -3,6 +3,7 @@ $(() => {
     dataType: 'json',
     success (r) {
       alert(r.message);
+      window.location.reload();
     }
   });
 
