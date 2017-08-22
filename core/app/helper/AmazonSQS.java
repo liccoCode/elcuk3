@@ -21,7 +21,7 @@ public class AmazonSQS {
     private volatile static AmazonSQSAsyncClient instance;
 
 
-    private static AmazonSQSAsyncClient cliet() {
+    private static AmazonSQSAsyncClient client() {
         if(instance == null) {
             synchronized(AmazonSQSAsyncClient.class) {
                 if(instance == null) {
@@ -34,6 +34,6 @@ public class AmazonSQS {
     }
 
     public static void sendMessage(String message) {
-        cliet().sendMessage(new SendMessageRequest(SQS_QUEUE, message));
+        client().sendMessage(new SendMessageRequest(SQS_QUEUE, message));
     }
 }

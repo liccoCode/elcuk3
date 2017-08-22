@@ -218,7 +218,7 @@ public class TimelineEventSource {
         }
 
         private Float skuPS() {
-            return this.analyzeDTO.getPsCal();
+            return this.analyzeDTO.getPs_cal();
         }
 
         private Float sidPS() {
@@ -409,7 +409,7 @@ public class TimelineEventSource {
     public static Event currentQtyEvent(AnalyzeDTO analyzeDTO, String type) {
         Event currenEvent = new Event();
         currenEvent.start = currenEvent.add8Hour(new Date());
-        float validPs = ("sku".equals(type) ? analyzeDTO.getPsCal() : analyzeDTO.ps);
+        float validPs = ("sku".equals(type) ? analyzeDTO.getPs_cal() : analyzeDTO.ps);
         float days = Webs
                 .scale2PointUp(analyzeDTO.qty / (validPs == 0 ? Integer.MAX_VALUE : validPs));
         currenEvent.end = currenEvent

@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.Caches;
 import helper.DBUtils;
+import models.User;
 import models.embedded.CategorySettings;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
@@ -16,10 +17,8 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -32,8 +31,11 @@ import java.util.stream.Collectors;
 @DynamicUpdate
 public class Category extends GenericModel {
 
-    @OneToMany(mappedBy = "category",
-            cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    private static final long serialVersionUID = -140523263681790753L;
+
+    private static final Map<String, List<Category>> CATEGORY_CACHE = new ConcurrentHashMap<>();
+
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
     @OrderBy("sku")
     public List<Product> products;
 
@@ -43,6 +45,8 @@ public class Category extends GenericModel {
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     public Team team;
 
+    @ManyToMany(cascade = {CascadeType.REFRESH}, mappedBy = "categories", fetch = FetchType.LAZY)
+    public List<User> users = new ArrayList<>();
 
     /**
      * Category拥有哪些模板
@@ -328,5 +332,19 @@ public class Category extends GenericModel {
             asins.add(row.get("asin").toString().toLowerCase());
         }
         return asins;
+    }
+
+    public static void updateCategory(String username, List<Category> categories) {
+        CATEGORY_CACHE.remove(username);
+        CATEGORY_CACHE.put(username, categories);
+    }
+
+    public static List<Category> categories(String username) {
+        List<Category> categories = CATEGORY_CACHE.get(username);
+        if(categories == null) {
+            CATEGORY_CACHE.put(username, User.findByUserName(username).categories);
+            categories = CATEGORY_CACHE.get(username);
+        }
+        return categories;
     }
 }

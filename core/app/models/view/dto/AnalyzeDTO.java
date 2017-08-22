@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -180,16 +181,17 @@ public class AnalyzeDTO implements Serializable {
      */
     public float returnRates = 0;
 
-    public float getPsCal() {
+    //BEGIN GENERATED CODE
+    public float getPs_cal() {
         if(this.ps_cal <= 0) {
-            float percent = this.day7 / 7f;
-            this.ps_cal = ps <= 0 ? 0.1f : percent;
+            float ps = this.day7 / 7f;
+            this.ps_cal = ps <= 0 ? 0.1f : ps;
         }
         this.ps_cal = Webs.scale2PointUp(this.ps_cal);
         return this.ps_cal;
     }
 
-    public float getDisPrice() {
+    public float getDis_Price() {
         try {
             Selling sell = Selling.findById(this.fid);
             if(sell != null) {
@@ -218,27 +220,27 @@ public class AnalyzeDTO implements Serializable {
      * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
-        float _ps = this.getPsCal();
-        float percent = this.ps;
+        float _ps = this.getPs_cal();
+        float ps = this.ps;
         return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
-                Webs.scale2PointUp(this.qty / (percent == 0 ? _ps : percent)),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
-                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked)
-                        / (percent == 0 ? _ps : percent))
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
     public F.T4<Float, Float, Float, Float> getSidTurnOverT4() {
-        float _ps = this.getPsCal();
+        float _ps = this.getPs_cal();
         _ps = _ps < 1 ? 1f : _ps;
-        float percent = this.ps;
+        float ps = this.ps;
         return new F.T4<>(
                 Webs.scale2PointUp(this.qty / _ps),
-                Webs.scale2PointUp(this.qty / (percent == 0 ? _ps : percent)),
+                Webs.scale2PointUp(this.qty / (ps == 0 ? _ps : ps)),
                 Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked) / _ps),
-                Webs.scale2PointUp((this.qty + this.way + this.inbound + this.working + this.worked)
-                        / (percent == 0 ? _ps : percent))
+                Webs.scale2PointUp(
+                        (this.qty + this.way + this.inbound + this.working + this.worked) / (ps == 0 ? _ps : ps))
         );
     }
 
@@ -249,7 +251,7 @@ public class AnalyzeDTO implements Serializable {
      * .2: 前台使用的颜色代码
      */
     public F.T2<Float, String> getPsDiffer() {
-        float _ps = this.getPsCal();
+        float _ps = this.getPs_cal();
         if(_ps >= 5) {
             float diff = Math.abs(_ps - this.ps) / (Math.max(_ps, this.ps) <= 0 ? 1f : Math.max(_ps, this.ps));
             String color = "";
@@ -307,5 +309,18 @@ public class AnalyzeDTO implements Serializable {
 
     public float day() {
         return new BigDecimal(this.day30 / 30).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+    }
+
+
+    public boolean containsCategory(List<String> categories) {
+        return categories.stream().anyMatch(category -> {
+            int length = category.length();
+            String temp = this.fid.substring(0, length - 1);
+            return AnalyzeDTO.containsTemp(category, temp);
+        });
+    }
+
+    private static boolean containsTemp(String category, String temp) {
+        return Objects.equals(category, temp);
     }
 }

@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @DynamicUpdate
 public class Team extends Model {
 
+    private static final long serialVersionUID = 1377319282270688661L;
     /**
      * 将用户的Team缓存起来, 不用每次判断都去 db 取(注:更新Team的时候也需要更新缓存)
      */
@@ -30,8 +31,7 @@ public class Team extends Model {
     /**
      * TEAM所拥有的USER
      */
-    @ManyToMany(cascade = {CascadeType.REFRESH}, mappedBy = "teams",
-            fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.REFRESH}, mappedBy = "teams", fetch = FetchType.LAZY)
     public Set<User> users = new HashSet<>();
 
     @Column(nullable = false, unique = true)
@@ -99,8 +99,8 @@ public class Team extends Model {
     public static Set<Team> teams(String username) {
         Set<Team> teams = TEAM_CACHE.get(username);
         if(teams == null) {
-            TEAM_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<>(User.findByUserName(username).teams));
+            /*这里拿一个 Privileges 的备份*/
+            TEAM_CACHE.put(username, new HashSet<>(User.findByUserName(username).teams));
             teams = TEAM_CACHE.get(username);
         }
         return teams;
