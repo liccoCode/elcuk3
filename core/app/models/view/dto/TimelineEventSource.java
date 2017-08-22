@@ -268,7 +268,7 @@ public class TimelineEventSource {
             //如果是入库数量相等则是已入库
             ProcureUnit.STAGE unitstage = this.unit.stage;
             if(unitstage != ProcureUnit.STAGE.CLOSE) {
-                int inboundingqty = this.unit.inboundingQty();
+                int inboundingqty = this.unit.paidQty();
                 int planqty = this.unit.attrs.planQty - inboundingqty;
                 if(planqty == 0) {
                     unitstage = ProcureUnit.STAGE.CLOSE;
