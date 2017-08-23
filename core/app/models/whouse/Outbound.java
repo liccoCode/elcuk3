@@ -35,7 +35,7 @@ public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
 
-    public static final String MengTopUrl = "http://45.32.141.39:9000";
+    public static final String MengTopUrl = "http://e.mengtop.com";
 
     @Id
     @Column(length = 30)
