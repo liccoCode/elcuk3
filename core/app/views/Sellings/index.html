@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'Selling列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -6,6 +6,42 @@
 #{/set}
 
 #{flash_alert /}
+#{errorMsgs /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Sellings.index()}" method="POST" class="form-inline" id="search_form">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">feed更新状态</div>
+                <select style="width:180px;" name="p.analyzeResult">
+                  <option value="">全部</option>
+                  <option value="成功">成功</option>
+                  <option value="失败">失败</option>
+                  <option value="更新中">更新中</option>
+                </select>
+              </div>
+            </div>
+
+            
+
+          </div>
+
+
+        </form>
+
+      </div>
+
+
+    </div>
+  </div>
+
+
+</div>
+
 
 <form action="@{Sellings.index()}" method="POST" class="search_form" id='search_form'>
   <div class="row-fluid">
@@ -49,7 +85,7 @@
         <span class="add-on">品线</span>
         <select name="p.categoryid">
           <option value="">ALL</option>
-        #{list items:categorys, as:'c'}
+        #{list items:categoryList, as:'c'}
           <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
         #{/list}
         </select>

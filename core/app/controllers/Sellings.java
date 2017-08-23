@@ -6,6 +6,7 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.AmazonProps;
 import models.market.*;
+import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.SellingAmzPost;
@@ -357,8 +358,11 @@ public class Sellings extends Controller {
     public static void index(SellingPost p) {
         if(p == null) p = new SellingPost();
         List<String> products = Product.skus(true);
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
         renderArgs.put("products", J.json(products));
-        renderArgs.put("categorys", User.getTeamCategorys(User.current()));
+        renderArgs.put("categoryList", categoryList);
         List<Selling> sellings = p.query();
         render(sellings, p);
     }

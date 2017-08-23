@@ -291,7 +291,7 @@ public class User extends Model {
      * 用户更新
      */
     public void update() {
-        /**
+        /*
          * 1. 验证密码是否正确
          * 2. 进行更新
          * 3. 更新缓存中的 user
