@@ -219,6 +219,9 @@ public class Outbound extends GenericModel {
             stock.category = this.type;
             stock.save();
             unit.availableQty = stock.currQty;
+            if(Objects.equals(this.type, StockRecord.C.B2B)) {
+                unit.outbound = this;
+            }
             unit.save();
         });
     }
