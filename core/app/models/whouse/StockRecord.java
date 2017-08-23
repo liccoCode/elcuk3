@@ -86,6 +86,12 @@ public class StockRecord extends Model {
                 return "出库";
             }
         },
+        B2BOutbound {
+            @Override
+            public String label() {
+                return "B2B出库";
+            }
+        },
         OtherOutbound {
             @Override
             public String label() {

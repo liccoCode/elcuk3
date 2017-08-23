@@ -35,7 +35,7 @@ public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
 
-    public static final String MengTopUrl = "http://45.32.141.39:9000";
+    public static final String MengTopUrl = "http://e.mengtop.com";
 
     @Id
     @Column(length = 30)
@@ -338,7 +338,6 @@ public class Outbound extends GenericModel {
     }
 
     private static void finalConfirm(Outbound out) {
-        out.status = S.Outbound;
         out.outboundDate = new Date();
         out.save();
         out.units.forEach(p -> {
@@ -350,22 +349,36 @@ public class Outbound extends GenericModel {
             p.outQty = total_main + total_last;
             p.availableQty = p.availableQty - p.outQty;
             p.save();
-            createStockRecord(p, p.availableQty);
+            createStockRecord(p, p.availableQty, out);
         });
     }
 
-    public static void createStockRecord(ProcureUnit unit, int currQty) {
+    public static void createStockRecord(ProcureUnit unit, int currQty, Outbound out) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.whouse;
         record.unit = unit;
         record.qty = unit.outQty;
-        record.type = StockRecord.T.Outbound;
+        switch(out.type) {
+            case Normal:
+                record.type = StockRecord.T.Outbound;
+                break;
+            case B2B:
+                record.type = StockRecord.T.B2BOutbound;
+                break;
+            case Check:
+            case Other:
+            case Refund:
+            case Sample:
+            case Process:
+                record.type = StockRecord.T.OtherOutbound;
+            default:
+                record.type = StockRecord.T.OtherOutbound;
+        }
         record.recordId = unit.id;
         record.currQty = currQty;
         record.save();
     }
-
 
     public String showCompany() {
         switch(this.type) {
