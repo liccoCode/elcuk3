@@ -359,22 +359,8 @@ public class Outbound extends GenericModel {
         record.whouse = unit.whouse;
         record.unit = unit;
         record.qty = unit.outQty;
-        switch(out.type) {
-            case Normal:
-                record.type = StockRecord.T.Outbound;
-                break;
-            case B2B:
-                record.type = StockRecord.T.B2BOutbound;
-                break;
-            case Check:
-            case Other:
-            case Refund:
-            case Sample:
-            case Process:
-                record.type = StockRecord.T.OtherOutbound;
-            default:
-                record.type = StockRecord.T.OtherOutbound;
-        }
+        record.type = out.type == StockRecord.C.Normal ? StockRecord.T.Outbound : StockRecord.T.OtherOutbound;
+        record.category = out.type;
         record.recordId = unit.id;
         record.currQty = currQty;
         record.save();
