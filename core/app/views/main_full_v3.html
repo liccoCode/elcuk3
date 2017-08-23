@@ -21,11 +21,10 @@
   </script>
 #{render '_css_header_v3.html' /}
 #{get 'moreStyles' /}
-#{render '_js_header_v3.html' /}
-#{get 'moreScripts' /}
+
 </head>
 
-<body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
+<body class="hold-transition skin-black sidebar-mini sidebar-collapse">
 <div class="wrapper">
 
 #{render 'header_v3.html'/}
@@ -35,8 +34,10 @@
     </section>
   </div>
 #{render 'aside.html'/}
-#{render 'footer.html'/}
 </div>
+
+#{render '_js_header_v3.html' /}
+#{get 'moreScripts' /}
 
 </body>
 </html>

@@ -20,17 +20,14 @@ import java.util.stream.Collectors;
  */
 public class SellingPost extends Post<Selling> {
 
+    private static final long serialVersionUID = 466049732872654863L;
     public String analyzeResult;
-
     public M market;
-
     public Selling.SC sellingCycle;
-
     public String systemUp;
-
     public String keywords;
-
     public String categoryid;
+    public int perSize = 25;
 
     @Override
     public F.T2<String, List<Object>> params() {
