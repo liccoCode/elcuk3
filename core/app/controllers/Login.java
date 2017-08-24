@@ -125,6 +125,12 @@ public class Login extends Secure.Security {
 
     @SuppressWarnings("unchecked")
     @Util
+    public static String currentUserName() {
+        return Secure.Security.connected();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Util
     public static User updateUserCache(User user) {
         USER_CACHE.put(user.username, user);
         return USER_CACHE.get(user.username);

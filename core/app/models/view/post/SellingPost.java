@@ -1,14 +1,16 @@
 package models.view.post;
 
-import models.User;
+import controllers.Login;
 import models.market.M;
 import models.market.Selling;
+import models.product.Category;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -18,17 +20,14 @@ import java.util.List;
  */
 public class SellingPost extends Post<Selling> {
 
+    private static final long serialVersionUID = 466049732872654863L;
     public String analyzeResult;
-
     public M market;
-
     public Selling.SC sellingCycle;
-
     public String systemUp;
-
     public String keywords;
-
     public String categoryid;
+    public int perSize = 25;
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -58,16 +57,6 @@ public class SellingPost extends Post<Selling> {
         if(StringUtils.isNotBlank(categoryid)) {
             sql.append(" AND s.listing.product.category.categoryId = ? ");
             params.add(categoryid);
-        } else {
-            List<String> categorys = User.getTeamCategorys(User.current());
-
-            if(categorys != null && categorys.size() > 0) {
-                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
-            } else {
-                categorys = new ArrayList<>();
-                categorys.add("-1");
-                sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categorys));
-            }
         }
         if(StringUtils.isNotBlank(keywords)) {
             sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.listing.product.sku LIKE ? ) ");
@@ -75,6 +64,18 @@ public class SellingPost extends Post<Selling> {
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
         }
+
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(categoryList != null && categoryList.size() > 0) {
+            sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
+        } else {
+            categoryList = new ArrayList<>();
+            categoryList.add("-1");
+            sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
+        }
+
         sql.append(" ORDER BY s.createDate DESC ");
         return new F.T2<>(sql.toString(), params);
     }

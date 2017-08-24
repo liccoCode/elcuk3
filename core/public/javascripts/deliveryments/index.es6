@@ -10,7 +10,7 @@ $(() => {
     let ck = $("#dp_" + $(this).data("index") + " input[type='checkbox']:checked");
     if (ck.length > 0) {
       let form = $('<form method="post" action=""></form>');
-      form.attr('action',$(this).attr("url"));
+      form.attr('action', $(this).attr("url"));
       form.hide().append($("#dp_" + $(this).data("index")).find(":input").clone()).appendTo('body');
       form.submit();
     } else {
@@ -52,6 +52,20 @@ $(() => {
     e.stopPropagation();
     let id = $(this).data("index");
     $("#" + id).find(':checkbox').prop('checked', $(this).prop('checked'));
+  });
+
+  $("td[name='clickTd']").click(function () {
+    let tr = $(this).parent("tr");
+    let id = $(this).data("id");
+    let format_id = id.replace(/\|/gi, '_');
+    if ($("#div" + format_id).html() != undefined) {
+      tr.next("tr").toggle();
+    } else {
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'><hr>";
+      html += "<div id='div" + format_id + "'></div></td></tr>";
+      tr.after(html);
+      $("#div" + format_id).load($(this).data("url"), {id: id});
+    }
   });
 
 });
