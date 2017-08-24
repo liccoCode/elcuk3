@@ -1,0 +1,30 @@
+<div class="box box-warning">
+  <div class="box-header with-border">
+    <div class="row-fluid">
+    #{ifnot _notitle}
+      <div class="${_row ? 'row': 'row-fluid'}" style="margin-top:10px;">
+        <div class="span12">
+          <h4 class="text-warning" rel="tooltip" title="最近的 50 条记录"><i class="icon-question-sign"></i>
+            Records
+            <i class="icon-sort-down"></i></h4>
+        </div>
+      </div>
+    #{/ifnot}
+    </div>
+  </div>
+  <div class="box-body">
+    <div class="${_row ? 'row' : 'row-fluid'}" style="margin-top:5px;max-height:200px;overflow:auto;margin-bottom:20px">
+      <div class="span12">
+      #{if !_records || _records.size() == 0}
+        <p class="text-info">暂时没有记录</p>
+      #{/if}
+      #{else }
+          #{list items:_records, as:'rcd'}
+          *{record() 为 vExtends 中的方法}*
+            <p class="text-info">${rcd.record().raw()}</p>
+          #{/list}
+      #{/else}
+      </div>
+    </div>
+  </div>
+</div>

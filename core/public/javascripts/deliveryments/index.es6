@@ -3,7 +3,7 @@
  */
 $(() => {
   $('#goToDeliverymentApply').click(function () {
-    $('#deliverys_form').attr('method', 'post').attr('action', $(this).attr("url")).submit();
+    $('#data_table').attr('method', 'post').attr('action', $(this).attr("url")).submit();
   });
 
   $("input[name='createInboundBtn']").click(function () {
