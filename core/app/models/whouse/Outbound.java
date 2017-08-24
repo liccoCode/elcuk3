@@ -338,10 +338,11 @@ public class Outbound extends GenericModel {
     }
 
     private static void finalConfirm(Outbound out) {
+        out.status = S.Outbound;
         out.outboundDate = new Date();
         out.save();
         out.units.forEach(p -> {
-            if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
+            if(Objects.equals("IN_STORAGE", p.stage.name())) {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
             }
             int total_main = p.mainBox.num * p.mainBox.boxNum;
