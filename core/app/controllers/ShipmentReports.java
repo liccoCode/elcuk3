@@ -190,8 +190,8 @@ public class ShipmentReports extends Controller {
             try {
                 String beginDate = new SimpleDateFormat("yyyyMMdd").format(p.from);
                 String endDate = new SimpleDateFormat("yyyyMMdd").format(p.to);
-                String redisIngKey = "shipmentReportExecuting" + beginDate + "_" + endDate;
-                String redisKey = "shipmentReport" + beginDate + "_" + endDate;
+                String redisIngKey = String.format("shipmentSkuExecuting_%s_%s", beginDate, endDate);
+                String redisKey = String.format("shipmentSku_%s_%s", beginDate, endDate);
                 String postvalue = Caches.get(redisKey);
                 /** 验证报表结果是否在缓存中生成 **/
                 if(StringUtils.isBlank(postvalue)) {
@@ -200,7 +200,7 @@ public class ShipmentReports extends Controller {
                     if(StringUtils.isBlank(ingValue)) {
                         //若redis没有 JRockend 正在执行任务的 标志位,那么通过 aws 发送消息队列调用任务执行
                         Map map = new HashMap();
-                        map.put("jobName", "shipmentReportJob");  //  任务ID
+                        map.put("jobName", "shipmentSkuJob");  //  任务ID
                         map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
                         String message = JSONObject.toJSONString(map);
                         AmazonSQS.sendMessage(message);
