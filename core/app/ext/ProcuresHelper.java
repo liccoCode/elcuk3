@@ -371,13 +371,13 @@ public class ProcuresHelper extends JavaExtensions {
     public static String bgcolor(F.T2<Integer, Integer> process) {
         double num = (double) process._1 / process._2;
         if(num == 1) {
-            return "progress-success";
+            return "progress-bar-green";
         } else if(num >= 0.66 && num < 1) {
-            return "progress-info";
+            return "progress-bar-aqua";
         } else if(num >= 0.33 && num < 0.66) {
-            return "progress-warning";
+            return "progress-bar-yellow";
         } else {
-            return "progress-danger";
+            return "progress-bar-red";
         }
     }
 }

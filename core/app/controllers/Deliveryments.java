@@ -130,7 +130,7 @@ public class Deliveryments extends Controller {
         if(isB2B || dmt.deliveryType == Deliveryment.T.MOVE) {
             render("/ProcureUnits/_b2b_unit_list.html", units);
         } else {
-            render("/ProcureUnits/_unit_list.html", units);
+            render("/ProcureUnits/_unit_list_v3.html", units);
         }
     }
 

@@ -1,6 +1,6 @@
 $ ->
   unitIds = []
-  $(".search_form").on("click", "#downloadFBAZIP", (e) ->
+  $(".form-inline").on("click", "#downloadFBAZIP", (e) ->
     checkboxList = $('input[name="pids"]:checked')
     if checkboxList.length is 0
       noty({
