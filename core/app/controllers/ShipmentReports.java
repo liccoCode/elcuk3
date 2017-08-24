@@ -204,7 +204,7 @@ public class ShipmentReports extends Controller {
                         map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
                         String message = JSONObject.toJSONString(map);
                         AmazonSQS.sendMessage(message);
-                        throw new FastRuntimeException("单个sku物流费年均价报表已经在后台计算中，请于 10min 后再来查看结果~");
+                        throw new FastRuntimeException("单个sku物流费年均价报表已经在后台计算中，请于 2min 后再来查看结果~");
                     } else {
                         throw new FastRuntimeException("单个sku物流费年均价报表已经在后台计算中，请稍后后再来查看结果~");
                     }
