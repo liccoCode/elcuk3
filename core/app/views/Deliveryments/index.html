@@ -2,7 +2,7 @@
 #{set title:"采购单列表 (${deliveryments.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'deliveryments/index.coffee'/}
+    #{script 'deliveryments/index.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
 #{/set}
 
@@ -109,7 +109,7 @@
               #{/if}
               #{else }没有请款单#{/else}
           </td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#dmt_${dmt_index}">
+          <td style="cursor:pointer;" name="clickTd" data-id="${dmt.id}" data-url="@{Deliveryments.showProcureUnitList()}">
             <span><i class="icon-reorder"></i></span>
             <span>${dmt.name}</span>
             <span class="badge badge-info">${dmt.units.size()}</span>
@@ -129,16 +129,6 @@
           <td>${dmt.projectName?.label()}</td>
           <td>${dmt.handler.username}</td>
           <td>#{time_tooltip time:dmt.createDate/}</td>
-        </tr>
-        <tr id="dmt_${dmt_index}" style="display:none;">
-          <td colspan="13">
-              #{if isB2B || dmt.deliveryType.name()=='MOVE'}
-                  #{render 'ProcureUnits/_b2b_unit_list.html', units:dmt.units, norecord: true/}
-              #{/if}
-              #{else }
-                  #{render 'ProcureUnits/_unit_list.html', units:dmt.units, norecord: true/}
-              #{/else}
-          </td>
         </tr>
       #{/list}
         <tr class="tb_footer">

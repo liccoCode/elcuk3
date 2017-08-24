@@ -11,6 +11,7 @@ import models.procure.Cooperator;
 import models.procure.Deliveryment;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Category;
 import models.view.Ret;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
@@ -90,6 +91,13 @@ public class Deliveryments extends Controller {
 
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
+
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        }
         notFoundIfNull(dmt);
         List<Long> expressUnitIds = dmt.units.stream()
                 .filter(unit -> unit.shipType == Shipment.T.EXPRESS)
@@ -105,6 +113,25 @@ public class Deliveryments extends Controller {
         }
         boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
         render(dmt, expressid, total, applyMsg, deliveryments, isB2b);
+    }
+
+    public static void showProcureUnitList(String id) {
+        Deliveryment dmt = Deliveryment.findById(id);
+        List<ProcureUnit> units = dmt.units;
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        }
+
+        boolean isB2B = (boolean) renderArgs.get("isB2B");
+        renderArgs.put("norecord", true);
+        if(isB2B || dmt.deliveryType == Deliveryment.T.MOVE) {
+            render("/ProcureUnits/_b2b_unit_list.html", units);
+        } else {
+            render("/ProcureUnits/_unit_list.html", units);
+        }
     }
 
     public static void update(Deliveryment dmt) {
