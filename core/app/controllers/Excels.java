@@ -854,23 +854,15 @@ public class Excels extends Controller {
 
         String createDate = dateFormat.format(outbounds.get(0).createDate);
         String targetId = outbounds.get(0).showCompany();
-        String shipType = outbounds.get(0).type.label();
+        String shipType = outbounds.get(0).shipType.label();
         String projectName = outbounds.get(0).projectName;
-        String type = null;
-        List<ProcureUnit> procureUnits = new ArrayList<>();
-        List<StockRecord> stockRecords = new ArrayList<>();
-        if(outbounds.get(0).type.name().equals("Normal")) {
-            type = "1";
-            outbounds.stream()
-                    .forEach(outbound -> procureUnits.addAll(ProcureUnit.findUnitOrderByShipment(outbound.id)));
-        } else {
-            type = "0";
-            outbounds.stream().forEach(outbound -> stockRecords.addAll(outbound.records));
-        }
+            List<ProcureUnit> procureUnits = new ArrayList<>();
+
+        outbounds.stream().forEach(outbound -> procureUnits.addAll(outbound.units));
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-        render(dateFormat, outbounds, createDate, targetId, shipType, projectName, type, procureUnits, stockRecords);
+        render(dateFormat, outbounds, createDate, targetId, shipType, projectName, procureUnits);
     }
 
     public static void exportOutBoundDetailReport(OutboundPost p) {
