@@ -36,6 +36,7 @@ import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.jobs.Job;
 import play.libs.F;
 import play.modules.excel.RenderExcel;
@@ -836,6 +837,40 @@ public class Excels extends Controller {
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("单月运输时效统计.xls"));
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(list, map, p);
+    }
+
+    public static void exportOutBoundReport(List<String> ids) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
+        Set<Long> whouseSet = new HashSet<>();
+        outbounds.stream().forEach(outbound -> whouseSet.add(outbound.whouse.getId()));
+        if(whouseSet.size() > 1) renderText("请勾选同一目的国家的出库单!");
+        Set<String> targetIdSet = new HashSet<>();
+        outbounds.stream().forEach(outbound -> targetIdSet.add(outbound.showCompany()));
+        if(targetIdSet.size() > 1) renderText("请勾选同一货代公司的出库单!");
+        Set<String> createDateSet = new HashSet<>();
+        outbounds.stream().forEach(outbound -> createDateSet.add(dateFormat.format(outbound.createDate)));
+        if(createDateSet.size() > 1) renderText("请勾选同一出库日期的出库单!");
+
+        String createDate = dateFormat.format(outbounds.get(0).createDate);
+        String targetId = outbounds.get(0).showCompany();
+        String shipType = outbounds.get(0).type.label();
+        String projectName = outbounds.get(0).projectName;
+        String type = null;
+        List<ProcureUnit> procureUnits = new ArrayList<>();
+        List<StockRecord> stockRecords = new ArrayList<>();
+        if(outbounds.get(0).type.name().equals("Normal")) {
+            type = "1";
+            outbounds.stream()
+                    .forEach(outbound -> procureUnits.addAll(ProcureUnit.findUnitOrderByShipment(outbound.id)));
+        } else {
+            type = "0";
+            outbounds.stream().forEach(outbound -> stockRecords.addAll(outbound.records));
+        }
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(dateFormat, outbounds, createDate, targetId, shipType, projectName, type, procureUnits, stockRecords);
     }
 
     public static void exportOutBoundDetailReport(OutboundPost p) {
