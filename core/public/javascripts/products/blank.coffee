@@ -6,19 +6,7 @@ $ ->
     $(@).val($(@).val().toUpperCase())
 
   # 产品定位和产品卖点点击新增一行
-  $("#create_product_form").on("click", "#more_locate_btn, #more_selling_point_btn",() ->
-    $btn = $(@)
-    $table = $("##{$btn.data("table")}")[0]
-    # 获取表格的行数
-    rowsCount = $table.rows.length
-    # 通过 js 克隆出一个新的行 由于表格的第一行是标题行，所以使用 表格的行数减去1得到最后一行
-    $tr = $("##{$btn.data("table")} tr:eq(#{rowsCount - 1})")[0]
-    $newRow = $tr.cloneNode(true)
-    # 修改 tr 元素内 textarea 的 name 属性
-    textareas = $newRow.getElementsByTagName("textarea")
-    setTextAreaName($btn.attr("id"), rowsCount, textareas)
-    $table.appendChild($newRow)
-  ).on("click", "[name^='delete_locate_row'], [name^='delete_selling_point_row']", () ->
+  $("#create_product_form").on("click", "[name^='delete_locate_row'], [name^='delete_selling_point_row']", () ->
     $btn = $(@)
     $btn.parent("td").parent().remove()
   )

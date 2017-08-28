@@ -191,7 +191,8 @@ public class Users extends Controller {
 
     public static void create() {
         String brandName = OperatorConfig.getVal("brandname");
-        render(brandName);
+        Date entryDate = new Date();
+        render(brandName, entryDate);
     }
 
     /**

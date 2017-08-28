@@ -19,13 +19,13 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-#{info_row}
-<ul>
-  <li>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</li>
-  <li>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</li>
-</ul>
-#{/info_row}
-
+<section class="content-max-width">
+  <div class="callout callout-info">
+    <h4>Note!</h4>
+    <p>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</p>
+    <p>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</p>
+  </div>
+</section>
 
 <div class="row">
   <div class="col-md-12">
@@ -36,14 +36,14 @@
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
-                <input style="width:90px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
               </div>
             </div>
 
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">To:</div>
-                <input style="width:90px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
               </div>
             </div>
 
@@ -109,7 +109,7 @@
               <input style="width:200px;" class="form-control" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
-            
+
             <button class="btn btn-primary" data-loading>搜索</button>
           </div>
           <br>

@@ -34,7 +34,7 @@
     <th>预计运输时间</th>
     <th>实际交货时间</th>
     <th>质检结果</th>
-    <th width="80px;">创建人/<br>创建时间</th>
+    <th width="90px;">创建人/<br>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
@@ -159,7 +159,7 @@
           </a>
         #{/if}
         #{elseif unit.selling != null}
-          <a class="btn btn-warning btn-sm" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+          <a class="btn btn-warning btn-xs" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
             补全 FnSku
           </a>
         #{/elseif}
