@@ -19,6 +19,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -169,7 +170,6 @@ public class Shipments extends Controller {
 
     @Before(only = {"show", "update", "beginShip", "refreshProcuress", "updateFba"})
     public static void setUpShowPage() {
-        //TODO 需要添加 FeeType 的数据
         renderArgs.put("whouses", Whouse.find("type=?", Whouse.T.FBA).fetch());
         renderArgs.put("shippers", Cooperator.shippers());
         String shipmentId = request.params.get("id");
@@ -284,16 +284,15 @@ public class Shipments extends Controller {
     public static void beginShip(String id, Date date, boolean sync) {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.planArrivDate", ship.dates.planArrivDate);
-
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             show(id);
         }
-
         try {
             ship.beginShip(date, sync);
         } catch(Exception e) {
             Validation.addError("", Webs.e(e));
+            Logger.info(e.getMessage());
         }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);

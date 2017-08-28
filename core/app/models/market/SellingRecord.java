@@ -452,7 +452,7 @@ public class SellingRecord extends GenericModel {
          * ]
          */
         HighChart chart;
-        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
+        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to, "PVAndSS");
         chart = Cache.get(cacheKey, HighChart.class);
         if(chart != null && chart.series != null && chart.series.size() > 0) {
             return chart;
@@ -486,8 +486,7 @@ public class SellingRecord extends GenericModel {
             get.setURI(uri);
             String result = HTTP.get(get);
             JSONObject json = JSON.parseObject(result);
-            Optional.ofNullable(json).ifPresent(j -> {
-                JSONObject object = j.getJSONObject("series");
+            Optional.ofNullable(json).ifPresent(object -> {
                 object.getJSONArray("ss").forEach(a -> {
                     JSONArray value = (JSONArray) a;
                     SellingRecord.buildChart(chart, market, "Session", value.get(0).toString(), value.get(1).toString());
@@ -522,7 +521,7 @@ public class SellingRecord extends GenericModel {
      */
     public static HighChart ajaxHighChartTurnRatio(String msku, Account acc, Date from, Date to) {
         HighChart chart;
-        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to);
+        String cacheKey = Caches.Q.cacheKey(acc, msku, from, to, "TurnRatio");
         chart = Cache.get(cacheKey, HighChart.class);
         if(chart != null && chart.series != null && chart.series.size() > 0) {
             return chart;
@@ -554,8 +553,8 @@ public class SellingRecord extends GenericModel {
                 get.setURI(uri);
                 String result = HTTP.get(get);
                 JSONObject json = JSON.parseObject(result);
-                Optional.ofNullable(json).ifPresent(j -> {
-                    JSONArray objects = j.getJSONObject("series").getJSONArray("conversions");
+                Optional.ofNullable(json).ifPresent(object -> {
+                    JSONArray objects = object.getJSONArray("conversions");
                     objects.forEach(a -> {
                         JSONArray value = (JSONArray) a;
                         SellingRecord.buildChart(chart, market, "转换率(%)",
