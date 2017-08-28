@@ -715,7 +715,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(!sync) {
             // 在测试环境下也不能标记 SHIPPED
             this.items.stream().filter(shipItem -> shipItem.unit.fba != null).forEach(shipItem -> {
-                if(!Arrays.asList(T.SEA, T.AIR).contains(this.type)) {
+                if(!Arrays.asList(T.SEA, T.AIR, T.RAILWAY).contains(this.type)) {
                     //暂停提交空运和海运的物流跟踪号到 Amazon(Amazon 要求最长为 10, 而空运和海运的跟踪号一般都超过 10 位)
                     //详情: http://docs.developer.amazonservices.com/en_US/fba_inbound/FBAInbound_Datatypes.html#NonPartneredLtlDataInput
                     shipItem.unit.fba.putTransportContentRetry(3, this);
@@ -751,10 +751,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             }
             if(totalShipWeight > 0)
                 item.weightRatio = BigDecimal.valueOf(itemWeight)
-                    .divide(BigDecimal.valueOf(totalShipWeight), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+                        .divide(BigDecimal.valueOf(totalShipWeight), 2, BigDecimal.ROUND_HALF_UP).floatValue();
             if(totalShipVolume > 0)
                 item.volumeRatio = BigDecimal.valueOf(itemVolume)
-                    .divide(BigDecimal.valueOf(totalShipVolume), 2, BigDecimal.ROUND_HALF_UP).floatValue();
+                        .divide(BigDecimal.valueOf(totalShipVolume), 2, BigDecimal.ROUND_HALF_UP).floatValue();
             item.save();
         });
     }

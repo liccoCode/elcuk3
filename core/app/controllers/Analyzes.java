@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.User;
+import models.OperatorConfig;
 import models.market.*;
 import models.product.Category;
 import models.view.Ret;
@@ -25,6 +26,7 @@ import play.utils.FastRuntimeException;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * 数据分析页面的控制器
@@ -136,17 +138,22 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingRecord(final AnalyzePost p) {
         try {
-            String json = await(new Job<String>() {
-                @Override
-                public String doJobWithResult() throws Exception {
-                    HighChart chart = SellingRecord
-                            .ajaxHighChartPVAndSS(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
-                    String sortName = p.countryName(true);
-                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
-                    return J.json(chart);
-                }
-            }.now());
-            renderJSON(json);
+            String brandname = OperatorConfig.getVal("brandname");
+            if(Objects.equals(brandname, "EASYACC")) {
+                String json = await(new Job<String>() {
+                    @Override
+                    public String doJobWithResult() throws Exception {
+                        HighChart chart = SellingRecord
+                                .ajaxHighChartPVAndSS(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
+                        String sortName = p.countryName(true);
+                        chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                        return J.json(chart);
+                    }
+                }.now());
+                renderJSON(json);
+            } else {
+                renderJSON(J.json(new HighChart()));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.s(e)));
         }
@@ -158,17 +165,23 @@ public class Analyzes extends Controller {
     @CacheFor("30mn")
     public static void ajaxSellingTurn(final AnalyzePost p) {
         try {
-            String json = await(new Job<String>() {
-                @Override
-                public String doJobWithResult() throws Exception {
-                    HighChart chart = SellingRecord
-                            .ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from, p.to);
-                    String sortName = p.countryName(true);
-                    chart.series.forEach(se -> se.visible = se.name.contains(sortName));
-                    return J.json(chart);
-                }
-            }.now());
-            renderJSON(json);
+            String brandname = OperatorConfig.getVal("brandname");
+            if(Objects.equals(brandname, "EASYACC")) {
+                String json = await(new Job<String>() {
+                    @Override
+                    public String doJobWithResult() throws Exception {
+                        HighChart chart = SellingRecord
+                                .ajaxHighChartTurnRatio(p.val, Account.findById(NumberUtils.toLong(p.aid)), p.from,
+                                        p.to);
+                        String sortName = p.countryName(true);
+                        chart.series.forEach(se -> se.visible = se.name.contains(sortName));
+                        return J.json(chart);
+                    }
+                }.now());
+                renderJSON(json);
+            } else {
+                renderJSON(J.json(new HighChart()));
+            }
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
         }

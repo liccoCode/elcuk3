@@ -151,7 +151,8 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public List<ProcureUnit> queryForExcel() {
         F.T2<String, List<Object>> params = params();
-        return ProcureUnit.find(params._1 + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
+        String sql = params._1 + " AND (p.type = 'ProcureSplit' OR p.type IS  NULL) ";
+        return ProcureUnit.find(sql + " ORDER BY p.createDate DESC", params._2.toArray()).fetch();
     }
 
     @Override

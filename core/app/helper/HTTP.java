@@ -47,6 +47,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -260,6 +261,19 @@ public class HTTP {
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch(IOException e) {
             Logger.warn("HTTP.get[%s] [%s]", url, Webs.s(e));
+            return "";
+        } finally {
+            closeResponse(response);
+        }
+    }
+
+    public static String get(HttpGet get) {
+        CloseableHttpResponse response = null;
+        try {
+            response = HTTP.client().execute(get);
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch(IOException e) {
+            Logger.warn("HTTP.get[%s] [%s]", get.getURI().toString(), Webs.s(e));
             return "";
         } finally {
             closeResponse(response);
@@ -563,6 +577,17 @@ public class HTTP {
     }
 
     public static JSONObject getJson(CookieStore cookieStore, String url) {
+        Logger.debug("HTTP.get Json [%s]", url);
+        String json = get(cookieStore, url, null);
+        try {
+            return JSON.parseObject(json);
+        } catch(Exception e) {
+            Logger.error("Bad JSON: \n%s", json);
+            throw new RuntimeException("Cannot parse JSON (check logs)", e);
+        }
+    }
+
+    public static JSONObject getJson(CookieStore cookieStore, String url, Header[] headers) {
         Logger.debug("HTTP.get Json [%s]", url);
         String json = get(cookieStore, url, null);
         try {
