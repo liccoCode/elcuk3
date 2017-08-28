@@ -317,15 +317,17 @@
             <span class="label label-warning">10</span>
           </a>
           <ul class="dropdown-menu">
-            <li class="header">You have 10 notifications</li>
+            <li class="header">请选择切换的项目</li>
             <li>
               <!-- Inner Menu: contains the notifications -->
               <ul class="menu">
+              #{list items:models.User.COR.values(), as:'c'}
                 <li><!-- start notification -->
-                  <a href="#">
-                    <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                  <a href="${c.url()}">
+                    <i class="fa fa-users text-aqua"></i> ${c.label()}
                   </a>
                 </li>
+              #{/list}
                 <!-- end notification -->
               </ul>
             </li>
@@ -340,25 +342,20 @@
             <span class="label label-danger">9</span>
           </a>
           <ul class="dropdown-menu">
-            <li class="header">You have 9 tasks</li>
+            <li class="header">切换项目</li>
             <li>
               <!-- Inner menu: contains the tasks -->
               <ul class="menu">
-                <li><!-- Task item -->
-                  <a href="#">
+                <li>
+                #{list items:models.User.COR.values(), as:'c'}
+                  <a href="${c.url()}">
                     <!-- Task title and progress text -->
                     <h3>
-                      Design some buttons
+                    ${c.label()}
                       <small class="pull-right">20%</small>
                     </h3>
-                    <!-- The progress bar -->
-                    <div class="progress xs">
-                      <!-- Change the css width attribute to simulate progress -->
-                      <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                        <span class="sr-only">20% Complete</span>
-                      </div>
-                    </div>
                   </a>
+                #{/list}
                 </li>
                 <!-- end task item -->
               </ul>
@@ -381,8 +378,7 @@
             <li class="user-header">
               <img src="../public/images/avatar5.png" class="img-circle" alt="User Image">
 
-              <p>
-              ${controllers.Secure.Security.connected()} - Web Developer
+              <p>${controllers.Secure.Security.connected()} - ${controllers.Login.currentDepart()}
                 <small>Member since Nov. 2012</small>
               </p>
             </li>
@@ -404,7 +400,7 @@
             <!-- Menu Footer-->
             <li class="user-footer">
               <div class="pull-left">
-                <a href="#" class="btn btn-default btn-flat">Profile</a>
+                <a href="@{Users.home()}" class="btn btn-default btn-flat">Profile</a>
               </div>
               <div class="pull-right">
                 <a href="@{Secure.logout()}" class="btn btn-default btn-flat">Sign out</a>

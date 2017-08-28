@@ -128,6 +128,13 @@ public class User extends Model {
     @Expose
     public String wangwang;
 
+    public String sex;
+
+    /**
+     * 入职日期
+     */
+    public Date entryDate;
+
     /**
      * 该用户是否被关闭
      */
@@ -251,6 +258,12 @@ public class User extends Model {
             @Override
             public String label() {
                 return "财务部";
+            }
+        },
+        Develop {
+            @Override
+            public String label() {
+                return "开发部";
             }
         };
 

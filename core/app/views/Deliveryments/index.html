@@ -15,8 +15,6 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-
-
 <div class="row">
   <div class="col-md-12">
     <div class="box box-primary">
@@ -131,10 +129,10 @@
               <td>#{time_tooltip time:twoDeliveryDate._1/}</td>
               <td>#{time_tooltip time:twoDeliveryDate._2/}</td>
               <td>
-                <div class="progress" style="margin-top:0px;">
-                  <div class="progress-bar ${procress.bgcolor()}" role="progressbar" style="width: ${(procress._1 / procress._2).format('#%')};">
-                    <span style="color:black;">${procress._1} / ${procress._2}</span>
-                  </div>
+                <div class="progress" style="margin-top:0px;position:relative;">
+                  <div class="progress-bar ${procress.bgcolor()}" role="progressbar" style="width: ${(procress._1 / procress._2).format('#%')};"></div>
+                  <span style="color:black;position:absolute;width:100%;text-align:center;display:block;">
+                  ${procress._1} /${procress._2}</span>
                 </div>
               </td>
               <td>${dmt.projectName?.label()}</td>
