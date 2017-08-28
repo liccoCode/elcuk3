@@ -6,7 +6,7 @@
 #{set 'moreScripts'}
     #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
-    #{script 'products/index.coffee'/}
+    #{script 'products/index.es6'/}
 #{/set}
 
 <style>
@@ -22,7 +22,7 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <div class="box-header with-border">
-        <form action="@{Products.index()}" method="post" class="form-inline">
+        <form action="@{Products.index()}" method="post" class="form-inline" id="search_Form">
           <div class="row-fluid">
             <select name="p.state" class="form-control" style="width: 100px;">
             #{list items:['Active', 'Inactive'], as:'s'}
@@ -42,14 +42,15 @@
 
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
-              <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 SKU、附加属性、条码" value="${p.search}">
+              <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 SKU、附加属性、条码"
+                     value="${p.search}" autocomplete="off">
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
 
             <button class="btn btn-primary" data-loading>搜索</button>
 
-            <a href="javascript:void(0)" data-href="@{Excels.exportProductDetailToExcel()}" class="btn btn-success"
-               target="_blank" id="downloadBtn" content="按照搜索条件导出 Product 基本信息到 Excel" placement='bottom' rel="popover">
+            <a href="javascript:void(0)" data-url="@{Excels.exportProductDetailToExcel()}" class="btn btn-success"
+               target="_blank" id="downloadBtn" title="按照搜索条件导出 Product 基本信息到 Excel" rel="tooltip">
               <i class="icon-download-alt"></i>下载 Excel
             </a>
           #{power.ck "products.edit"}
@@ -67,7 +68,7 @@
       #{bootstrap_pager_v3 pi:p, url:'/products/index'/}
       </div>
     </div>
-    
+
   #{records_v3 records:records/}
   </div>
 </div>
@@ -75,12 +76,12 @@
 <div id="copy_modal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3>同步SKU</h3>
-      </div>
-      <div class="modal-body">
-        <form action="@{Products.copy()}" id="update_form" class="form-horizontal">
+      <form action="@{Products.copy()}" id="update_form" class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h3>同步SKU</h3>
+        </div>
+        <div class="modal-body">
           <div class="form-group">
             <label class="col-sm-3 control-label">选择SKU</label>
             <div class="col-sm-9">
@@ -116,12 +117,13 @@
               </div>
             </div>
           </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <button class="btn btn-primary">同步</button>
-      </div>
+          <input type="hidden" id="target_choseid" name="choseid" value="0">
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-primary" name="submitBtn" value="同步"/>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -129,49 +131,66 @@
 <div id="backup_modal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3>复制SKU</h3>
-      </div>
-      <div class="modal-body">
-      #{form @Products.backup(), id:'update_form'}
-        <input type="hidden" id="backup_choseid" name="choseid" value="0">
+      <form action="@{Products.backup()}" class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h3>复制SKU</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Family</label>
+            <div class="col-sm-3">
+              <input style="width:150px" id="back_families" name="family" data-provide="typeahead" class="form-control"
+                     data-source="${families}" value="" autocomplete="off">
+            </div>
+          </div>
 
-        <tr>
-          <th>Family</th>
-          <td>
-            <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
-                   data-source="${families}" value="" autocomplete="off">
-          </td>
-          <th>SKU</th>
-          <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
-        </tr>
-        <dl class="dl-horizontal">
-          <dt>选择复制的信息:</dt>
-          <dd>
-            <label class="checkbox">
-              <input disabled type="checkbox" name="base" value="1" checked>
-              <a>基本属性</a>
-            </label>
-            <label class="checkbox">
-              <input type="checkbox" name="extend" value="1" checked>
-              <a>扩展属性</a>
-            </label>
-            <label class="checkbox">
-              <input type="checkbox" name="attach" value="1" checked>
-              <a>附件</a>
-            </label>
-          </dd>
-        </dl>
-      #{/form}
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <button class="btn btn-primary">复制</button>
-      </div>
+          <div class="form-group">
+            <label class="col-sm-3 control-label">SKU</label>
+            <div class="col-sm-3">
+              <input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-3 control-label">选择同步的信息</label>
+            <div class="col-sm-9">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="base" value="1" checked>基本属性
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="extend" value="1" checked>扩展属性
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="attach" value="1" checked>附件
+                </label>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="backup_choseid" name="choseid" value="0">
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-primary" name="submitBtn" value="复制"/>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
 #{include 'Products/_destroyLogForm.html'/}
 
 

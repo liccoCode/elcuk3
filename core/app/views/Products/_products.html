@@ -36,7 +36,7 @@
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
         <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
         <td>
-          <select name='pro.state' style="width:90px;" class="form-control">
+          <select name='pro.state' style="width:90px;" class="form-control" data-sku="${prod.sku}">
             <option>请选择</option>
               #{list items: models.product.Product.S.values(), as: 's'}
                 <option value="${s}" ${prod.state == s? 'selected' : ''}>${s}</option>
@@ -44,7 +44,7 @@
           </select>
         </td>
         <td>
-          <select name='pro.salesLevel' style="width:80px;" class="form-control">
+          <select name='pro.salesLevel' style="width:80px;" class="form-control" data-sku="${prod.sku}">
             <option>请选择</option>
               #{list items: models.product.Product.E.values(), as: 's'}
                 <option value="${s}" ${prod.salesLevel == s? 'selected' : ''}>${s}</option>
@@ -63,9 +63,8 @@
             <i class="icon-copy"></i>
           </a>
             #{power.ck "products.destroy"}
-              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-xs btn-danger" rel="tooltip" title="删除">
-                <i class="icon-trash"></i>
-              </a>
+              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-xs btn-danger" rel="tooltip" title="删除"
+                 data-sku="${prod.sku}"><i class="icon-trash"></i></a>
             #{/power.ck}
           <a href="" class="btn btn-xs btn-warning" rel="tooltip" title="物料配置">
             <i class="icon-th-list"></i>
