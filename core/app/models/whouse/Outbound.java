@@ -35,7 +35,7 @@ public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
 
-    public static final String MengTopUrl = "http://e.mengtop.com";
+    public static final String MengTopUrl = "http://45.32.141.39:9000";
 
     @Id
     @Column(length = 30)
@@ -219,9 +219,6 @@ public class Outbound extends GenericModel {
             stock.category = this.type;
             stock.save();
             unit.availableQty = stock.currQty;
-            if(Objects.equals(this.type, StockRecord.C.B2B)) {
-                unit.outbound = this;
-            }
             unit.save();
         });
     }
@@ -342,7 +339,7 @@ public class Outbound extends GenericModel {
         out.outboundDate = new Date();
         out.save();
         out.units.forEach(p -> {
-            if(Objects.equals("IN_STORAGE", p.stage.name())) {
+            if(Arrays.asList("IN_STORAGE").contains(p.stage.name())) {
                 p.stage = ProcureUnit.STAGE.OUTBOUND;
             }
             int total_main = p.mainBox.num * p.mainBox.boxNum;
@@ -350,22 +347,22 @@ public class Outbound extends GenericModel {
             p.outQty = total_main + total_last;
             p.availableQty = p.availableQty - p.outQty;
             p.save();
-            createStockRecord(p, p.availableQty, out);
+            createStockRecord(p, p.availableQty);
         });
     }
 
-    public static void createStockRecord(ProcureUnit unit, int currQty, Outbound out) {
+    public static void createStockRecord(ProcureUnit unit, int currQty) {
         StockRecord record = new StockRecord();
         record.creator = Login.current();
         record.whouse = unit.whouse;
         record.unit = unit;
         record.qty = unit.outQty;
-        record.type = out.type == StockRecord.C.Normal ? StockRecord.T.Outbound : StockRecord.T.OtherOutbound;
-        record.category = out.type;
+        record.type = StockRecord.T.Outbound;
         record.recordId = unit.id;
         record.currQty = currQty;
         record.save();
     }
+
 
     public String showCompany() {
         switch(this.type) {
