@@ -114,7 +114,7 @@ public class ReportDeal extends Controller {
 
         if(flag == null || !flag.equals("1")) {
             if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
-                renderJSON(new Ret(true, "this order state is " + ord.state.name()));
+                renderJSON(new Ret(true, ord.state.name()));
             if(StringUtils.isNotBlank(ord.invoiceState) && ord.invoiceState.equals("yes"))
                 renderJSON(new Ret(true, "this order is send before!"));
         }

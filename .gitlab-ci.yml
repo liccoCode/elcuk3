@@ -1,5 +1,9 @@
 image: zen9073/play:1.4.2
 
+stages:
+  - init
+  - test
+
 before_script:
   - export JAVA_HOME=/opt/jdk1.8.0_112
   - export CLASSPATH=.:$JAVA_HOME/lib
@@ -7,25 +11,33 @@ before_script:
   - export PLAY_HOME=/opt/play-1.4.2
   - export PATH=.:$PLAY_HOME:$PATH
 
-  - cd core
-  - play dependencies  --sync
 
-test:
+cache:
+  key: ${CI_BUILD_REF_NAME}
+  paths:
+    - node_modules/
+  
+job0:
+  stage: init
   script:
-    - ls lib
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/controllers
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/exception
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/ext
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/helper
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/jobs
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/models
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/mws
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/notifiers
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/query
-    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app/services
-
+    - cd core
+    - play dependencies  --sync
+    - pwd
   tags:
     - efk
   only:
     - master
+    
+job1:
+  stage: test
+  script:
+    - cd core
+    - pwd
+    - ls
+    - java -jar lib/checkStyle-8.1.jar -c conf/Erp_checkStyle.xml app -e app/views
+  tags:
+    - efk
+  only:
+    - master
+
 
