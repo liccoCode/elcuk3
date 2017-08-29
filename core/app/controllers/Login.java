@@ -137,7 +137,7 @@ public class Login extends Secure.Security {
                 USER_CACHE.put(user.username, user);
             }
             User user = USER_CACHE.get(username);
-            return user.department.label();
+            return user.department == null ? "" : user.department.label();
         }
         return "";
     }

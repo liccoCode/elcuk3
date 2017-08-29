@@ -234,6 +234,17 @@ public class User extends Model {
             public String url() {
                 return "https://e.ilecone.com/";
             }
+        },
+        Visio {
+            @Override
+            public String label() {
+                return "Visio";
+            }
+
+            @Override
+            public String url() {
+                return "http://104.207.150.98:9000/";
+            }
         };
 
         public abstract String label();
