@@ -1,7 +1,6 @@
 #{extends 'main_full_v3.html' /}
 #{set title:'创建新 Product' /}
 #{set 'moreScripts'}
-    #{script 'products/blank.coffee'/}
     #{script 'products/blank.es6'/}
 #{/set}
 
@@ -68,8 +67,10 @@
             <label for="inputEmail3" class="col-sm-2 control-label">重量(包材)</label>
             <div class="col-sm-2">
               <div class="input-group">
-                <input type="text" class="form-control" name="pro.weight" value="${pro.weight}">
-                <span class="input-group-addon">kg</span>
+                <input type="text" class="form-control col-xs-1" name="pro.weight" value="${pro.weight}">
+                <span class="input-group-addon">Kg</span>
+                <input type="text" class="form-control col-xs-1" id="pro_weight_g">
+                <span class="input-group-addon">g</span>
               </div>
             </div>
           </div>
@@ -152,7 +153,7 @@
             <div class="col-sm-2">
               <select class="form-control" name="pro.marketState">
               #{list items:models.product.Product.T.values(), as:'t'}
-                <option value="${t}" ${t == pro.marketState?.name() ?'selected':''}>${t}</option>
+                <option value="${t}" ${t == pro.marketState?.name() ?'selected':''}>${t.label()}</option>
               #{/list}
               </select>
             </div>
@@ -167,7 +168,7 @@
             <div class="col-sm-2">
               <select class="form-control" name="pro.procureState">
               #{list items:models.product.Product.P.values(), as:'p'}
-                <option value="${p}" ${p == pro.procureState?.name() ?'selected':''}>${p}</option>
+                <option value="${p}" ${p == pro.procureState?.name() ?'selected':''}>${p.label()}</option>
               #{/list}
               </select>
             </div>
@@ -175,7 +176,7 @@
             <div class="col-sm-2">
               <select class="form-control" name="pro.marketState">
               #{list items:models.product.Product.L.values(), as:'t'}
-                <option value="${t}" ${t == pro.productState?.name() ?'selected':''}>${t}</option>
+                <option value="${t}" ${t == pro.productState?.name() ?'selected':''}>${t.label()}</option>
               #{/list}
               </select>
             </div>
@@ -246,7 +247,7 @@
                 <textarea class="form-control" name="pro.locate[${locate_index - 1}].content">${locate.content}</textarea>
               </div>
               <div class="col-sm-1">
-                <button type="button" class="btn btn-danger btn-sm">删除</button>
+                <button type="button" class="btn btn-danger btn-sm" name="delete_locate_row">删除</button>
               </div>
             </div>
           #{/list}
@@ -277,7 +278,7 @@
                 <textarea class="form-control" name="pro.sellingPoint[${point_index - 1}].content">${point.content}</textarea>
               </div>
               <div class="col-sm-1">
-                <button type="button" class="btn btn-danger btn-sm">删除</button>
+                <button type="button" class="btn btn-danger btn-sm" name="delete_selling_point_row">删除</button>
               </div>
             </div>
           #{/list}
