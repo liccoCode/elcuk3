@@ -19,7 +19,7 @@
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-    <td>${ord.market.toString()}</td>
+    <td>${ord.market.countryName()}</td>
     <td data-toggle="toggle" data-target="#order_index_${ord_index}">
         <i class="icon-reorder"></i>
         <span class="badge badge-info">${ord?.fees?.size()}</span>

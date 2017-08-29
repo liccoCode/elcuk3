@@ -132,7 +132,8 @@ public class OrderPOST extends ESPost<Orderr> {
                 );
         topHits.ifPresent(hits -> this.count = hits.getLong("total"));
         if(orderIds.isEmpty()) return Collections.emptyList();
-        return Orderr.find("orderId IN (:orderIds)").bind("orderIds", orderIds).fetch();
+        return Orderr.find("orderId IN (:orderIds)").bind("orderIds", "306-4288897-9477925")
+                .fetch();
     }
 
     public List<OrderReportDTO> queryForExcel() {
