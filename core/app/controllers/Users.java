@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.*;
+import models.product.Category;
 import models.product.Team;
 import models.view.Ret;
 import models.view.post.UserPost;
@@ -36,13 +37,13 @@ public class Users extends Controller {
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
-
+        List<Category> categories = Category.findAll();
 
         List<Privilege> modules = Privilege.find("pid=0").fetch();
         Map<Long, List<Privilege>> maps = Privilege.getMenuMap(modules);
         renderArgs.put("maps", maps);
         renderArgs.put("modules", modules);
-
+        renderArgs.put("categories", categories);
         render(users, privileges, teams, roles, p);
     }
 
@@ -84,6 +85,17 @@ public class Users extends Controller {
         }
         int size = user.teams.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Team", size)));
+    }
+
+    public static void categories(Long id, List<String> categoryId) {
+        User user = User.findById(id);
+        try {
+            user.addCategories(categoryId);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.e(e)));
+        }
+        int size = user.categories.size();
+        renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Category", size)));
     }
 
     public static void roles(Long id, List<Long> roleId) {
@@ -179,7 +191,8 @@ public class Users extends Controller {
 
     public static void create() {
         String brandName = OperatorConfig.getVal("brandname");
-        render(brandName);
+        Date entryDate = new Date();
+        render(brandName, entryDate);
     }
 
     /**

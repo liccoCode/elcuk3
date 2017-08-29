@@ -1,5 +1,6 @@
 package models.view.post;
 
+import controllers.Login;
 import helper.DBUtils;
 import helper.Dates;
 import models.OperatorConfig;
@@ -7,6 +8,7 @@ import models.finance.PaymentUnit;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
+import models.product.Category;
 import models.view.highchart.HighChart;
 import models.view.highchart.Series;
 import models.whouse.InboundUnit;
@@ -22,6 +24,7 @@ import play.libs.F;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -30,6 +33,9 @@ import java.util.regex.Pattern;
  * Time: 4:32 PM
  */
 public class ProcurePost extends Post<ProcureUnit> {
+
+    private static final long serialVersionUID = 8821986351359739776L;
+
     private static final Pattern ID = Pattern.compile("^[0-9]*$");
     private static final Pattern FBA = Pattern.compile("^fba:(\\w*)$");
     public static final List<F.T2<String, String>> DATE_TYPES;
@@ -233,17 +239,24 @@ public class ProcurePost extends Post<ProcureUnit> {
 
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
-            sbd.append(" AND (")
-                    .append("p.product.sku LIKE ? OR ")
-                    .append("s.sellingId LIKE ? OR ")
-                    .append("d.id LIKE ? OR ")
-                    .append("f.shipmentId LIKE ?  ")
-                    .append(") ");
+            sbd.append(" AND (").append("p.product.sku LIKE ? OR ").append("s.sellingId LIKE ? OR ");
+            sbd.append("d.id LIKE ? OR ").append("f.shipmentId LIKE ? ").append(") ");
             for(int i = 0; i < 4; i++) params.add(word);
         }
         if(StringUtils.isNotBlank(this.unitIds)) {
             List<String> unitIdList = Arrays.asList(StringUtils.split(this.unitIds, "_"));
             sbd.append(" AND p.id IN ").append(SqlSelect.inlineParam(unitIdList));
+        }
+
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(categoryList != null && categoryList.size() > 0) {
+            sbd.append(" AND p.product.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
+        } else {
+            categoryList = new ArrayList<>();
+            categoryList.add("-1");
+            sbd.append(" AND p.product.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
         }
         return new F.T2<>(sbd.toString(), params);
     }
@@ -281,7 +294,8 @@ public class ProcurePost extends Post<ProcureUnit> {
     public List<HashMap<String, Object>> queryLogs() {
         String sql = "SELECT e.createAt as createAt, e.username as username, fid as fid,"
                 + "p.selling_sellingId as sellingId,p.isPlaced as isPlaced,f.shipmentId as fba,e.message as message "
-                + "FROM ElcukRecord e LEFT JOIN ProcureUnit p ON e.fid = p.id LEFT JOIN FBAShipment f ON p.fba_id = f.id "
+                +
+                "FROM ElcukRecord e LEFT JOIN ProcureUnit p ON e.fid = p.id LEFT JOIN FBAShipment f ON p.fba_id = f.id "
                 + "WHERE e.action=? AND e.createAt >= ? AND e.createAt <= ? ORDER BY e.createAt DESC";
         List<Map<String, Object>> rows = DBUtils
                 .rows(sql, Messages.get("procureunit.deepUpdate"), Dates.morning(this.from), Dates.night(this.to));

@@ -1,0 +1,196 @@
+#{extends 'main_full_v3.html' /}
+#{set title:"采购单元列表 (${p.count()})"  /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+
+#{errorMsgs /}
+#{flash_alert /}
+
+<section class="content-max-width">
+  <div class="callout callout-info">
+    <h4>Note!</h4>
+    <p>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</p>
+    <p>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</p>
+  </div>
+</section>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{ProcureUnits.index()}" class="form-inline" id="search_Form">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
+
+            <select name="p.dateType" class="form-control">
+            #{list items:models.view.post.ProcurePost.DATE_TYPES, as:'t'}
+              <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+            #{/list}
+            </select>
+
+            <select name="p.whouseId" class="form-control">
+              <option value="0">去往市场</option>
+            #{list items:whouses, as:'wh'}
+              <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.shipType" class="form-control" style="width:82px;">
+              <option value="">运输方式</option>
+            #{list items:models.procure.Shipment.T.values(), as:'t'}
+              <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.isConfirm" class="form-control">
+              <option value="">是否核单</option>
+            #{list items:models.view.post.ProcurePost.C, as:'c'}
+              <option ${c == p.isConfirm ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.categories" multiple="multiple" id="categories" class="form-control">
+            #{list items:categoryIds, as:'c'}
+              <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+            #{/list}
+            </select>
+
+            <select name="p.stages" multiple="multiple" id="stage" class="form-control">
+            #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+                #{if stage.label() != '审批中'}
+                  <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+                #{/if}
+            #{/list}
+            </select>
+
+            <select name="p.cooperatorId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'cop'}
+              <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.projectName" class="form-control">
+              <option value="">项目名称</option>
+            #{list items:models.User.COR, as:'c'}
+                #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                  <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+                #{/if}
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+
+            <button class="btn btn-primary" data-loading>搜索</button>
+          </div>
+          <br>
+          <div class="row-fluid">
+            <div class="input-prepend input-append inline">
+              <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-primary" rel="popover"
+                 content="明天需要交货的采购计划" data-loading="loading">明天计划</a>
+              <a href="@{ProcureUnits.planView(tomorrow2)}" class="btn btn-primary" rel="popover"
+                 content="后天需要交货的采购计划" data-loading="loading">后天计划</a>
+              <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-primary" rel="popover"
+                 content="第三天需要交货的采购计划" data-loading="loading">大后天计划</a>
+              <a href="@{ProcureUnits.noPlaced()}" class="btn btn-primary" rel="popover" content="发货时间为当天,
+                          同时货物还没有抵达货代的采购计划" data-loading="loading">当天未抵达</a>
+            </div>
+
+            <div class="input-prepend input-append inline">
+              <button class="btn btn-info" name="splitBtn" data-loading>采购分拆</button>
+              <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
+              <input type="hidden" name="p.type" value="${p.type}" id="type">
+            </div>
+
+            <div class="inline">
+              <input type="hidden" name="p.unitIds" id="unitIds"/>
+              <a target="_blank" class="btn bg-navy margin inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+                <i class="icon-download-alt"></i>下载ZIP
+              </a>
+              <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
+            #{power.ck "procures.downloadreports"}
+              <a href="javascript:void(0)" id="download_excel" class="btn btn-success">
+                <i class="icon-download-alt"></i>导出采购计划</a>
+            #{/power.ck}
+            </div>
+          #{include 'Deliveryments/_box_number_model.html'/}
+
+          </div>
+        </form>
+      </div>
+
+      <form method="post" id="create_deliveryment">
+        <div class="box-body">
+        #{if isB2B}
+            #{render 'ProcureUnits/_b2b_unit_list.html', units: p.query(), p:p, checkbox:true/}
+        #{/if}
+            #{else }
+            #{render 'ProcureUnits/_unit_list_v3.html', units: p.query(), p:p, checkbox:true/}
+        #{/else}
+        </div>
+
+        <div class="box-footer clearfix">
+        #{if p.stages.contains(models.procure.ProcureUnit.STAGE.PLAN)}
+            #{power.ck "procures.createdeliveryment"}
+              <div class="col-md-3">
+                <div class="input-group">
+                  <input class="form-control" id="name_input" name="name" value="${name}" placeHolder="采购单的别名(必须)">
+                  <div class="input-group-btn">
+                    <button id="create_deliveryment_btn" class="btn btn-primary" data-disable-with='添加中'>添加采购单</button>
+                  </div>
+                </div>
+              </div>
+            #{/power.ck}
+        #{/if}
+        #{if p.stages.contains(models.procure.ProcureUnit.STAGE.DELIVERY)}
+          <div class="col-md-3">
+            <div class="input-group">
+              <input class="form-control" id="name_deliverplan" name="deliverName" value="${name}" placeHolder="出货单的别名(必须)">
+              <div class="input-group-btn">
+                <button id="create_deliverplan_btn" class="btn btn-primary" data-disable-with='添加中'>添加出货单</button>
+              </div>
+            </div>
+          </div>
+        #{/if}
+        #{bootstrap_pager_v3 pi:p, url:'' /}
+        </div>
+      </form>
+    </div>
+
+  #{records_v3 records:logs/}
+
+
+  </div>
+</div>
+
+
+

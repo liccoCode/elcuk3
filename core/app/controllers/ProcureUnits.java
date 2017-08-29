@@ -97,7 +97,7 @@ public class ProcureUnits extends Controller {
             p.stages.add(ProcureUnit.STAGE.PLAN);
             p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
-        render(p);
+        render("ProcureUnits/index_v3.html", p);
     }
 
     @Check("procures.indexWhouse")

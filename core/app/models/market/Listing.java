@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @Entity
 public class Listing extends GenericModel {
 
+    private static final long serialVersionUID = 439933692957446629L;
 
     /**
      * Condition

@@ -1,0 +1,316 @@
+#{set tr_key: key ? key : 'unit'/}
+<table class="table table-condensed table-bordered dataTable" id="unit_table">
+  <tr>
+  #{if checkbox}
+    <th width="20px;">
+      <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
+    </th>
+  #{/if}
+  #{if relationPage}
+    <th width="20px;">
+      <input type="checkbox" name="checkAll" data-index="${dpIndex}">
+    </th>
+  #{/if}
+    <th width="40px;">#</th>
+    <th>父ID</th>
+    <th width="40px;">阶段</th>
+    <th width="150px;">Selling</th>
+    <th>Sku</th>
+    <th width="130px;">FBA-ShipmentId<br>CenterId</th>
+    <th>采购单<br>供应商</th>
+    <th>去往市场</th>
+    <th width="120px;">数量<br>(计划/交货/入库)</th>
+    <th>可用库存</th>
+  #{ifnot deliveryplan}
+    <th>单价</th>
+    <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
+      <abbr>总价</abbr>
+    </th>
+    <th>剩余请款金额</th>
+  #{/ifnot}
+    <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="95px;">FnSku</th>
+    <th>运输方式</th>
+    <th>预计交货时间</th>
+    <th>预计运输时间</th>
+    <th>实际交货时间</th>
+    <th>质检结果</th>
+    <th width="90px;">创建人/<br>创建时间</th>
+  </tr>
+#{list items:units, as:'unit'}
+  <tr id="procureUnit_${unit.id}">
+      #{if checkbox}
+        <td>
+            #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+            #{if unit.fba && unit.fba.dto}
+              <!-- 优先使用自身的 FBA 箱包装数据 -->
+                #{set dto: unit.fba.dto/}
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                     data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                     data-width="${dto.width}" data-height="${dto.height}">
+            #{/if}
+            #{elseif cooperItem}
+              <!-- 使用维护好的合作伙伴的数据 -->
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                     data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                     data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                     data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+            #{/elseif}
+            #{else}
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="" data-num="" data-lastcartonnum=""
+                     data-singleboxweight="" data-length=""
+                     data-width="" data-height="">
+            #{/else}
+        </td>
+      #{/if}
+      #{if relationPage}
+        <td>
+          <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
+        </td>
+      #{/if}
+    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
+      <i class="icon-reorder"></i>
+        #{if unit.parent}
+          <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
+             rel="tooltip" title="${unit.type?.label()}"></i>
+        #{/if}<br>
+    ${unit.id}
+    </td>
+    <td>${unit.parent?.id}</td>
+    <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+    <td class="selling_id" style="word-break:break-all;">
+      <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
+    </td>
+    <td>
+      <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
+    </td>
+    <td>
+        #{if unit.fba}
+            #{cache unit.fba.cacheKey(), for:'6h'}
+            ${unit.fba.shipmentId}
+                #{set feeds: unit.fba.feeds()/}
+                #{if feeds.size() > 0}
+                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                    #{set lastFeed: feeds.get(0)/}
+                    #{if lastFeed.isFailed()}
+                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
+                    #{/if}
+                    #{elseif lastFeed.isSussess()}
+                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                      </i>
+                    #{/elseif}
+                    #{else }
+                      <i class="icon-search" name="showFeedsPage"
+                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                      </i>
+                    #{/else}
+                #{/if}
+            #{/cache}
+            #{set fbaCenter: unit.fba.fbaCenter/}
+            #{if fbaCenter}
+              <a href="javascript:void(0)" rel="tooltip" placement="top" title="检查 FBA Label 中的 Ship To 是否正确"
+                 name="checkFBALabel"
+                 data-addressline1="${fbaCenter.addressLine1}"
+                 data-addressline2="${fbaCenter.addressLine2}"
+                 data-city="${fbaCenter.city}"
+                 data-name="${fbaCenter.name}"
+                 data-countrycode="${fbaCenter.countryCode}"
+                 data-stateorprovincecode="${fbaCenter.stateOrProvinceCode}"
+                 data-postalcode="${fbaCenter.postalCode}"><i class="icon-eye-open"></i>
+              </a>
+            #{/if}
+        #{/if}
+      <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
+    </td>
+    <td>
+        #{if unit.deliveryment}
+          <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
+        #{/if}
+      <br>${unit.cooperator?.name}
+    </td>
+    <td>${unit.whouse?.name}</td>
+    <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+    ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
+    </td>
+    <td>${unit.availableQty}</td>
+      #{ifnot deliveryplan}
+        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+        <td>
+            #{if unit.type?.name() == 'StockSplit'}
+              0
+            #{/if}
+            #{else }
+            ${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+            #{/else}
+        </td>
+      #{/ifnot}
+    <td>
+      <!-- FnSku 下载 Label -->
+        #{if unit.selling?.fnSku}
+        ${unit.selling.fnSku}
+          <br/>
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
+            <i class="icon-download-alt"></i> New
+          </a>
+        #{/if}
+        #{elseif unit.selling != null}
+          <a class="btn btn-warning btn-xs" href="@{Sellings.selling()}/${unit.selling?.sellingId}">
+            补全 FnSku
+          </a>
+        #{/elseif}
+    </td>
+    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}<br>
+      <span style="color:red">${unit.isDedicated?'(专线)':''}</span>
+    </td>
+    <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
+    <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
+    <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>
+    <td>
+      <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
+      ${unit.result?.label()}
+      </a>
+    </td>
+    <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate /}</td>
+  </tr>
+
+  <tr id="${tr_key}_${unit.id}" style="display:none;">
+    <td colspan="${checkbox ? '22' : '20'}" style="background-color:#F0F0F0;">
+      <div class="col-md-3">
+        <div class="box box-warning">
+          <div class="box-header with-border">Comment</div>
+          <div class="box-body">${unit.comment}</div>
+        </div>
+
+      </div>
+      <div class="col-md-3">
+        <div class="box box-info">
+          <div class="box-header with-border">关联运输单</div>
+          <div class="box-body">
+              #{list items:unit.relateShipment(), as:'sp'}
+                <li>
+                  <a href="@{Shipments.show(sp.id)}">${sp}</a>
+                  预计 #{time_tooltip time: sp.dates?.planBeginDate /} 开船
+                </li>
+              #{/list}
+          </div>
+        </div>
+        <div class="box box-info">
+          <div class="box-header with-border">关联 FBA</div>
+          <div class="box-body">
+              #{if unit.fba}
+                <a href="${unit.fba.fbaLink()}">
+                  <i class="icon-external-link"></i>
+                ${unit.fba.shipmentId}
+                </a>
+              #{/if}
+              #{else }
+                <span class="text-warning">还没有 FBA</span>
+              #{/else}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="box box-success">
+          <div class="box-header with-border">实际交货量</div>
+          <div class="box-body">
+            <table class="table table-condensed table-bordered">
+              <tr>
+                <td>实际交货量</td>
+                <td>实际交货日期</td>
+              </tr>
+              <tr>
+                <td>${unit.attrs.qty}</td>
+                <td>${unit.attrs.deliveryDate.los()}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="box-footer">
+            <div class="btn-toolbar">
+              <!-- 普通修改 -->
+                #{if unit.selling}
+                  <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-sm btn-primary">修改</a>
+                #{/if}
+                #{else }
+                  <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-sm btn-primary">修改</a>
+                #{/else}
+                #{if unit.stage.name() == 'PLAN'}
+                  <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-sm btn-danger">
+                    删除
+                  </a>
+                #{/if}
+              <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-sm btn-info">变更详情</a>
+                #{power.ck "procures.dosplitunit"}
+                    #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                      <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-sm btn-default"
+                         rel="tooltip" title="如B2B拆单，样品，试用等操作">SKU分拆</a>
+                      <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-sm btn-warning" target="_blank">
+                      ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
+                    #{/if}
+                #{/power.ck}
+            </div>
+
+              #{if delivery}
+                <div class="btn-toolbar">
+                  <!-- 确认到    货代处 -->
+                    #{if unit.selling}
+                        #{ifnot unit.isPlaced}
+                          <a data-remote='true' data-method='PUT' class="btn btn-sm btn-info" id="isplaced_${unit.id}_btn"
+                             href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
+                        #{/ifnot}
+                    #{/if}
+                  <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-tragettr="procureUnit_${unit.id}"
+                     data-href="@{ProcureUnits.confirmUnit(unit.id)}" name="confirmUnitBtn">已核单</a>
+                  <a href="javascript:void(0)" class="btn btn-sm ${unit.noPayment?'btn-success':'btn-danger'}"
+                     data-tragettr="procureUnit_${unit.id}" data-href="@{ProcureUnits.noPayment(unit.id)}" name="noPaymentBtn"
+                     rel='tooltip' title='因各种原因而不需要纳入 未进请款单金额 统计'>${unit.noPayment?'统计':'不统计'}</a>
+                </div>
+                  #{if unit.fba}
+                      #{power.ck 'fbas.update'}
+                        <div class="btn-toolbar">
+                          <a href="javascript:void(0)" class="btn btn-sm btn-warning" id="replaceUnitFBA"
+                             data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
+                          </a>
+                        </div>
+                      #{/power.ck}
+                  #{/if}
+                <div class="btn-toolbar">
+                    #{if unit.fba}
+                      <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
+                      <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+                    #{/if}
+                </div>
+              #{/if}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="box box-warning">
+          <div class="box-header with-border"><h3 class="box-title">Record</h3></div>
+          <div class="box-body">
+              #{ifnot norecord}
+                  #{cache unit.recordsPageCacheKey(), for:'3h'}
+                    <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                        #{records_ul  records: unit.records()/}
+                    </div>
+                  #{/cache}
+              #{/ifnot}
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+#{/list}
+</table>
+
+<!-- Ship To Modal -->
+<div id="fba_ship_to_modal" class="modal hide fade">
+  <div class="modal-body" id="fba_ship_to_body"></div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+  </div>
+</div>

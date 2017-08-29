@@ -1,284 +1,301 @@
-#{extends 'main.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'创建新 Product' /}
 #{set 'moreScripts'}
     #{script 'products/blank.coffee'/}
+    #{script 'products/blank.es6'/}
 #{/set}
 
-<div class="row-fluid">
-  <div class="span12">
-  #{info_row title:'基础信息'}
-    <br/>
-    <ul>
-      <li class="text-error">请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</li>
-      <li class="text-error">长(包材)、宽(包材)、高(包材)、重量(包材)：是指包装好包材后整个产品的长宽高重量</li>
-      <li class="text-error">长(产品)、宽(产品)、高(产品)、重量(产品)：是指还未包装的裸产品的长宽高重量</li>
-    </ul>
-  #{/info_row}
+#{errorMsgs /}
+#{flash_alert /}
 
-  #{errorMsgs /}
-  #{flash_alert /}
-    <form action="@{Products.create()}" method="post" id="create_product_form">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th>Category</th>
-          <td>
-            <input type="text" id="pro_category" name="pro.category.categoryId" value="${pro.category?.categoryId}" style="width:130px"
-                   data-provide="typeahead" data-source="${categorys}" required="required" autocomplete="off">
-          </td>
+<section class="content-max-width">
+  <div class="callout callout-info">
+    <h4><i class="icon fa fa-info"></i>基础信息!</h4>
+    <p>请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</p>
+    <p>长(包材)、宽(包材)、高(包材)、重量(包材)：是指包装好包材后整个产品的长宽高重量</p>
+    <p>长(产品)、宽(产品)、高(产品)、重量(产品)：是指还未包装的裸产品的长宽高重量</p>
+  </div>
+</section>
 
-          <th>Family</th>
-          <td>
-            <input type="text" id="pro_family" name="pro.family.family" data-provide="typeahead" autocomplete="off"
-                   data-source="${families}" value="${pro.family?.family}" style="width:130px" required="required">
-          </td>
-
-          <th>SKU</th>
-          <td><input type="text" id="pro_sku" name="pro.sku" value="${pro.sku}" required="required" autocomplete="off"></td>
-        </tr>
-
-        <tr>
-          <th>长(包材)</th>
-          <td>
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.lengths" value="${pro.lengths}">
-              <span class="add-on">mm</span>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header"></div>
+      <form action="@{Products.create()}" method="post" id="create_product_form" role="form" class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">Category</label>
+            <div class="col-sm-2">
+              <input type="email" class="form-control" id="pro_category" name="pro.category.categoryId" required
+                     value="${pro.category?.categoryId}" data-provide="typeahead" data-source="${categorys}">
             </div>
-          </td>
-
-          <th>宽(包材)</th>
-          <td>
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.width" value="${pro.width}">
-              <span class="add-on">mm</span>
+            <label for="inputEmail3" class="col-sm-2 control-label">Family</label>
+            <div class="col-sm-2">
+              <input id="pro_family" name="pro.family.family" data-provide="typeahead" required class="form-control"
+                     data-source="${families}" value="${pro.family?.family}">
             </div>
-          </td>
-
-          <th>对应原始SKU</th>
-          <td>
-            <select  style="width:100px;" name="pro.origin_project">
-            #{list items:models.User.COR.values(), as:'c'}
-              <option value="${c.name()}">${c.label()}</option>
-            #{/list}
-            </select>
-            <input type="text" name="pro.origin_sku" value="${pro.origin_sku}">
-          </td>
-        </tr>
-
-        <tr>
-          <th>高(包材)</th>
-          <td>
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.heigh" value="${pro.heigh}">
-              <span class="add-on">mm</span>
+            <label for="inputEmail3" class="col-sm-2 control-label">SKU</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" id="pro_sku" name="pro.sku" value="${pro.sku}" required>
             </div>
-          </td>
+          </div>
 
-          <th>重量(包材)</th>
-          <td colspan="3">
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-              <span class="add-on">Kg</span>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.lengths" value="${pro.lengths}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
-
-            <div class="input-append">
-              <input type="text" class="input-mini" id="pro_weight_g">
-              <span class="add-on">g</span>
+            <label for="inputEmail3" class="col-sm-2 control-label">宽(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.width" value="${pro.width}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
-          </td>
-        </tr>
+          </div>
 
-        <tr>
-          <th>长(产品)</th>
-          <td>
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.productLengths" value="${pro.productLengths}">
-              <span class="add-on">mm</span>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">高(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.heigh" value="${pro.heigh}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
-          </td>
-
-          <th>宽(产品)</th>
-          <td colspan="3">
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.productWidth" value="${pro.productWidth}">
-              <span class="add-on">mm</span>
+            <label for="inputEmail3" class="col-sm-2 control-label">重量(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.weight" value="${pro.weight}">
+                <span class="input-group-addon">kg</span>
+              </div>
             </div>
-          </td>
-        </tr>
+          </div>
 
-        <tr>
-          <th>高(产品)</th>
-          <td>
-            <div class="input-append">
-              <input type="text" style="width:100px" name="pro.productHeigh" value="${pro.productHeigh}">
-              <span class="add-on">mm</span>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">长(产品)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.productLengths" value="${pro.productLengths}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
-          </td>
-
-          <th>重量(产品)</th>
-          <td colspan="3">
-            <div class="input-append">
-              <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
-              <span class="add-on">Kg</span>
+            <label class="col-sm-2 control-label">宽(产品)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.productWidth" value="${pro.productWidth}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
+          </div>
 
-            <div class="input-append">
-              <input type="text" class="input-mini" id="pro_productWeight_g">
-              <span class="add-on">g</span>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">高(产品)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.productHeigh" value="${pro.productHeigh}">
+                <span class="input-group-addon">mm</span>
+              </div>
             </div>
-          </td>
-        </tr>
+            <label class="col-sm-2 control-label">重量(产品)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control col-xs-1" name="pro.productWeight" value="${pro.productWeight}">
+                <span class="input-group-addon">Kg</span>
 
-        <tr>
-          <th>申报价格(USD)</th>
-          <td>
-            <div class="input-prepend">
-              <span class="add-on">$</span>
-              <input type="text" style="width:100px" name="pro.declaredValue" value="${pro.declaredValue}">
+                <input type="text" class="form-control col-xs-1" id="pro_productWeight_g">
+                <span class="input-group-addon">g</span>
+              </div>
             </div>
-          </td>
-          <th>申报品名(运输)</th>
-          <td colspan="3">
-            <input type="text" id="pro_declareName" name="pro.declareName" value="${pro.declareName}">
-          </td>
-        </tr>
+          </div>
 
-        <tr>
-          <th>用途(运输)</th>
-          <td><input type="text" name="pro.useWay" value="${pro.useWay}"/></td>
-          <th>中文品名(运输)</th>
-          <td colspan="3"><input type="text" name="pro.chineseName" value="${pro.chineseName}"/></td>
-        </tr>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">申报价格(USD)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <span class="input-group-addon">$</span>
+                <input type="text" class="form-control" name="pro.declaredValue" value="${pro.declaredValue}">
+              </div>
+            </div>
+            <label class="col-sm-2 control-label">申报品名(运输)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" id="pro_declareName" name="pro.declareName" value="${pro.declareName}">
+                <span class="input-group-addon">mm</span>
+              </div>
+            </div>
+          </div>
 
-        <tr>
-          <th>销售等级</th>
-          <td>
-          #{select 'pro.salesLevel', items: models.product.Product.E.values(), value: pro.salesLevel, class:".select" /}
-          </td>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">用途(运输)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.useWay" value="${pro.useWay}">
+            </div>
+            <label class="col-sm-2 control-label">中文品名(运输)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.chineseName" value="${pro.chineseName}">
+            </div>
+          </div>
 
-          <th>上架状态</th>
-          <td>
-          #{select_enum name: "pro.marketState", items: models.product.Product.T.values(), value: pro.marketState/}
-          </td>
-          <th>UPC</th>
-          <td><input type="text" name="pro.upc" value="${pro.upc}" required></td>
-        </tr>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">销售等级</label>
+            <div class="col-sm-2">
+              <select class="form-control" name="pro.salesLevel">
+              #{list items:models.product.Product.E.values(), as:'e'}
+                <option value="${e}" ${e == pro.salesLevel?.name() ?'selected':''}>${e}</option>
+              #{/list}
+              </select>
+            </div>
+            <label class="col-sm-2 control-label">上架状态</label>
+            <div class="col-sm-2">
+              <select class="form-control" name="pro.marketState">
+              #{list items:models.product.Product.T.values(), as:'t'}
+                <option value="${t}" ${t == pro.marketState?.name() ?'selected':''}>${t}</option>
+              #{/list}
+              </select>
+            </div>
+            <label class="col-sm-2 control-label">UPC</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.upc" value="${pro.upc}" required>
+            </div>
+          </div>
 
-        <tr>
-          <th>采购状态</th>
-          <td>
-          #{select_enum name: "pro.procureState", items: models.product.Product.P.values(), value: pro.procureState/}
-          </td>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">采购状态</label>
+            <div class="col-sm-2">
+              <select class="form-control" name="pro.procureState">
+              #{list items:models.product.Product.P.values(), as:'p'}
+                <option value="${p}" ${p == pro.procureState?.name() ?'selected':''}>${p}</option>
+              #{/list}
+              </select>
+            </div>
+            <label class="col-sm-2 control-label">产品的生命周期</label>
+            <div class="col-sm-2">
+              <select class="form-control" name="pro.marketState">
+              #{list items:models.product.Product.L.values(), as:'t'}
+                <option value="${t}" ${t == pro.productState?.name() ?'selected':''}>${t}</option>
+              #{/list}
+              </select>
+            </div>
+            <label class="col-sm-2 control-label">Part Number</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.partNumber" value="${pro.partNumber}" required>
+            </div>
+          </div>
 
-          <th>产品的生命周期</th>
-          <td>
-          #{select_enum name: "pro.productState", items: models.product.Product.L.values(), value: pro.productState/}
-          </td>
-          <th>Part Number</th>
-          <td><input type="text" name="pro.partNumber" value="${pro.partNumber}" required></td>
-        </tr>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">上市时间</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                <input role="date" class="form-control" name="pro.marketTime" id="marketTimeDate" value="${pro.marketTime}">
+              </div>
+            </div>
+            <label class="col-sm-2 control-label">退市时间</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+                <input role="date" class="form-control" name="pro.delistingTime" value="${pro.delistingTime}">
+              </div>
+            </div>
+            <label class="col-sm-2 control-label">UPC(JP)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.upcJP" value="${pro.upcJP}">
+            </div>
+          </div>
 
-        <tr>
-          <th>上市时间</th>
-          <td>
-            <input type="date" name="pro.marketTime" value="${pro.marketTime}">
-          </td>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">产品名称</label>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" name="pro.abbreviation" id="pro_abbreviation"
+                     value="${pro.abbreviation}" required>
+            </div>
+            <label class="col-sm-2 control-label">Part Number(JP)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.partNumberJP" value="${pro.partNumberJP}">
+            </div>
+          </div>
 
-          <th>退市时间</th>
-          <td>
-            <input type="date" name="pro.delistingTime" value="${pro.delistingTime}">
-          </td>
+          <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">标题</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.productName" value="${pro.productName}">
+            </div>
+            <label for="inputEmail3" class="col-sm-2 control-label">副标题</label>
+            <div class="col-sm-6">
+              <input type="text" class="form-control" name="pro.subtitle" value="${pro.subtitle}" required>
+            </div>
+          </div>
 
-          <th>UPC(JP)</th>
-          <td><input type="text" name="pro.upcJP" value="${pro.upcJP}"></td>
-        </tr>
+          <div class="form-group">
+            <label class="col-sm-1 control-label">产品定位</label>
+            <label class="col-sm-2 control-label" style="text-align:left;">Title</label>
+            <label class="col-sm-6 control-label" style="text-align:left;">Content</label>
+          </div>
 
-        <tr>
-          <th>产品名称</th>
-          <td colspan="3">
-            <input type="text" style="width:95%" id="pro_abbreviation" name="pro.abbreviation" value="${pro.abbreviation}"
-                   required="required">
-          </td>
-          <th>Part Number(JP)</th>
-          <td><input type="text" name="pro.partNumberJP" value="${pro.partNumberJP}"></td>
-        </tr>
+          <div id="locates_table">
+          #{list items:pro.locate, as:'locate'}
+            <div class="form-group" style="vertical-align:middle;">
+              <label class="col-sm-1 control-label"></label>
+              <div class="col-sm-2">
+                <textarea class="form-control" name="pro.locate[${locate_index - 1}].title">${locate.title}</textarea>
+              </div>
+              <div class="col-sm-6">
+                <textarea class="form-control" name="pro.locate[${locate_index - 1}].content">${locate.content}</textarea>
+              </div>
+              <div class="col-sm-1">
+                <button type="button" class="btn btn-danger btn-sm">删除</button>
+              </div>
+            </div>
+          #{/list}
+          </div>
 
-        <tr>
-          <th>标题</th>
-          <td>
-            <input type="text" style="width:95%" value="${pro.productName}" name="pro.productName">
-          </td>
-          <th>副标题</th>
-          <td colspan="3">
-            <input type="text" style="width:95%" value="${pro.subtitle}" name="pro.subtitle">
-          </td>
-        </tr>
+          <div class="form-group">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-11">
+              <a class="btn btn-default" rel="popover" content="不够?再来一行" placement="right" id="more_locate_btn"
+                 data-table="locates_table"><i class="icon-plus"></i> More</a>
+            </div>
+          </div>
 
-        <tr>
-          <th>产品定位</th>
-          <td colspan="5">
-            <table class="table table-hover table-condensed table-bordered" id="locates_table">
-              <tr>
-                <th>Title</th>
-                <th>Content</th>
-              </tr>
-            #{list items:pro.locate, as:'locate'}
-              <tr>
-                <td class="span4">
-                  <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].title">${locate
-                  .title}</textarea>
-                </td>
-                <td>
-                  <textarea rows="2" style="width:90%" name="pro.locate[${locate_index - 1}].content">${locate
-                  .content}</textarea>
-                </td>
-                <td>
-                  <a class="btn" name='delete_locate_row'>删除</a>
-                </td>
-              </tr>
-            #{/list}
-            </table>
-            <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-               id="more_locate_btn" data-table="locates_table">
-              <i class="icon-plus"></i> More
-            </a>
-          </td>
-        </tr>
+          <div class="form-group">
+            <label class="col-sm-1 control-label">产品卖点</label>
+            <label class="col-sm-2 control-label" style="text-align:left;">Title</label>
+            <label class="col-sm-6 control-label" style="text-align:left;">Content</label>
+          </div>
 
-        <tr>
-          <th>产品卖点</th>
-          <td colspan="5">
-            <table class="table table-hover table-condensed table-bordered" id="selling_points_table">
-              <tr>
-                <th>Title</th>
-                <th>Content</th>
-                <th>操作</th>
-              </tr>
-            #{list items:pro.sellingPoint, as:'point'}
-              <tr>
-                <td class="span4">
-                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].title">${point.title}</textarea>
-                </td>
-                <td>
-                  <textarea rows="2" style="width:90%" name="pro.sellingPoint[${point_index - 1}].content">${point.content}</textarea>
-                </td>
-                <td>
-                  <a class="btn" name='delete_selling_point_row'>删除</a>
-                </td>
-              </tr>
-            #{/list}
-            </table>
-            <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-               id="more_selling_point_btn" data-table="selling_points_table">
-              <i class="icon-plus"></i> More
-            </a>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="6">
-            <button class="btn btn-primary">创建</button>
-          </td>
-        </tr>
-      </table>
-    </form>
+          <div id="selling_points_table">
+          #{list items:pro.sellingPoint, as:'point'}
+            <div class="form-group" style="vertical-align:middle;">
+              <label class="col-sm-1 control-label"></label>
+              <div class="col-sm-2">
+                <textarea class="form-control" name="pro.sellingPoint[${point_index - 1}].title">${point.title}</textarea>
+              </div>
+              <div class="col-sm-6">
+                <textarea class="form-control" name="pro.sellingPoint[${point_index - 1}].content">${point.content}</textarea>
+              </div>
+              <div class="col-sm-1">
+                <button type="button" class="btn btn-danger btn-sm">删除</button>
+              </div>
+            </div>
+          #{/list}
+          </div>
+
+          <div class="form-group">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-11">
+              <a class="btn btn-default" rel="popover" content="不够?再来一行" placement="right" id="more_selling_point_btn"
+                 data-table="selling_points_table"><i class="icon-plus"></i> More</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="box-footer">
+          <button class="btn btn-primary">创建</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

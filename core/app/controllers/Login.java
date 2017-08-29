@@ -125,6 +125,25 @@ public class Login extends Secure.Security {
 
     @SuppressWarnings("unchecked")
     @Util
+    public static String currentUserName() {
+        return Secure.Security.connected();
+    }
+
+    public static String currentDepart() {
+        String username = Secure.Security.connected();
+        if(StringUtils.isNotBlank(username)) {
+            if(USER_CACHE.get(username) == null) {
+                User user = User.findByUserName(username.toLowerCase());
+                USER_CACHE.put(user.username, user);
+            }
+            User user = USER_CACHE.get(username);
+            return user.department == null ? "" : user.department.label();
+        }
+        return "";
+    }
+
+    @SuppressWarnings("unchecked")
+    @Util
     public static User updateUserCache(User user) {
         USER_CACHE.put(user.username, user);
         return USER_CACHE.get(user.username);
