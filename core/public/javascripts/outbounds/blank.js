@@ -76,7 +76,7 @@ $(() => {
       return;
     }
     let $form = $("#submit_form");
-    window.open("/Outbounds/printOutboundForm?" + $form.serialize(), "_blank");
+    window.open('/Excels/exportOutBoundReport?' + $form.serialize(), "_blank");
   });
 
   $("#data_table").on("click", "input[name='editBoxInfo']", function (e) {

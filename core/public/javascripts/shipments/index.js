@@ -2,6 +2,13 @@
  * Created by licco on 2016/12/6.
  */
 $(() => {
+
+  $('#today').click(function (e) {
+    e.preventDefault();
+    $("input[name='p.from']").setDate(new Date());
+    $("input[name='p.to']").setDate(new Date());
+  });
+
   $('#createApplyBtn').click(function () {
     /*过滤掉apply为空的数据*/
     let $ck = $("#shipmentTable [type='checkbox']:checked");
