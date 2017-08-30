@@ -44,7 +44,7 @@
               </div>
             </div>
 
-            <select name="p.dateType" style="width: 150px;" class="form-control">
+            <select name="p.dateType" style="width: 120px;" class="form-control">
             #{list items:dateTypes, as:'t'}
               <option value="${t._1}" ${t._1 == p.dateType ? 'selected' : ''}>${t._2}</option>
             #{/list}
@@ -64,13 +64,13 @@
             #{/list}
             </select>
 
-            <select name="p.whouseIds" style="width:150px;" id="whouse_id" multiple="multiple" class="form-control">
-                         #{list items:whouses, as:'wh'}
-                           <option ${p.whouseIds.contains(wh.id) ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
-                         #{/list}
+            <select name="p.whouseIds" style="width:120px;" id="whouse_id" multiple="multiple" class="form-control">
+            #{list items:whouses, as:'wh'}
+              <option ${p.whouseIds.contains(wh.id) ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+            #{/list}
             </select>
 
-            <select name="p.cooperId" style="width: 150px;" class="form-control">
+            <select name="p.cooperId" style="width: 120px;" class="form-control">
               <option value="">运输商</option>
             #{list items:cooperators, as:'cooper'}
               <option ${p.cooperId == cooper.id ? 'selected' : ''} value="${cooper.id}">${cooper.name}</option>
@@ -91,13 +91,11 @@
             </div>
 
 
-            <div class="inline">
-              <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
-              <a href="@{Shipments.blank()}" class="btn btn-success">创建新运输单</a>
-            </div>
+            <button data-url='@{Shipments.index()}' class="btn btn-primary" data-loading='提交中...'>搜索</button>
+            <a href="@{Shipments.blank()}" class="btn btn-warning" data-loading>创建新运输单</a>
           </div>
         </div>
-        
+
         <div class="box-body">
           <div class="row-fluid">
             <div class="span12">
@@ -105,20 +103,19 @@
             </div>
             <div class="btn-toolbar">
             #{power.ck 'applys.shipmenttoapply'}
-              <button id="createApplyBtn" class="btn btn-success" data-url='@{Applys.shipmentToApply()}'
-                      data-disable-with='创建请款单中...'>
-                创建运输请款单
+              <button id="createApplyBtn" class="btn bg-orange" data-url='@{Applys.shipmentToApply()}'
+                      data-disable-with='创建请款单中...'>创建运输请款单
               </button>
             #{/power.ck}
             #{power.ck 'outbounds.index'}
-              <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-success" id="outboundBtn">
+              <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-warning" id="outboundBtn">
                 创建出库单
               </a>
             #{/power.ck}
               <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-success">
-                <i class="icon-download-alt"></i>导出运输单发货明细excel</a>
+                <i class="icon-download-alt"></i> 导出运输单发货明细excel</a>
               <a href="javascript:void(0)" data-url="@{Excels.shipmentDetailCost()}" target="_blank" id="exportBtn" class="btn btn-success">
-                <i class="icon-download-alt"></i>物流费用报表</a>
+                <i class="icon-download-alt"></i> 物流费用报表</a>
             </div>
           </div>
         </div>
