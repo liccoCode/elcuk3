@@ -9,11 +9,10 @@
     <th>Buyer</th>
     <th>SKU</th>
     <th style="width:100px;">PromotionIDs</th>
-    <th>DiscountPrice</th>
     <th>Email</th>
-    <th name="createDate" class="sortable">Create <i class="icon-sort"></i></th>
-    <th name="shipDate" class="sortable">ShipDate <i class="icon-sort"></i></th>
-    <th name="paymentDate" class="sortable">Payment <i class="icon-sort"></i></th>
+    <th>Create</th>
+    <th>ShipDate</th>
+    <th>Payment</th>
     <th>State</th>
     <th>Invoice</th>
 </tr>
@@ -41,14 +40,13 @@
     </td>
     <td>${ord.buyer}</td>
     <td>${ord.showItemSku()}</td>
-    <td>${ord.showPromotionIDs()}</td>
-    <td>${ord.showDiscountPrice()}</td>
+    <td data-toggle="tooltip" title="${ord.showDiscountPrice()}">${ord.showPromotionIDs()}</td>
     <td>
         <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
     </td>
-    <td>#{time_tooltip time:ord.createDate/}</td>
-    <td>#{time_tooltip time:ord.shipDate/}</td>
-    <td>#{time_tooltip time:ord.paymentDate/}</td>
+    <td>#{time_tooltip_v3 time:ord.createDate/}</td>
+    <td>#{time_tooltip_v3 time:ord.shipDate/}</td>
+    <td>#{time_tooltip_v3 time:ord.paymentDate/}</td>
     <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
     <td>
     #{if ord.invoiceState=='yes'}

@@ -4,9 +4,9 @@
 $(() => {
 
   $('#today').click(function (e) {
-    e.preventDefault();
-    $("input[name='p.from']").setDate(new Date());
-    $("input[name='p.to']").setDate(new Date());
+    $("input[name='p.from']").datepicker("setDate", new Date());
+    $("input[name='p.to']").datepicker("setDate", new Date());
+
   });
 
   $('#createApplyBtn').click(function () {
