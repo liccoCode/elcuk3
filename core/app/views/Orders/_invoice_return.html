@@ -93,15 +93,15 @@
       <td class="td4">
         <strong>${invoiceformat.to}</strong> <br>
       #{if invoice != null}
-        <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
+        <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.invoiceto.replace("DE","Deutschland")}">
       #{/if}
       #{else}
           #{if ord.address1!=null && ord.address1.length()>0}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.reciver+","+ord.address1
+            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.reciver+","+ord.address1
             .replace("DE","Deutschland")}">
           #{/if}
           #{else}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
+            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
           #{/else}
       #{/else}
       </td>
@@ -131,10 +131,10 @@
     <tr>
       <td class="td4"><strong>${invoiceformat.address}</strong><br>
       #{if invoice != null}
-        <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
+        <input class="form-control input-sm" type="text" id="address" name="invoice.address" value="${invoice.address.replace("DE","Deutschland")}">
       #{/if}
       #{else}
-        <input style="width:100%" type="text" id="address" name="invoice.address" value="${editaddress}">
+        <input class="form-control input-sm" type="text" id="address" name="invoice.address" value="${editaddress}">
       #{/else}
       </td>
       <td rowspan="2"></td>
