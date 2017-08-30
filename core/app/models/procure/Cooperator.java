@@ -362,7 +362,7 @@ public class Cooperator extends Model {
     }
 
     public List<Material> findMaterialNotExistCooper() {
-        List<Material> materials = Material.findAll();
+        List<Material> materials = Material.find("isDel = 0",null).fetch();
         List<CooperItem> items = this.cooperItems.stream()
                 .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
         List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
