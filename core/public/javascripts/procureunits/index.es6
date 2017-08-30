@@ -2,6 +2,13 @@
  * Created by licco on 2016/11/14.
  */
 $(() => {
+
+  $('#today').click(function (e) {
+    e.preventDefault();
+    $("input[name='p.from']").setDate(new Date());
+    $("input[name='p.to']").setDate(new Date());
+  });
+
   $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function (e) {
     e.stopPropagation();
     let $btn = $(this);
@@ -147,6 +154,14 @@ $(() => {
       "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
       "sPaginationType": "full_numbers",
       "iDisplayLength": 50,
+      "columnDefs": [
+        {
+          width: "200px",
+          targets: 0
+        },
+        { width: "200px", targets: 10 }
+
+      ],
       "aoColumnDefs": [
         {
           "bSortable": false,
