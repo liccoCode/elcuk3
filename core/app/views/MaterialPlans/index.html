@@ -1,6 +1,7 @@
 #{extends 'main_full.html'/}
 #{set title:"物料出货单列表 (${materialPlans.size()})" /}
 #{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
     #{script 'materialPlans/index.es6'/}
 #{/set}
 
