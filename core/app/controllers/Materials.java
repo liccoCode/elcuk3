@@ -11,6 +11,7 @@ import models.view.Ret;
 import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -50,6 +51,10 @@ public class Materials extends Controller {
 
     public static void create(Material m, List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
+        if(Material.find("code =? and isDel =0", m.code).first()!=null) {
+            Validation.addError("", "物料编码"+m.code+"已经存在");
+        }
+        if(Validation.hasErrors())  render("/Materials/blank.html", m);
         m.save();
         boms.forEach(unit -> {
             if(unit.id != null) {
