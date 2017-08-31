@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
@@ -11,15 +11,37 @@
     #{script 'localResize.ui.coffee'/}
     #{script 'mobileBUGFix.mini.js'/}
 #{/set}
+
 #{errorMsgs /}
 #{flash_alert /}
 
-#{warning_row ''}
-<ol>
-  <li>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</li>
-  <li>如果附件管理不能正常显示，请联系开发部</li>
-</ol>
-#{/warning_row}
+<section class="content-max-width">
+  <div class="callout callout-warning">
+    <h4>Note!</h4>
+    <p>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</p>
+    <p>如果附件管理不能正常显示，请联系开发部</p>
+  </div>
+</section>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#basicinfo" data-toggle='tab'>基本信息</a></li>
+        <li><a href="#extends" data-toggle='tab'>物流信息</a></li>
+        <li><a href="#newattach" data-toggle='tab'>附件管理</a></li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane active" id='basicinfo'>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 #{if pro == null}
 读取的 Product 不存在!
