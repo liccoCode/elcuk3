@@ -17,6 +17,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -124,6 +125,14 @@ public class Materials extends Controller {
         List<MaterialBom> boms = p.query();
         List<User> users = User.find("closed=?", false).fetch();
         User currUser = Login.current();
+        boms.forEach(bom -> {
+            List<Material> materialList = new ArrayList<>();
+            bom.materials.forEach(material -> {
+                if(!material.isDel)
+                    materialList.add(material);
+            });
+            bom.materials = materialList;
+        });
         render(p, boms, users, currUser);
     }
 
@@ -213,7 +222,9 @@ public class Materials extends Controller {
      */
     public static void showMaterialListByBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
-        List<Material> materials = bom.materials;
+        List<Material> materials = bom.materials.stream().
+                filter(item -> item.isDel == false).collect(Collectors.toList());
+        ;
         render("/Materials/_unit_list.html", materials);
     }
 }
