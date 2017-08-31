@@ -1,54 +1,52 @@
 <div class="row-fluid">
-  <form action="@{Products.update()}" method="post" id="whouse_attrs_form">
+  <form action="@{Products.update()}" method="post" id="whouse_attrs_form" class="form-horizontal">
     <table class="table table-bordered">
       <tr>
-        <td width="6%">SKU</td>
+        <th width="6%">SKU</th>
         <td>
         #{set sku: pro.whouseAttrs.whSku? pro.whouseAttrs.whSku : pro.sku/}
-          <input type="text" name="pro.whouseAttrs.whSku" value="${sku}" title="SKU" class="input-block-level"/>
+          <input type="text" name="pro.whouseAttrs.whSku" value="${sku}" title="SKU" class="form-control"/>
           <input type="hidden" name="pro.sku" value="${pro.sku}">
         </td>
       </tr>
       <tr>
-        <td width="10%">产品描述</td>
+        <th width="10%">产品描述</th>
         <td>
         #{set productName: pro.whouseAttrs.whProductName? pro.whouseAttrs.whProductName : pro.abbreviation/}
-          <textarea title="产品描述" rows="3" name="pro.whouseAttrs.whProductName" class="input-block-level">${productName}</textarea>
+          <textarea title="产品描述" rows="3" name="pro.whouseAttrs.whProductName" class="form-control">${productName}</textarea>
         </td>
       </tr>
       <tr>
-        <td>产品型号</td>
+        <th>产品型号</th>
         <td>
-          <input type="text" name="pro.whouseAttrs.whModel" value="${pro.whouseAttrs.whModel}" title="产品型号" class="input-block-level"/>
+          <input type="text" name="pro.whouseAttrs.whModel" value="${pro.whouseAttrs.whModel}" title="产品型号" class="form-control"/>
         </td>
       </tr>
       <tr>
-        <td>产品规格</td>
+        <th>产品规格</th>
         <td>
-          <textarea rows="6" name="pro.whouseAttrs.whFormat" title="产品规格" class="input-block-level">${pro.whouseAttrs.whFormat}</textarea>
+          <textarea rows="6" name="pro.whouseAttrs.whFormat" title="产品规格" class="form-control">${pro.whouseAttrs.whFormat}</textarea>
         </td>
       </tr>
       <tr>
         <td>产品颜色</td>
         <td>
-          <input type="text" name="pro.whouseAttrs.whColor" value="${pro.whouseAttrs.whColor}" title="产品颜色"
-                 class="input-block-level"/>
+          <input name="pro.whouseAttrs.whColor" value="${pro.whouseAttrs.whColor}" title="产品颜色" class="form-control"/>
         </td>
       </tr>
       <tr>
         <td>包装内描述</td>
         <td>
-          <textarea title="包装内描述" rows="3" name="pro.whouseAttrs.whDescription" class="input-block-level">${pro.whouseAttrs.whDescription}</textarea>
+          <textarea title="包装内描述" rows="3" name="pro.whouseAttrs.whDescription" class="form-control">${pro.whouseAttrs.whDescription}</textarea>
         </td>
       </tr>
       <tr>
         <td>包材尺寸(长*宽*高)</td>
         <td>
         #{set dimensions: pro.whouseAttrs.whDimensions? pro.whouseAttrs.whDimensions : pro.dimensions()/}
-          <div class="input-append">
-            <input type="text" name="pro.whouseAttrs.whDimensions" value="${dimensions}" title="包材尺寸"
-                   class="input-xxlarge"/>
-            <span class="add-on">mm</span>
+          <div class="input-group col-sm-4">
+            <input type="text" name="pro.whouseAttrs.whDimensions" value="${dimensions}" title="包材尺寸" class="form-control"/>
+            <span class="input-group-addon">mm</span>
           </div>
         </td>
       </tr>
@@ -56,17 +54,16 @@
         <td>包材重量</td>
         <td>
         #{set weight: pro.whouseAttrs.whWeight? pro.whouseAttrs.whWeight : pro.weightWithGram()/}
-          <div class="input-append">
-            <input type="text" name="pro.whouseAttrs.whWeight" value="${weight}" title="包材重量"
-                   class="input-mini"/>
-            <span class="add-on">g</span>
+          <div class="input-group col-sm-4">
+            <input type="text" name="pro.whouseAttrs.whWeight" value="${weight}" title="包材重量" class="form-control"/>
+            <span class="input-group-addon">g</span>
           </div>
         </td>
       </tr>
     #{power.ck "products.update"}
       <tr>
         <td colspan="4">
-          <a class="btn btn-success" id="save_whouse_atts_btn">保存</a>
+          <a class="btn btn-primary" id="save_whouse_atts_btn">保存</a>
         </td>
       </tr>
     #{/power.ck}
