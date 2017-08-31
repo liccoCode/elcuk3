@@ -260,28 +260,37 @@ public class MaterialUnit extends Model {
                 .setScale(2, 4)
                 .floatValue();
     }
+
     /**
      * 格式化产品要求，前台 popover 使用
      */
     public String formatProductTerms() {
         StringBuilder message = new StringBuilder();
-        message.append("<span class='label label-info'>规格:</span><br>");
-        if(material.specification != null && StringUtils.isBlank(material.specification)) {
+        if(StringUtils.isNotBlank(material.specification)) {
+            message.append("<span class='label label-info'>规格:</span><br>");
             String[] messageArray = StringUtils.split(material.specification, "\n");
             for(String text : messageArray) {
                 message.append("<p>").append(text).append("<p>");
             }
         }
-        if(material.texture != null && StringUtils.isNotEmpty(material.texture)) {
+        if(StringUtils.isNotEmpty(material.texture)) {
             message.append("<span class='label label-info'>材质:</span><br>");
             String[] messageArray = StringUtils.split(material.texture, "\n");
             for(String text : messageArray) {
                 message.append("<p>").append(text).append("<p>");
             }
         }
-        if(material.technology != null && StringUtils.isNotEmpty(material.technology)) {
+        if(StringUtils.isNotEmpty(material.technology)) {
             message.append("<span class='label label-info'>工艺:</span><br>");
             String[] messageArray = StringUtils.split(material.technology, "\n");
+            for(String text : messageArray) {
+                message.append("<p>").append(text).append("<p>");
+            }
+        }
+        if(material.cooperItems != null && material.cooperItems.size() > 0 &&
+                StringUtils.isNotEmpty(material.cooperItems.get(0).productTerms)) {
+            message.append("<span class='label label-info'>产品要求:</span><br>");
+            String[] messageArray = StringUtils.split(material.cooperItems.get(0).productTerms, "\n");
             for(String text : messageArray) {
                 message.append("<p>").append(text).append("<p>");
             }
