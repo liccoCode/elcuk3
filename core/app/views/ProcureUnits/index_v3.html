@@ -132,10 +132,10 @@
 
             <div class="inline">
               <input type="hidden" name="p.unitIds" id="unitIds"/>
-              <a target="_blank" class="btn bg-navy margin inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+              <a target="_blank" class="btn bg-navy margin" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
                 <i class="icon-download-alt"></i>下载ZIP
               </a>
-              <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
+              <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary">导出修改日志</a>
             #{power.ck "procures.downloadreports"}
               <a href="javascript:void(0)" id="download_excel" class="btn btn-success">
                 <i class="icon-download-alt"></i>导出采购计划</a>
