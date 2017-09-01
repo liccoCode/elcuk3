@@ -842,21 +842,24 @@ public class Excels extends Controller {
     public static void exportOutBoundReport(List<String> ids) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         List<Outbound> outbounds = Outbound.find("id IN " + SqlSelect.inlineParam(ids)).fetch();
-        Set<Long> whouseSet = new HashSet<>();
-        outbounds.stream().forEach(outbound -> whouseSet.add(outbound.whouse.getId()));
-        if(whouseSet.size() > 1) renderText("请勾选同一目的国家的出库单!");
+        Set<Shipment.T> shipTypeSet = new HashSet<>();
+        outbounds.stream().forEach(outbound -> shipTypeSet.add(outbound.shipType));
+        if(shipTypeSet.size() > 1) renderText("请勾选同一运输方式的出库单!");
         Set<String> targetIdSet = new HashSet<>();
         outbounds.stream().forEach(outbound -> targetIdSet.add(outbound.showCompany()));
         if(targetIdSet.size() > 1) renderText("请勾选同一货代公司的出库单!");
         Set<String> createDateSet = new HashSet<>();
         outbounds.stream().forEach(outbound -> createDateSet.add(dateFormat.format(outbound.createDate)));
         if(createDateSet.size() > 1) renderText("请勾选同一出库日期的出库单!");
+        Set<String> projectNameSet = new HashSet<>();
+        outbounds.stream().forEach(outbound -> projectNameSet.add(outbound.projectName));
+        if(projectNameSet.size() > 1) renderText("请勾选同一项目的出库单!");
 
         String createDate = dateFormat.format(outbounds.get(0).createDate);
         String targetId = outbounds.get(0).showCompany();
         String shipType = outbounds.get(0).shipType.label();
         String projectName = outbounds.get(0).projectName;
-            List<ProcureUnit> procureUnits = new ArrayList<>();
+        List<ProcureUnit> procureUnits = new ArrayList<>();
 
         outbounds.stream().forEach(outbound -> procureUnits.addAll(outbound.units));
         request.format = "xls";

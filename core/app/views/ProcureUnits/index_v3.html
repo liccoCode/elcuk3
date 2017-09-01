@@ -19,14 +19,6 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-<section class="content-max-width">
-  <div class="callout callout-info">
-    <h4>Note!</h4>
-    <p>当搜索的[阶段]为 PLAN 的时候, 则自动开启 添加采购单 功能</p>
-    <p>当搜索的[阶段]为 DELIVERY 的时候, 则自动开启 添加出货单 功能</p>
-  </div>
-</section>
-
 <div class="row">
   <div class="col-md-12">
     <div class="box box-primary">
@@ -132,10 +124,10 @@
 
             <div class="inline">
               <input type="hidden" name="p.unitIds" id="unitIds"/>
-              <a target="_blank" class="btn bg-navy margin inline" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
+              <a target="_blank" class="btn bg-navy margin" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
                 <i class="icon-download-alt"></i>下载ZIP
               </a>
-              <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary inline">导出修改日志</a>
+              <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary">导出修改日志</a>
             #{power.ck "procures.downloadreports"}
               <a href="javascript:void(0)" id="download_excel" class="btn btn-success">
                 <i class="icon-download-alt"></i>导出采购计划</a>

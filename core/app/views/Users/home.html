@@ -1,64 +1,148 @@
-#{extends 'main.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Welcome Home [' + user.username.capFirst() + ']'/}
 
 #{errorMsgs /}
 #{flash_alert /}
-#{info_row title:'用户信息'/}
+
 <div class="row">
-  <div class="span12">
-    <form method="post" action="@{Users.updates()}">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th>用户名</th>
-          <td>${user.username}</td>
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <h3 class="box-title">用户信息</h3>
+      </div>
+      <form method="post" action="@{Users.updates()}" class="form-horizontal">
+        <div class="box-body">
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">用户名</label>
+                <input style="width:250px;" readonly class="form-control" name="wuser.username" value="${user.username}">
+                <input type="hidden" value="${user.id}" name="userid">
+              </div>
+            </div>
 
-          <th>Email</th>
-          <td>${user.email}</td>
-        </tr>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Email</label>
+                <input style="width:250px;" class="form-control" name="wuser.email" value="${user.email}" readonly>
+              </div>
+            </div>
+          </div>
 
-        <tr>
-          <th>手机</th>
-          <td><input type="text" name="wuser.phone" value="${user.phone}"></td>
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">手机</label>
+                <input style="width:250px;" class="form-control" name="wuser.phone" value="${user.phone}">
+              </div>
+            </div>
 
-          <th>固定电话</th>
-          <td><input type="text" value="${user.tel}" name="wuser.tel"></td>
-        </tr>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">固定电话</label>
+                <input style="width:250px;" class="form-control" name="wuser.tel" value="${user.tel}">
+              </div>
+            </div>
+          </div>
 
-        <tr>
-          <th>QQ</th>
-          <td><input type="text" value="${user.qq}" name="wuser.qq"></td>
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">QQ</label>
+                <input style="width:250px;" class="form-control" name="wuser.qq" value="${user.qq}">
+              </div>
+            </div>
 
-          <th>阿里旺旺</th>
-          <td><input type="text" value="${user.wangwang}" name="wuser.wangwang"></td>
-        </tr>
-        <tr>
-          <th>密码</th>
-          <td colspan="4"><input type="password" name="wuser.password" placeHolder="更新需要填写正确的密码">
-          </td>
-        </tr>
-        <tr>
-          <th>新密码</th>
-          <td colspan="4"><input type="password" name="newPassword" placeHolder="填写需要修改的新密码或留空">
-          </td>
-        </tr>
-        <tr>
-          <th>新密码确认</th>
-          <td colspan="4">
-            <input type="password" name="newPasswordConfirm" placeHolder="如果不需要修改密码,留空"></td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <input type="hidden" value="${user.id}" name="userid">
-            <button class="btn btn-primary">更新</button>
-          </td>
-        </tr>
-      </table>
-    </form>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">阿里旺旺</label>
+                <input style="width:250px;" class="form-control" name="wuser.wangwang" value="${user.wangwang}">
+              </div>
+            </div>
+          </div>
+
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">密码</label>
+                <input style="width:250px;" class="form-control" type="password" name="wuser.password" placeHolder="更新需要填写正确的密码">
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">所属部门</label>
+                <select name="wuser.department" class="form-control" style="width:250px;">
+                #{list items:models.User.D, as:'d'}
+                  <option value="${d.name()}" #{if user.department==d} selected #{/if}>${d.label()}</option>
+                #{/list}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">新密码</label>
+                <input style="width:250px;" type="password" class="form-control" name="newPassword" placeHolder="填写需要修改的新密码或留空">
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">所属公司</label>
+                <select name="wuser.projectName" class="form-control" style="width:250px;">
+                #{list items:models.User.COR, as:'c'}
+                    #{if java.util.Arrays.asList(brandName, models.User.COR.MengTop.name()).contains(c.name())}
+                      <option value="${c.name()}" #{if user.projectName==c} selected #{/if}>${c.label()}</option>
+                    #{/if}
+                #{/list}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">新密码确认</label>
+                <input style="width:250px;" class="form-control" type="password" name="newPasswordConfirm" placeHolder="如果不需要修改密码,留空">
+              </div>
+            </div>
+
+
+          </div>
+
+          <div class="row-fluid">
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">性别</label>
+                <select name="wuser.sex" class="form-control" style="width:250px;">
+                  <option value="male" #{if user.sex == 'male'} selected #{/if}>男</option>
+                  <option value="female" #{if user.sex == 'female'} selected #{/if}>女</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">入职日期</label>
+                <input style="width:250px;" class="form-control" role="date" value="${user.entryDate.date()}"
+                       name="wuser.entryDate">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <button class="btn btn-primary">更新</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 
 #{power.ck "notifications.notifysall"}
-  #{success_row title:'发送全局 Notification'/}
+    #{success_row title:'发送全局 Notification'/}
 <div class="row">
   <div class="span12">
     <form action="@{Notifications.notifysAll()}" method="post">

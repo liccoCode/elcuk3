@@ -104,7 +104,8 @@ public class Deliveryments extends Controller {
                 .map(unit -> unit.id)
                 .collect(Collectors.toList());
         String expressid = StringUtils.join(expressUnitIds, ",");
-        double total = dmt.units.stream().mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+        double total = dmt.units.stream().filter(unit -> unit.type == ProcureUnit.T.ProcureSplit)
+                .mapToDouble(ProcureUnit::totalAmountToCNY).sum();
         String applyMsg = "";
         List<Deliveryment> deliveryments = new ArrayList<>();
         if(dmt.state == Deliveryment.S.PENDING_REVIEW) {

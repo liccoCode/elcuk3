@@ -1418,7 +1418,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(shipment == null) {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
             // 2. 用户更改了运输方式但未选择运输单
-            if(this.shipType == Shipment.T.EXPRESS || oldShipType != this.shipType) {
+            if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(this.shipType)
+                              || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
             this.changeOutbound(null);

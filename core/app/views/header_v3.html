@@ -324,7 +324,7 @@
               #{list items:models.User.COR.values(), as:'c'}
                 <li><!-- start notification -->
                   <a href="${c.url()}">
-                    <i class="fa fa-users text-aqua"></i> ${c.label()}
+                    <i class="fa fa-circle-o text-red"></i> ${c.label()}
                   </a>
                 </li>
               #{/list}
@@ -337,23 +337,22 @@
         <!-- Tasks Menu -->
         <li class="dropdown tasks-menu">
           <!-- Menu Toggle Button -->
+            #{set notifyNum: controllers.Notifications.notifyNum()/}
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-flag-o"></i>
-            <span class="label label-danger">9</span>
+            <span class="label label-danger">${notifyNum}</span>
           </a>
           <ul class="dropdown-menu">
-            <li class="header">切换项目</li>
+            <li class="header">You have ${notifyNum} notifications</li>
             <li>
               <!-- Inner menu: contains the tasks -->
               <ul class="menu">
                 <li>
-                #{list items:models.User.COR.values(), as:'c'}
-                  <a href="${c.url()}">
-                    <!-- Task title and progress text -->
-                    <h3>
-                    ${c.label()}
-                      <small class="pull-right">20%</small>
-                    </h3>
+                #{list items:controllers.Notifications.unReadNotify(), as:'n'}
+                  <a href="@{controllers.Notifications.viewSource(n.id)}">
+                    #{if n.type.name()=='SYSTEM'} <i class="fa fa-users text-orange"></i> #{/if}
+                    #{else } <i class="fa fa-user text-aqua"></i> #{/else}
+                    ${n.title}<small class="pull-right">${n.createAt.date()}</small>
                   </a>
                 #{/list}
                 </li>
@@ -361,7 +360,7 @@
               </ul>
             </li>
             <li class="footer">
-              <a href="#">View all tasks</a>
+              <a href="@{Notifications.index()}">View all notifications</a>
             </li>
           </ul>
         </li>

@@ -10,6 +10,7 @@ import play.db.jpa.GenericModel;
 import play.libs.F;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,12 @@ public class Notification extends GenericModel {
     public Date createAt;
 
     /**
+     * 创建人
+     */
+    @ManyToOne
+    public User creator;
+
+    /**
      * 是否阅读 通知
      */
     @Enumerated(EnumType.STRING)
@@ -101,8 +108,33 @@ public class Notification extends GenericModel {
         };
 
         public abstract String label();
-
     }
+
+    public enum T {
+        SYSTEM {
+            @Override
+            public String label() {
+                return "系统通知";
+            }
+        },
+        PERSONAL {
+            @Override
+            public String label() {
+                return "个人通知";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    @Enumerated(EnumType.STRING)
+    public T type;
+
+    /**
+     * 已阅用户id
+     * 存储格式（121，104）
+     */
+    public String readUser;
 
     @PrePersist
     public void prePersist() {
@@ -215,5 +247,10 @@ public class Notification extends GenericModel {
 
     public static void clearUserNotificationQueue(User user) {
         USER_QUEUE_CACHE.remove(user.username);
+    }
+
+    public static boolean containUser(Long id, String readUser) {
+        String[] users = readUser.split(",");
+        return Arrays.asList(users).contains(id.toString());
     }
 }
