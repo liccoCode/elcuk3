@@ -60,7 +60,8 @@ public class Users extends Controller {
 
     public static void home() {
         User user = Login.current();
-        render(user);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(user, brandName);
     }
 
     public static void privileges(Long id, List<Long> privilegeId) {
@@ -111,7 +112,6 @@ public class Users extends Controller {
     }
 
     public static void updates(User wuser, Long userid, String newPassword, String newPasswordConfirm) {
-
         User user = User.findById(userid);
         if(!user.authenticate(wuser.password)) {
             Validation.addError("", "用户密码错误, 请确认当前用户的密码正确");
@@ -128,9 +128,14 @@ public class Users extends Controller {
             user.wangwang = wuser.wangwang;
             user.phone = wuser.phone;
             user.qq = wuser.qq;
+            user.entryDate = wuser.entryDate;
+            user.sex = wuser.sex;
+            user.department = wuser.department;
+            user.projectName = wuser.projectName;
             if(StringUtils.isNotBlank(newPassword)) {
                 user.changePasswd(newPassword);
             } else {
+                user.password = wuser.password;
                 user.update();
             }
         } catch(Exception e) {
