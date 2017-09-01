@@ -37,7 +37,7 @@
                 <form method="post" id="plan_form" class="form-horizontal">
                   <div class="box-body">
                     <div class="form-group">
-                      <label for="productName_input" class="col-sm-1 control-label">id</label>
+                      <label for="productName_input" class="col-sm-1 control-label">采购单ID</label>
                       <div class="col-sm-5">
                         <input id="deliverymentId" value="${dp.id}" class="form-control" readonly/>
                         <input type="hidden" name="dp.id" value="${dp.id}">
@@ -82,10 +82,10 @@
                 </div>
               </div>
 
-              <div class="box box-default collapsed-box box-solid">
+              <div class="box box-warning collapsed-box box-solid">
                 <div class="box-header with-border">
                   <h3 class="box-title" data-toggle="toggle" data-target="#tl">
-                    Timeline <i class="icon-reorder"></i>
+                    Timeline <i class="icon-reorder" data-widget="collapse"></i>
                   </h3>
                   <div class="box-tools pull-right">
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -93,12 +93,9 @@
                   </div>
                 </div>
                 <div class="box-body" style="display: none;">
-                  <div class="row-fluid">
-                    <div id="tl" class="col-sm-12" style="height:350px;"></div>
-                  </div>
+                  <div id="tl" class="col-sm-12" style="height:350px;"></div>
                 </div>
               </div>
-
 
               <form action="#" id="bulkpost" method="POST" class="form-horizontal">
                 <div class="box box-success box-solid">
@@ -111,23 +108,19 @@
                   #{power.ck "products.edit"}
                     <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
                        id="delunit_form_submit" data-toggle="tooltip" data-placement="right" title="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right"
-                       class="btn btn-warning">
+                       class="btn btn-danger">
                       解除
                     </a>
                   #{/power.ck}
                   #{power.ck 'fbas.deploytoamazon'}
                     <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
-                       id="deployFBAs"
-                       class="btn btn-success">
-                      批量创建FBA</a>
+                       id="deployFBAs" class="btn btn-warning">批量创建FBA</a>
                     <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents("DeliverPlans", dp.id)}' data-method="POST"
-                       id="updateFbaCartonContents" class="btn btn-success">
-                      批量更新FBA箱内包装信息</a>
+                       id="updateFbaCartonContents" class="btn btn-warning">批量更新FBA箱内包装信息</a>
                   #{/power.ck}
                     <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("DeliverPlans", dp.id)}" data-method="POST"
                        id="downloadFBAZIP" class="btn btn-success" data-toggle="tooltip" data-placement="right" title="将选定的采购单元的 出货FBA进行压缩打包">
-                      <i class="icon-download-alt"></i>下载FBA ZIP 包
-                    </a>
+                      <i class="icon-download-alt"></i>下载FBA ZIP 包</a>
                   </div>
                   <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
                 #{render 'Deliveryments/_box_number_model.html'/}
@@ -137,7 +130,7 @@
 
             #{if showAdd}
                 #{form @DeliverPlans.addunits(dp.id), method: 'POST'}
-                  <div class="box box-warning box-solid">
+                  <div class="box box-primary box-solid">
                     <div class="box-header with-border"><h3 class="box-title">可添加进入[出货单]的[采购单元]</h3></div>
                     <div class="box-body">
                         #{render 'ProcureUnits/_unit_list_v3.html', units:plan_units, checkbox:true, key:'plan',deliveryplan:true/}
