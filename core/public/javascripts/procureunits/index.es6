@@ -150,18 +150,12 @@ $(() => {
   });
 
   $(document).ready(function () {
-    $("#unit_table").dataTable({
-      "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+    $("#unit_table").DataTable({
+      "sDom": "<'row-fluid'<'col-sm-3'l><'col-sm-9'f>r>t<'row-fluid'<'col-sm-6'i><'col-sm-6'p>>",
       "sPaginationType": "full_numbers",
+      'lengthChange': true,
       "iDisplayLength": 50,
-      "columnDefs": [
-        {
-          width: "200px",
-          targets: 0
-        },
-        { width: "200px", targets: 10 }
-
-      ],
+      "bAutoWidth":false,
       "aoColumnDefs": [
         {
           "bSortable": false,

@@ -324,27 +324,49 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         /**
          * 销量最好
          */
-        A,
+        A {
+            public String label() {
+                return "A";
+            }
+        },
 
         /**
          * 销量较好
          */
-        B,
+        B {
+            public String label() {
+                return "B";
+            }
+        },
 
         /**
          * 销量低迷
          */
-        C,
+        C {
+            public String label() {
+                return "C";
+            }
+        },
 
         /**
          * 销量较差
          */
-        D,
+        D {
+            public String label() {
+                return "D";
+            }
+        },
 
         /**
          * 销量极差
          */
-        E
+        E {
+            public String label() {
+                return "E";
+            }
+        };
+
+        public abstract String label();
     }
 
     /**
@@ -810,15 +832,22 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      */
     public void arryParamSetUP(FLAG flag) {
         if(flag.equals(FLAG.ARRAY_TO_STR)) {
-            /**
+            /*
              * 在转换成Json字符串之前需要对空字符串做一点处理
              */
             this.locates = J.json(this.fixNullStr(this.locate));
             this.sellingPoints = J.json(this.fixNullStr(this.sellingPoint));
         } else {
-            if(StringUtils.isNotBlank(this.locates)) this.locate = JSON.parseArray(this.locates, ProductDTO.class);
-            if(StringUtils.isNotBlank(this.sellingPoints)) this.sellingPoint = JSON.parseArray(this.sellingPoints,
-                    ProductDTO.class);
+            if(StringUtils.isNotBlank(this.locates)) {
+                this.locate = JSON.parseArray(this.locates, ProductDTO.class);
+                if(this.locate.size() == 0)
+                    this.locate.add(new ProductDTO());
+            }
+            if(StringUtils.isNotBlank(this.sellingPoints)) {
+                this.sellingPoint = JSON.parseArray(this.sellingPoints, ProductDTO.class);
+                if(this.sellingPoint.size() == 0)
+                    this.sellingPoint.add(new ProductDTO());
+            }
         }
     }
 

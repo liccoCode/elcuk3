@@ -123,6 +123,18 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String nineLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 8) {
+                return value.substring(0, 7) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
+        }
+    }
+
     public static String xxLong(String value) {
         if(StringUtils.isNotBlank(value)) {
             if(value.length() > 20) {

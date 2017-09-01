@@ -1,129 +1,99 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Orders (' + p.count() + ')'/}
 #{set 'moreScripts'}
-    #{script 'orders/orders.coffee'/}
     #{script 'component/pagination.coffee'/}
+    #{script 'orders/orders.coffee'/}
 #{/set}
 
-<div class="row-fluid">
-  <form id="search_form" class="search_form" action="@{Orders.index()}" method="POST">
-    <div class="span12">
-      <div class="input-prepend inline">
-        <span class="add-on">From:</span>
-        <input type="date" style="width:100px;" id="p_from" name="p.begin" value="${p.begin?.date()}">
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Orders.index()}" class="form-inline" id="search_form">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.begin" value="${p.begin.date()}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.end" value="${p.end.date()}">
+              </div>
+            </div>
+
+            <select id="o_market" name="p.market" class="form-control">
+              <option value="">Market(ALL)</option>
+            #{list items:models.market.M.values()}
+              <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+            #{/list}
+            </select>
+
+            <select id="o_acc" name="p.accountId" class="form-control">
+              <option value="">Account</option>
+            #{list items:accounts}
+              <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
+            #{/list}
+            </select>
+
+            <select id="o_state" name="p.state" class="form-control" style="width:80px;">
+              <option value="">State(ALL)</option>
+            #{list items:models.market.Orderr.S.values()}
+              <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
+            #{/list}
+            </select>
+
+            <select name="p.promotion" class="form-control" style="width:80px;">
+              <option value="">全部订单</option>
+              <option value="true"  ${p.promotion == true ? 'selected' : ''}>过滤出促销订单</option>
+              <option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>
+            </select>
+
+            <select name="p.invoiceState" class="form-control">
+              <option value="">发票状态(ALL)</option>
+              <option value="yes"  ${p.invoiceState == 'yes' ? 'selected' : ''}>发票已发送</option>
+              <option value="no" ${p.invoiceState == 'no' ? 'selected' : ''}>发票未发送</option>
+            </select>
+
+            <select name="p.category" id="categories" class="form-control">
+              <option value="">品线</option>
+            #{list items:categoryIds, as:'c'}
+              <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
+            #{/list}
+            </select>
+
+            <select name="p.field" class="form-control">
+            #{list items:models.view.post.OrderPOST.F, as:'f'}
+              <option value="${f.name()}" #{if p.field==f.name()} selected #{/if}>${f.label()}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeholder="请选择前面查询类型下拉框" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+
+            <button class="btn btn-primary" data-loading>搜索</button>
+            <input type="button" class="btn btn-success" id="downExcel" value="导出订单">
+            <input type="button" class="btn btn-warning" id="downSaleFeeExcel" value="导出订单费用">
+
+          </div>
+        </form>
       </div>
 
-      <div class="input-prepend inline">
-        <span class="add-on">To:</span>
-        <input type="date" style="width:100px;" id="p_to" name="p.end" value="${p.end?.date()}">
-      </div>
-
-      <select id="o_market" name="p.market" class="inline">
-        <option value="">Market(ALL)</option>
-      #{list items:models.market.M.values()}
-        <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
-      #{/list}
-      </select>
-      <select id="o_acc" name="p.accountId" class="inline">
-        <option value="">Account</option>
-      #{list items:accounts}
-        <option ${_.id == p.accountId ? 'selected' : ''} value="${_.id}">${_.prettyName()}</option>
-      #{/list}
-      </select>
-      <select id="o_state" name="p.state" class="inline">
-        <option value="">State(ALL)</option>
-      #{list items:models.market.Orderr.S.values()}
-        <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
-      #{/list}
-      </select>
-
-      <!-- TODO 暂时不支持排序 -->
-    *{<input type="hidden" name="p.orderBy" id="orderBy" value="createDate">}*
-    *{<select name="p.desc" class="inline">}*
-    *{<option value="DESC">DESC</option>}*
-    *{<option value="ASC">ASC</option>}*
-    *{</select>}*
-
-    *{<select name="p.paymentInfo" class="inline">}*
-    *{<option value="">支付信息</option>}*
-    *{<option ${p.paymentInfo == true ? 'selected' : ''} value="true">拥有支付信息</option>}*
-    *{<option ${p.paymentInfo == false ? 'selected' : ''} value="false">还没有支付信息}*
-    *{</option>}*
-    *{</select>}*
-
-    *{<select name="p.warnning" class="inline">}*
-    *{<option value="">全部订单</option>}*
-    *{<option ${p.warnning == true ? 'selected' : ''} value="true">过滤出警告订单</option>}*
-    *{<option ${p.warnning == false ? 'selected' : ''} value="false">正常的订单</option>}*
-    *{</select>}*
-
-      <select name="p.promotion" class="inline">
-        <option value="">全部订单</option>
-        <option value="true"  ${p.promotion == true ? 'selected' : ''}>过滤出促销订单</option>
-        <option value="false" ${p.promotion == false ? 'selected' : ''}>不是促销订单</option>
-      </select>
-
-      <select name="p.invoiceState" class="inline">
-        <option value="">发票状态(ALL)</option>
-        <option value="yes"  ${p.invoiceState == 'yes' ? 'selected' : ''}>发票已发送</option>
-        <option value="no" ${p.invoiceState == 'no' ? 'selected' : ''}>发票未发送</option>
-      </select>
-
-      <div class="input-prepend inline">
-        <select name="p.category" id="categories">
-          <option value="">品线</option>
-        #{list items:categoryIds, as:'c'}
-          <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
-        #{/list}
-        </select>
-      </div>
-
-      <select name="p.field" class="inline">
-      #{list items:models.view.post.OrderPOST.F, as:'f'}
-        <option value="${f.name()}" #{if p.field==f.name()} selected #{/if}>${f.label()}</option>
-      #{/list}
-      </select>
-
-      <!--
-      <div class="input-prepend inline">
-        <span class="add-on">PERCENT:</span>
-        <input type="text" style="width:40px;" name="p.percent" placeholder="百分比" autocomplete="off" value="${p.percent}">
-      </div>}
-      -->
-
-
-      <div class="inline input-append" id="search_btn">
-        <input type="hidden" name="p.page" value="${p.page}">
-        <input type="text" style="width:160px;" name="p.search" placeholder="请选择前面查询类型下拉框" value="${p.search}">
-        <button class="btn btn-primary" data-loading>搜索</button>
-      </div>
-
-      <div class="inline input-append">
-        <input type="button" class="btn btn-success" id="downExcel" value="导出订单">
-      </div>
-
-      <div class="inline input-append">
-        <input type="button" class="btn btn-warning" id="downSaleFeeExcel" value="导出订单费用">
-      </div>
-
-    </div>
-  </form>
-</div>
-
-<div class="row-fluid" id="order_list">
-  <div class="span12">
-  #{if orders.size() == 0}
-    暂时还没有订单
-  #{/if}
-  #{else }
-    <table class="table table-condensed table-bordered">
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
         #{render 'Orders/_order_table_tr.html', items:orders/}
-      <tr class="tb_footer">
-        <td colspan="16">
-            #{bootstrap_pager pi:p, url:'' /}
-        </td>
-      </tr>
-    </table>
-  #{/else}
+        </table>
+      </div>
+
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
+      </div>
+    </div>
   </div>
 </div>

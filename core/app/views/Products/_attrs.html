@@ -1,5 +1,5 @@
 #{if pro.productAttrs.size() > 0}
-<form action="@{Products.saveAttrs(pro.sku)}" method="POST" id="save_attrs_form">
+<form action="@{Products.saveAttrs(pro.sku)}" method="POST" id="save_attrs_form" class="form-horizontal">
   <table class="table table-bordered">
     <tr>
       <th>属性名称</th>
@@ -12,7 +12,8 @@
           ${att.attribute.name}
           </td>
           <td>
-              #{text_or_textarea flag: att.attribute.type, name: "productAttrs[${att_index - 1}].value", value: att.value/}
+              #{text_or_textarea flag: att.attribute.type, name: "productAttrs[${att_index - 1}].value",
+              value: att.value, class: "form-control"/}
             <input type="hidden" name="productAttrs[${att_index - 1}].id" value="${att.id}">
             <input type="hidden" name="productAttrs[${att_index - 1}].product.sku" value="${att.product.sku}">
             <input type="hidden" name="productAttrs[${att_index - 1}].attribute.id" value="${att.attribute.id}">
