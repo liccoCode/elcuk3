@@ -14,7 +14,7 @@
 #{list items:1..boxNumber, as: 'i'}
   <tr style="height: 98.6mm; vertical-align:middle;">
     <td width="49%" style="vertical-align:middle">
-        #{if models.OperatorConfig.getVal("addressname")=='Brandworl'}
+        #{if Arrays.asList("Brandworl","Visio").contains(models.OperatorConfig.getVal("addressname"))}
             #{render './brandworlShipmentDetail.html', procureUnit: procureUnit, box_num:i/}
         #{/if}
         #{else}

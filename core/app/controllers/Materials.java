@@ -11,11 +11,13 @@ import models.view.Ret;
 import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,6 +52,10 @@ public class Materials extends Controller {
 
     public static void create(Material m, List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
+        if(Material.find("code =? and isDel =0", m.code).first()!=null) {
+            Validation.addError("", "物料编码"+m.code+"已经存在");
+        }
+        if(Validation.hasErrors())  render("/Materials/blank.html", m);
         m.save();
         boms.forEach(unit -> {
             if(unit.id != null) {
@@ -119,6 +125,14 @@ public class Materials extends Controller {
         List<MaterialBom> boms = p.query();
         List<User> users = User.find("closed=?", false).fetch();
         User currUser = Login.current();
+        boms.forEach(bom -> {
+            List<Material> materialList = new ArrayList<>();
+            bom.materials.forEach(material -> {
+                if(!material.isDel)
+                    materialList.add(material);
+            });
+            bom.materials = materialList;
+        });
         render(p, boms, users, currUser);
     }
 
@@ -208,7 +222,9 @@ public class Materials extends Controller {
      */
     public static void showMaterialListByBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
-        List<Material> materials = bom.materials;
+        List<Material> materials = bom.materials.stream().
+                filter(item -> item.isDel == false).collect(Collectors.toList());
+        ;
         render("/Materials/_unit_list.html", materials);
     }
 }
