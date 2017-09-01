@@ -13,7 +13,9 @@ import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 每个用户的 Notification
@@ -80,8 +82,15 @@ public class Notifications extends Controller {
      */
     public static void viewSource(Long id) {
         Notification noty = Notification.findById(id);
-        if(noty.state != Notification.S.CHECKED) {
-            noty.changState(Notification.S.CHECKED);
+        if(noty.type == Notification.T.PERSONAL) {
+            if(noty.state != Notification.S.CHECKED) {
+                noty.changState(Notification.S.CHECKED);
+            }
+        } else {
+            Long userId = Login.current().id;
+            StringBuilder sb = new StringBuilder(noty.readUser);
+            noty.readUser = sb.append("," + userId).toString();
+            noty.save();
         }
         redirect(noty.sourceURL);
     }
@@ -96,4 +105,30 @@ public class Notifications extends Controller {
         else
             renderJSON(new Ret(false));
     }
+
+    public static int notifyNum() {
+        Long id = Login.current().id;
+        List<Notification> personals = Notification.find("user.id=? AND state=?", id, Notification.S.UNCHECKED)
+                .fetch();
+        int num = personals.size();
+        List<Notification> systems = Notification.find("state=? AND type=?",
+                Notification.S.UNCHECKED, Notification.T.SYSTEM).fetch();
+        List<Notification> unReads = systems.stream().filter(system -> !Notification.containUser(id, system.readUser))
+                .collect(Collectors.toList());
+        int totalUnReadNum = num + unReads.size();
+        return totalUnReadNum;
+    }
+
+    public static List<Notification> unReadNotify() {
+        Long id = Login.current().id;
+        List<Notification> personals = Notification.find("user.id=? AND state=?", id, Notification.S.UNCHECKED)
+                .fetch();
+        List<Notification> systems = Notification.find("state=? AND type=?",
+                Notification.S.UNCHECKED, Notification.T.SYSTEM).fetch();
+        List<Notification> unReads = systems.stream().filter(system -> !Notification.containUser(id, system.readUser))
+                .collect(Collectors.toList());
+        unReads.addAll(personals);
+        return unReads;
+    }
+
 }

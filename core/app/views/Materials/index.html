@@ -58,8 +58,8 @@
             <td>${m.type.label()}</td>
             <td>${m.boms[0]?.number}</td>
             <td>${m.specification}</td>
-            <td>${m.texture}</td>
-            <td>${m.technology}</td>
+            <td title="${m.texture}" rel="tooltip">${m.texture.xxLong()}</td>
+            <td title="${m.technology}" rel="tooltip">${m.technology.overLong()}</td>
             <td>${m.version}</td>
             <td>${m.nowPurchasePlanPrice()}</td>
             <td>

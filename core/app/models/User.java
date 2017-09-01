@@ -213,17 +213,6 @@ public class User extends Model {
                 return "https://e.redimp.com/";
             }
         },
-        MengTop {
-            @Override
-            public String label() {
-                return "MengTop";
-            }
-
-            @Override
-            public String url() {
-                return "https://e.mengtop.com/";
-            }
-        },
         Lecone {
             @Override
             public String label() {
@@ -244,6 +233,17 @@ public class User extends Model {
             @Override
             public String url() {
                 return "http://104.207.150.98:9000/";
+            }
+        },
+        MengTop {
+            @Override
+            public String label() {
+                return "MengTop";
+            }
+
+            @Override
+            public String url() {
+                return "https://e.mengtop.com/";
             }
         };
 
