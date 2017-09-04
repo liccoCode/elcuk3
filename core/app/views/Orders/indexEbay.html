@@ -1,0 +1,120 @@
+#{extends 'main_full.html'/}
+#{set title:'Ebay Orders (' + p.count() + ')'/}
+#{set 'moreScripts'}
+    #{script 'orders/orders.coffee'/}
+    #{script 'component/pagination.coffee'/}
+#{/set}
+
+<div class="row-fluid">
+  <form id="search_form" class="search_form" action="@{Orders.indexEbay()}" method="POST">
+    <div class="span12">
+      <div class="input-prepend inline">
+        <span class="add-on">From:</span>
+        <input type="date" style="width:100px;" id="p_from" name="p.begin" value="${p.from?.date()}">
+      </div>
+
+      <div class="input-prepend inline">
+        <span class="add-on">To:</span>
+        <input type="date" style="width:100px;" id="p_to" name="p.end" value="${p.to?.date()}">
+      </div>
+
+      <select id="o_market" name="p.market" class="inline">
+        <option value="">Market(ALL)</option>
+      #{list items:models.market.M.values()}
+        <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+      #{/list}
+      </select>
+
+      <select id="o_state" name="p.state" class="inline">
+        <option value="">State(ALL)</option>
+      #{list items:models.market.Orderr.S.values()}
+        <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
+      #{/list}
+      </select>
+
+      <div class="input-prepend inline">
+        <select name="p.category" id="categories">
+          <option value="">品线</option>
+        #{list items:categoryIds, as:'c'}
+          <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
+        #{/list}
+        </select>
+      </div>
+
+      <div class="inline input-append" id="search_btn">
+        <input type="hidden" name="p.page" value="${p.page}">
+        <input type="text" style="width:160px;" name="p.search" placeholder="只支持SKU查询" value="${p.search}">
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div class="row-fluid" id="order_list">
+  <div class="span12">
+  #{if orders.size() == 0}
+    暂时还没有订单
+  #{/if}
+  #{else }
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Market</th>
+        <th>Item</th>
+        <th>Country</th>
+        <th>City</th>
+        <th>Postal Code</th>
+        <th rel="popover" title="数字是什么?" content="(a | b), a: 订单重销售产品的个数. b: 支付信息个数">
+          <i class="icon-question-sign"></i> OrderId
+        </th>
+        <th>MerchantOrderId</th>
+        <th>Create</th>
+        <th>Payment</th>
+        <th>State</th>
+      </tr>
+        #{list items:orders, as:'ord'}
+          <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
+            <td>${ord.market.toString()}</td>
+            <td data-toggle="toggle" data-target="#order_index_${ord_index}">
+              <span class="badge badge-info">${ord?.items?.size()}</span> <i class="icon-reorder"></i>
+            </td>
+            <td>${ord.country}</td>
+            <td>${ord.city}</td>
+            <td>${ord.postalCode}</td>
+            <td>
+              <a href="#">${ord.orderId}</a>
+            </td>
+            <td>${ord.merchantOrderId}</td>
+            <td>#{time_tooltip time:ord.createDate/}</td>
+            <td>#{time_tooltip time:ord.paymentDate/}</td>
+            <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
+          </tr>
+          <tr style="display:none" id="order_index_${ord_index}">
+            <td colspan="10">
+              <table class="table table-bordered table-condensed">
+                <tr>
+                  <th>SKU</th>
+                  <th>Quantity</th>
+                  <th>CreateDate</th>
+                </tr>
+                  #{list items:ord.items, as:'i'}
+                    <tr>
+                      <td>${i.product?.sku}</td>
+                      <td>${i.quantity}</td>
+                      <td>#{time_tooltip time:i.createDate/}</td>
+                    </tr>
+                  #{/list}
+              </table>
+            </td>
+          </tr>
+
+        #{/list}
+      <tr class="tb_footer">
+        <td colspan="16">
+            #{bootstrap_pager pi:p, url:'' /}
+        </td>
+      </tr>
+    </table>
+  #{/else}
+  </div>
+</div>

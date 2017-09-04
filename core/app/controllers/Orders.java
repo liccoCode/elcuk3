@@ -9,10 +9,12 @@ import jobs.promise.FinanceShippedPromise;
 import models.ElcukRecord;
 import models.finance.SaleFee;
 import models.market.Account;
+import models.market.EbayOrder;
 import models.market.OrderInvoice;
 import models.market.Orderr;
 import models.product.Category;
 import models.view.Ret;
+import models.view.post.EbayOrderPost;
 import models.view.post.OrderPOST;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
@@ -45,6 +47,12 @@ public class Orders extends Controller {
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();
         render(p, orders, accounts, categoryIds);
+    }
+
+    public static void indexEbay(EbayOrderPost p) {
+        if(p == null) p = new EbayOrderPost();
+        List<EbayOrder> orders = p.query();
+        render(p, orders);
     }
 
     public static void show(String id) {

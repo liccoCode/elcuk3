@@ -140,7 +140,6 @@ public class EbayOrder extends GenericModel {
     public String country;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<EbayOrderItem> items = new ArrayList<>();
 
 }
