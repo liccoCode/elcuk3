@@ -35,7 +35,7 @@ public class Outbound extends GenericModel {
 
     private static final long serialVersionUID = 163177419089864527L;
 
-    public static final String MengTopUrl = "http://45.32.141.39:9000";
+    public static final String MengTopUrl = "http://e.mengtop.com";
 
     @Id
     @Column(length = 30)
@@ -326,6 +326,7 @@ public class Outbound extends GenericModel {
                     url.append("?auth_token=baef851cab745d3441d4bc7ff6f27b28&sku=").append(sku.toString());
                     url.append("&qty=").append(qty.toString()).append("&currency=").append(currency.toString());
                     url.append("&price=").append(price.toString());
+                    url.append("&projectName=").append(OperatorConfig.getVal("brandname"));
                     result = HTTP.get(url.toString());
                     return JSON.parseObject(result, Ret.class);
                 } else {
