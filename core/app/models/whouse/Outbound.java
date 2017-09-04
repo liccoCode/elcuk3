@@ -326,6 +326,7 @@ public class Outbound extends GenericModel {
                     url.append("?auth_token=baef851cab745d3441d4bc7ff6f27b28&sku=").append(sku.toString());
                     url.append("&qty=").append(qty.toString()).append("&currency=").append(currency.toString());
                     url.append("&price=").append(price.toString());
+                    url.append("&projectName=").append(OperatorConfig.getVal("brandname"));
                     result = HTTP.get(url.toString());
                     return JSON.parseObject(result, Ret.class);
                 } else {
