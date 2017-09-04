@@ -203,7 +203,7 @@ public class Outbound extends GenericModel {
         }
         if(Validation.hasErrors()) return;
         this.init();
-        this.status = S.Outbound;
+        this.status = this.type == StockRecord.C.B2B ? S.Create : Outbound.S.Outbound;
         this.save();
         records.stream().filter(record -> record.unitId != null).forEach(record -> {
             ProcureUnit unit = ProcureUnit.findById(record.unitId);
@@ -218,7 +218,11 @@ public class Outbound extends GenericModel {
             stock.type = StockRecord.T.OtherOutbound;
             stock.category = this.type;
             stock.save();
-            unit.availableQty = stock.currQty;
+            if(this.type == StockRecord.C.B2B) {
+                unit.outbound = this;
+            } else {
+                unit.availableQty = stock.currQty;
+            }
             unit.save();
         });
     }
