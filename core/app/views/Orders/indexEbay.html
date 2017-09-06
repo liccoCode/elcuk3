@@ -1,7 +1,6 @@
 #{extends 'main_full.html'/}
 #{set title:'Ebay Orders (' + p.count() + ')'/}
 #{set 'moreScripts'}
-    #{script 'orders/orders.coffee'/}
     #{script 'component/pagination.coffee'/}
 #{/set}
 
@@ -61,6 +60,7 @@
       <tr>
         <th>Market</th>
         <th>Item</th>
+        <th>FBA Fee</th>
         <th>Country</th>
         <th>City</th>
         <th>Postal Code</th>
@@ -71,12 +71,16 @@
         <th>Create</th>
         <th>Payment</th>
         <th>State</th>
+        <th>Action</th>
       </tr>
         #{list items:orders, as:'ord'}
           <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
             <td>${ord.market.toString()}</td>
             <td data-toggle="toggle" data-target="#order_index_${ord_index}">
-              <span class="badge badge-info">${ord?.items?.size()}</span> <i class="icon-reorder"></i>
+              <span class="badge badge-info">${ord.items?.size()}</span> <i class="icon-reorder"></i>
+            </td>
+            <td data-toggle="toggle" data-target="#order_fee_${ord_index}">
+              <i class="icon-reorder"></i> <span class="badge badge-info">${ord.fees?.size()}</span> ${ord.totalFbaFee()}
             </td>
             <td>${ord.country}</td>
             <td>${ord.city}</td>
@@ -88,9 +92,10 @@
             <td>#{time_tooltip time:ord.createDate/}</td>
             <td>#{time_tooltip time:ord.paymentDate/}</td>
             <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
+            <td><a href="@{Orders.refreshFeeByEbay(ord.orderId)}" class="btn btn-mini btn-warning">重新抓取费用</a></td>
           </tr>
           <tr style="display:none" id="order_index_${ord_index}">
-            <td colspan="10">
+            <td colspan="12">
               <table class="table table-bordered table-condensed">
                 <tr>
                   <th>SKU</th>
@@ -107,7 +112,30 @@
               </table>
             </td>
           </tr>
-
+          <tr style="display:none" id="order_fee_${ord_index}">
+            <td colspan="12">
+              <table class="table table-bordered table-condensed">
+                <tr>
+                  <th>SKU</th>
+                  <th>Fee Type</th>
+                  <th>Qty</th>
+                  <th>Currency</th>
+                  <th>Cost</th>
+                  <th>CreateDate</th>
+                </tr>
+                  #{list items:ord.fees, as:'fee'}
+                    <tr>
+                      <td>${fee.product_sku}</td>
+                      <td>${fee.type.name}</td>
+                      <td>${fee.qty}</td>
+                      <td>${fee.currency}</td>
+                      <td>${fee.cost}</td>
+                      <td>#{time_tooltip time:fee.date/}</td>
+                    </tr>
+                  #{/list}
+              </table>
+            </td>
+          </tr>
         #{/list}
       <tr class="tb_footer">
         <td colspan="16">

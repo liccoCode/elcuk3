@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -209,5 +210,13 @@ public class FeeType extends GenericModel {
      */
     public static FeeType dutyAndVAT() {
         return FeeType.findById("dutyandvat");
+    }
+
+    public static String mappingTypeName(String name) {
+        if(Objects.equals(name, "shippingcharge"))
+            return "shipping";
+        if(Objects.equals(name, "codchargeback"))
+            return "codfee";
+        return name;
     }
 }
