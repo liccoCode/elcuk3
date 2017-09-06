@@ -61,7 +61,7 @@ $(() => {
     if ($("#div" + format_id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'><hr>";
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'>";
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load($(this).data("url"), {id: id});
