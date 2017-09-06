@@ -19,7 +19,7 @@
     <td>${unit.qty}</td>
       #{if unit.receiptQty == 0 && !qtyEdit}
         <td name="unitUpdateTd">
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" id="qs_${unit.id}"
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-primary" id="qs_${unit.id}"
              uid="${unit.id}">签收异常</a>
         </td>
       #{/if}

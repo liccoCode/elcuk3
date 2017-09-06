@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html'/}
 #{set title:"物料采购计划列表 (${p.count()})"  /}
 #{set 'moreStyles'}
     #{stylesheet 'bootstrap-multiselect.css'/}
@@ -18,98 +18,114 @@
 #{flash_alert /}
 
 
-<div class="row-fluid">
-  <form action="@{MaterialUnits.index()}" method="get" class="search_form" id="search_Form">
-    <div class="row-fluid">
-      <div class="span12">
-        <div class="input-prepend input-append inline">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${p.from.date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${p.to.date()}">
-        </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
 
-        <div class="input-prepend inline">
-          <select name="p.stages" multiple="multiple" id="stage">
-          #{list items:models.material.MaterialUnit.STAGE.values(), as:'stage'}
-            <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
-          #{/list}
-          </select>
-        </div>
+      <form action="@{MaterialUnits.index()}" method="get" class="form-inline" id="search_Form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
 
-        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
-          <option value="">供应商</option>
-        #{list items:cooperators, as:'cop'}
-          <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
-        #{/list}
-        </select>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
 
-        <select name="p.materialId" class="inline">
-          <option value="">物料类型</option>
-        #{list items:models.material.Material.T, as:'t'}
-          <option value="${t.name()}" ${p.type.contains(t) ? 'selected' : ''}>${t.label()}</option>
-        #{/list}
-        </select>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
 
-        <div class="input-prepend input-append inline">
-          <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" style="width:200px;" name="p.search" placeholder="物料计划ID,物料编码" value="${p.search}">
-          <input type="hidden" name="p.page" value="${p.page}">
-          <button class="btn btn-primary" data-loading>搜索</button>
+            <div class="input-prepend inline">
+              <select name="p.stages" multiple="multiple" id="stage">
+              #{list items:models.material.MaterialUnit.STAGE.values(), as:'stage'}
+                <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+              #{/list}
+              </select>
+            </div>
+
+            <select name="p.cooperatorId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'cop'}
+              <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.type" class="form-control">
+              <option value="">物料类型</option>
+            #{list items:models.material.Material.T, as:'t'}
+              <option value="${t.name()}" ${p.type.contains(t) ? 'selected' : ''}>${t.label()}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input type="text" style="width:200px;" class="form-control" name="p.search" placeholder="物料计划ID,物料编码" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+
+            <button class="btn btn-primary" data-loading>搜索</button>
+            <a href="" class="btn btn-success" target="_blank"><i
+                class="icon-download-alt"></i>导出物料计划${str}</a>
+          </div>
         </div>
-        <div class="inline">
-          <a href="" class="btn btn-success" target="_blank"><i
-              class="icon-download-alt"></i>导出物料计划${str}</a>
+      </form>
+
+      <form method="post" id="create_materialUnit">
+        <div class="box-body">
+        #{render 'MaterialUnits/_unit_list.html', units: p.query(), p:p, checkbox:true , materialUnitsIndex:true/}
         </div>
+      </form>
+      
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
       </div>
     </div>
-  </form>
-</div>
-
-<form method="post" id="create_materialUnit">
-  <div class="row-fluid">
-    <div class="span12">
-    #{render 'MaterialUnits/_unit_list.html', units: p.query(), p:p, checkbox:true , materialUnitsIndex:true/}
-    </div>
   </div>
-
-</form>
-
+</div>
 
 
 <!--  修改物料计划 弹出div begin   -->
-<div id="bom_modal" class="modal hide fade">
-  <div class="modal-header">
-    <h4>物料计划修改</h4>
-  </div>
-  <div class="modal-body">
-    <form action="@{MaterialUnits.updateMaterialUnit()}" method="post" id="updateUnit_form">
-      <input type="hidden" name="unit.id" id="unit_id">
-      <input type="hidden" name="updateType" value="MaterialUnitIndex">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th width="30%">采购数量</th>
-          <td>
-            <input type="text" placeHolder="具体数量" id="unit_planQty" name="unit.planQty">
-          </td>
-        </tr>
-        <tr>
-          <th>价格</th>
-          <td>
-            <input type="text" id="unit_planPrice" name="unit.planPrice">
-            <select style="width:100px;" id="unit_planCurrency" name="unit.planCurrency">
-            #{list items:helper.Currency, as:'c'}
-              <option value="${c.name()}">${c.name()}</option>
-            #{/list}
-            </select>
-          </td>
-        </tr>
-      </table>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+<div id="bom_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>物料计划修改</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{MaterialUnits.updateMaterialUnit()}" method="post" id="updateUnit_form">
+              <input type="hidden" name="unit.id" id="unit_id">
+              <input type="hidden" name="updateType" value="MaterialUnitIndex">
+              <table class="table table-condensed table-bordered">
+                <tr>
+                  <th width="30%">采购数量</th>
+                  <td>
+                    <input type="text" placeHolder="具体数量" id="unit_planQty" name="unit.planQty">
+                  </td>
+                </tr>
+                <tr>
+                  <th>价格</th>
+                  <td>
+                    <input type="text" id="unit_planPrice" name="unit.planPrice">
+                    <select style="width:100px;" id="unit_planCurrency" name="unit.planCurrency">
+                    #{list items:helper.Currency, as:'c'}
+                      <option value="${c.name()}">${c.name()}</option>
+                    #{/list}
+                    </select>
+                  </td>
+                </tr>
+              </table>
+            </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
   </div>
 </div>
 <!--  修改物料计划 弹出div end   -->
