@@ -2,7 +2,7 @@
     #{extends 'main.html'/}
     #{set title:'Orders'/}
     #{set 'moreScripts'}
-        #{script 'orders/orders.coffee'/}
+        #{script 'orders/orders.es6'/}
     #{/set}
 #{/ifnot}
 #{flash_alert /}
@@ -29,7 +29,7 @@
       <!--
       <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning btn-small" id="refreshFeeBtn">重新抓取费用</button>}
       -->
-      <button data-url="@{Orders.refreshFeeById(ord.orderId)}" class="btn btn-warning btn-small">重新抓取费用</button>
+      <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning btn-small">重新抓取费用</button>
       &nbsp;&nbsp;
       <a href="@{Orders.show(ord.orderId)}" class="btn btn-success btn-small">刷新</a>
         #{if ord.feedback}

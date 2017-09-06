@@ -22,6 +22,7 @@ public class EbayOrderPost extends Post<EbayOrder> {
     private static final long serialVersionUID = 9006377542594278217L;
     public M market;
     public Orderr.S state = Orderr.S.SHIPPED;
+    public int perSize = 20;
 
     @Override
     public F.T2<String, List<Object>> params() {

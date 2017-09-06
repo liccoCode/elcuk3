@@ -1,12 +1,14 @@
 package controllers;
 
-import com.google.common.collect.Lists;
+import com.amazonservices.mws.finances.MWSFinancesServiceClient;
+import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
+import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
-import jobs.promise.FinanceShippedPromise;
 import models.ElcukRecord;
+import models.finance.EbayFee;
 import models.finance.SaleFee;
 import models.market.Account;
 import models.market.EbayOrder;
@@ -16,9 +18,11 @@ import models.product.Category;
 import models.view.Ret;
 import models.view.post.EbayOrderPost;
 import models.view.post.OrderPOST;
+import mws.MWSFinances;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -94,13 +98,37 @@ public class Orders extends Controller {
 
     public static void refreshFee(String id) {
         Orderr orderr = Orderr.findById(id);
+        orderr.fees.forEach(GenericModel::delete);
         try {
             Account account = Account.findById(orderr.account.id);
-            List<SaleFee> fees = new FinanceShippedPromise(account, orderr.market, Lists.newArrayList(orderr.orderId))
-                    .now().get();
-            renderJSON(new Ret(true, "总共处理 " + fees.size() + " 个费用"));
+            MWSFinancesServiceClient client = MWSFinances.client(account, orderr.market);
+            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
+            request.setSellerId(account.merchantId);
+            request.setMWSAuthToken(account.token);
+            request.setAmazonOrderId(id);
+            ListFinancialEventsResponse response = client.listFinancialEvents(request);
+            boolean flag = SaleFee.parseFinancesApiResult(response, account);
+            renderJSON(new Ret(flag, "重新抓取费用成功！"));
         } catch(Exception e) {
-            renderJSON(new Ret(e.getMessage()));
+            renderJSON(new Ret(false, e.getMessage()));
+        }
+    }
+
+    public static void refreshFeeByEbay(String id) {
+        EbayOrder orderr = EbayOrder.findById(id);
+        try {
+            Account account = Account.findById(orderr.account.id);
+            MWSFinancesServiceClient client = MWSFinances.client(account, orderr.market);
+            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
+            request.setSellerId(account.merchantId);
+            request.setMWSAuthToken(account.token);
+            request.setAmazonOrderId(id);
+            ListFinancialEventsResponse response = client.listFinancialEvents(request);
+            EbayFee.parseFinancesApiResult(response, orderr);
+            flash.success("重新抓取费用成功");
+            indexEbay(new EbayOrderPost());
+        } catch(Exception e) {
+            renderJSON(new Ret(false, e.getMessage()));
         }
     }
 

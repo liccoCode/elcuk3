@@ -1,11 +1,14 @@
 package models.market;
 
 import com.google.gson.annotations.Expose;
+import models.finance.EbayFee;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -141,5 +144,13 @@ public class EbayOrder extends GenericModel {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     public List<EbayOrderItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    public List<EbayFee> fees = new ArrayList<>();
+
+    public double totalFbaFee() {
+        return new BigDecimal(this.fees.stream().mapToDouble(fee -> fee.cost).sum())
+                .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
 
 }
