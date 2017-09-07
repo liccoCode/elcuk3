@@ -30,7 +30,7 @@
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
             <button class="btn btn-primary" data-loading>搜索</button>
-            <a class="btn btn-success" href="@{controllers.Materials.blank()}" id="printBtn" target="_blank">
+            <a class="btn btn-warning" href="@{controllers.Materials.blank()}" id="printBtn" target="_blank">
               <i class="icon-shopping-cart"></i> 新增物料</a>
           </div>
         </form>
@@ -57,10 +57,10 @@
               <td>${m.name}</td>
               <td>${m.type.label()}</td>
               <td>${m.boms[0]?.number}</td>
-              <td>${m.specification}</td>
-              <td title="${m.texture}" rel="tooltip">${m.texture.xxLong()}</td>
-              <td title="${m.technology}" rel="tooltip">${m.technology.overLong()}</td>
-              <td>${m.version}</td>
+              <td title="${m.specification}" data-toggle="tooltip">${m.specification.xxLong()}</td>
+              <td title="${m.texture}" data-toggle="tooltip">${m.texture.xxLong()}</td>
+              <td title="${m.technology}" data-toggle="tooltip">${m.technology.nineLong()}</td>
+              <td title="${m.version}" data-toggle="tooltip">${m.version}</td>
               <td>${m.nowPurchasePlanPrice()}</td>
               <td>
                 <a href="@{Materials.edit(m.id)}" class="btn btn-xs btn-primary">编辑</a>

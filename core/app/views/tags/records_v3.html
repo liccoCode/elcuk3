@@ -1,16 +1,9 @@
-<div class="box box-warning">
+<div class="box box-warning box-solid">
   <div class="box-header with-border">
-    <div class="row-fluid">
-    #{ifnot _notitle}
-      <div class="${_row ? 'row': 'row-fluid'}" style="margin-top:10px;">
-        <div class="span12">
-          <h4 class="text-warning" rel="tooltip" title="最近的 50 条记录"><i class="icon-question-sign"></i>
-            Records
-            <i class="icon-sort-down"></i></h4>
-        </div>
-      </div>
-    #{/ifnot}
-    </div>
+  #{ifnot _notitle}
+    <h3 class="box-title" rel="tooltip" title="最近的 50 条记录"><i class="icon-question-sign"></i>
+      Records</h3>
+  #{/ifnot}
   </div>
   <div class="box-body">
     <div class="${_row ? 'row' : 'row-fluid'}" style="margin-top:5px;max-height:200px;overflow:auto;margin-bottom:20px">

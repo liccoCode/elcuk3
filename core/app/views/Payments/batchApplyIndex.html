@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"会签审核列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -13,111 +13,121 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{Payments.batchApplyIndex()}" method="post" class="search_form" id="search_Form">
-    <div class="row-fluid">
-      <div class="span12">
-        <div class="input-prepend input-append inline">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${p.from.date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${p.to.date()}">
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <form action="@{Payments.batchApplyIndex()}" class="form-inline" id="search_Form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
+
+            <select name="p.status" class="form-control">
+              <option value="">状态</option>
+            #{list items:models.finance.BatchReviewApply.S, as:'s'}
+              <option #{if p.status==s} selected #{/if} value="${s.name()}">${s.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.cooperatorId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'cop'}
+              <option #{if p.cooperatorId==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.type" class="form-control">
+              <option value="">付款方式</option>
+            #{list items:models.finance.BatchReviewApply.W, as:'w'}
+              <option #{if p.way == w} selected #{/if} value="${w.name()}">${w.label()}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input class="form-control" name="p.search" style="width: 180px;" value="${p.search}" placeHolder="支付账号">
+            </div>
+
+            <button class="btn btn-primary" data-loading>搜索</button>
+            <input type="hidden" name="p.page" value="${p.page}">
+
+            <a class="btn btn-success" href="javascript:void(0)" id="printBtn" target="_blank"
+               data-url="@{Excels.exportBatchReviewApply()}"><i class="icon-print"></i> 审计部Excel导出</a>
+          </div>
         </div>
-
-        <select name="p.status" class="inline">
-          <option value="">状态</option>
-        #{list items:models.finance.BatchReviewApply.S, as:'s'}
-          <option #{if p.status==s} selected #{/if} value="${s.name()}">${s.label()}</option>
-        #{/list}
-        </select>
-
-        <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
-          <option value="">供应商</option>
-        #{list items:cooperators, as:'cop'}
-          <option #{if p.cooperatorId==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
-        #{/list}
-        </select>
-
-        <select name="p.type" class="inline">
-          <option value="">付款方式</option>
-        #{list items:models.finance.BatchReviewApply.W, as:'w'}
-          <option #{if p.way == w} selected #{/if} value="${w.name()}">${w.label()}</option>
-        #{/list}
-        </select>
-
-        <div class="input-prepend input-append inline">
-          <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" style="width:220px;" name="p.search" placeholder="" value="${p.search}">
-          <input type="hidden" name="p.page" value="${p.page}">
-          <button class="btn btn-primary" data-loading>搜索</button>
+      </form>
+      <form method="post" id="inboundForm">
+        <div class="box-body">
+          <table class="table table-condensed table-bordered" id="data-table">
+            <tr>
+              <th width="140px;">请款审核ID</th>
+              <th width="250px;">请款项</th>
+              <th width="70px;">付款方式</th>
+              <th width="100px;">审核阶段</th>
+              <th width="100px;">供应商</th>
+              <th width="100px;">核单金额</th>
+              <th width="190px;">创建人/创建时间</th>
+              <th width="180px;">品牌部审核意见/人</th>
+              <th width="180px;">审计部审核意见/人</th>
+              <th width="180px;">财务部审核意见/人</th>
+              <th width="200px;">备注</th>
+            </tr>
+          #{list items: applies, as: 'a'}
+            <tr>
+              <td><a href="@{Payments.showBatchApply(a.id)}">${a.id}</a></td>
+              <td style="cursor:pointer;" name="clickTd" data-id="${a.id}" data-url="@{Payments.showPaymentList()}">
+                <span><i class="icon-reorder"></i></span>
+                <span>${a.name}</span>
+                <span class="badge bg-light-blue">${a.paymentList.size()}</span>
+              </td>
+              <td>${a.way?.label()}</td>
+              <td style="color:${a.status?.rgb()}">${a.status?.label()}</td>
+              <td>${a.cooperator?.name}</td>
+              <td data-toggle="tooltip" title="$ ${a.totalApplyAmount()._1}">¥ ${a.totalApplyAmount()._3}</td>
+              <td>${a.creator.username}/#{time_tooltip_v3 time:a.createDate, datetime:true/}</td>
+              <td>
+                  #{list items:a.getHandlers(models.User.D.Brand),as:'b'}
+                  ${b.result?.label()} / ${b.handler.username} <br>
+                  #{/list}
+              </td>
+              <td>
+                  #{list items:a.getHandlers(models.User.D.Audit),as:'b'}
+                  ${b.result?.label()} / ${b.handler.username} <br>
+                  #{/list}
+              </td>
+              <td>
+                  #{list items:a.getHandlers(models.User.D.Finance),as:'b'}
+                  ${b.result?.label()} / ${b.handler.username} <br>
+                  #{/list}
+              </td>
+              <td rel="tooltip" title="${a.memo}">${a.memo.xxLong()}</td>
+            </tr>
+          #{/list}
+          </table>
         </div>
-        <a class="btn btn-info" href="javascript:void(0)" id="printBtn" target="_blank" data-url="@{Excels.exportBatchReviewApply()}">
-          <i class="icon-print"></i> 审计部Excel导出</a>
+      </form>
+
+      <div class="box-footer">
+      #{if applies.size() == 0}
+        暂时还没有入库记录
+      #{/if}
+      #{else }
+          #{bootstrap_pager_v3 pi:p, url:'' /}
+      #{/else}
       </div>
     </div>
-  </form>
-
-  <form method="post" id="inboundForm">
-    <div class="row-fluid">
-      <div class="span12">
-        <table class="table table-condensed table-bordered" id="data-table">
-          <tr>
-            <th width="125px;">请款审核ID</th>
-            <th width="250px;">请款项</th>
-            <th width="60px;">付款方式</th>
-            <th width="90px;">审核阶段</th>
-            <th width="100px;">供应商</th>
-            <th width="100px;">核单金额</th>
-            <th width="180px;">创建人/创建时间</th>
-            <th width="180px;">品牌部审核意见/人</th>
-            <th width="180px;">审计部审核意见/人</th>
-            <th width="180px;">财务部审核意见/人</th>
-            <th width="200px;">备注</th>
-          </tr>
-        #{list items: applies, as: 'a'}
-          <tr>
-            <td><a href="@{Payments.showBatchApply(a.id)}">${a.id}</a></td>
-            <td style="cursor:pointer;" name="clickTd" data-id="${a.id}" data-url="@{Payments.showPaymentList()}">
-              <span><i class="icon-reorder"></i></span>
-              <span>${a.name}</span>
-              <span class="badge badge-info">${a.paymentList.size()}</span>
-            </td>
-            <td>${a.way?.label()}</td>
-            <td>${a.status?.label()}</td>
-            <td>${a.cooperator?.name}</td>
-            <td rel="tooltip" title="$ ${a.totalApplyAmount()._1}">¥ ${a.totalApplyAmount()._3}</td>
-            <td>${a.creator.username}/#{time_tooltip time:a.createDate, datetime:true/}</td>
-            <td>
-                #{list items:a.getHandlers(models.User.D.Brand),as:'b'}
-                ${b.result?.label()} / ${b.handler.username} <br>
-                #{/list}
-            </td>
-            <td>
-                #{list items:a.getHandlers(models.User.D.Audit),as:'b'}
-                ${b.result?.label()} / ${b.handler.username} <br>
-                #{/list}
-            </td>
-            <td>
-                #{list items:a.getHandlers(models.User.D.Finance),as:'b'}
-                ${b.result?.label()} / ${b.handler.username} <br>
-                #{/list}
-            </td>
-            <td rel="tooltip" title="${a.memo}">${a.memo.xxLong()}</td>
-          </tr>
-        #{/list}
-          <tr>
-            <td colspan="11">
-            #{if applies.size() == 0}
-              暂时还没有入库记录
-            #{/if}
-            #{else }
-                #{bootstrap_pager pi:p, url:'' /}
-            #{/else}
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-  </form>
+  </div>
 </div>
+
 

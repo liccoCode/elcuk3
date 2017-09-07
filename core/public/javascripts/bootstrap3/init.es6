@@ -23,4 +23,6 @@ $(() => {
     select.selectize();
   });
 
+  $("table").addClass("table-hover");
+
 });

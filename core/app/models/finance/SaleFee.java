@@ -1,5 +1,6 @@
 package models.finance;
 
+import com.amazonservices.mws.finances.model.*;
 import exception.DBException;
 import helper.Currency;
 import helper.Dates;
@@ -21,6 +22,7 @@ import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -376,4 +378,84 @@ public class SaleFee extends Model {
                 + ", qty=" + qty
                 + '}';
     }
+
+    public static boolean parseFinancesApiResult(ListFinancialEventsResponse response, Account account) {
+        ListFinancialEventsResult result = response.getListFinancialEventsResult();
+        FinancialEvents financialEvents = result.getFinancialEvents();
+
+        if(financialEvents.getShipmentEventList().size() > 0) {
+            List<ShipmentEvent> events = financialEvents.getShipmentEventList();
+            events.forEach(event -> event.getShipmentItemList()
+                    .forEach(item -> {
+                        item.getItemChargeList().forEach(
+                                component -> SaleFee.saveChargeFeeForApi(component, event, item, "Order", account));
+                        item.getItemFeeList()
+                                .forEach(itemFee -> SaleFee.saveItemFeeForApi(itemFee, event, item, "Order", account));
+                        item.getPromotionList().forEach(
+                                promotion -> SaleFee.savePromotionForApi(promotion, event, item, "Order", account));
+                    }));
+        }
+        return true;
+    }
+
+    private static void saveChargeFeeForApi(ChargeComponent component, ShipmentEvent event, ShipmentItem item,
+                                            String type, Account account) {
+        if(component.getChargeAmount().getCurrencyAmount().floatValue() > 0) {
+            SaleFee fee = new SaleFee();
+            fee.type = FeeType.findById(FeeType.mappingTypeName(component.getChargeType().toLowerCase()));
+            fee.currency = Currency.valueOf(component.getChargeAmount().getCurrencyCode());
+            fee.cost = component.getChargeAmount().getCurrencyAmount().floatValue();
+            SaleFee.commonField(fee, event, item, type, account);
+        }
+    }
+
+    private static void saveItemFeeForApi(FeeComponent component, ShipmentEvent event, ShipmentItem item, String type,
+                                          Account account) {
+        if(component.getFeeAmount().getCurrencyAmount().floatValue() != 0) {
+            SaleFee fee = new SaleFee();
+            fee.type = FeeType.findById(FeeType.mappingTypeName(component.getFeeType().toLowerCase()));
+            fee.currency = Currency.valueOf(component.getFeeAmount().getCurrencyCode());
+            fee.cost = component.getFeeAmount().getCurrencyAmount().floatValue();
+            SaleFee.commonField(fee, event, item, type, account);
+        }
+    }
+
+    private static void savePromotionForApi(Promotion component, ShipmentEvent event, ShipmentItem item, String type,
+                                            Account account) {
+        if(component.getPromotionAmount().getCurrencyAmount().floatValue() != 0) {
+            SaleFee fee = new SaleFee();
+            fee.type = FeeType.findById(FeeType.mappingTypeName(component.getPromotionType().toLowerCase()));
+            fee.currency = Currency.valueOf(component.getPromotionAmount().getCurrencyCode());
+            fee.cost = component.getPromotionAmount().getCurrencyAmount().floatValue();
+            SaleFee.commonField(fee, event, item, type, account);
+        }
+    }
+
+    private static void commonField(SaleFee fee, ShipmentEvent event, ShipmentItem item, String type, Account account) {
+        M market = M.val(event.getMarketplaceName());
+        fee.usdCost = fee.currency.toUSD(fee.cost);
+        fee.market = market;
+        fee.memo = "ERP重新抓取API";
+        fee.orderId = event.getAmazonOrderId();
+        fee.order = Orderr.findById(fee.orderId);
+        fee.qty = item.getQuantityShipped();
+        fee.date = event.getPostedDate().toGregorianCalendar().getTime();
+        fee.transaction_type = type;
+        fee.product_sku = item.getSellerSKU().split(",")[0];
+        fee.account = account;
+        Map<String, Object> map = new HashMap<>();
+        map.put("order_orderId", fee.orderId);
+        map.put("account_id", fee.account.id);
+        map.put("market", fee.market.name());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        map.put("date", dateFormat.format(fee.date));
+        map.put("cost", fee.cost.toString());
+        map.put("currency", fee.currency.name());
+        map.put("type_name", fee.type.name.toLowerCase());
+        map.put("product_sku", fee.product_sku);
+        map.put("transaction_type", fee.transaction_type);
+        fee.md5_id = Webs.md5ForSaleFee(map);
+        fee.save();
+    }
+
 }
