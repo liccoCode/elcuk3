@@ -39,8 +39,8 @@ public class StockApiDeal extends Controller {
         try {
             Date now = new Date();
             User user = User.findById(178L);
-            Cooperator easyacc = Cooperator.findB2bCooperator();
-
+            String projectName = request.params.get("projectName");
+            Cooperator cooperator = Cooperator.findB2bCooperator(User.COR.valueOf(projectName));
             String[] skus = request.params.get("sku").split(",");
             String[] qtyList = request.params.get("qty").split(",");
             String[] currencyList = request.params.get("currency").split(",");
@@ -52,7 +52,7 @@ public class StockApiDeal extends Controller {
             deliveryment.createDate = now;
             deliveryment.projectName = User.COR.MengTop;
             deliveryment.handler = user;
-            deliveryment.cooperator = easyacc;
+            deliveryment.cooperator = cooperator;
             deliveryment.state = Deliveryment.S.DONE;
             deliveryment.save();
 
@@ -72,7 +72,7 @@ public class StockApiDeal extends Controller {
                 unit.inboundQty = qty;
                 unit.availableQty = qty;
                 unit.originQty = qty;
-                unit.cooperator = easyacc;
+                unit.cooperator = cooperator;
                 unit.attrs.deliveryDate = now;
                 unit.attrs.planDeliveryDate = now;
                 unit.createDate = now;

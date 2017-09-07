@@ -362,7 +362,7 @@ public class Cooperator extends Model {
     }
 
     public List<Material> findMaterialNotExistCooper() {
-        List<Material> materials = Material.find("isDel = 0",null).fetch();
+        List<Material> materials = Material.find("isDel = 0", null).fetch();
         List<CooperItem> items = this.cooperItems.stream()
                 .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
         List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
@@ -440,8 +440,16 @@ public class Cooperator extends Model {
         return this.cooperItems.stream().anyMatch(item -> Objects.equals(item.status, CooperItem.S.Pending));
     }
 
-    public static Cooperator findB2bCooperator() {
-       return Cooperator.findById(208L);
+    public static Cooperator findB2bCooperator(User.COR projectName) {
+        switch(projectName) {
+            case OUTXE:
+                return Cooperator.findById(209L);
+            case Brandworl:
+                return Cooperator.findById(210L);
+            case EASYACC:
+            default:
+                return Cooperator.findById(208L);
+        }
     }
 
 }

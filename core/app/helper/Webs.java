@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -411,5 +412,20 @@ public class Webs {
 
     public static String md5(String str) {
         return DigestUtils.md5Hex(str);
+    }
+
+    public static String md5ForSaleFee(Map<String, Object> object) {
+        if(object == null) return "";
+        Map<String, Object> sortMap = object.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, TreeMap::new));
+        StringBuilder md5 = new StringBuilder("{");
+        sortMap.keySet().forEach(key -> {
+            if(Arrays.asList("account_id", "cost", "date").contains(key)) {
+                md5.append(":").append(key).append("=>").append(object.get(key)).append(", ");
+            } else {
+                md5.append(":").append(key).append("=>\"").append(object.get(key)).append("\", ");
+            }
+        });
+        return DigestUtils.md5Hex(md5.substring(0, md5.length() - 2) + "}");
     }
 }
