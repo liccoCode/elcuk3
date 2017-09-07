@@ -154,7 +154,7 @@ public class DeliverPlans extends Controller {
         List<ProcureUnit> units = plan.units;
         boolean deliveryplan = true;
         boolean norecord = true;
-        render("/ProcureUnits/_unit_list.html", units, deliveryplan, norecord);
+        render("/ProcureUnits/_unit_list_v3.html", units, deliveryplan, norecord);
     }
 
 }
