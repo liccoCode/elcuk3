@@ -139,13 +139,13 @@ public class Material extends Model {
     public String cooperName;
 
     /**
-     *  采购余量
+     * 采购余量
      */
     @Transient
     public int qty;
 
     /**
-     *采购未确认数量
+     * 采购未确认数量
      */
     @Transient
     public int pendingQty;
@@ -160,7 +160,7 @@ public class Material extends Model {
      * 返回所有物料信息
      */
     public static List<Material> suppliers() {
-        List<Material> materials = Material.findAll();
+        List<Material> materials = Material.find("isDel = ?", false).fetch();
         materials.sort((c1, c2) -> collator.compare(c1.name, c2.name));
         return materials;
     }
