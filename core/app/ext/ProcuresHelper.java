@@ -1,6 +1,7 @@
 package ext;
 
 import helper.Webs;
+import models.finance.BatchReviewApply;
 import models.market.M;
 import models.material.MaterialPlan;
 import models.material.MaterialPurchase;
@@ -110,6 +111,23 @@ public class ProcuresHelper extends JavaExtensions {
                 return "#E8ECF1";
         }
     }
+
+    public static String rgb(BatchReviewApply.S status) {
+            switch(status) {
+                case Pending:
+                    return "#40B0F9";
+                case Brand:
+                    return "#88BEF5";
+                case Audit:
+                    return "#FBBC05";
+                case Finance:
+                    return "#FF6464";
+                case End:
+                    return "#00a65a";
+                default:
+                    return "#E8ECF1";
+            }
+        }
 
     public static String overLong(String value) {
         if(StringUtils.isNotBlank(value)) {

@@ -25,9 +25,7 @@
           </div>
         </div>
 
-        <div class="form-control">
-            #{select_enum name:'p.dateType', items:models.view.post.ProcreApplyPost.DateType.values(), value:p.dateType/}
-        </div>
+          #{select_enum name:'p.dateType', items:models.view.post.ProcreApplyPost.DateType.values(), value:p.dateType,class:"form-control"/}
 
         <select name="p.supplierId" class="form-control selectize" style="width:150px;">
           <option value="">供应商</option>
@@ -71,16 +69,13 @@
                 .floatValue().format('#,###.##')}</td>
                 <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2, 4)
                 .floatValue().format('#,###.##')}</td>
-                <td>#{time_tooltip time:apply.updateAt, datetime:true/}</td>
-                <td>#{time_tooltip time:apply.createdAt, datetime:true/}</td>
+                <td>#{time_tooltip_v3 time:apply.updateAt, datetime:true/}</td>
+                <td>#{time_tooltip_v3 time:apply.createdAt, datetime:true/}</td>
               </tr>
             #{/list}
         </table>
       </div>
     #{/form}
-
-
-
 
       <div class="box-footer">
         <div class="span12">

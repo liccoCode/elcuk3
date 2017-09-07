@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"汇签审核详情"  /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
@@ -6,158 +6,170 @@
     #{script 'applys/index.es6'/}
 #{/set}
 
-
 #{errorMsgs /}
 #{flash_alert /}
 
-<form action="" method="post" id="">
-#{info_row title:'请款审核单'/}
+<div class="row">
+  <div class="col-md-12">
+    <form action="" method="post" id="" class="form-horizontal">
+      <div class="box box-info box-solid">
+        <div class="box-header"><h3 class="box-title">请款审核单</h3></div>
+        <div class="box-body">
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">请款审核ID</label>
+            <div class="col-sm-3">
+              <input type="text" class="form-control" value="${apply.id}" readonly>
+            </div>
 
-  <div class="row-fluid">
-    <div class="span12">
-      <table class="table table-bordered">
-        <tr>
-          <th width="10%;">请款审核ID</th>
-          <td width="40%;"><input type="text" value="${apply.id}" readonly></td>
-          <th width="10%;">请款项:</th>
-          <td width="40%;"><input type="text" value="${apply.name}" class="input-xxlarge" required readonly></td>
-        </tr>
-        <tr>
-          <th>付款方式</th>
-          <td>
-            <select>
-            #{list items:models.finance.BatchReviewApply.W, as:'w'}
-              <option value="${w.name()}">${w.label()}</option>
-            #{/list}
-            </select>
-          <th>审核状态</th>
-          <td><input type="text" readonly value="${apply.status.label()}"></td>
-        </tr>
-        <tr>
-          <th>供应商</th>
-          <td><input type="text" readonly value="${apply.cooperator?.name}"></td>
-          <th>总核单金额</th>
-          <td>
-            <input type="text" value="${apply.totalApplyAmount()._3}" class="span2" readonly>
-            <select class="span2">
-              <option value="CNY">CNY</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <th>备注</th>
-          <td colspan="3">
-            <textarea name="inbound.memo" rows="4" class="input-block-level"></textarea>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <input type="hidden" name="record.origin" value="">
-            <input type="hidden" name="record.state" value="">
-            <button class="btn btn-primary" id="update">更新</button>
-            <a href="@{Inbounds.index()}" class="btn btn-success">取消</a>
-          </td>
-        </tr>
-      </table>
+            <label for="pro_family" class="col-sm-2 control-label">请款项</label>
+            <div class="col-sm-3">
+              <input type="text" class="form-control" value="${apply.name}" class="input-xxlarge" required readonly>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">付款方式</label>
+            <div class="col-sm-3">
+              <select class="form-control">
+              #{list items:models.finance.BatchReviewApply.W, as:'w'}
+                <option value="${w.name()}">${w.label()}</option>
+              #{/list}
+              </select>
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">审核状态</label>
+            <div class="col-sm-3">
+              <input type="text" class="form-control" value="${apply.name}" class="input-xxlarge" required readonly>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">供应商</label>
+            <div class="col-sm-3">
+              <input type="text" class="form-control" readonly value="${apply.cooperator?.name}">
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">总核单金额</label>
+            <div class="col-sm-3">
+              <div class="input-group">
+                <input type="text" value="${apply.totalApplyAmount()._3}" class="form-control" readonly>
+                <span class="input-group-addon">CNY</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">备注</label>
+            <div class="col-sm-8">
+              <textarea class="form-control" name="m.memo" rows="4" class="input-block-level">${apply.memo}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <button class="btn btn-primary" id="update">更新</button>
+          <a href="@{Payments.batchApplyIndex()}" class="btn btn-default">取消</a>
+          <input type="hidden" name="record.origin" value="">
+          <input type="hidden" name="record.state" value="">
+        </div>
+      </div>
+    </form>
+
+    <div class="box box-success box-solid">
+      <div class="box-header"><h3 class="box-title">请款审核明细</h3></div>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered" id="unit_table">
+          <tr>
+            <th>请款单编号</th>
+            <th>涉及的请款人</th>
+            <th>总请款金额</th>
+            <th>最近更新时间</th>
+            <th>创建时间</th>
+          </tr>
+        #{list items:apply.paymentList, as:'pay'}
+          <tr>
+            <td><a target="_blank" href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
+            <td>
+                #{list items:pay.applyers(), as:'applyer'}
+                ${applyer.username} &nbsp;
+                #{/list}
+            </td>
+            <td>${pay.currency.symbol()}  ${pay.totalFees()._3}</td>
+            <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
+            <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
     </div>
-  </div>
-</form>
 
-#{success_row title:'请款审核明细'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered" id="unit_table">
-      <tr>
-        <th>请款单编号</th>
-        <th>涉及的请款人</th>
-        <th>总请款金额</th>
-        <th>最近更新时间</th>
-        <th>创建时间</th>
-      </tr>
-    #{list items:apply.paymentList, as:'pay'}
-      <tr>
-        <td><a target="_blank" href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
-        <td>
-            #{list items:pay.applyers(), as:'applyer'}
-            ${applyer.username} &nbsp;
-            #{/list}
-        </td>
-        <td>${pay.currency.symbol()}  ${pay.totalFees()._3}</td>
-        <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
-        <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
-      </tr>
-    #{/list}
-    </table>
+    <div class="box box-primary box-solid">
+      <div class="box-header"><h3 class="box-title">审核信息</h3></div>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered" id="unit_table">
+          <tr>
+            <th width="250px;">审核部门</th>
+            <th width="250px;">审核人</th>
+            <th width="220px;">审核意见</th>
+            <th width="250px;">审核时间</th>
+            <th>说明</th>
+          </tr>
+        #{list items:apply.handlers, as:'h'}
+          <tr>
+            <td>${h.handler.department?.label()}</td>
+            <td>${h.handler.username}</td>
+            <td>${h.result?.label()}</td>
+            <td>#{time_tooltip_v3 time:h.createDate, datetime:true/}</td>
+            <td>${h.memo}</td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+    </div>
+
+    <form action="@{Payments.submitBatchResult()}" method="post" id="apply_form" class="form-horizontal">
+      <div class="box box-warning box-solid">
+        <div class="box-header"><h3 class="box-title">请款审批会签</h3></div>
+        <div class="box-body">
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">审核意见</label>
+            <div class="col-sm-3">
+              <label class="radio-inline">
+                <input type="radio" name="handler.result" value="Agree">同意
+              </label>
+              <label class="radio-inline">
+                <input type="radio" name="handler.result" value="Disagree">不同意
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-1 control-label">说明</label>
+            <div class="col-sm-8">
+              <textarea class="form-control" name="handler.memo" rows="4" class="input-block-level"></textarea>
+              <input type="hidden" name="handler.apply.id" value="${apply.id}">
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+        #{if apply.showSubmitBtn()}
+          <input type="submit" class="btn btn-primary" value="提交">
+        #{/if}
+        #{if apply.status.name() == 'Brand' && currDepart == 'Brand'}
+          <input type="button" class="btn btn-warning" value="移交审计部审核" name="transferBtn" data-status="Audit">
+        #{/if}
+        #{if apply.status.name() == 'Audit' && currDepart == 'Audit'}
+          <input type="button" class="btn btn-warning" value="移交财务部审核" name="transferBtn" data-status="Finance">
+        #{/if}
+        #{if apply.status.name() == 'Finance' && currDepart == 'Finance'}
+          <input type="button" class="btn btn-success" value="审核结束" id="endBtn">
+        #{/if}
+        </div>
+      </div>
+    </form>
+
   </div>
 </div>
-
-#{info_row title:'审核信息'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered" id="unit_table">
-      <tr>
-        <th width="250px;">审核部门</th>
-        <th width="250px;">审核人</th>
-        <th width="220px;">审核意见</th>
-        <th width="250px;">审核时间</th>
-        <th>说明</th>
-      </tr>
-    #{list items:apply.handlers, as:'h'}
-      <tr>
-        <td>${h.handler.department?.label()}</td>
-        <td>${h.handler.username}</td>
-        <td>${h.result?.label()}</td>
-        <td>#{time_tooltip time:h.createDate, datetime:true/}</td>
-        <td>${h.memo}</td>
-      </tr>
-    #{/list}
-    </table>
-  </div>
-</div>
-
-#{warning_row title:'请款审批会签'/}
-<form action="@{Payments.submitBatchResult()}" method="post">
-  <div class="row-fluid">
-    <div class="span12">
-      <table class="table table-condensed table-bordered" id="apply_form">
-        <tr>
-          <th>审核意见</th>
-          <td>
-            <label class="radio inline">
-              <input type="radio" name="handler.result" value="Agree">同意
-            </label>
-            <label class="radio inline">
-              <input type="radio" name="handler.result" value="Disagree">不同意
-            </label>
-          </td>
-        </tr>
-        <tr>
-          <th>说明</th>
-          <td>
-            <textarea rows="3" class="input-block-level" name="handler.memo"></textarea>
-            <input type="hidden" name="handler.apply.id" value="${apply.id}">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2">
-          #{if apply.showSubmitBtn()}
-            <input type="submit" class="btn btn-primary" value="提交">
-          #{/if}
-          #{if apply.status.name() == 'Brand' && currDepart == 'Brand'}
-            <input type="button" class="btn btn-warning" value="移交审计部审核" name="transferBtn" data-status="Audit">
-          #{/if}
-          #{if apply.status.name() == 'Audit' && currDepart == 'Audit'}
-            <input type="button" class="btn btn-warning" value="移交财务部审核" name="transferBtn" data-status="Finance">
-          #{/if}
-          #{if apply.status.name() == 'Finance' && currDepart == 'Finance'}
-            <input type="button" class="btn btn-success" value="审核结束" id="endBtn">
-          #{/if}
-          </td>
-        </tr>
-      </table>
-    </div>
-  </div>
-</form>
 
 <div class="row-fluid">
   <div class="span12">

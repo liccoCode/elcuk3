@@ -124,11 +124,11 @@ public class ProcreApplyPost extends Post<Apply> {
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ProcureApply.count(params._1, params._2.toArray());
+        return this.count;
     }
 
     @Override
     public Long getTotalCount() {
-        return ProcureApply.count();
+        return this.count;
     }
 }
