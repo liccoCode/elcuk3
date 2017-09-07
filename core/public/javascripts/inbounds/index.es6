@@ -5,7 +5,7 @@ $(() => {
 
   $("#printBtn").click(function (e) {
     e.stopPropagation();
-    if ($("input[type='checkbox']:checked").length == 0) {
+    if ($("#inboundForm input[type='checkbox']:checked").length == 0) {
       noty({
         text: '请选择需要打印的入库单',
         type: 'error'
