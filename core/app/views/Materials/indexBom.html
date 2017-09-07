@@ -25,7 +25,7 @@
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
             <button class="btn btn-primary" data-loading>搜索</button>
-            <input type="button" class="btn btn-success" id="addBom" value="新增包装BOM">
+            <input type="button" class="btn btn-warning" id="addBom" value="新增包装BOM">
           </div>
         </form>
       </div>
@@ -48,7 +48,7 @@
                   name="clickTd">
                 <span><i class="icon-reorder"></i></span>
                 <span>${m.name}</span>
-                <span class="badge badge-info">${m.materials.size()}</span>
+                <span class="badge bg-light-blue">${m.materials.size()}</span>
               </td>
               <td>${m.creator?.username}</td>
               <td>${m.status.label()}</td>

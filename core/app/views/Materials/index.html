@@ -30,7 +30,7 @@
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
             <button class="btn btn-primary" data-loading>搜索</button>
-            <a class="btn btn-success" href="@{controllers.Materials.blank()}" id="printBtn" target="_blank">
+            <a class="btn btn-warning" href="@{controllers.Materials.blank()}" id="printBtn" target="_blank">
               <i class="icon-shopping-cart"></i> 新增物料</a>
           </div>
         </form>
@@ -38,7 +38,7 @@
 
       <form method="post" id="inboundForm">
         <div class="box-body">
-          <table class="table table-condensed table-bordered table-hover" id="data-table">
+          <table class="table table-condensed table-bordered" id="data-table">
             <tr>
               <th>物料编码</th>
               <th>物料名称</th>

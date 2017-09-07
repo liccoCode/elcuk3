@@ -88,6 +88,7 @@ public class Materials extends Controller {
                 bom.save();
             }
         });
+        flash.success("保存成功！");
         edit(m.id);
     }
 
