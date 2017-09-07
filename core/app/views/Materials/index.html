@@ -38,7 +38,7 @@
 
       <form method="post" id="inboundForm">
         <div class="box-body">
-          <table class="table table-condensed table-bordered" id="data-table">
+          <table class="table table-condensed table-bordered table-hover" id="data-table">
             <tr>
               <th>物料编码</th>
               <th>物料名称</th>
@@ -57,10 +57,10 @@
               <td>${m.name}</td>
               <td>${m.type.label()}</td>
               <td>${m.boms[0]?.number}</td>
-              <td>${m.specification}</td>
-              <td title="${m.texture}" rel="tooltip">${m.texture.xxLong()}</td>
-              <td title="${m.technology}" rel="tooltip">${m.technology.overLong()}</td>
-              <td>${m.version}</td>
+              <td title="${m.specification}" data-toggle="tooltip">${m.specification.xxLong()}</td>
+              <td title="${m.texture}" data-toggle="tooltip">${m.texture.xxLong()}</td>
+              <td title="${m.technology}" data-toggle="tooltip">${m.technology.nineLong()}</td>
+              <td title="${m.version}" data-toggle="tooltip">${m.version}</td>
               <td>${m.nowPurchasePlanPrice()}</td>
               <td>
                 <a href="@{Materials.edit(m.id)}" class="btn btn-xs btn-primary">编辑</a>
