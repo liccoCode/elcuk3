@@ -96,7 +96,7 @@ public class InboundPost extends Post<Inbound> {
             sbd.append(" AND u.sku LIKE ? ");
             params.add("%" + this.search + "%");
         }
-        sbd.append(" AND i.inbound.createDate >= ? AND i.inbound.createDate <= ? ");
+        sbd.append(" AND i.inbound.receiveDate >= ? AND i.inbound.receiveDate <= ? ");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
         if(status != null) {
