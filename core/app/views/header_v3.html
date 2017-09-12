@@ -1,9 +1,9 @@
 <header class="main-header">
-  <a href="@{Application.index()}" class="logo">
+  <a href="@{Application.indexV3()}" class="logo">
     <!-- mini logo for sidebar mini 50x50 pixels -->
     <span class="logo-mini"><b>EA</b></span>
     <!-- logo for regular state and mobile devices -->
-    <span class="logo-lg"><b>EasyAcc</b></span>
+    <span class="logo-lg"><b>${models.OperatorConfig.getVal("brandname")}</b></span>
   </a>
 
   <nav class="navbar navbar-static-top" role="navigation">
@@ -280,7 +280,7 @@
 
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
-        <li class="dropdown messages-menu">
+*{        <li class="dropdown messages-menu">
           <!-- Menu toggle button -->
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-envelope-o"></i>
@@ -308,7 +308,7 @@
             </li>
             <li class="footer"><a href="#">See All Messages</a></li>
           </ul>
-        </li>
+        </li>}*
 
         <li class="dropdown notifications-menu">
           <!-- Menu toggle button -->

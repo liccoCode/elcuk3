@@ -121,6 +121,15 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         return dtos;
     }
 
+    public List<AnalyzeDTO> queryOrderByDayOne() {
+        List<AnalyzeDTO> dtos = this.analyzes();
+        if(StringUtils.isNotBlank(this.orderBy))
+            Collections.sort(dtos, new FieldComparator("day1", this.desc));
+        if(StringUtils.isNotBlank(this.market))
+            CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
+        return dtos;
+    }
+
     public static int setOutDayColor(List<AnalyzeDTO> dtos, Integer needCompare) {
         OperatorConfig outDays_config = OperatorConfig.find("name = ? ", "标准断货期天数").first();
         int outDay = Integer.parseInt(outDays_config.val);

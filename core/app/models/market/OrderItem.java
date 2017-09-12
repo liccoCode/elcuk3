@@ -176,11 +176,11 @@ public class OrderItem extends GenericModel {
      */
     @Cached("2h")
     public static HighChart ajaxHighChartUnitOrder(String val, String type, Date from, Date to) {
-        String cacked_key = Caches.Q.cacheKey("unit", val, type, from, to);
-        HighChart lines = Cache.get(cacked_key, HighChart.class);
+        String cache_key = Caches.Q.cacheKey("unit", val, type, from, to);
+        HighChart lines = Cache.get(cache_key, HighChart.class);
         if(lines != null) return lines;
-        synchronized(cacked_key.intern()) {
-            lines = Cache.get(cacked_key, HighChart.class);
+        synchronized(cache_key.intern()) {
+            lines = Cache.get(cache_key, HighChart.class);
             if(lines != null) return lines;
 
             // 做内部参数的容错
@@ -204,9 +204,9 @@ public class OrderItem extends GenericModel {
                 }
             }
 
-            Cache.add(cacked_key, highChart, "2h");
+            Cache.add(cache_key, highChart, "2h");
         }
-        return Cache.get(cacked_key, HighChart.class);
+        return Cache.get(cache_key, HighChart.class);
     }
 
 

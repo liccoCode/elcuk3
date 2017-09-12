@@ -451,4 +451,8 @@ public class Dates {
     public static Date aMonthAgo() {
         return DateTime.now().minusMonths(1).toDate();
     }
+
+    public static Date yesterday() {
+        return DateTime.now().minusDays(1).toDate();
+    }
 }

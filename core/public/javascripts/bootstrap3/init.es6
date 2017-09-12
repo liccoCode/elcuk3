@@ -25,4 +25,6 @@ $(() => {
 
   $("table").addClass("table-hover");
 
+  $('[data-toggle="popover"]').popover();
+
 });
