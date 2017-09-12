@@ -85,7 +85,7 @@
         <th>#</th>
         <th>物料编码</th>
         <th>请款状态</th>
-        <th>数量(交货/签收)</th>
+        <th>数量(交货/签收异常)</th>
         <th>单价</th>
         <th>单价*签收数量</th>
         <th>出货单状态</th>
@@ -109,7 +109,7 @@
               #{/list}
             </td>
             <td class="qty" qty="${procureUnit.qty}" receiptQty="${procureUnit.receiptQty?:0}"
-                style="color:${procureUnit.qty!=procureUnit.receiptQty? 'red':''}">
+                style="color:${(procureUnit.receiptQty>0&&procureUnit.qty!=procureUnit.receiptQty)? 'red':''}">
             ${procureUnit.qty}/${procureUnit.receiptQty?:0}
             </td>
             <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
