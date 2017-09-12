@@ -25,9 +25,9 @@
 
       <div class="tab-content">
         <div class="tab-pane active" id='orderinfo'>
-          <div class="box box-primary">
+          <div class="box box-primary box-solid">
             <div class="box-header with-border">
-              <h4>Order Basic</h4>
+              <h3 class="box-title">Order Basic</h3>
             </div>
             <div class="box-body">
               <table class="table table-condensed table-bordered">
@@ -100,16 +100,16 @@
               </table>
             </div>
             <div class="box-footer">
-              <button data-url="@{Orders.refreshFeeById(ord.orderId)}" class="btn btn-warning btn-xs">重新抓取费用</button>
-              <a href="@{Orders.show(ord.orderId)}" class="btn btn-success btn-xs">刷新</a>
+              <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning" id="refresh_btn">重新抓取费用</button>
+              <a href="@{Orders.show(ord.orderId)}" class="btn btn-success">刷新</a>
             #{if ord.feedback}
               <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
             #{/if}
             </div>
           </div>
 
-          <div class="box box-info">
-            <div class="box-header"><h4>Order Items</h4></div>
+          <div class="box box-info box-solid">
+            <div class="box-header"><h3 class="box-title">Order Items</h3></div>
             <div class="box-body">
               <table class="table table-bordered">
                 <tr>
@@ -140,8 +140,8 @@
             </div>
           </div>
 
-          <div class="box box-warning">
-            <div class="box-header"><h4>Order Fees</h4></div>
+          <div class="box box-warning box-solid">
+            <div class="box-header"><h3 class="box-title">Order Fees</h3></div>
             <div class="box-body">
             #{render 'Orders/_order_fees.html', fees:ord.fees/}
             </div>

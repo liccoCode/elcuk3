@@ -47,16 +47,17 @@
 
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
-              <input type="text" style="width:180px;" name="p.search" class="form-control"  value="${p.search}"
+              <input type="text" style="width:180px;" name="p.search" class="form-control" value="${p.search}"
                      placeHolder="搜索 物料编码 or 物料出货单ID">
               <input type="hidden" name="p.page" value="${p.page}">
               <input type="hidden" name="id" id="planId">
             </div>
 
             <button class="btn btn-primary" data-loading>搜索</button>
+          #{power.ck "materialplans.approve"}
             <a href="javascript:void(0)" data-url='@{MaterialPlans.approveBatch()}' class="btn btn-warning"
                id="confirmMaterialPlanBtn">财务审核</a>
-
+          #{/power.ck}
           </div>
         </div>
 
@@ -104,9 +105,12 @@
               <td>${dp.receiveCooperator?.name}</td>
               <td>
                   #{if dp.financeState.name() == financeState.name()}
-                    <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                    <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
-                       class="btn btn-xs btn-warning" uid="${dp.id}">审核</a>
+                      #{power.ck "materialplans.approve"}
+                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
+                           class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
+                      #{/power.ck}
+                    待审
                   #{/if}
                   #{else}
                   ${dp.financeState?.label()}

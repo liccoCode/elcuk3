@@ -1,39 +1,84 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
+import helper.J;
 import helper.Webs;
-import models.Notification;
 import models.OperatorConfig;
-import models.market.Account;
-import models.market.Feedback;
-import models.market.Orderr;
+import models.market.*;
 import models.view.Ret;
+import models.view.dto.AnalyzeDTO;
 import models.view.dto.DashBoard;
+import models.view.highchart.HighChart;
+import models.view.post.AnalyzePost;
 import models.view.post.StockPost;
 import models.whouse.Whouse;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
+import play.jobs.Job;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
+
     public static void index() {
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
-
-        DashBoard dashborad = Orderr.frontPageOrderTable(11);
+        DashBoard dashboard = Orderr.frontPageOrderTable(11);
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
+        render(dashboard, fbaWhouse);
+    }
 
-        render(dashborad, fbaWhouse);
+    public static void indexV3() {
+        if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
+            StockRecords.stockIndex(new StockPost());
+        }
+        DashBoard dashboard = Orderr.frontPageOrderTable(11);
+        render("Application/index_v3.html", dashboard);
+    }
+
+
+    public static void perDayOrderNum() {
+        DashBoard dashboard = Orderr.frontPageOrderTable(11);
+        Date now = Dates.yesterday();
+        HighChart chart = DashBoard.todayOrderNum("", "sid", now, now);
+        renderJSON(J.json(chart));
+    }
+
+    public static void topTenSkuByMarket(String market) {
+        AnalyzePost p = new AnalyzePost();
+        p.market = market;
+        List<AnalyzeDTO> dtos = p.queryOrderByDayOne();
+        if(dtos.size() >= 4) {
+            dtos = dtos.subList(0, 4);
+        }
+        render(dtos, market);
+    }
+
+    public static void ajaxUnit(String sid) {
+        Selling selling = Selling.findById(sid);
+        AnalyzePost p = new AnalyzePost();
+        p.val = selling.merchantSKU;
+        p.market = selling.market.toString();
+        p.type = "sid";
+        HighChart chart = await(new Job<HighChart>() {
+            @Override
+            public HighChart doJobWithResult() throws Exception {
+                return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+            }
+        }.now());
+        String countryName = selling.market.countryName();
+        chart.series.forEach(se -> se.visible = se.name.contains(countryName));
+        renderJSON(J.json(chart));
     }
 
     public static void oldDashBoard() {

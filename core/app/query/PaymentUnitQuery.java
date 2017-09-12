@@ -66,7 +66,7 @@ public class PaymentUnitQuery {
                 .where("p.createdAt<=?").param(to)
                 .where("p.feeType_name=?").param(feeTypeName)
                 .where("s.type=?").param(shipType.name())
-                .where("s.whouse.market=?").param(market)
+                .where("s.whouse.market=?").param(market.name())
                 .groupBy("p.currency");
 
         List<Map<String, Object>> rows = DBUtils.rows(totalAmount.toString(), totalAmount.getParams().toArray());
@@ -146,7 +146,7 @@ public class PaymentUnitQuery {
                     .where(SqlSelect.whereIn("u.sku", skus))
                     .where("p.feeType_name='transportshipping'")
                     .where("p.currency=?").param(crcy.name())
-                    .where("w.market=?").param(market)
+                    .where("w.market=?").param(market.name())
                     .groupBy("u.sku");
 
             List<Map<String, Object>> rows = DBUtils.rows(sql.toString(), sql.getParams().toArray());

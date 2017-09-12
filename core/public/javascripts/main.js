@@ -215,6 +215,10 @@ $(function () {
     window.self.location = $(this).val();
   });
 
+  $("*:contains('搜索')").click(function(){
+    $("input[name='p.page']").val(1);
+  });
+
 });
 
 $.noty.defaults = $.extend({}, $.noty.defaults, {

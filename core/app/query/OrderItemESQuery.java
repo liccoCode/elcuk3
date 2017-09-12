@@ -1,5 +1,6 @@
 package query;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import models.market.M;
@@ -137,20 +138,55 @@ public class OrderItemESQuery {
         return baseMoveingAve("", "all", market, from, to);
     }
 
+    /**
+     * 获取销量
+     *
+     * @param val
+     * @param type
+     * @param market
+     * @param from
+     * @param to
+     * @return
+     */
+    public static double quantityByDate(String val, String type, M market, Date from, Date to) {
+        JSONObject result = OrderItemESQuery.result(val, type, market, from, to);
+        double qty = 0;
+        Optional optional = Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"));
+        if(optional.isPresent()) {
+            qty = J.dig(result, "aggregations.aggs_filters.units")
+                    .getJSONArray("buckets").stream().map(bucket -> (JSONObject) bucket)
+                    .mapToDouble(bucket -> bucket.getJSONObject("quantity").getFloat("value")).sum();
+        }
+        return qty;
+    }
+
 
     /**
      * @param val
      * @param type sku/msku/cat
      */
+
     private Series.Line base(String val, String type, M market, Date from, Date to) {
         if(market == null) throw new FastRuntimeException("此方法 Market 必须指定");
         if(!Arrays.asList("sku", "msku", "category_id", "all").contains(type))
             throw new FastRuntimeException("还不支持 " + type + " " + "类型");
+        JSONObject result = OrderItemESQuery.result(val, type, market, from, to);
+        Series.Line line = new Series.Line(market.label() + "销量");
+        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
+                .map(units -> units.getJSONArray("buckets"))
+                .ifPresent(buckets -> buckets.stream().map(bucket -> (JSONObject) bucket)
+                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
+                                bucket.getJSONObject("quantity").getFloat("value"))
+                        )
+                );
+        return line.sort();
+    }
 
+    private static JSONObject result(String val, String type, M market, Date from, Date to) {
         DateTime fromD = market.withTimeZone(from);
         DateTime toD = market.withTimeZone(to);
         DateTimeFormatter isoFormat = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
-
         SearchSourceBuilder search = new SearchSourceBuilder()
                 .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
@@ -171,18 +207,7 @@ public class OrderItemESQuery {
                     .defaultField(type)
                     .defaultOperator(Operator.AND));
         }
-
-        JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
-        Series.Line line = new Series.Line(market.label() + "销量");
-        Optional.of(J.dig(result, "aggregations.aggs_filters.units"))
-                .map(units -> units.getJSONArray("buckets"))
-                .ifPresent(buckets -> buckets.stream()
-                        .map(bucket -> (JSONObject) bucket)
-                        .forEach(bucket -> line.add(Dates.date2JDate(bucket.getDate("key")),
-                                bucket.getJSONObject("quantity").getFloat("value"))
-                        )
-                );
-        return line.sort();
+        return ES.search(System.getenv(Constant.ES_INDEX), "orderitem", search);
     }
 
     /**
