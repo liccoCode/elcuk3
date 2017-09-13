@@ -14,66 +14,61 @@
 #{info_row title:'物料采购单信息'/}
 
 <div class="row-fluid">
-  <div class="tab-content">
-    <div class="tab-pane fade active in" id='currentPage'>
-      <form action="@{MaterialPurchases.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
-        <table class="table table-condensed table-bordered">
-          <tr>
-            <th width="120px;">物料采购单ID</th>
-            <td>
-              <span id="deliverymentId">${dmt.id}</span>
-              <input type="hidden" name="dmt.id" value="${dmt.id}">
-            </td>
+  <form action="@{MaterialPurchases.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th width="120px;">物料采购单ID</th>
+        <td>
+          <span id="deliverymentId">${dmt.id}</span>
+          <input type="hidden" name="dmt.id" value="${dmt.id}">
+        </td>
 
-            <th>State</th>
-            <td style="color:${dmt.state.rgb()}" width="400px;">
-            ${dmt.state.label()}
-            #{if dmt.state.name().equals("PENDING_REVIEW")}
-              (${applyMsg?.split(",")[0]})
-            #{/if}
-            </td>
-          </tr>
+        <th>State</th>
+        <td style="color:${dmt.state.rgb()}" width="400px;">
+        ${dmt.state.label()}
+        #{if dmt.state.name().equals("PENDING_REVIEW")}
+          (${applyMsg?.split(",")[0]})
+        #{/if}
+        </td>
+      </tr>
 
-          <tr>
-            <th>Name</th>
-            <td>
-              <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
-            </td>
-            <th>供应商</th>
-            <td>${dmt.cooperator?.name}</td>
-          </tr>
-          <tr>
-            <th>下单时间</th>
-            <td colspan="3">
-              <input type="text" readonly="" disabled="" class="input-medium" name="dmt.orderTime" value="${dmt.orderTime.datetime()}">
-            </td>
-          </tr>
-          <tr>
-            <th>User</th>
-            <td>${dmt.handler.username}</td>
-            <th>项目名称</th>
-            <td>
-              <input type="text" readonly="" disabled="" class="input-medium" value="${dmt.projectName}">
-            </td>
-          </tr>
-          <tr>
-            <th><h4>Memo:</h4></th>
-            <td colspan="3">
-              <textarea rows="5" name="dmt.memo" class="span12">${dmt.memo}</textarea>
-            </td>
-          </tr>
-        #{power.ck "products.edit"}
-          <tr>
-            <td colspan="4">
-              <button class="btn btn-primary">更新</button>
-            </td>
-          </tr>
-        #{/power.ck}
-        </table>
-      </form>
-    </div>
-
-  </div>
+      <tr>
+        <th>Name</th>
+        <td>
+          <input type="text" class="span10" name="dmt.name" value="${dmt.name}">
+        </td>
+        <th>供应商</th>
+        <td>${dmt.cooperator?.name}</td>
+      </tr>
+      <tr>
+        <th>下单时间</th>
+        <td colspan="3">
+          <input type="text" readonly="" disabled="" class="input-medium" name="dmt.orderTime" value="${dmt.orderTime.datetime()}">
+        </td>
+      </tr>
+      <tr>
+        <th>User</th>
+        <td>${dmt.handler.username}</td>
+        <th>项目名称</th>
+        <td>
+          <input type="text" readonly="" disabled="" class="input-medium" value="${dmt.projectName}">
+        </td>
+      </tr>
+      <tr>
+        <th>Memo</th>
+        <td colspan="3">
+          <textarea rows="5" name="dmt.memo" class="input-block-level">${dmt.memo}</textarea>
+        </td>
+      </tr>
+    #{power.ck "products.edit"}
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-primary">更新</button>
+        </td>
+      </tr>
+    #{/power.ck}
+    </table>
+  </form>
 </div>
 
 
@@ -133,7 +128,7 @@
         <tr>
           <th>交货地址</th>
           <td colspan="7">
-          <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress"></textarea>
+            <textarea rows="3" class="span12" name="excel.deliveryAddress" id="excel_deliveryAddress"></textarea>
           </td>
         </tr>
 
