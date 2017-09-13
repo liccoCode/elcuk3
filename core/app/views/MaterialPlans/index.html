@@ -90,7 +90,7 @@
               #{else }没有请款单#{/else}
           </td>
           <td>${dp.cooperator?.name}</td>
-          <td>${dp.state.label()}</td>
+          <td style="background:${dp.state?.rgb()}">${dp.state.label()}</td>
           <td>${dp.receipt?.label()}</td>
           <td>${dp.receiveCooperator?.name}</td>
           <td>
