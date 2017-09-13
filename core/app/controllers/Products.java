@@ -26,10 +26,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -352,7 +349,7 @@ public class Products extends Controller {
         showAttr(pro.sku);
     }
 
-    public static void removeAttr(String sku, Long id){
+    public static void removeAttr(String sku, Long id) {
         ProductAttr attr = ProductAttr.findById(id);
         attr.delete();
         flash.success("删除成功");
@@ -476,8 +473,9 @@ public class Products extends Controller {
         List<Product> products = Product.find("sku like '" + sku + "%'").fetch();
         List<String> same_sku = products.stream().map(p -> p.sku).collect(Collectors.toList());
         Cooperator cooperator = Cooperator.findById(cooperId);
-        List<String> existList = cooperator.cooperItems.stream().map(itm -> itm.product.sku)
-                .collect(Collectors.toList());
+        List<String> existList = cooperator.cooperItems.stream()
+                .filter(item -> Objects.equals(item.type, CooperItem.T.SKU))
+                .map(itm -> itm.product.sku).collect(Collectors.toList());
         CollectionUtils.filter(same_sku, o -> {
             for(String exist_sku : existList) {
                 if(exist_sku.equals(o.toString())) return true;
