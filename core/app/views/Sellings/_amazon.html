@@ -1,161 +1,343 @@
-<div class="row-fluid">
-#{if s.state == models.market.Selling.S.DOWN}
-  <div class="alert alert-error">
-    <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向
-      Amazon 发送请求
-    </p>
-  </div>
-#{/if}
-#{else }
-  <div class="btn-toolbar" id='btns' style="text-align:right;">
-    <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}" content="直接更新到数据库"
-            placement='bottom' rel="popover" title="Local Update Button">Update
-    </button>
-    <button class="btn btn-warning" id="amz-sync" content="从 Amazon 同步回来更新到数据库"
-            placement='bottom' rel="popover" title="Sync From Amazon Button">Sync
-    </button>
-    <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.partialUpdate()}"
-            content="AMZ局部更新" placement='bottom' rel="popover">Deploy Part
-    </button>
-    <button class="btn btn-warning" id="img_cal" content="图片按照 0~8 设置好编号以后,点击此按钮更新到AMAZON." placement='bottom'
-            rel="popover">AMZ图片更新
-    </button>
-      #{power.ck "sellings.repushfeedstoamazon"}
-        <a class="btn btn-danger" href="@{Sellings.rePushFeedsToAmazon(s.sellingId)}" content="把 DB 内已经存在的 Feed 重新提交给
-        Amazon, 只用于 Rockend 和 Amazon 出现问题后重新上架" placement='bottom' rel="popover">
-          重新提交上架
-        </a>
-      #{/power.ck}
-  </div>
-#{/else}
-</div>
-
-<div class="row-fluid">
-  <div class="span12">
-    <ul class="thumbnails" id="images" sku='${s.merchantSKU.split(",")[0]}'></ul>
-    <div class="input-prepend span12">
-      <input type="hidden" class="span10" name="s.aps.imageName" readonly value="${s.aps.imageName}">
+<div class="box box-default">
+  <div class="box-header with-border">
+  #{if s.state == models.market.Selling.S.DOWN}
+    <div class="alert alert-error">
+      <p style="text-align:center;">Selling ${s.sellingId} 已经不在 Amazon 中存在了, 系统中已经标记为 DOWN, 不再允许向
+        Amazon 发送请求
+      </p>
     </div>
-  </div>
-
-
-
-#{form @Sellings.selling(s.sellingId), class: 'form-horizontal', id: 'saleAmazonForm'}
-
-  <div class="span12">
-    <div class="span5">
-      <input type="hidden" name="s.sellingId" value="${s.sellingId}">
-      <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
-        #{text_field id:'msku',name: 's.merchantSKU', label: 'Merchant SKU', value: s.merchantSKU/}
-        #{text_field id:'upc',name: 's.aps.upc', label: 'UPC', value: s.aps.upc /}
-        #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: s.aps.manufacturer /}
-        #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: s.aps.brand/}
-        #{checkbox_text_field id:'standerPrice',checkboxname: 'p.standerprice', name: 's.aps.standerPrice',
-        label: '标准价格', value: s.aps.standerPrice /}
-        #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期', value: s.aps.startDate?.format('yyyy-MM-dd') /}
-        #{checkbox_text_field id:'RBN',checkboxname: 'p.rbns', name: 's.aps.rbns[0]', label: 'Recommanded Browser Nodes',
-        value: s.aps.rbns[0] /}
-        #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',
-        value: '' /}
-        #{checkbox_wrap id:'giftwrap', label: '附加选项'}
-          <label class="checkbox">
-            <input type="checkbox" id='giftwrap' ${s.aps.isGiftWrap?'checked':''} name="s.aps.isGiftWrap" value="true">
-            GiftWrap
-          </label>
-        #{/checkbox_wrap}
-        #{text_field id:'state', readonly: true, label: '系统内状态', value: s.state.name() /}
-
-        #{checkbox_product_volume id:'productvolume',readonly:true,
-        checkboxname: 'p.productvolume', label:'长宽高(包材)',
-        id1: 'productLengths',id2: 'productWidth',id3: 'productHeigh',
-        hid1: 'dbLengths',hid2: 'dbWidth',hid3: 'dbHeigh',
-        name1: 'p.productLengths',
-        label1: '长(包材)', value1: s.listing.product.lengths,
-        name2: 'p.productWidth',
-        label2: '宽(包材)', value2: s.listing.product.width,
-        name3: 'p.productHeigh',
-        label3: '高(包材)', value3: s.listing.product.heigh /}
-
+  #{/if}
+  #{else }
+    <div class="col-sm-12" id='btns' style="text-align:right;">
+      <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}" title="直接更新到数据库"
+              placement='bottom' data-toggle="tooltip">Update
+      </button>
+      <button class="btn btn-warning" id="amz-sync" title="从 Amazon 同步回来更新到数据库"
+              placement='bottom' data-toggle="tooltip">Sync
+      </button>
+      <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.partialUpdate()}"
+              title="AMZ局部更新" placement='bottom' data-toggle="tooltip">Deploy Part
+      </button>
+        #{power.ck "sellings.repushfeedstoamazon"}
+          <a class="btn btn-danger" href="@{Sellings.rePushFeedsToAmazon(s.sellingId)}" content="把 DB 内已经存在的 Feed 重新提交给
+          Amazon, 只用于 Rockend 和 Amazon 出现问题后重新上架" placement='bottom' rel="popover">
+            重新提交上架
+          </a>
+        #{/power.ck}
     </div>
-    <div class="span5">
-        #{text_field id:'account', disabled: true, label: '上架账户', value: s.account.prettyName() /}
-        #{hidden_field id: 'accountId', name: 's.account.id', value: s.account.id /}
-        #{text_field id:'market', name: 's.market', readonly: true, label:'市场', value: s.market.name() /}
-        #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-        'ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games', 'Lighting'], value: s.aps.templateType/}
-        #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:[s.aps
-        .feedProductType], value: s.aps.feedProductType, native: true /}
-        #{checkbox_text_field id:'salePrice',checkboxname: 'p.saleprice', name: 's.aps.salePrice', label: '优惠销售价格',
-        value: s.aps.salePrice /}
-        #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: s.aps.endDate?.format('yyyy-MM-dd') /}
-        #{text_field id:'manufacturerPartNumber', readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number',
-        value: s.aps.manufacturerPartNumber /}
-        #{text_field id:'modelNumber', name: 's.aps.modelNumber', label: 'Model Number',value: s.aps.modelNumber /}
-        #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
-
-        #{checkbox_product_weight readonly:true,sid:'sproductWeight',hid:'hproductWeight' , id:'productWeight',
-        ck:false, unitname:'p.productWeightUnit', checkboxname: 'p.productWeight',name: 'p.proWeight',
-        label: '重量(产品)', value: s.listing.product.productWeight /}
-        #{checkbox_product_weight readonly:true,sid:'sweight',hid:'hweight', id:'weight',unitname:'p.weightUnit',
-        ck:true, checkboxname: 'p.weight',name: 'p.packWeight',label: '重量(包材)', value: s.listing.product.weight /}
-
-      <label class="control-label" for="sellingCycle">生命周期</label>
-
-      <div class="controls">
-        <select name="s.sellingCycle">
-            #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-              <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-            #{/list}
-        </select>
+  #{/else}
+  </div>
+  <div class="box-body">
+    <form action="@{Sellings.selling(s.sellingId)}" method="post" class="form-horizontal" id="saleAmazonForm">
+      <div class="form-group">
+        <label for="msku" class="col-sm-1 control-label">Merchant SKU</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.merchantSKU}" id="msku" name="s.merchantSKU">
+          <input type="hidden" name="s.sellingId" value="${s.sellingId}">
+          <input type="hidden" name="s.aps.imageName" value="${s.aps.imageName}">
+        </div>
+        <label for="account" class="col-sm-2 control-label">上架账户</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.account.prettyName()}" id="account" readonly>
+          <input type="hidden" value="${s.account.id}" id="accountId" name="s.account.id">
+        </div>
+        <label for="market" class="col-sm-2 control-label">市场</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.market.name()}" id="market" name="s.market" readonly>
+        </div>
       </div>
-    </div>
+      <div class="form-group">
+        <label for="upc" class="col-sm-1 control-label">UPC</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.upc}" id="upc" name="s.aps.upc">
+        </div>
+        <label for="manufacturer" class="col-sm-2 control-label">Manufacturer</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.manufacturer}" id="manufacturer" name="s.aps.manufacturer">
+        </div>
+        <label for="templateType" class="col-sm-2 control-label">模板类型</label>
+        <div class="col-sm-2">
+          <select class="form-control" name="s.aps.templateType" id="templateType">
+          #{list items:['Computers','ConsumerElectronics', 'Wireless', 'HomeImprovement', 'Home', 'Games','Lighting'], as:'t'}
+            <option value="${t}" ${s.aps.templateType==t?'selected':''}>${t}</option>
+          #{/list}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="brand" class="col-sm-1 control-label">品牌</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.brand}" id="brand" name="s.aps.brand">
+        </div>
+        <label for="itemType" class="col-sm-2 control-label">ItemType</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.itemType}" id="itemType" name="s.aps.itemType">
+        </div>
+        <label for="feedProductType" class="col-sm-2 control-label">Feed Product Type</label>
+        <div class="col-sm-2">
+          <select class="form-control" name="s.aps.feedProductType" id="feedProductType">
+          #{list items:[s.aps.feedProductType], as:'t'}
+            <option value="${t}" ${s.aps.feedProductType==t?'selected':''}>${t}</option>
+          #{/list}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="standerPrice" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.standerprice" value="true"> 标准价格
+        </label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.standerPrice}" id="standerPrice" name="s.aps.standerPrice">
+        </div>
+        <label for="salePrice" class="col-sm-2 control-label" style="color:red;">
+          <input type="checkbox" name="p.saleprice" value="true"> 优惠销售价格
+        </label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.salePrice}" id="salePrice" name="s.aps.salePrice">
+        </div>
+        <label for="RBN" class="col-sm-2 control-label" style="color:red;">
+          <input type="checkbox" name="p.rbns" value="true"> Recommanded Browser Nodes
+        </label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.rbns[0]}" id="RBN" name="s.aps.rbns[0]">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="startDate" class="col-sm-1 control-label">优惠开始日期</label>
+        <div class="col-sm-2">
+          <input class="form-control" role="date" value="${s.aps.startDate.date()}" id="startDate" name="s.aps.startDate">
+        </div>
+        <label for="endDate" class="col-sm-2 control-label">优惠价格截止日期</label>
+        <div class="col-sm-2">
+          <input class="form-control" role="date" value="${s.aps.endDate.date()}" id="endDate" name="s.aps.endDate">
+        </div>
+        <label for="manufacturerPartNumber" class="col-sm-2 control-label">Part Number</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.manufacturerPartNumber}" id="manufacturerPartNumber" readonly
+                 name="s.aps.manufacturerPartNumber">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="giftwrap" class="col-sm-1 control-label">附加选项</label>
+        <div class="col-sm-2">
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id='giftwrap' ${s.aps.isGiftWrap?'checked':''} name="s.aps.isGiftWrap" value="true">GiftWrap
+            </label>
+          </div>
+        </div>
+        <label for="fnSku" class="col-sm-2 control-label">FBA 的 FNSKU</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.fnSku}" id="fnSku" name="s.fnSku">
+        </div>
+        <label for="modelNumber" class="col-sm-2 control-label">Model Number</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${s.aps.modelNumber}" id="modelNumber" name="s.aps.modelNumber">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="state" class="col-sm-1 control-label">系统内状态</label>
+        <div class="col-sm-2">
+          <input class="form-control" id='state' value="${s.state.name()}" readonly>
+        </div>
+        <label for="sellingCycle" class="col-sm-2 control-label">生命周期</label>
+        <div class="col-sm-2">
+          <select name="s.sellingCycle" class="form-control">
+          #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+            <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+          #{/list}
+          </select>
+        </div>
+        <label for="productWeight" class="col-sm-2 control-label">重量(产品)</label>
+        <div class="col-sm-2">
+          <div class="form-inline">
+            <input class="form-control" readonly style="width:100px;" name="p.proWeight" value="${s.listing.product.productWeight}">
+            <select style="width:100px;" id="sweight" name="p.weightUnit" class="form-control">
+              <option value="KG">kg</option>
+              <option value="OZ">oz</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="standerPrice" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.productvolume" value="true"> 长宽高(包材)
+        </label>
+        <div class="col-sm-3">
+          <div class="form-inline">
+            <input class="form-control" value="${s.listing.product.lengths}" id="standerPrice" name="p.productLengths"
+                   style="width:60px;" readonly>
+            <input class="form-control" value="${s.listing.product.width}" id="standerPrice" name="p.productWidth"
+                   style="width:60px;" readonly>
+            <input class="form-control" value="${s.listing.product.heigh}" id="standerPrice" name="p.productHeigh"
+                   style="width: 60px;" readonly>
+            <select style="width:60px;" id="volumeunit" name="p.volumeunit" class="form-control">
+              <option value="MM">mm</option>
+              <option value="IN">inch</option>
+            </select>
+          </div>
+        </div>
+        <label for="weight" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.weight" value="true"> 重量(包材)
+        </label>
+        <div class="col-sm-2">
+          <div class="form-inline">
+            <input class="form-control" value="${s.listing.product.weight}" id="weight" name="p.packWeight"
+                   style="width:80px;" readonly>
+            <select style="width:100px;" id="sweight" name="p.weightUnit" class="form-control">
+              <option value="KG">kg</option>
+              <option value="OZ">oz</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-sm-4 col-sm-offset-1">
+          <div class="form-inline" id="sellingPreview">
+            <input class="form-control" data-source="${sids}" autocomplete="off" name="selling.sellingId"
+                   id="inputsellingid" data-provide="typeahead" style="width:300px;">
+            <button class="btn btn-info" type="button" id="sid_preview">
+              <i class="icon-search"></i>
+            </button>
+            <button class="btn btn-success" type="button">填充</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="title" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.title" value="true"> 标题
+        </label>
+        <div class="col-sm-10">
+          <textarea class="form-control" id="title" name="s.aps.title" rows="3">${s.aps.title}</textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bulletPoint1" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.keyfeturess" value="true"> BulletPoint
+        </label>
+        <div class="col-sm-9">
+          <input class="form-control" id="bulletPoint1" name="s.aps.keyFeturess[0]" value="${s.aps.keyFeturess[0]}"
+                 placeholder="bulletPoint 1">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="bulletPoint1_hint"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="bulletPoint2" name="s.aps.keyFeturess[1]" value="${s.aps.keyFeturess[1]}"
+                 placeholder="bulletPoint 2">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="bulletPoint2_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="bulletPoint3" name="s.aps.keyFeturess[2]" value="${s.aps.keyFeturess[2]}"
+                 placeholder="bulletPoint 3">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="bulletPoint3_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="bulletPoint4" name="s.aps.keyFeturess[3]" value="${s.aps.keyFeturess[3]}"
+                 placeholder="bulletPoint 4">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="bulletPoint4_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="bulletPoint5" name="s.aps.keyFeturess[4]" value="${s.aps.keyFeturess[4]}"
+                 placeholder="bulletPoint 5">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="bulletPoint5_hint"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="searchTerms1" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.keyfeturess" value="true"> SearchTerms
+        </label>
+        <div class="col-sm-9">
+          <input class="form-control" id="searchTerms1" name="s.aps.searchTermss[0]" value="${s.aps.searchTermss[0]}"
+                 placeholder="searchTerms 1">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="searchTerms1_hint"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="searchTerms2" name="s.aps.searchTermss[1]" value="${s.aps.searchTermss[1]}"
+                 placeholder="searchTerms 2">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="searchTerms2_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="searchTerms3" name="s.aps.searchTermss[2]" value="${s.aps.searchTermss[2]}"
+                 placeholder="searchTerms 3">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="searchTerms3_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="searchTerms4" name="s.aps.searchTermss[3]" value="${s.aps.searchTermss[3]}"
+                 placeholder="searchTerms 4">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="searchTerms4_hint"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1">
+          <input class="form-control" id="searchTerms5" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]}"
+                 placeholder="searchTerms 5">
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="searchTerms5_hint"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="productDesc" class="col-sm-1 control-label" style="color:red;">
+          <input type="checkbox" name="p.productdesc" value="true"> 产品详细描述
+        </label>
+        <div class="col-sm-9">
+          <textarea class="form-control" id="productDesc" name="s.aps.productDesc" rows="15">${s.aps.productDesc}</textarea>
+        </div>
+        <div class="col-sm-1">
+          <span class="help-inline" id="productDesc_hint"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-1" id="previewDesc"></div>
+      </div>
+
+    </form>
   </div>
-
-  <div class="row">
-    <span class="span8" style="text-align:right;">
-    </span>
-
-    <div class="span4">
-        #{input_append /}
-    </div>
-  </div>
-
-  <div class="span10">
-      #{checkbox_textarea_field id:'title',checkboxname:'p.title', name: 's.aps.title', rows: 3, label: '标题', value: s.aps.title /}
-  </div>
-
-  <div class="span10">
-    <div id="hardwarePlatformHome" style="display: none">
-        #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
-          #{text_field id:'hardwarePlatform2', name: 's.aps.hardwarePlatformss[1]', label: '', value: '' /}
-          #{text_field id:'hardwarePlatform3', name: 's.aps.hardwarePlatformss[2]', label: '', value: '' /}
-          #{text_field id:'hardwarePlatform4', name: 's.aps.hardwarePlatformss[3]', label: '', value: '' /}
-          #{text_field id:'hardwarePlatform5', name: 's.aps.hardwarePlatformss[4]', label: '', value: '' /}
-    </div>
-
-      #{checkbox_text_field id:'bulletPoint1', checkboxname:'p.keyfeturess', name: 's.aps.keyFeturess[0]',
-      label: 'BulletPoint 1~5',
-      value: s.aps.keyFeturess[0]/}
-      #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: s.aps.keyFeturess[1] /}
-      #{text_field id:'bulletPoint3', name: 's.aps.keyFeturess[2]', label: '', value: s.aps.keyFeturess[2]/}
-      #{text_field id:'bulletPoint4', name: 's.aps.keyFeturess[3]', label: '', value: s.aps.keyFeturess[3]/}
-      #{text_field id:'bulletPoint5', name: 's.aps.keyFeturess[4]', label: '', value: s.aps.keyFeturess[4]/}
-
-      #{checkbox_text_field id:'searchTerms1', checkboxname:'p.searchtermss', name: 's.aps.searchTermss[0]',
-      label: 'SearchTerms 1~5', value: s.aps.searchTermss[0]/}
-      #{text_field id:'searchTerms2', name: 's.aps.searchTermss[1]', label: '', value: s.aps.searchTermss[1]/}
-      #{text_field id:'searchTerms3', name: 's.aps.searchTermss[2]', label: '', value: s.aps.searchTermss[2]/}
-      #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: s.aps.searchTermss[3]/}
-      #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: s.aps.searchTermss[4]/}
-
-      #{checkbox_textarea_field id:'productDesc', checkboxname:'p.productdesc',name: 's.aps.productDesc', rows: 15,
-      label: '产品详细描述', value: s.aps.productDesc, class: 'span10' /}
-  </div>
-
-
-  <div class="offset1 span9" id="previewDesc"></div>
-#{/form}
-#{include 'Sellings/_invalid_characters.html'/}
 </div>
 
-#{records records:records, row:true/}
+#{include 'Sellings/_invalid_characters.html'/}
+
+#{records_v3 records:records, row:true/}

@@ -1,7 +1,10 @@
 $ ->
   ALERT_TEMPLATE = "<div class='alert alert-success fade in' style='text-align:center;'><button class='close' data-dismiss='alert'>×</button><div id='replace_it'></div></div>"
-  IMGLI_TEMPLATE = "<li class='span2'><a class='thumbnail' target='_blank'><img width='180px' height='30px'></a><label></label>
-<input style='width:80%;height:17px;text-align:center;'>&nbsp;&nbsp;<button class='btn btn-mini btn-danger' name='delImage'><i class='icon-trash' style='width:22%;'></i></button></li>"
+  IMGLI_TEMPLATE = "<div class='col-xs-2 col-md-2'><div class='thumbnail'><a class='thumbnail' target='_blank'
+ style='height:230px'><img
+ alt='100%x180'></a>
+<div class='caption'><input style='height:33px;text-align:center;'>&nbsp;&nbsp;<button class='btn btn-mini btn-danger'
+ name='delImage'><i class='icon-trash' style='width:22%;'></i></button></li></div></div></div>"
 
   # 图片初始化方法
   imageInit = ->
@@ -237,7 +240,7 @@ $ ->
         htmlCode = div.html()
         count = htmlCode.length
         $('#productDesc').val(htmlCode)
-        $("#productDesc").find('~ .help-inline').html((2000 - count) + " bytes left")
+        $("#productDesc_hint").html((2000 - count) + " bytes left")
         $('#previewDesc').html($('#productDesc').val())
       items: ['source', '|', '|', 'forecolor', 'bold']
     });
