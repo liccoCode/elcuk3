@@ -1,16 +1,21 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Reflects;
+import models.ElcukRecord;
 import models.OperatorConfig;
 import models.material.MaterialUnit;
 import models.procure.Cooperator;
 import models.product.Category;
 import models.view.post.MaterialUnitPost;
 import models.whouse.Whouse;
+import org.apache.commons.lang.StringUtils;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,18 +70,26 @@ public class MaterialUnits extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialUnit(MaterialUnit unit, String updateType) {
-        MaterialUnit materialUnit = MaterialUnit.findById(unit.id);
-        materialUnit.planQty = unit.planQty;
-        materialUnit.planPrice = unit.planPrice;
-        materialUnit.planCurrency = unit.planCurrency;
+    public static void updateMaterialUnit(MaterialUnit unit, String updateType, Long matId) {
+        MaterialUnit materialUnit = MaterialUnit.findById(matId);
+
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(materialUnit, "planQty", unit.planQty));
+        logs.addAll(Reflects.logFieldFade(materialUnit, "planPrice", unit.planPrice));
+        logs.addAll(Reflects.logFieldFade(materialUnit, "planCurrency", unit.planCurrency));
         materialUnit.planDeliveryDate = unit.planDeliveryDate;
         materialUnit.save();
+        if(logs.size() > 0) {
+            new ElcukRecord(Messages.get("materialUnits.update"),
+                    Messages.get("materialUnits.update.msg", matId, StringUtils.join(logs, "<br>")),
+                    materialUnit.materialPurchase.id).save();
+        }
+
         flash.success("操作成功");
         if("MaterialUnitIndex".equals(updateType)) {
             index(new MaterialUnitPost());
         } else if("MaterialPurchaseShow".equals(updateType)) {
-            MaterialPurchases.show(unit.materialPurchase.id);
+            MaterialPurchases.show(materialUnit.materialPurchase.id);
         }
     }
 
