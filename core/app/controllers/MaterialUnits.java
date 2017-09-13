@@ -80,8 +80,8 @@ public class MaterialUnits extends Controller {
         materialUnit.planDeliveryDate = unit.planDeliveryDate;
         materialUnit.save();
         if(logs.size() > 0) {
-            new ElcukRecord(Messages.get("materialUnits.update"),
-                    Messages.get("materialUnits.update.msg", matId, StringUtils.join(logs, "<br>")),
+            new ElcukRecord(Messages.get("materialunits.update"),
+                    Messages.get("materialunits.update.msg", matId, StringUtils.join(logs, "<br>")),
                     materialUnit.materialPurchase.id).save();
         }
 

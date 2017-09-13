@@ -230,8 +230,9 @@ public class MaterialPlan extends GenericModel {
         this.units.removeAll(planUnits);
         this.save();
 
-        new ElcukRecord(Messages.get("deliverplan.delunit"),
-                Messages.get("deliverplan.delunit.msg", pids, this.id), this.id).save();
+        new ElcukRecord(Messages.get("materialplans.delunit"),
+                Messages.get("materialplans.delunit.msg",  pids, this.id), this.id).save();
+
         return planUnits;
     }
 
@@ -247,6 +248,8 @@ public class MaterialPlan extends GenericModel {
         this.state = P.DONE;
         this.deliveryDate = new Date();
         this.save();
+        new ElcukRecord(Messages.get("materialplans.confirm"),
+                Messages.get("materialplans.confirm.msg", this.id), this.id).save();
     }
 
     /**
@@ -286,8 +289,8 @@ public class MaterialPlan extends GenericModel {
         planUnit.stage = ProcureUnit.STAGE.DELIVERY;
         materialPlan.units.add(planUnit);
         materialPlan.save();
-        new ERecordBuilder("materialPlan.addunits")
-                .msgArgs(code, materialPlan.id).fid(materialPlan.id).save();
+        new ElcukRecord(Messages.get("materialplans.addunit"),
+                Messages.get("materialplans.addunit.msg", code ,id), id).save();
         return materialPlan;
     }
 

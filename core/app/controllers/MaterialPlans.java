@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
@@ -123,6 +124,8 @@ public class MaterialPlans extends Controller {
                 planUnit.save();
             }
         }
+        new ElcukRecord(Messages.get("materialplans.create"),
+                Messages.get("materialplans.create.msg", dp.id), dp.id).save();
         flash.success("物料出货单 %s 创建成功.", dp.id);
         MaterialPlans.show(dp.id);
     }
@@ -235,7 +238,6 @@ public class MaterialPlans extends Controller {
             }
             render("/MaterialPlans/show.html", dp, units, qtyEdit, receipt);
         } else {
-            new ElcukRecord(Messages.get("materialPlans.confirm"), String.format("确认[物料出货单] %s", id), id).save();
             flash.success("物料出货单 %s 确认成功.", id);
             show(id);
         }
@@ -259,10 +261,17 @@ public class MaterialPlans extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialPlanUnit(MaterialPlanUnit unit) {
-        MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(unit.id);
-        materialPlanUnit.receiptQty = unit.receiptQty;
+    public static void updateMaterialPlanUnit(MaterialPlanUnit unit,Long matId) {
+        MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(matId);
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(materialPlanUnit, "receiptQty", unit.receiptQty));
         materialPlanUnit.save();
+        if(logs.size() > 0) {
+            new ElcukRecord(Messages.get("materialplanunits.update"),
+                    Messages.get("materialplanunits.update.msg", matId, StringUtils.join(logs, "<br>")),
+                    materialPlanUnit.materialPlan.id).save();
+        }
+
         renderJSON(new Ret());
     }
 
@@ -344,6 +353,7 @@ public class MaterialPlans extends Controller {
 
     /**
      * 将出货单从其所关联的请款单中剥离开
+     *
      * @param id
      */
     public static void departProcureApply(String id) {
