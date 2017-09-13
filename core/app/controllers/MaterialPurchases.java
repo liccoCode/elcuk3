@@ -112,8 +112,8 @@ public class MaterialPurchases extends Controller {
             unit.save();
         });
         purchase.save();
-        new ElcukRecord(Messages.get("materialPurchases.create"),
-                Messages.get("materialPurchases.create.msg", purchase.id), purchase.id).save();
+        new ElcukRecord(Messages.get("materialpurchases.create"),
+                Messages.get("materialpurchases.create.msg", purchase.id), purchase.id).save();
         flash.success("MaterialPurchase %s 创建成功.", purchase.id);
         MaterialPurchases.show(purchase.id);
     }
@@ -190,7 +190,7 @@ public class MaterialPurchases extends Controller {
         if(Validation.hasErrors()) {
             render("MaterialPurchases/show.html", dmt);
         }
-        new ElcukRecord(Messages.get("materialPurchases.confirm"), Messages.get("materialPurchases.confirm.msg", dmt.id),
+        new ElcukRecord(Messages.get("materialpurchases.confirm"), Messages.get("materialpurchases.confirm.msg", dmt.id),
                 dmt.id).save();
         show(id);
     }
