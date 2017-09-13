@@ -27,4 +27,13 @@ $(() => {
     }
   });
 
+  //单个数据下架js处理
+  $("#data-table a[name='delBtn']").click(function (e) {
+    e.preventDefault();
+    if (confirm("确定下架数据吗")) {
+      $("#mid").val($(this).attr('uid'));
+      return $('#search_Form').attr('action', $(this).data('url')).submit();
+    }
+  });
+
 });
