@@ -279,3 +279,11 @@ refund.confirm=\u786e\u8ba4\u9000\u8d27
 refund.confirm.msg=\u9000\u8d27\u6570\u91cf[%s] \u5907\u6ce8\u8bf4\u660e %s
 refund.transfer=\u4e0d\u826f\u54c1\u8f6c\u5165
 refund.transfer.msg=\u8f6c\u5165\u6570\u91cf %s \u5907\u6ce8\u8bf4\u660e %s
+
+
+materialPurchases.create=\u521b\u5efa\u005b\u7269\u6599\u91c7\u8d2d\u5355\u005d
+materialPurchases.create.msg=ID[%s]
+materialPurchases.confirm=\u786e\u8ba4\u005b\u7269\u6599\u91c7\u8d2d\u5355\u005d
+materialPurchases.confirm.msg=ID[%s]
+materialPurchases.cancel=\u53d6\u6d88\u005b\u7269\u6599\u91c7\u8d2d\u5355\u005d
+materialPurchases.cancel.msg=\u56E0 [%s] \u0020\u53d6\u6d88\u4ed8\u6b3e\u5355\u7269\u6599\u91c7\u8d2d\u5355

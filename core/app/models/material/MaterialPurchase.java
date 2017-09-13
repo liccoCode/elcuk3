@@ -178,7 +178,8 @@ public class MaterialPurchase extends GenericModel {
         this.state = MaterialPurchase.S.CANCEL;
         this.save();
         new ElcukRecord(Messages.get("materialPurchases.cancel"),
-                Messages.get("materialPurchases.cancel.msg", this.id, msg.trim()), this.id).save();
+                Messages.get("materialPurchases.cancel.msg", msg), id).save();
+
     }
 
 

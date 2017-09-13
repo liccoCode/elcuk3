@@ -111,8 +111,9 @@ public class MaterialPurchases extends Controller {
             }
             unit.save();
         });
-
         purchase.save();
+        new ElcukRecord(Messages.get("materialPurchases.create"),
+                Messages.get("materialPurchases.create.msg", purchase.id), purchase.id).save();
         flash.success("MaterialPurchase %s 创建成功.", purchase.id);
         MaterialPurchases.show(purchase.id);
     }
@@ -157,7 +158,8 @@ public class MaterialPurchases extends Controller {
         Material m = Material.findById(materialId);
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
-                .put("period", copItem.period).put("boxSize", copItem.boxSize).put("surplusPendingQty", m.surplusPendingQty()).build());
+                .put("period", copItem.period).put("boxSize", copItem.boxSize)
+                .put("surplusPendingQty", m.surplusPendingQty()).build());
     }
 
 
@@ -188,7 +190,8 @@ public class MaterialPurchases extends Controller {
         if(Validation.hasErrors()) {
             render("MaterialPurchases/show.html", dmt);
         }
-        new ElcukRecord(Messages.get("MaterialPurchases.confirm"), String.format("确认[物料采购单] %s", id), id).save();
+        new ElcukRecord(Messages.get("materialPurchases.confirm"), Messages.get("materialPurchases.confirm.msg", dmt.id),
+                dmt.id).save();
         show(id);
     }
 
