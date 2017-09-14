@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.finance.Apply;
 import models.finance.FeeType;
@@ -14,6 +15,7 @@ import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.*;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -174,6 +176,8 @@ public class Applys extends Controller {
         apply.confirm = true;
         apply.updateAt = new Date();
         apply.save();
-        render("Applys/material.html", apply);
+        new ElcukRecord(Messages.get("materialapply.confirm"),
+                Messages.get("materialapply.confirm.msg", id), id.toString()).save();
+        Applys.material(id);
     }
 }

@@ -56,6 +56,14 @@ public class MaterialPlan extends GenericModel {
 
     public enum P {
         /**
+         * 取消状态
+         */
+        CANCEL {
+            @Override
+            public String label() {
+                return "取消";
+            }
+        }, /**
          * 已创建：创建成功后即为“已创建”
          */
         CREATE {
@@ -360,7 +368,7 @@ public class MaterialPlan extends GenericModel {
                         "所属出货单 %s 从原有请款单 %s 中剥离.", this.id, this.apply.serialNumber));
             }
         }
-        new ERecordBuilder("materialplan.departApply")
+        new ERecordBuilder("materialplans.departapply")
                 .msgArgs(this.id, this.apply.serialNumber)
                 .fid(this.apply.id)
                 .save();
