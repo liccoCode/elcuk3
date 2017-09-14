@@ -18,7 +18,7 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
-      <select name="p.dateType" style="width: 150px;" class="inline">
+      <select name="p.dateType" style="width: 100px;" class="inline">
       #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
         <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
       #{/list}
@@ -31,21 +31,21 @@
       #{/list}
       </select>
 
-      <select name="p.receipt" style="width: 150px;" class="inline">
+      <select name="p.receipt" style="width: 100px;" class="inline">
         <option value="">收货类型</option>
       #{list items:models.material.MaterialPlan.R.values(), as:'d'}
         <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.financeState" style="width: 150px;" class="inline">
+      <select name="p.financeState" style="width: 80px;" class="inline">
         <option value="">财务审核</option>
       #{list items:models.material.MaterialPlan.S.values(), as:'d'}
         <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
       #{/list}
       </select>
 
-      <select name="p.planState" style="width: 150px;" class="inline">
+      <select name="p.planState" style="width: 80px;" class="inline">
         <option value="">状态</option>
       #{list items:models.material.MaterialPlan.P.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.planState?.name() ? 'selected' : ''}>${t.label()}</option>
@@ -66,6 +66,9 @@
            id="confirmMaterialPlanBtn">财务审核</a>
       </div>
     #{/power.ck}
+
+      <a class="btn btn-success" href="javascript:void(0)" id="exportExcel" target="_blank"
+         data-url="@{Excels.exportMaterialPlanDetail()}"><i class="icon-download-alt"></i> 导出</a>
     </div>
   </div>
   <input type="hidden" name="p.page" value="${p.page}">
