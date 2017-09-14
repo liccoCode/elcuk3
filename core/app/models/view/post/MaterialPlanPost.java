@@ -17,10 +17,13 @@ import java.util.List;
  * Time: PM5:12
  */
 public class MaterialPlanPost extends Post<MaterialPlan> {
+    private static final long serialVersionUID = 5347073981886038520L;
+
     public MaterialPlanPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusDays(5).toDate();
         this.to = now.toDate();
+        this.dateType = DateType.CREATE;
     }
 
     /**
@@ -28,20 +31,43 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
      */
     public Date from;
     public Date to;
-
     public Long cooperId;
-
     public MaterialPlan.P planState;
+    public DateType dateType;
+    public MaterialPlan.R receipt;
+    public MaterialPlan.S financeState;
+
+    public enum DateType {
+        /**
+         * 创建时间
+         */
+        CREATE {
+            @Override
+            public String label() {
+                return "创建时间";
+            }
+        },
+        /**
+         * 交货时间
+         */
+        DELIVERY {
+            @Override
+            public String label() {
+                return "交货时间";
+            }
+        };
+
+        public abstract String label();
+    }
 
 
     @Override
     public F.T2<String, List<Object>> params() {
-
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM MaterialPlan d LEFT JOIN d.units u WHERE 1=1 AND");
         List<Object> params = new ArrayList<>();
 
-        /** 时间参数 **/
+        /* 时间参数 **/
         sbd.append(" d.createDate>=? AND d.createDate<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
@@ -56,7 +82,17 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
             params.add(this.cooperId);
         }
 
-        /** 模糊查询参数 **/
+        if(this.receipt != null) {
+            sbd.append(" AND d.receipt=?");
+            params.add(this.receipt);
+        }
+
+        if(this.financeState != null) {
+            sbd.append(" AND d.financeState=?");
+            params.add(this.financeState);
+        }
+
+        /* 模糊查询参数 **/
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
             sbd.append(" AND (")
