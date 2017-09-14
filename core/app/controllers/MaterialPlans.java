@@ -198,7 +198,8 @@ public class MaterialPlans extends Controller {
 
         flash.success("成功将 %s 出货单元从物料出货单 %s 中移除.", StringUtils.join(pids, ","), id);
         if(dp.units.isEmpty()) {
-            dp.delete();
+            dp.state=  MaterialPlan.P.CANCEL;
+            dp.save();
             index(null);
         } else {
             show(dp.id);
