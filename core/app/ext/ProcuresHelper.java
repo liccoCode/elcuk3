@@ -294,6 +294,16 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(MaterialPlan.S stage) {
+        switch(stage) {
+            case PENDING_REVIEW:
+                return "#FF0000 ";
+            case APPROVE:
+            default:
+                return "#42cfc4";
+        }
+    }
+
     public static BaseTemplate.RawData records(FBAShipment fba) {
         String[] lines = StringUtils.splitByWholeSeparator(fba.records, "\n");
         if(lines != null) {

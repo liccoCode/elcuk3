@@ -129,11 +129,9 @@ public class MaterialPlans extends Controller {
 
     @Check("materialpurchases.index")
     public static void index(MaterialPlanPost p) {
-        List<MaterialPlan> materialPlans;
         if(p == null) p = new MaterialPlanPost();
-        materialPlans = p.query();
-        MaterialPlan.S financeState = MaterialPlan.S.PENDING_REVIEW;
-        render(materialPlans, p, financeState);
+        List<MaterialPlan> materialPlans = p.query();
+        render(materialPlans, p);
     }
 
     public static void show(String id) {
@@ -344,6 +342,7 @@ public class MaterialPlans extends Controller {
 
     /**
      * 将出货单从其所关联的请款单中剥离开
+     *
      * @param id
      */
     public static void departProcureApply(String id) {
