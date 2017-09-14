@@ -1,30 +1,27 @@
+window.$dataui = {
+  dateinput: function () {
+    $("input[role='date']").datepicker({
+      format: 'yyyy-mm-dd',
+      autoclose: true
+    });
+  },
+
+  selectize: function () {
+    $("select").each(function () {
+      let select = $(this);
+      if (!select.hasClass('selectize')) {
+        return;
+      }
+      select.selectize();
+    });
+  }
+};
+
 $(() => {
 
-  $("#date_from").datepicker({
-    format: 'yyyy-mm-dd',
-    autoclose: true
-  });
-
-  $("#date_to").datepicker({
-    format: 'yyyy-mm-dd',
-    autoclose: true
-  });
-
-  $("input[role='date']").datepicker({
-    format: 'yyyy-mm-dd',
-    autoclose: true
-  });
-
-  $("select").each(function () {
-    let select = $(this);
-    if (!select.hasClass('selectize')) {
-      return;
-    }
-    select.selectize();
-  });
-
+  window.$dataui.dateinput();
+  window.$dataui.selectize();
   $("table").addClass("table-hover");
-
   $('[data-toggle="popover"]').popover();
 
 });

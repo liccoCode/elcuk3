@@ -10,133 +10,128 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class="box box-primary">
-      <div class="box-header with-border">
-        <h3 class="box-title">手动添加采购单</h3>
-      </div>
-
-      <form action="@{Deliveryments.createManual()}" class="form-horizontal" method="post" id="new_procureunit">
-        <div class="box-body">
-          <table class="table table-condensed table-bordered">
-            <tr>
-              <th width="150px;">采购单别名</th>
-              <td>
-                <div class="col-lg-8">
-                  <input type="text" name="dmt.name" class="form-control" value="${name}" required>
-                </div>
-              </td>
-              <th>SKU</th>
-              <td>
-                <div class="col-lg-8">
-                  <input type="text" name="units[0].product.sku" data-provide="typeahead" id="unit_sku" autocomplete="off"
-                         value="${units[0]?.product?.sku}" class="form-control">
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th>供应商</th>
-              <td>
-                <div class="col-lg-6">
-                  <select name="dmt.cooperator.id" class="form-control">
-                    <option value="">请选择</option>
-                  </select>
-                </div>
-                <input type="hidden" name="dmt.id" value="${dmt.id}">
-              </td>
-
-              <th>价格</th>
-              <td>
-                <input type="text" class="span1 inline" id="unit_price" name="units[0].attrs.price" value="${units[0]?.attrs?.price}">
-              #{pickCurrency id:'unit_currency', name:'units[0].attrs.currency',class: 'span1 inline',
-              c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
-              </td>
-            </tr>
-            <tr>
-              <th>采购数量</th>
-              <td>
-                <div class="col-lg-3">
-                  <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty" value="${units[0]?.attrs?.planQty}">
-                </div>
-                <div class="col-lg-3">
-                  <div class="input-group">
-                    <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize="">
-                    <span class="input-group-addon">箱</span>
-                  </div>
-                </div>
-
-                <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
-
-              </td>
-
-              <th>预计交货日期</th>
-              <td>
-                <input type="date" name="units[0].attrs.planDeliveryDate" value="${units[0]?.attrs?.planDeliveryDate?.date()}"
-                       autocomplete="off" required>
-                <input type="hidden" name="units[0].attrs.deliveryDate" value="${units[0]?.attrs?.deliveryDate?.date()}">
-              </td>
-            </tr>
-            <tr>
-              <th>B2B选项</th>
-              <td colspan="3">
-                <div class="col-lg-3">
-                  <select name="units[0].projectName" class="form-control">
-                  #{list items:models.User.COR, as:'c'}
-                    <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
-                  #{/list}
-                  </select>
-                </div>
-              </td>
-            </tr>
-
-            <tr id="btn_tr">
-              <td colspan="2">
-                <button class="btn btn-primary">保存</button>
-              </td>
-              <td colspan="2">
-                <button class="btn btn-warning" id="addSkuBtn">新增SKU</button>
-              </td>
-            </tr>
-          </table>
+    <form action="@{Deliveryments.createManual()}" class="form-horizontal" method="post" id="new_procureunit">
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">手动添加采购单</h3>
         </div>
-      </form>
-    </div>
+        <div class="box-body">
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">采购单别名</label>
+            <div class="col-sm-2">
+              <input type="text" name="dmt.name" class="form-control" value="${name}" required>
+            </div>
+            <label for="" class="col-sm-1 control-label">SKU</label>
+            <div class="col-sm-2">
+              <input type="text" name="units[0].product.sku" data-provide="typeahead" id="unit_sku" autocomplete="off"
+                     value="${units[0]?.product?.sku}" class="form-control">
+            </div>
+            <label for="" class="col-sm-1 control-label">供应商</label>
+            <div class="col-sm-2">
+              <select name="dmt.cooperator.id" class="form-control">
+                <option value="">请选择</option>
+              </select>
+              <input type="hidden" name="dmt.id" value="${dmt.id}">
+            </div>
+            <label for="" class="col-sm-1 control-label">预计交货日期</label>
+            <div class="col-sm-2">
+              <input role="date" name="units[0].attrs.planDeliveryDate" autocomplete="off" required class="form-control"
+                     value="${units[0]?.attrs?.planDeliveryDate?.date()}">
+              <input type="hidden" name="units[0].attrs.deliveryDate" value="${units[0]?.attrs?.deliveryDate?.date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">价格</label>
+            <div class="col-sm-2">
+              <div class="form-inline">
+                <input type="text" class="form-control" id="unit_price" name="units[0].attrs.price"
+                       value="${units[0]?.attrs?.price}">
+              #{pickCurrency id:'unit_currency', name:'units[0].attrs.currency',class: 'form-control',
+              c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
+              </div>
+            </div>
+            <label for="" class="col-sm-1 control-label">采购数量</label>
+            <div class="col-sm-2">
+              <div class="form-inline">
+                <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty"
+                       value="${units[0]?.attrs?.planQty}" style="width:100px;">
+                <div class="input-group">
+                  <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
+                         style="width:100px;">
+                  <span class="input-group-addon">箱</span>
+                  <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
+                </div>
+              </div>
+            </div>
+            <label for="" class="col-sm-1 control-label">B2B选项</label>
+            <div class="col-sm-2">
+              <select name="units[0].projectName" class="form-control">
+              #{list items:models.User.COR, as:'c'}
+                <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
+              #{/list}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <div class="col-sm-3">
+            <button class="btn btn-primary">保存</button>
+          </div>
+          <button class="btn btn-warning" id="addSkuBtn">新增SKU</button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
 
 <script type="text/template" id="copy">
-  <tr>
-    <th>SKU <span style="color:red"><%= num+1 %></span></th>
-    <td><input type="text" name="units[<%= num %>].product.sku" autocomplete="off"></td>
-    <th>价格</th>
-    <td>
-      <input type="text" class="span1 inline" id="unit_price" name="units[<%= num %>].attrs.price">
-      <select name="units[<%= num %>].attrs.currency" class="span1">
-      #{list items:helper.Currency.values(), as:'cr'}
-        <option ${cr == 'CNY' ? 'selected' : ''} value="${cr}">${cr}</option>
-      #{/list}
-      </select>
-  </tr>
-  <tr>
-    <th>采购数量</th>
-    <td>
-      <input type="text" class="input-mini" placeHolder="具体数量" name="units[<%= num %>].attrs.planQty">
-      <input type="text" name="box_size" class="input-mini" placeHolder="箱数">
-      <span class="add-on">箱</span>
-    </td>
-    <th>预计交货日期</th>
-    <td>
-      <input type="date" name="units[<%= num %>].attrs.planDeliveryDate" autocomplete="off" required>
-      <input type="hidden" name="units[<%= num %>].attrs.deliveryDate" value="">
-    </td>
-  </tr>
-  <tr>
-    <th>B2B选项</th>
-    <td colspan="3">
-      <select name="units[<%= num %>].projectName">
-      #{list items:models.User.COR, as:'c'}
-        <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
-      #{/list}
-      </select>
-    </td>
-  </tr>
+  <div class="box box-warning" id="box-<%= num %>">
+    <div class="box-body">
+      <div class="form-group">
+        <label for="" class="col-sm-1 control-label">SKU <span style="color:red"><%= num+1 %></span></label>
+        <div class="col-sm-2">
+          <input class="form-control" name="units[<%= num %>].product.sku" autocomplete="off">
+        </div>
+        <label for="" class="col-sm-1 control-label">价格</label>
+        <div class="col-sm-2">
+          <div class="form-inline">
+            <input type="text" class="form-control" id="unit_price" name="units[<%= num %>].attrs.price">
+            <select id="unit_currency" name="units[<%= num %>].attrs.currency" class="form-control">
+            #{list items:helper.Currency.values(), as:'cr'}
+              <option ${cr == helper.Currency.CNY ? 'selected' : ''} value="${cr}">${cr}</option>
+            #{/list}
+            </select>
+          </div>
+        </div>
+        <label for="" class="col-sm-1 control-label">采购数量</label>
+        <div class="col-sm-2">
+          <div class="form-inline">
+            <input class="form-control" placeHolder="具体数量" name="units[<%= num %>].attrs.planQty"
+                   value="${units[0]?.attrs?.planQty}" style="width:100px;" required>
+            <div class="input-group">
+              <input class="form-control" name="box_size" placeHolder="箱数" boxSize="" style="width:100px;">
+              <span class="input-group-addon">箱</span>
+            </div>
+          </div>
+        </div>
+        <label for="" class="col-sm-1 control-label">预计交货日期</label>
+        <div class="col-sm-2">
+          <input role="date" name="units[<%= num %>].attrs.planDeliveryDate" autocomplete="off" class="form-control" required>
+          <input type="hidden" name="units[<%= num %>].attrs.deliveryDate" value="">
+        </div>
+      </div>
+      <div class="form-group" id="tail-form-<%= num %>">
+        <label for="" class="col-sm-1 control-label">B2B选项</label>
+        <div class="col-sm-2">
+          <select name="units[<%= num %>].projectName" class="form-control">
+          #{list items:models.User.COR, as:'c'}
+            <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
+          #{/list}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
 </script>
+
