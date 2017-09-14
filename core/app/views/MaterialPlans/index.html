@@ -113,7 +113,7 @@
           <td>${dp.state.label()}</td>
           <td>${dp.receipt?.label()}</td>
           <td>${dp.receiveCooperator?.name}</td>
-          <td>
+          <td style="color:${dp.financeState.rgb()}">
               #{if dp.financeState.name() == "PENDING_REVIEW"}
                   #{power.ck "materialplans.approve"}
                     <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->

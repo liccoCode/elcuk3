@@ -16,6 +16,7 @@
     <tr>
       <th><input type="checkbox" id="check_all"></th>
       <th>出货计划</th>
+      <th>财务审核</th>
       <th>出货日期</th>
       <th>物料编码</th>
       <th>单价</th>
@@ -36,10 +37,11 @@
           <td width="200px;">
             <a href="@{MaterialPlans.show(fee.materialPlan.id)}#${punit?.id}">${fee.materialPlan.id} #${punit.id}</a>
           </td>
+          <td style="color:${punit.materialPlan.financeState?.rgb()}">${punit.materialPlan.financeState?.label()}</td>
           <td>#{time_tooltip time:punit.materialPlan.deliveryDate/}</td>
           <td>${punit.material.code}</td>
           <td>${payment.currency.symbol()} ${punit.getPrice()}</td>
-          <td class="qty" 
+          <td class="qty"
               style="color:${(punit.receiptQty>0&&punit.qty!=punit.receiptQty)? 'red':''}">
           ${punit.qty}/${punit.receiptQty?:0}
           </td>
