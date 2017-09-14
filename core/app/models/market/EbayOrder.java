@@ -2,13 +2,11 @@ package models.market;
 
 import com.google.gson.annotations.Expose;
 import models.finance.EbayFee;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
