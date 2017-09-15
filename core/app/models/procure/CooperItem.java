@@ -309,7 +309,7 @@ public class CooperItem extends Model {
         if(logs.size() > 0) {
             new ElcukRecord(Messages.get("cooperators.updatecooperitem"),
                     Messages.get("cooperators.updatecooperitem.msg", db.id, StringUtils.join(logs, "<br>")),
-                    db.toString()).save();
+                    db.id.toString()).save();
         }
     }
 
