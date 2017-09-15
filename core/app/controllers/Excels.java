@@ -1001,4 +1001,21 @@ public class Excels extends Controller {
         }
     }
 
+    /**
+     * 导出 合作伙伴的物料与sku的Records记录与导出修改日志
+     */
+    public static void exportCooperItemLogs() {
+        CooperatorPost post = new CooperatorPost();
+        List<Map<String, Object>> logs = post.logs();
+        if(logs != null && logs.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "物料修改日志.xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss"));
+            render(logs);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
 }

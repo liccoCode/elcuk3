@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
+import helper.Reflects;
+import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.material.Material;
 import models.product.Product;
@@ -14,6 +16,7 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -179,11 +182,28 @@ public class CooperItem extends Model {
 
     public Date createDate;
 
-    public CooperItem checkAndUpdate() {
-        this.check();
-        this.setAttributes();
+    public CooperItem checkAndUpdate(CooperItem entity) {
+        entity.check();
+        entity.setAttributes();
+        entity.setDefaultValue();
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "price", entity.price));
+        logs.addAll(Reflects.logFieldFade(this, "currency", entity.currency));
+        logs.addAll(Reflects.logFieldFade(this, "otherPrice", entity.otherPrice));
+        logs.addAll(Reflects.logFieldFade(this, "period", entity.period));
+        logs.addAll(Reflects.logFieldFade(this, "lowestOrderNum", entity.lowestOrderNum));
+
+        this.productTerms = entity.productTerms;
+        this.memo = entity.memo;
+        this.items = entity.items;
         this.setDefaultValue();
-        return this.save();
+        this.save();
+        if(logs.size() > 0) {
+            new ElcukRecord(Messages.get("cooperators.updatecooperitem"),
+                    Messages.get("cooperators.updatecooperitem.msg", this.id, StringUtils.join(logs, "<br>")),
+                    this.id.toString()).save();
+        }
+        return this;
     }
 
     public void setAttributes() {
@@ -246,36 +266,62 @@ public class CooperItem extends Model {
         return item;
     }
 
-    public void saveMaterialItem(Cooperator cooperator) {
+    public void saveMaterialItem(Cooperator cop) {
         Material m = Material.findById(this.material.id);
         List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
-        if(this.id == null
-                && cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
+        if(cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
             Validation.addError("", "供应商下已经存在该物料，请选择其他物料!");
-            return;
-        } else if(this.id != null && cooperItems.stream()
-                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)) {
-            Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
             return;
         }
         this.type = T.MATERIAL;
-        this.cooperator = cooperator;
+        this.cooperator = cop;
         this.createDate = new Date();
         this.setAttributes();
         this.setDefaultValue();
         this.save();
+        new ElcukRecord(Messages.get("cooperators.savecooperitem"),
+                Messages.get("cooperators.savecooperitem.msg", this.id), this.id.toString());
+    }
+
+    public void updateMaterialItem(Cooperator cooperator, CooperItem db) {
+        Material m = Material.findById(this.material.id);
+        List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
+        if(db.id != null && cooperItems.stream()
+                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)) {
+            Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
+            return;
+        }
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(db, "price", this.price));
+        logs.addAll(Reflects.logFieldFade(db, "currency", this.currency));
+        logs.addAll(Reflects.logFieldFade(db, "otherPrice", this.otherPrice));
+        logs.addAll(Reflects.logFieldFade(db, "period", this.period));
+        logs.addAll(Reflects.logFieldFade(db, "lowestOrderNum", this.lowestOrderNum));
+        this.setAttributes();
+        this.setDefaultValue();
+
+        db.productTerms = this.productTerms;
+        db.memo = this.memo;
+        db.items = this.items;
+        db.setAttributes();
+        db.setDefaultValue();
+        db.save();
+        if(logs.size() > 0) {
+            new ElcukRecord(Messages.get("cooperators.updatecooperitem"),
+                    Messages.get("cooperators.updatecooperitem.msg", db.id, StringUtils.join(logs, "<br>")),
+                    db.id.toString()).save();
+        }
     }
 
     /**
      * 基础的检查
      */
     private void check() {
-        if(this.product == null) throw new FastRuntimeException("没有关联产品, 不允许.");
+        if(this.sku == null) throw new FastRuntimeException("没有关联产品, 不允许.");
         if(this.price <= 0) throw new FastRuntimeException("采购价格能小于 0 ?");
         if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");
         if(this.period < 0) throw new FastRuntimeException("生产周期不允许小于  0");
-        if(!this.product.sku.equals(this.sku))
-            throw new FastRuntimeException("不允许使 this.product.sku 与 this.sku 不一样!");
+
     }
 
     /**
