@@ -132,11 +132,9 @@ public class MaterialPlans extends Controller {
 
     @Check("materialpurchases.index")
     public static void index(MaterialPlanPost p) {
-        List<MaterialPlan> materialPlans;
         if(p == null) p = new MaterialPlanPost();
-        materialPlans = p.query();
-        MaterialPlan.S financeState = MaterialPlan.S.PENDING_REVIEW;
-        render(materialPlans, p, financeState);
+        List<MaterialPlan> materialPlans = p.query();
+        render(materialPlans, p);
     }
 
     public static void show(String id) {

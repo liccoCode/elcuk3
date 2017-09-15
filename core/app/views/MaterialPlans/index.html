@@ -18,6 +18,12 @@
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
 
+      <select name="p.dateType" style="width: 100px;" class="inline">
+      #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
+
       <select name="p.cooperId" class="inline selectize" style="width:150px;">
         <option value="">供应商</option>
       #{list items:suppliers, as:'sp'}
@@ -25,7 +31,21 @@
       #{/list}
       </select>
 
-      <select name="p.planState" style="width: 150px;" class="inline">
+      <select name="p.receipt" style="width: 100px;" class="inline">
+        <option value="">收货类型</option>
+      #{list items:models.material.MaterialPlan.R.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.financeState" style="width: 80px;" class="inline">
+        <option value="">财务审核</option>
+      #{list items:models.material.MaterialPlan.S.values(), as:'d'}
+        <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
+      #{/list}
+      </select>
+
+      <select name="p.planState" style="width: 80px;" class="inline">
         <option value="">状态</option>
       #{list items:models.material.MaterialPlan.P.values(), as:'t'}
         <option value="${t.name()}" ${t.name() == p.planState?.name() ? 'selected' : ''}>${t.label()}</option>
@@ -46,6 +66,9 @@
            id="confirmMaterialPlanBtn">财务审核</a>
       </div>
     #{/power.ck}
+
+      <a class="btn btn-success" href="javascript:void(0)" id="exportExcel" target="_blank"
+         data-url="@{Excels.exportMaterialPlanDetail()}"><i class="icon-download-alt"></i> 导出</a>
     </div>
   </div>
   <input type="hidden" name="p.page" value="${p.page}">
@@ -93,14 +116,14 @@
           <td style="background:${dp.state?.rgb()}">${dp.state.label()}</td>
           <td>${dp.receipt?.label()}</td>
           <td>${dp.receiveCooperator?.name}</td>
-          <td>
-              #{if dp.financeState.name() == financeState.name()}
+          <td style="color:${dp.financeState.rgb()}">
+              #{if dp.financeState.name() == "PENDING_REVIEW"}
                   #{power.ck "materialplans.approve"}
                     <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
                     <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
                        class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
                   #{/power.ck}
-                待审
+                待审核
               #{/if}
               #{else}
               ${dp.financeState?.label()}
