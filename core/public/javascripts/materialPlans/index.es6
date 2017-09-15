@@ -14,12 +14,12 @@ $(() => {
       $("#div" + format_id).load($(this).data("url"), {id: id}, function () {
         $("#data-table").unmask();
         //点击明细修改按钮，显示弹出框,并初始化明细数据
-            $("a[name='unitUpdateBtn']").click(function () {
-              let id = $(this).attr("uid");
-              //赋值
-              $("#unit_id").val(id);
-              $("#bom_modal").modal('show');
-            });
+        $("a[name='unitUpdateBtn']").click(function () {
+          let id = $(this).attr("uid");
+          //赋值
+          $("#unit_id").val(id);
+          $("#bom_modal").modal('show');
+        });
       });
     }
   });
@@ -97,38 +97,43 @@ $(() => {
 
   //请款js处理
   $('#goToApply').click(function (e) {
-      e.stopPropagation();
-      let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
-      if ($("input[name='pids']:checked").length == 0) {
+    e.stopPropagation();
+    let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
+    if ($("input[name='pids']:checked").length == 0) {
+      noty({
+        text: '请选择需纳入请款的出货单(相同供应商)',
+        type: 'error'
+      });
+      return false;
+    } else {
+
+      let i = 0;
+      let j = 0;
+      let ids = [];
+      $("input[name='pids']:checked").each(function () {
+        if ($(this).attr("cooperName") != firstCooper) {
+          j++;
+        }
+        ids.push($(this).val());
+      });
+      if (j > 0) {
         noty({
-          text: '请选择需纳入请款的出货单(相同供应商)',
+          text: '请选择[供应商]一致的出货单进行创建！',
           type: 'error'
         });
         return false;
-      } else {
-
-        let i = 0;
-        let j = 0;
-        let ids = [];
-        $("input[name='pids']:checked").each(function () {
-          if ($(this).attr("cooperName") != firstCooper) {
-            j++;
-          }
-          ids.push($(this).val());
-        });
-        if (j > 0) {
-          noty({
-            text: '请选择[供应商]一致的出货单进行创建！',
-            type: 'error'
-          });
-          return false;
-        }
-
-        if (i == 0 && j == 0) {
-          $('#deliverys_form').attr('action', $(this).attr('url')).submit();
-        }
       }
-    });
 
+      if (i == 0 && j == 0) {
+        $('#deliverys_form').attr('action', $(this).attr('url')).submit();
+      }
+    }
+  });
+
+  $("#exportExcel").click(function (e) {
+    e.stopPropagation();
+    let $form = $("#deliverys_form");
+    window.open($(this).data("url") + "?" + $form.serialize(), "_blank");
+  });
 
 });

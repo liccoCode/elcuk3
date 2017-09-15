@@ -923,6 +923,23 @@ public class Excels extends Controller {
     }
 
 
+    public static void exportMaterialPlanDetail(MaterialPlanPost p) {
+        if(p == null) p = new MaterialPlanPost();
+        List<MaterialPlan> planList = p.query();
+        if(planList != null && planList.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s-%s物料出货导出明细.xls",
+                    formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(planList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+
+    }
+
+
     public static void skuShipmentReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
         if(p.from == null || p.to == null) {
