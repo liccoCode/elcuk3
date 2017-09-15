@@ -1,9 +1,8 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.GTs;
-import helper.J;
-import helper.Webs;
+import helper.*;
+import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
@@ -11,6 +10,7 @@ import models.view.Ret;
 import models.view.post.CooperatorPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -71,14 +71,6 @@ public class Cooperators extends Controller {
         renderJSON(new Ret());
     }
 
-    public static void itemEdit(CooperItem copItem) {
-        validation.valid(copItem);
-        if(Validation.hasErrors())
-            renderJSON(new Ret(validation.errorsMap()));
-        copItem.checkAndUpdate();
-        renderJSON(new Ret());
-    }
-
     /**
      * 创建新的 Cooperator
      *
@@ -130,6 +122,8 @@ public class Cooperators extends Controller {
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
         flash.success("创建成功.");
+        new ElcukRecord(Messages.get("cooperators.savecooperitem"),
+                Messages.get("cooperators.savecooperitem.msg", copItem.id), copItem.id.toString()).save();
         redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
@@ -150,6 +144,8 @@ public class Cooperators extends Controller {
     public static void removeCooperItemById(Long id) {
         CooperItem item = CooperItem.findById(id);
         item.delete();
+        new ElcukRecord(Messages.get("cooperators.cooperitemdelete"),
+                Messages.get("cooperators.cooperitemdelete.msg", id), id.toString()).save();
         flash.success("删除成功！");
         CooperatorPost p = new CooperatorPost();
         p.search = item.cooperator.fullName;
@@ -167,6 +163,8 @@ public class Cooperators extends Controller {
             render("Cooperators/newCooperItem.html", copItem, cop);
         copItem.checkAndSave(cop);
         flash.success("创建成功.");
+        new ElcukRecord(Messages.get("cooperators.savecooperitem"),
+                Messages.get("cooperators.savecooperitem.msg", copItem.id), copItem.id.toString()).save();
         redirect("/cooperators/index#" + copItem.cooperator.id);
     }
 
@@ -196,24 +194,25 @@ public class Cooperators extends Controller {
         render("/Cooperators/index.html", p, coopers);
     }
 
-    public static void updateCooperItem(CooperItem copItem) {
-        checkAuthenticity();
-        validation.valid(copItem);
+    public static void updateCooperItem(CooperItem copItem, Long copItemId) {
+        CooperItem db = CooperItem.findById(copItemId);
         if(Validation.hasErrors()) {
             renderArgs.put("cop", copItem.cooperator);
             renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
         }
-        copItem.checkAndUpdate();
+        db.checkAndUpdate(copItem);
         flash.success("CooperItem %s, %s 修改成功", copItem.id, copItem.sku);
         CooperatorPost p = new CooperatorPost();
-        p.search = copItem.cooperator.fullName;
+        p.search = db.cooperator.fullName;
         List<Cooperator> coopers = p.query();
         render("/Cooperators/index.html", p, coopers);
     }
 
     public static void removeCooperItem(CooperItem copItem) {
         copItem.checkAndRemove();
+        new ElcukRecord(Messages.get("cooperators.cooperitemdelete"),
+                Messages.get("cooperators.cooperitemdelete.msg", copItem.id), copItem.id.toString()).save();
         renderJSON(new Ret());
     }
 

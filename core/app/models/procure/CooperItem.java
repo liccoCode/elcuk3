@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.J;
+import helper.Reflects;
+import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.material.Material;
 import models.product.Product;
@@ -14,6 +16,7 @@ import play.data.validation.MinSize;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.jpa.Model;
+import play.i18n.Messages;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
@@ -179,10 +182,18 @@ public class CooperItem extends Model {
 
     public Date createDate;
 
-    public CooperItem checkAndUpdate() {
-        this.check();
-        this.setAttributes();
-        this.setDefaultValue();
+    public CooperItem checkAndUpdate(CooperItem entity) {
+        entity.check();
+        entity.setAttributes();
+        entity.setDefaultValue();
+        List<String> logs = new ArrayList<>();
+        logs.addAll(Reflects.logFieldFade(this, "price", entity.price));
+        logs.addAll(Reflects.logFieldFade(this, "currency", entity.currency));
+        if(logs.size() > 0) {
+            new ElcukRecord(Messages.get("cooperators.updatecooperitem"),
+                    Messages.get("cooperators.updatecooperitem.msg", this.id, StringUtils.join(logs, "<br>")),
+                    this.id.toString()).save();
+        }
         return this.save();
     }
 
@@ -270,12 +281,11 @@ public class CooperItem extends Model {
      * 基础的检查
      */
     private void check() {
-        if(this.product == null) throw new FastRuntimeException("没有关联产品, 不允许.");
+        if(this.sku == null) throw new FastRuntimeException("没有关联产品, 不允许.");
         if(this.price <= 0) throw new FastRuntimeException("采购价格能小于 0 ?");
         if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");
         if(this.period < 0) throw new FastRuntimeException("生产周期不允许小于  0");
-        if(!this.product.sku.equals(this.sku))
-            throw new FastRuntimeException("不允许使 this.product.sku 与 this.sku 不一样!");
+
     }
 
     /**
