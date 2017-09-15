@@ -10,7 +10,7 @@
     <th width="200px;">物料编码</th>
     <th width="250px;">物料名称</th>
     <th>工厂物料代码</th>
-    <th width="80px;">物料采购单</th>
+    <th width="95px;">物料采购单</th>
     <th width="80px;">供应商</th>
     <th width="70px;">采购数</th>
     <th width="80px;">单价</th>
@@ -54,7 +54,7 @@
       #{/if}
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}</td>
-    <td>#{time_tooltip time:unit.createDate/}</td>
+    <td>#{time_tooltip_v3 time:unit.createDate/}</td>
   </tr>
 #{/list}
 </table>

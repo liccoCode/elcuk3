@@ -7,7 +7,6 @@
     #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'materialUnits/index.es6'/}
-    #{script 'materialUnits/index.coffee'/}
 #{/set}
 <style>
   .table td{
@@ -16,7 +15,6 @@
 </style>
 #{errorMsgs /}
 #{flash_alert /}
-
 
 <div class="row">
   <div class="col-md-12">
@@ -29,14 +27,14 @@
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
-                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
               </div>
             </div>
 
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">To:</div>
-                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
               </div>
             </div>
 
