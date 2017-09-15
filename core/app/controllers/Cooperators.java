@@ -110,21 +110,26 @@ public class Cooperators extends Controller {
         render(cop, copItem);
     }
 
-    public static void saveMaterialItem(CooperItem copItem, long cooperId) {
-        checkAuthenticity();
+    public static void saveMaterialItem(CooperItem copItem, Long cooperId, Long copItemId) {
+        CooperItem db =null;
+        if(copItemId != null){
+             db = CooperItem.findById(copItemId);
+        }
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
         renderArgs.put("materials", cop.findMaterialNotExistCooper());
         renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
-        copItem.saveMaterialItem(cop);
+        if(copItemId == null) {
+            copItem.saveMaterialItem(cop);
+        } else {
+            copItem.updateMaterialItem(cop , db);
+        }
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
         flash.success("创建成功.");
-        new ElcukRecord(Messages.get("cooperators.savecooperitem"),
-                Messages.get("cooperators.savecooperitem.msg", copItem.id), copItem.id.toString()).save();
-        redirect("/cooperators/index#" + copItem.cooperator.id);
+        redirect("/cooperators/index#" + db.cooperator.id);
     }
 
     public static void editCooperItem(long cooperId) {
