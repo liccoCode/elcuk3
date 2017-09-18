@@ -316,6 +316,8 @@ public class ProcuresHelper extends JavaExtensions {
 
     public static String rgb(MaterialPlan.P stage) {
         switch(stage) {
+            case CANCEL:
+                return "#F9A021";
             case CREATE:
                 return "#DEFBC2";
             case DONE:

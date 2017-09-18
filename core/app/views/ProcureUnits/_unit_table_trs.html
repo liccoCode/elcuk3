@@ -47,8 +47,13 @@
 
   <th>单价</th>
   <td>
-    <input type="text" class="span3" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
-  #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span3', c:unit.attrs.currency?:helper.Currency.CNY /}
+    <input type="text" class="span3" id="unit_price"  name="unit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'unit.attrs.currency',
+                 class:'span3', c:unit.attrs.currency?:helper.Currency.CNY /}
+  #{power.ck "cooperitem.price"}
+    <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
+    <input type="hidden" id="priceFlag" value="1">
+  #{/power.ck}
   </td>
 </tr>
 

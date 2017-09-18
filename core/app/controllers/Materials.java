@@ -2,6 +2,7 @@ package controllers;
 
 import helper.GTs;
 import helper.J;
+import models.ElcukRecord;
 import models.User;
 import models.material.Material;
 import models.material.MaterialBom;
@@ -13,11 +14,13 @@ import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +44,8 @@ public class Materials extends Controller {
     public static void index(MaterialPost p) {
         if(p == null) p = new MaterialPost();
         List<Material> materials = p.query();
+        renderArgs.put("logs",
+                ElcukRecord.records(Arrays.asList("materials.create", "materials.update", "materials.delete"), 50));
         render(p, materials);
     }
 
@@ -52,10 +57,10 @@ public class Materials extends Controller {
 
     public static void create(Material m, List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
-        if(Material.find("code =? and isDel =0", m.code).first()!=null) {
-            Validation.addError("", "物料编码"+m.code+"已经存在");
+        if(Material.find("code =? and isDel =0", m.code).first() != null) {
+            Validation.addError("", "物料编码" + m.code + "已经存在");
         }
-        if(Validation.hasErrors())  render("/Materials/blank.html", m);
+        if(Validation.hasErrors()) render("/Materials/blank.html", m);
         m.save();
         boms.forEach(unit -> {
             if(unit.id != null) {
@@ -65,6 +70,8 @@ public class Materials extends Controller {
             }
         });
         flash.success("新增物料【" + m.code + "】成功！");
+        new ElcukRecord(Messages.get("materials.create"),
+                Messages.get("materials.create.msg", m.id), m.id.toString()).save();
         index(new MaterialPost());
     }
 
@@ -89,6 +96,8 @@ public class Materials extends Controller {
             }
         });
         flash.success("保存成功！");
+        new ElcukRecord(Messages.get("materials.update"),
+                Messages.get("materials.update.msg", m.id), m.id.toString()).save();
         edit(m.id);
     }
 
@@ -102,7 +111,9 @@ public class Materials extends Controller {
         material.isDel = true;
         material.updateDate = new Date();
         material.save();
-        flash.success(String.format("删除 %s 成功！", material.name));
+        flash.success(String.format("下架 %s 成功！", material.name));
+        new ElcukRecord(Messages.get("materials.delete"),
+                Messages.get("materials.delete.msg", material.id), material.id.toString()).save();
         index(new MaterialPost());
     }
 
@@ -224,8 +235,7 @@ public class Materials extends Controller {
     public static void showMaterialListByBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
         List<Material> materials = bom.materials.stream().
-                filter(item -> item.isDel == false).collect(Collectors.toList());
-        ;
+                filter(item -> !item.isDel).collect(Collectors.toList());
         render("/Materials/_unit_list.html", materials);
     }
 }
