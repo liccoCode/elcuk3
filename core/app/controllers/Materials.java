@@ -2,6 +2,7 @@ package controllers;
 
 import helper.GTs;
 import helper.J;
+import helper.Webs;
 import models.User;
 import models.material.Material;
 import models.material.MaterialBom;
@@ -52,10 +53,10 @@ public class Materials extends Controller {
 
     public static void create(Material m, List<MaterialBom> boms) {
         m.projectName = Login.current().projectName;
-        if(Material.find("code =? and isDel =0", m.code).first()!=null) {
-            Validation.addError("", "物料编码"+m.code+"已经存在");
+        if(Material.find("code =? and isDel =0", m.code).first() != null) {
+            Validation.addError("", "物料编码" + m.code + "已经存在");
         }
-        if(Validation.hasErrors())  render("/Materials/blank.html", m);
+        if(Validation.hasErrors()) render("/Materials/blank.html", m);
         m.save();
         boms.forEach(unit -> {
             if(unit.id != null) {
@@ -137,6 +138,12 @@ public class Materials extends Controller {
     }
 
     public static void createBom(MaterialBom b) {
+        List<MaterialBom> materialBoms = MaterialBom.find("number = ? and isDel = false", b.number).fetch();
+        if(materialBoms != null && materialBoms.size() > 0) {
+            Validation.addError("", "B0M—ID["+b.number+"]已存在,不允许二次创建!");
+            Webs.errorToFlash(flash);
+            Materials.indexBom(new MaterialBomPost());
+        }
         b.creator = Login.current();
         b.createDate = new Date();
         b.updateDate = new Date();
@@ -223,8 +230,7 @@ public class Materials extends Controller {
     public static void showMaterialListByBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
         List<Material> materials = bom.materials.stream().
-                filter(item -> item.isDel == false).collect(Collectors.toList());
-        ;
+                filter(item -> !item.isDel).collect(Collectors.toList());
         render("/Materials/_unit_list.html", materials);
     }
 }
