@@ -30,7 +30,7 @@ $(() => {
     e.preventDefault()
     let from = new Date($("#p_from").val());
     let to = new Date($("#p_to").val());
-    if ($("selec[name='p.category']").val()) {
+    if ($("select[name='p.category']").val()) {
       if (((to - from) / 1000 / 60 / 60 / 24) > 31) {
         alert("暂时只能导出一个月之内的数据！");
       } else {
