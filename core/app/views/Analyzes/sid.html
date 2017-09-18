@@ -57,7 +57,7 @@
     <th>
       主要运输方式
     </th>
-    <th>退货率</th>
+    <th>退货数</th>
   </tr>
   </thead>
   <tbody>
@@ -115,8 +115,8 @@
       </select>
     </td>
     <td>${dto.main_ship_type}</td>
-    <td style="${dto.returnRates > 0.3 ? 'background-color:#FF0000' : ''}" rel="popover" data-content="${dto.returns}/${dto.sales}"
-        placement="top">${dto.returnRates.format('#.#%')}
+    <td style="${dto.returnRates > 0.3 ? 'background-color:#FF0000' : ''}" rel="popover" data-content="${dto.returns}/${dto.sales}(${dto.returnRates.format('#.#%')})"
+        placement="top">${dto.returns}
     </td>
   </tr>
   #{/list}
