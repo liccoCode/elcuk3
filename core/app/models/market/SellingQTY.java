@@ -9,6 +9,7 @@ import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -65,7 +66,8 @@ public class SellingQTY extends GenericModel implements ElcukRecord.Log {
      */
     public Integer unsellable = 0;
 
-
+    public Date updateDate;
+    
     public SellingQTY() {
     }
 
@@ -88,13 +90,13 @@ public class SellingQTY extends GenericModel implements ElcukRecord.Log {
      * 将一个全新的 SellingQTY[qty,pending,inbound,unsellable] 关联到 Selling 上, 包括 Selling, Product, 组成 id
      *
      * @param merchantSKU
-     * @throws SellingQTYAttachNoWhouseException
-     *          SellingQTY 无法绑定 Whouse 的错误
+     * @throws SellingQTYAttachNoWhouseException SellingQTY 无法绑定 Whouse 的错误
      */
     public void attach2Selling(String merchantSKU, Whouse whouse) {
         Validate.notNull(merchantSKU);
         Validate.notNull(whouse);
-        this.selling = Selling.findById(Selling.sid(Selling.getMappingSKU(merchantSKU), whouse.account.type, whouse.account));
+        this.selling = Selling
+                .findById(Selling.sid(Selling.getMappingSKU(merchantSKU), whouse.account.type, whouse.account));
         this.product = Product.findByMerchantSKU(merchantSKU);
         if(this.selling == null || this.product == null) throw new SellingQTYAttachNoWhouseException();
         // 虽然可以通过 Whouse.find("account=?", sell.account).first(); 找到 Whouse, 但是这是此 Selling 对应的 FBA 仓库, 此方法除了能够绑定 FBA 库存还需要能够绑定其他的库存
