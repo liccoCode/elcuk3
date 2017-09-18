@@ -20,7 +20,7 @@ public class MaterialBomPost extends Post<MaterialBom> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sbd = new StringBuilder("SELECT m FROM MaterialBom m where 1=1 ");
+        StringBuilder sbd = new StringBuilder("SELECT m FROM MaterialBom m where 1=1  and isDel = false ");
         List<Object> params = new ArrayList<>();
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND (m.number LIKE ? ");
