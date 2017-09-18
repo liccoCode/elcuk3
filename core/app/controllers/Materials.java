@@ -108,6 +108,11 @@ public class Materials extends Controller {
 
     public static void deleteMaterialBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
+        if(bom.materials != null && bom.materials.size() > 0){
+            Validation.addError("", "B0M—ID["+bom.number+"]已绑定物料,不允许删除!");
+            Webs.errorToFlash(flash);
+            Materials.indexBom(new MaterialBomPost());
+        }
         bom.isDel = true;
         bom.updateDate = new Date();
         bom.save();
