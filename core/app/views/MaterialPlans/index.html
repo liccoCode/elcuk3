@@ -13,7 +13,6 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <form action="@{MaterialPlans.index()}" class="form-inline" id="deliverys_form">
-
         <div class="box-header with-border">
           <div class="row-fluid">
 
@@ -30,6 +29,26 @@
                 <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
               </div>
             </div>
+
+            <select name="p.dateType" style="width: 100px;" class="form-control">
+            #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.receipt" style="width: 100px;" class="form-control">
+              <option value="">收货类型</option>
+            #{list items:models.material.MaterialPlan.R.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.financeState" style="width: 80px;" class="form-control">
+              <option value="">财务审核</option>
+            #{list items:models.material.MaterialPlan.S.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
 
             <select name="p.cooperId" class="form-control selectize" style="width:150px;">
               <option value="">供应商</option>
@@ -100,11 +119,11 @@
                   #{else }没有请款单#{/else}
               </td>
               <td>${dp.cooperator?.name}</td>
-              <td>${dp.state.label()}</td>
+              <td style="color:${dp.state.rgb()}">${dp.state.label()}</td>
               <td>${dp.receipt?.label()}</td>
               <td>${dp.receiveCooperator?.name}</td>
               <td>
-                  #{if dp.financeState.name() == financeState.name()}
+                  #{if dp.financeState.name() == "PENDING_REVIEW"}
                       #{power.ck "materialplans.approve"}
                         <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
                         <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
@@ -150,7 +169,7 @@
   </div>
   <div class="modal-body">
     <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
-      <input type="hidden" name="unit.id" id="unit_id">
+      <input type="hidden" name="matId" id="unit_id">
       <table class="table table-condensed table-bordered">
         <tr>
           <th width="30%">实际签收数量</th>

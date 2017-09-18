@@ -1,13 +1,19 @@
 package models.view.post;
 
 import controllers.Login;
+import helper.DBUtils;
 import models.User;
 import models.procure.Cooperator;
 import org.apache.commons.lang.StringUtils;
+import play.db.helper.JpqlSelect;
+import play.i18n.Messages;
 import play.libs.F;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,6 +73,23 @@ public class CooperatorPost extends Post<Cooperator> {
     @Override
     public Long count(F.T2<String, List<Object>> params) {
         return (long) Cooperator.find(params._1, params._2.toArray()).fetch().size();
+    }
+
+
+    public List<Map<String, Object>> logs(){
+        StringBuilder sbd = new StringBuilder("SELECT e.* ,ci.sku ,m.`code`,c.`fullName` from ElcukRecord e ");
+               sbd.append(" LEFT join CooperItem ci  on e.`fid` = ci.id ");
+               sbd.append(" left join Cooperator c on ci.`cooperator_id` = c.id ");
+               sbd.append(" left join Material m on m.id = ci.`material_id` ");
+               sbd.append(" WHERE 1=1 AND  ");
+               List<String> actionMsgs = Arrays.asList("cooperators.savecooperitem",
+                       "cooperators.updatecooperitem",
+                       "cooperators.cooperitemdelete").
+                       stream().map(action -> Messages.get(action)).collect(Collectors.toList());
+               sbd.append(JpqlSelect.whereIn("action", actionMsgs));
+               sbd.append("AND createAt>DATE_SUB(CURDATE(), INTERVAL ? MONTH) ORDER BY createAt DESC");
+        List<Map<String, Object>> rows = DBUtils.rows(sbd.toString(),new Object[] {3});
+        return  rows;
     }
 
 }

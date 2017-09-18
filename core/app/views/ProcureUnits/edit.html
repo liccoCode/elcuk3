@@ -53,3 +53,13 @@
 </div>
 <input type="hidden" id="unitId" value="${unit.id}">
 #{records records:logs/}
+
+
+<script>
+  var priceFlag  =  $("#priceFlag").val();
+  if (priceFlag == 1){
+    $("input[name='unit.attrs.price']").attr({'readOnly':false});
+  }else{
+    $("input[name='unit.attrs.price']").attr({'readOnly':true});
+  }
+</script>

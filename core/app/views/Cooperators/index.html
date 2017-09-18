@@ -22,9 +22,9 @@
               <input type="text" class="form-control" style="width:220px;" name="p.search" placeholder="全称 or SKU or 代码" value="${p.search}">
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
-
             <button class="btn btn-primary" data-loading>搜索</button>
             <a href="@{Cooperators.newCooper()}" class="btn btn-warning">添加新合作伙伴</a>
+            <a href="@{Excels.exportCooperItemLogs()}" class="btn btn-success"> 下载日志</a>
           </div>
         </form>
       </div>
@@ -83,7 +83,6 @@
         #{/list}
         </table>
       </div>
-
       <div class="box-footer">
       #{bootstrap_pager_v3 pi:p, url:'/products/index'/}
       </div>

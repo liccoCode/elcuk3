@@ -316,11 +316,23 @@ public class ProcuresHelper extends JavaExtensions {
 
     public static String rgb(MaterialPlan.P stage) {
         switch(stage) {
+            case CANCEL:
+                return "#F9A021";
             case CREATE:
                 return "#DEFBC2";
             case DONE:
             default:
                 return "#88BEF5";
+        }
+    }
+
+    public static String rgb(MaterialPlan.S stage) {
+        switch(stage) {
+            case PENDING_REVIEW:
+                return "#FF0000 ";
+            case APPROVE:
+            default:
+                return "#42cfc4";
         }
     }
 
