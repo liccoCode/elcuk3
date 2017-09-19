@@ -5,6 +5,7 @@ import helper.Reflects;
 import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
+import models.User;
 import models.material.*;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
@@ -53,6 +54,7 @@ public class MaterialPlans extends Controller {
                 .unPaidApplies(p == null ? null : p.cooperId);
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("avaliableApplies", avaliableApplies);
+        renderArgs.put("users", User.find("closed=?", false).fetch());
     }
 
     /**

@@ -52,6 +52,13 @@
       #{/list}
       </select>
 
+      <select name="p.userId" style="width: 80px;" class="inline selectize">
+        <option value="">User</option>
+      #{list items:users, as:'u'}
+        <option value="${u.id}" ${u.id==p.userId?'selected':''}>${u.username}</option>
+      #{/list}
+      </select>
+
       <div class="input-prepend input-append inline">
         <span class="add-on"><i class="icon-search"></i></span>
         <input type="text" style="width:180px;" name="p.search" class="input-medium" value="${p.search}"
