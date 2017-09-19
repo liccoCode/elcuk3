@@ -2,6 +2,7 @@ package controllers;
 
 import helper.GTs;
 import helper.J;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.material.Material;
@@ -119,6 +120,11 @@ public class Materials extends Controller {
 
     public static void deleteMaterialBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
+        if(bom.materials != null && bom.materials.size() > 0){
+            Validation.addError("", "B0M—ID["+bom.number+"]已绑定物料,不允许删除!");
+            Webs.errorToFlash(flash);
+            Materials.indexBom(new MaterialBomPost());
+        }
         bom.isDel = true;
         bom.updateDate = new Date();
         bom.save();
@@ -149,6 +155,12 @@ public class Materials extends Controller {
     }
 
     public static void createBom(MaterialBom b) {
+        List<MaterialBom> materialBoms = MaterialBom.find("number = ? and isDel = false", b.number).fetch();
+        if(materialBoms != null && materialBoms.size() > 0) {
+            Validation.addError("", "B0M—ID["+b.number+"]已存在,不允许二次创建!");
+            Webs.errorToFlash(flash);
+            Materials.indexBom(new MaterialBomPost());
+        }
         b.creator = Login.current();
         b.createDate = new Date();
         b.updateDate = new Date();

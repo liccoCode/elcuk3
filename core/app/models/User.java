@@ -232,7 +232,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.visioa.com/";
+                return "http://104.207.150.98:9000/";
             }
         },
         MengTop {

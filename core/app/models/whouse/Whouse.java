@@ -306,6 +306,9 @@ public class Whouse extends Model {
                         M.AMAZON_JP).contains(m)) {
                     Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.AIR, this);
                 }
+                if("Ecooe".equals(OperatorConfig.getVal("brandname")) && M.AMAZON_FR == m){
+                    Shipment.checkNotExistAndCreate(nextBeginDate.toDate(), Shipment.T.SEA, this);
+                }
             } else if(nextBeginDate.getDayOfWeek() == 4) {
                 if(Arrays.asList("EASYACC", "Brandworl").contains(OperatorConfig.getVal("brandname"))) {
                     if(Arrays.asList(M.AMAZON_UK, M.AMAZON_DE).contains(m)) {
