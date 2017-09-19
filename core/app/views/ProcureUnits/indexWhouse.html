@@ -135,12 +135,12 @@
                 <i class="icon-download-alt"></i> 导出采购计划</a>
             #{/power.ck}
 
+            #{include 'Deliveryments/_box_number_model.html'/}
             </div>
           </div>
         </form>
       </div>
 
-    #{include 'Deliveryments/_box_number_model.html'/}
 
       <form method="post" id="create_deliveryment">
         <div class="box-body">
@@ -152,7 +152,7 @@
               </th>
               <th style="width:50px;">采购计划ID</th>
               <th style="width:30px;">父ID</th>
-              <th>阶段</th>
+              <th style="width:20px;">阶段</th>
               <th style="width:155px;">Sku<br>产品名称</th>
               <th width="120px;">FBA-ShipmentId<br>CenterId</th>
               <th width="65px;">去往市场</th>
