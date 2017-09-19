@@ -168,6 +168,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.easya.cc/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-tablet";
+            }
         },
         Ecooe {
             @Override
@@ -178,6 +183,11 @@ public class User extends Model {
             @Override
             public String url() {
                 return "https://e.ecooe.com/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-cutlery";
             }
         },
         Brandworl {
@@ -190,6 +200,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.brandworl.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-suitcase";
+            }
         },
         OUTXE {
             @Override
@@ -200,6 +215,11 @@ public class User extends Model {
             @Override
             public String url() {
                 return "https://e.outxe.com/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-hdd-o";
             }
         },
         Redimp {
@@ -212,6 +232,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.redimp.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-gamepad";
+            }
         },
         Lecone {
             @Override
@@ -222,6 +247,11 @@ public class User extends Model {
             @Override
             public String url() {
                 return "https://e.ilecone.com/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-sliders";
             }
         },
         Visio {
@@ -234,6 +264,11 @@ public class User extends Model {
             public String url() {
                 return "http://104.207.150.98:9000/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-briefcase";
+            }
         },
         MengTop {
             @Override
@@ -245,11 +280,18 @@ public class User extends Model {
             public String url() {
                 return "https://e.mengtop.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-sitemap";
+            }
         };
 
         public abstract String label();
 
         public abstract String url();
+
+        public abstract String pic();
     }
 
     public enum D {

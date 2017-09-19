@@ -280,7 +280,7 @@
 
     <div class="navbar-custom-menu">
       <ul class="nav navbar-nav">
-*{        <li class="dropdown messages-menu">
+      *{        <li class="dropdown messages-menu">
           <!-- Menu toggle button -->
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-envelope-o"></i>
@@ -324,7 +324,7 @@
               #{list items:models.User.COR.values(), as:'c'}
                 <li><!-- start notification -->
                   <a href="${c.url()}">
-                    <i class="fa fa-circle-o text-red"></i> ${c.label()}
+                    <i class="fa ${c.pic()}" style="color:red"></i> ${c.label()}
                   </a>
                 </li>
               #{/list}
@@ -337,10 +337,12 @@
         <!-- Tasks Menu -->
         <li class="dropdown tasks-menu">
           <!-- Menu Toggle Button -->
-            #{set notifyNum: controllers.Notifications.notifyNum()/}
+        #{set notifyNum: controllers.Notifications.notifyNum()/}
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-flag-o"></i>
+            <i class="fa fa-bell-o"></i>
+          #{if notifyNum > 0}
             <span class="label label-danger">${notifyNum}</span>
+          #{/if}
           </a>
           <ul class="dropdown-menu">
             <li class="header">You have ${notifyNum} notifications</li>
@@ -350,9 +352,10 @@
                 <li>
                 #{list items:controllers.Notifications.unReadNotify(), as:'n'}
                   <a href="@{controllers.Notifications.viewSource(n.id)}">
-                    #{if n.type.name()=='SYSTEM'} <i class="fa fa-users text-orange"></i> #{/if}
-                    #{else } <i class="fa fa-user text-aqua"></i> #{/else}
-                    ${n.title}<small class="pull-right">${n.createAt.date()}</small>
+                      #{if n.type.name()=='SYSTEM'} <i class="fa fa-users text-orange"></i> #{/if}
+                      #{else } <i class="fa fa-user text-aqua"></i> #{/else}
+                  ${n.title}
+                    <small class="pull-right">${n.createAt.date()}</small>
                   </a>
                 #{/list}
                 </li>
