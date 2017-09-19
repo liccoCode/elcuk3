@@ -68,9 +68,15 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
         List<Object> params = new ArrayList<>();
 
         /* 时间参数 **/
-        sbd.append(" d.createDate>=? AND d.createDate<=?");
-        params.add(Dates.morning(this.from));
-        params.add(Dates.night(this.to));
+        if(this.dateType != null) {
+            if(this.dateType == MaterialPlanPost.DateType.DELIVERY) {
+                sbd.append(" d.deliveryDate>=? AND d.deliveryDate<=?");
+            } else {
+                sbd.append(" d.createDate>=? AND d.createDate<=?");
+            }
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
+        }
 
         if(this.planState != null) {
             sbd.append(" AND d.state=?");
