@@ -129,7 +129,7 @@ public class Cooperators extends Controller {
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
         flash.success("创建成功.");
-        redirect("/cooperators/index#" + db.cooperator.id);
+        redirect("/cooperators/index#" + cooperId);
     }
 
     public static void editCooperItem(long cooperId) {
