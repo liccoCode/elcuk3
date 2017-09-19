@@ -75,7 +75,7 @@
               <td>#{time_tooltip_v3 time:u.qcDate()/}</td>
               <td>${u.unqualifiedQty}</td>
               <td>
-                <select style="width:85px; height:24px;" name="type" class="form-control">
+                <select style="width:85px; height:24px; padding:0px;" name="type" class="form-control">
                   <option value="">请选择</option>
                     #{list items:models.whouse.Refund.InboundType, as:'t'}
                       <option value="${t.name()}">${t.label()}</option>
@@ -86,7 +86,7 @@
                 <input type="text" name="memo" value="" style="width:150px;height:24px;" class="form-control input-sm">
               </td>
               <td>
-                <input type="text" style="width:40px;height:24px;" name="units[${u_index-1}].attrs.qty"
+                <input type="text" style="width:60px;height:24px;" name="units[${u_index-1}].attrs.qty"
                        value="${u.unqualifiedQty}" data-origin="${u.unqualifiedQty}" class="form-control input-sm">
                 <input type="button" class="btn btn-warning btn-xs" name="refundBtn" value="退货"
                        data-url="@{Refunds.unQualifiedHandle()}" data-id="${u.id}">

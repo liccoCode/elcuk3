@@ -60,10 +60,7 @@
               #{/if}/>
         </td>
         <td>
-          <select name="handType" style="width:75px;
-              #{if unit.qty == unit.planQty}
-                  display:none;
-              #{/if}"
+          <select name="handType" style="width:75px; ${unit.qty==unit.planQty?'display:none;':''}" class="form-control"
               #{if unit.status.name() != "Create"}
                   disabled
               #{/if}>
@@ -98,7 +95,7 @@
         <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
               #{if unit.status.name()!="Receive" } readonly #{/if} class="form-control"
-                 style="width:58px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}" />
+                 style="width:58px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
