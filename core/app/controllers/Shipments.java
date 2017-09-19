@@ -209,7 +209,6 @@ public class Shipments extends Controller {
             Validation.addError("", "ShipmentId 错误");
             Webs.errorToFlash(flash);
         }
-
         render(ship);
     }
 

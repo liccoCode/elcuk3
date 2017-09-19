@@ -155,6 +155,7 @@ $(() => {
   $(document).on("click", "[name='delete_btn']", function (e) {
     let length = $("div[class='box-body']").length;
     $("#box-" + (length - 1)).remove();
+    addDeleteBtn();
   });
 
   validQty();

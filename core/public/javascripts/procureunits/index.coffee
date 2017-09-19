@@ -9,12 +9,12 @@ $ ->
       })
       return false
     else
-      $table = $("#box_number_table")[0]
-      while($table.hasChildNodes())
-        $table.removeChild($table.lastChild)
+      $("#box_number_table").html("")
       checkboxList.each(->
-        $tr = parseDom1("<tr><td>#{$(@).val()}</td><td><div class='input-append'><input type='text' class='input-mini' name='boxNumbers' value='#{$(@).data("boxnum")}' maxlength='3'/><span class='add-on'>箱</span></div></td></tr>")
-        $table.appendChild($tr)
+        $tr = "<tr><td style='vertical-align:middle'>#{$(@).val()}</td><td><div class='input-group'>
+<input type='text' class='form-control' name='boxNumbers' value='#{$(@).data("boxnum")}' maxlength='3'/>
+<span class='input-group-addon'>箱</span></div></td></tr>"
+        $("#box_number_table").append($tr)
         unitIds.push($(@).val())
       )
       $('#box_number_modal').modal('show')
@@ -22,10 +22,12 @@ $ ->
 # 确保用户填写的是大于零的数字
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1")
-  ).on("click", "#submitDownloadFBAZIP", (r) ->
+  )
+
+  $("#submitDownloadFBAZIP").click(->
     LoadMask.mask()
     $('#unitIds').val(unitIds.join("_"))
-    $form = $("form.search_form")
+    $form = $("#search_Form")
     # ajax 模拟提交文件下载请求
     inputs = '';
     #formData = $form.serialize() + ""
