@@ -48,16 +48,16 @@ $ ->
     )
 
   $("#batchDown").click(->
-    if $("data-table input[type='checkbox']:checked").length == 0
+    if $("#data-table input[type='checkbox']:checked").length == 0
       noty({
         text: "请选择需要下架的Selling",
         type: 'error',
         timeout: 2000
       })
     else
-      return false if !confirm("需要同时将" + $("data-table input[type='checkbox']:checked").length + "个selling系统内下架？")
+      return false if !confirm("需要同时将" + $("#data-table input[type='checkbox']:checked").length + "个selling系统内下架？")
       sellingIds = []
-      checkboxList = $("data-table input[type='checkbox']:checked")
+      checkboxList = $("#data-table input[type='checkbox']:checked")
       for checkbox in checkboxList when checkbox.checked then sellingIds.push(checkbox.value)
       $.post('/sellings/batchDownSelling',
         sellingIds: sellingIds,
