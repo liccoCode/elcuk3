@@ -108,7 +108,8 @@ public class ReportDeal extends Controller {
         String orderId = request.params.get("orderId");
         String taxNumber = request.params.get("taxNumber");
         String flag = request.params.get("flag");
-
+        Logger.info(String.format("Osticket 调用生成发票接口,传入参数 [orderId:%s];[flag:%s];[taxNumber:%s]",
+                orderId, flag, taxNumber));
         Orderr ord = Orderr.findById(orderId);
         if(ord == null) renderJSON(new Ret(false, "this order is not exist"));
 
