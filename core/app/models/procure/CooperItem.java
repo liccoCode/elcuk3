@@ -183,6 +183,7 @@ public class CooperItem extends Model {
     public Date createDate;
 
     public CooperItem checkAndUpdate(CooperItem entity) {
+        entity.product = Product.findById(entity.sku);
         entity.check();
         entity.setAttributes();
         entity.setDefaultValue();

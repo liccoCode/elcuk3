@@ -32,6 +32,7 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
     public Date from;
     public Date to;
     public Long cooperId;
+    public Long userId;
     public MaterialPlan.P planState;
     public DateType dateType;
     public MaterialPlan.R receipt;
@@ -82,6 +83,12 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
             sbd.append(" AND d.state=?");
             params.add(this.planState);
         }
+        
+        if(this.userId != null && this.userId > 0) {
+            sbd.append(" AND d.handler.id=?");
+            params.add(this.userId);
+        }
+
 
         if(this.cooperId != null && this.cooperId > 0) {
             sbd.append(" AND d.cooperator.id=?");

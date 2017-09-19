@@ -319,8 +319,10 @@ materials.create=\u521b\u5efa\u005b\u7269\u6599\u005d
 materials.create.msg=ID[%s]    
 materials.update=\u4fee\u6539\u005b\u7269\u6599\u005d
 materials.update.msg=ID[%s]
-materials.delete=\u4e0b\u67b6\u005b\u7269\u6599\u005d
-materials.delete.msg=ID[%s]
+materials.up=\u4e0a\u67b6\u005b\u7269\u6599\u005d
+materials.up.msg=ID[%s]  
+materials.down=\u4e0b\u67b6\u005b\u7269\u6599\u005d
+materials.down.msg=ID[%s]
 
 
 cooperators.savecooperitem=\u521b\u5efa\u005b\u0043\u006f\u006f\u0070\u0065\u0072\u0049\u0074\u0065\u006d\u005d

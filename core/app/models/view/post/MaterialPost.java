@@ -22,13 +22,42 @@ public class MaterialPost extends Post<Material> {
     public Material.T type;
     public Long cooperId;
     public String number;
+    public S status;
+
+    public enum S {
+        /**
+         * 上架
+         */
+        UP {
+            @Override
+            public String label() {
+                return "上架";
+            }
+        },
+        /**
+         * 下架
+         */
+        DOWN {
+            @Override
+            public String label() {
+                return "下架";
+            }
+        };
+
+        public abstract String label();
+    }
+
 
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m "
                 + "LEFT JOIN m.cooperItems ci  LEFT JOIN m.boms bs WHERE m.isDel=? ");
-        params.add(false);
+        if(this.status != null && this.status == S.DOWN) {
+            params.add(true);
+        } else {
+            params.add(false);
+        }
         if(type != null) {
             sbd.append(" AND m.type = ? ");
             params.add(type);

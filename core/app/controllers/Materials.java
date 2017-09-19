@@ -107,12 +107,21 @@ public class Materials extends Controller {
 
     public static void deleteMaterial(Long id) {
         Material material = Material.findById(id);
-        material.isDel = true;
-        material.updateDate = new Date();
-        material.save();
-        flash.success(String.format("下架 %s 成功！", material.name));
-        new ElcukRecord(Messages.get("materials.delete"),
-                Messages.get("materials.delete.msg", material.id), material.id.toString()).save();
+        if(material.isDel){
+            material.isDel = false;
+            material.updateDate = new Date();
+            material.save();
+            flash.success(String.format(" %s 上架成功！", material.name));
+            new ElcukRecord(Messages.get("materials.up"),
+                    Messages.get("materials.up.msg", material.id), material.id.toString()).save();
+        }else {
+            material.isDel = true;
+            material.updateDate = new Date();
+            material.save();
+            flash.success(String.format(" %s 下架成功！", material.name));
+            new ElcukRecord(Messages.get("materials.down"),
+                    Messages.get("materials.down.msg", material.id), material.id.toString()).save();
+        }
         index(new MaterialPost());
     }
 
