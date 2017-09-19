@@ -112,7 +112,7 @@ public class MaterialApply extends Apply {
             dmt.apply = apply;
             dmt.save();
         }
-        new ERecordBuilder("materialApply.save")
+        new ERecordBuilder("materialapply.save")
                 .msgArgs(StringUtils.join(materialPlanIds, ","), apply.serialNumber)
                 .fid(apply.id)
                 .save();
@@ -138,7 +138,7 @@ public class MaterialApply extends Apply {
             dmt.apply = this;
             dmt.save();
         }
-        new ERecordBuilder("materialApply.save")
+        new ERecordBuilder("materialapply.save")
                 .msgArgs(StringUtils.join(materialPlanIds, ","), this.id)
                 .fid(this.id + "")
                 .save();
@@ -225,8 +225,8 @@ public class MaterialApply extends Apply {
 
 
     public List<ElcukRecord> records() {
-        return ElcukRecord.records(this.id + "", Arrays.asList("materialapply.save", "procureunit.editPaySatus",
-                "deliveryment.departApply"), 50);
+        return ElcukRecord.records(this.id + "", Arrays.asList("materialapply.save", "materialapply.confirm",
+                "materialplans.departapply"), 50);
     }
 
     public void updateAt(long applyId ){

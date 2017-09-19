@@ -3,6 +3,7 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.User;
 import models.finance.Apply;
 import models.finance.FeeType;
@@ -14,6 +15,7 @@ import models.procure.Shipment;
 import models.view.Ret;
 import models.view.post.*;
 import play.data.validation.Validation;
+import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -31,7 +33,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Applys extends Controller {
 
-    @Before(only = {"procures", "transports", "materials"})
+    @Before(only = {"procures", "materials"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);
@@ -52,9 +54,9 @@ public class Applys extends Controller {
         if(p == null) p = new TransportApplyPost();
         List<User> users = User.findAll();
         List<TransportApply> applyes = p.query();
-        render(applyes, p, users);
+        List<Cooperator> suppliers = Cooperator.suppliersForShipment();
+        render(applyes, p, users, suppliers);
     }
-
 
     /**
      * 采购请款单
@@ -174,6 +176,8 @@ public class Applys extends Controller {
         apply.confirm = true;
         apply.updateAt = new Date();
         apply.save();
-        render("Applys/material.html", apply);
+        new ElcukRecord(Messages.get("materialapply.confirm"),
+                Messages.get("materialapply.confirm.msg", id), id.toString()).save();
+        Applys.material(id);
     }
 }

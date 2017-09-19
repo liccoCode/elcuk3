@@ -1,6 +1,6 @@
 $(() => {
 
-  $('#funcs').on('click', 'button:contains(重新抓取费用)', function () {
+  $("#refresh_btn").click(function () {
     LoadMask.mask();
     $.post($(this).data("url"), function (r) {
       let type = r.flag ? "success" : "error";
@@ -9,7 +9,7 @@ $(() => {
         type: type,
         timeout: 3000
       });
-      LoadMask.unmask();
+      window.location.reload();
     });
   });
 

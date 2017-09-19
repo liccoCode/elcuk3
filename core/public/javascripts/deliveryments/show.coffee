@@ -183,7 +183,7 @@ $ ->
     $(@).css('cursor': 'pointer')
   ).on("click", ".selling_id a", (e) ->
     $("#tl").show()
-    $("#tl").parent().show();
+    $("#tl").parent().parent().show();
     $td = $(@)
     loadTimeLine('sid', $td.text().trim())
   )

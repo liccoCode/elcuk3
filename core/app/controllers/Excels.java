@@ -923,6 +923,23 @@ public class Excels extends Controller {
     }
 
 
+    public static void exportMaterialPlanDetail(MaterialPlanPost p) {
+        if(p == null) p = new MaterialPlanPost();
+        List<MaterialPlan> planList = p.query();
+        if(planList != null && planList.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("%s-%s物料出货导出明细.xls",
+                    formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(planList);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+
+    }
+
+
     public static void skuShipmentReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
         if(p.from == null || p.to == null) {
@@ -979,6 +996,23 @@ public class Excels extends Controller {
             renderArgs.put(RenderExcel.RA_FILENAME, "汇签审核报表.xls");
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(applies);
+        } else {
+            renderText("没有数据无法生成Excel文件！");
+        }
+    }
+
+    /**
+     * 导出 合作伙伴的物料与sku的Records记录与导出修改日志
+     */
+    public static void exportCooperItemLogs() {
+        CooperatorPost post = new CooperatorPost();
+        List<Map<String, Object>> logs = post.logs();
+        if(logs != null && logs.size() != 0) {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, "物料修改日志.xls");
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put("dmt", new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss"));
+            render(logs);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }

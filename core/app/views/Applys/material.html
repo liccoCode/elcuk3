@@ -52,8 +52,8 @@
     <dl class="dl-horizontal">
       <dt>#</dt>
       <dd><a href="@{MaterialPlans.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
-      <dt>状态</dt>
-      <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
+      <dt>审核状态</dt>
+      <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
       <dt>供应商</dt>
       <dd>${dmt.cooperator.fullName}</dd>
       <dt>创建时间</dt>
@@ -85,7 +85,7 @@
         <th>#</th>
         <th>物料编码</th>
         <th>请款状态</th>
-        <th>数量(交货/签收)</th>
+        <th>数量(交货/签收异常)</th>
         <th>单价</th>
         <th>单价*签收数量</th>
         <th>出货单状态</th>
@@ -109,7 +109,7 @@
               #{/list}
             </td>
             <td class="qty" qty="${procureUnit.qty}" receiptQty="${procureUnit.receiptQty?:0}"
-                style="color:${procureUnit.qty!=procureUnit.receiptQty? 'red':''}">
+                style="color:${(procureUnit.receiptQty>0&&procureUnit.qty!=procureUnit.receiptQty)? 'red':''}">
             ${procureUnit.qty}/${procureUnit.receiptQty?:0}
             </td>
             <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>

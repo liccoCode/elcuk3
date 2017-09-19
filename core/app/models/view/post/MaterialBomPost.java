@@ -16,6 +16,7 @@ import java.util.List;
 public class MaterialBomPost extends Post<MaterialBom> {
 
     public MaterialBom.S status;
+    public int perSize = 20;
 
 
     @Override

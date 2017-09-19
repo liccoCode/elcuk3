@@ -29,8 +29,8 @@
     <td>${itm.boxSize}</td>
     <td>${itm.lowestOrderNum}</td>
     <td>
-      <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-sm"><i class="icon-pencil"></i></a>
-      <a href="@{Cooperators.removeCooperItemById(itm.id)}" class="btn btn-xs btn-danger" rel="tooltip"
+      <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-xs btn-info"><i class="icon-pencil"></i></a>
+      <a href="@{Cooperators.removeCooperItemById(itm.id)}" class="btn btn-xs btn-danger" data-toggle="tooltip"
          name="itemDel" title="删除"><i class="icon-trash"></i></a>
     </td>
   </tr>
@@ -38,7 +38,7 @@
   <!-- 为此供应商关联新的产品 -->
   <tr>
     <td colspan="13">
-      <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-sm btn-warning">为[${coper.fullName}]添加新的生产的物料</a>
+      <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-xs btn-warning">为[${coper.fullName}]添加新的生产的物料</a>
     </td>
   </tr>
 </table>

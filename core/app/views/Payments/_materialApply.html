@@ -14,12 +14,13 @@
   </div>
   <table class="table table-bordered table-condensed" id="apply_table">
     <tr>
-      <th><label><input type="checkbox" id="check_all"></label></th>
+      <th><input type="checkbox" id="check_all"></th>
       <th>出货计划</th>
+      <th>财务审核</th>
       <th>出货日期</th>
       <th>物料编码</th>
       <th>单价</th>
-      <th>数量(交货/签收)</th>
+      <th>数量(交货/签收异常)</th>
       <th>付款类型</th>
       <th>总额修正价</th>
       <th>付款金额</th>
@@ -33,20 +34,15 @@
             #{set records:fee.fixValueRecords()/}
             #{set denyRecords: fee.denyRecords()/}
           <td><input type="checkbox" name="paymentUnitIds" value="${fee.id}"></td>
-          <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${fee.id}'
-                                                                                             width="200px;">
-              #{if (records.size() + denyRecords.size()) > 0}
-                <i class="icon-reorder"></i>
-              #{/if}
-            <a href="@{Deliveryments.show(fee.materialPlan.id)}#${punit?.id}">
-            ${fee.materialPlan.id} #${punit.id}
-            </a>
+          <td width="200px;">
+            <a href="@{MaterialPlans.show(fee.materialPlan.id)}#${punit?.id}">${fee.materialPlan.id} #${punit.id}</a>
           </td>
+          <td style="color:${punit.materialPlan.financeState?.rgb()}">${punit.materialPlan.financeState?.label()}</td>
           <td>#{time_tooltip time:punit.materialPlan.deliveryDate/}</td>
           <td>${punit.material.code}</td>
           <td>${payment.currency.symbol()} ${punit.getPrice()}</td>
-          <td class="qty" 
-              style="color:${punit.qty!=punit.receiptQty? 'red':''}">
+          <td class="qty"
+              style="color:${(punit.receiptQty>0&&punit.qty!=punit.receiptQty)? 'red':''}">
           ${punit.qty}/${punit.receiptQty?:0}
           </td>
           <td>${fee.feeType.nickName}</td>

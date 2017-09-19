@@ -7,7 +7,6 @@
     #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'materialUnits/index.es6'/}
-    #{script 'materialUnits/index.coffee'/}
 #{/set}
 <style>
   .table td{
@@ -16,7 +15,6 @@
 </style>
 #{errorMsgs /}
 #{flash_alert /}
-
 
 <div class="row">
   <div class="col-md-12">
@@ -29,14 +27,14 @@
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
-                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
               </div>
             </div>
 
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">To:</div>
-                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
               </div>
             </div>
 
@@ -80,14 +78,13 @@
         #{render 'MaterialUnits/_unit_list.html', units: p.query(), p:p, checkbox:true , materialUnitsIndex:true/}
         </div>
       </form>
-      
+
       <div class="box-footer">
       #{bootstrap_pager_v3 pi:p, url:'' /}
       </div>
     </div>
   </div>
 </div>
-
 
 <!--  修改物料计划 弹出div begin   -->
 <div id="bom_modal" class="modal fade bs-example-modal-lg">
@@ -98,28 +95,28 @@
       </div>
       <div class="modal-body">
         <form action="@{MaterialUnits.updateMaterialUnit()}" method="post" id="updateUnit_form">
-              <input type="hidden" name="unit.id" id="unit_id">
-              <input type="hidden" name="updateType" value="MaterialUnitIndex">
-              <table class="table table-condensed table-bordered">
-                <tr>
-                  <th width="30%">采购数量</th>
-                  <td>
-                    <input type="text" placeHolder="具体数量" id="unit_planQty" name="unit.planQty">
-                  </td>
-                </tr>
-                <tr>
-                  <th>价格</th>
-                  <td>
-                    <input type="text" id="unit_planPrice" name="unit.planPrice">
-                    <select style="width:100px;" id="unit_planCurrency" name="unit.planCurrency">
-                    #{list items:helper.Currency, as:'c'}
-                      <option value="${c.name()}">${c.name()}</option>
-                    #{/list}
-                    </select>
-                  </td>
-                </tr>
-              </table>
-            </form>
+          <input type="hidden" name="matId" id="unit_id">
+          <input type="hidden" name="updateType" value="MaterialUnitIndex">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">采购数量</th>
+              <td>
+                <input type="text" placeHolder="具体数量" id="unit_planQty" name="unit.planQty">
+              </td>
+            </tr>
+            <tr>
+              <th>价格</th>
+              <td>
+                <input type="text" id="unit_planPrice" name="unit.planPrice">
+                <select style="width:100px;" id="unit_planCurrency" name="unit.planCurrency">
+                #{list items:helper.Currency, as:'c'}
+                  <option value="${c.name()}">${c.name()}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+          </table>
+        </form>
       </div>
       <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>

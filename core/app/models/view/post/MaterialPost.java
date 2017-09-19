@@ -22,6 +22,7 @@ public class MaterialPost extends Post<Material> {
     public Material.T type;
     public Long cooperId;
     public String number;
+    public int perSize = 20;
 
     @Override
     public F.T2<String, List<Object>> params() {

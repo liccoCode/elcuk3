@@ -16,7 +16,7 @@
     <th width="40px;">阶段</th>
     <th width="170px;">Selling</th>
     <th width="120px">Sku</th>
-    <th width="130px;">FBA-ShipmentId<br>CenterId</th>
+    <th width="145px;">FBA-ShipmentId<br>CenterId</th>
     <th>采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="120px;">数量<br>(计划/交货/入库)</th>
@@ -308,9 +308,13 @@
 </table>
 
 <!-- Ship To Modal -->
-<div id="fba_ship_to_modal" class="modal hide fade">
-  <div class="modal-body" id="fba_ship_to_body"></div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+<div id="fba_ship_to_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body" id="fba_ship_to_body"></div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+      </div>
+    </div>
   </div>
 </div>

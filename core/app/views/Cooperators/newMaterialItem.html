@@ -34,15 +34,19 @@
           #{/list}
           </select>
           <input type="hidden" name="cooperId" value="${cop.id}">
-          <input type="hidden" name="copItem.id" value="${copItem.id}">
+          <input type="hidden" name="copItemId" value="${copItem.id}">
         #{authenticityToken /}
         </td>
 
         <th>价格</th>
         <td>
           <div class="inline">
-            <input class="input input-mini" type="text" name="copItem.price" value="${copItem.price}">
+            <input class="input input-mini" type="text" readonly='true' name="copItem.price" value="${copItem.price}">
           #{pickCurrency name:'copItem.currency',  class:'input-mini', c:copItem.currency?:helper.Currency.CNY/}
+          #{power.ck "cooperitem.price"}
+             <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
+            <input type="hidden" id="priceFlag" value="1">
+          #{/power.ck}
           </div>
         </td>
       </tr>
@@ -192,4 +196,12 @@
       <td><input type="text" name="copItem.items[<%= num%>].schemeName"></td>
     </tr>
   </table>
+</script>
+
+
+<script>
+  var priceFlag  =  $("#priceFlag").val();
+  if (priceFlag == 1){
+    $("input[name='copItem.price']").attr({'readOnly':false});
+  }
 </script>

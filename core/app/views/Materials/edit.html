@@ -1,4 +1,4 @@
-#{extends 'main.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'编辑物料' /}
 #{set 'moreScripts'}
 #{/set}
@@ -11,72 +11,86 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Materials.update(), method:'POST'}
-    #{info_row title: '编辑物料'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-bordered">
-      <tr>
-        <th>物料编码<span style="color:red">*</span></th>
-        <td>
-          <input type="text" name="m.code" required autocomplete="off" value="${material.code}">
-          <input type="hidden" name="m.id" value="${material.id}">
-        </td>
-        <th>物料名称<span style="color:red">*</span></th>
-        <td style="width: 40%;"><input type="text" name="m.name" value="${material.name}" required></td>
-      </tr>
-      <tr>
-        <th>物料类型<span style="color:red">*</span></th>
-        <td>
-          <select name="m.type" required>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border"><h3 class="box-title">编辑物料</h3></div>
+      <form action="@{Materials.update()}" method="post" class="form-horizontal">
+        <div class="box-body">
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-2 control-label">物料编码<span style="color:red">*</span></label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.code" required autocomplete="off" value="${material.code}">
+              <input type="hidden" name="m.id" value="${material.id}">
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">物料名称<span style="color:red">*</span></label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.name" value="${material.name}" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-2 control-label">物料类型<span style="color:red">*</span></label>
+            <div class="col-sm-3">
+              <select name="m.type" required class="form-control">
               #{list items:models.material.Material.T, as:'t'}
                 <option value="${t.name()}" ${t==material.type?'selected':''}>${t.label()}</option>
               #{/list}
-          </select>
-        </td>
-        <th>B0M—ID</th>
-        <td>
-          <select name="boms[0].id" class="inline selectize" style="width:220px;" >
-            <option value="">请输入包装组</option>
+              </select>
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">B0M—ID</label>
+            <div class="col-sm-3">
+              <select name="boms[0].id" class="inline selectize" style="width:220px;">
+                <option value="">请输入包装组</option>
               #{list items:materialBoms, as:'b'}
                 <option #{if boms[0]?.id==b.id} selected #{/if} value="${b.id}">${b.number}-${b.name}</option>
               #{/list}
-          </select>
-        </td>
+              </select>
+            </div>
+          </div>
 
-      </tr>
-      <tr>
-        <th>规格</th>
-        <td><input type="text" name="m.specification" value="${material.specification}" autocomplete="off"></td>
-        <th>材质</th>
-        <td><input type="text" class="input-xxlarge" name="m.texture" value="${material.texture}" autocomplete="off">
-        </td>
-      </tr>
-      <tr>
-        <th>工厂物料代码</th>
-        <td><input type="text" name="m.version" value="${material.version}" autocomplete="off"></td>
-        <th>工艺</th>
-        <td>
-          <input type="text" class="input-xxlarge" name="m.technology" value="${material.technology}" autocomplete="off">
-        </td>
-      </tr>
-      <tr>
-        <th>备注</th>
-        <td colspan="4">
-          <textarea name="m.memo" rows="4" class="input-block-level">${material.memo}</textarea>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="4">
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-2 control-label">规格</label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.specification" value="${material.specification}" autocomplete="off">
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">材质</label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.texture" value="${material.texture}" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-2 control-label">工厂物料代码</label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.version" value="${material.version}" autocomplete="off">
+            </div>
+
+            <label for="pro_family" class="col-sm-2 control-label">工艺</label>
+            <div class="col-sm-3">
+              <input class="form-control" name="m.technology" value="${material.technology}" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pro_category" class="col-sm-2 control-label">备注</label>
+            <div class="col-sm-8">
+              <textarea class="form-control" name="m.memo" rows="4" class="input-block-level">${material.memo}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="box-footer">
           <input type="hidden" name="record.origin" value="">
           <input type="hidden" name="record.state" value="">
-          <button class="btn btn-primary" name="create_record">保存</button>
-          <a href="@{Materials.index()}" class="btn btn-success">取消</a>
-        </td>
-      </tr>
-    </table>
+          <button class="btn btn-primary" name="create_record" data-loading>保存</button>
+          <a href="@{Materials.index()}" class="btn btn-default">取消</a>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-
-#{/form}
 

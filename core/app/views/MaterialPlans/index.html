@@ -13,23 +13,42 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <form action="@{MaterialPlans.index()}" class="form-inline" id="deliverys_form">
-
         <div class="box-header with-border">
           <div class="row-fluid">
 
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
-                <input style="width:100px;" class="form-control" id="date_from" name="p.from" value="${p.from.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
               </div>
             </div>
 
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">To:</div>
-                <input style="width:100px;" class="form-control" id="date_to" name="p.to" value="${p.to.date()}">
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
               </div>
             </div>
+
+            <select name="p.dateType" style="width: 100px;" class="form-control">
+            #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.receipt" style="width: 100px;" class="form-control">
+              <option value="">收货类型</option>
+            #{list items:models.material.MaterialPlan.R.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.financeState" style="width: 80px;" class="form-control">
+              <option value="">财务审核</option>
+            #{list items:models.material.MaterialPlan.S.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
 
             <select name="p.cooperId" class="form-control selectize" style="width:150px;">
               <option value="">供应商</option>
@@ -47,16 +66,17 @@
 
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
-              <input type="text" style="width:180px;" name="p.search" class="form-control"  value="${p.search}"
+              <input type="text" style="width:180px;" name="p.search" class="form-control" value="${p.search}"
                      placeHolder="搜索 物料编码 or 物料出货单ID">
               <input type="hidden" name="p.page" value="${p.page}">
               <input type="hidden" name="id" id="planId">
             </div>
 
             <button class="btn btn-primary" data-loading>搜索</button>
+          #{power.ck "materialplans.approve"}
             <a href="javascript:void(0)" data-url='@{MaterialPlans.approveBatch()}' class="btn btn-warning"
                id="confirmMaterialPlanBtn">财务审核</a>
-
+          #{/power.ck}
           </div>
         </div>
 
@@ -90,7 +110,7 @@
               <td style="cursor:pointer;" data-url="@{MaterialPlans.showMaterialPlanUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
                 <span><i class="icon-reorder"></i></span>
                 <span>${dp.name}</span>
-                <span class="badge badge-info">${dp.units.size()}</span>
+                <span class="badge bg-light-blue">${dp.units.size()}</span>
               </td>
               <td>
                   #{if dp.apply}
@@ -99,22 +119,25 @@
                   #{else }没有请款单#{/else}
               </td>
               <td>${dp.cooperator?.name}</td>
-              <td>${dp.state.label()}</td>
+              <td style="color:${dp.state.rgb()}">${dp.state.label()}</td>
               <td>${dp.receipt?.label()}</td>
               <td>${dp.receiveCooperator?.name}</td>
               <td>
-                  #{if dp.financeState.name() == financeState.name()}
-                    <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                    <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
-                       class="btn btn-xs btn-warning" uid="${dp.id}">审核</a>
+                  #{if dp.financeState.name() == "PENDING_REVIEW"}
+                      #{power.ck "materialplans.approve"}
+                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
+                           class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
+                      #{/power.ck}
+                    待审
                   #{/if}
                   #{else}
                   ${dp.financeState?.label()}
                   #{/else}
               </td>
-              <td>#{time_tooltip time:dp.deliveryDate, datetime:true/}</td>
+              <td>#{time_tooltip_v3 time:dp.deliveryDate, datetime:true/}</td>
               <td>${dp.handler.username}</td>
-              <td>#{time_tooltip time:dp.createDate/}</td>
+              <td>#{time_tooltip_v3 time:dp.createDate/}</td>
             </tr>
           #{/list}
           </table>
@@ -146,7 +169,7 @@
   </div>
   <div class="modal-body">
     <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
-      <input type="hidden" name="unit.id" id="unit_id">
+      <input type="hidden" name="matId" id="unit_id">
       <table class="table table-condensed table-bordered">
         <tr>
           <th width="30%">实际签收数量</th>
