@@ -34,7 +34,7 @@
           #{/list}
           </select>
           <input type="hidden" name="cooperId" value="${cop.id}">
-          <input type="hidden" name="copItemId" value="${copItem.id}">
+          <input type="hidden" name="copItemId"  id="copItemId" value="${copItem.id}">
         #{authenticityToken /}
         </td>
 
@@ -201,7 +201,11 @@
 
 <script>
   var priceFlag  =  $("#priceFlag").val();
+  var copItemId  =   $("#copItemId").val();    //获取copItemId ,为空代表新增,那么不做限制
   if (priceFlag == 1){
     $("input[name='copItem.price']").attr({'readOnly':false});
+  }
+  if (copItemId == '' ){
+      $("input[name='copItem.price']").attr({'readOnly':false});
   }
 </script>
