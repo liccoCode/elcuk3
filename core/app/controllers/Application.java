@@ -139,4 +139,9 @@ public class Application extends Controller {
         renderJSON(Orderr.frontPageOrderTable(9));
     }
 
+    public static void systemTimeline() {
+        String url = OperatorConfig.getVal("elcuk2url");
+        render(url);
+    }
+
 }
