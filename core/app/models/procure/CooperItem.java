@@ -321,7 +321,7 @@ public class CooperItem extends Model {
         if(this.price <= 0) throw new FastRuntimeException("采购价格能小于 0 ?");
         if(this.lowestOrderNum < 0) throw new FastRuntimeException("最低采货量不允许小于 0 ");
         if(this.period < 0) throw new FastRuntimeException("生产周期不允许小于  0");
-
+        if(this.product == null) throw new FastRuntimeException("SKU没有找到，请先新建SKU！");
     }
 
     /**
