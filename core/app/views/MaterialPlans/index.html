@@ -8,14 +8,12 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-
 <div class="row">
   <div class="col-md-12">
     <div class="box box-primary">
       <form action="@{MaterialPlans.index()}" class="form-inline" id="deliverys_form">
         <div class="box-header with-border">
           <div class="row-fluid">
-
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
@@ -64,9 +62,16 @@
             #{/list}
             </select>
 
+            <select name="p.userId" style="width: 100px;" class="form-control selectize">
+              <option value="">创建人</option>
+            #{list items:users, as:'u'}
+              <option value="${u.id}" ${u.id==p.userId?'selected':''}>${u.username}</option>
+            #{/list}
+            </select>
+
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
-              <input type="text" style="width:180px;" name="p.search" class="form-control" value="${p.search}"
+              <input type="text" style="width:240px;" name="p.search" class="form-control" value="${p.search}"
                      placeHolder="搜索 物料编码 or 物料出货单ID">
               <input type="hidden" name="p.page" value="${p.page}">
               <input type="hidden" name="id" id="planId">
@@ -95,7 +100,7 @@
               <th>收货方</th>
               <th width="70px;">财务审核</th>
               <th width="150px;">出货时间</th>
-              <th width="50px;">User</th>
+              <th width="80px;">User</th>
               <th width="90px;">Create</th>
             </tr>
           #{list items:materialPlans, as:'dp'}
@@ -119,7 +124,7 @@
                   #{else }没有请款单#{/else}
               </td>
               <td>${dp.cooperator?.name}</td>
-              <td style="color:${dp.state.rgb()}">${dp.state.label()}</td>
+              <td style="background-color:${dp.state.rgb()}">${dp.state.label()}</td>
               <td>${dp.receipt?.label()}</td>
               <td>${dp.receiveCooperator?.name}</td>
               <td>
