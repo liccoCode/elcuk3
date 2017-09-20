@@ -181,7 +181,7 @@ public class AnalyzeDTO implements Serializable {
      */
     public float returnRates = 0;
 
-    public String[] indexColor = {"progress-bar-aqua","progress-bar-red","progress-bar-green", "progress-bar-yellow"};
+    public static String[] indexColor = {"progress-bar-aqua","progress-bar-red","progress-bar-green", "progress-bar-yellow"};
 
     //BEGIN GENERATED CODE
     public float getPs_cal() {
