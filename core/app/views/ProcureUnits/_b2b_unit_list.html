@@ -3,9 +3,7 @@
   <tr>
   #{if checkbox}
     <th width="20px;">
-      <label class="checkbox">
-        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
-      </label>
+      <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="${tr_key} checkall" value="">
     </th>
   #{/if}
   #{if relationPage}
@@ -39,31 +37,29 @@
   <tr id="procureUnit_${unit.id}">
       #{if checkbox}
         <td>
-          <label class="checkbox">
-              #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
-              #{if unit.fba && unit.fba.dto}
-                <!-- 优先使用自身的 FBA 箱包装数据 -->
-                  #{set dto: unit.fba.dto/}
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
-                       data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
-                       data-width="${dto.width}" data-height="${dto.height}">
-              #{/if}
-              #{elseif cooperItem}
-                <!-- 使用维护好的合作伙伴的数据 -->
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
-                       data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
-                       data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
-                       data-width="${cooperItem.width}" data-height="${cooperItem.height}">
-              #{/elseif}
-              #{else}
-                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
-                       data-boxnum="" data-num="" data-lastcartonnum=""
-                       data-singleboxweight="" data-length=""
-                       data-width="" data-height="">
-              #{/else}
-          </label>
+            #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
+            #{if unit.fba && unit.fba.dto}
+              <!-- 优先使用自身的 FBA 箱包装数据 -->
+                #{set dto: unit.fba.dto/}
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="${dto.boxNum}" data-num="${dto.num}" data-lastcartonnum="${dto.lastCartonNum}"
+                     data-singleboxweight="${dto.singleBoxWeight}" data-length="${dto.length}"
+                     data-width="${dto.width}" data-height="${dto.height}">
+            #{/if}
+            #{elseif cooperItem}
+              <!-- 使用维护好的合作伙伴的数据 -->
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="${cooperItem.boxNum(unit.qty())}" data-num="${cooperItem.boxSize}"
+                     data-lastcartonnum="${cooperItem.lastCartonNum(unit.qty())}"
+                     data-singleboxweight="${cooperItem.singleBoxWeight}" data-length="${cooperItem.length}"
+                     data-width="${cooperItem.width}" data-height="${cooperItem.height}">
+            #{/elseif}
+            #{else}
+              <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}"
+                     data-boxnum="" data-num="" data-lastcartonnum=""
+                     data-singleboxweight="" data-length=""
+                     data-width="" data-height="">
+            #{/else}
         </td>
       #{/if}
       #{if relationPage}
@@ -240,19 +236,16 @@
     </td>
   </tr>
 #{/list}
-#{if p != null}
-  <tr class="tb_footer">
-    <td colspan="25">
-        #{bootstrap_pager pi:p, url:'' /}
-    </td>
-  </tr>
-#{/if}
 </table>
 
 <!-- Ship To Modal -->
-<div id="fba_ship_to_modal" class="modal hide fade">
-  <div class="modal-body" id="fba_ship_to_body"></div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+<div id="fba_ship_to_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body" id="fba_ship_to_body"></div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+      </div>
+    </div>
   </div>
 </div>

@@ -9,7 +9,7 @@ $(() => {
     });
   });
 
-  $.post("/Application/perDayOrderNum", function (r) {
+  $.post("/application/perDayOrderNum", function (r) {
     let title = r.title == undefined ? r["series"][0]["name"] : r.title;
     Highcharts.chart('pieChart1', {
       credits: {
@@ -52,7 +52,7 @@ $(() => {
   function refreshTopFive (market) {
     let div = $("#progress_by_market");
     div.mask();
-    div.load("/Application/topTenSkuByMarket", {market: market}, function () {
+    div.load("/application/topTenSkuByMarket", {market: market}, function () {
       div.unmask();
     });
   }

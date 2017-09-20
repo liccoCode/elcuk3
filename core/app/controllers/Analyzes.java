@@ -69,7 +69,7 @@ public class Analyzes extends Controller {
     public static void analyzes(final AnalyzePost p) {
         try {
             List<AnalyzeDTO> dtos = p.query();
-            User user = Login.current();
+            User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
             if(categories.size() == 0) {
