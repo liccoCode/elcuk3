@@ -24,6 +24,15 @@
               <option #{if p.type==t} selected #{/if} value="${t.name()}">${t.label()}</option>
             #{/list}
             </select>
+
+            <select name="p.status" style="width: 100px;" class="form-control">
+              <option value="">物料状态</option>
+            #{list items:models.view.post.MaterialPost.S.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.status?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
               <input type="text" class="form-control" style="width:220px;" name="p.search"

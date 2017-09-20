@@ -742,21 +742,32 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public void calculationRatio() {
         float totalShipWeight = this.totalWeight();
         float totalShipVolume = this.totalVolume();
-        this.items.forEach(item -> {
-            float itemWeight = 0f;
-            Float weight = item.unit.product.weight;
-            Float itemVolume = item.totalVolume();
-            if(weight != null) {
-                itemWeight += item.qty * weight;
+        int num = this.items.size();
+        for(int i = 0; i < num; i++) {
+            ShipItem item = this.items.get(i);
+            float totalWeightRatio = 0f;
+            float totalVolumeRatio = 0f;
+            if(i + 1 == num) {
+                item.weightRatio = 1 - totalWeightRatio;
+                item.volumeRatio = 1 - totalVolumeRatio;
+            } else {
+                float itemWeight = 0f;
+                Float weight = item.unit.product.weight;
+                Float itemVolume = item.totalVolume();
+                if(weight != null) {
+                    itemWeight += item.qty * weight;
+                }
+                if(totalShipWeight > 0)
+                    item.weightRatio = BigDecimal.valueOf(itemWeight)
+                            .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                if(totalShipVolume > 0)
+                    item.volumeRatio = BigDecimal.valueOf(itemVolume)
+                            .divide(BigDecimal.valueOf(totalShipVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                totalWeightRatio += item.weightRatio;
+                totalVolumeRatio += item.volumeRatio;
             }
-            if(totalShipWeight > 0)
-                item.weightRatio = BigDecimal.valueOf(itemWeight)
-                        .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
-            if(totalShipVolume > 0)
-                item.volumeRatio = BigDecimal.valueOf(itemVolume)
-                        .divide(BigDecimal.valueOf(totalShipVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
             item.save();
-        });
+        }
     }
 
     private void shouldSomeStateValidate(S state, String action) {
