@@ -121,6 +121,14 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         return dtos;
     }
 
+    public List<AnalyzeDTO> queryByPrivate(List<AnalyzeDTO> dtos, List<String> categories) {
+        categories.forEach(categoryId -> {
+            if(StringUtils.isNotBlank(this.categoryId))
+                CollectionUtils.filter(dtos, new SearchPredicate("^" + this.categoryId));
+        });
+        return dtos;
+    }
+
     public List<AnalyzeDTO> queryOrderByDayOne() {
         List<AnalyzeDTO> dtos = this.analyzes();
         if(StringUtils.isNotBlank(this.orderBy))

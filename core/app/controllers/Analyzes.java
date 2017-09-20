@@ -14,6 +14,7 @@ import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.TrafficRatePost;
 import models.view.report.TrafficRate;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -72,12 +73,8 @@ public class Analyzes extends Controller {
             User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
-            if(categories.size() == 0) {
-                render("Analyzes/" + p.type + ".html", p);
-            } else {
-                dtos = dtos.stream().filter(dto -> dto.containsCategory(categories)).collect(Collectors.toList());
-                render("Analyzes/" + p.type + ".html", dtos, p);
-            }
+            dtos = p.queryByPrivate(dtos, categories);
+            render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
