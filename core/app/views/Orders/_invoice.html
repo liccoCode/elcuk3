@@ -87,14 +87,14 @@
       <td class="td4">
         <strong>${invoiceformat.to}</strong> <br>
       #{if invoice}
-        <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.formatStr(invoice.invoiceto)}">
+        <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.formatStr(invoice.invoiceto)}">
       #{/if}
       #{else}
           #{if ord.address1 && ord.address1.length() > 0}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.formatAddress1()}">
+            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.formatAddress1()}">
           #{/if}
           #{else}
-            <input style="width:100%" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
+            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
           #{/else}
       #{/else}
       </td>
@@ -124,10 +124,10 @@
       <td class="td4">
         <strong>${invoiceformat.address}</strong><br>
       #{if invoice}
-        <input style="width:100%" type="text" id="address" name="invoice.address" value="${invoice.formatStr(invoice.address)}">
+        <input class="form-control input-sm" type="text" id="address" name="invoice.address" value="${invoice.formatStr(invoice.address)}">
       #{/if}
       #{else}
-        <input style="width:100%" type="text" id="address" name="invoice.address" value="${editaddress}">
+        <input class="form-control input-sm" type="text" id="address" name="invoice.address" value="${editaddress}">
       #{/else}
       </td>
       <td rowspan="2"></td>
@@ -157,14 +157,14 @@
         #{if invoice}
             #{if invoice.isEurope()}
               <td class="td3">
-                <input type="text" name="invoice.price" value="${item.invoiceTotalPrice()}">
+                <input type="text" name="invoice.price" value="${item.invoiceTotalPrice()}" class="form-control input-sm">
               </td>
               <td class="td3">${item.invoicePrice()}</td>
             #{/if}
             #{else}
                 #{set price: invoice.price.get(item_index-1)/}
               <td class="td3">
-                <input type="text" name="invoice.price" value="${price}">
+                <input type="text" name="invoice.price" value="${price}" class="form-control input-sm">
               </td>
               <td class="td3">${item.invoiceTotalPrice(price)}</td>
             #{/else}
@@ -172,13 +172,13 @@
         #{else}
             #{if item.quantity != 0}
               <td class="td3">
-                <input type="text" name="invoice.price" value="${item.invoicePrice(rate)}">
+                <input type="text" name="invoice.price" value="${item.invoicePrice(rate)}" class="form-control input-sm">
               </td>
               <td class="td3">${item.invoiceTotalPriceWithRate(rate)}</td>
             #{/if}
             #{else}
               <td class="td3">
-                <input type="text" name="invoice.price" value="0">
+                <input type="text" name="invoice.price" value="0" class="form-control input-sm">
               </td>
               <td>0</td>
             #{/else}
@@ -201,13 +201,13 @@
             #{if invoice}
                 #{if invoice.isEurope()}
                   <td class="td3">
-                    <input type="text" name="invoice.price" value="${fee.cost}">
+                    <input type="text" name="invoice.price" value="${fee.cost}" class="form-control input-sm">
                   </td>
                   <td class="td3">${fee.cost}</td>
                 #{/if}
                 #{else}
                   <td class="td3">
-                    <input type="text" name="invoice.price" value="${invoice.price.get(feeCount)}">
+                    <input type="text" name="invoice.price" value="${invoice.price.get(feeCount)}" class="form-control input-sm">
                   </td>
                   <td class="td3">${invoice.price.get(feeCount)}</td>
                 #{/else}
@@ -215,7 +215,7 @@
             #{/if}
             #{else }
               <td class="td3">
-                <input type="text" name="invoice.price" value="${fee.invoiceCost(rate)}">
+                <input type="text" name="invoice.price" value="${fee.invoiceCost(rate)}" class="form-control input-sm">
               </td>
               <td class="td3">${fee.invoiceScaleCost(rate)}</td>
             #{/else}

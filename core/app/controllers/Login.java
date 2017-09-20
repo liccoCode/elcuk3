@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,6 +123,34 @@ public class Login extends Secure.Security {
             return USER_CACHE.get(username.toLowerCase());
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Util
+    public static String currentUserName() {
+        return Secure.Security.connected();
+    }
+
+    public static String currentDepart() {
+        String username = Secure.Security.connected();
+        if(StringUtils.isNotBlank(username)) {
+            if(USER_CACHE.get(username) == null) {
+                User user = User.findByUserName(username.toLowerCase());
+                USER_CACHE.put(user.username, user);
+            }
+            User user = USER_CACHE.get(username);
+            return user.department == null ? "" : user.department.label();
+        }
+        return "";
+    }
+
+    public static String memberDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MMMM-yyyy", Locale.ENGLISH);
+        User user = current();
+        if(user.entryDate != null) {
+            return sdf.format(user.entryDate);
+        }
+        return "";
     }
 
     @SuppressWarnings("unchecked")

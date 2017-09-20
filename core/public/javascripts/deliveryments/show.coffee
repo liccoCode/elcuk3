@@ -179,11 +179,11 @@ $ ->
     a.removeAttribute("href")
     a.removeAttribute("target")
   )
-  $("#unit_list").on("mouseenter focus", "table td.selling_id a", (e) ->
-    $(@).css(
-      'cursor': 'pointer')
-  ).on("click", "table td.selling_id a", (e) ->
+  $("#unit_table").on("mouseenter focus", "table td.selling_id a", (e) ->
+    $(@).css('cursor': 'pointer')
+  ).on("click", ".selling_id a", (e) ->
     $("#tl").show()
+    $("#tl").parent().parent().show();
     $td = $(@)
     loadTimeLine('sid', $td.text().trim())
   )

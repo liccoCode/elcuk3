@@ -1,6 +1,7 @@
 package ext;
 
 import helper.Webs;
+import models.finance.BatchReviewApply;
 import models.market.M;
 import models.material.MaterialPlan;
 import models.material.MaterialPurchase;
@@ -111,10 +112,39 @@ public class ProcuresHelper extends JavaExtensions {
         }
     }
 
+    public static String rgb(BatchReviewApply.S status) {
+            switch(status) {
+                case Pending:
+                    return "#40B0F9";
+                case Brand:
+                    return "#88BEF5";
+                case Audit:
+                    return "#FBBC05";
+                case Finance:
+                    return "#FF6464";
+                case End:
+                    return "#00a65a";
+                default:
+                    return "#E8ECF1";
+            }
+        }
+
     public static String overLong(String value) {
         if(StringUtils.isNotBlank(value)) {
             if(value.length() > 12) {
                 return value.substring(0, 11) + "...";
+            } else {
+                return value;
+            }
+        } else {
+            return "";
+        }
+    }
+
+    public static String nineLong(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            if(value.length() > 8) {
+                return value.substring(0, 7) + "...";
             } else {
                 return value;
             }
@@ -383,13 +413,13 @@ public class ProcuresHelper extends JavaExtensions {
     public static String bgcolor(F.T2<Integer, Integer> process) {
         double num = (double) process._1 / process._2;
         if(num == 1) {
-            return "progress-success";
+            return "progress-bar-green";
         } else if(num >= 0.66 && num < 1) {
-            return "progress-info";
+            return "progress-bar-aqua";
         } else if(num >= 0.33 && num < 0.66) {
-            return "progress-warning";
+            return "progress-bar-yellow";
         } else {
-            return "progress-danger";
+            return "progress-bar-red";
         }
     }
 }

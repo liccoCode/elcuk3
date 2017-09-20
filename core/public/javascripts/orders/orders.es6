@@ -1,6 +1,6 @@
 $(() => {
 
-  $('#funcs').on('click', 'button:contains(重新抓取费用)', function () {
+  $("#refresh_btn").click(function () {
     LoadMask.mask();
     $.post($(this).data("url"), function (r) {
       let type = r.flag ? "success" : "error";
@@ -9,7 +9,7 @@ $(() => {
         type: type,
         timeout: 3000
       });
-      LoadMask.unmask();
+      window.location.reload();
     });
   });
 
@@ -30,7 +30,7 @@ $(() => {
     e.preventDefault()
     let from = new Date($("#p_from").val());
     let to = new Date($("#p_to").val());
-    if ($("selec[name='p.category']").val()) {
+    if ($("select[name='p.category']").val()) {
       if (((to - from) / 1000 / 60 / 60 / 24) > 31) {
         alert("暂时只能导出一个月之内的数据！");
       } else {

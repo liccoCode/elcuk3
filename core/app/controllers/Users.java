@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.*;
+import models.product.Category;
 import models.product.Team;
 import models.view.Ret;
 import models.view.post.UserPost;
@@ -36,13 +37,13 @@ public class Users extends Controller {
         List<Privilege> privileges = Privilege.findAll();
         List<Team> teams = Team.findAll();
         List<Role> roles = Role.findAll();
-
+        List<Category> categories = Category.findAll();
 
         List<Privilege> modules = Privilege.find("pid=0").fetch();
         Map<Long, List<Privilege>> maps = Privilege.getMenuMap(modules);
         renderArgs.put("maps", maps);
         renderArgs.put("modules", modules);
-
+        renderArgs.put("categories", categories);
         render(users, privileges, teams, roles, p);
     }
 
@@ -59,7 +60,8 @@ public class Users extends Controller {
 
     public static void home() {
         User user = Login.current();
-        render(user);
+        String brandName = OperatorConfig.getVal("brandname");
+        render(user, brandName);
     }
 
     public static void privileges(Long id, List<Long> privilegeId) {
@@ -86,6 +88,17 @@ public class Users extends Controller {
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Team", size)));
     }
 
+    public static void categories(Long id, List<String> categoryId) {
+        User user = User.findById(id);
+        try {
+            user.addCategories(categoryId);
+        } catch(Exception e) {
+            renderJSON(new Ret(false, Webs.e(e)));
+        }
+        int size = user.categories.size();
+        renderJSON(new Ret(true, String.format("添加成功, 共 %s 个Category", size)));
+    }
+
     public static void roles(Long id, List<Long> roleId) {
         //if(roleId == null || roleId.size() == 0) renderJSON(new Ret(false, "必须选择角色"));
         User user = User.findById(id);
@@ -99,7 +112,6 @@ public class Users extends Controller {
     }
 
     public static void updates(User wuser, Long userid, String newPassword, String newPasswordConfirm) {
-
         User user = User.findById(userid);
         if(!user.authenticate(wuser.password)) {
             Validation.addError("", "用户密码错误, 请确认当前用户的密码正确");
@@ -116,9 +128,14 @@ public class Users extends Controller {
             user.wangwang = wuser.wangwang;
             user.phone = wuser.phone;
             user.qq = wuser.qq;
+            user.entryDate = wuser.entryDate;
+            user.sex = wuser.sex;
+            user.department = wuser.department;
+            user.projectName = wuser.projectName;
             if(StringUtils.isNotBlank(newPassword)) {
                 user.changePasswd(newPassword);
             } else {
+                user.password = wuser.password;
                 user.update();
             }
         } catch(Exception e) {
@@ -179,7 +196,8 @@ public class Users extends Controller {
 
     public static void create() {
         String brandName = OperatorConfig.getVal("brandname");
-        render(brandName);
+        Date entryDate = new Date();
+        render(brandName, entryDate);
     }
 
     /**

@@ -400,6 +400,15 @@ public class Cooperator extends Model {
     }
 
     /**
+     * 返回所有供应商
+     */
+    public static List<Cooperator> suppliersForShipment() {
+        List<Cooperator> cooperators = Cooperator.find("type=?", T.SHIPPER).fetch();
+        cooperators.sort((c1, c2) -> collator.compare(c1.name, c2.name));
+        return cooperators;
+    }
+
+    /**
      * 返回所有供应商的名称集合
      *
      * @return

@@ -11,7 +11,7 @@
     <th>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
-  <tr class="text-center">
+  <tr>
     <td>${unit.material?.code}</td>
     <td>${unit.material?.name}</td>
     <td>${unit.material?.version}</td>
@@ -19,7 +19,7 @@
     <td>${unit.qty}</td>
       #{if unit.receiptQty == 0 && !qtyEdit}
         <td name="unitUpdateTd">
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" id="qs_${unit.id}"
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-warning" id="qs_${unit.id}"
              uid="${unit.id}">签收异常</a>
         </td>
       #{/if}

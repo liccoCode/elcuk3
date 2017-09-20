@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"付款单列表"  /}
 #{set 'moreStyles'}
     #{stylesheet 'payments.css'/}
@@ -8,110 +8,116 @@
     #{script 'applys/index.es6'/}
 #{/set}
 
-#{form @Payments.index(), class:'search_form', id:'payments_form', method:'POST'}
-<div class="row-fluid">
-  <div class="span12">
-    <div class="input-prepend inline">
-      <span class="add-on">From:</span>
-      <input type="date" name="p.from" value="${p.from.date()}">
-    </div>
-    <div class="input-prepend inline">
-      <span class="add-on">To:</span>
-      <input type="date" name="p.to" value="${p.to.date()}">
-    </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <form action="@{Payments.index()}" class="form-inline" id="payments_form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
 
-    <div class="inline">
-        #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values() , value: p.dateType /}
-    </div>
-    <div class="inline">
-        #{select_enum name:'p.states', items:models.finance.Payment.S.values()}
-          <option value="">状态</option>
-        #{/select_enum}
-    </div>
-    <div class="inline">
-        #{select 'p.cooperId', items:cooperator, labelProperty:'name', valueProperty:'id' ,value: p.cooperId,
-        style:'height:28px;' }
-            #{option ''}合作伙伴#{/option}
-        #{/select}
-    </div>
-    <div class="inline">
-        #{select name:'p.actualCurrency', items:helper.Currency.values(), value: p.actualCurrency, style:'height:28px;' }
-            #{option ''}支付币种#{/option}
-        #{/select}
-    </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on"><i class="icon-search"></i></span>
-      <input type="hidden" name="p.page" value="${p.page}">
-      <input type="text" style="width:120px;" name="p.search" placeholder="支付账号" value="${p.search}">
-      <button class="btn btn-primary" data-loading>搜索</button>
-    </div>
+          #{select_enum name:'p.dateType', items:models.view.post.PaymentsPost.DateType.values(), value: p.dateType, class:"form-control"/}
 
-    <input type="button" class="btn btn-warning" id="batchApplyBtn" value="请款核单" data-url="@{Payments.batchApply()}">
+          #{select_enum name:'p.states', items:models.finance.Payment.S.values(), class:"form-control"}
+            <option value="">状态</option>
+          #{/select_enum}
 
-  </div>
-</div>
+            <select name="p.cooperId" class="form-control selectize" style="width:250px;">
+              <option value="">合作伙伴</option>
+            #{list items:cooperator, as:'s'}
+              <option value="${s.id}" ${s.id == p.cooperId?'selected':''}>${s.name}</option>
+            #{/list}
+            </select>
 
-<div class="row-fluid">
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
-      <th class="">请款单编号</th>
-      <th class="ten">涉及的请款人</th>
-      <th class="ten">支付人</th>
-      <th>合作伙伴</th>
-      <th width="90px;">汇签状态</th>
-      <th width="100px;">状态</th>
-      <th class="ten">总请款金额</th>
-      <th class="ten">总实际支付金额</th>
-      <th>最近更新时间</th>
-      <th>创建时间</th>
-    </tr>
-      #{list items:payments, as:'pay'}
-        <tr>
-          <td>
-              #{if !pay.batchReviewApply}
-                <input type="checkbox" name="pids" value="${pay.id}" cooperId="${pay.cooperator?.id}">
-              #{/if}
-          </td>
-          <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
-          <td>
-              #{list items:pay.applyers(), as:'applyer'}
-              ${applyer.username} &nbsp;
-              #{/list}
-          </td>
-          <td>${pay.payer?.username}</td>
-          <td>
-              #{list items:pay.cooperators(), as:'cop'}
-            ${cop.fullName}
+          #{select_enum name:'p.actualCurrency', items:helper.Currency.values(), value: p.actualCurrency, class:"form-control"}
+            <option value="">支付币种</option>
+          #{/select_enum}
+
+          <div class="input-group">
+            <div class="input-group-addon"><i class="icon-search"></i></div>
+            <input class="form-control" name="p.search" style="width: 180px;" value="${p.search}" placeHolder="支付账号">
+          </div>
+
+          <button class="btn btn-primary" data-loading>搜索</button>
+          <input type="hidden" name="p.page" value="${p.page}">
+
+          <input type="button" class="btn btn-warning" id="batchApplyBtn" value="请款核单" data-url="@{Payments.batchApply()}">
+        </div>
+
+        <div class="box-body">
+          <table class="table table-bordered table-condensed">
+            <tr>
+              <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
+              <th class="">请款单编号</th>
+              <th class="ten">涉及的请款人</th>
+              <th class="ten">支付人</th>
+              <th>合作伙伴</th>
+              <th width="90px;">汇签状态</th>
+              <th width="100px;">状态</th>
+              <th class="ten">总请款金额</th>
+              <th class="ten">总实际支付金额</th>
+              <th>最近更新时间</th>
+              <th>创建时间</th>
+            </tr>
+          #{list items:payments, as:'pay'}
+            <tr>
+              <td>
+                  #{if !pay.batchReviewApply}
+                    <input type="checkbox" name="pids" value="${pay.id}" cooperId="${pay.cooperator?.id}">
+                  #{/if}
+              </td>
+              <td><a href="@{Payments.show(pay.id)}">${pay.paymentNumber}</a></td>
+              <td>
+                  #{list items:pay.applyers(), as:'applyer'}
+                  ${applyer.username} &nbsp;
+                  #{/list}
+              </td>
+              <td>${pay.payer?.username}</td>
+              <td>
+                  #{list items:pay.cooperators(), as:'cop'}
+                      ${cop.fullName}
+                    #{/list}
+              </td>
+              <td>${pay.batchReviewApply?.status?.label()}</td>
+              <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
+              <td>
+                  #{set totalFees: pay.totalFees()/}
+                <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
+                ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
+                </a>
+              </td>
+              <td>
+              ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
+                <i class="badge badge-info">${pay.units().size()}</i>
+              </td>
+              <td>#{time_tooltip_v3 time:pay.updateAt, datetime:true/}</td>
+              <td>#{time_tooltip_v3 time:pay.createdAt, datetime:true/}</td>
+            </tr>
           #{/list}
-          </td>
-          <td>${pay.batchReviewApply?.status?.label()}</td>
-          <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
-          <td>
-              #{set totalFees: pay.totalFees()/}
-            <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
-            ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
-            </a>
-          </td>
-          <td>
-          ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
-            <i class="badge badge-info">${pay.units().size()}</i>
-          </td>
-          <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
-          <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
-        </tr>
-      #{/list}
-  </table>
-</div>
-#{/form}
-<div class="row-fluid" id="order_list">
-  <div class="span12">
-  #{if payments.size() == 0}
-    暂时还没有付款单
-  #{/if}
-  #{else }
-      #{bootstrap_pager pi:p, url:'' /}
-  #{/else}
+          </table>
+        </div>
+      </form>
+
+      <div class="box-footer">
+      #{if payments.size() == 0}
+        暂时还没有付款单
+      #{/if}
+      #{else }
+          #{bootstrap_pager_v3 pi:p, url:'' /}
+      #{/else}
+      </div>
+    </div>
   </div>
 </div>

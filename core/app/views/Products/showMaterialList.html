@@ -3,22 +3,20 @@
     <th></th>
     <th>物料编码</th>
     <th>物料名称</th>
-    <th>物料类别</th>
     <th>规格</th>
     <th width="150px;">材质</th>
     <th width="150px;">工艺</th>
-    <th width="150px;">工厂物料代码</th>
   </tr>
 #{list items:materials, as:'m'}
   <tr>
     <td><input type="checkbox" name="mids" value="${m.id}"></td>
-    <td>${m.code}</td>
-    <td>${m.name}</td>
-    <td>${m.type.label()}</td>
-    <td>${m.specification}</td>
-    <td>${m.texture}</td>
-    <td>${m.technology}</td>
-    <td>${m.version}</td>
+    <td data-toggle="tooltip" title="工厂物料代码: ${m.version}">
+      <a href="@{Materials.edit(m.id)}" target="_blank">${m.code}</a>
+    </td>
+    <td data-toggle="tooltip" title="${m.name}">${m.name.nineLong()}</td>
+    <td data-toggle="tooltip" title="${m.specification}">${m.specification.nineLong()}</td>
+    <td data-toggle="tooltip" title="${m.texture}">${m.texture.nineLong()}</td>
+    <td data-toggle="tooltip" title="${m.technology}">${m.technology.nineLong()}</td>
   </tr>
 #{/list}
 </table>

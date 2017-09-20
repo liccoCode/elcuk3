@@ -22,6 +22,7 @@ public class MaterialPost extends Post<Material> {
     public Material.T type;
     public Long cooperId;
     public String number;
+    public int perSize = 20;
     public S status;
 
     public enum S {
@@ -46,7 +47,6 @@ public class MaterialPost extends Post<Material> {
 
         public abstract String label();
     }
-
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -97,7 +97,7 @@ public class MaterialPost extends Post<Material> {
         params.add(false);
         if(type != null) {
             sbd.append(" AND m.type = ? ");
-            params.add(type);
+            params.add(type.name());
         }
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND (m.code LIKE ? ");
@@ -110,7 +110,7 @@ public class MaterialPost extends Post<Material> {
             params.add(cooperId);
         }
         if(StringUtils.isNotBlank(this.number)) {
-            sbd.append(" AND b.number = ? ");
+            sbd.append(" AND mb.number = ? ");
             params.add(this.number);
         }
         sbd.append(" GROUP BY m.id HAVING confirmQty>0 || pendingQty>0 ");
@@ -134,7 +134,7 @@ public class MaterialPost extends Post<Material> {
         params.add(false);
         if(type != null) {
             sbd.append(" AND m.type = ? ");
-            params.add(type);
+            params.add(type.name());
         }
 
         if(StringUtils.isNotBlank(this.search)) {
@@ -147,7 +147,7 @@ public class MaterialPost extends Post<Material> {
             params.add(cooperId);
         }
         if(StringUtils.isNotBlank(this.number)) {
-            sbd.append(" AND b.number = ? ");
+            sbd.append(" AND mb.number = ? ");
             params.add(this.number);
         }
         sbd.append(" GROUP BY m.id ");

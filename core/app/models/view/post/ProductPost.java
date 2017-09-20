@@ -1,5 +1,7 @@
 package models.view.post;
 
+import controllers.Login;
+import models.product.Category;
 import models.product.Product;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.SqlSelect;
@@ -8,6 +10,7 @@ import play.libs.F;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,7 +51,7 @@ public class ProductPost extends Post<Product> {
         List<Object> params = new ArrayList<>();
 
         if(categories.size() > 0) {
-            sbd.append(" AND p.category.id IN " + SqlSelect.inlineParam(categories));
+            sbd.append(" AND p.category.id IN ").append(SqlSelect.inlineParam(categories));
         }
 
         if(StringUtils.isNotBlank(this.search)) {
@@ -73,6 +76,17 @@ public class ProductPost extends Post<Product> {
             } else {
                 sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.DOWN)));
             }
+        }
+        
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(categoryList != null && categoryList.size() > 0) {
+            sbd.append(" AND p.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
+        } else {
+            categoryList = new ArrayList<>();
+            categoryList.add("-1");
+            sbd.append(" AND p.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
         }
         return new F.T2<>(sbd.toString(), params);
     }

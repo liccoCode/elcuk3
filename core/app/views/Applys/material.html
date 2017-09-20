@@ -91,9 +91,12 @@
         <th>出货单状态</th>
       </tr>
         #{list items:dmt.applyUnit(), as:'procureUnit'}
-
-          <tr #{if !procureUnit.isNeedPay}style="background:red"#{/if}>
-
+           #{if procureUnit.isNeedPay}
+           <tr>
+           #{/if}
+           #{else}
+           <tr style="background:red">
+           #{/else}
               #{set pid:procureUnit.id/}
             <td>
               <label class="checkbox"><input type="checkbox" name="unitids" value="${procureUnit.id}" class="${tr_key}" id="unitids"></label>

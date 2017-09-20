@@ -63,6 +63,9 @@ public class User extends Model {
     @ManyToMany(fetch = FetchType.EAGER)
     public Set<Role> roles = new HashSet<>();
 
+    @ManyToMany
+    public List<Category> categories = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "payer", fetch = FetchType.LAZY)
     public List<Payment> paymentPaied = new ArrayList<>();
@@ -125,6 +128,13 @@ public class User extends Model {
     @Expose
     public String wangwang;
 
+    public String sex;
+
+    /**
+     * 入职日期
+     */
+    public Date entryDate;
+
     /**
      * 该用户是否被关闭
      */
@@ -158,6 +168,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.easya.cc/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-tablet";
+            }
         },
         Ecooe {
             @Override
@@ -168,6 +183,11 @@ public class User extends Model {
             @Override
             public String url() {
                 return "https://e.ecooe.com/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-cutlery";
             }
         },
         Brandworl {
@@ -180,6 +200,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.brandworl.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-suitcase";
+            }
         },
         OUTXE {
             @Override
@@ -190,6 +215,11 @@ public class User extends Model {
             @Override
             public String url() {
                 return "https://e.outxe.com/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-hdd-o";
             }
         },
         Redimp {
@@ -202,6 +232,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.redimp.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-gamepad";
+            }
         },
         Lecone {
             @Override
@@ -213,6 +248,11 @@ public class User extends Model {
             public String url() {
                 return "https://e.ilecone.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-sliders";
+            }
         },
         Visio {
             @Override
@@ -222,7 +262,12 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.visioa.com/";
+                return "http://104.207.150.98:9000/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-briefcase";
             }
         },
         MengTop {
@@ -235,11 +280,18 @@ public class User extends Model {
             public String url() {
                 return "https://e.mengtop.com/";
             }
+
+            @Override
+            public String pic() {
+                return "fa-sitemap";
+            }
         };
 
         public abstract String label();
 
         public abstract String url();
+
+        public abstract String pic();
     }
 
     public enum D {
@@ -259,6 +311,12 @@ public class User extends Model {
             @Override
             public String label() {
                 return "财务部";
+            }
+        },
+        Develop {
+            @Override
+            public String label() {
+                return "开发部";
             }
         };
 
@@ -299,7 +357,7 @@ public class User extends Model {
      * 用户更新
      */
     public void update() {
-        /**
+        /*
          * 1. 验证密码是否正确
          * 2. 进行更新
          * 3. 更新缓存中的 user
@@ -355,6 +413,10 @@ public class User extends Model {
         return this.teams.contains(team);
     }
 
+    public boolean isHaveCategory(Category category) {
+        return this.categories.contains(category);
+    }
+
     /**
      * 增加Team;(删除原来的, 重新添加现在的)
      *
@@ -377,6 +439,22 @@ public class User extends Model {
         }
     }
 
+    public void addCategories(List<String> categoryId) {
+        if(categoryId == null || categoryId.size() == 0) {
+            this.categories = new ArrayList<>();
+            Category.updateCategory(this.username, this.categories);
+            this.save();
+        } else {
+            List<Category> categoryList = Category.find("categoryId IN " + JpqlSelect.inlineParam(categoryId)).fetch();
+            if(categoryList.size() != categoryList.size())
+                throw new FastRuntimeException("需要修改的Category数量与系统中存在的不一致, 请确通过 Web 形式修改.");
+            this.categories = new ArrayList<>();
+            this.save();
+            this.categories.addAll(categoryList);
+            Category.updateCategory(this.username, this.categories);
+            this.save();
+        }
+    }
 
     /**
      * 增加Role;(删除原来的, 重新添加现在的)

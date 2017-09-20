@@ -3,7 +3,7 @@
  */
 $(() => {
 
-   //列表状态查询下拉框样式处理
+  //列表状态查询下拉框样式处理
   $("#stage").multiselect({
     buttonWidth: '120px',
     nonSelectedText: '状态',
@@ -33,7 +33,11 @@ $(() => {
     $("#updateUnit_form").submit();
   });
 
-
+  $("#create_deliverplan_btn").click(function (e) {
+    e.preventDefault();
+    let $form = $("#create_materialUnit");
+    window.open('/MaterialPlans/materialPlan?' + $form.serialize(), "_blank");
+  });
 
   //创建 入库单,出库单,退货单 js处理
   $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function (e) {
@@ -59,97 +63,96 @@ $(() => {
     }
   });
 
-
   function validProNameAndCooperName ($btn) {
-      let firstProjectName = $('input[name="pids"]:checked').first().attr("project");
-      let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
-      let firstStage = $("input[name='pids']:checked").first().attr("stage");
-      let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
-      let firstShipType = $("input[name='pids']:checked").first().attr("shipType");
-      if (firstProjectName == 'MengTop') {
-        return true;
+    let firstProjectName = $('input[name="pids"]:checked').first().attr("project");
+    let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
+    let firstStage = $("input[name='pids']:checked").first().attr("stage");
+    let firstWhouse = $("input[name='pids']:checked").first().attr("whouse");
+    let firstShipType = $("input[name='pids']:checked").first().attr("shipType");
+    if (firstProjectName == 'MengTop') {
+      return true;
+    }
+    let o = 0;
+    let i = 0;
+    let j = 0;
+    let k = 0;
+    $("input[name='pids']:checked").each(function () {
+      if ($(this).attr("project") != firstProjectName) {
+        i++;
       }
-      let o = 0;
-      let i = 0;
-      let j = 0;
-      let k = 0;
-      $("input[name='pids']:checked").each(function () {
-        if ($(this).attr("project") != firstProjectName) {
-          i++;
-        }
-        if ($(this).attr("cooperName") != firstCooper) {
-          j++;
-        }
-        if ($(this).attr("whouse") != firstWhouse) {
-          o++;
-        }
-        if ($(this).attr("shipType") != firstShipType) {
-          k++;
-        }
+      if ($(this).attr("cooperName") != firstCooper) {
+        j++;
+      }
+      if ($(this).attr("whouse") != firstWhouse) {
+        o++;
+      }
+      if ($(this).attr("shipType") != firstShipType) {
+        k++;
+      }
+    });
+    if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
+      noty({
+        text: '请选择【供应商】一致的采购计划！',
+        type: 'error'
       });
-      if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
+      return false;
+    }
+
+    if ($btn.attr("id") == 'createOutboundBtn') {
+      if (!firstWhouse) {
         noty({
-          text: '请选择【供应商】一致的采购计划！',
+          text: '采购计划的【目的国家】未填写！',
           type: 'error'
         });
         return false;
       }
-
-      if ($btn.attr("id") == 'createOutboundBtn') {
-        if (!firstWhouse) {
-          noty({
-            text: '采购计划的【目的国家】未填写！',
-            type: 'error'
-          });
-          return false;
-        }
-        if (!firstShipType) {
-          noty({
-            text: '采购计划的【运输方式】未填写！',
-            type: 'error'
-          });
-          return false;
-        }
-        if (o > 0) {
-          noty({
-            text: '请选择【目的国家】一致的采购计划！',
-            type: 'error'
-          });
-          return false;
-        }
-        if (i > 0) {
-          noty({
-            text: '请选择【项目名称】一致的采购计划！',
-            type: 'error'
-          });
-          return false;
-        }
-        if (k > 0) {
-          noty({
-            text: '请选择【运输方式】一致的采购计划！',
-            type: 'error'
-          });
-          return false;
-        }
-      }
-
-      if ($btn.attr("id") == 'createRefundBtn') {
-        i = 0;
-        $("input[name='pids']:checked").each(function () {
-          if ($(this).attr("stage") != firstStage) {
-            i++;
-          }
+      if (!firstShipType) {
+        noty({
+          text: '采购计划的【运输方式】未填写！',
+          type: 'error'
         });
-        if (i > 0) {
-          noty({
-            text: '请选择相同【阶段】的采购单元',
-            type: 'error'
-          });
-          return false;
-        }
+        return false;
       }
-      return true;
+      if (o > 0) {
+        noty({
+          text: '请选择【目的国家】一致的采购计划！',
+          type: 'error'
+        });
+        return false;
+      }
+      if (i > 0) {
+        noty({
+          text: '请选择【项目名称】一致的采购计划！',
+          type: 'error'
+        });
+        return false;
+      }
+      if (k > 0) {
+        noty({
+          text: '请选择【运输方式】一致的采购计划！',
+          type: 'error'
+        });
+        return false;
+      }
     }
+
+    if ($btn.attr("id") == 'createRefundBtn') {
+      i = 0;
+      $("input[name='pids']:checked").each(function () {
+        if ($(this).attr("stage") != firstStage) {
+          i++;
+        }
+      });
+      if (i > 0) {
+        noty({
+          text: '请选择相同【阶段】的采购单元',
+          type: 'error'
+        });
+        return false;
+      }
+    }
+    return true;
+  }
 
 });
 

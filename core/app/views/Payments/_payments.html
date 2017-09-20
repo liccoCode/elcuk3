@@ -1,4 +1,4 @@
-<table class="table table-bordered table-condensed">
+<table class="table table-bordered table-condensed table-hover">
   <tr>
     <th class="">请款单编号</th>
     <th class="ten">涉及的请款人</th>
@@ -23,12 +23,11 @@
         #{list items:pay.cooperators(), as:'cop'}
             ${cop.fullName}
           #{/list}
-
     </td>
     <td style="color:${pay.stateColor()}">${pay.state.label()}</td>
     <td>
         #{set totalFees: pay.totalFees()/}
-      <a href="#" rel='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
+      <a href="#" data-toggle='tooltip' title="USD: ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')};  CNY: ${new java.math.BigDecimal(totalFees._2).setScale(2,4).floatValue().format('#,###.##')};  ${pay.currency}: ${new java.math.BigDecimal(totalFees._3).setScale(2,4).floatValue().format('#,###.##')}">
       ${helper.Currency.USD.symbol()} ${new java.math.BigDecimal(totalFees._1).setScale(2,4).floatValue().format('#,###.##')}
       </a>
     </td>
@@ -36,8 +35,8 @@
     ${pay.actualCurrency?.symbol()} ${new java.math.BigDecimal(pay.actualPaid).setScale(2,4).floatValue().format('#,###.##')}
       <i class="badge badge-info">${pay.units().size()}</i>
     </td>
-    <td>#{time_tooltip time:pay.updateAt, datetime:true/}</td>
-    <td>#{time_tooltip time:pay.createdAt, datetime:true/}</td>
+    <td>#{time_tooltip_v3 time:pay.updateAt, datetime:true/}</td>
+    <td>#{time_tooltip_v3 time:pay.createdAt, datetime:true/}</td>
   </tr>
 #{/list}
 </table>

@@ -60,13 +60,7 @@ $(() => {
       let html = "<tr style='background-color:#F2F2F2'><td colspan='11'>";
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
-      $("#div" + format_id).load($(this).data("url"), {id: id}, function () {
-        $("input[name='editBoxInfo']").click(function (e) {
-          e.stopPropagation();
-          let id = $(this).data("id");
-          refreshDiv(id);
-        });
-      });
+      $("#div" + format_id).load($(this).data("url"), {id: id}, function () {});
     }
   });
 

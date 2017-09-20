@@ -2,6 +2,13 @@
  * Created by licco on 2016/11/14.
  */
 $(() => {
+
+  $('#today').click(function (e) {
+    e.preventDefault();
+    $("input[name='p.from']").setDate(new Date());
+    $("input[name='p.to']").setDate(new Date());
+  });
+
   $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function (e) {
     e.stopPropagation();
     let $btn = $(this);
@@ -143,10 +150,12 @@ $(() => {
   });
 
   $(document).ready(function () {
-    $("#unit_table").dataTable({
-      "sDom": "<'row-fluid'<'span9'l><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+    $("#unit_table").DataTable({
+      "sDom": "<'row-fluid'<'col-sm-3'l><'col-sm-9'f>r>t<'row-fluid'<'col-sm-6'i><'col-sm-6'p>>",
       "sPaginationType": "full_numbers",
+      'lengthChange': true,
       "iDisplayLength": 50,
+      "bAutoWidth":false,
       "aoColumnDefs": [
         {
           "bSortable": false,
