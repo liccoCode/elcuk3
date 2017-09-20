@@ -35,7 +35,7 @@ public class Application extends Controller {
         }
         DashBoard dashboard = Orderr.frontPageOrderTable(11);
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render(dashboard, fbaWhouse);
+        render("Application/index_v3.html", dashboard);
     }
 
     public static void indexV3() {
@@ -58,8 +58,8 @@ public class Application extends Controller {
         AnalyzePost p = new AnalyzePost();
         p.market = market;
         List<AnalyzeDTO> dtos = p.queryOrderByDayOne();
-        if(dtos.size() >= 4) {
-            dtos = dtos.subList(0, 4);
+        if(dtos.size() >= 5) {
+            dtos = dtos.subList(0, 5);
         }
         render(dtos, market);
     }
