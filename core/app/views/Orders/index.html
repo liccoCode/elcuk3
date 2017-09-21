@@ -39,7 +39,7 @@
             #{/list}
             </select>
 
-            <select id="o_state" name="p.state" class="form-control" style="width:80px;">
+            <select id="o_state" name="p.state" class="form-control" style="width:100px;">
               <option value="">State(ALL)</option>
             #{list items:models.market.Orderr.S.values()}
               <option ${_ == p.state ? 'selected' : ''} value="${_.name()}">${_}</option>
