@@ -41,7 +41,7 @@ $ ->
     $('#fba_ship_to_body').html(new FbaShipToBuilder($(@)).buildBody())
     $('#fba_ship_to_modal').modal('show');
   )
-  $('#unit_list').on('click', 'a[name=confirmUnitBtn]', (e) ->
+  $('#unit_table').on('click', 'a[name=confirmUnitBtn]', (e) ->
     $btn = $(@)
     $.getJSON($btn.data('href'), (data) ->
       if data.flag
@@ -60,7 +60,7 @@ $ ->
     )
   )
 
-  $('#unit_list').on('click', 'a[name=noPaymentBtn]', (e) ->
+  $('#unit_table').on('click', 'a[name=noPaymentBtn]', (e) ->
     e.preventDefault()
     $btn = $(@)
     $.getJSON($btn.data('href'), (data) ->
@@ -71,10 +71,10 @@ $ ->
           timeout: 3000
         })
         if $btn.text() == '统计'
-          $btn.prop("class", "btn btn-small btn-danger")
+          $btn.prop("class", "btn btn-xs btn-danger")
           $btn.text('不统计')
         else
-          $btn.prop("class", "btn btn-small btn-success")
+          $btn.prop("class", "btn btn-xs btn-success")
           $btn.text('统计')
       else
         noty({
