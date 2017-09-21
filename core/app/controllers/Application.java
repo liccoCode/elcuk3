@@ -35,7 +35,8 @@ public class Application extends Controller {
         }
         DashBoard dashboard = Orderr.frontPageOrderTable(11);
         List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render("Application/index_v3.html", dashboard);
+        AnalyzePost p = new AnalyzePost();
+        render("Application/index_v3.html", dashboard, p);
     }
 
     public static void indexV3() {
