@@ -100,7 +100,8 @@ $(() => {
         },
         tooltip: {
           shared: true,
-          crosshairs: true
+          crosshairs: true,
+          xDateFormat: '%Y-%m-%d'
         },
         series: r['series']
       });
