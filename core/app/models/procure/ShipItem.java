@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
 @Entity
 @DynamicUpdate
 public class ShipItem extends GenericModel {
+    private static final long serialVersionUID = -8123332841271888513L;
+
     public ShipItem() {
     }
 
@@ -144,6 +146,12 @@ public class ShipItem extends GenericModel {
      * 体积占比
      */
     public Float volumeRatio;
+
+    /**
+     * 最终占比
+     * 体积重比
+     */
+    public Float finalRatio;
 
     /**
      * 采购成本 用于运输丢失率统计报表

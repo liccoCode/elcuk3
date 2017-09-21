@@ -149,7 +149,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public enum S {
         /**
          * 取消状态
-         * TODO effect: 需要删除
          */
         CANCEL {
             @Override
@@ -175,9 +174,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "锁定准备运输";
             }
         },
-        /**
-         * 运输中
-         */
         SHIPPING {
             @Override
             public String label() {
@@ -193,38 +189,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "清关中";
             }
         },
-
         BOOKED {
             @Override
             public String label() {
                 return "已预约";
             }
         },
-
         DELIVERYING {
             @Override
             public String label() {
                 return "派送中";
             }
         },
-
         RECEIPTD {
             @Override
             public String label() {
                 return "已签收";
             }
         },
-
         RECEIVING {
             @Override
             public String label() {
                 return "入库中";
             }
         },
-
-        /**
-         * 完成
-         */
         DONE {
             @Override
             public String label() {
@@ -739,17 +727,29 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.save();
     }
 
+    /**
+     * 1、快递、专线、空运、铁路体积重与重量取大值 cm/5000
+     * 2、海运取实际体积
+     * 公式：单个sku的占比=取种值*数量/综合重
+     * 注：综合重为所有sku的体积与重量对比取大值*数量的总和
+     */
     public void calculationRatio() {
         float totalShipWeight = this.totalWeight();
         float totalShipVolume = this.totalVolume();
+        float totalRealWeight = this.totalRealWeight();
         int num = this.items.size();
+        float totalWeightRatio = 0f;
+        float totalVolumeRatio = 0f;
+        float totalRealWeightRatio = 0f;
         for(int i = 0; i < num; i++) {
             ShipItem item = this.items.get(i);
-            float totalWeightRatio = 0f;
-            float totalVolumeRatio = 0f;
             if(i + 1 == num) {
-                item.weightRatio = 1 - totalWeightRatio;
-                item.volumeRatio = 1 - totalVolumeRatio;
+                item.weightRatio = BigDecimal.valueOf(1 - totalWeightRatio).setScale(
+                        4, BigDecimal.ROUND_HALF_UP).floatValue();
+                item.volumeRatio = BigDecimal.valueOf(1 - totalVolumeRatio).setScale(
+                        4, BigDecimal.ROUND_HALF_UP).floatValue();
+                item.finalRatio = BigDecimal.valueOf(1 - totalRealWeightRatio).setScale(
+                        4, BigDecimal.ROUND_HALF_UP).floatValue();
             } else {
                 float itemWeight = 0f;
                 Float weight = item.unit.product.weight;
@@ -763,8 +763,26 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 if(totalShipVolume > 0)
                     item.volumeRatio = BigDecimal.valueOf(itemVolume)
                             .divide(BigDecimal.valueOf(totalShipVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                if(totalRealWeight > 0) {
+                    if(Objects.equals(this.type, T.SEA)) {
+                        item.finalRatio = item.volumeRatio;
+                    } else {
+                        float currentWeight = 0f;
+                        Float volume = (item.unit.product.lengths == null ? 0 : item.unit.product.lengths)
+                                * (item.unit.product.width == null ? 0 : item.unit.product.width)
+                                * (item.unit.product.heigh == null ? 0 : item.unit.product.heigh);
+                        if(((volume / 1000) / 5000) > item.unit.product.weight) {
+                            currentWeight = (volume / 1000) * item.qty / 5000;
+                        } else {
+                            currentWeight = item.unit.product.weight * item.qty;
+                        }
+                        item.finalRatio = BigDecimal.valueOf(currentWeight).divide(BigDecimal.valueOf(totalRealWeight),
+                                4, BigDecimal.ROUND_HALF_UP).floatValue();
+                    }
+                }
                 totalWeightRatio += item.weightRatio;
                 totalVolumeRatio += item.volumeRatio;
+                totalRealWeightRatio += item.finalRatio;
             }
             item.save();
         }
@@ -1200,6 +1218,22 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Float weight = itm.unit.product.weight;
             if(weight != null) {
                 totalWeight += itm.qty * weight;
+            }
+        }
+        return totalWeight;
+    }
+
+    private float totalRealWeight() {
+        float totalWeight = 0f;
+        for(ShipItem itm : this.items) {
+            if(itm.unit == null) continue;
+            Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
+                    * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
+                    * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
+            if(((volume / 1000) / 5000) > itm.unit.product.weight) {
+                totalWeight += (volume / 1000) * itm.qty / 5000;
+            } else {
+                totalWeight += itm.unit.product.weight * itm.qty;
             }
         }
         return totalWeight;
