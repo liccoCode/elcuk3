@@ -64,7 +64,7 @@ $(() => {
 
   function getSales (fid) {
     let sid = fid;
-    $.post("/Analyzes/ajaxUnit", $("#search_Form").serialize(), function (r) {
+    $.post("/analyzes/ajaxUnit", $("#search_Form").serialize(), function (r) {
       Highcharts.chart("ajaxUnitDiv", {
         credits: {
           text: 'EasyAcc',

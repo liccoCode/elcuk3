@@ -43,8 +43,9 @@ public class Application extends Controller {
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
+        AnalyzePost p = new AnalyzePost();
         DashBoard dashboard = Orderr.frontPageOrderTable(11);
-        render("Application/index_v3.html", dashboard);
+        render("Application/index_v3.html", dashboard, p);
     }
 
 
