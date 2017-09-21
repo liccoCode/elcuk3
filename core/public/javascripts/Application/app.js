@@ -58,12 +58,13 @@ $(() => {
   }
 
   $(document).on("click", "a[name='sku_href']", function (r) {
+    $("#sellingId").val($(this).data("fid"));
     getSales($(this).data("fid"));
   });
 
   function getSales (fid) {
     let sid = fid;
-    $.post("/Application/ajaxUnit", {sid: sid}, function (r) {
+    $.post("/Analyzes/ajaxUnit", $("#search_Form").serialize(), function (r) {
       Highcharts.chart("ajaxUnitDiv", {
         credits: {
           text: 'EasyAcc',

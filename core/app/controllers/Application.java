@@ -64,23 +64,6 @@ public class Application extends Controller {
         render(dtos, market);
     }
 
-    public static void ajaxUnit(String sid) {
-        Selling selling = Selling.findById(sid);
-        AnalyzePost p = new AnalyzePost();
-        p.val = selling.merchantSKU;
-        p.market = selling.market.toString();
-        p.type = "sid";
-        HighChart chart = await(new Job<HighChart>() {
-            @Override
-            public HighChart doJobWithResult() throws Exception {
-                return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-            }
-        }.now());
-        String countryName = selling.market.countryName();
-        chart.series.forEach(se -> se.visible = se.name.contains(countryName));
-        renderJSON(J.json(chart));
-    }
-
     public static void oldDashBoard() {
         index();
     }
