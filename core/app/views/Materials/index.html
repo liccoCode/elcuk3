@@ -67,10 +67,10 @@
             <td>${m.name}</td>
             <td>${m.type.label()}</td>
             <td>${m.boms[0]?.number}</td>
-            <td>${m.specification}</td>
+            <td title="${m.specification}" rel="tooltip">${m.specification.xxLong()}</td>
             <td title="${m.texture}" rel="tooltip">${m.texture.xxLong()}</td>
             <td title="${m.technology}" rel="tooltip">${m.technology.overLong()}</td>
-            <td>${m.version}</td>
+            <td title="${m.version}" rel="tooltip">${m.version.overLong()}</td>
             <td>${m.nowPurchasePlanPrice()}</td>
             <td>
               <a href="@{Materials.edit(m.id)}" class="btn btn-mini btn-primary">编辑</a>
