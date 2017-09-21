@@ -30,6 +30,29 @@ public class OutboundPost extends Post<Outbound> {
     public String search;
     public String flag = "Normal";
     public String whichPage;
+    public DateType dateType;
+
+    public enum DateType {
+        /**
+         * 创建时间
+         */
+        CREATE {
+            @Override
+            public String label() {
+                return "创建时间";
+            }
+        },
+        /**
+         * 出库时间
+         */
+        OUTBOUND {
+            @Override
+            public String label() {
+                return "出库时间";
+            }
+        };
+        public abstract String label();
+    }
 
     public OutboundPost() {
         DateTime now = DateTime.now(Dates.timeZone(null));
@@ -60,9 +83,17 @@ public class OutboundPost extends Post<Outbound> {
         else
             sbd.append(" LEFT JOIN o.records u WHERE 1=1");
         List<Object> params = new ArrayList<>();
-        sbd.append(" AND o.createDate >= ? AND o.createDate <= ? ");
-        params.add(Dates.morning(this.from));
-        params.add(Dates.night(this.to));
+
+        /* 时间参数 **/
+        if(this.dateType != null) {
+            if(this.dateType == OutboundPost.DateType.OUTBOUND) {
+                sbd.append(" AND o.outboundDate >= ? AND o.outboundDate <= ? ");
+            } else {
+                sbd.append(" AND o.createDate >= ? AND o.createDate <= ? ");
+            }
+            params.add(Dates.morning(this.from));
+            params.add(Dates.night(this.to));
+        }
 
         if(StringUtils.isNotEmpty(this.search)) {
             if(StringUtils.isNotEmpty(isSearchForId())) {

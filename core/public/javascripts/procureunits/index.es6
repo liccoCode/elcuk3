@@ -4,9 +4,8 @@
 $(() => {
 
   $('#today').click(function (e) {
-    e.preventDefault();
-    $("input[name='p.from']").setDate(new Date());
-    $("input[name='p.to']").setDate(new Date());
+    $("input[name='p.from']").datepicker("setDate", new Date());
+    $("input[name='p.to']").datepicker("setDate", new Date());
   });
 
   $('#createInboundBtn,#createOutboundBtn,#createRefundBtn').click(function (e) {
@@ -45,6 +44,7 @@ $(() => {
     let i = 0;
     let j = 0;
     let k = 0;
+    let l = "";
     $("input[name='pids']:checked").each(function () {
       if ($(this).attr("project") != firstProjectName) {
         i++;
@@ -58,7 +58,18 @@ $(() => {
       if ($(this).attr("shipType") != firstShipType) {
         k++;
       }
+      if ($(this).attr("unqualifiedQty") > 0) {
+        l+=$(this).val()+",";
+      }
     });
+    if (l.length > 0  && $btn.attr("id") == 'createInboundBtn') {
+      noty({
+        text: '【'+l.substring(0,l.length-1)+'】存在不良品数未处理，请处理！',
+        type: 'error'
+      });
+      return false;
+    }
+    
     if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
       noty({
         text: '请选择【供应商】一致的采购计划！',

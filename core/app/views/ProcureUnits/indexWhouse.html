@@ -27,9 +27,7 @@
       <div class="box-header with-border">
         <form action="@{ProcureUnits.indexWhouse()}" method="get" class="form-inline" id="search_Form">
           <div class="row-fluid">
-            <div class="form-group">
-              <button id="today" class="btn"><i class="icon-search"></i> Today</button>
-            </div>
+            <button class="btn btn-primary" id="today"><i class="icon-search"></i> Today</button>
 
             <div class="form-group">
               <button class="btn btn-warning" name="splitBtn" data-loading>库存分拆</button>
@@ -177,7 +175,7 @@
               <td>
                 <input type="checkbox" name="pids" cooperName="${unit.cooperator?.name}" project="${unit.projectName}"
                        value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
-                       shipType="${unit.shipType?.name()}" data-boxnum="${unit.boxNum()}">
+                       shipType="${unit.shipType?.name()}" unqualifiedQty="${unit.unqualifiedQty}" data-boxnum="${unit.boxNum()}">
               </td>
               <td rel="tooltip" title="${unit.comment}">
                   #{if unit.parent}

@@ -51,19 +51,16 @@
         <td>${unit.planQty}</td>
         <td>
           <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.attrs.planQty}"
-                 style="width:58px;
-                     #{if unit.planQty>0 && unit.qty/unit.planQty<0.9 && unit.handType?.name()=='Delivery'}
-                         background-color:yellow;
-                     #{/if}" value="${unit.qty}" data-origin="${unit.qty}" class="form-control"
+                 style="width:58px; padding:10px;
+                 #{if unit.qty>0 && unit.qty != unit.planQty} background-color:red; #{/if}"
+                 value="${unit.qty}" data-origin="${unit.qty}" class="form-control"
               #{if !Arrays.asList('Create','Receive').contains(unit.status.name())}
                  readonly
               #{/if}/>
         </td>
         <td>
           <select name="handType" style="width:75px; ${unit.qty==unit.planQty?'display:none;':''}" class="form-control"
-              #{if unit.status.name() != "Create"}
-                  disabled
-              #{/if}>
+            #{if !Arrays.asList('Create','Receive').contains(unit.status.name())} disabled #{/if}>
               #{list items:models.whouse.InboundUnit.H, as:'h'}
                 <option ${h.name() == unit.handType?.name() ? 'selected' : ''}  value="${h.name()}">${h.label()}</option>
               #{/list}
