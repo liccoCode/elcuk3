@@ -1298,7 +1298,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "运输单没有添加进入请款单, 不需要剥离");
         for(PaymentUnit fee : this.fees) {
             if(Arrays.asList(PaymentUnit.S.PAID, PaymentUnit.S.APPROVAL).contains(fee.state)) {
-                Validation.addError("", "运输但中已经有运输请款项目被批准或付款, 无法剥离");
+                Validation.addError("", "运输单中已经有运输请款项目被批准或付款, 无法剥离");
+                break;
+            }
+            if(fee.payment != null) {
+                Validation.addError("", "运输单中已经有产生支付单, 无法剥离");
                 break;
             }
         }
