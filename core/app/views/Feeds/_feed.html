@@ -3,29 +3,34 @@
   <p class="muted text-center">等待创建新的 Feed.</p>
 #{/if}
 #{else }
-  <table class="table table-condensed table-bordered">
-    <tr>
-      <th>Id</th>
-      <th>FeedId</th>
-      <th>Fid</th>
-      <th>Memo</th>
-      <th>CreateAt</th>
-      <th>UpdateAt</th>
-      <th>analyzeResult</th>
-    </tr>
-      #{list items:feeds, as:'feed'}
+  <div class="box">
+    <div class="box-header"></div>
+    <div class="box-body">
+      <table class="table table-condensed table-bordered">
         <tr>
-          <td>
-            <a href='javascript:window.open("/feed/${feed.id}/show", "newwindow", "height=750, width=1000, top=0, left=0, toolbar=no, menubar=no");'>${feed.id}</a>
-          </td>
-          <td>${feed.feedId}</td>
-          <td>${feed.fid}</td>
-          <td>${feed.memo}</td>
-          <td>${feed.createdAt}</td>
-          <td>${feed.updatedAt}</td>
-          <td>${feed.analyzeResult}</td>
+          <th>Id</th>
+          <th>FeedId</th>
+          <th>Fid</th>
+          <th>Memo</th>
+          <th>CreateAt</th>
+          <th>UpdateAt</th>
+          <th>analyzeResult</th>
         </tr>
-      #{/list}
-  </table>
+          #{list items:feeds, as:'feed'}
+            <tr>
+              <td>
+                <a href='javascript:window.open("/feed/${feed.id}/show", "newwindow", "height=750, width=1000, top=0, left=0, toolbar=no, menubar=no");'>${feed.id}</a>
+              </td>
+              <td>${feed.feedId}</td>
+              <td>${feed.fid}</td>
+              <td>${feed.memo}</td>
+              <td>${feed.createdAt}</td>
+              <td>${feed.updatedAt}</td>
+              <td>${feed.analyzeResult}</td>
+            </tr>
+          #{/list}
+      </table>
+    </div>
+  </div>
 #{/else}
 </div>

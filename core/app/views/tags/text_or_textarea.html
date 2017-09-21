@@ -1,6 +1,6 @@
 #{if _flag == models.product.Attribute.T.STRING}
-<textarea rows="3" class="span10" name="${_name}">${_value}</textarea>
+<textarea rows="3" class="${_class ? _class : 'span10'}" name="${_name}">${_value}</textarea>
 #{/if}
 #{else }
-<input type="text" class="span10" name="${_name}" value="${_value}">
+<input type="text" class="${_class ? _class : 'span10'}" name="${_name}" value="${_value}">
 #{/else}

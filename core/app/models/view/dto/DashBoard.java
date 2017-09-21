@@ -1,6 +1,13 @@
 package models.view.dto;
 
+import helper.Caches;
+import helper.Dates;
+import models.market.M;
+import models.view.highchart.HighChart;
+import models.view.highchart.Series;
 import org.joda.time.DateTime;
+import play.cache.Cache;
+import query.OrderItemESQuery;
 import query.vo.OrderrVO;
 
 import java.io.Serializable;
@@ -14,6 +21,7 @@ import java.util.*;
  */
 public class DashBoard implements Serializable {
 
+    private static final long serialVersionUID = -2341111922189827360L;
     public Map<String, OrderInfo> infos = new LinkedHashMap<>();
     public Map<String, OrderInfo> accsInfos = new HashMap<>();
 
@@ -144,6 +152,26 @@ public class DashBoard implements Serializable {
         return this;
     }
 
+    public static HighChart todayOrderNum(String val, String type, Date from, Date to) {
+        String cache_key = Caches.Q.cacheKey("unit", val, type, from, to);
+        Cache.delete(cache_key);
+        HighChart pieByToday = Cache.get(cache_key, HighChart.class);
+        if(pieByToday != null) return pieByToday;
+        Series.Pie pie = new Series.Pie("as");
+        Double result;
+        from = Dates.morning(from);
+        to = Dates.night(to);
+        for(M m : M.values()) {
+            result = OrderItemESQuery.quantityByDate(val, type, m, from, to);
+            if(result > 0) pie.add(result.floatValue(), m.name());
+        }
+        pieByToday = new HighChart(Series.PIE);
+        pieByToday.title = Dates.date2Date(from) + " orders num";
+        pieByToday.series(pie);
+        Cache.delete(cache_key);
+        Cache.add(cache_key, pieByToday, "2h");
+        return pieByToday;
+    }
 
     /**
      * 订单的状态数据

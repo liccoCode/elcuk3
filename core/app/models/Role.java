@@ -27,6 +27,7 @@ public class Role extends GenericModel {
      * 将用户的Role缓存起来, 不用每次判断都去 db 取(注:更新Team的时候也需要更新缓存)
      */
     private static final Map<String, Set<Role>> ROLE_CACHE = new ConcurrentHashMap<>();
+    private static final long serialVersionUID = 5611447935472020707L;
 
     /**
      * ROLE所拥有的USER
@@ -88,8 +89,8 @@ public class Role extends GenericModel {
     public static Set<Role> roles(String username) {
         Set<Role> roles = ROLE_CACHE.get(username);
         if(roles == null) {
-            ROLE_CACHE.put(username, /*这里拿一个 Privileges 的备份*/
-                    new HashSet<>(User.findByUserName(username).roles));
+            /*这里拿一个 Privileges 的备份*/
+            ROLE_CACHE.put(username, new HashSet<>(User.findByUserName(username).roles));
             roles = ROLE_CACHE.get(username);
         }
         return roles;

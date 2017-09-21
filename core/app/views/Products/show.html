@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
@@ -11,119 +11,120 @@
     #{script 'localResize.ui.coffee'/}
     #{script 'mobileBUGFix.mini.js'/}
 #{/set}
+
 #{errorMsgs /}
 #{flash_alert /}
 
-#{warning_row ''}
-<ol>
-  <li>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</li>
-  <li>如果附件管理不能正常显示，请联系开发部</li>
-</ol>
-#{/warning_row}
+<section class="content-max-width">
+  <div class="callout callout-warning">
+    <p>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</p>
+    <p>如果附件管理不能正常显示，请联系开发部</p>
+  </div>
+</section>
 
 #{if pro == null}
 读取的 Product 不存在!
 #{/if}
 #{else }
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#basicinfo" data-toggle='tab'>基本信息</a>
-  </li>
-  <li>
-    <a href="#extends" data-toggle='tab'>物流信息</a>
-  </li>
-  <li>
-    <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
-  </li>
-  <li>
-    <a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a>
-  </li>
-  <li>
-    <a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a>
-  </li>
-    #{power.ck "products.whouseattrs"}
-      <li>
-        <a href="#whouseAttrs" data-toggle="tab" id="showWhouseAttr">仓库信息</a>
-      </li>
-    #{/power.ck}
-  <li>
-    <a href="#material_tab" data-toggle='tab'>物料信息</a>
-  </li>
-</ul>
 
-<div id="selling_tabs" class="tab-content">
-  <div class="tab-pane fade active in" id='basicinfo'>
-      #{include 'Products/_basicInfo.html'/}
-  </div>
-  <div class="tab-pane fade" id='extends'>
-    <div class="row-fluid">
-      <form class="search_form" id="select_template_form">
-        <select name="templateId" class="inline">
-          <option value="">请选择模板</option>
-            #{list items:templates, as:'template'}
-              <option value="${template.id}">${template.name}</option>
-            #{/list}
-        </select>
-        <input type="hidden" name="sku" value="${pro.sku}">
-        <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
-      </form>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#basicinfo" data-toggle='tab'>基本信息</a></li>
+        <!-- <li><a href="#extends" data-toggle='tab'>物流信息</a></li> -->
+        <li><a href="#newattach" data-toggle='tab'>附件管理</a></li>
+        <li><a href="#saleinfo" data-toggle='tab' id="skuSaleInfo">销售信息</a></li>
+        <li><a href="#procureinfo" data-toggle='tab' id="skuProcureInfo">采购信息</a></li>
+          #{power.ck "products.whouseattrs"}
+            <li><a href="#whouseAttrs" data-toggle="tab" id="showWhouseAttr">仓库信息</a></li>
+          #{/power.ck}
+        <li><a href="#material_tab" data-toggle='tab'>物料信息</a></li>
+      </ul>
 
-        #{info_row title:'Attributes'/}
-      <div id="extends_atts_home">
-          #{include 'Products/_attrs.html'/}
+      <div class="tab-content">
+        <div class="tab-pane active" id='basicinfo'>
+            #{include 'Products/_basicInfo.html'/}
+        </div>
+
+        <div class="tab-pane" id="extends">
+          <div class="row-fluid">
+            <div class="box box-warning">
+              <div class="box-header">
+                <h4>Attributes</h4>
+                <form class="form-inline" id="select_template_form">
+                  <select name="templateId" class="form-control">
+                    <option value="">请选择模板</option>
+                      #{list items:templates, as:'template'}
+                        <option value="${template.id}">${template.name}</option>
+                      #{/list}
+                  </select>
+                  <input type="hidden" name="sku" value="${pro.sku}">
+                  <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+                </form>
+              </div>
+              <div class="box-body">
+                <div id="extends_atts_home">
+                    #{include 'Products/_attrs.html'/}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="newattach">
+          <div class="row-fluid">
+            <iframe frameBorder=0 scrolling=no src='https://kod.easya.cc/index.php?explorer/index&path=SKU/${pro.sku}'
+                    width="100%" height="1000px"></iframe>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="saleinfo">
+          <input type="hidden" name="skuvalue" value="0">
+            #{info_row title:'销售额和销量'/}
+          <div class="row-fluid">
+            <div class="span6" style="height:450px;" id='skusalefee'></div>
+            <div class="span6" style="height:450px;" id='skusaleqty'></div>
+          </div>
+            #{info_row title:'利润'/}
+          <div class="row-fluid">
+            <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="procureinfo">
+          <input type="hidden" name="skuprocurevalue" value="0">
+          <div class="row-fluid">
+            <table class="table table-bordered">
+              <tr>
+                <td class="span2">总采购数量</td>
+                <td>${procureqty}</td>
+              </tr>
+            </table>
+          </div>
+            #{info_row title:'采购价格'/}
+          <div class="row-fluid">
+            <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
+          </div>
+            #{info_row title:'采购数量'/}
+          <div class="row-fluid">
+            <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
+          </div>
+        </div>
+
+          #{power.ck "products.whouseattrs"}
+            <div class="tab-pane" id="whouseAttrs">
+                #{include 'Products/_whouseAttrsForm.html'/}
+            </div>
+          #{/power.ck}
+
+        <div class="tab-pane" id="material_tab">
+            #{include 'Products/_material.html'/}
+        </div>
+
       </div>
     </div>
   </div>
-
-  <div class="tab-pane fade" id='attach'>
-      #{include 'Products/_attach.html'/}
-  </div>
-
-  <div class="tab-pane fade" id='newattach'>
-      #{include 'Products/_newattach.html'/}
-  </div>
-
-  <div class="tab-pane fade" id='saleinfo'>
-    <input type="hidden" name="skuvalue" value="0">
-      #{info_row title:'销售额和销量'/}
-    <div class="row-fluid">
-      <div class="span6" style="height:450px;" id='skusalefee'></div>
-      <div class="span6" style="height:450px;" id='skusaleqty'></div>
-    </div>
-      #{info_row title:'利润'/}
-    <div class="row-fluid">
-      <div class="span6" style="height:450px;width:1200px" id='skuprofit'></div>
-    </div>
-  </div>
-
-  <div class="tab-pane fade" id='procureinfo'>
-    <input type="hidden" name="skuprocurevalue" value="0">
-    <div class="row-fluid">
-      <table class="table table-bordered">
-        <tr>
-          <td class="span2">总采购数量</td>
-          <td>${procureqty}</td>
-        </tr>
-      </table>
-    </div>
-      #{info_row title:'采购价格'/}
-    <div class="row-fluid">
-      <div class="span6" style="height:450px;width:1200px" id='skuprocureprice'></div>
-    </div>
-      #{info_row title:'采购数量'/}
-    <div class="row-fluid">
-      <div class="span6" style="height:450px;width:1200px" id='skuprocureqty'></div>
-    </div>
-  </div>
-    #{power.ck "products.whouseattrs"}
-      <div class="tab-pane fade" id='whouseAttrs'>
-          #{include 'Products/_whouseAttrsForm.html'/}
-      </div>
-    #{/power.ck}
-
-  <div class="tab-pane fade" id="material_tab">
-      #{include 'Products/_material.html'/}
-  </div>
-
 </div>
 #{/else}
+

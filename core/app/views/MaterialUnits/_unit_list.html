@@ -6,22 +6,22 @@
     </th>
   #{/if}
     <th width="40px;">#</th>
-    <th width="40px;">阶段</th>
+    <th width="60px;">阶段</th>
     <th width="200px;">物料编码</th>
     <th width="250px;">物料名称</th>
     <th>工厂物料代码</th>
-    <th width="80px;">物料采购单</th>
+    <th width="95px;">物料采购单</th>
     <th width="80px;">供应商</th>
     <th width="70px;">采购数</th>
     <th width="80px;">单价</th>
-    <th width="80px;">总价</th>
+    <th width="100px;">总价</th>
     <th width="70px;">采购余量</th>
   #{if materialUnitsIndex}
-    <th>Action</th>
+    <th width="30px;">Action</th>
   #{/if}
     <th width="70px;">项目名称</th>
     <th width="60px;">创建人</th>
-    <th width="80px;">创建时间</th>
+    <th width="90px;">创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
@@ -44,34 +44,17 @@
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
     <td>
-      <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${unit.material?.surplusConfirmQty()}</a>
+      <a href="javascript:void(0)" data-toggle="tooltip" data-placement="right" title="出货可用数">${unit.material?.surplusConfirmQty()}</a>
     </td>
 
       #{if materialUnitsIndex}
         <td>
-          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-small btn-primary" uid="${unit.id}">修改</a>
+          <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-primary" uid="${unit.id}">修改</a>
         </td>
       #{/if}
     <td>${unit.projectName}</td>
     <td>${unit.handler?.username}</td>
-    <td>#{time_tooltip time:unit.createDate/}</td>
+    <td>#{time_tooltip_v3 time:unit.createDate/}</td>
   </tr>
-
-
 #{/list}
-#{if p != null}
-  <tr class="tb_footer">
-    <td colspan="25">
-        #{bootstrap_pager pi:p, url:'' /}
-    </td>
-  </tr>
-#{/if}
 </table>
-
-<!-- Ship To Modal -->
-<div id="fba_ship_to_modal" class="modal hide fade">
-  <div class="modal-body" id="fba_ship_to_body"></div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
-  </div>
-</div>

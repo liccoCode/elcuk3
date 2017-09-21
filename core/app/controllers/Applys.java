@@ -33,7 +33,7 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Applys extends Controller {
 
-    @Before(only = {"procures", "transports", "materials"})
+    @Before(only = {"procures", "materials"})
     public static void beforIndex() {
         List<Cooperator> suppliers = Cooperator.suppliers();
         renderArgs.put("suppliers", suppliers);
@@ -54,9 +54,9 @@ public class Applys extends Controller {
         if(p == null) p = new TransportApplyPost();
         List<User> users = User.findAll();
         List<TransportApply> applyes = p.query();
-        render(applyes, p, users);
+        List<Cooperator> suppliers = Cooperator.suppliersForShipment();
+        render(applyes, p, users, suppliers);
     }
-
 
     /**
      * 采购请款单

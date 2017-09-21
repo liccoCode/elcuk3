@@ -4,11 +4,11 @@
 #{else }
 <table class="table table-condensed table-bordered">
   <tr>
-    <th width="60px;"></th>
-    <th style="min-width:120px;">SKU</th>
+    <th style="width:40px;"></th>
+    <th style="width:150px;">SKU</th>
     <th style="width:100px;">Family</th>
-    <th>Name</th>
-    <th style="width:90px;">最近采购价格</th>
+    <th style="width:350px;">Name</th>
+    <th style="width:100px;">最近采购价格</th>
     <th style="width:120px;">最近采购供应商</th>
     <th style="width:70px;">产品状态</th>
     <th style="width:70px;">销售级别</th>
@@ -18,14 +18,14 @@
   </tr>
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
-        <td height="60px;">
+        <td>
           <a href="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg" target="_blank">
-            <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg">
+            <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg" style="width:40px;height:40px;">
           </a>
         </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
         <td>${prod.family?.family}</td>
-        <td class="span10">${prod.productName}
+        <td>${prod.productName}
             #{if prod.origin_sku}<br>
               <span style="color:red">同${prod.origin_project?.name()} sku:
             <a href="${prod.origin_project?.url()}product/${prod.origin_sku}" target="_blank">${prod.origin_sku}</a>
@@ -36,7 +36,7 @@
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
         <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
         <td>
-          <select name='pro.state' class="span1" style="width:90px;" size="1">
+          <select name='pro.state' style="width:90px;" class="form-control" data-sku="${prod.sku}">
             <option>请选择</option>
               #{list items: models.product.Product.S.values(), as: 's'}
                 <option value="${s}" ${prod.state == s? 'selected' : ''}>${s}</option>
@@ -44,7 +44,7 @@
           </select>
         </td>
         <td>
-          <select name='pro.salesLevel' class="span1" style="width:80px;" size="1">
+          <select name='pro.salesLevel' style="width:80px;" class="form-control" data-sku="${prod.sku}">
             <option>请选择</option>
               #{list items: models.product.Product.E.values(), as: 's'}
                 <option value="${s}" ${prod.salesLevel == s? 'selected' : ''}>${s}</option>
@@ -54,115 +54,24 @@
         <td>#{time_tooltip time:prod.marketTime/}</td>
         <td>#{time_tooltip time:prod.delistingTime/}</td>
         <td>
-          <a href="javascript:void(0);" id="copyBtn" class="btn btn-mini btn-success" rel="tooltip" title="同步"
+          <a href="javascript:void(0);" id="copyBtn" class="btn btn-xs btn-success" rel="tooltip" title="同步"
              data-sku="${prod.sku}">
             <i class="icon-refresh"></i>
           </a>
-          <a href="javascript:void(0);" id="backupBtn" class="btn btn-mini btn-info" rel="tooltip" title="复制"
+          <a href="javascript:void(0);" id="backupBtn" class="btn btn-xs btn-info" rel="tooltip" title="复制"
              data-sku="${prod.sku}" data-family="${prod.family?.family}">
             <i class="icon-copy"></i>
           </a>
             #{power.ck "products.destroy"}
-              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-mini btn-danger" rel="tooltip" title="删除">
-                <i class="icon-trash"></i>
-              </a>
+              <a href="javascript:void(0);" id="deleteBtn" class="btn btn-xs btn-danger" rel="tooltip" title="删除"
+                 data-sku="${prod.sku}"><i class="icon-trash"></i></a>
             #{/power.ck}
-          <a href="" class="btn btn-mini btn-warning" rel="tooltip" title="物料配置">
+          <a href="" class="btn btn-xs btn-warning" rel="tooltip" title="物料配置">
             <i class="icon-th-list"></i>
           </a>
         </td>
       </tr>
     #{/list}
-    #{if pi}
-      <tr>
-        <td colspan="11">
-            #{bootstrap_pager pi:pi, url:'/products/index'/}
-        </td>
-      </tr>
-    #{/if}
 </table>
 #{/else}
 
-<div id="copy_modal" class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>同步SKU</h3>
-  </div>
-  <div class="modal-body">
-  #{form @Products.copy(), id:'update_form'}
-    <dl class="dl-horizontal">
-      <input type="hidden" id="target_choseid" name="choseid" value="3333"/>
-      <dt>选择SKU</dt>
-      <dd>
-        <input type="text" autocomplete="off" data-provide="typeahead" data-items="5" data-source="${products}"
-               name="skuid" value="" style="width:172px;" placeHolder="搜索 SKU">
-      </dd>
-
-      <dt>选择同步的信息:</dt>
-      <dd>
-        <label class="checkbox">
-          <input type="checkbox" name="base" value="1" checked>
-          <a>基本属性</a>
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="extend" value="1" checked>
-          <a>扩展属性</a>
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="attach" value="1" checked>
-          <a>附件</a>
-        </label>
-      </dd>
-    </dl>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-      <button class="btn btn-primary">同步</button>
-    </div>
-  #{/form}
-  </div>
-</div>
-
-<div id="backup_modal" class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>复制SKU</h3>
-  </div>
-  <div class="modal-body">
-  #{form @Products.backup(), id:'update_form'}
-    <input type="hidden" id="backup_choseid" name="choseid" value="0">
-
-    <tr>
-      <th>Family</th>
-      <td>
-        <input style="width:150px" id="back_families" type="text" name="family" data-provide="typeahead"
-               data-source="${families}" value="" autocomplete="off">
-      </td>
-      <th>SKU</th>
-      <td><input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off"></td>
-    </tr>
-    <dl class="dl-horizontal">
-      <dt>选择复制的信息:</dt>
-      <dd>
-        <label class="checkbox">
-          <input disabled type="checkbox" name="base" value="1" checked>
-          <a>基本属性</a>
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="extend" value="1" checked>
-          <a>扩展属性</a>
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="attach" value="1" checked>
-          <a>附件</a>
-        </label>
-      </dd>
-    </dl>
-
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-      <button class="btn btn-primary">复制</button>
-    </div>
-  #{/form}
-  </div>
-</div>
-#{include 'Products/_destroyLogForm.html'/}

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by IntelliJ IDEA.
@@ -179,7 +180,9 @@ public class AnalyzeDTO implements Serializable {
      * 退货率
      */
     public float returnRates = 0;
-    
+
+    public static String[] indexColor = {"progress-bar-aqua","progress-bar-red","progress-bar-green", "progress-bar-yellow"};
+
     //BEGIN GENERATED CODE
     public float getPs_cal() {
         if(this.ps_cal <= 0) {
@@ -214,9 +217,9 @@ public class AnalyzeDTO implements Serializable {
      * - onwork
      *
      * @return ._1: 根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     *         ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
-     *         ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
-     *         ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     * ._2: 根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天<br/>
+     * ._3: 根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
+     * ._4: 根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天<br/>
      */
     public F.T4<Float, Float, Float, Float> getTurnOverT4() {
         float _ps = this.getPs_cal();
@@ -247,7 +250,7 @@ public class AnalyzeDTO implements Serializable {
      * 比较此 Selling 中自行设计的 ps 与计算出来的 _ps 之间的差值
      *
      * @return .1: 差据的大小
-     *         .2: 前台使用的颜色代码
+     * .2: 前台使用的颜色代码
      */
     public F.T2<Float, String> getPsDiffer() {
         float _ps = this.getPs_cal();
@@ -308,5 +311,18 @@ public class AnalyzeDTO implements Serializable {
 
     public float day() {
         return new BigDecimal(this.day30 / 30).setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
+    }
+
+
+    public boolean containsCategory(List<String> categories) {
+        return categories.stream().anyMatch(category -> {
+            int length = category.length();
+            String temp = this.fid.substring(0, length - 1);
+            return AnalyzeDTO.containsTemp(category, temp);
+        });
+    }
+
+    private static boolean containsTemp(String category, String temp) {
+        return Objects.equals(category, temp);
     }
 }

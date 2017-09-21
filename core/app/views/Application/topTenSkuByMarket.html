@@ -1,0 +1,17 @@
+<p class="text-center">
+  <strong>${market} Top Five</strong>
+</p>
+
+#{list items:dtos, as:'a'}
+<div class="progress-group">
+  <span class="progress-text">
+    <a href="javascript:void(0);" name="sku_href" data-fid="${a.fid}" style="cursor:pointer;">${a.fid}</a>
+  </span>
+  <span class="progress-number"><b>${a.day1}</b>/${a.day7}</span>
+
+  <div class="progress sm">
+    <div class="progress-bar ${models.view.dto.AnalyzeDTO.indexColor[a_index%4]}"
+         style="width: ${a.day1*100/(a.day7==0?1:a.day7)}%"></div>
+  </div>
+</div>
+#{/list}

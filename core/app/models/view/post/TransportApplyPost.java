@@ -81,7 +81,7 @@ public class TransportApplyPost extends Post<TransportApply> {
             params.add(Dates.night(this.to));
         }
 
-        if(this.userId != null) {
+        if(this.cooperId != null) {
             sql.append(" AND cooperator.id = ? ");
             params.add(this.cooperId);
         }

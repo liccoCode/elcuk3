@@ -1,88 +1,111 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:s.sellingId/}
-#{set 'moreStyles'}
-    #{stylesheet 'market.css'/}
-#{/set}
 #{set 'moreScripts'}
     #{script 'editor/kindeditor-min.js'/}
     #{script 'editor/lang/zh_CN.js'/}
     #{script 'component/amazon.coffee'/}
     #{script 'sellings/selling.coffee'/}
 #{/set}
-#{set 'moreStyles'}
-    #{stylesheet 'market.css'/}
-#{/set}
-#{if s.market.isAmazon()}
-    #{flash_alert /}
-    #{info_row title:'Selling详情' /}
+
+#{errorMsgs /}
+#{flash_alert /}
+
 <div class="row">
-  <div class="span6">
-    <strong><i class=" icon-volume-up"></i>&nbsp;&nbsp;温馨提示: &nbsp;Deploy 操作前请先进行 Sync 操作将 Amazon的数据同步到系统内.</strong>
-  </div>
-  <!--<a href="@{Listings.listing(s.listing.listingId)}">Listing : ${s.listing.listingId}</a>-->
-  <div class="6" style="text-align:right;">
-    SKU:<a href="@{Products.show()}/${s.merchantSKU.split(",")[0]}" style="text-decoration:underline;">${s.merchantSKU.split(",")[0]}</a>&nbsp;
-    &nbsp;&nbsp;
-    ASIN:<a href="${s.showListingLink()}" target="_blank" style="text-decoration:underline;">${s.asin}</a>&nbsp;&nbsp;&nbsp;
-  </div>
-</div>
-<br>
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#amazon" data-toggle='tab'>Amazon</a>
-  </li>
-  <li>
-    <a href="#attach" data-toggle='tab'>附件</a>
-  </li>
-  <li>
-    <a href="#selling" data-toggle='tab' id="showFeeds">Selling</a>
-  </li>
-  <li>
-    <a href="#feed" data-toggle='tab' id="showFeedsButton">Feed</a>
-  </li>
-</ul>
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header">
+        <div class="col-md-6">
+          <strong>
+            <i class=" icon-volume-up"></i>&nbsp;&nbsp;温馨提示: &nbsp;Deploy 操作前请先进行 Sync 操作将Amazon的数据同步到系统内.
+          </strong>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+          SKU:<a href="@{Products.show()}/${s.merchantSKU.split(",")[0]}" style="text-decoration:underline;">${s.merchantSKU.split(",")[0]}</a>&nbsp;
+          &nbsp;&nbsp;
+          ASIN:<a href="${s.showListingLink()}" target="_blank" style="text-decoration:underline;">${s.asin}</a>&nbsp;&nbsp;&nbsp;
+        </div>
+      </div>
 
-<div id="selling_tabs" class="tab-content">
-  <div class="tab-pane fade active in" id='amazon'>
-      #{include 'Sellings/_amazon.html'/}
-  </div>
+      <div class="box-body">
+        <div class="nav-tabs-custom">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#amazon" data-toggle='tab'>Amazon</a></li>
+            <li><a href="#picture" data-toggle='tab'>Picture</a></li>
+            <li><a href="#attach" data-toggle='tab'>Attach</a></li>
+            <li><a href="#selling" data-toggle='tab' id="showFeeds">Selling</a></li>
+            <li><a href="#feed" data-toggle='tab' id="showFeedsButton">Feed</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane fade active in" id='amazon'>
+            #{include 'Sellings/_amazon.html'/}
+            </div>
 
-  <div class="tab-pane fade" id='attach'>
-      #{include 'Sellings/_attach.html'/}
-  </div>
+            <div class="tab-pane fade" id='picture'>
+            #{include 'Sellings/_picture.html'/}
+            </div>
 
-  <div class="tab-pane fade" id='selling'>
-    <div class="row-fluid">
-      <div class="offset2 span8">
-        <h4>在这里对 Selling 的 Listing 进行修正(只允许同 SKU)</h4>
-          #{form @Sellings.changeListing(), id: 'changeListing', class: 'form'}
-              #{text_field id: 'sellingId_read', readonly: true, name: 's.sellingId', label: 'SellingId', value: s.sellingId /}
-              #{text_field id:'listing', name: 'listingId', label: 'Listing', value: s.listing?.listingId /}
-            <button type="submit" class="btn">更换</button>
-          #{/form}
+            <div class="tab-pane fade" id='attach'>
+            #{include 'Sellings/_attach.html'/}
+            </div>
 
-        <h4>设置参数</h4>
+            <div class="tab-pane fade" id='selling'>
+              <div class="row">
+                <div class="box">
+                  <div class="box-header"><h3 class="box-title">在这里对 Selling 的 Listing 进行修正(只允许同 SKU)</h3></div>
+                  <div class="box-body">
+                    <form class="form-horizontal" action="@{Sellings.changeListing()}" id="changeListing">
+                      <div class="form-group">
+                        <div class="col-sm-6 col-sm-offset-2">
+                          <label for="sellingId_read" class="col-sm-1 control-label">SellingId</label>
+                          <div class="col-sm-11">
+                            <input class="form-control" id="sellingId_read" name="s.sellingId" value="${s.sellingId}" readonly>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-sm-6 col-sm-offset-2">
+                          <label for="listing" class="col-sm-1 control-label">Listing</label>
+                          <div class="col-sm-9">
+                            <input class="form-control" id="listing" name="listingId" value="${s.listing?.listingId}">
+                          </div>
+                          <div class="col-sm-2">
+                            <button type="submit" class="btn">更换</button>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                    <form class="form-horizontal" action="@{Sellings.changeListing()}" id="upAndDownForm">
+                      <div class="form-group">
+                        <div class="col-sm-6 col-sm-offset-2">
+                          <label for="sellingState" class="col-sm-2 control-label">当前状态</label>
+                          <div class="col-sm-6">
+                            <input class="form-control" id="sellingState" value="${s.state}" readonly>
+                          </div>
+                          <div class="col-sm-4">
+                            <input type="hidden" id="sellingId" value="${s.sellingId}">
+                            <a class="btn btn-primary" id="sellingUp" data-confirm="确认上架?">系统内上架</a>
+                            <a class="btn btn-danger" id="sellingDown" data-confirm="确认下架?">系统内下架</a>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <form class="form" id="upAndDownForm">
-            #{text_field id: 'sellingState', label: '当前状态', value: s.state ,readonly: true /}
-          <input type="hidden" id="sellingId" value="${s.sellingId}">
-          <a class="btn btn-primary" id="sellingUp" data-confirm="确认上架?">系统内上架</a>
-          <a class="btn btn-danger" id="sellingDown" data-confirm="确认下架?">系统内下架</a>
-        </form>
+            <div class="tab-pane fade" id='feed'>
+              <div class="row-fluid">
+                <div class="offset2 span8" id="feedsHome">
+                #{include 'Feeds/_feed.html'/}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="tab-pane fade" id='feed'>
-    <div class="row-fluid">
-      <div class="offset2 span8" id="feedsHome">
-          #{include 'Feeds/_feed.html'/}
-      </div>
-    </div>
-  </div>
 </div>
-#{/if}
-#{else }
-Market ${s.market} 还不支持!
-#{/else}
 
 #{tsp_show_template /}

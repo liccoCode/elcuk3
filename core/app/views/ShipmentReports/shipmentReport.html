@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'单月物流发货量报表'/}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
@@ -9,60 +9,71 @@
 <ul>
   <li><strong>单月运输时效统计</strong></li>
 </ul>
+
 #{/info_row}
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{ShipmentReports.shipmentReport()}" method="get" class="search_form" id='search_form'>
-    <div class="row-fluid">
-      <div class="span12">
-        <div class="input-prepend input-append inline">
-          <span class="add-on">开始时间From:</span>
-          <input type="date" name="p.from" value="${p.from.date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${p.to.date()}">
-        </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{ShipmentReports.shipmentReport()}" method="get" class="form-inline" id='search_form'>
+          <div class="row-fluid">
 
-        <div class="input-append input-prepend inline">
-          <span class="add-on"><i class="icon-search"></i></span>
-          <button class="btn btn-primary" data-loading>统计</button>
-        </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
 
-        <div class="input-append input-prepend inline">
-          <span class="add-on"><i class="icon-file"></i></span>
-          <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.skuShipmentReport()}"
-                 value="导出Excel"/>
-        </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
 
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <button class="btn btn-primary" data-loading>统计</button>
+            </div>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-file"></i></div>
+              <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.skuShipmentReport()}"
+                     value="导出Excel"/>
+            </div>
+
+          </div>
+        </form>
       </div>
-    </div>
-  </form>
-  
-  <div class="row-fluid">
-    <div class="span12">
-      <b style="color:#0e90d2">单个sku物流费年均价报表</b>
-      <table id="shipItemTable" class="table table-condensed table-bordered">
-        <tr>
-          <th>SKU</th>
-          <th>海运年均价</th>
-          <th>空运年均价</th>
-          <th>快递年均价</th>
-          <th>海运税金年均价</th>
-          <th>空运税金年均价</th>
-          <th>快递税金年均价</th>
-        </tr>
-      #{list items:list, as:'ship'}
-        <tr>
-          <td>${ship.SKU}</td>
-          <td>${ship.SEA_P}</td>   
-          <td>${ship.AIR_P}</td>
-          <td>${ship.EXPRESS_P}</td>
-          <td>${ship.SEA_V}</td>
-          <td>${ship.AIR_V}</td>
-          <td>${ship.EXPRESS_V}</td>
-        </tr>
-      #{/list}
-      </table>
+
+      <div class="box-body">
+        <b style="color:#0e90d2">单个sku物流费均价报表</b>
+        <table id="shipItemTable" class="table table-condensed table-bordered">
+          <tr>
+            <th>SKU</th>
+            <th>海运年均价</th>
+            <th>空运年均价</th>
+            <th>快递年均价</th>
+            <th>海运税金年均价</th>
+            <th>空运税金年均价</th>
+            <th>快递税金年均价</th>
+          </tr>
+        #{list items:list, as:'ship'}
+          <tr>
+            <td>${ship.SKU}</td>
+            <td>${ship.SEA_P}</td>
+            <td>${ship.AIR_P}</td>
+            <td>${ship.EXPRESS_P}</td>
+            <td>${ship.SEA_V}</td>
+            <td>${ship.AIR_V}</td>
+            <td>${ship.EXPRESS_V}</td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
     </div>
   </div>
 </div>

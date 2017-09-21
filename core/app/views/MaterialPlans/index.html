@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"物料出货单列表 (${materialPlans.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -8,183 +8,192 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-<form action="@{MaterialPlans.index()}" class="search_form" id="deliverys_form">
-  <div class="row-fluid">
-    <div class="span12">
-      <div class="input-prepend input-append inline">
-        <span class="add-on">From:</span>
-        <input type="date" name="p.from" value="${p.from.date()}">
-        <span class="add-on">To:</span>
-        <input type="date" name="p.to" value="${p.to.date()}">
-      </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <form action="@{MaterialPlans.index()}" class="form-inline" id="deliverys_form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
 
-      <select name="p.dateType" style="width: 100px;" class="inline">
-      #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
-        <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
-      #{/list}
-      </select>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
 
-      <select name="p.cooperId" class="inline selectize" style="width:150px;">
-        <option value="">供应商</option>
-      #{list items:suppliers, as:'sp'}
-        <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-      #{/list}
-      </select>
-
-      <select name="p.receipt" style="width: 100px;" class="inline">
-        <option value="">收货类型</option>
-      #{list items:models.material.MaterialPlan.R.values(), as:'d'}
-        <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
-      #{/list}
-      </select>
-
-      <select name="p.financeState" style="width: 80px;" class="inline">
-        <option value="">财务审核</option>
-      #{list items:models.material.MaterialPlan.S.values(), as:'d'}
-        <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
-      #{/list}
-      </select>
-
-      <select name="p.planState" style="width: 80px;" class="inline">
-        <option value="">状态</option>
-      #{list items:models.material.MaterialPlan.P.values(), as:'t'}
-        <option value="${t.name()}" ${t.name() == p.planState?.name() ? 'selected' : ''}>${t.label()}</option>
-      #{/list}
-      </select>
-
-      <select name="p.userId" style="width: 80px;" class="inline selectize">
-        <option value="">User</option>
-      #{list items:users, as:'u'}
-        <option value="${u.id}" ${u.id==p.userId?'selected':''}>${u.username}</option>
-      #{/list}
-      </select>
-
-      <div class="input-prepend input-append inline">
-        <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" style="width:180px;" name="p.search" class="input-medium" value="${p.search}"
-               placeHolder="搜索 物料编码 or 物料出货单ID">
-        <input type="hidden" name="p.page" value="${p.page}">
-        <input type="hidden" name="id" id="planId">
-        <button class="btn btn-primary" data-loading>搜索</button>
-      </div>
-    #{power.ck "materialplans.approve"}
-      <div class="inline">
-        <a href="javascript:void(0)" data-url='@{MaterialPlans.approveBatch()}' class="btn btn-warning inline"
-           id="confirmMaterialPlanBtn">财务审核</a>
-      </div>
-    #{/power.ck}
-
-      <a class="btn btn-success" href="javascript:void(0)" id="exportExcel" target="_blank"
-         data-url="@{Excels.exportMaterialPlanDetail()}"><i class="icon-download-alt"></i> 导出</a>
-    </div>
-  </div>
-  <input type="hidden" name="p.page" value="${p.page}">
-
-  <div class="row-fluid">
-    <div class="span12">
-      <table class="table table-condensed table-bordered" id="data-table">
-        <tr>
-          <th width="20px;">
-            <input type="checkbox" id="checkbox_all" class="checkall" value="">
-          </th>
-          <th>物料出货单ID</th>
-          <th>出货单名称</th>
-          <th>请款单</th>
-          <th>供应商</th>
-          <th>状态</th>
-          <th>收货类型</th>
-          <th>收货方</th>
-          <th>财务审核</th>
-          <th width="125px;">出货时间</th>
-          <th>User</th>
-          <th>Create</th>
-        </tr>
-      #{list items:materialPlans, as:'dp'}
-        <tr>
-          <td>
-            <input type="checkbox" name="pids" value="${dp.id}" id="checkbox_${dp.id}" financeState="${dp.financeState}">
-          </td>
-          <td>
-            <a href="@{MaterialPlans.show(dp.id)}" target="_blank">${dp.id}</a>
-          </td>
-
-          <td style="cursor:pointer;" data-url="@{MaterialPlans.showMaterialPlanUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
-            <span><i class="icon-reorder"></i></span>
-            <span>${dp.name}</span>
-            <span class="badge badge-info">${dp.units.size()}</span>
-          </td>
-          <td>
-              #{if dp.apply}
-                <a href="@{Applys.material(dp.apply.id)}">${dp.apply.serialNumber}</a>
-              #{/if}
-              #{else }没有请款单#{/else}
-          </td>
-          <td>${dp.cooperator?.name}</td>
-          <td style="background:${dp.state?.rgb()}">${dp.state.label()}</td>
-          <td>${dp.receipt?.label()}</td>
-          <td>${dp.receiveCooperator?.name}</td>
-          <td style="color:${dp.financeState.rgb()}">
-              #{if dp.financeState.name() == "PENDING_REVIEW"}
-                  #{power.ck "materialplans.approve"}
-                    <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                    <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
-                       class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
-                  #{/power.ck}
-                待审核
-              #{/if}
-              #{else}
-              ${dp.financeState?.label()}
-              #{/else}
-          </td>
-          <td>#{time_tooltip time:dp.deliveryDate, datetime:true/}</td>
-          <td>${dp.handler.username}</td>
-          <td>#{time_tooltip time:dp.createDate/}</td>
-        </tr>
-      #{/list}
-        <tr class="tb_footer">
-          <td colspan="13">
-          #{bootstrap_pager pi:p, url:'' /}
-          </td>
-        </tr>
-      </table>
-      <div class="btn-toolbar">
-      #{power.ck 'deliveryments.deliverymenttoapply'}
-        <select name="applyId" class="inline selectize" style="width:250px;">
-          <option value="0">新请款单</option>
-            #{list items:avaliableApplies, as:'a'}
-              <option value="${a.id}">${a.serialNumber}</option>
+            <select name="p.dateType" style="width: 100px;" class="form-control">
+            #{list items:models.view.post.MaterialPlanPost.DateType.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.dateType.name()? 'selected' : ''}>${d.label()}</option>
             #{/list}
-        </select>
-        <input url='@{MaterialPlans.materialPlanToApply()}' type="submit"
-               id="goToApply" class="btn btn-success" value="出货单请款">
-      #{/power.ck}
-      </div>
+            </select>
+
+            <select name="p.receipt" style="width: 100px;" class="form-control">
+              <option value="">收货类型</option>
+            #{list items:models.material.MaterialPlan.R.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.receipt?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.financeState" style="width: 80px;" class="form-control">
+              <option value="">财务审核</option>
+            #{list items:models.material.MaterialPlan.S.values(), as:'d'}
+              <option value="${d.name()}" ${d.name() == p.financeState?.name()? 'selected' : ''}>${d.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.cooperId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:suppliers, as:'sp'}
+              <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.planState" style="width: 150px;" class="form-control">
+              <option value="">状态</option>
+            #{list items:models.material.MaterialPlan.P.values(), as:'t'}
+              <option value="${t.name()}" ${t.name() == p.planState?.name() ? 'selected' : ''}>${t.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.userId" style="width: 100px;" class="form-control selectize">
+              <option value="">创建人</option>
+            #{list items:users, as:'u'}
+              <option value="${u.id}" ${u.id==p.userId?'selected':''}>${u.username}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input type="text" style="width:240px;" name="p.search" class="form-control" value="${p.search}"
+                     placeHolder="搜索 物料编码 or 物料出货单ID">
+              <input type="hidden" name="p.page" value="${p.page}">
+              <input type="hidden" name="id" id="planId">
+            </div>
+
+            <button class="btn btn-primary" data-loading>搜索</button>
+          #{power.ck "materialplans.approve"}
+            <a href="javascript:void(0)" data-url='@{MaterialPlans.approveBatch()}' class="btn btn-warning"
+               id="confirmMaterialPlanBtn">财务审核</a>
+          #{/power.ck}
+          </div>
+        </div>
+
+        <div class="box-body">
+          <table class="table table-condensed table-bordered" id="data-table">
+            <tr>
+              <th width="20px;">
+                <input type="checkbox" id="checkbox_all" class="checkall" value="">
+              </th>
+              <th>物料出货单ID</th>
+              <th>出货单名称</th>
+              <th>请款单</th>
+              <th>供应商</th>
+              <th>状态</th>
+              <th>收货类型</th>
+              <th>收货方</th>
+              <th width="70px;">财务审核</th>
+              <th width="150px;">出货时间</th>
+              <th width="80px;">User</th>
+              <th width="90px;">Create</th>
+            </tr>
+          #{list items:materialPlans, as:'dp'}
+            <tr>
+              <td>
+                <input type="checkbox" name="pids" value="${dp.id}" id="checkbox_${dp.id}" financeState="${dp.financeState}">
+              </td>
+              <td>
+                <a href="@{MaterialPlans.show(dp.id)}" target="_blank">${dp.id}</a>
+              </td>
+
+              <td style="cursor:pointer;" data-url="@{MaterialPlans.showMaterialPlanUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
+                <span><i class="icon-reorder"></i></span>
+                <span>${dp.name}</span>
+                <span class="badge bg-light-blue">${dp.units.size()}</span>
+              </td>
+              <td>
+                  #{if dp.apply}
+                    <a href="@{Applys.material(dp.apply.id)}">${dp.apply.serialNumber}</a>
+                  #{/if}
+                  #{else }没有请款单#{/else}
+              </td>
+              <td>${dp.cooperator?.name}</td>
+              <td style="background-color:${dp.state.rgb()}">${dp.state.label()}</td>
+              <td>${dp.receipt?.label()}</td>
+              <td>${dp.receiveCooperator?.name}</td>
+              <td>
+                  #{if dp.financeState.name() == "PENDING_REVIEW"}
+                      #{power.ck "materialplans.approve"}
+                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
+                           class="btn btn-mini btn-warning" uid="${dp.id}">审核</a>
+                      #{/power.ck}
+                    待审
+                  #{/if}
+                  #{else}
+                  ${dp.financeState?.label()}
+                  #{/else}
+              </td>
+              <td>#{time_tooltip_v3 time:dp.deliveryDate, datetime:true/}</td>
+              <td>${dp.handler.username}</td>
+              <td>#{time_tooltip_v3 time:dp.createDate/}</td>
+            </tr>
+          #{/list}
+          </table>
+        </div>
+
+        <div class="box-footer">
+        #{power.ck 'deliveryments.deliverymenttoapply'}
+          <select name="applyId" class="form-control selectize" style="width:250px;">
+            <option value="0">新请款单</option>
+              #{list items:avaliableApplies, as:'a'}
+                <option value="${a.id}">${a.serialNumber}</option>
+              #{/list}
+          </select>
+          <input url='@{MaterialPlans.materialPlanToApply()}' type="submit"
+                 id="goToApply" class="btn btn-success" value="出货单请款">
+        #{/power.ck}
+        #{bootstrap_pager_v3 pi:p, url:'' /}
+        </div>
+
+      </form>
     </div>
   </div>
-</form>
-
+</div>
 
 <!--  修改签收数量 弹出div begin   -->
-<div id="bom_modal" class="modal hide fade">
-  <div class="modal-header">
-    <h4>签收数量修改</h4>
-  </div>
-  <div class="modal-body">
-    <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
-      <input type="hidden" name="matId" id="unit_id">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th width="30%">实际签收数量</th>
-          <td>
-            <input type="text" placeHolder="实际签收数量" id="unit_receiptQty" name="unit.receiptQty">
-          </td>
-        </tr>
-      </table>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+<div id="bom_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>签收数量修改</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
+          <input type="hidden" name="matId" id="unit_id">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">实际签收数量</th>
+              <td>
+                <input type="text" placeHolder="实际签收数量" id="unit_receiptQty" name="unit.receiptQty">
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
   </div>
 </div>
 <!--  修改签收数量 弹出div end   -->
+
+

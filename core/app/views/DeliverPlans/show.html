@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"出货单 #" + dp.id /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
@@ -13,151 +13,161 @@
 
 #{errorMsgs /}
 #{flash_alert /}
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#basicinfo" data-toggle='tab'>基本信息</a>
-  </li>
-  <li>
-    <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
-  </li>
-</ul>
 
-<div class="tab-content">
-  <div class="tab-pane fade active in" id='basicinfo'>
-    <div class="row-fluid">
-      <div class="span12">
-        <form method="post" id="plan_form">
-          <table class="table table-condensed table-bordered">
-            <tr>
-              <th width="80px;">Id</th>
-              <td>
-                <span id="deliverymentId">${dp.id}</span>
-                <input type="hidden" name="dp.id" value="${dp.id}">
-              </td>
-              <th>CreateDate</th>
-              <td>
-                <input type="text" readonly="" disabled="" class="input-medium" name="dp.createDate" value="${dp.createDate
-                .datetime()}">
-              </td>
-            </tr>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
 
-            <tr>
-              <th>Name</th>
-              <td colspan="1">
-                <input type="text" class="span10" name="dp.name" value="${dp.name}">
-              </td>
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+        </li>
+        <li>
+          <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
+        </li>
+      </ul>
 
-              <th>User</th>
-              <td>${dp.handler.username}</td>
-            </tr>
-            <tr>
-              <th>供应商</th>
-              <td>${dp.cooperator?.name}</td>
-              <th>状态</th>
-              <td>${dp.state.label()}</td>
-            </tr>
-            <tr>
-              <th>Memo:</th>
-              <td colspan="5">
-                <textarea rows="5" name="dp.memo" class="span12">${dp.memo}</textarea>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="6">
-                <button id="plan_update_btn" class="btn btn-primary">更新</button>
-                <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-success" target="_blank">
-                  <i class="icon-download-alt"></i>导出出仓单</a>
-              </td>
-            </tr>
-          </table>
-        </form>
-      </div>
-    </div>
+      <div class="tab-content">
+        <div class="tab-pane fade active in" id='basicinfo'>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header"></div>
+                <form method="post" id="plan_form" class="form-horizontal">
+                  <div class="box-body">
+                    <div class="form-group">
+                      <label for="productName_input" class="col-sm-1 control-label">采购单ID</label>
+                      <div class="col-sm-5">
+                        <input id="deliverymentId" value="${dp.id}" class="form-control" readonly/>
+                        <input type="hidden" name="dp.id" value="${dp.id}">
+                      </div>
+                      <label for="subtitle_input" class="col-sm-1 control-label">CreateDate</label>
+                      <div class="col-sm-5">
+                        <input readonly class="form-control" name="dp.createDate" value="${dp.createDate.datetime()}">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="productName_input" class="col-sm-1 control-label">Name</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" name="dp.name" value="${dp.name}">
+                      </div>
+                      <label for="subtitle_input" class="col-sm-1 control-label">User</label>
+                      <div class="col-sm-5">
+                        <input value="${dp.handler.username}" class="form-control" readonly/>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="productName_input" class="col-sm-1 control-label">供应商</label>
+                      <div class="col-sm-5">
+                        <input value="${dp.cooperator?.name}" class="form-control" readonly/>
+                      </div>
+                      <label for="subtitle_input" class="col-sm-1 control-label">状态</label>
+                      <div class="col-sm-5">
+                        <input value="${dp.state.label()}" class="form-control" readonly/>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="productName_input" class="col-sm-1 control-label">Memo</label>
+                      <div class="col-sm-11">
+                        <textarea rows="5" name="dp.memo" class="form-control">${dp.memo}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+                <div class="box-footer">
+                  <button id="plan_update_btn" class="btn btn-primary">更新</button>
+                  <a href="@{Excels.deliverplans(dp.id)}" class="btn btn-success" target="_blank">
+                    <i class="icon-download-alt"></i>导出出仓单</a>
+                </div>
+              </div>
 
+              <div class="box box-warning collapsed-box box-solid">
+                <div class="box-header with-border">
+                  <h3 class="box-title" data-toggle="toggle" data-target="#tl">
+                    Timeline <i class="icon-reorder"></i>
+                  </h3>
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="box-body">
+                  <div class="row-fluid">
+                    <div id="tl" class="col-sm-12" style="height:350px;"></div>
+                  </div>
+                </div>
+              </div>
 
-    <div class="row-fluid">
-      <div class="span12 alert">
-        <h4 data-toggle="toggle" data-target="#tl">Timeline <i class="icon-reorder"></i></h4>
-      </div>
-    </div>
-    <div class="row-fluid">
-      <div id="tl" class="span12" style="height:350px;"></div>
-    </div>
+              <form action="#" id="bulkpost" method="POST" class="form-horizontal">
+                <div class="box box-success box-solid">
+                  <div class="box-header with-border"><h3 class="box-title">已经添加进入[出货单]的[采购单元]</h3></div>
+                  <div class="box-body">
+                  #{render 'ProcureUnits/_unit_list_v3.html', units:dp.units, checkbox:true,
+                      key:'delivery', delivery:true, deliveryplan:true/}
+                  </div>
+                  <div class="box-footer">
+                  #{power.ck "products.edit"}
+                    <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
+                       id="delunit_form_submit" data-toggle="tooltip" data-placement="right" title="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right"
+                       class="btn btn-danger">
+                      解除
+                    </a>
+                  #{/power.ck}
+                  #{power.ck 'fbas.deploytoamazon'}
+                    <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
+                       id="deployFBAs" class="btn btn-warning">批量创建FBA</a>
+                    <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents("DeliverPlans", dp.id)}' data-method="POST"
+                       id="updateFbaCartonContents" class="btn btn-warning">批量更新FBA箱内包装信息</a>
+                  #{/power.ck}
+                    <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("DeliverPlans", dp.id)}" data-method="POST"
+                       id="downloadFBAZIP" class="btn btn-success" data-toggle="tooltip" data-placement="right" title="将选定的采购单元的 出货FBA进行压缩打包">
+                      <i class="icon-download-alt"></i>下载FBA ZIP 包</a>
+                  </div>
+                  <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
+                #{render 'Deliveryments/_box_number_model.html'/}
+                #{render 'Deliveryments/_fba_carton_contents.html'/}
+                </div>
+              </form>
 
-  #{success_row title:"已经添加进入[出货单]的[采购单元] "/}
-    <form action="#" id="bulkpost" method="POST">
-      <div class="row-fluid">
-        <div class="span12" id="unit_list">
-        #{render 'ProcureUnits/_unit_list.html', units:dp.units, checkbox:true, key:'delivery', delivery:true,
-    deliveryplan:true/}
-        </div>
-      </div>
-      <div class="row-fluid">
-        <div class="btn-toolbar">
-        #{power.ck "products.edit"}
-          <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
-             id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
-            解除
-          </a>
-        #{/power.ck}
-        #{power.ck 'fbas.deploytoamazon'}
-          <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
-             id="deployFBAs"
-             class="btn btn-success">
-            批量创建FBA</a>
-          <a href="javascript:void(0);" data-url='@{FBAs.updateCartonContents("DeliverPlans", dp.id)}' data-method="POST"
-             id="updateFbaCartonContents" class="btn btn-success">
-            批量更新FBA箱内包装信息</a>
-        #{/power.ck}
-          <a href="javascript:void(0);" data-url="@{FBAs.downloadZip("DeliverPlans", dp.id)}" data-method="POST"
-             id="downloadFBAZIP" class="btn btn-success" rel="popover" content="将选定的采购单元的 出货FBA进行压缩打包">
-            <i class="icon-download-alt"></i>下载FBA ZIP 包
-          </a>
-        </div>
-      </div>
-      <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
-    #{render 'Deliveryments/_box_number_model.html'/}
-    #{render 'Deliveryments/_fba_carton_contents.html'/}
-    </form>
-
-  #{if showAdd}
-      #{info_row title:'可添加进入[出货单]的[采购单元]'/}
-      #{form @DeliverPlans.addunits(dp.id), method: 'POST'}
-        <div class="row-fluid">
-          <div class="span12">
-            <input type="hidden" name="dp.id" value="${dp.id}">
-              #{render 'ProcureUnits/_unit_list.html', units:plan_units, checkbox:true, key:'plan', deliveryplan:true/}
-          </div>
-        </div>
-        <div class="row-fluid">
-          <div class="span12">
-            <div class="pull-left input-prepend input-append">
-              <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-                #{power.ck "products.edit"}
-                  <button id="plan_form_submit" class="btn btn-primary">添加</button>
-                #{/power.ck}
+            #{if showAdd}
+                #{form @DeliverPlans.addunits(dp.id), method: 'POST'}
+                  <div class="box box-primary box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">可添加进入[出货单]的[采购单元]</h3></div>
+                    <div class="box-body">
+                        #{render 'ProcureUnits/_unit_list_v3.html', units:plan_units, checkbox:true, key:'plan',deliveryplan:true/}
+                    </div>
+                    <div class="box-footer">
+                      <span class="add-on" data-toggle="tooltip" data-placement="right" title="将 PLAN 状态的采购计划添加到采购单中">
+                        <i class="icon-question-sign"></i></span>
+                        #{power.ck "products.edit"}
+                          <button id="plan_form_submit" class="btn btn-primary">添加</button>
+                        #{/power.ck}
+                    </div>
+                  </div>
+                #{/form}
+            #{/if}
+            #{records_v3 records:records/}
             </div>
           </div>
         </div>
-      #{/form}
-  #{/if}
-  #{records records:records/}
-  </div>
 
-  <div class="tab-pane fade" id='newattach'>
-    <div class="row-fluid">
-      <div class="span12">
-        <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
-      </div>
-    </div>
-    <div class="row-fluid">
-      <div style="min-height:300px;" class="span12 well" id="dropbox">
-        <ul class="thumbnails uploaded"></ul>
-      #{power.ck "products.edit"}
-        <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-      #{/power.ck}
+        <!-- 附件管理div -->
+        <div class="tab-pane" id='newattach'>
+          <div class="row-fluid">
+            <div class="span12">
+              <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div style="min-height:300px;" class="span12 well" id="dropbox">
+              <ul class="thumbnails uploaded"></ul>
+            #{power.ck "products.edit"}
+              <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+            #{/power.ck}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-

@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"物料库存列表(${size})"  /}
 
 #{set 'moreScripts'}
@@ -14,86 +14,93 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{MaterialPlans.indexMaterial()}" method="get" class="search_form" id="search_Form">
-    <div class="row-fluid">
-      <div class="span12">
-        <select name="p.type" class="inline">
-          <option value="">物料类别</option>
-        #{list items:models.material.Material.T, as:'t'}
-          <option #{if p.type==t} selected #{/if} value="${t.name()}">${t.label()}</option>
-        #{/list}
-        </select>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
 
-        <select name="p.cooperId" class="inline selectize" style="width:150px;">
-          <option value="">供应商</option>
-        #{list items:cooperators, as:'sp'}
-          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-        #{/list}
-        </select>
+      <div class="box-header with-border">
+        <form action="@{MaterialPlans.indexMaterial()}" method="get" class="form-inline" id="search_Form">
+          <div class="row-fluid">
 
-        <select name="p.number" class="inline selectize" style="width:150px;">
-          <option value="">B0M—ID</option>
-        #{list items:boms, as:'bs'}
-          <option ${bs.number == p.number ? 'selected' : ''} value="${bs.number}">${bs.number}</option>
-        #{/list}
-        </select>
+            <select name="p.type" class="form-control">
+              <option value="">物料类别</option>
+            #{list items:models.material.Material.T, as:'t'}
+              <option #{if p.type==t} selected #{/if} value="${t.name()}">${t.label()}</option>
+            #{/list}
+            </select>
 
-        <div class="input-prepend input-append inline">
-          <span class="add-on"><i class="icon-search"></i></span>
-          <input type="text" style="width:220px;" name="p.search" placeholder="物料编码 or 物料名称" value="${p.search}">
-          <input type="hidden" name="p.page" value="${p.page}">
-          <button class="btn btn-primary" data-loading>搜索</button>
+            <select name="p.cooperId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'sp'}
+              <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+            #{/list}
+            </select>
 
-        </div>
-        <div class="input-prepend input-append inline">
-          <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单</a>
-        </div>
+            <select name="p.number" class="form-control selectize" style="width:150px;">
+              <option value="">B0M—ID</option>
+            #{list items:boms, as:'bs'}
+              <option ${bs.number == p.number ? 'selected' : ''} value="${bs.number}">${bs.number}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeHolder="物料编码 or 物料名称" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+            
+            <button class="btn btn-primary" data-loading>搜索</button>
+            <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单</a>
+
+          </div>
+        </form>
+      </div>
+
+      <div class="box-body">
+        <form method="post" id="planForm" action="@{MaterialPlans.blank()}">
+          <div class="row-fluid">
+            <div class="span12">
+              <table class="table table-condensed table-bordered" id="data-table">
+                <tr>
+                  <th width="20px;">
+                    <input type="checkbox" id="checkbox_all" class="checkall" value="">
+                  </th>
+                  <th>物料编码</th>
+                  <th>B0M—ID</th>
+                  <th>物料名称</th>
+                  <th>物料类别</th>
+                  <th>采购余量</th>
+                  <th>采购未确认数量</th>
+                  <th>物料供应商</th>
+                  <th>项目名称</th>
+                </tr>
+              #{list items:materials, as:'m'}
+                <tr>
+                  <td>
+                      #{if m.qty > 0}
+                        <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
+                               cooperName="${m.cooperators()}">
+                      #{/if}
+                  </td>
+                  <td>${m.code}</td>
+                  <td>${m.number}</td>
+                  <td>${m.name}</td>
+                  <td>${m.type.label()}</td>
+                  <td>
+                    <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.qty}</a>
+                  </td>
+                  <td>${m.pendingQty}</td>
+                  <td>${m.cooperName}</td>
+                  <td>${m.projectName}</td>
+                </tr>
+              #{/list}
+              </table>
+            </div>
+          </div>
+
+          <input type="hidden" id="name_form" name="planName">
+        </form>
       </div>
     </div>
-  </form>
-
-  <form method="post" id="planForm" action="@{MaterialPlans.blank()}">
-    <div class="row-fluid">
-      <div class="span12">
-        <table class="table table-condensed table-bordered" id="data-table">
-          <tr>
-            <th width="20px;">
-              <input type="checkbox" id="checkbox_all" class="checkall" value="">
-            </th>
-            <th>物料编码</th>
-            <th>B0M—ID</th>
-            <th>物料名称</th>
-            <th>物料类别</th>
-            <th>采购余量</th>
-            <th>采购未确认数量</th>
-            <th>物料供应商</th>
-            <th>项目名称</th>
-          </tr>
-        #{list items:materials, as:'m'}
-          <tr>
-            <td>
-                #{if m.qty > 0}
-                  <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
-                         cooperName="${m.cooperators()}">
-                #{/if}
-            </td>
-            <td>${m.code}</td>
-            <td>${m.number}</td>
-            <td>${m.name}</td>
-            <td>${m.type.label()}</td>
-            <td>
-              <a href="javascript:void(0)" target="_blank" rel="tooltip" title="出货可用数">${m.qty}</a>
-            </td>
-            <td>${m.pendingQty}</td>
-            <td>${m.cooperName}</td>
-            <td>${m.projectName}</td>
-          </tr>
-        #{/list}
-        </table>
-      </div>
-    </div>
-
-    <input type="hidden" id="name_form" name="planName">
-  </form>
+  </div>
 </div>

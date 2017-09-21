@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"出货单列表 (${deliverplans.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -14,67 +14,80 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-#{form @DeliverPlans.index(), class:'search_form', id:'deliverys_form'}
-<div class="row-fluid">
-  <div class="span12">
-    <div class="input-prepend input-append inline">
-      <span class="add-on">From:</span>
-      <input type="date" name="p.from" value="${p.from.date()}">
-      <span class="add-on">To:</span>
-      <input type="date" name="p.to" value="${p.to.date()}">
-    </div>
 
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+    #{form @DeliverPlans.index(), class:'form-inline', id:'deliverys_form'}
+      <div class="box-header with-border">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">From:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+          </div>
+        </div>
 
-    <select name="p.cooperId" class="inline">
-      <option value="">供应商</option>
-        #{list items:suppliers, as:'sp'}
-          <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
-        #{/list}
-    </select>
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">To:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+          </div>
+        </div>
 
-      #{select_enum name: "p.planState", items: models.procure.DeliverPlan.P.values(), value: p.planState,
-      class:'inline'}
-        <option value="">状态</option>
-      #{/select_enum}
+        <select name="p.cooperId" style="width: 150px;" class="form-control">
+          <option value="">供应商</option>
+            #{list items:suppliers, as:'sp'}
+              <option ${sp.id == p.cooperId ? 'selected' : ''} value="${sp.id}">${sp.name}</option>
+            #{/list}
+        </select>
 
-    <div class="input-prepend input-append inline">
-      <span class="add-on"><i class="icon-search"></i></span>
-      <input type="text" name="p.search" class="input-medium" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
-      <input type="hidden" name="p.page" value="${p.page}">
-      <button class="btn btn-primary" data-loading>搜索</button>
-    </div>
-  </div>
-</div>
+        <select name="p.planState" style="width: 150px;" class="form-control">
+          <option value="">状态</option>
+            #{list items:models.procure.DeliverPlan.P.values(), as:'t'}
+              <option value="${t.name()}" ${t.name() ==  p.planState?.name() ? 'selected' : ''}>${t.label()}</option>
+            #{/list}
+        </select>
 
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered" id="data-table">
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>供应商</th>
-        <th>状态</th>
-        <th>User</th>
-        <th>Create</th>
-      </tr>
-        #{list items:deliverplans, as:'dp'}
+        <div class="input-group">
+          <div class="input-group-addon"><i class="icon-search"></i></div>
+          <input type="text" name="p.search" style="width:200px;" class="form-control" value="${p.search}" placeHolder="搜索 id 自动识别, +N 语法">
+          <input type="hidden" name="p.page" value="${p.page}">
+        </div>
+        <button class="btn btn-primary" data-loading>搜索</button>
+      </div>
+
+      <div class="box-body">
+        <table class="table table-condensed table-bordered" id="data-table">
           <tr>
-            <td>
-              <a href="@{DeliverPlans.show(dp.id)}" target="_blank">${dp.id}</a>
-            </td>
-            <td style="cursor:pointer;" data-url="@{DeliverPlans.showProcureUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
-              <span><i class="icon-reorder"></i></span>
-              <span>${dp.name}</span>
-              <span class="badge badge-info">${dp.units.size()}</span>
-            </td>
-            <td>${dp.supplier()?.name}</td>
-            <td>${dp.state.label()}</td>
-            <td>${dp.handler.username}</td>
-            <td>#{time_tooltip time:dp.createDate/}</td>
+            <th>#</th>
+            <th>Name</th>
+            <th>供应商</th>
+            <th>状态</th>
+            <th>User</th>
+            <th>Create</th>
           </tr>
-        #{/list}
-    </table>
+            #{list items:deliverplans, as:'dp'}
+              <tr>
+                <td>
+                  <a href="@{DeliverPlans.show(dp.id)}" target="_blank">${dp.id}</a>
+                </td>
+                <td style="cursor:pointer;" data-url="@{DeliverPlans.showProcureUnitList(dp.id)}" data-id="${dp.id}" name="clickTd">
+                  <span><i class="icon-reorder"></i></span>
+                  <span>${dp.name}</span>
+                  <span class="badge bg-light-blue">${dp.units.size()}</span>
+                </td>
+                <td>${dp.supplier()?.name}</td>
+                <td>${dp.state.label()}</td>
+                <td>${dp.handler.username}</td>
+                <td>#{time_tooltip time:dp.createDate/}</td>
+              </tr>
+            #{/list}
+        </table>
+      </div>
+    #{/form}
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
+      </div>
+    </div>
   </div>
 </div>
-#{/form}
-#{bootstrap_pager pi:p, url:'' /}

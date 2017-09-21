@@ -4,7 +4,7 @@ $ ->
     source: (query, process) ->
       sku = $sku.val()
       $.get('/products/sameSku', {sku: sku})
-      .done((c) ->
+        .done((c) ->
         process(c)
       )
   })
@@ -14,12 +14,15 @@ $ ->
       LoadMask.mask()
       $btn = $(@)
       $.ajax($btn.data('url'))
-      .done((r) ->
+        .done((r) ->
         type = if r.flag
           alert(r.message)
           window.close()
         else
-          noty({text: r.message, type: 'error'})
+          noty({
+            text: r.message,
+            type: 'error'
+          })
         LoadMask.unmask()
       )
   )
@@ -34,7 +37,8 @@ $ ->
     sid = $(@).data("sid")
     btnGroup = $(@).parent()
     btnGroup.mask('同步中...')
-    $.post('/sellings/syncAmazon', sid: $('input[name="s.sellingId"]').val(),
+    $.post('/sellings/syncAmazon',
+      sid: $('input[name="s.sellingId"]').val(),
       (r) ->
         if r.flag is true
           alert('同步成功, 请刷新页面查看最新数据')
@@ -44,19 +48,23 @@ $ ->
     )
 
   $("#batchDown").click(->
-    if $("input[type='checkbox']:checked").length == 0
-      noty({text: "请选择需要下架的Selling", type: 'error', timeout: 2000})
+    if $("#data-table input[type='checkbox']:checked").length == 0
+      noty({
+        text: "请选择需要下架的Selling",
+        type: 'error',
+        timeout: 2000
+      })
     else
-      return false if !confirm("需要同时将"+$("input[type='checkbox']:checked").length+"个selling系统内下架？")
+      return false if !confirm("需要同时将" + $("#data-table input[type='checkbox']:checked").length + "个selling系统内下架？")
       sellingIds = []
-      checkboxList = $("input[type='checkbox']:checked")
+      checkboxList = $("#data-table input[type='checkbox']:checked")
       for checkbox in checkboxList when checkbox.checked then sellingIds.push(checkbox.value)
-      $.post('/sellings/batchDownSelling', sellingIds: sellingIds,
+      $.post('/sellings/batchDownSelling',
+        sellingIds: sellingIds,
         (r) ->
           if r.flag is true
             alert('同步成功, 请刷新页面查看最新数据!')
           else
             alert(r.message)
-          btnGroup.unmask()
       )
   )

@@ -10,29 +10,28 @@
   #{if useCheckbox}
     <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
   #{/if}
-    <th>采购计划</th>
-    <th width="30px;">阶段</th>
-    <th width="130px;">Sku</th>
-    <th width="150px;">Selling</th>
+    <th width="55px;">采购ID</th>
+    <th width="40px;">阶段</th>
+    <th width="160px;">Sku</th>
+    <th width="160px;">Selling</th>
   #{if useCheckbox}
-    <th>FBA</th>
-    <th>CenterId</th>
+    <th width="90px;">FBA</th>
+    <th width="40px;">CenterId</th>
   #{/if}
-    <th><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
+    <th width="90px;"><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
     <th width="50px;">Receive</th>
     <th width="40px;">Qty1</th>
-    <th>采购单<br>供应商</th>
-    <th width="135px;">预计发货时间<br>预计到库时间</th>
-    <th width="135px;">预计交货时间<br>实际交货时间</th>
+    <th width="65px;">采购单<br>供应商</th>
+    <th width="140px;">预计发货时间<br>预计到库时间</th>
+    <th width="140px;">预计交货时间<br>实际交货时间</th>
     <th width="50px;">总重量(kg)</th>
-    <th>包装信息</th>
-    <th>抵达?</th>
-    <th width="40px;">质检结果</th>
+    <th width="40px;">包装<br>信息</th>
+    <th width="40px;">质检<br>结果</th>
   #{if useCheckbox}
-    <th width="35px;">运往仓库</th>
+    <th width="35px;">运往<br>仓库</th>
   #{/if}
     <th width="80px;">运营创建人<br>采购创建人</th>
-    <th width="60px;">丢失量<br>/赔偿金额</th>
+    <th width="70px;">丢失量<br>/赔偿金额</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
         <th width="30px;">记录运费</th>
@@ -125,9 +124,8 @@
     </td>
     <td>${itm.totalWeight().format("#.##")}</td>
     <td>
-      <input type="button" class="btn btn-mini btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
+      <input type="button" class="btn btn-xs btn-info" value="查看" name="editBoxInfo" data-id="${itm.unit.id}">
     </td>
-    <td>#{yesOrNo f:itm.unit.isPlaced /}</td>
     <td>
         #{if itm.unit.result?.name()=='Qualified'}
           <i style="color:green" class="icon-ok"></i>

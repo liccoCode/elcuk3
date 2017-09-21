@@ -372,7 +372,7 @@ public class Products extends Controller {
                     atts.add(productAttr);
                 });
         Collections.sort(atts);
-        render(pro);
+        render("Products/_attrs.html",pro);
     }
 
     public static void addAttr(String sku, String attr) {

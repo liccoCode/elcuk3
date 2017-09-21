@@ -1,5 +1,5 @@
 #{ifnot part}
-    #{extends 'main.html'/}
+    #{extends 'main_full_v3.html'/}
     #{set title:'Orders'/}
     #{set 'moreScripts'}
         #{script 'orders/orders.es6'/}
@@ -8,152 +8,162 @@
 #{flash_alert /}
 #{errorMsgs /}
 
-<ul class="nav nav-tabs" id="below_tab">
-  <li class="active">
-    <a href="#orderinfo" data-toggle='tab'>订单信息</a>
-  </li>
-  <li>
-    <a href="#invoiceinfo" data-toggle='tab'>销售发票信息</a>
-  </li>
-  <li>
-    <a href="#returninfo" data-toggle='tab'>退款发票信息</a>
-  </li>
-</ul>
-<div id="below_tabContent" class="tab-content">
-  <div class="tab-pane fade active in" id='orderinfo'>
-  #{if ord == null}
-    读取的 Order 不存在!
-  #{/if}
-  #{else }
-    <div class="btn-toolbar" id='funcs'>
-      <!--
-      <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning btn-small" id="refreshFeeBtn">重新抓取费用</button>}
-      -->
-      <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning btn-small">重新抓取费用</button>
-      &nbsp;&nbsp;
-      <a href="@{Orders.show(ord.orderId)}" class="btn btn-success btn-small">刷新</a>
-        #{if ord.feedback}
-          <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
-        #{/if}
-    </div>
-    <div class="label label-info">Order Basic</div>
-    <div>
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <td>OrderId:</td>
-          <td>
-            <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}
-            </a></td>
-          <td>Address:</td>
-          <td>${ord.address}</td>
-          <td>Address1:</td>
-          <td>${ord.address1.raw()}</td>
-          <td>Reciver:</td>
-          <td>${ord.reciver}</td>
-        </tr>
-        <tr>
-          <td>ArriveDate:</td>
-          <td>${ord.arriveDate}</td>
-          <td>Buyer:</td>
-          <td>${ord.buyer}</td>
-          <td>City:</td>
-          <td>${ord.city}</td>
-          <td>Country:</td>
-          <td>${ord.country}</td>
-        </tr>
-        <tr>
-          <td>CreateDate:</td>
-          <td>${ord.createDate}</td>
-          <td>Email:</td>
-          <td>${ord.email}</td>
-          <td>Market:</td>
-          <td>${ord.market.toString()}</td>
-          <td>PaymentDate:</td>
-          <td>${ord.paymentDate}</td>
-        </tr>
-        <tr>
-          <td>Phone:</td>
-          <td>${ord.phone}</td>
-          <td>PostalCode:</td>
-          <td>${ord.postalCode}</td>
-          <td>Province:</td>
-          <td>${ord.province}</td>
-          <td>Account</td>
-          <td>${ord.account.prettyName()}</td>
-        </tr>
-        <tr>
-          <td>ShipDate:</td>
-          <td>${ord.shipDate}</td>
-          <td>ShipLevel:</td>
-          <td>${ord.shipLevel}</td>
-          <td>ShippingAmount:</td>
-          <td>${ord.shippingAmount}</td>
-          <td>ShippingService:</td>
-          <td>${ord.shippingService}</td>
-        </tr>
-        <tr>
-          <td>State:</td>
-          <td style="color:${'#' + ord.state.color()}}">${ord.state}</td>
-          <td>TotalAmount:</td>
-          <td>${ord.totalAmount}</td>
-          <td>TrackNo:</td>
-          <td>${ord.trackNo}</td>
-          <td>UserId:</td>
-          <td>${ord.userid}</td>
-        </tr>
-        <tr>
-          <td>Memo</td>
-          <td colspan="7">${ord.memo}</td>
-        </tr>
-      </table>
-    </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#orderinfo" data-toggle='tab'>订单信息</a>
+        </li>
+        <li>
+          <a href="#invoiceinfo" data-toggle='tab'>销售发票信息</a>
+        </li>
+        <li>
+          <a href="#returninfo" data-toggle='tab'>退款发票信息</a>
+        </li>
+      </ul>
 
-    <div class="label label-info">Order Items</div>
-    <div>
-      <table class="table table-bordered">
-        <tr>
-          <th>SKU</th>
-          <th>Id</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>ShipPrice</th>
-          <th>ProductName</th>
-          <th>CreateDate</th>
-          <th>Memo</th>
-        </tr>
-          #{list items:ord.items, as:'item'}
-            <tr>
-              <td>${item.product.sku}</td>
-              <td>${item.id}</td>
-              <td>${item.quantity}</td>
-              <td>${item.price} ${item.currency}</td>
-              <td>${item.shippingPrice}</td>
-              <td>
-                <a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}
-                </a></td>
-              <td>${item.createDate}</td>
-              <td>${item.memo}</td>
-            </tr>
-          #{/list}
-      </table>
+      <div class="tab-content">
+        <div class="tab-pane active" id='orderinfo'>
+          <div class="box box-primary box-solid">
+            <div class="box-header with-border">
+              <h3 class="box-title">Order Basic</h3>
+            </div>
+            <div class="box-body">
+              <table class="table table-condensed table-bordered">
+                <tr>
+                  <th>OrderId:</th>
+                  <td>
+                    <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}
+                    </a></td>
+                  <th>Address:</th>
+                  <td>${ord.address}</td>
+                  <th>Address1:</th>
+                  <td>${ord.address1.raw()}</td>
+                  <th>Reciver:</th>
+                  <td>${ord.reciver}</td>
+                </tr>
+                <tr>
+                  <th>ArriveDate:</th>
+                  <td>${ord.arriveDate}</td>
+                  <th>Buyer:</th>
+                  <td>${ord.buyer}</td>
+                  <th>City:</th>
+                  <td>${ord.city}</td>
+                  <th>Country:</th>
+                  <td>${ord.country}</td>
+                </tr>
+                <tr>
+                  <th>CreateDate:</th>
+                  <td>${ord.createDate}</td>
+                  <th>Email:</th>
+                  <td>${ord.email}</td>
+                  <th>Market:</th>
+                  <td>${ord.market.toString()}</td>
+                  <th>PaymentDate:</th>
+                  <td>${ord.paymentDate}</td>
+                </tr>
+                <tr>
+                  <th>Phone:</th>
+                  <td>${ord.phone}</td>
+                  <th>PostalCode:</th>
+                  <td>${ord.postalCode}</td>
+                  <th>Province:</th>
+                  <td>${ord.province}</td>
+                  <th>Account</th>
+                  <td>${ord.account.prettyName()}</td>
+                </tr>
+                <tr>
+                  <th>ShipDate:</th>
+                  <td>${ord.shipDate}</td>
+                  <th>ShipLevel:</th>
+                  <td>${ord.shipLevel}</td>
+                  <th>ShippingAmount:</th>
+                  <td>${ord.shippingAmount}</td>
+                  <th>ShippingService:</th>
+                  <td>${ord.shippingService}</td>
+                </tr>
+                <tr>
+                  <th>State:</th>
+                  <td style="color:${'#' + ord.state.color()}}">${ord.state}</td>
+                  <th>TotalAmount:</th>
+                  <td>${ord.totalAmount}</td>
+                  <th>TrackNo:</th>
+                  <td>${ord.trackNo}</td>
+                  <th>UserId:</th>
+                  <td>${ord.userid}</td>
+                </tr>
+                <tr>
+                  <th>Memo</th>
+                  <td colspan="7">${ord.memo}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="box-footer">
+              <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning" id="refresh_btn">重新抓取费用</button>
+              <a href="@{Orders.show(ord.orderId)}" class="btn btn-success">刷新</a>
+            #{if ord.feedback}
+              <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
+            #{/if}
+            </div>
+          </div>
+
+          <div class="box box-info box-solid">
+            <div class="box-header"><h3 class="box-title">Order Items</h3></div>
+            <div class="box-body">
+              <table class="table table-bordered">
+                <tr>
+                  <th>SKU</th>
+                  <th>Id</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>ShipPrice</th>
+                  <th>ProductName</th>
+                  <th>CreateDate</th>
+                  <th>Memo</th>
+                </tr>
+              #{list items:ord.items, as:'item'}
+                <tr>
+                  <td>${item.product.sku}</td>
+                  <td>${item.id}</td>
+                  <td>${item.quantity}</td>
+                  <td>${item.price} ${item.currency}</td>
+                  <td>${item.shippingPrice}</td>
+                  <td>
+                    <a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}
+                    </a></td>
+                  <td>${item.createDate}</td>
+                  <td>${item.memo}</td>
+                </tr>
+              #{/list}
+              </table>
+            </div>
+          </div>
+
+          <div class="box box-warning box-solid">
+            <div class="box-header"><h3 class="box-title">Order Fees</h3></div>
+            <div class="box-body">
+            #{render 'Orders/_order_fees.html', fees:ord.fees/}
+            </div>
+          </div>
+
+        </div>
+
+        <div class="tab-pane" id='invoiceinfo'>
+        #{if ord.canBeProvidedInvoice()}
+            #{render 'Orders/_invoice.html', ord: ord, totalamount: totalamount, notaxamount: notaxamount, tax: tax,
+        invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat/}
+          #{/if}
+        </div>
+        <div class="tab-pane" id='returninfo'>
+        #{if isreturn==1 && ord.canBeProvidedInvoice()}
+              #{render 'Orders/_invoice_return.html',ord: ord, totalamount: totalamount, notaxamount: notaxamount,
+        tax: tax, invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat,
+        returndate:returndate/}
+            #{/if}
+        </div>
+      </div>
+
     </div>
-    <div class="label label-info">Order Fees</div>
-    <div>
-        #{render 'Orders/_order_fees.html', fees:ord.fees/}
-    </div>
-  #{/else}
-  </div>
-  <div class="tab-pane fade" id='invoiceinfo'>
-  #{if ord.canBeProvidedInvoice()}
-    #{render 'Orders/_invoice.html', ord: ord, totalamount: totalamount, notaxamount: notaxamount, tax: tax,
-  invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat/}
-  #{/if}
-  </div>
-  <div class="tab-pane fade" id='returninfo'>
-  #{if isreturn==1 && ord.canBeProvidedInvoice()}
-      #{render 'Orders/_invoice_return.html',ord: ord, totalamount: totalamount, notaxamount: notaxamount,
-  tax: tax, invoice: invoice, records: records, editaddress: editaddress, invoiceformat: invoiceformat,
-  returndate:returndate/}
-    #{/if}
   </div>
 </div>

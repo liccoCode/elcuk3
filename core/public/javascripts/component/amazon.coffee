@@ -3,7 +3,7 @@ $ ->
   validateMaxLength = (maxLength, obj) ->
     $text = $(obj)
     length = unescape(encodeURI(jsEscapeHtml($text.val().trim()))).length
-    $text.find('~ .help-inline').html((maxLength - length) + " bytes left")
+    $("#" + $text.attr("id") + "_hint").html((maxLength - length) + " bytes left")
     if length > maxLength then $text.css('color', 'red') else $text.css('color', '')
     false
 
@@ -25,7 +25,6 @@ $ ->
 
   # bullet_point 的检查, search Terms 的检查, Product DESC 输入, 字数计算
   $('#saleAmazonForm').on('keyup blur', "[name^='s.aps.keyFeturess'],[name^='s.aps.searchTermss']", (e) ->
-    return false if e.keyCode is 13
     validateMaxLength(valid_length(@), @)
   ).on('keyup', "[name='s.aps.productDesc']", (e) ->
     validateMaxLength(valid_length(@), @)
@@ -51,14 +50,8 @@ $ ->
 #  自动补全的 sid 的功能条
     $input = $(@)
     return false if @value.length < 10
-
     LoadMask.mask()
-    $.ajax('/sellings/tsp', {
-      type: 'GET',
-      data: {sid: @value},
-      dataType: 'json'
-    })
-      .done((r) ->
+    $.post("/sellings/tsp", {sid: @value}, (r) ->
       $('#sid_preview').data('tsp', r)
       noty({
         text: '加载成功, 可点击 "放大镜" 查看详细信息或者点击 "填充" 进行填充',

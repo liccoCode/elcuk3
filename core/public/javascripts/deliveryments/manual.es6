@@ -42,7 +42,7 @@ $(() => {
       let cooper_id = $("select[name='dmt.cooperator.id']").val();
       let boxSize = $(this).attr("boxSize");
       if (cooper_id && boxSize) {
-        $(this).prev("input").val(boxSize * $(this).val());
+        $(this).parent("div").prev("input").val(boxSize * $(this).val());
       } else {
         alert('请先选择 供应商!');
       }
@@ -101,9 +101,9 @@ $(() => {
             if (!r.flag) {
               alert(r.message);
             } else {
-              $input.parent("td").parent("tr").find("input[name$='attrs.price']").val(r.price);
-              $input.parent("td").parent("tr").next("tr").find("input[name='box_size']").attr("boxSize", r.boxSize);
-              $input.parent("td").parent("tr").find("option:contains(" + r.currency + ")").prop('selected', true);
+              $input.parent("div").parent("div").find("input[name$='attrs.price']").val(r.price);
+              $input.parent("div").parent("div").parent("div[class='box-body']").find("input[name='box_size']").attr("boxSize", r.boxSize);
+              $input.parent("div").parent("div").find("option:contains(" + r.currency + ")").prop('selected', true);
               calu_box_size();
             }
             LoadMask.unmask();
@@ -122,11 +122,12 @@ $(() => {
     }
     let index = $("input[name$='product.sku']").length;
     let html = _.template($("#copy").text())({"num": index});
-    $("#btn_tr").before(html);
-    window.$ui.dateinput();
+    $("#new_procureunit").append(html);
+    window.$dataui.dateinput();
     init();
     validQty();
     bind_b2b_checkbox();
+    addDeleteBtn();
   });
 
   function validQty () {
@@ -140,6 +141,22 @@ $(() => {
       }
     });
   }
+
+  function addDeleteBtn () {
+    $("[name='delete_btn']").remove();
+    let $btn = "<div class='col-sm-3' style='text-align:right;'>";
+    $btn += "<button type='button' class='btn btn-danger' name='delete_btn'>删除</button></div>";
+    let length = $("div[class='box-body']").length;
+    if (length > 1) {
+      $("#tail-form-" + (length - 1)).append($btn);
+    }
+  }
+
+  $(document).on("click", "[name='delete_btn']", function (e) {
+    let length = $("div[class='box-body']").length;
+    $("#box-" + (length - 1)).remove();
+    addDeleteBtn();
+  });
 
   validQty();
 

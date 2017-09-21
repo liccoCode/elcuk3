@@ -12,7 +12,7 @@
     <th>生产周期(day)</th>
     <th>每箱数量</th>
     <th>最低采购量</th>
-    <th width="70"></th>
+    <th width="90px;"></th>
   </tr>
 #{list items:items, as:'itm'}
   <tr>
@@ -29,15 +29,16 @@
     <td>${itm.boxSize}</td>
     <td>${itm.lowestOrderNum}</td>
     <td>
-      <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-mini"><i class="icon-edit"></i></a>
-      <a href="@{Cooperators.removeCooperItemById(itm.id)}" class="btn btn-mini"><i class="icon-remove"></i></a>
+      <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-xs btn-info"><i class="icon-pencil"></i></a>
+      <a href="@{Cooperators.removeCooperItemById(itm.id)}" class="btn btn-xs btn-danger" data-toggle="tooltip"
+         name="itemDel" title="删除"><i class="icon-trash"></i></a>
     </td>
   </tr>
 #{/list}
   <!-- 为此供应商关联新的产品 -->
   <tr>
     <td colspan="13">
-      <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-warning">为[${coper.fullName}]添加新的生产的物料</a>
+      <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-xs btn-warning">为[${coper.fullName}]添加新的生产的物料</a>
     </td>
   </tr>
 </table>
