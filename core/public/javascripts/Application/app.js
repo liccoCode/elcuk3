@@ -100,17 +100,7 @@ $(() => {
         },
         tooltip: {
           shared: true,
-          formatter: function () {
-            let s = "<b>" + Highcharts.dateFormat('%Y-%m-%d', point.x) + "</b><br>";
-            point.points.forEach(function (point) {
-              let totalY = point.series.yData.reduce(function (a, b) {
-                a + b
-              });
-              s += "<span style='color:" + point.series.color + "'>" + point.series.name + "</span>: <b>#{point.y}" +
-              " ({totalY})</b><br/>";
-              return s;
-            });
-          }
+          crosshairs: true
         },
         series: r['series']
       });
