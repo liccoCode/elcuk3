@@ -1230,6 +1230,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
                     * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
                     * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
+            Logger.info(itm.unit.product.sku);
             if(((volume / 1000) / 5000) > itm.unit.product.weight) {
                 totalWeight += (volume / 1000) * itm.qty / 5000;
             } else {
