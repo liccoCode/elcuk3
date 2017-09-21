@@ -3,7 +3,7 @@ $(() => {
   $("#shipments").on("click", ".delete", function (e) {
     e.stopPropagation();
     let id = $(this).data('id');
-    $.post("/apply/transport/" + id + "/shipment", function (r) {
+    $.post("/applys/departShipmentFromApply", {id: id}, function (r) {
       if (r.flag) {
         noty({
           text: "#" + id + r.message,
