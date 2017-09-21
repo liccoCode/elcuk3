@@ -1,13 +1,9 @@
 #{extends 'main_full_v3.html' /}
 #{set title: '运输项目列表' /}
 #{set 'moreScripts'}
+  #{script 'shipItem/index.js'/}
 #{/set}
-<script type="text/javascript">
-  $(document).on('click', '#today', function (e) {
-    $("input[name='p.from']").data('dateinput').setValue(new Date());
-    $("input[name='p.to']").data('dateinput').setValue(new Date());
-  });
-</script>
+
 
 #{flash_alert /}
 
