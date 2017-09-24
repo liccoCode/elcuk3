@@ -185,7 +185,6 @@
           <div class="box-header with-border"><h3 class="box-title">Comment</h3></div>
           <div class="box-body">${unit.comment}</div>
         </div>
-
       </div>
       <div class="col-md-3">
         <div class="box box-info box-solid">
@@ -194,7 +193,7 @@
               #{list items:unit.relateShipment(), as:'sp'}
                 <li>
                   <a href="@{Shipments.show(sp.id)}">${sp}</a>
-                  预计 #{time_tooltip time: sp.dates?.planBeginDate /} 开船
+                  预计 #{time_tooltip_v3 time: sp.dates?.planBeginDate /} 开船
                 </li>
               #{/list}
           </div>
