@@ -73,7 +73,7 @@ public class Analyzes extends Controller {
             User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
-            dtos = p.queryByPrivate(dtos, categories);
+           // dtos = p.queryByPrivate(dtos, categories);
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
