@@ -6,7 +6,7 @@
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'deliveryments/show.coffee'/}
-    #{script 'deliverplans/show.coffee'/}
+    #{script 'deliverplans/show.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
     #{script 'deliveryments/fba_carton_contents.coffee'/}
 #{/set}
@@ -159,7 +159,7 @@
             </div>
           </div>
           <div class="row-fluid">
-            <div style="min-height:300px;" class="span12 well" id="dropbox">
+            <div style="min-height:300px;" class="col-sm-12 well" id="delivery_plan_dropbox">
               <ul class="thumbnails uploaded"></ul>
             #{power.ck "products.edit"}
               <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
