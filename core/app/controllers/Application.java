@@ -5,6 +5,7 @@ import helper.Dates;
 import helper.J;
 import helper.Webs;
 import models.OperatorConfig;
+import models.User;
 import models.market.*;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
@@ -17,6 +18,7 @@ import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
 import play.jobs.Job;
+import play.libs.Crypto;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -30,6 +32,11 @@ import java.util.Objects;
 public class Application extends Controller {
 
     public static void index() {
+        User user = Login.current();
+        if(user.passwordDigest.equals(Crypto.encryptAES("123456"))) {
+            flash.error("请先修改您的初始密码，不能为123456！");
+            render("Users/home.html", user);
+        }
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
@@ -39,6 +46,11 @@ public class Application extends Controller {
     }
 
     public static void indexV3() {
+        User user = Login.current();
+        if(user.passwordDigest.equals(Crypto.encryptAES("123456"))) {
+            flash.error("请先修改您的初始密码，不能为123456！");
+            render("Users/home.html", user);
+        }
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
