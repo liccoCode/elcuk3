@@ -117,7 +117,6 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
-
         return dtos;
     }
 

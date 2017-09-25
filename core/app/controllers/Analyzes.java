@@ -69,17 +69,16 @@ public class Analyzes extends Controller {
      */
     public static void analyzes(final AnalyzePost p) {
         try {
-            List<AnalyzeDTO> dtos = p.query();
             User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
-           // dtos = p.queryByPrivate(dtos, categories);
+            List<AnalyzeDTO> dtos = p.query();
+            dtos = p.queryByPrivate(dtos, categories);
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
     }
-
 
     /**
      * 流量转化率统计报表
