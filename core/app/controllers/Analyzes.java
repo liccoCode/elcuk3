@@ -5,7 +5,6 @@ import helper.J;
 import helper.Webs;
 import models.OperatorConfig;
 import models.User;
-
 import models.market.*;
 import models.product.Category;
 import models.view.Ret;
@@ -14,7 +13,6 @@ import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.TrafficRatePost;
 import models.view.report.TrafficRate;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -26,6 +24,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -72,6 +71,10 @@ public class Analyzes extends Controller {
             User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
+            if(categories.size() == 0) {
+                List<AnalyzeDTO> dtos = new ArrayList<>();
+                render("Analyzes/" + p.type + ".html", dtos, p);
+            }
             List<AnalyzeDTO> dtos = p.query();
             dtos = p.queryByPrivate(dtos, categories);
             render("Analyzes/" + p.type + ".html", dtos, p);

@@ -22,6 +22,7 @@ import play.utils.FastRuntimeException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 分析页面的 Post 请求
@@ -121,11 +122,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
     public List<AnalyzeDTO> queryByPrivate(List<AnalyzeDTO> dtos, List<String> categories) {
-        categories.forEach(categoryId -> {
-            if(StringUtils.isNotBlank(categoryId))
-                CollectionUtils.filter(dtos, new SearchPredicate("^" + categoryId));
-        });
-        return dtos;
+        return dtos.stream().filter(dto -> dto.containsCategory(categories)).collect(Collectors.toList());
     }
 
     public List<AnalyzeDTO> queryOrderByDayOne() {
