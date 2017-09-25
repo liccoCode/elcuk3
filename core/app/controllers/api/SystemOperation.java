@@ -4,6 +4,7 @@ import controllers.Login;
 import models.Notification;
 import models.OperatorConfig;
 import models.User;
+import play.libs.Crypto;
 import play.mvc.Before;
 import play.mvc.Controller;
 
@@ -19,8 +20,13 @@ import java.util.stream.Collectors;
  */
 public class SystemOperation extends Controller {
 
-    @Before(unless = {"login", "authenticate", "logout"})
+    @Before(unless = {"login", "authenticate", "logout", "updates"})
     static void monitBefore() throws Throwable {
+        User user = Login.current();
+        if(user.passwordDigest.equals(Crypto.encryptAES("123456"))) {
+            flash.error("请先修改您的初始密码，不能为123456！");
+            render("Users/home.html", user);
+        }
         //这里应该是用于记录整个应用所有 Controller 的数据统计信息.
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
         renderArgs.put("isB2B", isB2B);

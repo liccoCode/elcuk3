@@ -123,8 +123,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     public List<AnalyzeDTO> queryByPrivate(List<AnalyzeDTO> dtos, List<String> categories) {
         categories.forEach(categoryId -> {
-            if(StringUtils.isNotBlank(this.categoryId))
-                CollectionUtils.filter(dtos, new SearchPredicate("^" + this.categoryId));
+            if(StringUtils.isNotBlank(categoryId))
+                CollectionUtils.filter(dtos, new SearchPredicate("^" + categoryId));
         });
         return dtos;
     }
