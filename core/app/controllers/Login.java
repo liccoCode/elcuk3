@@ -133,6 +133,8 @@ public class Login extends Secure.Security {
 
     public static String currentDepart() {
         String username = Secure.Security.connected();
+        //全部转为小写
+        username = username.toLowerCase();
         if(StringUtils.isNotBlank(username)) {
             if(USER_CACHE.get(username) == null) {
                 User user = User.findByUserName(username.toLowerCase());
