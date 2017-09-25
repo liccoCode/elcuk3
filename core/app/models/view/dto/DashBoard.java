@@ -166,7 +166,7 @@ public class DashBoard implements Serializable {
             if(result > 0) pie.add(result.floatValue(), m.name());
         }
         pieByToday = new HighChart(Series.PIE);
-        pieByToday.title = Dates.date2Date(from) + " orders num";
+        pieByToday.title = Dates.date2Date(from) + " orders nums";
         pieByToday.series(pie);
         Cache.delete(cache_key);
         Cache.add(cache_key, pieByToday, "2h");

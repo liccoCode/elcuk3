@@ -63,7 +63,7 @@ $(() => {
 
   function getSales (fid) {
     let sid = fid;
-    $.post("/Application/ajaxUnit", {sid: sid}, function (r) {
+    $.post("/application/ajaxUnit", {sid: sid}, function (r) {
       Highcharts.chart("ajaxUnitDiv", {
         credits: {
           text: 'EasyAcc',
@@ -100,7 +100,8 @@ $(() => {
         },
         tooltip: {
           shared: true,
-          crosshairs: true
+          crosshairs: true,
+          xDateFormat: '%Y-%m-%d'
         },
         series: r['series']
       });

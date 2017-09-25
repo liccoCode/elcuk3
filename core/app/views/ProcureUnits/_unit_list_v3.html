@@ -185,7 +185,6 @@
           <div class="box-header with-border"><h3 class="box-title">Comment</h3></div>
           <div class="box-body">${unit.comment}</div>
         </div>
-
       </div>
       <div class="col-md-3">
         <div class="box box-info box-solid">
@@ -194,7 +193,7 @@
               #{list items:unit.relateShipment(), as:'sp'}
                 <li>
                   <a href="@{Shipments.show(sp.id)}">${sp}</a>
-                  预计 #{time_tooltip time: sp.dates?.planBeginDate /} 开船
+                  预计 #{time_tooltip_v3 time: sp.dates?.planBeginDate /} 开船
                 </li>
               #{/list}
           </div>
@@ -227,63 +226,58 @@
                 <td>${unit.attrs.qty}</td>
                 <td>${unit.attrs.deliveryDate.los()}</td>
               </tr>
+              <tr>
+                <td colspan="2">
+                    #{if unit.selling}
+                      <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-xs btn-primary">修改</a>
+                    #{/if}
+                    #{else }
+                      <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-xs btn-primary">修改</a>
+                    #{/else}
+                    #{if unit.stage.name() == 'PLAN'}
+                      <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-xs btn-danger">
+                        删除
+                      </a>
+                    #{/if}
+                  <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-xs btn-info">变更详情</a>
+                    #{power.ck "procures.dosplitunit"}
+                        #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
+                          <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-xs btn-default"
+                             rel="tooltip" title="如B2B拆单，样品，试用等操作">SKU分拆</a>
+                          <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-xs btn-warning" target="_blank">
+                          ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
+                        #{/if}
+                    #{/power.ck}
+                </td>
+              </tr>
             </table>
           </div>
           <div class="box-footer">
-            <div class="btn-toolbar">
-              <!-- 普通修改 -->
-                #{if unit.selling}
-                  <a href="@{ProcureUnits.edit(unit.id)}" target="_blank" class="btn btn-sm btn-primary">修改</a>
-                #{/if}
-                #{else }
-                  <a href="@{ProcureUnits.editManual(unit.id)}" target="_blank" class="btn btn-sm btn-primary">修改</a>
-                #{/else}
-                #{if unit.stage.name() == 'PLAN'}
-                  <a href="@{ProcureUnits.destroy(unit.id)}" data-method='DELETE' data-confirm="确认删除?" class="btn btn-sm btn-danger">
-                    删除
-                  </a>
-                #{/if}
-              <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-sm btn-info">变更详情</a>
-                #{power.ck "procures.dosplitunit"}
-                    #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
-                      <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-sm btn-default"
-                         rel="tooltip" title="如B2B拆单，样品，试用等操作">SKU分拆</a>
-                      <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-sm btn-warning" target="_blank">
-                      ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
-                    #{/if}
-                #{/power.ck}
-            </div>
-
               #{if delivery}
-                <div class="btn-toolbar">
                   <!-- 确认到    货代处 -->
                     #{if unit.selling}
                         #{ifnot unit.isPlaced}
-                          <a data-remote='true' data-method='PUT' class="btn btn-sm btn-info" id="isplaced_${unit.id}_btn"
+                          <a data-remote='true' data-method='PUT' class="btn btn-xs btn-info" id="isplaced_${unit.id}_btn"
                              href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
                         #{/ifnot}
                     #{/if}
-                  <a href="javascript:void(0)" class="btn btn-sm btn-warning" data-tragettr="procureUnit_${unit.id}"
+                  <a href="javascript:void(0)" class="btn btn-xs btn-warning" data-tragettr="procureUnit_${unit.id}"
                      data-href="@{ProcureUnits.confirmUnit(unit.id)}" name="confirmUnitBtn">已核单</a>
-                  <a href="javascript:void(0)" class="btn btn-sm ${unit.noPayment?'btn-success':'btn-danger'}"
+                  <a href="javascript:void(0)" class="btn btn-xs ${unit.noPayment?'btn-success':'btn-danger'}"
                      data-tragettr="procureUnit_${unit.id}" data-href="@{ProcureUnits.noPayment(unit.id)}" name="noPaymentBtn"
                      rel='tooltip' title='因各种原因而不需要纳入 未进请款单金额 统计'>${unit.noPayment?'统计':'不统计'}</a>
-                </div>
-                  #{if unit.fba}
-                      #{power.ck 'fbas.update'}
-                        <div class="btn-toolbar">
-                          <a href="javascript:void(0)" class="btn btn-sm btn-warning" id="replaceUnitFBA"
+                    #{if unit.fba}
+                        #{power.ck 'fbas.update'}
+                          <a href="javascript:void(0)" class="btn btn-xs btn-warning" id="replaceUnitFBA"
                              data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
                           </a>
-                        </div>
-                      #{/power.ck}
-                  #{/if}
-                <div class="btn-toolbar">
-                    #{if unit.fba}
-                      <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-small btn-success">箱內麦</a>
-                      <a href="javascript:void(0)" class="btn btn-small btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+                        #{/power.ck}
                     #{/if}
-                </div>
+
+                    #{if unit.fba}
+                      <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-xs btn-success">箱內麦</a>
+                      <a href="javascript:void(0)" class="btn btn-xs btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+                    #{/if}
               #{/if}
           </div>
         </div>
