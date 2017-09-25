@@ -83,7 +83,7 @@
                           </div>
                           <div class="col-sm-4">
                             <input type="hidden" id="sellingId" value="${s.sellingId}">
-                          #{if s.state=='DOWN'}
+                          #{if s.state.name()=='DOWN'}
                             <a class="btn btn-primary" id="sellingUp" data-confirm="确认上架?">系统内上架</a>
                           #{/if}
                           #{else }
