@@ -1,12 +1,12 @@
 $(() => {
 
-  $("#copyBtn").click(function () {
+  $("a[name='copyBtn']").click(function () {
     let sku = $(this).data('sku');
     $("#target_choseid").val(sku);
     $('#copy_modal').modal('show');
   });
 
-  $("#backupBtn").click(function () {
+  $("a[name='backupBtn']").click(function () {
     let id = $(this).data('sku');
     let family = $(this).data('family');
     $("#backup_choseid").val(id);
@@ -57,7 +57,7 @@ $(() => {
       }
     }
     LoadMask.unmask();
-  }).on("click", "#deleteBtn", function () {
+  }).on("click", "a[name='deleteBtn']", function () {
     let $logForm = $("#logForm");
     let sku = $(this).data("sku");
     $($("#logForm input")[0]).val(sku);
