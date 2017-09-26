@@ -28,18 +28,34 @@
               <input class="form-control" id="pro_category" name="pro.category.categoryId" required
                      value="${pro.category?.categoryId}" data-provide="typeahead" data-source="${categorys}">
             </div>
-            <label for="pro_family" class="col-sm-2 control-label">Family</label>
+            <label for="pro_family" class="col-sm-1 control-label">Family</label>
             <div class="col-sm-2">
               <input id="pro_family" name="pro.family.family" data-provide="typeahead" required class="form-control"
                      data-source="${families}" value="${pro.family?.family}">
             </div>
-            <label for="inputEmail3" class="col-sm-2 control-label">SKU</label>
+            <label for="inputEmail3" class="col-sm-1 control-label">SKU</label>
             <div class="col-sm-2">
               <input type="text" class="form-control" id="pro_sku" name="pro.sku" value="${pro.sku}" required>
             </div>
           </div>
 
           <div class="form-group">
+            <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.lengths" value="${pro.lengths}">
+                <span class="input-group-addon">mm</span>
+              </div>
+            </div>
+
+            <label for="inputEmail3" class="col-sm-1 control-label">宽(包材)</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" class="form-control" name="pro.width" value="${pro.width}">
+                <span class="input-group-addon">mm</span>
+              </div>
+            </div>
+
             <label for="inputEmail3" class="col-sm-1 control-label">高(包材)</label>
             <div class="col-sm-2">
               <div class="input-group">
@@ -47,7 +63,8 @@
                 <span class="input-group-addon">mm</span>
               </div>
             </div>
-            <label for="inputEmail3" class="col-sm-2 control-label">重量(包材)</label>
+
+            <label for="inputEmail3" class="col-sm-1 control-label">重量(包材)</label>
             <div class="col-sm-2">
               <div class="input-group">
                 <input type="text" class="form-control col-xs-1" name="pro.weight" value="${pro.weight}">
@@ -66,16 +83,14 @@
                 <span class="input-group-addon">mm</span>
               </div>
             </div>
-            <label class="col-sm-2 control-label">宽(产品)</label>
+            <label class="col-sm-1 control-label">宽(产品)</label>
             <div class="col-sm-2">
               <div class="input-group">
                 <input type="text" class="form-control" name="pro.productWidth" value="${pro.productWidth}">
                 <span class="input-group-addon">mm</span>
               </div>
             </div>
-          </div>
 
-          <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">高(产品)</label>
             <div class="col-sm-2">
               <div class="input-group">
@@ -83,7 +98,7 @@
                 <span class="input-group-addon">mm</span>
               </div>
             </div>
-            <label class="col-sm-2 control-label">重量(产品)</label>
+            <label class="col-sm-1 control-label">重量(产品)</label>
             <div class="col-sm-2">
               <div class="input-group">
                 <input type="text" class="form-control col-xs-1" name="pro.productWeight" value="${pro.productWeight}">
@@ -103,21 +118,16 @@
                 <input type="text" class="form-control" name="pro.declaredValue" value="${pro.declaredValue}">
               </div>
             </div>
-            <label class="col-sm-2 control-label">申报品名(运输)</label>
+            <label class="col-sm-1 control-label">申报品名(运输)</label>
             <div class="col-sm-2">
-              <div class="input-group">
-                <input type="text" class="form-control" id="pro_declareName" name="pro.declareName" value="${pro.declareName}">
-                <span class="input-group-addon">mm</span>
-              </div>
+              <input type="text" class="form-control" id="pro_declareName" name="pro.declareName" value="${pro.declareName}">
             </div>
-          </div>
 
-          <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">用途(运输)</label>
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.useWay" value="${pro.useWay}">
             </div>
-            <label class="col-sm-2 control-label">中文品名(运输)</label>
+            <label class="col-sm-1 control-label">中文品名(运输)</label>
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.chineseName" value="${pro.chineseName}">
             </div>
@@ -132,7 +142,7 @@
               #{/list}
               </select>
             </div>
-            <label class="col-sm-2 control-label">上架状态</label>
+            <label class="col-sm-1 control-label">上架状态</label>
             <div class="col-sm-2">
               <select class="form-control" name="pro.marketState">
               #{list items:models.product.Product.T.values(), as:'t'}
@@ -140,13 +150,7 @@
               #{/list}
               </select>
             </div>
-            <label class="col-sm-2 control-label">UPC</label>
-            <div class="col-sm-2">
-              <input type="text" class="form-control" name="pro.upc" value="${pro.upc}" required>
-            </div>
-          </div>
 
-          <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">采购状态</label>
             <div class="col-sm-2">
               <select class="form-control" name="pro.procureState">
@@ -155,7 +159,7 @@
               #{/list}
               </select>
             </div>
-            <label class="col-sm-2 control-label">产品的生命周期</label>
+            <label class="col-sm-1 control-label">产品生命周期</label>
             <div class="col-sm-2">
               <select class="form-control" name="pro.marketState">
               #{list items:models.product.Product.L.values(), as:'t'}
@@ -163,9 +167,24 @@
               #{/list}
               </select>
             </div>
-            <label class="col-sm-2 control-label">Part Number</label>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-1 control-label">UPC</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.upc" value="${pro.upc}" required>
+            </div>
+            <label class="col-sm-1 control-label">Part Number</label>
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.partNumber" value="${pro.partNumber}" required>
+            </div>
+            <label class="col-sm-1 control-label">UPC(JP)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.upcJP" value="${pro.upcJP}">
+            </div>
+            <label class="col-sm-1 control-label">Part Num.(JP)</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" name="pro.partNumberJP" value="${pro.partNumberJP}">
             </div>
           </div>
 
@@ -177,29 +196,23 @@
                 <input role="date" class="form-control" name="pro.marketTime" id="marketTimeDate" value="${pro.marketTime}">
               </div>
             </div>
-            <label class="col-sm-2 control-label">退市时间</label>
+            <label class="col-sm-1 control-label">退市时间</label>
             <div class="col-sm-2">
               <div class="input-group">
                 <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
                 <input role="date" class="form-control" name="pro.delistingTime" value="${pro.delistingTime}">
               </div>
             </div>
-            <label class="col-sm-2 control-label">UPC(JP)</label>
-            <div class="col-sm-2">
-              <input type="text" class="form-control" name="pro.upcJP" value="${pro.upcJP}">
-            </div>
+
           </div>
 
           <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">产品名称</label>
             <div class="col-sm-6">
-              <input type="text" class="form-control" name="pro.abbreviation" id="pro_abbreviation"
-                     value="${pro.abbreviation}" required>
+              <input type="text" class="form-control" name="pro.abbreviation" id="pro_abbreviation" required
+                     value="${pro.abbreviation}">
             </div>
-            <label class="col-sm-2 control-label">Part Number(JP)</label>
-            <div class="col-sm-2">
-              <input type="text" class="form-control" name="pro.partNumberJP" value="${pro.partNumberJP}">
-            </div>
+
           </div>
 
           <div class="form-group">
@@ -207,7 +220,7 @@
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.productName" value="${pro.productName}">
             </div>
-            <label for="inputEmail3" class="col-sm-2 control-label">副标题</label>
+            <label for="inputEmail3" class="col-sm-1 control-label">副标题</label>
             <div class="col-sm-6">
               <input type="text" class="form-control" name="pro.subtitle" value="${pro.subtitle}" required>
             </div>
