@@ -75,8 +75,10 @@ public class Analyzes extends Controller {
                 List<AnalyzeDTO> dtos = new ArrayList<>();
                 render("Analyzes/" + p.type + ".html", dtos, p);
             }
+            Long start = System.currentTimeMillis();
             List<AnalyzeDTO> dtos = p.query();
             dtos = p.queryByPrivate(dtos, categories);
+            Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) / 1000);
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
