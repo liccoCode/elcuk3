@@ -139,6 +139,10 @@ public class EbayOrder extends GenericModel {
      * 国家
      */
     public String country;
+    /**
+     * 是否使用 MWS 同步过 SaleFee 数据
+     */
+    public boolean synced = false;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     public List<EbayOrderItem> items = new ArrayList<>();
