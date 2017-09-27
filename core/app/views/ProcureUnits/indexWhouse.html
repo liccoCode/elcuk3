@@ -186,7 +186,7 @@
               </td>
               <td>${unit.parent?.id}</td>
               <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
-              <td rel="tooltip" title="${unit.product?.abbreviation}" style="word-break:break-all">
+              <td data-toggle="tooltip" title="${unit.product?.abbreviation}" style="word-break:break-all">
                 <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
                 <br>${unit?.product?.abbreviation?.overLong()}
               </td>
