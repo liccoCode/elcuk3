@@ -280,10 +280,9 @@ public class Inbound extends GenericModel {
                 u.save();
                 if(this.type == T.Purchase) {
                     ProcureUnit punit = u.unit;
-                    punit.attrs.qty = (punit.attrs.qty == null ? 0 : punit.attrs.qty) - u.qty;
                     punit.unqualifiedQty += u.unqualifiedQty;
                     punit.currWhouse = u.target;
-                    if(punit.attrs.qty == 0) {
+                    if(punit.inboundQty == 0) {
                         punit.stage = ProcureUnit.STAGE.DELIVERY;
                         punit.result = u.result;
                     }
@@ -353,7 +352,7 @@ public class Inbound extends GenericModel {
                 refund.createRefundByInbound(return_units);
                 Refund.confirmRefund(Arrays.asList(refund));
             }
-            /**创建尾货单**/
+            /*创建尾货单**/
             if(tail_units.size() > 0) {
                 this.createTailInbound(tail_units);
             }
