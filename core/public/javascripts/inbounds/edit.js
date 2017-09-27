@@ -56,10 +56,10 @@ $(() => {
       $(this).parent('td').next().find('select').hide();
       $(this).attr("style", "width:35px;");
     } else if (attr == 'qty' && $(this).val() != $(this).data('qty')) {
-      if ($(this).val() / $(this).data('qty') < 0.9 && $(this).parent('td').next().find('select').val() == 'Delivery') {
-        $(this).attr("style", "width:35px;background-color:yellow;");
+      if ($(this).val() != $(this).data('qty')) {
+        $(this).attr("style", "width:58px; padding:10px; background-color:red;");
       } else {
-        $(this).attr("style", "width:35px;");
+        $(this).attr("style", "width:58px; padding:10px;");
       }
       $(this).parent('td').next().find('select').show();
     }
