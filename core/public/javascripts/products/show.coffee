@@ -82,8 +82,4 @@ $ ->
     window.dropUpload.iniDropbox(whouseAttachsFidCallBack, dropbox)
 
   $(document).ready ->
-    new LocalResize(document.getElementById('file_home')).success (stop, data) ->
-      $('#file_home').data('base64_file', data['base64Clean']).data('origin_name', data['original']['name'])
-      stop()
-
     initWhouseAttachs()

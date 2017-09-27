@@ -1223,7 +1223,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return totalWeight;
     }
 
-    private float totalRealWeight() {
+    public float totalRealWeight() {
         float totalWeight = 0f;
         for(ShipItem itm : this.items) {
             if(itm.unit == null) continue;
