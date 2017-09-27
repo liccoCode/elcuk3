@@ -5,7 +5,6 @@ import helper.J;
 import helper.Webs;
 import models.OperatorConfig;
 import models.User;
-
 import models.market.*;
 import models.product.Category;
 import models.view.Ret;
@@ -25,6 +24,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -68,21 +68,22 @@ public class Analyzes extends Controller {
      */
     public static void analyzes(final AnalyzePost p) {
         try {
-            List<AnalyzeDTO> dtos = p.query();
-            User user = Login.current();
+            User user = User.findById(Login.current().id);
             List<String> categories =
                     user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
             if(categories.size() == 0) {
-                render("Analyzes/" + p.type + ".html", p);
-            } else {
-                dtos = dtos.stream().filter(dto -> dto.containsCategory(categories)).collect(Collectors.toList());
+                List<AnalyzeDTO> dtos = new ArrayList<>();
                 render("Analyzes/" + p.type + ".html", dtos, p);
             }
+            Long start = System.currentTimeMillis();
+            List<AnalyzeDTO> dtos = p.query();
+            dtos = p.queryByPrivate(dtos, categories);
+            Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) / 1000);
+            render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
     }
-
 
     /**
      * 流量转化率统计报表

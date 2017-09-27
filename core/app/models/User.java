@@ -262,7 +262,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "http://104.207.150.98:9000/";
+                return "https://e.visioa.com/";
             }
 
             @Override
@@ -298,7 +298,7 @@ public class User extends Model {
         Brand {
             @Override
             public String label() {
-                return "品牌部";
+                return "品牌事业部";
             }
         },
         Audit {
@@ -317,6 +317,18 @@ public class User extends Model {
             @Override
             public String label() {
                 return "开发部";
+            }
+        },
+        Shipment {
+            @Override
+            public String label() {
+                return "物流部";
+            }
+        },
+        Whouse {
+            @Override
+            public String label() {
+                return "仓储部";
             }
         };
 

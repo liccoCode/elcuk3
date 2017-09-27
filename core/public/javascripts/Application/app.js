@@ -9,7 +9,7 @@ $(() => {
     });
   });
 
-  $.post("/Application/perDayOrderNum", function (r) {
+  $.post("/application/perDayOrderNum", function (r) {
     let title = r.title == undefined ? r["series"][0]["name"] : r.title;
     Highcharts.chart('pieChart1', {
       credits: {
@@ -52,7 +52,7 @@ $(() => {
   function refreshTopFive (market) {
     let div = $("#progress_by_market");
     div.mask();
-    div.load("/Application/topTenSkuByMarket", {market: market}, function () {
+    div.load("/application/topTenSkuByMarket", {market: market}, function () {
       div.unmask();
     });
   }
@@ -63,7 +63,7 @@ $(() => {
 
   function getSales (fid) {
     let sid = fid;
-    $.post("/Application/ajaxUnit", {sid: sid}, function (r) {
+    $.post("/application/ajaxUnit", {sid: sid}, function (r) {
       Highcharts.chart("ajaxUnitDiv", {
         credits: {
           text: 'EasyAcc',
@@ -100,17 +100,8 @@ $(() => {
         },
         tooltip: {
           shared: true,
-          formatter: function () {
-            let s = "<b>" + Highcharts.dateFormat('%Y-%m-%d', point.x) + "</b><br>";
-            point.points.forEach(function (point) {
-              let totalY = point.series.yData.reduce(function (a, b) {
-                a + b
-              });
-              s += "<span style='color:" + point.series.color + "'>" + point.series.name + "</span>: <b>#{point.y}" +
-              " ({totalY})</b><br/>";
-              return s;
-            });
-          }
+          crosshairs: true,
+          xDateFormat: '%Y-%m-%d'
         },
         series: r['series']
       });

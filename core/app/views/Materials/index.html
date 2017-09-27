@@ -47,49 +47,55 @@
         </form>
       </div>
 
-      <form method="post" id="inboundForm">
-        <div class="box-body">
-          <table class="table table-condensed table-bordered" id="data-table">
-            <tr>
-              <th>物料编码</th>
-              <th>物料名称</th>
-              <th width="70px;">物料类别</th>
-              <th width="70px;">B0M—ID</th>
-              <th>规格</th>
-              <th width="280px;">材质</th>
-              <th width="150px;">工艺</th>
-              <th width="120px;">工厂物料代码</th>
-              <th width="100px;">最近采购价</th>
-              <th width="100px;">操作</th>
-            </tr>
-          #{list items:materials, as:'m'}
-            <tr>
-              <td>${m.code}</td>
-              <td>${m.name}</td>
-              <td>${m.type.label()}</td>
-              <td>${m.boms[0]?.number}</td>
-              <td title="${m.specification}" data-toggle="tooltip">${m.specification.xxLong()}</td>
-              <td title="${m.texture}" data-toggle="tooltip">${m.texture.xxLong()}</td>
-              <td title="${m.technology}" data-toggle="tooltip">${m.technology.nineLong()}</td>
-              <td title="${m.version}" data-toggle="tooltip">${m.version}</td>
-              <td>${m.nowPurchasePlanPrice()}</td>
-              <td>
-                <a href="@{Materials.edit(m.id)}" class="btn btn-xs btn-primary">编辑</a>
-                <a href="javascript:void(0)" data-url='@{Materials.deleteMaterial(m.id)}' uid="${m.id}"
-                   name="delBtn" class="btn btn-xs btn-danger">下架</a>
-              </td>
-            </tr>
-          #{/list}
-          </table>
+            <form method="post" id="inboundForm">
+              <div class="box-body">
+                <table class="table table-condensed table-bordered" id="data-table">
+                  <tr>
+                    <th>物料编码</th>
+                    <th>物料名称</th>
+                    <th width="70px;">物料类别</th>
+                    <th width="70px;">B0M—ID</th>
+                    <th>规格</th>
+                    <th width="280px;">材质</th>
+                    <th width="150px;">工艺</th>
+                    <th width="120px;">工厂物料代码</th>
+                    <th width="100px;">最近采购价</th>
+                    <th width="100px;">操作</th>
+                  </tr>
+                #{list items:materials, as:'m'}
+                  <tr>
+                    <td>${m.code}</td>
+                    <td>${m.name}</td>
+                    <td>${m.type.label()}</td>
+                    <td>${m.boms[0]?.number}</td>
+                    <td title="${m.specification}" data-toggle="tooltip">${m.specification.xxLong()}</td>
+                    <td title="${m.texture}" data-toggle="tooltip">${m.texture.xxLong()}</td>
+                    <td title="${m.technology}" data-toggle="tooltip">${m.technology.nineLong()}</td>
+                    <td title="${m.version}" rel="tooltip">${m.version.overLong()}</td>
+                    <td>${m.nowPurchasePlanPrice()}</td>
+                    <td>
+                      <a href="@{Materials.edit(m.id)}" class="btn btn-xs btn-primary">编辑</a>
+                        #{if m.isDel}
+                          <a href="javascript:void(0)" data-url='@{Materials.deleteMaterial(m.id)}' msg='确定上架数据吗'
+                             uid="${m.id}" name="delBtn" class="btn btn-xs btn-success">上架</a>
+                        #{/if}
+                        #{else }
+                          <a href="javascript:void(0)" data-url='@{Materials.deleteMaterial(m.id)}' msg='确定下架数据吗'
+                             uid="${m.id}" name="delBtn" class="btn btn-xs btn-danger">下架</a>
+                        #{/else}
+                    </td>
+                  </tr>
+                #{/list}
+                </table>
+              </div>
+            </form>
+            <div class="box-footer">
+            #{bootstrap_pager_v3 pi:p, url:'' /}
+            </div>
+          </div>
         </div>
-      </form>
-      <div class="box-footer">
-      #{bootstrap_pager_v3 pi:p, url:'' /}
-      </div>
     </div>
-  </div>
-</div>
 
-#{records_v3 records:logs/}
+  #{records_v3 records:logs/}
 
 
