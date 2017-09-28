@@ -33,6 +33,7 @@
     <th>预计交货时间</th>
     <th>预计运输时间</th>
     <th>实际交货时间</th>
+    <th>是否核准</th>
     <th>质检结果</th>
     <th width="90px;">创建人/<br>创建时间</th>
   </tr>
@@ -170,6 +171,7 @@
     <td>#{time_tooltip_v3 time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>
+    <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
     <td>
       <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
       ${unit.result?.label()}
