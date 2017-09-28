@@ -1,6 +1,5 @@
 package controllers;
 
-import controllers.api.SystemOperation;
 import helper.J;
 import helper.Webs;
 import models.*;
@@ -27,7 +26,7 @@ import java.util.*;
  * Date: 2/9/12
  * Time: 3:43 PM
  */
-@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class})
 public class Users extends Controller {
 
     @Check("users.index")
@@ -143,6 +142,7 @@ public class Users extends Controller {
             Validation.addError("", Webs.e(e));
             render("Users/home.html", user);
         }
+        Login.updateUserCache(user);
         flash.success("修改成功.");
         redirect("/users/home");
     }

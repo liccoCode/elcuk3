@@ -51,7 +51,7 @@ public class Login extends Secure.Security {
     static boolean authenticate(String username, String password) {
         //全部转为小写
         username = username.toLowerCase();
-        /**
+        /*
          * 1. 判断是否拥有此用户; 使用公司邮箱 @easyacceu.com
          * 2. 判断用户登陆是否正常
          */

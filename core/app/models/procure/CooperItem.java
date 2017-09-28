@@ -197,6 +197,7 @@ public class CooperItem extends Model {
         this.productTerms = entity.productTerms;
         this.memo = entity.memo;
         this.items = entity.items;
+        this.setAttributes();
         this.setDefaultValue();
         this.save();
         if(logs.size() > 0) {
