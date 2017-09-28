@@ -200,7 +200,7 @@ $(() => {
   });
 
   $("#extends").on("click", "#add_template_btn", function () {
-    let temp_id = $("select[name='templateId']").val();
+    let temp_id = $("select[name='templateIdSelect']").val();
     if (!temp_id) {
       noty({
         text: "请选择要加载的模板",
@@ -208,8 +208,9 @@ $(() => {
         timeout: 5000
       });
     } else {
+      $("#commit_templateId").val(temp_id);
       LoadMask.mask();
-      $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), function (r) {
+      $("#extends_atts_home").load("/Products/attrs", $("#add_attr_form").serialize(), function (r) {
         LoadMask.unmask()
       });
     }
@@ -233,5 +234,6 @@ $(() => {
       LoadMask.unmask();
     });
   });
+
 
 });
