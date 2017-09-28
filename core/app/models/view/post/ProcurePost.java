@@ -123,7 +123,7 @@ public class ProcurePost extends Post<ProcureUnit> {
         this.stages.add(ProcureUnit.STAGE.DELIVERY);
         this.stages.add(ProcureUnit.STAGE.IN_STORAGE);
         this.dateType = "createDate";
-        this.perSize = 70;
+        this.perSize = 20;
         projectNames.clear();
         projectNames.add(OperatorConfig.getVal("brandname"));
         projectNames.add("B2B");

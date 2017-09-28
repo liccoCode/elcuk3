@@ -1,8 +1,10 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.product.Category;
@@ -23,10 +25,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -91,13 +90,13 @@ public class Inbounds extends Controller {
         render(units, proUnit, planId, it, username);
     }
 
-    public static void create(Inbound inbound, List<InboundUnit> dtos) {
+    public static void create(Inbound inbound, List<InboundUnit> dtos, boolean isTail) {
         inbound.id = Inbound.id();
         inbound.receiver = Login.current();
         inbound.createDate = new Date();
         inbound.status = inbound.type == Inbound.T.Purchase ? Inbound.S.Create : Inbound.S.Handing;
         inbound.save();
-        inbound.create(dtos);
+        inbound.create(dtos, isTail);
         flash.success("创建成功!");
         edit(inbound.id);
     }
@@ -255,6 +254,31 @@ public class Inbounds extends Controller {
         Inbound inbound = Inbound.findById(id);
         List<InboundUnit> units = inbound.units;
         render("/Inbounds/_units.html", units);
+    }
+
+    public static void createTailInboundByUnitId(Long unitId) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
+        String msg = ProcureUnit.validInbound(unit);
+        if(StringUtils.isNotBlank(msg)) {
+            renderText(msg);
+        }
+        msg = ProcureUnit.validRefund(unit);
+        if(StringUtils.isNotBlank(msg)) {
+            renderText(msg);
+        }
+        User user = Login.current();
+        Inbound inbound = new Inbound();
+        inbound.type = Inbound.T.Purchase;
+        inbound.name = String.format("%s_%s_%s_%s--尾货单",
+                unit.cooperator.name, inbound.type.label(), Dates.date2Date(), user.username);
+        inbound.cooperator = unit.cooperator;
+        inbound.status = Inbound.S.Create;
+        inbound.createDate = new Date();
+        inbound.projectName = Login.current().projectName;
+        List<ProcureUnit> units = new ArrayList<>();
+        unit.attrs.planQty = unit.attrs.planQty - unit.attrs.qty;
+        units.add(unit);
+        render("Inbounds/createTailInbound.html", inbound, units, unit);
     }
 
 }
