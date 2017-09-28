@@ -79,10 +79,6 @@ public class EbayFee extends Model {
     public String transaction_type;
 
     public String md5_id;
-    /**
-     * 是否使用 MWS 同步过 SaleFee 数据
-     */
-    public boolean synced = false;
 
     public static boolean parseFinancesApiResult(ListFinancialEventsResponse response, EbayOrder order) {
         ListFinancialEventsResult result = response.getListFinancialEventsResult();
