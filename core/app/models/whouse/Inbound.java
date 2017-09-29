@@ -290,6 +290,7 @@ public class Inbound extends GenericModel {
                         punit.stage = ProcureUnit.STAGE.DELIVERY;
                         punit.result = u.result;
                     }
+                    punit.attrs.qty += u.qty;
                     punit.save();
                 }
             } else if(u.status == InboundUnit.S.Receive && !(u.result == null || (u.result == InboundUnit.R.Qualified
@@ -305,6 +306,7 @@ public class Inbound extends GenericModel {
                 punit.result = u.result;
                 punit.stage = ProcureUnit.STAGE.IN_STORAGE;
                 if(this.type == T.Purchase) {
+                    punit.attrs.qty += u.qty;
                     punit.inboundQty += u.inboundQty;
                     punit.unqualifiedQty += u.unqualifiedQty;
                     punit.availableQty += u.inboundQty;

@@ -212,10 +212,6 @@ public class InboundUnit extends Model {
                 if(this.unit.attrs.planQty - NumberUtils.toInt(value) != 0 && this.handType == null) {
                     this.handType = H.Actual;
                 }
-                if(this.status == S.Receive) {
-                    this.unit.attrs.qty = NumberUtils.toInt(value);
-                    this.unit.save();
-                }
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
                 break;
             case "handType":
