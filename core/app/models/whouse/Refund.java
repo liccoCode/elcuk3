@@ -367,7 +367,6 @@ public class Refund extends GenericModel {
         ProcureUnit unit = ProcureUnit.findById(unitId);
         if(unit.stage == ProcureUnit.STAGE.DELIVERY) {
             unit.stage = ProcureUnit.STAGE.IN_STORAGE;
-            unit.attrs.qty += qty;
         }
         unit.inboundQty += qty;
         unit.unqualifiedQty -= qty;
