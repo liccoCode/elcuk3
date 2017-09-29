@@ -18,11 +18,11 @@
           <a href="#basicinfo" data-toggle='tab'>基本信息</a>
         </li>
         <li>
-          <a href="#extends" data-toggle='tab'>物流信息</a>
+          <a href="#extends" data-toggle='tab' id="attrBtn">物流信息</a>
         </li>
         <li><a href="#newattach" data-toggle='tab'>附件管理</a></li>
       </ul>
-
+      <input type="hidden" value="${tab}" id="attrVal">
       <div id="selling_tabs" class="tab-content">
         <div class="tab-pane active" id='basicinfo'>
           <div class="row">
@@ -234,13 +234,23 @@
                       #{/list}
                     </select>
                     <input type="hidden" name="sku" value="${pro.sku}">
-                    <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+                    <a class="btn btn-warning" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+
+                    <div class="form-group">
+                      <div class="input-group">
+                        <input style="width:200px;" class="form-control" type="text" id="syncSku"
+                               data-url="@{Attributes.sameAttr()}" placeholder="手动输入SKU">
+                      </div>
+                    </div>
+                    <a class="btn btn-success" rel="popover" content="将sku模板内的属性字段添加到下方" id="sync_sku_btn">SKU同步</a>
                   </div>
                 </div>
                 <div class="box-body" id="extends_atts_home">
                 #{include 'Products/_attrs.html'/}
                 </div>
-                <div class="box-footer"></div>
+                <div class="box-footer">
+                  <a class="btn btn-primary" id="save_attrs_btn">保存</a>
+                </div>
               </div>
             </div>
           </div>
@@ -264,4 +274,5 @@
   <input type="hidden" name="sku" value="${pro.sku}">
   <input type="hidden" name="attr" id="commit_attr">
   <input type="hidden" name="templateId" id="commit_templateId">
+  <input type="hidden" name="skuSync" id="syncSkuInput">
 </form>

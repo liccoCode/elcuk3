@@ -851,6 +851,9 @@ public class ProcureUnits extends Controller {
         if(StringUtils.isNotEmpty(Refund.isAllReufund(id))) {
             renderJSON(new Ret(false, "采购计划【" + id + "】正在走退货流程，请查证！ 【" + Refund.isAllReufund(id) + "】"));
         }
+        if(unit.unqualifiedQty > 0){
+            renderJSON(new Ret(false, "该采购计划存在不良品数未处理，请处理！"));
+        }
         renderJSON(new Ret(true));
     }
 
