@@ -16,6 +16,8 @@ public class UserPost extends Post<User> {
     public int perSize = 20;
     public boolean closed = false;
 
+    public User.D department;
+
 
     @Override
     public F.T2<String, List<Object>> params() {
@@ -24,6 +26,10 @@ public class UserPost extends Post<User> {
         if(StringUtils.isNotBlank(this.search)) {
             sql.append(" AND s.username like ? ");
             params.add("%" + this.search + "%");
+        }
+        if(this.department != null) {
+            sql.append(" AND s.department =? ");
+            params.add(this.department);
         }
         sql.append(" AND s.closed = ? ");
         params.add(closed);
