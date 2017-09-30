@@ -9,7 +9,7 @@
 #{/set}
 
 
-<div class="box box-default">
+<div class="box box-success">
   <div class="box-body">
     <div class="row">
       <div class="col-md-6" style="height:300px;">
@@ -42,7 +42,7 @@
   </div>
 </div>
 
-<div class="box box-warning">
+<div class="box box-primary">
   <div class="box-header">
     <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="form-inline">
       <div class="row-fluid">
@@ -60,7 +60,7 @@
           </div>
         </div>
 
-        <a class="form-control btn" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
+        <a class="form-control btn btn-default" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
           Reload
         </a>
 
@@ -71,33 +71,36 @@
           </label>
         </div>
 
-      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p.aid, class: 'form-control'}
+      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p.aid, class:'form-control selectize', style:"width:150px;"}
           #{option ''}Account#{/option}
       #{/select}
 
-      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control'}
+      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control selectize',
+      style:"width:120px;"}
           #{option ''}Market#{/option}
       #{/select}
 
-      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control', native: true}
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize', native: true,
+      style:"width:100px;"}
           #{option ''}Category#{/option}
       #{/select}
 
-      #{select 'p.state', items:['Active', 'Inactive', 'All'], value: p.state, class: 'form-control'}
+      #{select 'p.state', items:['Active', 'Inactive', 'All'], value: p.state, class: 'form-control selectize',
+      style:"width:80px;"}
       #{/select}
-
 
         <div class="input-group">
           <div class="input-group-addon"><i class="icon-search"></i></div>
           <input class="form-control" id="a_param" name="p.search" placeholder="搜索 MSKU/SKU/ASIN/^71xx">
         </div>
 
-        <a class="btn" id="a_search">搜索</a>
-        <a class="btn" id="exceldown" rel="popover">下载Excel(SID)</a>
+        <a class="btn btn-primary" id="a_search">搜索</a>
+        <a class="btn btn-success" id="exceldown">下载Excel(SID)</a>
 
-        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;">
+        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;margin-top:5px;">
           Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
         </a>
+
 
         <input type="hidden" id="postPage" name="p.page" value="1">
         <input type="hidden" id="postType" name="p.type" value="sid">
