@@ -104,8 +104,16 @@ public class Products extends Controller {
 
     public static void showAttr(String sku) {
         Product pro = Product.findByMerchantSKU(sku);
+        List<Template> templates = pro.category.templates;
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
-        render(pro, qtys);
+        render(pro, qtys, templates);
+    }
+
+    public static void showAttr(String sku ,String tab) {
+        Product pro = Product.findByMerchantSKU(sku);
+        List<Template> templates = pro.category.templates;
+        List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
+        render(pro, qtys, templates ,tab);
     }
 
     public static void copy(String choseid, String skuid, String base, String extend, String attach) {
@@ -353,7 +361,7 @@ public class Products extends Controller {
         ProductAttr attr = ProductAttr.findById(id);
         attr.delete();
         flash.success("删除成功");
-        showAttr(sku);
+        showAttr(sku , "attr");
     }
 
     /**
@@ -372,8 +380,45 @@ public class Products extends Controller {
                     atts.add(productAttr);
                 });
         Collections.sort(atts);
-        render("Products/_attrs.html",pro);
+        render("Products/_attrs.html", pro);
     }
+
+
+    /**
+     * 同步sku物流属性
+     */
+    public static void syncSku(String sku, String skuSync) {
+        Product pro = Product.findById(sku);
+        List<ProductAttr> atts = pro.productAttrs;
+
+        Product sync = Product.findById(skuSync);
+        List<ProductAttr> syncAttr = sync.productAttrs;
+
+        Map map = new HashMap();
+        syncAttr.forEach(attr -> map.put(attr.attribute.id, attr));
+        atts.forEach(attr -> map.put(attr.attribute.id, attr));
+
+        Set entrySet = map.entrySet();
+        Iterator it = entrySet.iterator();
+        while(it.hasNext()) {
+            Map.Entry me = (Map.Entry) it.next();
+            ProductAttr productAttr = (ProductAttr) me.getValue();
+            if(!sku.equals(productAttr.product.sku)) {
+                ProductAttr newAttr = new ProductAttr();
+                newAttr.product = pro;
+                newAttr.attribute = productAttr.attribute;
+                newAttr.value = productAttr.value;
+                newAttr.save();
+                atts.add(newAttr);
+            }
+        }
+        Collections.sort(atts);
+        pro.productAttrs = atts;
+        pro.save();
+
+        render("Products/_attrs.html", pro);
+    }
+
 
     public static void addAttr(String sku, String attr) {
         Product product = Product.findById(sku);
@@ -392,7 +437,7 @@ public class Products extends Controller {
         new_attr.attribute = attribute;
         new_attr.product = product;
         new_attr.save();
-        Products.showAttr(sku);
+        showAttr(sku , "attr");
     }
 
     /**
