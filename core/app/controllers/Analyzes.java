@@ -48,6 +48,13 @@ public class Analyzes extends Controller {
         render(accs, categoryIds, p);
     }
 
+    public static void indexV3() {
+        List<Account> accs = Account.openedSaleAcc();
+        List<String> categoryIds = Category.categoryIds();
+        AnalyzePost p = new AnalyzePost();
+        render("Analyzes/index_v3.html", accs, categoryIds, p);
+    }
+
     @Before(only = {"analyzes", "ajaxUnit"})
     public static void countTime() {
         if(Play.mode.isProd()) return;
