@@ -5,12 +5,11 @@
       <input type="checkbox" id="checkbox_all" class="checkall" value="">
     </th>
   #{/if}
-    <th width="40px;">采购ID</th>
-    <th width="80px;">采购单</th>
+    <th width="80px;">采购ID<br>采购单</th>
   #{if !is_b2b}
     <th width="160px;">Selling</th>
   #{/if}
-    <th width="270px;">SKU<br>产品名称</th>
+    <th width="260px;">SKU<br>产品名称</th>
     <th width="150px;">预计交货时间/<br>预计运输时间</th>
     <th width="55px;">计划交货数量</th>
     <th width="60px;">实际交货数量</th>
@@ -20,7 +19,7 @@
     <th width="40px;">去往仓库</th>
     <th width="40px;">运输方式</th>
     <th width="50px;">状态</th>
-    <th>质检结果</th>
+    <th width="55px;">质检结果</th>
     <th width="60px;">合格数</th>
     <th width="60px;">不良品数</th>
     <th width="80px;">目标仓库</th>
@@ -33,8 +32,7 @@
           <input type="checkbox" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
-        <td>${unit.unit?.id} </td>
-        <td>${unit.unit?.deliveryment?.id}</td>
+        <td>${unit.unit?.id} <br>${unit.unit?.deliveryment?.id}</td>
           #{if !is_b2b}
             <td style="word-break:break-all;">
               <a href="@{Sellings.selling(unit.unit?.selling?.sellingId)}" target="_blank">${unit.unit?.selling?.sellingId}</a>
@@ -80,7 +78,7 @@
         <td style="color:${unit.unit?.shipType?.rgb()}">${unit.unit?.shipType?.label()}</td>
         <td style="background-color:${unit.status.rgb()}">${unit.status?.label()}</td>
         <td>
-          <select name="result" style="width:70px;" qty="${unit.qty}" class="form-control"
+          <select name="result" style="width:55px;padding:5px;" qty="${unit.qty}" class="form-control"
               #{if unit.status.name() != "Receive"}
                   disabled
               #{/if}>
@@ -92,13 +90,14 @@
         <td>
           <input type="text" name="qualifiedQty" data-qty="${unit.qty}" value="${unit.qualifiedQty}" data-origin="${unit.qualifiedQty}"
               #{if unit.status.name()!="Receive" } readonly #{/if} class="form-control"
-                 style="width:58px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
+                 style="width:50px; padding:5px;#{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"/>
         </td>
         <td>
           <input type="text" name="unqualifiedQty" data-qty="${unit.qty}" data-origin="${unit.unqualifiedQty}"
                  value="${unit.unqualifiedQty}"
               #{if unit.status.name()!="Receive" } readonly #{/if}
-                 style="width:58px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}" class="form-control"/>
+                 style="width:58px;padding:5px; #{if unit.result?.name() == 'UnCheck'} display:none; #{/if}"
+                 class="form-control"/>
         </td>
         <td>
           <select name="target" style="max-width: 80px;" ${unit.status.name() != "Receive" ? 'disabled':''} class="form-control">

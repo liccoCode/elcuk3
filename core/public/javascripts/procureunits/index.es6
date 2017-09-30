@@ -160,22 +160,6 @@ $(() => {
     $("#search_Form").submit();
   });
 
-  $(document).ready(function () {
-    $("#unit_table").DataTable({
-      "sDom": "<'row-fluid'<'col-sm-3'l><'col-sm-9'f>r>t<'row-fluid'<'col-sm-6'i><'col-sm-6'p>>",
-      "sPaginationType": "full_numbers",
-      'lengthChange': true,
-      "iDisplayLength": 50,
-      "bAutoWidth":false,
-      "aoColumnDefs": [
-        {
-          "bSortable": false,
-          "aTargets": [0]
-        }
-      ]
-    });
-  });
-
   $("#unit_table").on("click", "input[name='editBoxInfo']", function (e) {
     e.stopPropagation();
     let ids = $(this).data("id");

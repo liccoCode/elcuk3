@@ -1,12 +1,9 @@
 #{extends 'main_full_v3.html' /}
 #{set title:"采购单元列表 (${p.count()})"  /}
 #{set 'moreStyles'}
-    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
     #{stylesheet 'bootstrap-multiselect.css'/}
 #{/set}
 #{set 'moreScripts'}
-    #{script 'bootstrap3/jquery.dataTables.js'/}
-    #{script 'bootstrap3/dataTables.bootstrap.js'/}
     #{script 'bootstrap-multiselect.js'/}
     #{script 'component/pagination.coffee'/}
     #{script 'procureunits/index.coffee'/}
@@ -138,38 +135,31 @@
         </form>
       </div>
 
-
       <form method="post" id="create_deliveryment">
         <div class="box-body">
           <table class="table table-condensed table-bordered" id="unit_table">
-            <thead>
             <tr>
-              <th style="width:20px;">
-                <input type="checkbox" id="checkbox_all" class="checkall">
-              </th>
-              <th style="width:50px;">采购计划ID</th>
-              <th style="width:30px;">父ID</th>
-              <th style="width:20px;">阶段</th>
-              <th style="width:155px;">Sku<br>产品名称</th>
+              <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
+              <th width="50px;">采购计划ID</th>
+              <th width="30px;">父ID</th>
+              <th width="40px;">阶段</th>
+              <th width="185px;">Sku<br>产品名称</th>
               <th width="120px;">FBA-ShipmentId<br>CenterId</th>
               <th width="65px;">去往市场</th>
-              <th style="width:40px;">深圳仓库</th>
-              <th width="40px;">供应商</th>
-              <th width="80px;">采购单</th>
+              <th width="50px;">深圳仓库</th>
+              <th width="55px;">采购单<br>供应商</th>
               <th width="105px;">数量<br>(计划/交货/入库)</th>
-              <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="100px;">FnSku</th>
-              <th width="30px;">运输方式</th>
-              <th style="width:170px;">时间<br>(预计交货/预计运输)</th>
+              <th rel="popover" content="<img src='/img/helper/fnsku.png' />" width="95px;">FnSku</th>
+              <th width="40px;">运输方式</th>
+              <th width="130px;">时间<br>(预计交货/预计运输)</th>
               <th width="80px;">实际交货时间</th>
-              <th width="30px;">质检状态</th>
-              <th width="30px;">质检结果</th>
-              <th width="30px;">包装信息</th>
-              <th width="60px;">项目名称</th>
+              <th width="40px;">质检状态</th>
+              <th width="40px;">质检结果</th>
+              <th width="40px;">包装信息</th>
+              <th width="50px;">项目名称</th>
               <th width="75px;">创建人<br>创建时间</th>
             </tr>
-            </thead>
-            <tbody>
-            #{list items:p.query(), as:'unit'}
+          #{list items:p.query(), as:'unit'}
             <tr>
                 #{set dto: unit.fba?.dto/}
               <td>
@@ -177,10 +167,11 @@
                        value="${unit.id}" whouse="${unit.whouse?.name()}" stage="${unit.stage?.name()}"
                        shipType="${unit.shipType?.name()}" unqualifiedQty="${unit.unqualifiedQty}" data-boxnum="${unit.boxNum()}">
               </td>
-              <td rel="tooltip" title="${unit.comment}">
+              <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
+                <i class="icon-reorder"></i>
                   #{if unit.parent}
                     <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
-                       rel="tooltip" title="${unit.type?.label()}"></i>
+                       data-toggle="tooltip" title="${unit.type?.label()}"></i>
                   #{/if}
                 <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank">${unit.id}</a>
               </td>
@@ -219,15 +210,15 @@
               </td>
               <td style="word-break:break-all;">${unit.whouse?.name}</td>
               <td>${unit.currWhouse?.name}</td>
-              <td>${unit.cooperator?.name}</td>
-              <td>${unit.deliveryment?.id}</td>
+              <td>${unit.deliveryment?.id}<br>${unit.cooperator?.name}</td>
               <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
               ${unit.attrs.planQty} / ${unit.attrs.qty} / ${unit.inboundQty}
               </td>
               <td>
                   #{if unit.selling?.fnSku}
+                  ${unit.selling.fnSku}<br/>
                     <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
-                      <i class="icon-download-alt"></i> ${unit.selling.fnSku}
+                      <i class="icon-download-alt"></i> New
                     </a>
                   #{/if}
                   #{elseif unit.selling != null}
@@ -261,25 +252,100 @@
                   #{if unit.stage.name()=='IN_STORAGE'}
                     <input type="button" data-id="${unit.id}" name="editBoxInfo" value="填写"
                            class="btn btn-xs ${unit.validBoxInfoIsCorrect() ? 'btn-success' : 'btn-danger'}">
-
                   #{/if}
               </td>
               <td>${unit.projectName}</td>
               <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
             </tr>
-            #{/list}
-            </tbody>
+
+            <tr id="${tr_key}_${unit.id}" style="display:none;">
+              <td colspan="${checkbox ? '22' : '20'}" style="background-color:#F0F0F0;">
+                <div class="col-md-3">
+                  <div class="box box-warning box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">Comment</h3></div>
+                    <div class="box-body">${unit.comment}</div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="box box-info box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">关联运输单</h3></div>
+                    <div class="box-body">
+                        #{list items:unit.relateShipment(), as:'sp'}
+                          <li>
+                            <a href="@{Shipments.show(sp.id)}">${sp}</a>
+                            预计 #{time_tooltip_v3 time: sp.dates?.planBeginDate /} 开船
+                          </li>
+                        #{/list}
+                    </div>
+                  </div>
+                  <div class="box box-info box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">关联 FBA</h3></div>
+                    <div class="box-body">
+                        #{if unit.fba}
+                          <a href="${unit.fba.fbaLink()}">
+                            <i class="icon-external-link"></i>
+                          ${unit.fba.shipmentId}
+                          </a>
+                        #{/if}
+                        #{else }
+                          <span class="text-warning">还没有 FBA</span>
+                        #{/else}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="box box-success box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">实际交货量</h3></div>
+                    <div class="box-body">
+                      <table class="table table-condensed table-bordered">
+                        <tr>
+                          <td>实际交货量</td>
+                          <td>实际交货日期</td>
+                        </tr>
+                        <tr>
+                          <td>${unit.attrs.qty}</td>
+                          <td>${unit.attrs.deliveryDate.los()}</td>
+                        </tr>
+                      </table>
+                    </div>
+                    <div class="box-footer">
+                      <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-xs btn-info">变更详情</a>
+                        #{if unit.stage.name()=='IN_STORAGE' && unit.attrs.qty < unit.attrs.planQty}
+                          <a href="@{Inbounds.createTailInboundByUnitId(unit.id)}" target="_blank" data-toggle="tooltip"
+                             title="请谨慎使用该按钮,创建尾货单" class="btn btn-xs btn-danger">再次收货</a>
+                        #{/if}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="box box-warning box-solid">
+                    <div class="box-header with-border"><h3 class="box-title">Record</h3></div>
+                    <div class="box-body">
+                        #{ifnot norecord}
+                            #{cache unit.recordsPageCacheKey(), for:'3h'}
+                              <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                                  #{records_ul  records: unit.records()/}
+                              </div>
+                            #{/cache}
+                        #{/ifnot}
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          #{/list}
           </table>
+        </div>
+
+        <div class="box-footer">
+        #{bootstrap_pager_v3 pi:p, url:'' /}
         </div>
       </form>
     </div>
-
-
   </div>
 </div>
 
 #{records_v3 records:logs/}
-
 
 <div id="fba_carton_contents_modal" class="modal fade bs-example-modal-lg">
   <div class="modal-dialog modal-lg" role="document">

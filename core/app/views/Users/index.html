@@ -31,6 +31,14 @@
                   <option ${!p.closed ? 'selected' : ''} value="false">否</option>
                 </select>
               </div>
+
+              <select name="p.department" class="form-control" style="width:150px;">
+                <option value="">所属部门</option>
+              #{list items:models.User.D.values(), as:'d'}
+                <option value="${d.name()}" ${p.department.name()==d.name()?'selected':''} >${d.label()}</option>
+              #{/list}
+              </select>
+
               <input type="submit" value="搜索" class="btn btn-primary" data-disable-with='提交中...'>
               <a href="@{Users.create()}" class="btn btn-success">添加用户</a>
             </div>

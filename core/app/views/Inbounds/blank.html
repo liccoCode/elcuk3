@@ -21,6 +21,7 @@
         <th>收货入库单ID</th>
         <td>
           <input type="text" name="inbound.id" disabled>
+          <input type="hidden" name="isTail" value="false">
         </td>
         <th>状态</th>
         <td style="width: 40%;"><input type="text" name="inbound.status" value="Create" readonly></td>
@@ -108,7 +109,6 @@
             <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
             <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
             <td>${planQty}</td>
-
             <td>${unit.fba?.shipmentId}</td>
             <td>${unit.whouse?.name()}</td>
             <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>

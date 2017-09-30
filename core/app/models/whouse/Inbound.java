@@ -168,12 +168,16 @@ public class Inbound extends GenericModel {
     @Transient
     public List<String> inboundDtos = new ArrayList<>();
 
-    public void create(List<InboundUnit> units) {
+    public void create(List<InboundUnit> units, boolean isTail) {
         units.stream().filter(Objects::nonNull).filter(unit -> validIsNotExist(unit.unitId)).forEach(u -> {
             u.inbound = this;
             u.unit = ProcureUnit.findById(u.unitId);
             this.projectName = User.COR.valueOf(u.unit.projectName);
-            u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
+            if(isTail) {
+                u.planQty = u.unit.attrs.planQty - u.unit.attrs.qty;
+            } else {
+                u.planQty = this.type == T.Purchase ? u.unit.attrs.planQty : u.unit.availableQty;
+            }
             if(this.type == T.Machining) {
                 u.status = InboundUnit.S.Receive;
                 u.result = InboundUnit.R.Qualified;
@@ -315,6 +319,12 @@ public class Inbound extends GenericModel {
                 this.createStockRecord(u, punit.availableQty);
             }
         }
+    }
+
+    public int totalRealQty(Long unitId) {
+        List<InboundUnit> inboundUnits = InboundUnit.find("unit.id = ?", unitId).fetch();
+        return inboundUnits.stream().filter(unit -> unit.status == InboundUnit.S.Inbound)
+                .mapToInt(unit -> unit.qty).sum();
     }
 
     private void createStockRecord(InboundUnit unit, int currQty) {

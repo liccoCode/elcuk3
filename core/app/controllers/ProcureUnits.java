@@ -106,7 +106,6 @@ public class ProcureUnits extends Controller {
             p = new ProcurePost();
             p.dateType = "attrs.planShipDate";
         }
-        p.pagination = false;
         render(p);
     }
 

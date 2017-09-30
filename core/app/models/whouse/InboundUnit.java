@@ -213,7 +213,7 @@ public class InboundUnit extends Model {
                     this.handType = H.Actual;
                 }
                 if(this.status == S.Receive) {
-                    this.unit.attrs.qty = NumberUtils.toInt(value);
+                    this.unit.attrs.qty -= (this.qty - NumberUtils.toInt(value));
                     this.unit.save();
                 }
                 logs.addAll(Reflects.logFieldFade(this, attr, NumberUtils.toInt(value)));
