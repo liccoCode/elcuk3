@@ -35,7 +35,7 @@
               <select name="p.department" class="form-control" style="width:150px;">
                 <option value="">所属部门</option>
               #{list items:models.User.D.values(), as:'d'}
-                <option value="${d.name()}" ${p.department.name()==d.name()?'selected':''} >${d.label()}</option>
+                <option value="${d.name()}" ${p.department?.name()==d.name()?'selected':''} >${d.label()}</option>
               #{/list}
               </select>
 
