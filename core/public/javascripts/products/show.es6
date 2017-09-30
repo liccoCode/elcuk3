@@ -199,8 +199,32 @@ $(() => {
     });
   });
 
-  $("#extends").on("click", "#add_template_btn", function () {
-    let temp_id = $("select[name='templateId']").val();
+  $("#sync_sku_btn").click(function () {
+    let sku = $("#syncSku").val();
+    if (!sku) {
+      noty({
+        text: "请选择要同步的SKU",
+        type: 'error',
+        timeout: 3000
+      });
+    } else {
+      $("#syncSkuInput").val(sku);
+      LoadMask.mask();
+      $("#extends_atts_home").load("/Products/syncSku", $("#add_attr_form").serialize(), function (r) {
+
+        LoadMask.unmask();
+        let msg = {
+          text: "同步成功",
+          type: 'success',
+          timeout: 2000
+        }
+        noty(msg);
+      });
+    }
+  });
+
+  $("#extends").on("click", "#add_template_btn", function (e) {
+    let temp_id = $("select[name='templateIdSelect']").val();
     if (!temp_id) {
       noty({
         text: "请选择要加载的模板",
@@ -208,30 +232,16 @@ $(() => {
         timeout: 5000
       });
     } else {
-      LoadMask.mask();
-      $("#extends_atts_home").load("/Products/attrs", $("#select_template_form").serialize(), function (r) {
+      $("#commit_templateId").val(temp_id);
+      e.preventDefault();
+      $("#extends_atts_home").load("/Products/attrs", $("#add_attr_form").serialize(), function (r) {
         LoadMask.unmask()
       });
     }
-  }).on("click", "#save_attrs_btn", function () {
-    LoadMask.mask();
-    let $form = $("#save_attrs_form");
-    $.post("/products/saveAttrs", $form.serialize(), function (r) {
-      if (r.flag) {
-        noty({
-          text: "保存成功.",
-          type: 'success',
-          timeout: 5000
-        });
-      } else {
-        noty({
-          text: r.message,
-          type: 'success',
-          timeout: 5000
-        });
-      }
-      LoadMask.unmask();
-    });
   });
+
+  if("attr"==$("#attrVal").val()){
+    $("#attrBtn").click();
+  }
 
 });

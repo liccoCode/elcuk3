@@ -1,228 +1,278 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:pro.sku /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
     #{script 'products/show.es6'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 
 #{errorMsgs /}
 #{flash_alert /}
 
 
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#basicinfo" data-toggle='tab'>基本信息</a>
-  </li>
-  <li>
-    <a href="#extends" data-toggle='tab'>物流信息</a>
-  </li>
-  <li>
-    <a href="#newattach" data-toggle='tab' id="showAttachs">附件管理</a>
-  </li>
-</ul>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#basicinfo" data-toggle='tab'>基本信息</a>
+        </li>
+        <li>
+          <a href="#extends" data-toggle='tab' id="attrBtn">物流信息</a>
+        </li>
+        <li><a href="#newattach" data-toggle='tab'>附件管理</a></li>
+      </ul>
+      <input type="hidden" value="${tab}" id="attrVal">
+      <div id="selling_tabs" class="tab-content">
+        <div class="tab-pane active" id='basicinfo'>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <form action="@{Products.saveShipmentInfo()}" method="post" class="form-horizontal">
+                  <div class="box-header"></div>
+                  <div class="box-body">
+                    <div class="form-group">
+                      <label for="p_sku" class="col-sm-1 control-label">SKU</label>
+                      <div class="col-sm-2">
+                        <input class="form-control" value="${pro.sku}" id="p_sku" name="pro.sku" readonly>
+                      </div>
+                      <label for="" class="col-sm-1 control-label">Category</label>
+                      <div class="col-sm-2">
+                        <input class="form-control" value="${pro.category}" readonly>
+                      </div>
+                      <label for="" class="col-sm-1 control-label">Family</label>
+                      <div class="col-sm-2">
+                        <input class="form-control" value="${pro.family?.family}" readonly>
+                      </div>
+                      <label for="" class="col-sm-1 control-label">Brand</label>
+                      <div class="col-sm-2">
+                        <input class="form-control" value="${pro.family?.brand}" readonly>
+                      </div>
+                    </div>
 
-<div id="selling_tabs" class="tab-content">
-  <div class="tab-pane fade active in" id="basicinfo">
-    <div class="row-fluid">
-      <form action="@{Products.saveShipmentInfo()}" method="post">
-        <table class="table table-bordered">
-          <tr>
-            <th>SKU</th>
-            <td width="600px;">${pro.sku}<input id="p_sku" type="hidden" name="pro.sku" value="${pro.sku}"></td>
-            <th>Category</th>
-            <td>${pro.category}</td>
-          </tr>
-          <tr>
-            <th>Brand</th>
-            <td>${pro.family?.brand}</td>
-            <th>Family</th>
-            <td>${pro.family?.family}</td>
-          </tr>
-          <tr>
-            <th>长(包材)</th>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.lengths" value="${pro.lengths}">
-                <span class="add-on">mm</span>
+
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.lengths" value="${pro.lengths}" readonly>
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">宽(包材)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.width" value="${pro.width}" readonly>
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">高(包材)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.heigh" value="${pro.heigh}" readonly>
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">重量(包材)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.weight" value="${pro.weight}" readonly>
+                          <span class="input-group-addon">Kg</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">or</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-1 control-label">长(产品)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.productLengths"
+                                 readonly value="${pro.productLengths}">
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">宽(产品)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.productWidth" readonly value="${pro.productWidth}">
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">高(产品)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.productHeigh"
+                                 readonly value="${pro.productHeigh}">
+                          <span class="input-group-addon">mm</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">inch</span>
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">重量(产品)</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="pro.productWeight" readonly value="${pro.productWeight}">
+                          <span class="input-group-addon">Kg</span>
+                          <input type="text" class="form-control" readonly>
+                          <span class="input-group-addon">or</span>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-1 control-label">申报价格</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <span class="input-group-addon">$</span>
+                          <input type="text" class="form-control" name="pro.declaredValue" value="${pro.declaredValue}">
+                        </div>
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">申报品名(运输)</label>
+                      <div class="col-sm-2">
+                        <input type="text" class="form-control" name="pro.declareName" value="${pro.declareName}">
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">用途(运输)</label>
+                      <div class="col-sm-2">
+                        <input type="text" class="form-control" name="pro.useWay" value="${pro.useWay}">
+                      </div>
+                      <label for="inputEmail3" class="col-sm-1 control-label">中文品名(运输)</label>
+                      <div class="col-sm-2">
+                        <input type="text" class="form-control" name="pro.chineseName" value="${pro.chineseName}">
+                      </div>
+                    </div>
+
+
+                    <div class="form-group">
+                      <label for="proabbreviation" class="col-sm-1 control-label">产品名称</label>
+                      <div class="col-sm-5">
+                        <input id="proabbreviation" class="form-control" name="pro.abbreviation"
+                               readonly value="${pro.abbreviation}">
+                        <input type="hidden" name="pro.iscopy" value="${pro.iscopy}">
+                      </div>
+                      <label for="proabbreviation" class="col-sm-1 control-label">HS CODE</label>
+                      <div class="col-sm-5">
+                        <input type="text" class="form-control" name="pro.hs_code" placeholder="请输入HS CODE" value="${pro.hs_code}">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="box-footer">
+                    <input type="submit" class="btn btn-primary" value="保存">
+                  </div>
+                </form>
               </div>
-            </td>
-            <th>宽(包材)</th>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.width" value="${pro.width}">
-                <span class="add-on">mm</span>
+
+              <div class="box box-info">
+                <div class="box-header with-border"><h4>Product (Selling)QTY</h4></div>
+                <div class="box-body">
+                  <table class="table table-bordered">
+                    <tr>
+                      <th>Qid</th>
+                      <th>Inbound</th>
+                      <th>Qty</th>
+                      <th>Unsellable</th>
+                      <th>Pending</th>
+                      <th>ASIN</th>
+                      <th>Whouse</th>
+                    </tr>
+                  #{list items:qtys, as:'qty'}
+                    <form method="post" action="@{Products.updateSellingQty()}" class="form-inline">
+                      <tr>
+                        <td>${qty.id}</td>
+                        <td>${qty.inbound} </td>
+                        <td>${qty.qty} </td>
+                        <td>${qty.unsellable} </td>
+                        <td>${qty.pending} </td>
+                        <td>${qty.selling.asin}</td>
+                        <td>${qty.whouse.name}</td>
+
+                      </tr>
+                    </form>
+                  #{/list}
+                  </table>
+                </div>
               </div>
-            </td>
-          </tr>
-          <tr>
-            <th>高(包材)</th>
-            <td>
-              <div class="input-append">
 
-                <input type="text" class="input-mini" name="pro.heigh" value="${pro.heigh}">
-                <span class="add-on">mm</span>
+            #{records_v3 records:records/}
+            </div>
+          </div>
+        </div>
+
+
+        <div class="tab-pane fade" id='extends'>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <div class="form-inline">
+                    <div class="form-group">
+                      <div class="input-group">
+                        <div class="input-group-addon">属性:</div>
+                        <input style="width:200px;" class="form-control" type="text" name="input_attr"
+                               data-url="@{Attributes.sameAttr()}" placeholder="手动输入属性">
+                      </div>
+                    </div>
+
+                    <button class="btn btn-primary" id="add_attr_btn" data-loading>添加</button>
+
+                    <select name="templateIdSelect" id="templateId" class="form-control" style="width:202px;">
+                      <option value="">请选择模板</option>
+                      #{list items:templates, as:'template'}
+                        <option value="${template.id}">${template.name}</option>
+                      #{/list}
+                    </select>
+                    <input type="hidden" name="sku" value="${pro.sku}">
+                    <a class="btn btn-warning" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
+
+                    <div class="form-group">
+                      <div class="input-group">
+                        <input style="width:200px;" class="form-control" type="text" id="syncSku"
+                               data-url="@{Attributes.sameAttr()}" placeholder="手动输入SKU">
+                      </div>
+                    </div>
+                    <a class="btn btn-success" rel="popover" content="将sku模板内的属性字段添加到下方" id="sync_sku_btn">SKU同步</a>
+                  </div>
+                </div>
+                <div class="box-body" id="extends_atts_home">
+                #{include 'Products/_attrs.html'/}
+                </div>
+                <div class="box-footer">
+                  <a class="btn btn-primary" id="save_attrs_btn">保存</a>
+                </div>
               </div>
-            </td>
+            </div>
+          </div>
+        </div>
 
-            <th>重量(包材)</th>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.weight" value="${pro.weight}">
-                <span class="add-on">Kg</span>
-              </div>
-            </td>
-          </tr>
 
-          <tr>
-            <td>长(产品)</td>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.productLengths" value="${pro.productLengths}">
-                <span class="add-on">mm</span>
-              </div>
-            </td>
-
-            <td>宽(产品)</td>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.productWidth" value="${pro.productWidth}">
-                <span class="add-on">mm</span>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>高(产品)</th>
-            <td>
-              <div class="input-append">
-
-                <input type="text" class="input-mini" name="pro.productHeigh" value="${pro.productHeigh}">
-                <span class="add-on">mm</span>
-              </div>
-            </td>
-            <th>重量(产品)</th>
-            <td>
-              <div class="input-append">
-                <input type="text" class="input-mini" name="pro.productWeight" value="${pro.productWeight}">
-                <span class="add-on">Kg</span>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <th>申报价格</th>
-            <td>
-              <div class="input-prepend">
-                <span class="add-on">$</span>
-                <input type="text" class="input-mini" value="${pro.declaredValue}" name="pro.declaredValue">
-              </div>
-            </td>
-            <th>申报品名(运输)</th>
-            <td>
-              <input type="text" name="pro.declareName" value="${pro.declareName}">
-            </td>
-          </tr>
-
-          <tr>
-            <th>用途(运输)</th>
-            <td><input type="text" name="pro.useWay" value="${pro.useWay}"/></td>
-            <th>中文品名(运输)</th>
-            <td><input type="text" name="pro.chineseName" value="${pro.chineseName}"/></td>
-          </tr>
-
-          <tr>
-            <th>产品名称</th>
-            <td><input type="text" style="width:95%" name="pro.abbreviation" value="${pro.abbreviation}"></td>
-            <th>HS CODE</th>
-            <td><input type="text" name="pro.hs_code" placeholder="请输入HS CODE" value="${pro.hs_code}" ></td>
-          </tr>
-          <tr>
-            <th colspan="4">
-              <input type="submit" class="btn btn-primary" value="保存">
-            </th>
-          </tr>
-        </table>
-      </form>
-    </div>
-  #{info_row title:'Product (Selling)QTY'/}
-    <div>
-      <table class="table table-bordered">
-        <tr>
-          <th>Qid</th>
-          <th>Inbound</th>
-          <th>Qty</th>
-          <th>Unsellable</th>
-          <th>Pending</th>
-          <th>ASIN</th>
-          <th>Whouse</th>
-          <th>&nbsp;</th>
-        </tr>
-      #{list items:qtys, as:'qty'}
-        <form method="post" action="@{Products.updateSellingQty()}">
-          <tr>
-            <td>${qty.id}<input type="hidden" name="qty.id" value="${qty.id}"></td>
-            <td>
-              <input type="text" class="input-mini" style="color:#4A8BF4;" name="qty.inbound" value="${qty.inbound}">
-            </td>
-            <td>
-              <input type="text" class="input-mini" style="color:#9BD444;" name="qty.qty" value="${qty.qty}">
-            </td>
-            <td>
-              <input type="text" class="input-mini" style="color:#D84A38;text-decoration:underline;" name="qty.unsellable" value="${qty.unsellable}">
-            </td>
-            <td>
-              <input type="text" class="input-mini" style="color:#CC6600;" name="qty.pending" value="${qty.pending}">
-            </td>
-            <td><a target="_blank" href="${qty.selling.asinLink()}">${qty.selling.asin}</a></td>
-            <td>${qty.whouse.name}</td>
-            <td>
-              <button class="btn btn-primary" data-confirm='确认更新?'>更新</button>
-            </td>
-          </tr>
-        </form>
-      #{/list}
-      </table>
-    #{records records:records, row:true/}
-    </div>
-
-  </div>
-
-  <div class="tab-pane fade" id='extends'>
-    <div class="row-fluid">
-      <div class="input-prepend input-append inline">
-        <span class="add-on">属性:</span>
-        <input type="text" name="input_attr" data-url="@{Attributes.sameAttr()}" placeholder="手动输入属性">
-        <input type="button" class="btn btn-primary" value="添加" id="add_attr_btn">
+        <div class="tab-pane" id="newattach">
+          <div class="row-fluid">
+            <iframe frameBorder=0 scrolling=no src='https://kod.easya.cc/index.php?explorer/index&path=SKU/${pro.sku}'
+                    width="100%" height="1000px"></iframe>
+          </div>
+        </div>
       </div>
-
-      <div class="input-prepend input-append inline">
-        <select name="templateId" class="inline">
-          <option value="">请选择模板</option>
-        #{list items:templates, as:'template'}
-          <option value="${template.id}">${template.name}</option>
-        #{/list}
-        </select>
-        <input type="hidden" name="sku" value="${pro.sku}">
-        <a class="btn btn-primary" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
-      </div>
-
-    #{info_row title:'Attributes'/}
-    #{include 'Products/_attrs.html'/}
     </div>
-  </div>
 
-  <div class="tab-pane fade" id='attach'>
-  #{include 'Products/_attach.html'/}
   </div>
 </div>
-
+</div>
 
 <form action="@{Products.addAttr()}" method="post" id="add_attr_form">
   <input type="hidden" name="sku" value="${pro.sku}">
   <input type="hidden" name="attr" id="commit_attr">
+  <input type="hidden" name="templateId" id="commit_templateId">
+  <input type="hidden" name="skuSync" id="syncSkuInput">
 </form>
