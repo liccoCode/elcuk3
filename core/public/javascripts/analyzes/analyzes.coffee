@@ -12,7 +12,7 @@ $ ->
     $("#postType").val($div.attr("id"))
     LoadMask.mask($data_table)
 
-    $div.load("/Analyzes/analyzes", $('.search_form').serialize(), (r) ->
+    $div.load("/Analyzes/analyzes", $('#click_param').serialize(), (r) ->
       $div.find('table').dataTable(
           sDom: if $div.attr("id") == 'sid' then "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>" else "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
           sPaginationType: "full_numbers"
@@ -113,7 +113,7 @@ $ ->
   )
 
   # Form 搜索功能
-  $(".search_form").on("change", "[name=p\\.market]", (e) ->
+  $("#click_param").on("change", "[name=p\\.market]", (e) ->
     ajaxFreshAcitveTableTab()
 
   # 搜索按钮
@@ -142,7 +142,7 @@ $ ->
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
     $div = $(@)
     LoadMask.mask($div)
-    $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
+    $.ajax("/analyzes/#{$div.data("method")}", {type: 'GET', data: $('#click_param').serialize(), dataType: 'json'})
     .done((r) ->
       if r.flag == false
         noty({text: r.message.split("|F")[0], type: 'warning', timeout: 5000})
@@ -203,7 +203,7 @@ $ ->
       LoadMask.mask($div)
       $market = $("[name='p.market']")
       $market.data('oldMarket', $market.val()).val($btn.data('market'))
-      $.ajax('/analyzes/ajaxMovingAve', {type: 'GET', data: $('.search_form').serialize(), dataType: 'json'})
+      $.ajax('/analyzes/ajaxMovingAve', {type: 'GET', data: $('#click_param').serialize(), dataType: 'json'})
       .done((r) ->
         $market.val($market.data('oldMarket'))
         if r.flag == false
