@@ -1,11 +1,16 @@
 #{extends 'main_full_v3.html'/}
 #{set title:'Analyze'/}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
+#{/set}
 #{set 'moreScripts'}
-    #{script 'jquery.dataTables.js'/}
-    #{script 'highstock.js'/}
+    #{script 'bootstrap3/jquery.dataTables.js'/}
+    #{script 'bootstrap3/dataTables.bootstrap.js'/}
+    #{script 'bootstrap3/highcharts.js'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'analyzes/analyzes.coffee'/}
+    #{script 'analyzes/analyzes.es6'/}
 #{/set}
 
 <div class="box box-success">
@@ -112,13 +117,16 @@
   </div>
   <div class="box-body">
     <div class="row-fluid">
-      <ul id="below_tab" class="nav nav-tabs">
-        <li class="active"><a href="#sid" data-toggle="tab">SID</a></li>
-        <li class=""><a href="#sku" data-toggle="tab">SKU</a></li>
-      </ul>
-      <div id="below_tabContent" class="tab-content">
-        <div class="tab-pane fade active in" id="sid">wait</div>
-        <div class="tab-pane fade" id="sku">wait</div>
+      <div class="nav-tabs-custom">
+        <ul id="below_tab" class="nav nav-tabs">
+          <li class="active"><a href="#sid" data-toggle="tab">SID</a></li>
+          <li class=""><a href="#sku" data-toggle="tab">SKU</a></li>
+        </ul>
+
+        <div id="below_tabContent" class="tab-content">
+          <div class="tab-pane fade active in" id="sid">wait</div>
+          <div class="tab-pane fade" id="sku">wait</div>
+        </div>
       </div>
     </div>
   </div>

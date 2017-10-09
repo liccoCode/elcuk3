@@ -204,6 +204,11 @@ public class Cooperator extends Model {
      */
     public int tail = 70;
 
+    /**
+     * 是否可见
+     */
+    public boolean visible = true;
+
     public enum L {
         MICRO {
             @Override

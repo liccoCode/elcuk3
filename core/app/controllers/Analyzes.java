@@ -83,8 +83,18 @@ public class Analyzes extends Controller {
                 render("Analyzes/" + p.type + ".html", dtos, p);
             }
             Long start = System.currentTimeMillis();
-            List<AnalyzeDTO> dtos = p.query();
-            dtos = p.queryByPrivate(dtos, categories);
+            //List<AnalyzeDTO> dtos = p.query();
+            //dtos = p.queryByPrivate(dtos, categories);
+
+            List<AnalyzeDTO> dtos = new ArrayList<>();
+            AnalyzeDTO one = new AnalyzeDTO("PCPB16000-BR,612046508237|A_US|1");
+            one.asin="B01MDR2LDK";
+            AnalyzeDTO two = new AnalyzeDTO("PCPB16000-BB,612046508336|A_US|1");
+            two.asin="B06XNYBR7D";
+
+            dtos.add(one);
+            dtos.add(two);
+
             Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) / 1000);
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
