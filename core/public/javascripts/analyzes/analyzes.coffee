@@ -5,25 +5,8 @@ $.extend $.fn.dataTableExt.oStdClasses,
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
 
-  # table 数据列表
-  $("#below_tabContent").on("ajaxFresh", "#sid,#sku", () ->
-    $data_table = $("#below_tabContent")
-    $div = $(@)
-    $("#postType").val($div.attr("id"))
-    LoadMask.mask($data_table)
-
-    $div.load("/Analyzes/analyzes", $('#click_param').serialize(), (r) ->
-      $div.find('table').dataTable(
-          sDom: if $div.attr("id") == 'sid' then "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>" else "<'row-fluid'<'span9'><'span3'f>r>t<'row-fluid'<'span6'i><'span6'p>>"
-          sPaginationType: "full_numbers"
-          iDisplayLength: 50
-          aaSorting: [[16, "desc"]]
-          aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
-      )
-      LoadMask.unmask($data_table)
-    )
   # 分页事件
-  ).on("click", ".pagination a[page]", (e) ->
+  $("#below_tabContent").on("click", ".pagination a[page]", (e) ->
     e.preventDefault()
     $a = $(@)
     $('#postPage').val($a.attr('page'))
