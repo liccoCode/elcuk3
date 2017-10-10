@@ -120,4 +120,27 @@ $(() => {
     })
   });
 
+  $("#sid").on('change', 'select[name=sellingCycle]', function (e) {
+    let $select = $(this);
+    if ($select.val() != '') {
+      $.post("/sellings/changeSellingCycle", {
+        sellingId: $select.data('sellingid'),
+        cycle: $select.val()
+      },
+      function (r) {
+        if (r.flag) {
+          noty({
+            text: 'Selling' + r.message + '生命周期修改为 ' + $select.find("option:selected").text() + '!',
+            type: 'success'
+          });
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
+
 });
