@@ -14,6 +14,7 @@ import models.view.dto.AnalyzeDTO;
 import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
+import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -451,6 +452,20 @@ public class ShipItem extends GenericModel {
             }
         }
         return message;
+    }
+
+    public float totalRealWeight() {
+        float totalWeight = 0f;
+        Float volume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
+                * (this.unit.product.width == null ? 0 : this.unit.product.width)
+                * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
+        Logger.info(this.unit.product.sku);
+        if(((volume / 1000) / 5000) > this.unit.product.weight) {
+            totalWeight += (volume / 1000) * this.qty / 5000;
+        } else {
+            totalWeight += this.unit.product.weight * this.qty;
+        }
+        return totalWeight;
     }
 
 }
