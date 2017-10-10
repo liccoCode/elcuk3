@@ -136,7 +136,7 @@ $ ->
           timeout: 5000
         })
       else if r['series'].length != 0
-        Highcharts.chart($div.attr("id"), {
+        $div.highcharts('StockChart', {
           credits:
             text: 'EasyAcc'
             href: ''
