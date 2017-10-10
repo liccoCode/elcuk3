@@ -17,11 +17,17 @@
       <div class="box-header with-border">
         <form action="@{Cooperators.index()}" method="get" class="form-inline" id="search_Form">
           <div class="row-fluid">
+            <select class="form-control" style="width:80px;" name="p.visible">
+              <option value="true">显示</option>
+              <option value="false">隐藏</option>
+            </select>
+
             <div class="input-group">
               <span class="input-group-addon"><i class="icon-search"></i></span>
               <input type="text" class="form-control" style="width:220px;" name="p.search" placeholder="全称 or SKU or 代码" value="${p.search}">
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
+
             <button class="btn btn-primary" data-loading>搜索</button>
             <a href="@{Cooperators.newCooper()}" class="btn btn-warning">添加新合作伙伴</a>
             <a href="@{Excels.exportCooperItemLogs()}" class="btn btn-success"> 下载日志</a>
