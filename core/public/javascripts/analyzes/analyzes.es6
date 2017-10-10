@@ -1,10 +1,8 @@
 $(() => {
 
   $(document).ready(function () {
-
     let $div = $("#sid");
     $("#postType").val("sid");
-
     $div.load("/Analyzes/analyzes", $('#click_param').serialize(), function () {
       $div.find('table').dataTable({
         "sDom": "<'row-fluid'<'col-sm-3'l><'col-sm-9'f>r>t<'row-fluid'<'col-sm-6'i><'col-sm-6'p>>",
