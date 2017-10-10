@@ -14,7 +14,7 @@ $ ->
     e.preventDefault()
     $('#postPage').val($(@).val())
     ajaxFreshAcitveTableTab()
-  # SKU | SID 项目的详细查看事件
+# SKU | SID 项目的详细查看事件
   ).on("click", ".sid,.sku", (e) ->
     $td = $(@)
     sidOrSku = $td.text().trim()
@@ -128,7 +128,7 @@ $ ->
       data: $('#click_param').serialize(),
       dataType: 'json'
     })
-      .done((r) ->
+    .done((r) ->
       if r.flag == false
         noty({
           text: r.message.split("|F")[0],
@@ -186,7 +186,7 @@ $ ->
         $div.html(noDataDisplayMessage)
       LoadMask.unmask($div)
     )
-      .fail((xhr, text, error) ->
+    .fail((xhr, text, error) ->
       noty({
         text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}",
         type: 'error',
@@ -209,7 +209,7 @@ $ ->
         data: $('#click_param').serialize(),
         dataType: 'json'
       })
-        .done((r) ->
+      .done((r) ->
         $market.val($market.data('oldMarket'))
         if r.flag == false
           noty({
