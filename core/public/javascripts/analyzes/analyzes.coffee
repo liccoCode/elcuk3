@@ -161,7 +161,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
           timeout: 5000
         })
       else if r['series'].length != 0
-        $div.highcharts('StockChart', {
+        Highcharts.chart($div.attr("id"), {
           credits:
             text: 'EasyAcc'
             href: ''
