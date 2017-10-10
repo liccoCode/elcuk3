@@ -41,7 +41,7 @@
     <td>${unit.materialPurchase?.id}</td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.planQty}</td>
-    <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
+    <td>${unit.planCurrency?.symbol()} ${unit.planPrice}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
     <td>
       <a href="javascript:void(0)" data-toggle="tooltip" data-placement="right" title="出货可用数">${unit.material?.surplusConfirmQty()}</a>
