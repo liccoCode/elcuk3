@@ -4,6 +4,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
   sWrapper: "dataTables_wrapper form-inline"
 
 $ ->
+  Highcharts.setOptions(global: {useUTC: false})
 # 分页事件
   $("#below_tabContent").on("click", ".sid,.sku", (e) ->
     $td = $(@)
