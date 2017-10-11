@@ -159,7 +159,7 @@ $ ->
       })
       LoadMask.unmask($div)
     )
-  ).on('click', '.btn-toolbar > .btn-small', (e) ->
+  ).on('click', '.btn-xs', (e) ->
     $btn = $(@)
     $div = $('#a_units')
     events = _.filter($('#a_units').highcharts().series, (serie) ->
