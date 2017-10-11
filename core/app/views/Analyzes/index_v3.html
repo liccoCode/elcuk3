@@ -15,7 +15,7 @@
 
 <div class="box box-success">
   <div class="box-body">
-    <div class="row" id="basic">
+    <div class="row" id="basic" style="height:400px;">
       <div class="col-md-6" style="height:300px;">
         <div id="a_units" data-method="ajaxUnit"></div>
       </div>
@@ -80,13 +80,11 @@
           #{option ''}Account#{/option}
       #{/select}
 
-      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control selectize',
-      style:"width:120px;"}
+      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control selectize',style:"width:120px;"}
           #{option ''}Market#{/option}
       #{/select}
 
-      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize', native: true,
-      style:"width:100px;"}
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize',style:"width:100px;"}
           #{option ''}Category#{/option}
       #{/select}
 
@@ -105,7 +103,6 @@
         <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;margin-top:5px;">
           Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
         </a>
-
 
         <input type="hidden" id="postPage" name="p.page" value="1">
         <input type="hidden" id="postType" name="p.type" value="sid">
