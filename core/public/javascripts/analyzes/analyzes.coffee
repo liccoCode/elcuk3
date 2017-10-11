@@ -5,17 +5,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
 
 $ ->
 # 分页事件
-  $("#below_tabContent").on("click", ".pagination a[page]", (e) ->
-    e.preventDefault()
-    $a = $(@)
-    $('#postPage').val($a.attr('page'))
-    ajaxFreshAcitveTableTab()
-  ).on('change', '.pagination select', (e) ->
-    e.preventDefault()
-    $('#postPage').val($(@).val())
-    ajaxFreshAcitveTableTab()
-# SKU | SID 项目的详细查看事件
-  ).on("click", ".sid,.sku", (e) ->
+  $("#below_tabContent").on("click", ".sid,.sku", (e) ->
     $td = $(@)
     sidOrSku = $td.text().trim()
     $('#postVal').val(sidOrSku)
@@ -41,17 +31,6 @@ $ ->
     # 选中 效果
     $td.parents('table').find('tr').removeClass('selected')
     $td.parents('tr').addClass('selected')
-# 列排序事件
-  ).on('click', 'th[orderby]', (e) ->
-    $td = $(@)
-    $('#postOrderBy').val($td.attr('orderby'))
-
-    $desc = $('#postDesc')
-    if $td.hasClass('sortable')
-      $desc.val(if $desc.val() == "true" then false else true)
-    else
-      $desc.val(true)
-    ajaxFreshAcitveTableTab()
   )
 
   # 当前选中的tab，调用相对应数据
@@ -59,11 +38,6 @@ $ ->
     type = $("#below_tab li.active a").attr("href")
     $("#{type}").trigger("ajaxFresh")
 
-  # Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
-  $('a[data-toggle=tab]').on('shown', (e) ->
-    $('#postPage').val(1)
-    ajaxFreshAcitveTableTab()
-  )
 
   # 绑定 sid tab 中修改 ps 值
   $('#sid').on('change', 'input[ps]', () ->
@@ -95,27 +69,17 @@ $ ->
   )
 
   # Form 搜索功能
-  $("#click_param").on("change", "[name=p\\.market]", (e) ->
-    ajaxFreshAcitveTableTab()
-
-# 搜索按钮
-  ).on("click", ".btn:contains(搜索)", (e) ->
+  $("#click_param").on("click", ".btn:contains(搜索)", (e) ->
     e.preventDefault()
     if $('select[name|="p.categoryId"]').val() is ''
       $("#postVal").val('all')
     else
       ajaxSaleUnitLines()
-
     ajaxFreshAcitveTableTab()
-
 # 重新加载全部的销售线
   ).on("click", ".btn:contains(Reload)", (e) ->
     e.preventDefault()
     ajaxSaleUnitLines()
-  ).on("click", ".btn:contains(Excel)", (e) ->
-    e.preventDefault()
-    $form = $('#click_param')
-    window.location.href = '/Excels/analyzes?' + $form.serialize()
   )
 
   #parameters：
