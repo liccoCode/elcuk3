@@ -45,7 +45,7 @@ public class Analyzes extends Controller {
         List<Account> accs = Account.openedSaleAcc();
         List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
-        render(accs, categoryIds, p);
+        render("Analyzes/index_v3.html", accs, categoryIds, p);
     }
 
     public static void indexV3() {
