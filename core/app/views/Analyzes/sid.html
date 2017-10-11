@@ -33,7 +33,7 @@
   <tbody>
   #{list items:dtos, as:'dto'}
   <tr>
-    <td class="sid" style="word-break:break-all;">${dto.fid}</td>
+    <td class="sid" style="word-break:break-all;cursor: pointer;">${dto.fid}</td>
     <td>
       <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
       <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
@@ -53,8 +53,8 @@
       </div>
     </td>
     <td style="background:${'#'+psDiffer._2}">
-        <input type="text" ps sid="${dto.fid}" value="${dto.ps}" class="form-control input-xs"
-               style="width:40px;padding:3px;">
+      <input type="text" ps sid="${dto.fid}" value="${dto.ps}" class="form-control input-xs"
+             style="width:40px;padding:3px;">
     </td>
     <td>${dto.day1}</td>
     <td style="color:${dto.difference.rgb()}">
