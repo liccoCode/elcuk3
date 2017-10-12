@@ -16,7 +16,7 @@ $ ->
     $categoryNode = $('select[name|="p.categoryId"]')
     categoryId = $categoryNode.val()
     $categoryNode.val("")
-    ajaxSaleUnitLines()
+    ajaxSaleUnitLinesForSku()
     $categoryNode.val(categoryId)
 
     # 转换率与 PageView
@@ -196,6 +196,12 @@ $ ->
         serie.remove() if serie.name in ["#{$btn.text()}亚马逊 滑动平均", '滑动平均 汇总']
       )
   )
+
+  ajaxSaleUnitLinesForSku = ->
+    $postVal = $('#postVal')
+    displayStr = $postVal.val()
+    head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
+    $("#a_units").trigger("ajaxFresh", [head, "Units", {}, '没有数据, 无法绘制曲线...'])
 
   # 销售订单曲线
   ajaxSaleUnitLines = ->
