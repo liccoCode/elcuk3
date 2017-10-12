@@ -159,7 +159,9 @@ $ ->
       })
       LoadMask.unmask($div)
     )
-  ).on('click', '.btn-xs', (e) ->
+  )
+    
+  $(".btn-xs").click((e) ->
     $btn = $(@)
     $div = $('#a_units')
     events = _.filter($('#a_units').highcharts().series, (serie) ->
