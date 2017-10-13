@@ -225,7 +225,7 @@ public class MWSReports {
     }
 
     public static MarketplaceWebService client(Account account, M market) {
-        String key = String.format("client_%s_%s", account.id, market.name());
+        String key = String.format("WebServiceClient_%s_%s", account.id, market.name());
         MarketplaceWebService client;
         if(cached.containsKey(key)) return cached.get(key);
         if(cached.containsKey(key)) return cached.get(key);

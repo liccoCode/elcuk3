@@ -9,10 +9,10 @@
   #{/if}
   #{else }
     <div class="col-sm-12" id='btns' style="text-align:right;">
-      <button class="btn btn-warning" id="amz-update" data-url="@{Sellings.update()}" title="直接更新到数据库"
+      <button class="btn btn-info" id="amz-update" data-url="@{Sellings.update()}" title="直接更新到数据库"
               placement='bottom' data-toggle="tooltip">Update
       </button>
-      <button class="btn btn-warning" id="amz-sync" title="从 Amazon 同步回来更新到数据库"
+      <button class="btn btn-success" id="amz-sync" title="从 Amazon 同步回来更新到数据库"
               placement='bottom' data-toggle="tooltip">Sync
       </button>
       <button class="btn btn-warning" id="amz-part-update" data-url="@{Sellings.partialUpdate()}"
