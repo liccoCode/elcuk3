@@ -232,7 +232,7 @@ public class Sellings extends Controller {
     public static void syncAmazon(final String sid) {
         try {
             Selling selling = Selling.findById(sid);
-            selling.syncFromAmazon();
+            selling.syncAmazonInfoFromApi();
             renderJSON(new Ret());
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));

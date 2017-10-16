@@ -6,6 +6,7 @@ import controllers.api.SystemOperation;
 import helper.*;
 import helper.Currency;
 import models.InventoryCostUnit;
+import models.OperatorConfig;
 import models.RevenueAndCostDetail;
 import models.User;
 import models.finance.BatchReviewApply;
@@ -105,7 +106,8 @@ public class Excels extends Controller {
                     String.format("%s出仓单.xls", dp.id));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
-            render(dp, unitList);
+            String companyName = OperatorConfig.getVal("companyname");
+            render(dp, unitList, companyName);
         } else {
             renderText("没有数据无法生成Excel文件！");
         }
