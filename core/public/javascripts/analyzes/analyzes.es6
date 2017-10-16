@@ -198,39 +198,39 @@ function paramWidth (type) {
         "targets": [0]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [1]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [2]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [3]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [4]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [5]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [6]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [7]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [8]
       },
       {
-        "width": "80px",
+        "width": "70px",
         "targets": [9]
       },
       {
@@ -242,31 +242,31 @@ function paramWidth (type) {
         "targets": [11]
       },
       {
-        "width": "45px",
+        "width": "70px",
         "targets": [12]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [13]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [14]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [15]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [16]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [17]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [18]
       }
     ]
