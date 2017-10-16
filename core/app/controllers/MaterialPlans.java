@@ -81,10 +81,8 @@ public class MaterialPlans extends Controller {
         }
 
         List<Material> units = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-
-        Cooperator cop = Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
-                        + ".id", units.get(0).id).first();
+        Cooperator cop = Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? " +
+                " ORDER BY ci.id", units.get(0).id).first();
         MaterialPlan dp = new MaterialPlan();
         dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;
@@ -198,7 +196,7 @@ public class MaterialPlans extends Controller {
 
         flash.success("成功将 %s 出货单元从物料出货单 %s 中移除.", StringUtils.join(pids, ","), id);
         if(dp.units.isEmpty()) {
-            dp.state=  MaterialPlan.P.CANCEL;
+            dp.state = MaterialPlan.P.CANCEL;
             dp.save();
             index(null);
         } else {
@@ -262,7 +260,7 @@ public class MaterialPlans extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialPlanUnit(MaterialPlanUnit unit,Long matId) {
+    public static void updateMaterialPlanUnit(MaterialPlanUnit unit, Long matId) {
         MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(matId);
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(materialPlanUnit, "receiptQty", unit.receiptQty));
