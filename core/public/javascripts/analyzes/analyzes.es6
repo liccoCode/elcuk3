@@ -198,11 +198,11 @@ function paramWidth (type) {
         "targets": [0]
       },
       {
-        "width": "40px",
+        "width": "45px",
         "targets": [1]
       },
       {
-        "width": "40px",
+        "width": "45px",
         "targets": [2]
       },
       {
@@ -230,7 +230,7 @@ function paramWidth (type) {
         "targets": [8]
       },
       {
-        "width": "70px",
+        "width": "60px",
         "targets": [9]
       },
       {
@@ -242,7 +242,7 @@ function paramWidth (type) {
         "targets": [11]
       },
       {
-        "width": "70px",
+        "width": "90px",
         "targets": [12]
       },
       {
