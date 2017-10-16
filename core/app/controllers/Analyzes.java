@@ -83,7 +83,12 @@ public class Analyzes extends Controller {
                 render("Analyzes/" + p.type + ".html", dtos, p);
             }
             Long start = System.currentTimeMillis();
-            List<AnalyzeDTO> dtos = p.query();
+            List<AnalyzeDTO> dtos = new ArrayList<>();
+
+            AnalyzeDTO one = new AnalyzeDTO("88WFARHMTLU-300M5V1AW");
+            one.difference = 4;
+            dtos.add(one);
+
             dtos = p.queryByPrivate(dtos, categories);
             Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) / 1000);
             render("Analyzes/" + p.type + ".html", dtos, p);
