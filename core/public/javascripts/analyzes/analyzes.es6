@@ -84,7 +84,7 @@ $(() => {
 });
 
 function paramWidth (type) {
-  if (type == "sid") {
+  if (type === "sid") {
     return [
       {
         "width": "150px",
@@ -194,79 +194,79 @@ function paramWidth (type) {
   } else {
     return [
       {
-        "width": "150px",
+        "width": "250px",
         "targets": [0]
       },
       {
-        "width": "100px",
+        "width": "45px",
         "targets": [1]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [2]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [3]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [4]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [5]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [6]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [7]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [8]
       },
       {
-        "width": "28px",
+        "width": "80px",
         "targets": [9]
       },
       {
-        "width": "28px",
+        "width": "45px",
         "targets": [10]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [11]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [12]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [13]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [14]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [15]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [16]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [17]
       },
       {
-        "width": "15px",
+        "width": "45px",
         "targets": [18]
       }
     ]
