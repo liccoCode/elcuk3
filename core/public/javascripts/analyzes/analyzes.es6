@@ -179,7 +179,7 @@ $(() => {
   }
 
   //Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
-  $('a[data-toggle=tab]').click(function (e) {
+  $('a[data-toggle=tab]').on('shown.bs.tab', function (e) {
     $('#postPage').val(1);
     ajaxFreshActiveTableTab();
   });
