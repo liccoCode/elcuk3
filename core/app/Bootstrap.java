@@ -79,6 +79,7 @@ public class Bootstrap extends Job {
         Account.initOfferIds();
         ElcukConfig.init();
         Caches.clearRedisRunningKeys();
+        //QiniuUtils.init();
 
         /**
          * 流程activiti的初始化
