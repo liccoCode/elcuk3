@@ -45,7 +45,7 @@ public class Analyzes extends Controller {
         List<Account> accs = Account.openedSaleAcc();
         List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
-        render(accs, categoryIds, p);
+        render("Analyzes/index_v3.html", accs, categoryIds, p);
     }
 
     public static void indexV3() {
@@ -85,7 +85,7 @@ public class Analyzes extends Controller {
             Long start = System.currentTimeMillis();
             List<AnalyzeDTO> dtos = p.query();
             dtos = p.queryByPrivate(dtos, categories);
-            Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) / 1000);
+            Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) + "ms");
             render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");

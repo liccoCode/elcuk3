@@ -101,7 +101,7 @@ public class Orders extends Controller {
         orderr.fees.forEach(GenericModel::delete);
         try {
             Account account = Account.findById(orderr.account.id);
-            MWSFinancesServiceClient client = MWSFinances.client(account, orderr.market);
+            MWSFinancesServiceClient client = MWSFinances.client(account, account.type);
             ListFinancialEventsRequest request = new ListFinancialEventsRequest();
             request.setSellerId(account.merchantId);
             request.setMWSAuthToken(account.token);

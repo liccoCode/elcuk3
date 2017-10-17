@@ -1,4 +1,4 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"物料出货单 #" + dp.id /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
@@ -10,27 +10,41 @@
 #{errorMsgs /}
 #{flash_alert /}
 
+<div class="row">
+  <div class="col-md-12">
+    <form action="@{MaterialPlans.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm" class="form-horizontal">
+      <div class="box box-primary box-solid">
+        <div class="box-header with-border"><h3 class="box-title">物料出货单信息</h3></div>
+        <div class="box-body">
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">物料出货单ID</label>
+            <div class="col-sm-2">
+              <input type="text" id="deliverymentId" name="dp.id" value="${dp?.id}" class="form-control" readonly/>
+            </div>
+            <label for="" class="col-sm-1 control-label">State</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" value="${dp?.state?.label()}" readonly>
+            </div>
+            <label for="" class="col-sm-1 control-label">供应商</label>
+            <div class="col-sm-2">
+              <input type="text" value="${dp?.cooperator?.name}" class="form-control" readonly/>
+              <input type="hidden" name="dp.cooperator.id" value="${dp?.cooperator?.id}" required/>
+            </div>
+            <label for="" class="col-sm-1 control-label">创建日期</label>
+            <div class="col-sm-2">
+              <input type="text" readonly class="form-control" value="${dp.createDate.datetime()}">
+            </div>
+          </div>
 
-#{info_row title:'物料出货单信息'/}
-
-<div class="row-fluid">
-      <form action="@{MaterialPlans.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm">
-        <table class="table table-condensed table-bordered">
-          <tr>
-            <th>物料出货单ID</th>
-            <td><input type="text" id="deliverymentId" name="dp.id" value="${dp?.id}" readonly/></td>
-            <th>State</th>
-            <td><input type="text" value="${dp?.state?.label()}" readonly></td>
-          </tr>
-          <tr>
-            <th>物料出货单名称<span style="color:red">*</span></th>
-            <td>
-              <input type="text" class="span8" name="dp.name" value="${dp.name}" #{if !qtyEdit}readonly#{/if} required>
-            </td>
-            <th>收货类型<span style="color:red">*</span></th>
-            <td>
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">物料出货单名称<span style="color:red">*</span></label>
+            <div class="col-sm-5">
+              <input class="form-control" name="dp.name" value="${dp.name}" #{if !qtyEdit}readonly#{/if} required>
+            </div>
+            <label for="" class="col-sm-1 control-label">收货类型<span style="color:red">*</span></label>
+            <div class="col-sm-2">
             #{if qtyEdit}
-              <select name="dp.receipt" class="inline" required  id="receipt">
+              <select name="dp.receipt" class="form-control" required id="receipt">
                 <option value="">收货类型</option>
                   #{list items:models.material.MaterialPlan.R, as:'c'}
                     <option value="${c.name()}" ${c==dp.receipt?'selected':''}>${c.label()}</option>
@@ -38,200 +52,179 @@
               </select>
             #{/if}
             #{else }
-              <input type="text" value="${dp.receipt.label()}" readonly>
+              <input type="text" class="form-control" value="${dp.receipt.label()}" readonly>
             #{/else}
-            </td>
-          </tr>
-          <tr>
-            <th>供应商</th>
-            <td>
-              <input type="hidden" name="dp.cooperator.id" value="${dp?.cooperator?.id}" #{if !qtyEdit}readonly#{/if} required/>
-              <input type="text" value="${dp?.cooperator?.name}" readonly/>
-            </td>
-            <th>项目名称<span style="color:red">*</span></th>
-            <td>
+            </div>
+            <div #{if receipt }style="display: none" #{/if} id="receiveTr">
+              <label for="" class="col-sm-1 control-label">收货方</label>
+              <div class="col-sm-2">
+              #{if qtyEdit}
+                <select name="dp.receiveCooperator.id" class="form-control selectize" style="width:220px;" id="outCooperator">
+                  <option value="">请输入收货供应商代码</option>
+                    #{list items:cooperators, as:'cop'}
+                      <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
+                    #{/list}
+                </select>
+              #{/if}
+              #{else }
+                <input type="text" value="${dp.receiveCooperator?.name}" class="form-control" readonly>
+              #{/else}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="whouse" class="col-sm-1 control-label">目的地</label>
+            <div class="col-sm-5">
+              <input class="form-control" name="dp.address" #{if !qtyEdit} readonly #{/if} value="${dp?.address}" id="whouse">
+            </div>
+            <label for="" class="col-sm-1 control-label">供应商</label>
+            <div class="col-sm-2">
+              <input type="text" value="${dp?.cooperator?.name}" class="form-control" readonly/>
+              <input type="hidden" name="dp.cooperator.id" value="${dp?.cooperator?.id}"/>
+            </div>
+            <label for="" class="col-sm-1 control-label">项目名称<span style="color:red">*</span></label>
+            <div class="col-sm-2">
             #{if qtyEdit}
-              <select name="dp.projectName" class="inline" required>
+              <select name="dp.projectName" class="form-control" required>
                 <option value="${brandName}">${brandName}</option>
               </select>
             #{/if}
             #{else }
-              <input type="text" name="dp.projectName" value="${dp.projectName}" readonly>
+              <input type="text" name="dp.projectName" value="${dp.projectName}" class="form-control" readonly>
             #{/else}
-            </td>
-          </tr>
+            </div>
+          </div>
 
-          <tr  #{if receipt }style="display: none" #{/if} id="receiveTr">
-            <th>收货方</th>
-            <td colspan="3">
-            #{if qtyEdit}
-              <select name="dp.receiveCooperator.id" class="inline selectize" style="width:220px;" id="outCooperator">
-                <option value="">请输入收货供应商代码</option>
-                  #{list items:cooperators, as:'cop'}
-                    <option #{if dp?.receiveCooperator?.id==cop.id} selected #{/if} value="${cop.id}">${cop.name}</option>
-                  #{/list}
-              </select>
-            #{/if}
-              #{else }
-                <input type="text" value="${dp.receiveCooperator?.name}" readonly>
-              #{/else}
-            </td>
-          </tr>
-          <tr>
-            <th>目的地</th>
-            <td colspan="3">
-              <textarea name="dp.address" rows="1" class="input-block-level" id="whouse"
-                        #{if !qtyEdit}disabled="disabled"#{/if}>${dp?.address}</textarea>
-            </td>
-          </tr>
-
-          <tr>
-            <th>创建人</th>
-            <td>
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">创建人</label>
+            <div class="col-sm-2">
+              <input class="form-control" name="dp.handler.username" value="${dp?.handler?.username}" readonly/>
               <input type="hidden" name="dp.handler.id" value="${dp?.handler?.id}" required/>
-              <input type="text" name="dp.handler.username" value="${dp?.handler?.username}" readonly/>
-            </td>
-            <th>创建日期</th>
-            <td>
-              <input type="text" readonly class="input-medium" value="${dp.createDate.datetime()}">
-            </td>
-          </tr>
-          <tr>
-            <th>备注</th>
-            <td colspan="5">
-              <textarea name="dp.memo" rows="4" class="input-block-level">${dp?.memo}</textarea>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="6">
-            #{if dp.apply}
-                <a href="@{Applys.material(dp.apply.id)}" class="btn btn-success">${dp.apply.serialNumber}
-                  请款单</a>
-            #{/if}
-              <button class="btn btn-primary" name="create_record">更新</button>
-              <a href="@{Excels.materialPlan(dp.id)}" class="btn btn-success" target="_blank"><i
-                  class="icon-download-alt"></i>导出物料出货单</a>
-            </td>
-          </tr>
-        </table>
-      </form>
-</div>
+            </div>
+            <label for="" class="col-sm-1 control-label">创建日期</label>
+            <div class="col-sm-2">
+              <input type="text" readonly class="form-control" value="${dp.createDate.datetime()}">
+            </div>
+          </div>
 
-#{success_row title:"已经添加进入[物料出货单]的[出货单元] "/}
-<form action="#" id="bulkpost" method="POST">
-  <div class="row-fluid">
-    <div class="span12" id="unit_list">
-      <table class="table table-condensed table-bordered" id="unit_table">
-        <tr>
-          <th width="15px;">#</th>
-          <th>物料编码</th>
-          <th>物料名称</th>
-          <th>工厂物料代码</th>
-          <th>采购余量</th>
-          <th>交货数量</th>
-          <th>Action_签收数量</th>
-          <th>项目名称</th>
-          <th>创建人</th>
-          <th>创建时间</th>
-        </tr>
-      #{list items:units, as:'unit'}
-        <tr class="text-center">
-          <td>
-            <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}">
-          </td>
-          <td>${unit.material?.code}</td>
-          <td>${unit.material?.name}</td>
-          <td>${unit.material?.version}</td>
-          <td>${unit.material?.surplusConfirmQty()}</td>
-          <td>
-              #{if qtyEdit}
-                <input type="text" name="qty" class="input-medium" value="${unit.qty}">
-              #{/if}
-              #{else } ${unit.qty} #{/else}
-          </td>
-          <td>
-              #{if unit.receiptQty == 0 && !qtyEdit}
-                <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" id="qs_${unit.id}"
-                   uid="${unit.id}">签收异常</a>
-              #{/if}
-              #{else } ${unit.receiptQty} #{/else}
-          </td>
-          <td>${unit.material?.projectName}</td>
-          <td>${unit.handler?.username}</td>
-          <td>#{time_tooltip time:unit.createDate /}</td>
-        </tr>
-      #{/list}
-      </table>
-    </div>
-  </div>
-
-#{if qtyEdit}
-  <div class="row-fluid">
-    <div class="span12">
-
-      <div class="input-append">
-        <button id="delunit_form_submit" class="btn btn-warning" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
-                placeHolder="将 DELIVERY 状态的出货计划从出货单中移除出去" data-disable-with='解除中'>
-          解除
-        </button>
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">备注</label>
+            <div class="col-sm-11">
+              <textarea name="dp.memo" rows="4" class="form-control">${dp?.memo}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+        #{if dp.apply}
+          <a href="@{Applys.material(dp.apply.id)}" class="btn btn-success">${dp.apply.serialNumber}请款单</a>
+        #{/if}
+          <button class="btn btn-primary" name="create_record">更新</button>
+          <a href="@{Excels.materialPlan(dp.id)}" class="btn btn-success" target="_blank">
+            <i class="icon-download-alt"></i>导出物料出货单</a>
+        </div>
       </div>
-
-      <div class="input-append">
-        <input type="text" id="code" placeHolder="物料编码(必须)">
-        <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>
-          快速添加
-        </button>
+    </form>
+    <form action="#" id="bulkpost" method="POST" class="form-horizontal">
+      <div class="box box-success box-solid">
+        <div class="box-header with-border"><h3 class="box-title">已经添加进入[物料出货单]的[出货单元]</h3></div>
+        <div class="box-body">
+          <table class="table table-condensed table-bordered" id="unit_table">
+            <tr>
+              <th width="15px;">#</th>
+              <th>物料编码</th>
+              <th>物料名称</th>
+              <th>工厂物料代码</th>
+              <th>采购余量</th>
+              <th>交货数量</th>
+              <th>Action_签收数量</th>
+              <th>项目名称</th>
+              <th>创建人</th>
+              <th>创建时间</th>
+            </tr>
+          #{list items:units, as:'unit'}
+            <tr>
+              <td>
+                <input type="checkbox" name="pids" value="${unit.id}" class="${tr_key}" id="checkbox_${unit.id}">
+              </td>
+              <td>${unit.material?.code}</td>
+              <td>${unit.material?.name}</td>
+              <td>${unit.material?.version}</td>
+              <td>${unit.material?.surplusConfirmQty()}</td>
+              <td>
+                  #{if qtyEdit}
+                    <input type="text" name="qty" class="form-control input-sm" value="${unit.qty}">
+                  #{/if}
+                  #{else } ${unit.qty} #{/else}
+              </td>
+              <td>
+                  #{if unit.receiptQty == 0 && !qtyEdit}
+                    <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-warning" id="qs_${unit.id}"
+                       uid="${unit.id}">签收异常</a>
+                  #{/if}
+                  #{else } ${unit.receiptQty} #{/else}
+              </td>
+              <td>${unit.material?.projectName}</td>
+              <td>${unit.handler?.username}</td>
+              <td>#{time_tooltip time:unit.createDate /}</td>
+            </tr>
+          #{/list}
+          </table>
+        </div>
+        <div class="box-footer">
+          <div class="col-sm-1">
+            <button id="delunit_form_submit" class="btn btn-danger" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
+                    placeHolder="将 DELIVERY 状态的出货计划从出货单中移除出去" data-disable-with='解除中'>解除
+            </button>
+          </div>
+          <div class="col-sm-2">
+            <input type="text" id="code" placeHolder="物料编码(必须)" class="form-control">
+          </div>
+          <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>快速添加</button>
+          <button id="confirmPlanBtn" class="btn btn-primary" data-disable-with='添加中'>确认</button>
+        </div>
       </div>
-
-      <div class="input-append">
-        <button id="confirmPlanBtn" class="btn btn-primary" data-disable-with='添加中'>
-          确认
-        </button>
-      </div>
-
-    </div>
-  </div>
-#{/if}
-  <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
-</form>
-
-#{records records:records/}
-
-<div class="row-fluid">
-  <div class="span12">
-    <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+    </form>
   </div>
 </div>
-<div class="row-fluid">
-  <div style="min-height:300px;" class="span12 well" id="dropbox">
-    <ul class="thumbnails uploaded"></ul>
-  #{power.ck "products.edit"}
-    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-  #{/power.ck}
+
+#{records_v3 records:records/}
+
+<div class="box box-info box-solid">
+  <div class="box-header with-border"><h3 class="box-title">附件 <i class="icon-sort-down"></i></h3></div>
+  <div class="box-body">
+    <div style="min-height:300px; width:97%;" class="span12 well" id="dropbox">
+      <ul class="thumbnails uploaded"></ul>
+    #{power.ck "products.edit"}
+      <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+    #{/power.ck}
+    </div>
   </div>
 </div>
 
 <!--  修改签收数量 弹出div begin   -->
-<div id="bom_modal" class="modal hide fade">
-  <div class="modal-header">
-    <h4>签收数量修改</h4>
-  </div>
-  <div class="modal-body">
-    <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form">
-      <input type="hidden" name="matId" id="unit_id">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th width="30%">实际签收数量</th>
-          <td>
-            <input type="text" placeHolder="实际签收数量" id="unit_receiptQty" name="unit.receiptQty">
-          </td>
-        </tr>
-      </table>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+<div id="bom_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h3 class="modal-title">签收数量修改</h3></div>
+      <div class="modal-body">
+        <form action="@{MaterialPlans.updateMaterialPlanUnit()}" method="post" id="updateUnit_form" class="form-horizontal">
+          <div class="row">
+            <div class="form-group">
+              <label for="" class="col-sm-3 control-label">实际签收数量</label>
+              <div class="col-sm-6">
+                <input type="text" placeHolder="实际签收数量" id="unit_receiptQty" name="unit.receiptQty" class="form-control">
+                <input type="hidden" name="matId" id="unit_id">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
   </div>
 </div>
 <!--  修改签收数量 弹出div end   -->

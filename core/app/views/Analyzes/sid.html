@@ -1,5 +1,5 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table id="sorttable" class="table table-condensed table-bordered">
+<table id="sorttable" class="table table-condensed table-bordered hover">
   <thead>
   <tr>
     <th title="可双击下面 MerchantSKU">SellingId</th>
@@ -11,60 +11,30 @@
     <th>入库</th>
     <th>Reserved</th>
     <th>在库</th>
-    <th>Reviews</th>
-    <th>Rating</th>
     <th>PS</th>
     <th>_PS</th>
     <th>Day1</th>
-    <th>
-      <abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr>
-    </th>
+    <th><abbr title="Day1与Day7平均值的差值(百分比)">Diff(%)</abbr></th>
     <th>Day7</th>
     <th>Day7ave</th>
     <th>Day30</th>
     <th>Day30ave</th>
-    <th>
-      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天">
-        TOR
-      </abbr>
-    </th>
-    <th>
-      <abbr title="根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天">
-        TOR1
-      </abbr>
-    </th>
-    <th>
-      <abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天;">
-        _TOR
-      </abbr>
-    </th>
-    <th>
-      <abbr title="根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天">
-        _TOR1
-      </abbr>
-    </th>
-    <th>
-      <abbr title="多少天之后会断货(线条会接不上)">
-        断货天数
-      </abbr>
-    </th>
-    <th>
-      实时价格
-    </th>
-    <th>
-      生命周期
-    </th>
-    <th>
-      主要运输方式
-    </th>
+    <th><abbr title="根据系统计算出的 ps 计算的这个产品现在(在库)的货物还能够周转多少天">TOR</abbr></th>
+    <th><abbr title="根据人工设置的 ps 计算的这个产品现在(在库)的货物还能够周转多少天">TOR1</abbr></th>
+    <th><abbr title="根据系统计算出的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天;">_TOR</abbr></th>
+    <th><abbr title="根据人工设置的 ps 计算的这个产品现在(在库 + 在途 + 入库 + 在产)的货物还能够周转多少天">_TOR1</abbr></th>
+    <th><abbr title="多少天之后会断货(线条会接不上)">断货天数</abbr></th>
+    <th>实时价格</th>
+    <th>生命周期</th>
+    <th>主要运输方式</th>
     <th>退货数</th>
   </tr>
   </thead>
   <tbody>
   #{list items:dtos, as:'dto'}
   <tr>
-    <td class="sid">${dto.fid}</td>
-    <td style="min-width: 105px;">
+    <td class="sid" style="word-break:break-all;cursor: pointer;">${dto.fid}</td>
+    <td>
       <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
       <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
       <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
@@ -76,26 +46,18 @@
     <td style="color:#CC6615">${dto.inbound}</td>
     <td class="color:#CC6615">${dto.reserved}</td>
     <td class="text-success">${dto.qty}</td>
-    <td>${dto.reviews}
-      <small>${dto.reviewRatio.format('#')}</small>
-    </td>
-    <td>${dto.rating.format('#.##')}</td>
       #{set psDiffer:dto.getPsDiffer()/}
-    <td style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
+    <td style="text-align:center;background:${'#'+psDiffer._2}">
       <div class="input-prepend" style="margin:0;">
         <span class="add-on" style="width:35px">${psDiffer._1.format('#%')}</span>
       </div>
     </td>
-    <td style="text-align:center;width:90px;background:${'#'+psDiffer._2}">
-      <div class="input-prepend" style="margin:0;">
-        <input type="text" ps sid="${dto.fid}" value="${dto.ps}" style="width:45px;">
-      </div>
+    <td style="background:${'#'+psDiffer._2}">
+      <input type="text" ps sid="${dto.fid}" value="${dto.ps}" class="form-control input-xs"
+             style="width:40px;padding:3px;">
     </td>
     <td>${dto.day1}</td>
-    <td style="color:${dto.difference.rgb()}">
-    ${dto.difference.format('#.##')}
-      (${dto.percentage().format('#.##%')})
-    </td>
+    <td style="color:${dto.difference.rgb()}">${dto.difference.format('#.##')} (${dto.percentage().format('#.##%')})</td>
     <td>${dto.day7}</td>
     <td>${(dto.day1 - dto.difference).format('#.#')}</td>
     <td>${dto.day30}</td>

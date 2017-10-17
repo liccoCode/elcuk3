@@ -1,5 +1,5 @@
 <!-- 生成 Analyzes 页面下方的 selling 信息 -->
-<table  id="skutable" class="table table-condensed table-bordered">
+<table id="skutable" class="table table-condensed table-bordered">
   <thead>
   <tr>
     <th title="可双击下面 SKU">SKU</th>
@@ -20,13 +20,13 @@
     <th>Day7</th>
     <th>Day7ave</th>
     <th>Day30</th>
-    <th >Day30ave</th>
+    <th>Day30ave</th>
     <th>_TOR</th>
     <th>_TOR1</th>
   </tr>
   </thead>
- <tbody>
-#{list items:dtos, as:'dto'}
+  <tbody>
+  #{list items:dtos, as:'dto'}
   <tr>
     <td class="sku"><i class="icon-bolt"></i> ${dto.fid}</td>
     <td style="color:#A5B600">${dto.plan}</td>
@@ -53,6 +53,6 @@
     <td>${dto.turnOverT4._1} )</td>
     <td>${dto.turnOverT4._3} )</td>
   </tr>
-#{/list}
- </tbody>
+  #{/list}
+  </tbody>
 </table>

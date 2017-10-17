@@ -270,8 +270,7 @@ public class CooperItem extends Model {
 
     public void saveMaterialItem(Cooperator cop) {
         Material m = Material.findById(this.material.id);
-        List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
-        if(cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
+        if(cop.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
             Validation.addError("", "供应商下已经存在该物料，请选择其他物料!");
             return;
         }
@@ -288,11 +287,6 @@ public class CooperItem extends Model {
     public void updateMaterialItem(Cooperator cooperator, CooperItem db) {
         Material m = Material.findById(this.material.id);
         List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
-        if(db.id != null && cooperItems.stream()
-                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)) {
-            Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
-            return;
-        }
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(db, "price", this.price));
         logs.addAll(Reflects.logFieldFade(db, "currency", this.currency));

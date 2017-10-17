@@ -15,9 +15,7 @@ public class UserPost extends Post<User> {
     private static final long serialVersionUID = 8537899224904638147L;
     public int perSize = 20;
     public boolean closed = false;
-
     public User.D department;
-
 
     @Override
     public F.T2<String, List<Object>> params() {
