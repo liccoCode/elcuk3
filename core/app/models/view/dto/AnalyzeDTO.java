@@ -181,7 +181,8 @@ public class AnalyzeDTO implements Serializable {
      */
     public float returnRates = 0;
 
-    public static String[] indexColor = {"progress-bar-aqua","progress-bar-red","progress-bar-green", "progress-bar-yellow"};
+    public static String[] indexColor = {"progress-bar-aqua", "progress-bar-red", "progress-bar-green",
+            "progress-bar-yellow"};
 
     //BEGIN GENERATED CODE
     public float getPs_cal() {
@@ -317,6 +318,9 @@ public class AnalyzeDTO implements Serializable {
     public boolean containsCategory(List<String> categories) {
         return categories.stream().anyMatch(category -> {
             int length = category.length();
+            if(length >= this.fid.length()) {
+                return false;
+            }
             String temp = this.fid.substring(0, length);
             return Objects.equals(category, temp);
         });
