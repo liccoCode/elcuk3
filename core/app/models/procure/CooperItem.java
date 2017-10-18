@@ -34,6 +34,7 @@ import java.util.Objects;
 @Entity
 public class CooperItem extends Model {
 
+    private static final long serialVersionUID = -5498608660409739424L;
     @ManyToOne
     public Cooperator cooperator;
 
@@ -42,6 +43,12 @@ public class CooperItem extends Model {
 
     @OneToOne
     public Material material;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    public List<ProductMaterial> skus = new ArrayList();
+
+    @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
+    public List<ProductMaterial> mats = new ArrayList();
 
     /**
      * 冗余字段
@@ -57,6 +64,21 @@ public class CooperItem extends Model {
     @Expose
     @Min(0)
     public Float price;
+
+    /**
+     * 含税价
+     */
+    @Expose
+    @Min(0)
+    public Float taxPrice;
+
+    /**
+     * 税点
+     * 单位 %
+     */
+    @Expose
+    @Min(0)
+    public Integer taxPoint;
 
     /***
      * 其他价格（包含包材配件价格）
@@ -193,6 +215,8 @@ public class CooperItem extends Model {
         logs.addAll(Reflects.logFieldFade(this, "otherPrice", entity.otherPrice));
         logs.addAll(Reflects.logFieldFade(this, "period", entity.period));
         logs.addAll(Reflects.logFieldFade(this, "lowestOrderNum", entity.lowestOrderNum));
+        logs.addAll(Reflects.logFieldFade(this, "taxPrice", entity.taxPrice));
+        logs.addAll(Reflects.logFieldFade(this, "taxPoint", entity.taxPoint));
 
         this.productTerms = entity.productTerms;
         this.memo = entity.memo;
@@ -357,5 +381,13 @@ public class CooperItem extends Model {
         } else {
             return lastCartonNum;
         }
+    }
+
+    public List<ProductMaterial> mats() {
+        return ProductMaterial.find("product.id=?", this.id).fetch();
+    }
+
+    public List<ProductMaterial> products() {
+        return ProductMaterial.find("material.id=?", this.id).fetch();
     }
 }

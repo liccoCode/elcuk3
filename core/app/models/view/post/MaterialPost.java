@@ -52,7 +52,7 @@ public class MaterialPost extends Post<Material> {
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m "
-                + "LEFT JOIN m.cooperItems ci  LEFT JOIN m.boms bs WHERE m.isDel=? ");
+                + "LEFT JOIN m.cooperItems ci LEFT JOIN m.boms bs WHERE m.isDel=? ");
         if(this.status != null && this.status == S.DOWN) {
             params.add(true);
         } else {
