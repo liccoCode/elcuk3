@@ -1,5 +1,5 @@
 $ ->
-  $('.profits_form').ajaxForm({
+  $('#profits_form').ajaxForm({
     dataType: 'json',
     success: (r) ->
       alert(r.message)
@@ -17,13 +17,13 @@ $ ->
     )
 
   # Form 搜索功能
-  $(".search_form").on("click", ".btn:contains(Excel)", (e) ->
+  $("#profits_form").on("click", ".btn:contains(Excel)", (e) ->
     e.preventDefault()
     $form = $('#profits_form')
     window.open('/Excels/profit?' + $form.serialize(), "_blank")
   )
 
-  $(".search_form").on("click", ".btn:contains(Inventory)", (e) ->
+  $("#profits_form").on("click", ".btn:contains(Inventory)", (e) ->
     e.preventDefault()
     $form = $('#profits_form')
     $.post('/Profits/inventory', $form.serialize(),
