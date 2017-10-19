@@ -60,15 +60,20 @@
                 <td>${apply.id}</td>
                 <td><a href="@{Applys.material(apply.id)}">${apply.serialNumber}</a></td>
                 <td>${apply.cooperator.fullName}</td>
-                  #{set currency:apply.currency()/}
-                <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.appliedAmount()).setScale(2, 4)
-                .floatValue().format('#,###.##')}</td>
-                <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()-apply.appliedAmount()).setScale(2, 4)
-                .floatValue().format('#,###.##')}</td>
-                <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()).setScale(2, 4)
-                .floatValue().format('#,###.##')}</td>
-                <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2, 4)
-                .floatValue().format('#,###.##')}</td>
+                  #{if apply.type == models.material.MaterialApply.T.PLAN}
+                      #{set currency:apply.currency()/}
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.appliedAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()-apply.appliedAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                  #{/if}
+                  #{else }
+                      #{set currency:apply.currencyPurchase()/}
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.appliedAmountPurchase()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmountPurchase()-apply.appliedAmountPurchase()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmountPurchase()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                    <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmountPurchase()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+                  #{/else}
                 <td>#{time_tooltip_v3 time:apply.updateAt, datetime:true/}</td>
                 <td>#{time_tooltip_v3 time:apply.createdAt, datetime:true/}</td>
               </tr>

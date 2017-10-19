@@ -9,6 +9,8 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
+import models.material.MaterialPurchase;
+import models.material.MaterialUnit;
 import models.procure.*;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Cache;
@@ -107,6 +109,19 @@ public class PaymentUnit extends Model {
     }
 
 
+    public PaymentUnit(MaterialUnit materialUnit) {
+        this();
+        this.materialUnit = materialUnit;
+        this.materialPurchase = materialUnit.materialPurchase;
+        this.amount = materialUnit.totalAmount();
+        this.unitQty = materialUnit.qty > 0 ? materialUnit.qty : materialUnit.planQty;
+        this.currency = materialUnit.getCurrency();
+        this.payment = Payment.buildPayment(materialUnit.materialPurchase.cooperator, materialUnit.getCurrency(),
+                materialUnit.totalAmount(), materialUnit.materialPurchase.applyPurchase);
+        this.payee = User.current();
+        this.payment.save();
+    }
+
     public PaymentUnit(MaterialPlanUnit materialPlanUnit) {
         this();
         this.materialPlanUnit = materialPlanUnit;
@@ -119,7 +134,7 @@ public class PaymentUnit extends Model {
         this.payee = User.current();
         this.payment.save();
     }
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
     public Payment payment;
 
@@ -137,6 +152,8 @@ public class PaymentUnit extends Model {
      * 4. 运输单元
      * 5. 物料出货单
      * 6. 物料出货计划
+     * 7. 物料采购单
+     * 8. 物料采购单元
      * 各种不同的关联关系, 由于无法像动态语言那样灵活, 所以将复杂性交给 Hibernate, 手动去选择不同的关联类型
      */
 
@@ -157,6 +174,12 @@ public class PaymentUnit extends Model {
 
     @ManyToOne(fetch = FetchType.LAZY)
     public MaterialPlanUnit materialPlanUnit;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialPurchase materialPurchase;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public MaterialUnit materialUnit;
 
 
     /**
@@ -234,26 +257,33 @@ public class PaymentUnit extends Model {
 
     @PrePersist
     public void beforeSave() {
-        if(this.feeType == null)
+        if(this.feeType == null) {
             throw new PaymentException("支付单元必须拥有费用类型.");
-        if(this.currency == null)
+        }
+        if(this.currency == null) {
             throw new PaymentException("支付单元的货币种类不允许为空.");
+        }
         this.createdAt = new Date();
     }
 
     public void basicRemoveValidate(String reason) {
-        if(StringUtils.isBlank(reason))
+        if(StringUtils.isBlank(reason)) {
             Validation.addError("", "必须填写取消的理由.");
-        if(this.isApproval())
+        }
+        if(this.isApproval()) {
             Validation.addError("", "请款已经被批准, 不允许删除记录, 请与财务交流调整.");
+        }
     }
 
     public PaymentUnit procureFeeRemove(String reason) {
         basicRemoveValidate(reason);
-        if(this.remove)
+        if(this.remove) {
             Validation.addError("", "已经删除了");
+        }
 
-        if(Validation.hasErrors()) return null;
+        if(Validation.hasErrors()) {
+            return null;
+        }
 
         this.remove = true;
         this.save();
@@ -267,21 +297,27 @@ public class PaymentUnit extends Model {
 
     public PaymentUnit materialFeeRemove(String reason) {
         basicRemoveValidate(reason);
-        if(this.remove)
+        if(this.remove) {
             Validation.addError("", "已经删除了");
-        if(Validation.hasErrors()) return null;
+        }
+        if(Validation.hasErrors()) {
+            return null;
+        }
         this.remove = true;
         this.save();
+        Long fid =  this.materialPlanUnit != null ? this.materialPlanUnit.id : this.materialUnit.id;
         new ERecordBuilder("materialPlanUnit.destroy")
                 .msgArgs(reason, this.currency, this.amount(), this.feeType.nickName)
-                .fid(this.materialPlanUnit.id) // 取消的操作, 记录在 MaterialPlanUnit 身上, 因为是对采购计划取消请款
+                .fid(fid) // 取消的操作, 记录在 MaterialPlanUnit 身上, 因为是对采购计划取消请款
                 .save();
         return this;
     }
 
     public PaymentUnit transportFeeRemove(String reason) {
         basicRemoveValidate(reason);
-        if(Validation.hasErrors()) return this;
+        if(Validation.hasErrors()) {
+            return this;
+        }
         this.shipment.fees.remove(this);
         this.shipment.save();
         String fid;
@@ -309,15 +345,24 @@ public class PaymentUnit extends Model {
     }
 
     public void transportApply() {
-        if(this.cooperator == null)
+        if(this.cooperator == null) {
             this.cooperator = this.shipment.cooper;
-        if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
-        if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
-        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
+        }
+        if(this.shipment.apply == null) {
+            Validation.addError("", "没有添加请款单, 无需批准操作.");
+        }
+        if(this.remove) {
+            Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        }
+        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0) {
             Validation.addError("", "请添加合作伙伴" + this.cooperator.name + "的支付方式信息");
-        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
+        }
+        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state)) {
             Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
-        if(Validation.hasErrors()) return;
+        }
+        if(Validation.hasErrors()) {
+            return;
+        }
         if(this.payment == null) {
             this.payment = Payment.buildPayment(this.cooperator, this.currency, this.amount(), this.shipment.apply)
                     .save();
@@ -339,16 +384,27 @@ public class PaymentUnit extends Model {
          * 3. 判断状态是否允许
          * 4. 费用关系人是否有支付方式
          */
-        if(this.cooperator == null)
+        if(this.cooperator == null) {
             this.cooperator = this.shipment.cooper;
-        if(this.shipment.apply == null) Validation.addError("", "没有添加请款单, 无需批准操作.");
-        if(this.payment == null) Validation.addError("", this.feeType.nickName + "没有请款, 不能进行批准操作.");
-        if(this.remove) Validation.addError("", "#" + this.id + " 请款单已经删除了");
-        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0)
+        }
+        if(this.shipment.apply == null) {
+            Validation.addError("", "没有添加请款单, 无需批准操作.");
+        }
+        if(this.payment == null) {
+            Validation.addError("", this.feeType.nickName + "没有请款, 不能进行批准操作.");
+        }
+        if(this.remove) {
+            Validation.addError("", "#" + this.id + " 请款单已经删除了");
+        }
+        if(this.cooperator.paymentMethods == null || this.cooperator.paymentMethods.size() <= 0) {
             Validation.addError("", "请添加合作伙伴" + this.cooperator.name + "的支付方式信息");
-        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state))
+        }
+        if(Arrays.asList(S.PAID, S.APPROVAL).contains(this.state)) {
             Validation.addError("", String.format("%s 状态拒绝 '批准'", this.state.label()));
-        if(Validation.hasErrors()) return;
+        }
+        if(Validation.hasErrors()) {
+            return;
+        }
         if(this.payment == null) {
             this.payment = Payment.buildPayment(this.cooperator, this.currency, this.amount(), this.shipment.apply)
                     .save();
@@ -373,14 +429,19 @@ public class PaymentUnit extends Model {
          * 2. 原因填写
          * 3. 删除检查
          */
-        if(this.remove)
+        if(this.remove) {
             Validation.addError("", "已经删除了");
-        if(!Arrays.asList(S.APPLY, S.APPROVAL, S.DENY).contains(this.state))
+        }
+        if(!Arrays.asList(S.APPLY, S.APPROVAL, S.DENY).contains(this.state)) {
             Validation.addError("", this.state.label() + " 状态拒绝 '驳回'");
-        if(StringUtils.isBlank(reason))
+        }
+        if(StringUtils.isBlank(reason)) {
             Validation.addError("", "驳回的原因必须填写");
+        }
 
-        if(Validation.hasErrors()) return;
+        if(Validation.hasErrors()) {
+            return;
+        }
         this.state = S.DENY;
         this.save();
         new ERecordBuilder("paymentunit.deny")
@@ -435,12 +496,13 @@ public class PaymentUnit extends Model {
          * second: shipment
          * third: shipItem
          */
-        if(this.deliveryment != null)
+        if(this.deliveryment != null) {
             return this.deliveryment.id;
-        else if(this.shipment != null)
+        } else if(this.shipment != null) {
             return this.shipment.id;
-        else
+        } else {
             return "无外键(孤儿), 请联系 It";
+        }
     }
 
     /**
@@ -503,21 +565,28 @@ public class PaymentUnit extends Model {
      * @param fixValue
      */
     public void fixValue(Float fixValue, String reason) {
-        if(this.state == S.PAID)
+        if(this.state == S.PAID) {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
-        if(this.fixValue == fixValue && fixValue != 0)
+        }
+        if(this.fixValue == fixValue && fixValue != 0) {
             Validation.addError("", "修正值没有修改");
-        if(StringUtils.isBlank(reason))
+        }
+        if(StringUtils.isBlank(reason)) {
             Validation.addError("", "修改修正价, 必须填写原因");
-        if(this.remove)
+        }
+        if(this.remove) {
             Validation.addError("", "此请款已经被删除, 无法修改.");
+        }
 
-        if(Validation.hasErrors()) return;
+        if(Validation.hasErrors()) {
+            return;
+        }
 
         float oldFixValue = this.fixValue;
         this.fixValue = fixValue;
-        if(this.state == S.DENY)
+        if(this.state == S.DENY) {
             this.state = S.APPLY;
+        }
         this.save();
         new ERecordBuilder("paymentunit.fixValue").msgArgs(reason, oldFixValue, this.fixValue).fid(this.id).save();
     }
@@ -528,9 +597,12 @@ public class PaymentUnit extends Model {
      * @param fee
      */
     public PaymentUnit fixUnitValue(PaymentUnit fee) {
-        if(this.state == S.PAID)
+        if(this.state == S.PAID) {
             Validation.addError("", "请款已经完成支付, 不允许再修改修正价格.");
-        if(Validation.hasErrors()) return this;
+        }
+        if(Validation.hasErrors()) {
+            return this;
+        }
         fee.amount = fee.unitPrice * fee.unitQty;
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "amount", fee.amount));

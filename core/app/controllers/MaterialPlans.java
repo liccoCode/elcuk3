@@ -198,7 +198,7 @@ public class MaterialPlans extends Controller {
 
         flash.success("成功将 %s 出货单元从物料出货单 %s 中移除.", StringUtils.join(pids, ","), id);
         if(dp.units.isEmpty()) {
-            dp.state=  MaterialPlan.P.CANCEL;
+            dp.state = MaterialPlan.P.CANCEL;
             dp.save();
             index(null);
         } else {
@@ -262,7 +262,7 @@ public class MaterialPlans extends Controller {
     /**
      * 修改物料计划
      */
-    public static void updateMaterialPlanUnit(MaterialPlanUnit unit,Long matId) {
+    public static void updateMaterialPlanUnit(MaterialPlanUnit unit, Long matId) {
         MaterialPlanUnit materialPlanUnit = MaterialPlanUnit.findById(matId);
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(materialPlanUnit, "receiptQty", unit.receiptQty));
@@ -332,14 +332,19 @@ public class MaterialPlans extends Controller {
      */
     @Check("materialpurchases.index")
     public static void materialPlanToApply(List<String> pids, MaterialPlanPost p, Long applyId) {
-        if(pids == null) pids = new ArrayList<>();
+        if(pids == null) {
+            pids = new ArrayList<>();
+        }
         if(pids.size() <= 0) {
             flash.error("请选择需纳入请款的出货单(相同供应商).");
             index(p);
         }
         MaterialApply apply = MaterialApply.findById(applyId);
-        if(apply == null) apply = MaterialApply.buildMaterialApply(pids);
-        else apply.appendMaterialApply(pids);
+        if(apply == null) {
+            apply = MaterialApply.buildMaterialApply(pids);
+        } else {
+            apply.appendMaterialApply(pids);
+        }
 
         if(apply == null || Validation.hasErrors()) {
             for(Error error : Validation.errors()) {
@@ -362,11 +367,11 @@ public class MaterialPlans extends Controller {
         long applyId = dmt.apply.id;
         dmt.apply.updateAt(applyId);
         dmt.departFromProcureApply();
-
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-        else
+        } else {
             flash.success("%s 剥离成功.", id);
+        }
         Applys.material(applyId);
     }
 }
