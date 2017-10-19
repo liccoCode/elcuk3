@@ -142,7 +142,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         rows.forEach(row -> map.put(row.get("sku").toString(), Integer.parseInt(row.get("total").toString())));
         dtos.forEach(dto -> {
             String sku = dto.fid.split(",")[0];
-            dto.eurQty = map.get(sku);
+            dto.eurQty = map.get(sku) == null ? 0 : map.get(sku);
         });
     }
 
