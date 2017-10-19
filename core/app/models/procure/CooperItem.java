@@ -34,6 +34,7 @@ import java.util.Objects;
 @Entity
 public class CooperItem extends Model {
 
+    private static final long serialVersionUID = -5498608660409739424L;
     @ManyToOne
     public Cooperator cooperator;
 
@@ -42,6 +43,12 @@ public class CooperItem extends Model {
 
     @OneToOne
     public Material material;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    public List<ProductMaterial> skus = new ArrayList();
+
+    @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
+    public List<ProductMaterial> mats = new ArrayList();
 
     /**
      * 冗余字段
@@ -57,6 +64,21 @@ public class CooperItem extends Model {
     @Expose
     @Min(0)
     public Float price;
+
+    /**
+     * 含税价
+     */
+    @Expose
+    @Min(0)
+    public Float taxPrice;
+
+    /**
+     * 税点
+     * 单位 %
+     */
+    @Expose
+    @Min(0)
+    public Integer taxPoint;
 
     /***
      * 其他价格（包含包材配件价格）
@@ -193,6 +215,8 @@ public class CooperItem extends Model {
         logs.addAll(Reflects.logFieldFade(this, "otherPrice", entity.otherPrice));
         logs.addAll(Reflects.logFieldFade(this, "period", entity.period));
         logs.addAll(Reflects.logFieldFade(this, "lowestOrderNum", entity.lowestOrderNum));
+        logs.addAll(Reflects.logFieldFade(this, "taxPrice", entity.taxPrice));
+        logs.addAll(Reflects.logFieldFade(this, "taxPoint", entity.taxPoint));
 
         this.productTerms = entity.productTerms;
         this.memo = entity.memo;
@@ -270,8 +294,7 @@ public class CooperItem extends Model {
 
     public void saveMaterialItem(Cooperator cop) {
         Material m = Material.findById(this.material.id);
-        List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
-        if(cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
+        if(cop.cooperItems.stream().anyMatch(item -> Objects.equals(item.material, m))) {
             Validation.addError("", "供应商下已经存在该物料，请选择其他物料!");
             return;
         }
@@ -288,11 +311,6 @@ public class CooperItem extends Model {
     public void updateMaterialItem(Cooperator cooperator, CooperItem db) {
         Material m = Material.findById(this.material.id);
         List<CooperItem> cooperItems = CooperItem.find("type =?", T.MATERIAL).fetch();
-        if(db.id != null && cooperItems.stream()
-                .anyMatch(item -> Objects.equals(item.material, m) && item.cooperator != cooperator)) {
-            Validation.addError("", " 其他供应商下已经存在该物料，请重新选择物料!");
-            return;
-        }
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(db, "price", this.price));
         logs.addAll(Reflects.logFieldFade(db, "currency", this.currency));
@@ -363,5 +381,13 @@ public class CooperItem extends Model {
         } else {
             return lastCartonNum;
         }
+    }
+
+    public List<ProductMaterial> mats() {
+        return ProductMaterial.find("product.id=?", this.id).fetch();
+    }
+
+    public List<ProductMaterial> products() {
+        return ProductMaterial.find("material.id=?", this.id).fetch();
     }
 }

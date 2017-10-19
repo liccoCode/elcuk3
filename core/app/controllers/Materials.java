@@ -7,9 +7,11 @@ import models.ElcukRecord;
 import models.User;
 import models.material.Material;
 import models.material.MaterialBom;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.product.Product;
 import models.view.Ret;
+import models.view.post.CooperItemPost;
 import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
@@ -109,14 +111,14 @@ public class Materials extends Controller {
 
     public static void deleteMaterial(Long id) {
         Material material = Material.findById(id);
-        if(material.isDel){
+        if(material.isDel) {
             material.isDel = false;
             material.updateDate = new Date();
             material.save();
             flash.success(String.format(" %s 上架成功！", material.name));
             new ElcukRecord(Messages.get("materials.up"),
                     Messages.get("materials.up.msg", material.id), material.id.toString()).save();
-        }else {
+        } else {
             material.isDel = true;
             material.updateDate = new Date();
             material.save();
@@ -129,8 +131,8 @@ public class Materials extends Controller {
 
     public static void deleteMaterialBom(Long id) {
         MaterialBom bom = MaterialBom.findById(id);
-        if(bom.materials != null && bom.materials.size() > 0){
-            Validation.addError("", "B0M—ID["+bom.number+"]已绑定物料,不允许删除!");
+        if(bom.materials != null && bom.materials.size() > 0) {
+            Validation.addError("", "B0M—ID[" + bom.number + "]已绑定物料,不允许删除!");
             Webs.errorToFlash(flash);
             Materials.indexBom(new MaterialBomPost());
         }
@@ -166,7 +168,7 @@ public class Materials extends Controller {
     public static void createBom(MaterialBom b) {
         List<MaterialBom> materialBoms = MaterialBom.find("number = ? and isDel = false", b.number).fetch();
         if(materialBoms != null && materialBoms.size() > 0) {
-            Validation.addError("", "B0M—ID["+b.number+"]已存在,不允许二次创建!");
+            Validation.addError("", "B0M—ID[" + b.number + "]已存在,不允许二次创建!");
             Webs.errorToFlash(flash);
             Materials.indexBom(new MaterialBomPost());
         }
@@ -207,7 +209,6 @@ public class Materials extends Controller {
     }
 
     public static void showMaterialList(String search, String type) {
-        String word = String.format("%%%s%%", StringUtils.replace(search.trim(), "'", "''"));
         MaterialPost p = new MaterialPost();
         p.search = search;
         if(StringUtils.isNotBlank(type)) {
@@ -216,6 +217,18 @@ public class Materials extends Controller {
         p.pagination = false;
         List<Material> materials = p.query();
         render("/Products/showMaterialList.html", materials);
+    }
+
+    public static void showMaterialListForCopItem(String search, String type) {
+        CooperItemPost p = new CooperItemPost();
+        p.search = search;
+        p.type = CooperItem.T.MATERIAL;
+        if(StringUtils.isNotBlank(type)) {
+            p.matType = Material.T.valueOf(type);
+        }
+        p.pagination = false;
+        List<CooperItem> items = p.query();
+        render("/Cooperators/showMaterialListForCopItem.html", items);
     }
 
     public static void bindMaterialForSku(String[] ids, String sku) {

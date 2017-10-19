@@ -79,12 +79,9 @@ public class MaterialPlans extends Controller {
             Webs.errorToFlash(flash);
             MaterialPlans.indexMaterial(new MaterialPost());
         }
-
         List<Material> units = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-
-        Cooperator cop = Cooperator
-                .find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? ORDER BY ci"
-                        + ".id", units.get(0).id).first();
+        Cooperator cop = Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci "
+                + "WHERE ci.material.id=? ORDER BY ci.id", units.get(0).id).first();
         MaterialPlan dp = new MaterialPlan();
         dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;

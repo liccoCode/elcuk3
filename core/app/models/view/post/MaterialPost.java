@@ -52,7 +52,7 @@ public class MaterialPost extends Post<Material> {
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT distinct m FROM Material m "
-                + "LEFT JOIN m.cooperItems ci  LEFT JOIN m.boms bs WHERE m.isDel=? ");
+                + "LEFT JOIN m.cooperItems ci LEFT JOIN m.boms bs WHERE m.isDel=? ");
         if(this.status != null && this.status == S.DOWN) {
             params.add(true);
         } else {
@@ -93,7 +93,7 @@ public class MaterialPost extends Post<Material> {
         sbd.append(" LEFT JOIN Cooperator c ON c.id = i.cooperator_id ");
         sbd.append(" LEFT JOIN MaterialUnit u ON m.id = u.material_id ");
         sbd.append(" LEFT JOIN MaterialPurchase p ON p.id = u.materialPurchase_id ");
-        sbd.append(" WHERE m.isDel= ? ");
+        sbd.append(" WHERE m.isDel= ? AND p.cooperator_id=i.cooperator_id ");
         params.add(false);
         if(type != null) {
             sbd.append(" AND m.type = ? ");
@@ -113,7 +113,7 @@ public class MaterialPost extends Post<Material> {
             sbd.append(" AND mb.number = ? ");
             params.add(this.number);
         }
-        sbd.append(" GROUP BY m.id HAVING confirmQty>0 || pendingQty>0 ");
+        sbd.append(" GROUP BY m.id, i.cooperator_id HAVING confirmQty>0 || pendingQty>0 ");
         return new F.T2<>(sbd.toString(), params);
     }
 

@@ -48,7 +48,7 @@
               <input style="width:200px;" class="form-control" name="p.search" placeHolder="物料编码 or 物料名称" value="${p.search}">
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
-            
+
             <button class="btn btn-primary" data-loading>搜索</button>
             <a href="javascript:void(0);" id="createPlanBtn" data-disable-with='添加中' class="btn btn-success">添加物料出货单</a>
 
@@ -79,7 +79,7 @@
                   <td>
                       #{if m.qty > 0}
                         <input type="checkbox" name="pids" value="${m.id}" class="${tr_key}" id="checkbox_${m.id}"
-                               cooperName="${m.cooperators()}">
+                               cooperName="${m.cooperName}">
                       #{/if}
                   </td>
                   <td>${m.code}</td>

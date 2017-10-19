@@ -1,5 +1,7 @@
 package models.market;
 
+import com.amazonservices.mws.products.MarketplaceWebServiceProductsClient;
+import com.amazonservices.mws.products.model.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
@@ -13,6 +15,7 @@ import models.product.Attach;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.SellingAmzPost;
+import mws.MWSProducts;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.NumberUtils;
@@ -23,6 +26,9 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.jsoup.Jsoup;
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import play.Logger;
 import play.Play;
 import play.data.validation.Required;
@@ -36,8 +42,14 @@ import play.libs.Time;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -211,6 +223,12 @@ public class Selling extends GenericModel {
     public AmazonProps aps;
     // ---- Images ????
 
+    public String binding;
+    public String productGroup;
+    public String productTypeName;
+    public String publisher;
+
+
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
 
@@ -321,6 +339,53 @@ public class Selling extends GenericModel {
         params.add(new BasicNameValuePair("user_name", Login.current().username));
         HTTP.post(System.getenv(Constant.ROCKEND_HOST) + "/amazon_product_sync_back", params);
         this.save();
+    }
+
+    /**
+     * 通过mws的方式同步数据
+     */
+    public void syncAmazonInfoFromApi() {
+        MarketplaceWebServiceProductsClient client = MWSProducts.client(this.account, this.account.type);
+        GetMatchingProductRequest request = new GetMatchingProductRequest();
+        request.setSellerId(account.merchantId);
+        request.setMWSAuthToken(account.token);
+        request.setMarketplaceId(account.type.amid().name());
+        ASINListType asinList = new ASINListType();
+        asinList.getASIN().add(this.asin);
+        request.setASINList(asinList);
+        GetMatchingProductResponse response = client.getMatchingProduct(request);
+
+        List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
+        results.forEach(result -> {
+            com.amazonservices.mws.products.model.Product product = result.getProduct();
+            String attributeXml = product.getAttributeSets().toXML();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            try {
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                StringReader sr = new StringReader(attributeXml);
+                InputSource is = new InputSource(sr);
+
+                Document doc = db.parse(is);
+                NodeList nodeList = doc.getElementsByTagName("ns2:ItemAttributes");
+                for(int i = 0; i < nodeList.getLength(); i++) {
+                    Element n = (Element) nodeList.item(i);
+                    this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
+                    this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
+                    this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
+                    this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0).getTextContent();
+                    this.aps.quantity = Integer.parseInt(n.getElementsByTagName("ns2:PackageQuantity").item(0)
+                            .getTextContent());
+                    this.productGroup = n.getElementsByTagName("ns2:ProductGroup").item(0).getTextContent();
+                    this.productTypeName = n.getElementsByTagName("ns2:ProductTypeName").item(0).getTextContent();
+                    this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
+                    this.aps.title = n.getElementsByTagName("ns2:Title").item(0).getTextContent();
+                    this.save();
+                }
+            } catch(ParserConfigurationException | SAXException | IOException e) {
+                Logger.error(e.getMessage());
+            }
+        });
+
     }
 
     /**

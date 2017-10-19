@@ -57,10 +57,7 @@
              style="width:40px;padding:3px;">
     </td>
     <td>${dto.day1}</td>
-    <td style="color:${dto.difference.rgb()}">
-    ${dto.difference.format('#.##')}
-      (${dto.percentage().format('#.##%')})
-    </td>
+    <td style="color:${dto.difference.rgb()}">${dto.difference.format('#.##')} (${dto.percentage().format('#.##%')})</td>
     <td>${dto.day7}</td>
     <td>${(dto.day1 - dto.difference).format('#.#')}</td>
     <td>${dto.day30}</td>
