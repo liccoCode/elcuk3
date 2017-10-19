@@ -191,7 +191,7 @@ function paramWidth (type) {
         "targets": [25]
       },
       {
-        "width": "30px",
+        "width": "35px",
         "targets": [26]
       }
     ]
