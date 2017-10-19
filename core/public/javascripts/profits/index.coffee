@@ -1,16 +1,11 @@
 $ ->
-  $('#profits_form').ajaxForm({
-    dataType: 'json',
-    success: (r) ->
-      alert(r.message)
-  })
-
   $.extend $.fn.dataTableExt.oStdClasses,
     sWrapper: "dataTables_wrapper form-inline"
 
   $(document).ready ->
     $("#profit").dataTable(
       bPaginate: false
+      scrollX: true
       aaSorting: [
         [0, "desc"]
       ]
