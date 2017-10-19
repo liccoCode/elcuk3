@@ -77,6 +77,11 @@ public class AnalyzeDTO implements Serializable {
     public int qty = 0;
 
     /**
+     * 欧洲仓库存
+     */
+    public int eurQty = 0;
+
+    /**
      * 计算出来的 PS
      */
     public float ps_cal = 0;

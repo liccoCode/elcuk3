@@ -1,10 +1,7 @@
 package models.view.post;
 
 import com.alibaba.fastjson.JSON;
-import helper.Caches;
-import helper.Constant;
-import helper.Dates;
-import helper.HTTP;
+import helper.*;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.OperatorConfig;
 import models.market.M;
@@ -102,6 +99,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
         if(this.type.equals("sid")) {
             setOutDayColor(dtos, null);
+            calculationEurInventory(dtos);
         }
 
         // 过滤各种条件
@@ -132,6 +130,20 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.market))
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
         return dtos;
+    }
+
+    public void calculationEurInventory(List<AnalyzeDTO> dtos) {
+        StringBuffer sql = new StringBuffer("SELECT q.product_sku AS 'sku',  sum(q.qty) AS 'total' FROM SellingQTY q");
+        sql.append(" LEFT JOIN Selling s ON s.sellingId = q.selling_sellingId ");
+        sql.append(" WHERE s.market IN ('AMAZON_DE','AMAZON_IT','AMAZON_UK','AMAZON_FR','AMAZON_ES') ");
+        sql.append(" GROUP BY q.product_sku ");
+        List<Map<String, Object>> rows = DBUtils.rows(sql.toString());
+        Map<String, Integer> map = new HashMap<>();
+        rows.forEach(row -> map.put(row.get("sku").toString(), Integer.parseInt(row.get("total").toString())));
+        dtos.forEach(dto -> {
+            String sku = dto.fid.split(",")[0];
+            dto.eurQty = map.get(sku);
+        });
     }
 
     public static int setOutDayColor(List<AnalyzeDTO> dtos, Integer needCompare) {
