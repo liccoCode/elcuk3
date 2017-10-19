@@ -1,5 +1,5 @@
 #{set tr_key: key ? key : 'unit'/}
-<table class="table table-condensed table-bordered" id="data-table">
+<table class="table table-condensed table-bordered table-hover" id="data-table1">
   <tr>
     <th>物料编码</th>
     <th>物料名称</th>
@@ -17,8 +17,8 @@
     <td>${m.type.label()}</td>
     <td>${m.boms[0]?.number}</td>
     <td>${m.specification}</td>
-    <td>${m.technology}</td>
-    <td>${m.version}</td>
+    <td data-toggle="tooltip" title="${m.technology}">${m.technology.overLong()}</td>
+    <td data-toggle="tooltip" title="${m.version}">${m.version.overLong()}</td>
     <td>${m.nowPurchasePlanPrice()}</td>
   </tr>
 #{/list}
