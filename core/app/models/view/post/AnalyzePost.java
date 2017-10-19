@@ -141,8 +141,10 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         Map<String, Integer> map = new HashMap<>();
         rows.forEach(row -> map.put(row.get("sku").toString(), Integer.parseInt(row.get("total").toString())));
         dtos.forEach(dto -> {
-            String sku = dto.fid.split(",")[0];
-            dto.eurQty = map.get(sku) == null ? 0 : map.get(sku);
+            if(Arrays.asList("de", "it", "uk", "fr", "es").contains(dto.market.sortName())) {
+                String sku = dto.fid.split(",")[0];
+                dto.eurQty = map.get(sku) == null ? 0 : map.get(sku);
+            }
         });
     }
 
