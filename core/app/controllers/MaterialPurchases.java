@@ -7,8 +7,8 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.OperatorConfig;
 import models.User;
-import models.finance.ProcureApply;
 import models.material.Material;
+import models.material.MaterialApply;
 import models.material.MaterialPurchase;
 import models.material.MaterialUnit;
 import models.procure.CooperItem;
@@ -17,12 +17,14 @@ import models.procure.Deliveryment;
 import models.view.Ret;
 import models.view.post.MaterialPurchasePost;
 import org.apache.commons.lang.StringUtils;
+import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,13 +51,15 @@ public class MaterialPurchases extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex(MaterialPurchasePost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
-        List<ProcureApply> availableApplies = ProcureApply.unPaidApplies(p == null ? null : p.cooperId);
+        List<MaterialApply> avaliableApplies = MaterialApply.unPaidApplies(p == null ? null : p.cooperId);
         renderArgs.put("suppliers", suppliers);
-        renderArgs.put("availableApplies", availableApplies);
+        renderArgs.put("availableApplies", avaliableApplies);
     }
 
     public static void index(MaterialPurchasePost p) {
-        if(p == null) p = new MaterialPurchasePost();
+        if(p == null) {
+            p = new MaterialPurchasePost();
+        }
         List<MaterialPurchase> materialPurchases = p.query();
         render(materialPurchases, p);
     }
@@ -125,8 +129,9 @@ public class MaterialPurchases extends Controller {
      */
     public static void update(MaterialPurchase dmt) {
         validation.valid(dmt);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("MaterialPurchases/show.html", dmt);
+        }
         dmt.save();
         flash.success("更新成功.");
         show(dmt.id);
@@ -153,8 +158,9 @@ public class MaterialPurchases extends Controller {
     // 供应商的价格
     public static void price(long cooperId, Long materialId) {
         validation.required(cooperId);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             renderJSON(new Ret(Webs.v(Validation.errors())));
+        }
         Material m = Material.findById(materialId);
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
@@ -214,12 +220,14 @@ public class MaterialPurchases extends Controller {
     public static void delunits(String id, List<Long> pids) {
         MaterialPurchase dmt = MaterialPurchase.findById(id);
         Validation.required("materialPurchases.delunits", pids);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("MaterialPurchases/show.html", dmt);
+        }
         dmt.unAssignUnitInMaterialPurchase(pids);
 
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             render("MaterialPurchases/show.html", dmt);
+        }
 
         flash.success("成功将 %s 物料计划从当前物料采购单中移除.", StringUtils.join(pids, ","));
         show(dmt.id);
@@ -238,10 +246,92 @@ public class MaterialPurchases extends Controller {
 
     public static void validDmtIsNeedApply(String id) {
         MaterialPurchase dmt = MaterialPurchase.findById(id);
-        if(Arrays.asList("CONFIRM", "PENDING").contains(dmt.state.name()))
+        if(Arrays.asList("CONFIRM", "PENDING").contains(dmt.state.name())) {
             renderJSON(new Ret());
-        if(dmt.state == MaterialPurchase.S.CANCEL)
+        }
+        if(dmt.state == MaterialPurchase.S.CANCEL) {
             renderJSON(new Ret(false, "采购单已取消！"));
+        }
+    }
+
+    /**
+     * 为出货单提交请款单申请
+     */
+    @Check("materialpurchases.index")
+    public static void materialPurchaseToApply(List<String> pids, MaterialPurchasePost p, Long applyId) {
+        if(pids == null) {
+            pids = new ArrayList<>();
+        }
+        if(pids.size() <= 0) {
+            flash.error("请选择需纳入请款的采购单(相同供应商).");
+            index(p);
+        }
+        MaterialApply apply = MaterialApply.findById(applyId);
+        if(apply == null) {
+            apply = MaterialApply.buildMaterialApplyPurchase(pids);
+        } else {
+            apply.appendMaterialApplyPurchase(pids);
+        }
+
+        if(apply == null || Validation.hasErrors()) {
+            for(Error error : Validation.errors()) {
+                flash.error(error.message());
+            }
+            index(p);
+        } else {
+            flash.success("物料请款单 %s 申请成功.", apply.serialNumber);
+            Applys.material(apply.id);
+        }
+    }
+
+    /**
+     * 将采购单从其所关联的请款单中剥离开
+     *
+     * @param id
+     */
+    public static void departProcureApply(String id) {
+        MaterialPurchase dmt = MaterialPurchase.findById(id);
+        long applyId = dmt.applyPurchase.id;
+        dmt.applyPurchase.updateAt(applyId);
+        dmt.departFromProcureApply();
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+        } else {
+            flash.success("%s 剥离成功.", id);
+        }
+        Applys.material(applyId);
+    }
+
+    /**
+     * 批量财务审核
+     *
+     * @param pids
+     */
+    public static void approveBatch(List<String> pids) {
+        MaterialPurchase.approve(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(new MaterialPurchasePost());
+        }
+        flash.success("物料审核成功.");
+        index(new MaterialPurchasePost());
+    }
+
+    /**
+     * 单个财务审核
+     *
+     * @param id
+     */
+    public static void approve(String id) {
+        List<String> pids = new ArrayList<>();
+        pids.add(id);
+        MaterialPurchase.approve(pids);
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            index(new MaterialPurchasePost());
+        }
+        flash.success("物料审核成功.");
+        index(new MaterialPurchasePost());
     }
 
 }

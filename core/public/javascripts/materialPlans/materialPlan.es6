@@ -18,10 +18,16 @@ $(() => {
     $.post($(this).data("url"), {unitIds: ids}, function (r) {
       LoadMask.unmask();
       if (r.flag) {
-        alert(r.message);
+        noty({
+          text: r.message,
+          type: 'success'
+        });
         window.location.reload();
       } else {
-        alert(r.message);
+        noty({
+          text: r.message,
+          type: 'error'
+        });
       }
     });
   });

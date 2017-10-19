@@ -70,6 +70,8 @@ $ ->
         .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
         .find('.unknow').text("? #{format_Num(unknown_summery)}")
 
+      table_summary.find('.totalNumPurchases').text("#{qty}")
+
       total_plan_qty += receiptQty
       total_qty += qty
       total_cny_summery += cny_summery
@@ -77,6 +79,7 @@ $ ->
       total_unknown_summery += unknown_summery
 
     $('.totalQty').text("#{total_qty} / #{total_plan_qty} ")
+    $('#totalQty').text("#{total_qty}")
     $('.totalCost').text("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
 
     pay_cny = 0

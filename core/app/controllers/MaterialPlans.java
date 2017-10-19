@@ -329,14 +329,19 @@ public class MaterialPlans extends Controller {
      */
     @Check("materialpurchases.index")
     public static void materialPlanToApply(List<String> pids, MaterialPlanPost p, Long applyId) {
-        if(pids == null) pids = new ArrayList<>();
+        if(pids == null) {
+            pids = new ArrayList<>();
+        }
         if(pids.size() <= 0) {
             flash.error("请选择需纳入请款的出货单(相同供应商).");
             index(p);
         }
         MaterialApply apply = MaterialApply.findById(applyId);
-        if(apply == null) apply = MaterialApply.buildMaterialApply(pids);
-        else apply.appendMaterialApply(pids);
+        if(apply == null) {
+            apply = MaterialApply.buildMaterialApply(pids);
+        } else {
+            apply.appendMaterialApply(pids);
+        }
 
         if(apply == null || Validation.hasErrors()) {
             for(Error error : Validation.errors()) {
@@ -359,11 +364,11 @@ public class MaterialPlans extends Controller {
         long applyId = dmt.apply.id;
         dmt.apply.updateAt(applyId);
         dmt.departFromProcureApply();
-
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-        else
+        } else {
             flash.success("%s 剥离成功.", id);
+        }
         Applys.material(applyId);
     }
 }

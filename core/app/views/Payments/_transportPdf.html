@@ -16,12 +16,27 @@
   #{list items:payment.units(), as:'fee'}
    <tr>
      <td>
+       <!-- 运输单 -->
        #{if fee.shipItem}
          ${fee.shipment.id}#${fee.shipItem.id}
        #{/if}
-       #{else }
+       #{elseif fee.shipItem == null && fee.shipment}
          ${fee.shipment.id}
-       #{/else}
+       #{/elseif}
+       <!-- 物料出货单 -->
+       #{elseif fee.materialPlanUnit}
+         ${fee.materialPlan.id}#${fee.materialPlanUnit.id}
+       #{/elseif}
+       #{elseif fee.materialPlanUnit == null && fee.materialPlan}
+         ${fee.materialPlan.id}
+       #{/elseif}
+       <!-- 物料采购单 -->
+       #{elseif fee.materialUnit}
+         ${fee.materialPurchase.id}#${fee.materialUnit.id}
+       #{/elseif}
+       #{elseif fee.materialUnit == null && fee.materialPurchase}
+         ${fee.materialPurchase.id}
+       #{/elseif}
      </td>
      <td>${fee.feeType.nickName}</td>
      <td>${fee.currency.symbol()}${fee.unitPrice}</td>
