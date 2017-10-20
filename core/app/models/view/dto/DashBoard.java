@@ -157,6 +157,7 @@ public class DashBoard implements Serializable {
         Cache.delete(cache_key);
         HighChart pieByToday = Cache.get(cache_key, HighChart.class);
         if(pieByToday != null) return pieByToday;
+        pieByToday = new HighChart(Series.PIE);
         Series.Pie pie = new Series.Pie("as");
         Double result;
         from = Dates.morning(from);
@@ -173,7 +174,6 @@ public class DashBoard implements Serializable {
                 totalOrderNum += result.floatValue();
             }
         }
-        pieByToday = new HighChart(Series.PIE);
         pieByToday.title = Dates.date2Date(from) + " orders nums (" + totalOrderNum + ")";
         pieByToday.series(pie);
         Cache.delete(cache_key);
