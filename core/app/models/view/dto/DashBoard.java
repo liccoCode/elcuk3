@@ -169,6 +169,7 @@ public class DashBoard implements Serializable {
             if(result > 0) {
                 pie.add(result.floatValue(), m.name());
                 if(result.floatValue() > highestOrderNum) {
+                    highestOrderNum = result.floatValue();
                     pieByToday.highestMarket = m.name();
                 }
                 totalOrderNum += result.floatValue();
