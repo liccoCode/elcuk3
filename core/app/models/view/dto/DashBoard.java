@@ -161,12 +161,20 @@ public class DashBoard implements Serializable {
         Double result;
         from = Dates.morning(from);
         to = Dates.night(to);
+        float totalOrderNum = 0f;
+        float highestOrderNum = 0f;
         for(M m : M.values()) {
             result = OrderItemESQuery.quantityByDate(val, type, m, from, to);
-            if(result > 0) pie.add(result.floatValue(), m.name());
+            if(result > 0) {
+                pie.add(result.floatValue(), m.name());
+                if(result.floatValue() > highestOrderNum) {
+                    pieByToday.highestMarket = m.name();
+                }
+                totalOrderNum += result.floatValue();
+            }
         }
         pieByToday = new HighChart(Series.PIE);
-        pieByToday.title = Dates.date2Date(from) + " orders nums";
+        pieByToday.title = Dates.date2Date(from) + " orders nums (" + totalOrderNum + ")";
         pieByToday.series(pie);
         Cache.delete(cache_key);
         Cache.add(cache_key, pieByToday, "2h");

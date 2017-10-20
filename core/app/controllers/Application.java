@@ -34,18 +34,8 @@ public class Application extends Controller {
             StockRecords.stockIndex(new StockPost());
         }
         DashBoard dashboard = Orderr.frontPageOrderTable(11);
-        List<Whouse> fbaWhouse = Whouse.findByType(Whouse.T.FBA);
-        render("Application/index_v3.html", dashboard);
+        render(dashboard);
     }
-
-    public static void indexV3() {
-        if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
-            StockRecords.stockIndex(new StockPost());
-        }
-        DashBoard dashboard = Orderr.frontPageOrderTable(11);
-        render("Application/index_v3.html", dashboard);
-    }
-
 
     public static void perDayOrderNum() {
         DashBoard dashboard = Orderr.frontPageOrderTable(11);
