@@ -55,6 +55,8 @@ $(() => {
     div.mask();
     div.load("/application/topTenSkuByMarket", {market: market}, function () {
       div.unmask();
+      let fid = $("#progress_by_market").find("div").data("fid");
+      getSales(fid);
     });
   }
 
