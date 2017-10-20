@@ -39,6 +39,9 @@ $(() => {
           events: {
             click: function (event) {
               refreshTopFive(event.point.name);
+            },
+            afterAnimate: function (event) {
+              refreshTopFive(r["highestMarket"]);
             }
           }
         }
@@ -46,8 +49,6 @@ $(() => {
       series: r["series"]
     });
   });
-
-  refreshTopFive("AMAZON_DE");
 
   function refreshTopFive (market) {
     let div = $("#progress_by_market");
