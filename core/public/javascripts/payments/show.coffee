@@ -116,17 +116,13 @@ $ ->
     date
 
   ajaxBocRate = ->
-    LoadMask.mask()
     $('#boc_rate').load('/payment/boc', ->
       $('#currency').change()
-      LoadMask.unmask()
     )
 
   ajaxExRate = (from = $('#request_currency').text()) ->
-    LoadMask.mask()
     $('#ex_rate').load("/payment/xe?currency=#{from}", ->
       $('#currency').change()
-      LoadMask.unmask()
     )
 
   ajaxBocRate()

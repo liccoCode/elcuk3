@@ -1,34 +1,31 @@
-#{warning_row title: '相关支付单' /}
-<div class="row-fluid">
-  <table class="table table-bordered table-condensed" id="relate_payment_table">
-    <tr>
-      <th>支付单编号</th>
-      <th>状态</th>
-      <th>批准后总金额(不含驳回)</th>
-      <th>已申请</th>
-      <th>驳回</th>
-      <th>批准</th>
-      <th>已支付</th>
-    </tr>
-  #{list items:payments, as:'payment'}
-    <tr>
-      <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
-      <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
-      <td class="total_price" symbol="${payment.currency.symbol()}" amount="${new java.math.BigDecimal(payment.approvalAmount())}">
-      ${payment.currency.symbol()} ${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}
-      </td>
-        #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
-          <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
-        #{/list}
-    </tr>
-  #{/list}
-    <tr #{if !showtotal}style="display: none;" #{/if}>
-      <td></td>
-      <td>总额</td>
-      <td class="usd"></td>
-      <td class="cny"></td>
-      <td class="unknown"></td>
-      <td colspan="2"></td>
-    </tr>
-  </table>
-</div>
+<table class="table table-bordered table-condensed" id="relate_payment_table">
+  <tr>
+    <th>支付单编号</th>
+    <th>状态</th>
+    <th>批准后总金额(不含驳回)</th>
+    <th>已申请</th>
+    <th>驳回</th>
+    <th>批准</th>
+    <th>已支付</th>
+  </tr>
+#{list items:payments, as:'payment'}
+  <tr>
+    <td><a href="@{Payments.show(payment.id)}" target="_blank">${payment.paymentNumber}</a></td>
+    <td style="color:${payment.stateColor()}">${payment.state.label()}</td>
+    <td class="total_price" symbol="${payment.currency.symbol()}" amount="${new java.math.BigDecimal(payment.approvalAmount())}">
+    ${payment.currency.symbol()} ${new java.math.BigDecimal(payment.approvalAmount()).format('#,###.##')}
+    </td>
+      #{list items:models.finance.PaymentUnit.S.values(), as:'state'}
+        <td style="color:${state.stateColor()}">${payment.unitsStateSize(state)}</td>
+      #{/list}
+  </tr>
+#{/list}
+  <tr #{if !showtotal}style="display: none;" #{/if}>
+    <td></td>
+    <td>总额</td>
+    <td class="usd"></td>
+    <td class="cny"></td>
+    <td class="unknown"></td>
+    <td colspan="2"></td>
+  </tr>
+</table>

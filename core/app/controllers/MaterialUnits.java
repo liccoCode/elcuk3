@@ -173,6 +173,33 @@ public class MaterialUnits extends Controller {
 
 
     /**
+     * 批量预付款申请
+     *
+     * @param unitIds
+     */
+    public static void batchPrePay(Long[] unitIds) {
+        if(unitIds.length == 0) {
+            renderJSON(new Ret(false, "请选择请款明细!"));
+        }
+        List<MaterialUnit> units = MaterialUnit.find("id IN " + SqlSelect.inlineParam(unitIds)).fetch();
+        for(MaterialUnit unit : units) {
+            if(!unit.isNeedPay) {
+                renderJSON(new Ret(false, "物料采购计划ID:" + unit.id + "不可以请款!"));
+            }
+            try {
+                unit.billingPrePay();
+            } catch(PaymentException e) {
+                Validation.addError("", e.getMessage());
+            }
+            if(Validation.hasErrors()){
+                renderJSON(new Ret(Validation.errors().get(0).message()));
+            }
+        }
+        renderJSON(new Ret(true, "预付款请款成功"));
+    }
+
+
+    /**
      * 批量付款申请
      *
      * @param unitIds
