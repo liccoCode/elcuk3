@@ -175,7 +175,7 @@ public class DashBoard implements Serializable {
                 totalOrderNum += result.floatValue();
             }
         }
-        pieByToday.title = Dates.date2Date(from) + " orders nums (" + Integer.parseInt(totalOrderNum + "") + ")";
+        pieByToday.title = Dates.date2Date(from) + " orders nums (" + (int) totalOrderNum + ")";
         pieByToday.series(pie);
         Cache.delete(cache_key);
         Cache.add(cache_key, pieByToday, "2h");
