@@ -68,6 +68,7 @@
             <tr>
               <th width="20px;"></th>
               <th>物料采购单ID</th>
+              <th>请款单</th>
               <th>Name</th>
               <th>供应商</th>
               <th>State</th>
@@ -78,10 +79,18 @@
             </tr>
           #{list items:materialPurchases, as:'dmt'}
             <tr>
-              <td><input type="checkbox" name="pids" value="${dmt.id}" cooperName="${dmt.supplier()?.name}" financeState="${dmt.financeState}"></td>
+              <td><input type="checkbox" name="pids" value="${dmt.id}" cooperName="${dmt.supplier()?.name}" financeState="${dmt.financeState}"
+                         #{if dmt.applyPurchase}applyId="${dmt.applyPurchase.id}"#{/if}  ></td>
               <td>
                 <a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a>
               </td>
+              <td>
+                  #{if dmt.applyPurchase}
+                    <a href="@{Applys.material(dmt.applyPurchase.id)}">${dmt.applyPurchase.serialNumber}</a>
+                  #{/if}
+                  #{else }没有请款单#{/else}
+              </td>
+
               <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
                 <span><i class="icon-reorder"></i></span>
                 <span>${dmt.name}</span>
