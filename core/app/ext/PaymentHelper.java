@@ -65,9 +65,9 @@ public class PaymentHelper extends JavaExtensions {
     public static String stateLabel(PaymentUnit unit) {
         switch(unit.state) {
             case APPLY:
-                return "label-inverse";
+                return "label-primary";
             case DENY:
-                return "label-important";
+                return "label-danger";
             case APPROVAL:
                 return "label-info";
             case PAID:
