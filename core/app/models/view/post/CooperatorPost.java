@@ -36,7 +36,8 @@ public class CooperatorPost extends Post<Cooperator> {
         sql.append("WHERE  1 = 1 ");
 
         if(StringUtils.isNotEmpty(search)) {
-            sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? )");
+            sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? OR i.material.code like ?)");
+            params.add("%" + search + "%");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
