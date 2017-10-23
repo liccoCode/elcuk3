@@ -324,7 +324,7 @@
                             #{/list}
                         </td>
                         <td class="qty" qty="${procureUnit.planQty}">${procureUnit.planQty}</td>
-                        <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
+                        <td>${procureUnit.getCurrency().symbol()} ${procureUnit.planPrice}</td>
                         <td class="price" amount="${procureUnit.totalAmount()}">
                         ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
                         <td>${procureUnit.materialPurchase.state.label()}</td>

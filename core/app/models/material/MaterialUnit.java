@@ -360,19 +360,6 @@ public class MaterialUnit extends Model {
     }
 
     /**
-     * 获取 cooperItems  的价格
-     *
-     * @return
-     */
-    public Float getPrice() {
-        List<CooperItem> cooperItems = this.material.cooperItems;
-        if(cooperItems != null && cooperItems.get(0) != null) {
-            return cooperItems.get(0).price;
-        }
-        return null;
-    }
-
-    /**
      * 1. 出货计划所在的出货单单需要拥有一个请款单
      * 2. 出货计划需要已经交货
      */
