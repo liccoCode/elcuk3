@@ -43,13 +43,6 @@
                         #{pickCurrency name:'copItem.currency', c:copItem.currency, class:'form-control'/}
                         </div>
                       </div>
-                      <label for="" class="col-sm-1 control-label">含税价</label>
-                      <div class="col-sm-2">
-                        <div class="form-inline">
-                          <input class="form-control" name="copItem.taxPrice" value="${copItem.taxPrice}">
-                        #{pickCurrency name:'copItem.currency', c:copItem.currency, class:'form-control'/}
-                        </div>
-                      </div>
                       <label class="col-sm-1 control-label">税点</label>
                       <div class="col-sm-2">
                         <div class="input-group">
@@ -57,6 +50,14 @@
                           <span class="input-group-addon">%</span>
                         </div>
                       </div>
+                      <label for="" class="col-sm-1 control-label">含税价</label>
+                      <div class="col-sm-2">
+                        <div class="form-inline">
+                          <input class="form-control" name="copItem.taxPrice" value="${copItem.taxPrice}">
+                        #{pickCurrency name:'copItem.taxCurrency', c:copItem.taxCurrency, class:'form-control'/}
+                        </div>
+                      </div>
+
                     </div>
 
                     <div class="form-group">
