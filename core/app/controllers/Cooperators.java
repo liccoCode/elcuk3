@@ -313,4 +313,17 @@ public class Cooperators extends Controller {
         render(mats);
     }
 
+    public static void findTaxPrice(String sku, Long cooperId, boolean containTax) {
+        validation.required(cooperId);
+        validation.required(sku);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.v(Validation.errors())));
+        CooperItem copItem = CooperItem.find("product.sku=? AND cooperator.id=?", sku, cooperId).first();
+        renderJSON(GTs.newMap("price", containTax ? copItem.taxPrice : copItem.price)
+                .put("currency", containTax ? copItem.taxCurrency : copItem.currency)
+                .put("taxPoint", containTax ? copItem.taxPoint : 0)
+                .put("flag", true)
+                .put("period", copItem.period).put("boxSize", copItem.boxSize).build());
+    }
+
 }

@@ -373,6 +373,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isPlaced = false;
 
+    /**
+     * 采购单价是否含税，默认为否
+     */
+    public boolean containTax = false;
 
     /**
      * 是否需要付款
@@ -1419,7 +1423,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
             // 2. 用户更改了运输方式但未选择运输单
             if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(this.shipType)
-                              || oldShipType != this.shipType) {
+                    || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
             this.changeOutbound(null);

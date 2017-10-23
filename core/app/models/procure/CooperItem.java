@@ -72,6 +72,11 @@ public class CooperItem extends Model {
     @Min(0)
     public Float taxPrice;
 
+    @Required
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public Currency taxCurrency = Currency.CNY;
+
     /**
      * 税点
      * 单位 %
@@ -217,6 +222,7 @@ public class CooperItem extends Model {
         logs.addAll(Reflects.logFieldFade(this, "lowestOrderNum", entity.lowestOrderNum));
         logs.addAll(Reflects.logFieldFade(this, "taxPrice", entity.taxPrice));
         logs.addAll(Reflects.logFieldFade(this, "taxPoint", entity.taxPoint));
+        logs.addAll(Reflects.logFieldFade(this, "taxCurrency", entity.taxCurrency));
 
         this.productTerms = entity.productTerms;
         this.memo = entity.memo;

@@ -25,6 +25,31 @@ $(() => {
     }
   });
 
+  $("select[name='unit.containTax']").change(function () {
+    let cooperId = $("select[name='dmt.cooperator.id']").val();
+    let containTax = $(this).val();
+    if (cooperId) {
+      LoadMask.mask();
+      $.post("/Cooperators/findTaxPrice", {
+        cooperId: cooperId,
+        sku: $('#unit_sku').val(),
+        containTax: containTax
+      }, function (r) {
+        if (!r.flag) {
+          alert(r.message);
+        } else {
+          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#unit_price").val(r.price);
+          $("#box_num").attr("boxSize", r.boxSize);
+          calu_box_size();
+          let text = containTax=="true" ? ("税点：" + r.taxPoint) : "";
+          $("#taxSpan").text(text);
+        }
+        LoadMask.unmask();
+      });
+    }
+  });
+
   bind_b2b_checkbox();
 
   function bind_b2b_checkbox () {

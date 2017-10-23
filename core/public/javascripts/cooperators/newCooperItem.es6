@@ -29,6 +29,11 @@ $(() => {
     });
   });
 
+  $("input[name='copItem.taxPoint']").change(function () {
+    let price = $("input[name='copItem.price']").val();
+    $("input[name='copItem.taxPrice']").val(price * (1 + $(this).val() / 100));
+  });
+
   $("#bind_btn").click(function (e) {
     e.preventDefault();
     $("#bind_div").mask();
