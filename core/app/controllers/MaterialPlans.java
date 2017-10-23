@@ -50,8 +50,8 @@ public class MaterialPlans extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex(MaterialPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
-        List<MaterialApply> avaliableApplies = MaterialApply
-                .unPaidApplies(p == null ? null : p.cooperId);
+        List<MaterialApply> avaliableApplies = MaterialApply.unPaidApplies(
+                p == null ? null : p.cooperId , MaterialApply.T.PLAN );
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("avaliableApplies", avaliableApplies);
         renderArgs.put("users", User.find("closed=?", false).fetch());
