@@ -240,8 +240,39 @@ $(() => {
     }
   });
 
-  if("attr"==$("#attrVal").val()){
+  if ("attr" == $("#attrVal").val()) {
     $("#attrBtn").click();
   }
+
+  $("#whouseAttrs").on("click", "#save_whouse_atts_btn", function () {
+    LoadMask.mask();
+    $.post("/products/update", $("#whouse_attrs_form").serialize(), function (r) {
+      if (r.flag) {
+        noty({
+          text: "保存成功.",
+          type: 'success',
+          timeout: 5000
+        });
+      } else {
+        noty({
+          text: "#{r.message}",
+          type: 'error',
+          timeout: 5000
+        });
+      }
+      LoadMask.unmask();
+    });
+  }).on("click", "#whouse_attrs_attach_btn", function () {
+    $file_home = $('#file_home');
+    $.post("/products/update", {
+      p: 'PRODUCTWHOUSE',
+      fid: $file_home.data('fid'),
+      base64File: $file_home.data('base64_file'),
+      originName: $file_home.data('origin_name')
+    }, function (r) {
+      alert(r.message)
+      window.location.reload()
+    });
+  });
 
 });

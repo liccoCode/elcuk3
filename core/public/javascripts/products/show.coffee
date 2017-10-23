@@ -1,5 +1,5 @@
 $ ->
-  # 图片
+# 图片
   dropbox = $('#dropbox')
   # 包装
   packageDropbox = $('#packageDropbox')
@@ -27,48 +27,12 @@ $ ->
   window.dropUpload.iniDropbox(fidCallBack, instructionsDropbox)
   window.dropUpload.iniDropbox(fidCallBack, silkscreenDropbox)
 
-
   # 将字符串转化成Dom元素
   parseDom = (arg) ->
     objE = document.createElement("table")
     objE.innerHTML = arg
     objE.childNodes[0]
 
-  $("#whouseAttrs").on('click', '#save_whouse_atts_btn', (e) ->
-    $form = $(@).parents('form')
-    $.ajax($form.attr('action'), {
-      type: 'POST',
-      data: $form.serialize(),
-      dataType: 'json'
-    })
-      .done((r) ->
-      msg = if r.flag is true
-        {
-          text: "保存成功.",
-          type: 'success',
-          timeout: 5000
-        }
-      else
-        {
-          text: "#{r.message}",
-          type: 'error',
-          timeout: 5000
-        }
-      noty(msg)
-      LoadMask.unmask()
-    )
-  ).on('click', '#whouse_attrs_attach_btn', (e) ->
-    $file_home = $('#file_home')
-    $.post('/attachs/uploadForBase64', {
-      p: 'PRODUCTWHOUSE',
-      fid: $file_home.data('fid'),
-      base64File: $file_home.data('base64_file'),
-      originName: $file_home.data('origin_name')
-    }).done((r) ->
-      alert(r.message)
-      window.location.reload()
-    )
-  )
 
   whouseAttachsFidCallBack = ->
     {
