@@ -211,17 +211,8 @@ public class MaterialUnit extends Model {
 
     public float totalAmountToCNY() {
         return this.planCurrency.toCNY(new BigDecimal(this.planCurrency.toString())
-                .multiply(new BigDecimal(this.paidQty())).setScale(2, 4).floatValue());
+                .multiply(new BigDecimal(this.planQty)).setScale(2, 4).floatValue());
 
-    }
-
-    public int paidQty() {
-        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
-                .contains(this.stage.name())) {
-            return qty;
-        } else {
-            return this.planQty;
-        }
     }
 
     /**
@@ -231,7 +222,7 @@ public class MaterialUnit extends Model {
      */
     public float totalAmount() {
         return new BigDecimal(this.planPrice)
-                .multiply(new BigDecimal(this.paidQty()))
+                .multiply(new BigDecimal(this.planQty))
                 .setScale(2, 4)
                 .floatValue();
     }

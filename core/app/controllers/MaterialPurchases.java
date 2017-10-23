@@ -51,7 +51,8 @@ public class MaterialPurchases extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex(MaterialPurchasePost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
-        List<MaterialApply> avaliableApplies = MaterialApply.unPaidApplies(p == null ? null : p.cooperId);
+        List<MaterialApply> avaliableApplies = MaterialApply.unPaidApplies(
+                p == null ? null : p.cooperId , MaterialApply.T.PURCHASE );
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("availableApplies", avaliableApplies);
     }

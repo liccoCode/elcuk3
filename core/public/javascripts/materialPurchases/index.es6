@@ -16,16 +16,27 @@ $(() => {
 
       let i = 0;
       let j = 0;
+      let l = 0;
       let ids = [];
       $("input[name='pids']:checked").each(function () {
         if ($(this).attr("cooperName") != firstCooper) {
           j++;
         }
         ids.push($(this).val());
+        if ($(this).attr("applyId")) {
+          l++;
+        }
       });
+      if (l > 0) {
+        noty({
+          text: '请选择未请款的采购单进行请款！',
+          type: 'error'
+        });
+        return false;
+      }
       if (j > 0) {
         noty({
-          text: '请选择[供应商]一致的出货单进行创建！',
+          text: '请选择[供应商]一致的采购单进行请款！',
           type: 'error'
         });
         return false;
@@ -37,22 +48,19 @@ $(() => {
     }
   });
 
-
   $("td[name='clickTd']").click(function () {
-      let tr = $(this).parent("tr");
-      let id = $(this).data("id");
-      let format_id = id.replace(/\|/gi, '_');
-      if ($("#div" + format_id).html() != undefined) {
-        tr.next("tr").toggle();
-      } else {
-        let html = "<tr style='background-color:#F2F2F2'><td colspan='13'>";
-        html += "<div id='div" + format_id + "'></div></td></tr>";
-        tr.after(html);
-        $("#div" + format_id).load($(this).data("url"), {id: id});
-      }
-    });
-
-  
+    let tr = $(this).parent("tr");
+    let id = $(this).data("id");
+    let format_id = id.replace(/\|/gi, '_');
+    if ($("#div" + format_id).html() != undefined) {
+      tr.next("tr").toggle();
+    } else {
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'>";
+      html += "<div id='div" + format_id + "'></div></td></tr>";
+      tr.after(html);
+      $("#div" + format_id).load($(this).data("url"), {id: id});
+    }
+  });
 
   //财务审核js处理
   $("#approveBatch").click(function (e) {

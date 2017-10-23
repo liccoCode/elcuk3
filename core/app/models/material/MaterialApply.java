@@ -123,11 +123,11 @@ public class MaterialApply extends Apply {
      *
      * @return
      */
-    public static List<MaterialApply> unPaidApplies(Long cooperatorId) {
+    public static List<MaterialApply> unPaidApplies(Long cooperatorId , T type) {
         if(cooperatorId == null) {
-            return MaterialApply.find("confirm=false").fetch();
+            return MaterialApply.find("confirm=false AND type = ? " , type).fetch();
         } else {
-            return MaterialApply.find("confirm=false AND cooperator.id=?", cooperatorId).fetch();
+            return MaterialApply.find("confirm=false AND type = ? AND cooperator.id=?", type , cooperatorId).fetch();
         }
     }
 
