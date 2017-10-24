@@ -53,7 +53,7 @@
             </div>
             <label for="" class="col-sm-1 control-label">是否含税</label>
             <div class="col-sm-2">
-              <select class="form-control" name="unit.containTax">
+              <select class="form-control" name="units[0].containTax">
                 <option #{if unit.containTax} selected #{/if} value="true">是</option>
                 <option #{if !unit.containTax} selected #{/if} value="false">否</option>
               </select>
@@ -111,6 +111,7 @@
               <option ${cr == helper.Currency.CNY ? 'selected' : ''} value="${cr}">${cr}</option>
             #{/list}
             </select>
+            <span name="taxSpan"></span>
           </div>
         </div>
         <label for="" class="col-sm-1 control-label">采购数量</label>
@@ -137,13 +138,6 @@
           #{list items:models.User.COR, as:'c'}
             <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
           #{/list}
-          </select>
-        </div>
-        <label for="" class="col-sm-1 control-label">是否含税</label>
-        <div class="col-sm-2">
-          <select class="form-control" name="units[<%= num %>].containTax">
-            <option #{if unit.containTax} selected #{/if} value="true">是</option>
-            <option #{if !unit.containTax} selected #{/if} value="false">否</option>
           </select>
         </div>
       </div>
