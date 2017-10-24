@@ -11,6 +11,7 @@
     <th>入库</th>
     <th>Reserved</th>
     <th>在库</th>
+    <th>Eur库存</th>
     <th>PS</th>
     <th>_PS</th>
     <th>Day1</th>
@@ -46,6 +47,7 @@
     <td style="color:#CC6615">${dto.inbound}</td>
     <td class="color:#CC6615">${dto.reserved}</td>
     <td class="text-success">${dto.qty}</td>
+    <td style="color:#0000E1">${dto.eurQty}</td>
       #{set psDiffer:dto.getPsDiffer()/}
     <td style="text-align:center;background:${'#'+psDiffer._2}">
       <div class="input-prepend" style="margin:0;">
@@ -53,8 +55,7 @@
       </div>
     </td>
     <td style="background:${'#'+psDiffer._2}">
-      <input type="text" ps sid="${dto.fid}" value="${dto.ps}" class="form-control input-xs"
-             style="width:40px;padding:3px;">
+      <input type="text" ps sid="${dto.fid}" value="${dto.ps}" class="form-control input-xs" style="width:40px;padding:3px;">
     </td>
     <td>${dto.day1}</td>
     <td style="color:${dto.difference.rgb()}">${dto.difference.format('#.##')} (${dto.percentage().format('#.##%')})</td>

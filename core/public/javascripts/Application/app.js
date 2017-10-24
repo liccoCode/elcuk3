@@ -39,6 +39,9 @@ $(() => {
           events: {
             click: function (event) {
               refreshTopFive(event.point.name);
+            },
+            afterAnimate: function (event) {
+              refreshTopFive(r["highestMarket"]);
             }
           }
         }
@@ -47,13 +50,13 @@ $(() => {
     });
   });
 
-  refreshTopFive("AMAZON_DE");
-
   function refreshTopFive (market) {
     let div = $("#progress_by_market");
     div.mask();
     div.load("/application/topTenSkuByMarket", {market: market}, function () {
       div.unmask();
+      let fid = $("#progress_by_market").find("div").data("fid");
+      getSales(fid);
     });
   }
 
