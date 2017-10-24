@@ -74,26 +74,26 @@
             <div class="box box-success">
               <div class="box-body">
                 <div class="col-sm-3">
-                <dl class="dl-horizontal">
-                  <dt>#</dt>
-                  <dd><a href="@{MaterialPlans.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
-                  <dt>审核状态</dt>
-                  <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
-                  <dt>供应商</dt>
-                  <dd>${dmt.cooperator.fullName}</dd>
-                  <dt>创建时间</dt>
-                  <dd>${dmt.createDate}</dd>
-                  <dt>出货时间</dt>
-                  <dd>${dmt.deliveryDate}</dd>
-                </dl>
-                <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-xs" target="_blank"
-                   content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
-                  <i class="icon-download-alt"></i>下载 Excel
-                </a>
-                  #{if dmt.isProcureApplyDepartable()}
-                    <a href="@{MaterialPlans.departProcureApply(dmt.id)}" class="btn btn-danger btn-xs" data-method='DELETE'
-                       data-confirm='确认移除?'>从当前请款单中移除</a>
-                  #{/if}
+                  <dl class="dl-horizontal">
+                    <dt>#</dt>
+                    <dd><a href="@{MaterialPlans.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
+                    <dt>审核状态</dt>
+                    <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
+                    <dt>供应商</dt>
+                    <dd>${dmt.cooperator.fullName}</dd>
+                    <dt>创建时间</dt>
+                    <dd>${dmt.createDate}</dd>
+                    <dt>出货时间</dt>
+                    <dd>${dmt.deliveryDate}</dd>
+                  </dl>
+                  <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-xs" target="_blank"
+                     content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
+                    <i class="icon-download-alt"></i>下载 Excel
+                  </a>
+                    #{if dmt.isProcureApplyDepartable()}
+                      <a href="@{MaterialPlans.departProcureApply(dmt.id)}" class="btn btn-danger btn-xs" data-method='DELETE'
+                         data-confirm='确认移除?'>从当前请款单中移除</a>
+                    #{/if}
                 </div>
                 <div class="col-sm-9">
                   <table class="table table-bordered table-condensed">
@@ -204,7 +204,8 @@
                                                 #{power.ck 'paymentunits.destroy'}
                                                     #{ifnot fee.remove || fee.isApproval()}
                                                       <button class="paymentUnitCancel btn btn-xs btn-danger"
-                                                              feeid='${fee.id}' url='@{PaymentUnits.destroyMaterial()}'>取消
+                                                              feeid='${fee.id}' url='@{PaymentUnits.destroyMaterial()}'>
+                                                        取消
                                                       </button>
                                                     #{/ifnot}
                                                 #{/power.ck}
@@ -266,8 +267,8 @@
                   <dl class="dl-horizontal">
                     <dt>#</dt>
                     <dd><a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
-                    <dt>状态</dt>
-                    <dd style="color:${dmt.state.rgb()}">${dmt.state.label()}</dd>
+                    <dt>审核状态</dt>
+                    <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
                     <dt>供应商</dt>
                     <dd>${dmt.cooperator.fullName}</dd>
                     <dt>创建时间</dt>
