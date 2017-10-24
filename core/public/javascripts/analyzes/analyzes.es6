@@ -131,7 +131,7 @@ function paramWidth (type) {
         "targets": [10]
       },
       {
-        "width": "15px",
+        "width": "28px",
         "targets": [11]
       },
       {
@@ -171,7 +171,7 @@ function paramWidth (type) {
         "targets": [20]
       },
       {
-        "width": "35px",
+        "width": "15px",
         "targets": [21]
       },
       {
@@ -179,16 +179,20 @@ function paramWidth (type) {
         "targets": [22]
       },
       {
-        "width": "15px",
+        "width": "35px",
         "targets": [23]
       },
       {
-        "width": "45px",
+        "width": "15px",
         "targets": [24]
       },
       {
-        "width": "30px",
+        "width": "45px",
         "targets": [25]
+      },
+      {
+        "width": "35px",
+        "targets": [26]
       }
     ]
   } else {
