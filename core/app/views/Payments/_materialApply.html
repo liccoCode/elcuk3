@@ -16,9 +16,15 @@
     <table class="table table-bordered table-condensed" id="apply_table">
       <tr>
         <th><input type="checkbox" id="check_all"></th>
-        <th>出货计划</th>
+        <th>
+          #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}出货计划#{/if}
+          #{else }采购计划#{/else}
+        </th>
         <th>财务审核</th>
-        <th>出货日期</th>
+        <th>
+          #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}出货日期#{/if}
+          #{else }下单日期#{/else}
+        </th>
         <th>物料编码</th>
         <th>单价</th>
         <th>
