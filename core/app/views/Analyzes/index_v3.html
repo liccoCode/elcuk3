@@ -6,7 +6,7 @@
 #{set 'moreScripts'}
     #{script 'bootstrap3/jquery.dataTables.js'/}
     #{script 'bootstrap3/dataTables.bootstrap.js'/}
-    #{script 'bootstrap3/highcharts.js'/}
+    #{script 'highstock.js'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'analyzes/analyzes.coffee'/}
@@ -15,7 +15,7 @@
 
 <div class="box box-success">
   <div class="box-body">
-    <div class="row" id="basic">
+    <div class="row" id="basic" style="height:400px;">
       <div class="col-md-6" style="height:300px;">
         <div id="a_units" data-method="ajaxUnit"></div>
       </div>
@@ -40,7 +40,7 @@
   </div>
 </div>
 
-<div class="box box-warning">
+<div class="box">
   <div class="box-body">
     <div id="tl" class="col-md-12" style="height:350px;"></div>
   </div>
@@ -80,13 +80,11 @@
           #{option ''}Account#{/option}
       #{/select}
 
-      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control selectize',
-      style:"width:120px;"}
+      #{select 'p.market', items: models.market.M.values(), value: p.market, class: 'form-control selectize',style:"width:120px;"}
           #{option ''}Market#{/option}
       #{/select}
 
-      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize', native: true,
-      style:"width:100px;"}
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize',style:"width:100px;"}
           #{option ''}Category#{/option}
       #{/select}
 
@@ -106,7 +104,6 @@
           Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
         </a>
 
-
         <input type="hidden" id="postPage" name="p.page" value="1">
         <input type="hidden" id="postType" name="p.type" value="sid">
         <input type="hidden" id="postOrderBy" name="p.orderBy" value="day7">
@@ -119,8 +116,8 @@
     <div class="row-fluid">
       <div class="nav-tabs-custom">
         <ul id="below_tab" class="nav nav-tabs">
-          <li class="active"><a href="#sid" data-toggle="tab">SID</a></li>
-          <li class=""><a href="#sku" data-toggle="tab">SKU</a></li>
+          <li class="active"><a href="#sid" data-toggle="tab" data-type="sid">SID</a></li>
+          <li class=""><a href="#sku" data-toggle="tab" data-type="sku">SKU</a></li>
         </ul>
 
         <div id="below_tabContent" class="tab-content">

@@ -3,18 +3,10 @@ window.jQuery = window.$
 $.extend $.fn.dataTableExt.oStdClasses,
   sWrapper: "dataTables_wrapper form-inline"
 
+$ ->
+  Highcharts.setOptions(global: {useUTC: false})
 # 分页事件
-  $("#below_tabContent").on("click", ".pagination a[page]", (e) ->
-    e.preventDefault()
-    $a = $(@)
-    $('#postPage').val($a.attr('page'))
-    ajaxFreshAcitveTableTab()
-  ).on('change', '.pagination select', (e) ->
-    e.preventDefault()
-    $('#postPage').val($(@).val())
-    ajaxFreshAcitveTableTab()
-# SKU | SID 项目的详细查看事件
-  ).on("click", ".sid,.sku", (e) ->
+  $("#below_tabContent").on("click", ".sid,.sku", (e) ->
     $td = $(@)
     sidOrSku = $td.text().trim()
     $('#postVal').val(sidOrSku)
@@ -24,7 +16,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
     $categoryNode = $('select[name|="p.categoryId"]')
     categoryId = $categoryNode.val()
     $categoryNode.val("")
-    ajaxSaleUnitLines()
+    ajaxSaleUnitLinesForSku()
     $categoryNode.val(categoryId)
 
     # 转换率与 PageView
@@ -40,56 +32,15 @@ $.extend $.fn.dataTableExt.oStdClasses,
     # 选中 效果
     $td.parents('table').find('tr').removeClass('selected')
     $td.parents('tr').addClass('selected')
-# 列排序事件
-  ).on('click', 'th[orderby]', (e) ->
-    $td = $(@)
-    $('#postOrderBy').val($td.attr('orderby'))
-
-    $desc = $('#postDesc')
-    if $td.hasClass('sortable')
-      $desc.val(if $desc.val() == "true" then false else true)
-    else
-      $desc.val(true)
-
-    ajaxFreshAcitveTableTab()
   )
 
-  $("#sid").on('change', 'select[name=sellingCycle]', (e) ->
-    $select = $(@)
-    if $select.val() != ''
-      $.ajax("/sellings/changeSellingCycle",
-        data: {
-          sellingId: $select.data('sellingid'),
-          cycle: $select.val()
-        },
-        dataType: 'json')
-        .done((r)->
-        msg = if r.flag is true
-          {
-            text: "Selling #{r.message} 生命周期修改为 #{$select.find("option:selected").text()}",
-            type: 'success'
-          }
-        else
-          {
-            text: r.message,
-            type: 'error'
-          }
-        noty(msg)
-      )
-  )
-
-# 当前选中的tab，调用相对应数据
+  # 当前选中的tab，调用相对应数据
   ajaxFreshAcitveTableTab = ->
     type = $("#below_tab li.active a").attr("href")
     $("#{type}").trigger("ajaxFresh")
 
-# Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
-  $('a[data-toggle=tab]').on('shown', (e) ->
-    $('#postPage').val(1)
-    ajaxFreshAcitveTableTab()
-  )
 
-# 绑定 sid tab 中修改 ps 值
+  # 绑定 sid tab 中修改 ps 值
   $('#sid').on('change', 'input[ps]', () ->
     $line = $(@)
     LoadMask.mask($line)
@@ -118,33 +69,22 @@ $.extend $.fn.dataTableExt.oStdClasses,
     )
   )
 
-# Form 搜索功能
-  $("#click_param").on("change", "[name=p\\.market]", (e) ->
-    ajaxFreshAcitveTableTab()
-
-# 搜索按钮
-  ).on("click", ".btn:contains(搜索)", (e) ->
+  # Form 搜索功能
+  $("#click_param").on("click", ".btn:contains(搜索)", (e) ->
     e.preventDefault()
     if $('select[name|="p.categoryId"]').val() is ''
       $("#postVal").val('all')
     else
       ajaxSaleUnitLines()
-
     ajaxFreshAcitveTableTab()
-
 # 重新加载全部的销售线
   ).on("click", ".btn:contains(Reload)", (e) ->
     e.preventDefault()
     ajaxSaleUnitLines()
-  ).on("click", ".btn:contains(Excel)", (e) ->
-    e.preventDefault()
-    $form = $('#click_param')
-    window.location.href = '/Excels/analyzes?' + $form.serialize()
   )
 
-
-#parameters：
-# headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
+  #parameters：
+  # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
     $div = $(@)
     LoadMask.mask($div)
@@ -153,7 +93,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
       data: $('#click_param').serialize(),
       dataType: 'json'
     })
-      .done((r) ->
+    .done((r) ->
       if r.flag == false
         noty({
           text: r.message.split("|F")[0],
@@ -161,7 +101,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
           timeout: 5000
         })
       else if r['series'].length != 0
-        Highcharts.chart($div.attr("id"), {
+        $div.highcharts('StockChart', {
           credits:
             text: 'EasyAcc'
             href: ''
@@ -211,7 +151,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
         $div.html(noDataDisplayMessage)
       LoadMask.unmask($div)
     )
-      .fail((xhr, text, error) ->
+    .fail((xhr, text, error) ->
       noty({
         text: "Load #{$div.attr('id')} #{error} because #{xhr.responseText}",
         type: 'error',
@@ -219,7 +159,9 @@ $.extend $.fn.dataTableExt.oStdClasses,
       })
       LoadMask.unmask($div)
     )
-  ).on('click', '.btn-toolbar > .btn-small', (e) ->
+  )
+    
+  $(".btn-xs").click((e) ->
     $btn = $(@)
     $div = $('#a_units')
     events = _.filter($('#a_units').highcharts().series, (serie) ->
@@ -234,7 +176,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
         data: $('#click_param').serialize(),
         dataType: 'json'
       })
-        .done((r) ->
+      .done((r) ->
         $market.val($market.data('oldMarket'))
         if r.flag == false
           noty({
@@ -257,7 +199,13 @@ $.extend $.fn.dataTableExt.oStdClasses,
       )
   )
 
-# 销售订单曲线
+  ajaxSaleUnitLinesForSku = ->
+    $postVal = $('#postVal')
+    displayStr = $postVal.val()
+    head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
+    $("#a_units").trigger("ajaxFresh", [head, "Units", {}, '没有数据, 无法绘制曲线...'])
+
+  # 销售订单曲线
   ajaxSaleUnitLines = ->
     categoryId = $('select[name|="p.categoryId"]').val()
     $postVal = $('#postVal')
@@ -270,20 +218,19 @@ $.extend $.fn.dataTableExt.oStdClasses,
     head = "Selling [<span style='color:orange'>#{displayStr}</span> | " + $('#postType').val().toUpperCase() + "] Unit Order"
     $("#a_units").trigger("ajaxFresh", [head, "Units", {}, '没有数据, 无法绘制曲线...'])
 
-
-# 转换率的曲线
+  # 转换率的曲线
   ajaxTurnOverLine = ->
 # 无数据提示
     noDataDisplay = '<div class="alert alert-success"><h3 style="text-align:center">请双击需要查看的 Selling 查看转化率</h3></div>'
     $("#a_turn").trigger("ajaxFresh", ['Selling[' + $('#postVal').val() + '] 转化率', "转化率", {}, noDataDisplay])
 
-# 绘制 Session 的曲线
+  # 绘制 Session 的曲线
   ajaxSessionLine = ->
 # 无数据提示
     noDataDisplay = '<div class="alert alert-success"><h3 style="text-align:center">双击查看 Selling 的 PageView & Session</h3></div>'
     $("#a_ss").trigger("ajaxFresh", ['Selling[' + $('#postVal').val() + '] SS', "Session && PV", {}, noDataDisplay])
 
-# 清理 Session 转化率与 PageView
+  # 清理 Session 转化率与 PageView
   pageViewDefaultContent = () ->
     template = '<div class="alert alert-success"><h3 style="text-align:center"></h3></div>'
     for id,v of {
@@ -292,7 +239,7 @@ $.extend $.fn.dataTableExt.oStdClasses,
     }
       $('#' + id).empty().append(template).find('h3').html(v)
 
-# 绘制 ProcureUnit 的 timeline 中的数据
+  # 绘制 ProcureUnit 的 timeline 中的数据
   paintProcureUnitInTimeline = (type, val)->
     $div = $('#tl')
     LoadMask.mask($div)
@@ -312,8 +259,14 @@ $.extend $.fn.dataTableExt.oStdClasses,
           LoadMask.unmask($div)
     )
 
-# 页面 初始化数据
+  # Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
+  $('a[data-toggle=tab]').on('shown', (e) ->
+    $('#postPage').val(1)
+    ajaxFreshAcitveTableTab()
+  )
+
+  # 页面 初始化数据
   ajaxFreshAcitveTableTab()
   ajaxSaleUnitLines()
-# 默认 PageView 线
+  # 默认 PageView 线
   pageViewDefaultContent()

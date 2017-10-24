@@ -161,7 +161,7 @@ public class Role extends GenericModel {
 
     public static boolean isShipmentRole(User user) {
         List<Role> roles = Role.find("roleName in " + SqlSelect.inlineParam(Arrays.asList("物流专员", "物流主管"))).fetch();
-        return roles != null && user.roles.stream().anyMatch(role -> roles.contains(role));
+        return roles != null && user.roles.stream().anyMatch(roles::contains);
     }
 
 }
