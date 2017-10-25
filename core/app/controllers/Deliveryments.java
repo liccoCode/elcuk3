@@ -7,10 +7,7 @@ import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.ProcureApply;
-import models.procure.Cooperator;
-import models.procure.Deliveryment;
-import models.procure.ProcureUnit;
-import models.procure.Shipment;
+import models.procure.*;
 import models.product.Category;
 import models.view.Ret;
 import models.view.highchart.HighChart;
@@ -333,6 +330,11 @@ public class Deliveryments extends Controller {
             unit.deliveryment = dmt;
             unit.stage = ProcureUnit.STAGE.DELIVERY;
             unit.containTax = containTax;
+            if(containTax) {
+                CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?",
+                        unit.product.sku, unit.cooperator.id).first();
+                unit.taxPoint = item.taxPoint;
+            }
             unit.validateManual();
             if(Validation.hasErrors()) {
                 render("Deliveryments/manual.html", dmt, units);

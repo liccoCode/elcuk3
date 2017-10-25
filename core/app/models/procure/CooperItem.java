@@ -83,7 +83,7 @@ public class CooperItem extends Model {
      */
     @Expose
     @Min(0)
-    public Integer taxPoint;
+    public Integer taxPoint = 0;
 
     /***
      * 其他价格（包含包材配件价格）
