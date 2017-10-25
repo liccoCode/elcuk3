@@ -139,7 +139,11 @@
     </td>
     <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
-        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
+            #{if unit.containTax}
+              <br><div class="label label-danger">税点:${unit.taxPoint}</div>
+            #{/if}
+        </td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
         <td>
             #{if unit.type?.name() == 'StockSplit'}

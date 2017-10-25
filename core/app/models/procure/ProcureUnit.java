@@ -30,10 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
-import play.data.validation.Check;
-import play.data.validation.CheckWith;
-import play.data.validation.Required;
-import play.data.validation.Validation;
+import play.data.validation.*;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
@@ -377,6 +374,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 采购单价是否含税，默认为否
      */
     public boolean containTax = false;
+
+    /**
+     * 税点
+     * 单位 %
+     */
+    @Expose
+    @Min(0)
+    public Integer taxPoint = 0;
 
     /**
      * 是否需要付款
