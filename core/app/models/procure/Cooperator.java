@@ -203,6 +203,16 @@ public class Cooperator extends Model {
      * 尾款
      */
     public int tail = 70;
+    
+    /**
+     * 物料首付款
+     */
+    public int materialFirst = 0;
+
+    /**
+     * 物料尾款
+     */
+    public int materialTail = 100;
 
     /**
      * 是否可见
