@@ -12,7 +12,6 @@ import models.view.dto.DashBoard;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.StockPost;
-import models.whouse.Whouse;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
