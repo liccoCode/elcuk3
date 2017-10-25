@@ -249,8 +249,9 @@
                   #{/elseif}
               </td>
               <td>
-                  #{if unit.stage.name()=='IN_STORAGE'}
-                    <input type="button" data-id="${unit.id}" name="editBoxInfo" value="填写"
+                  #{if Arrays.asList("IN_STORAGE","OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE").contains(unit.stage.name())}
+                    <input type="button" data-id="${unit.id}" name="editBoxInfo"  data-stage="${unit.stage.name()}"
+                           #{if unit.stage.name()=='IN_STORAGE'}value="填写"#{/if}  #{else}value="查看" #{/else}
                            class="btn btn-xs ${unit.validBoxInfoIsCorrect() ? 'btn-success' : 'btn-danger'}">
                   #{/if}
               </td>
