@@ -35,7 +35,7 @@
     <td>${unit.material?.name}</td>
     <td>${unit.material?.version}</td>
     <td>${unit.planQty}</td>
-    <td>${unit.material?.surplusConfirmQty()}</td>
+    <td>${unit.material?.surplusConfirmQty(cooperId)}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
     <td>

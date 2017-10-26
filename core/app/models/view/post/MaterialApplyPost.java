@@ -64,8 +64,9 @@ public class MaterialApplyPost extends Post<Apply> {
 
     @Override
     public F.T2<String, List<Object>> params() {
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT p FROM MaterialApply p LEFT JOIN p.materialPlans d ");
-        sql.append(" LEFT JOIN d.units u WHERE 1=1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT p FROM MaterialApply p ");
+        sql.append(" LEFT JOIN p.materialPlans d  LEFT JOIN d.units u  ");
+        sql.append(" LEFT JOIN p.materialPurchases pa  LEFT JOIN pa.units pau WHERE 1=1 ");
         List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
@@ -88,6 +89,7 @@ public class MaterialApplyPost extends Post<Apply> {
             sql.append(" AND (")
                     .append(" p.serialNumber LIKE ?")
                     .append(" OR u.material.code LIKE ?")
+                    .append(" OR pau.material.code LIKE ?")
                     .append(")");
             for(int i = 0; i < 2; i++) {
                 params.add(word);

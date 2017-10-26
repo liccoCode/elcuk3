@@ -203,6 +203,16 @@ public class Cooperator extends Model {
      * 尾款
      */
     public int tail = 70;
+    
+    /**
+     * 物料首付款
+     */
+    public int materialFirst = 0;
+
+    /**
+     * 物料尾款
+     */
+    public int materialTail = 100;
 
     /**
      * 是否可见
@@ -368,11 +378,10 @@ public class Cooperator extends Model {
 
     public List<Material> findMaterialNotExistCooper() {
         List<Material> materials = Material.find("isDel = 0", null).fetch();
-        List<CooperItem> items = this.cooperItems.stream()
-                .filter(item -> item.type.equals(CooperItem.T.MATERIAL)).collect(Collectors.toList());
-        List<Material> notExists = materials.stream().filter(material -> !items.contains(material))
-                .collect(Collectors.toList());
-        return notExists;
+        List<String> items = this.cooperItems.stream()
+                .filter(item -> item.type.equals(CooperItem.T.MATERIAL))
+                .map(item -> item.material.code).collect(Collectors.toList());
+        return materials.stream().filter(material -> !items.contains(material.code)).collect(Collectors.toList());
     }
 
     @Override
@@ -380,12 +389,8 @@ public class Cooperator extends Model {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Cooperator that = (Cooperator) o;
-
-        if(this.id != null ? !this.id.equals(that.id) : that.id != null) return false;
-
-        return true;
+        return this.id != null ? this.id.equals(that.id) : that.id == null;
     }
 
     @Override

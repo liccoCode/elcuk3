@@ -18,12 +18,41 @@ $(() => {
     $.post($(this).data("url"), {unitIds: ids}, function (r) {
       LoadMask.unmask();
       if (r.flag) {
-        alert(r.message);
-        window.location.reload();
+        noty({
+          text: r.message,
+          type: 'success'
+        });
+        setTimeout("window.location.reload()",1500);
       } else {
-        alert(r.message);
+        noty({
+          text: r.message,
+          type: 'error'
+        });
       }
     });
   });
+
+  let switchInput = $("input[name='my-checkbox']").bootstrapSwitch();
+
+  $("input[name='my-checkbox']").on('switchChange.bootstrapSwitch', function (event, state) {
+    let feesize = $(this).attr('feesize')
+    let url = $(this).attr('url')
+    if(feesize > 0) {
+      noty({
+        text: '存在费用明细,不可以更改收款状态!',
+        type: 'error'
+      });
+      setTimeout("window.location.reload()",1500);
+    }else{
+      $('#edit_pay_form').attr('action', url)
+      $("#edit_pay").modal('show')
+    }
+  });
+
+  $("#close_modal").click(function (e) {
+    e.preventDefault();
+    $("#edit_pay").modal('hide');
+    window.location.reload();
+  })
 
 });

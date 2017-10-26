@@ -232,8 +232,9 @@ public class MaterialPlanUnit extends Model {
      */
     public boolean hasTailPay() {
         for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.procurement())
+            if(fee.feeType == FeeType.procurement()){
                 return true;
+            }
         }
         return false;
     }

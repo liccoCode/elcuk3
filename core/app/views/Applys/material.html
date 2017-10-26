@@ -1,240 +1,456 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"物料请款单 ${apply.serialNumber}" /}
 #{set 'moreScripts'}
     #{script 'materialPlans/materialPlan.coffee'/}
     #{script 'materialPlans/materialPlan.es6'/}
 #{/set}
 #{flash_alert /}
-<div class="row-fluid">
-  <div class="span3">
-    <dl class="dl-horizontal">
-      <dt>编号</dt>
-      <dd><a href="@{Applys.material(apply.id)}">${apply.serialNumber}</a></dd>
-      <dt>系统 ID</dt>
-      <dd>${apply.id}</dd>
-    </dl>
-  </div>
-  <div class="span3">
-    <dl class="dl-horizontal">
-      <dt>最后更新时间</dt>
-      <dd>#{time_tooltip time: apply.updateAt, datetime: true/}</dd>
-      <dt>创建时间</dt>
-      <dd>#{time_tooltip time: apply.createdAt, datetime: true/}</dd>
-    </dl>
-  </div>
-  <div class="span4">
-    <dl class="dl-horizontal">
-      <dt>总数量</dt>
-      <dd><span class="totalQty"></span></dd>
-      <dt>总金额</dt>
-      <dd><span class="totalCost"></span></dd>
-    </dl>
-  </div>
-  <div class="span2">
-    <div class="btn-toolbar">
-    #{if apply.confirm}
-         <button class="btn btn-danger" disabled="">请款单已经确认</button>
-       #{/if}
-       #{else }
-         <a href='@{Applys.materialConfirm(apply.id)}' class="btn btn-success"
-             data-disable-with='确认中...'>确认请款单</a>
-       #{/else}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-body">
+        <div class="form-horizontal">
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-1 control-label">编号</label>
+            <div class="col-sm-2">
+              <input class="form-control" value="${apply.serialNumber}" readonly>
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label">最后更新时间</label>
+            <div class="col-sm-2">
+              <input class="form-control" value="${apply.updateAt.format("yyyy-MM-dd HH:MM:ss")}" readonly>
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label">总数量</label>
+            <div class="col-sm-2">
+            #{if apply.type == models.material.MaterialApply.T.PLAN}
+              <input class="form-control" id="planTotalQty" readonly>
+            #{/if}
+            #{else }
+              <input class="form-control" id="totalQty" readonly>
+            #{/else}
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label"></label>
+            <div class="col-sm-2">
+            #{if apply.confirm}
+              <button class="btn btn-danger" disabled="">请款单已经确认</button>
+            #{/if}
+            #{else }
+              <a href='@{Applys.materialConfirm(apply.id)}' class="btn btn-primary" data-disable-with='确认中...'>确认请款单</a>
+            #{/else}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-1 control-label">系统 ID</label>
+            <div class="col-sm-2">
+              <input class="form-control" value="${apply.id}" readonly>
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label">创建时间</label>
+            <div class="col-sm-2">
+              <input class="form-control" value="${apply.createdAt.format("yyyy-MM-dd HH:MM:ss")}" readonly>
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label">总金额</label>
+            <div class="col-sm-2">
+              <input class="form-control" id="totalCost" readonly>
+            </div>
+            <label for="p_sku" class="col-sm-1 control-label"></label>
+            <div class="col-sm-2">
+            #{power.ck 'procureunits.billingprepay'}
+              <button name="applyBtn" data-url="@{MaterialUnits.batchPrePay()}" class="btn btn-success">批量申请预付款</button>
+            #{/power.ck}
+            #{power.ck 'procureunits.billingtailpay'}
+              <button name="applyBtn" data-url="@{MaterialUnits.batchTailPay()}" class="btn btn-warning">批量申请尾款</button>
+            #{/power.ck}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
-<hr style="border-top: 1px dashed;">
-
-#{list items:apply.materialPlans, as:'dmt'}
-    #{set tr_key: key ? key : 'unit'/}
-<div class="row-fluid">
-  <div class="span3">
-    <dl class="dl-horizontal">
-      <dt>#</dt>
-      <dd><a href="@{MaterialPlans.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
-      <dt>审核状态</dt>
-      <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
-      <dt>供应商</dt>
-      <dd>${dmt.cooperator.fullName}</dd>
-      <dt>创建时间</dt>
-      <dd>${dmt.createDate}</dd>
-      <dt>出货时间</dt>
-      <dd>${dmt.deliveryDate}</dd>
-    </dl>
-    <dl class="dl-horizontal">
-      <dt>&nbsp;</dt>
-      <dd>
-        <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-small" target="_blank"
-           content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
-          <i class="icon-download-alt"></i>下载 Excel
-        </a>
-          #{if dmt.isProcureApplyDepartable()}
-            <a href="@{MaterialPlans.departProcureApply(dmt.id)}" class="btn btn-danger btn-small" data-method='DELETE'
-               data-confirm='确认移除?'>从当前请款单中移除</a>
-          #{/if}
-      </dd>
-    </dl>
-  </div>
-
-  <div class="span9">
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th width="15px;">
-          <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="checkall">
-        </th>
-        <th>#</th>
-        <th>物料编码</th>
-        <th>请款状态</th>
-        <th>数量(交货/签收异常)</th>
-        <th>单价</th>
-        <th>单价*签收数量</th>
-        <th>出货单状态</th>
-      </tr>
-        #{list items:dmt.applyUnit(), as:'procureUnit'}
-           #{if procureUnit.isNeedPay}
-           <tr>
-           #{/if}
-           #{else}
-           <tr style="background:red">
-           #{/else}
-              #{set pid:procureUnit.id/}
-            <td>
-              <label class="checkbox"><input type="checkbox" name="unitids" value="${procureUnit.id}" class="${tr_key}" id="unitids"></label>
-            </td>
-            <td data-toggle="toggle" data-target="#unit_${pid}">
-              <i class="icon-reorder"></i>
-            ${procureUnit.id}
-            </td>
-            <td>${procureUnit.material.code}</td>
-            <td>
-              #{list items:procureUnit.fees(), as:'fee'}
-                <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
-              #{/list}
-            </td>
-            <td class="qty" qty="${procureUnit.qty}" receiptQty="${procureUnit.receiptQty?:0}"
-                style="color:${(procureUnit.receiptQty>0&&procureUnit.qty!=procureUnit.receiptQty)? 'red':''}">
-            ${procureUnit.qty}/${procureUnit.receiptQty?:0}
-            </td>
-            <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
-            <td class="price" amount="${procureUnit.totalAmount()}">
-            ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
-            <td>${procureUnit.materialPlan.state.label()}</td>
-          </tr>
-          <tr id="unit_${pid}" style="display:none">
-            <td colspan="12">
-              <div class="row-fluid">
-                <div class="span2">
-                    #{ifnot procureUnit.hasTailPay()}
-                        #{form @MaterialPlanUnits.billingPrePay(pid, apply.id), method:'POST'}
-                          <input type="submit" value="申请尾款" class="btn btn-mini btn-warning" rel="tooltip">
-                        #{/form}
-                    #{/ifnot}
-                  <input type="hidden" name="feesize" id="feesize" value="${procureUnit.fees().size()}">
-                  <label>请款开关:</label>
-                  <div class="switch" data-on="warning" data-off="danger">
-                      #{if procureUnit.isNeedPay}
-                        <input id="switch_pay" name="switch_pay" type="checkbox" checked url='@{MaterialPlanUnits.editPaySatus(pid)}'/>
-                      #{/if}
-                      #{else}
-                        <input id="switch_pay" name="switch_pay" type="checkbox" Unchecked url='@{MaterialPlanUnits.editPaySatus(pid)}'/>
-                      #{/else}
-                  </div>
-                </div>
-                <div class="span10">
-                    #{if procureUnit.fees().size() > 0}
-                      <table class="table table-bordered table-condensed" style="margin-bottom:0">
-                        <tr>
-                          <th></th>
-                          <th>#</th>
-                          <th>付款单</th>
-                          <th>状态</th>
-                          <th>请款类型</th>
-                          <th>请款数量</th>
-                          <th>请款金额</th>
-                          <th>修正值</th>
-                        </tr>
-                          #{list items:procureUnit.fees(), as:'fee'}
-                            <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
-                              <td>
-                                  #{power.ck 'paymentunits.destroy'}
-                                      #{ifnot fee.remove || fee.isApproval()}
-                                        <button class="paymentUnitCancel btn btn-mini btn-danger"  feeid='${fee.id}'
-                                                url='@{PaymentUnits.destroyMaterial()}'>取消
-                                        </button>
-                                      #{/ifnot}
-                                  #{/power.ck}
-                              </td>
-                              <td>${fee.id}</td>
-                              <td>
-                                <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
-                                ${fee.payment.paymentNumber}
-                                </a>
-                              </td>
-                              <td>
-                                <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
-                              </td>
-                              <td>${fee.feeType.nickName}</td>
-                              <td>${fee.unitQty.format('#')}</td>
-                              <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
-                              <td>
-                                <div class="row-fluid">
-                                    #{if fee.isApproval()}
-                                    ${fee.currency.symbol()} ${fee.fixValue}
-                                    #{/if}
-                                    #{else }
-                                        #{form @PaymentUnits.fixValueMaterial(fee.id), class:'form-inline', method:'POST'}
-                                          <div class="input-prepend">
-                                            <span class="add-on">${fee.currency.symbol()}</span>
-                                            <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
-                                          </div>
-                                              <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
-                                              <input type="submit" value="修正" class="btn">
-                                        #{/form}
-                                    #{/else}
-                                </div>
-                              </td>
-                            </tr>
-                              #{set fixValueRecords: fee.fixValueRecords()/}
-                              #{set denyRecords: fee.denyRecords()/}
-                              #{if (denyRecords.size() + fixValueRecords.size()) > 0}
-                                <tr class="${fee.isApproval()? 'muted':''}">
-                                  <td colspan="8">
-                                    <div class="row-fluid">
-                                      <div class="span6">
-                                          #{records_ul records:denyRecords /}
-                                      </div>
-                                      <div class="span6">
-                                          #{records_ul records:fixValueRecords /}
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              #{/if}
-                          #{/list}
-                      </table>
+  #{if apply.type == models.material.MaterialApply.T.PLAN}
+      #{list items:apply.materialPlans, as:'dmt'}
+          #{set tr_key: key ? key : 'unit'/}
+        <div class="row">
+          <div class="col-md-12">
+            <div class="box box-success">
+              <div class="box-body">
+                <div class="col-sm-3">
+                  <dl class="dl-horizontal">
+                    <dt>#</dt>
+                    <dd><a href="@{MaterialPlans.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
+                    <dt>审核状态</dt>
+                    <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
+                    <dt>供应商</dt>
+                    <dd>${dmt.cooperator.fullName}</dd>
+                    <dt>创建时间</dt>
+                    <dd>${dmt.createDate}</dd>
+                    <dt>出货时间</dt>
+                    <dd>${dmt.deliveryDate}</dd>
+                  </dl>
+                  <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-xs" target="_blank"
+                     content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
+                    <i class="icon-download-alt"></i>下载 Excel
+                  </a>
+                    #{if dmt.isProcureApplyDepartable()}
+                      <a href="@{MaterialPlans.departProcureApply(dmt.id)}" class="btn btn-danger btn-xs" data-method='DELETE'
+                         data-confirm='确认移除?'>从当前请款单中移除</a>
                     #{/if}
-                    #{else }
-                      <span class="text-center">没有请款记录</span>
-                    #{/else}
+                </div>
+                <div class="col-sm-9">
+                  <table class="table table-bordered table-condensed">
+                    <tr>
+                      <th width="15px;">
+                        <input type="checkbox" id="${key ? tr_key + '_' : ''}checkbox_all" class="checkall">
+                      </th>
+                      <th>#</th>
+                      <th>物料编码</th>
+                      <th>请款状态</th>
+                      <th>数量(交货/签收异常)</th>
+                      <th>单价</th>
+                      <th>单价*签收数量</th>
+                      <th>出货单状态</th>
+                      <th>操作</th>
+                      <th>请款开关</th>
+                    </tr>
+                      #{list items:dmt.applyUnit(), as:'procureUnit'}
+                          #{if procureUnit.isNeedPay}
+                          <tr>
+                          #{/if}
+                          #{else}
+                          <tr style="background:red">
+                          #{/else}
+                          #{set pid:procureUnit.id/}
+                        <td>
+                          <input type="checkbox" name="unitids" value="${procureUnit.id}" class="${tr_key}" id="unitids">
+                        </td>
+                        <td data-toggle="toggle" data-target="#unit_${pid}">
+                          <i class="icon-reorder"></i>
+                        ${procureUnit.id}
+                        </td>
+                        <td>${procureUnit.material.code}</td>
+                        <td>
+                            #{list items:procureUnit.fees(), as:'fee'}
+                              <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                            #{/list}
+                        </td>
+                        <td class="qty" qty="${procureUnit.qty}" receiptQty="${procureUnit.receiptQty?:0}"
+                            style="color:${(procureUnit.receiptQty>0&&procureUnit.qty!=procureUnit.receiptQty)? 'red':''}">
+                        ${procureUnit.qty}/${procureUnit.receiptQty?:0}
+                        </td>
+                        <td>${procureUnit.getCurrency().symbol()} ${procureUnit.getPrice()}</td>
+                        <td class="price" amount="${procureUnit.totalAmount()}">
+                        ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
+                        <td>${procureUnit.materialPlan.state.label()}</td>
+                        <td>
+                            #{ifnot procureUnit.hasTailPay()}
+                                #{form @MaterialPlanUnits.billingPrePay(pid, apply.id), method:'POST'}
+                                  <input type="submit" value="申请尾款" class="btn btn-xs btn-warning" rel="tooltip">
+                                #{/form}
+                            #{/ifnot}
+                        </td>
+                        <td><input type="checkbox" name="my-checkbox" data-size="mini"
+                                   url='@{MaterialPlanUnits.editPaySatus(pid)}' feesize="${procureUnit.fees().size()}"
+                                   #{if procureUnit.isNeedPay}checked#{/if} #{else}Unchecked#{/else}>
+                        </td>
+
+
+                      </tr>
+                        <tr id="unit_${pid}" style="display:none">
+                          <td colspan="12">
+                            <div class="row-fluid">
+                              <div class="span10">
+                                  #{if procureUnit.fees().size() > 0}
+                                    <table class="table table-bordered table-condensed" style="margin-bottom:0">
+                                      <tr>
+                                        <th></th>
+                                        <th>#</th>
+                                        <th>付款单</th>
+                                        <th>状态</th>
+                                        <th>请款类型</th>
+                                        <th>请款数量</th>
+                                        <th>请款金额</th>
+                                        <th>修正值</th>
+                                      </tr>
+                                        #{list items:procureUnit.fees(), as:'fee'}
+                                          <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
+                                            <td>${fee.id}</td>
+                                            <td>
+                                              <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
+                                              ${fee.payment.paymentNumber}
+                                              </a>
+                                            </td>
+                                            <td>
+                                              <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                                            </td>
+                                            <td>${fee.feeType.nickName}</td>
+                                            <td>${fee.unitQty.format('#')}</td>
+                                            <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
+                                            <td width="450px">
+                                              <div class="row-fluid">
+                                                  #{if fee.isApproval()}
+                                                  ${fee.currency.symbol()} ${fee.fixValue}
+                                                  #{/if}
+                                                  #{else }
+                                                      #{form @PaymentUnits.fixValueMaterial(fee.id), class:'form-inline', method:'POST'}
+                                                        <span class="add-on">${fee.currency.symbol()}</span>
+                                                        <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
+                                                        <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
+                                                        <input type="submit" value="修正" class="btn  btn-xs">
+                                                      #{/form}
+                                                  #{/else}
+                                              </div>
+
+                                            </td>
+                                            <td>
+                                                #{power.ck 'paymentunits.destroy'}
+                                                    #{ifnot fee.remove || fee.isApproval()}
+                                                      <button class="paymentUnitCancel btn btn-xs btn-danger"
+                                                              feeid='${fee.id}' url='@{PaymentUnits.destroyMaterial()}'>
+                                                        取消
+                                                      </button>
+                                                    #{/ifnot}
+                                                #{/power.ck}
+                                            </td>
+                                          </tr>
+                                            #{set fixValueRecords: fee.fixValueRecords()/}
+                                            #{set denyRecords: fee.denyRecords()/}
+                                            #{if (denyRecords.size() + fixValueRecords.size()) > 0}
+                                              <tr class="${fee.isApproval()? 'muted':''}">
+                                                <td colspan="8">
+                                                  <div class="row-fluid">
+                                                    <div class="span6">
+                                                        #{records_ul records:denyRecords /}
+                                                    </div>
+                                                    <div class="span6">
+                                                        #{records_ul records:fixValueRecords /}
+                                                    </div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </table>
+                                  #{/if}
+                                  #{else }
+                                    <span class="text-center">没有请款记录</span>
+                                  #{/else}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      #{/list}
+                    <tr class="table_summary">
+                      <td colspan="3"></td>
+                      <td>总额</td>
+                      <td class="totalNum"></td>
+                      <td rel='tooltip' title='汇总美金' class="usd"></td>
+                      <td rel='tooltip' title="汇总人民币" class="cny"></td>
+                      <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
+                      <td colspan="4"></td>
+                    </tr>
+                  </table>
                 </div>
               </div>
-            </td>
-          </tr>
-        #{/list}
-      <tr class="table_summary">
-        <td colspan="3"></td>
-        <td>总额</td>
-        <td class="totalNum"></td>
-        <td rel='tooltip' title='汇总美金' class="usd"></td>
-        <td rel='tooltip' title="汇总人民币" class="cny"></td>
-        <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
-        <td colspan="4"></td>
-      </tr>
-    </table>
+            </div>
+          </div>
+        </div>
+        <hr style="border-top: 1px dashed;">
+      #{/list}
+  #{/if}
+  #{else }
+      #{list items:apply.materialPurchases, as:'dmt'}
+          #{set tr_key: key ? key : 'unit'/}
+        <div class="row">
+          <div class="col-md-12">
+            <div class="box box-success">
+              <div class="box-body">
+                <div class="col-sm-3">
+                  <dl class="dl-horizontal">
+                    <dt>#</dt>
+                    <dd><a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a></dd>
+                    <dt>审核状态</dt>
+                    <dd style="color:${dmt.financeState.rgb()}">${dmt.financeState.label()}</dd>
+                    <dt>供应商</dt>
+                    <dd>${dmt.cooperator.fullName}</dd>
+                    <dt>创建时间</dt>
+                    <dd>${dmt.createDate}</dd>
+                    <dt>下单时间</dt>
+                    <dd>${dmt.orderTime}</dd>
+                    <dt>最后交货时间</dt>
+                    <dd>${dmt.orderTime}</dd>
+                  </dl>
+                  <a href="@{Excels.exportDeliverymentDetailToExcel(dmt.id)}" class="btn btn-primary btn-xs"
+                     target="_blank"
+                     content="导出采购单中所有采购计划列表数据" placement='bottom' rel="popover">
+                    <i class="icon-download-alt"></i>下载 Excel
+                  </a>
+                    #{if dmt.isProcureApplyDepartable()}
+                      <a href="@{MaterialPurchases.departProcureApply(dmt.id)}" class="btn btn-danger btn-xs"
+                         data-method='DELETE'
+                         data-confirm='确认移除?'>从当前请款单中移除</a>
+                    #{/if}
+                </div>
+                <div class="col-sm-9">
+                  <table class="table table-bordered table-condensed">
+                    <tr>
+                      <th width="15px;"><input type="checkbox" class="checkall"></th>
+                      <th>#</th>
+                      <th width="250px;">物料编码</th>
+                      <th>请款状态</th>
+                      <th>采购数量</th>
+                      <th>单价</th>
+                      <th>单价*签收数量</th>
+                      <th>采购单状态</th>
+                      <th>操作</th>
+                      <th>请款开关</th>
+                    </tr>
+                      #{list items:dmt.applyUnit(), as:'procureUnit'}
+                          #{if procureUnit.isNeedPay}
+                          <tr>
+                          #{/if}
+                          #{else}
+                          <tr style="background:red">
+                          #{/else}
+                          #{set pid:procureUnit.id/}
+                        <td>
+                          <input type="checkbox" name="unitids" value="${procureUnit.id}" id="unitids">
+                        </td>
+                        <td data-toggle="toggle" data-target="#unit_${pid}">
+                          <i class="icon-reorder"></i>
+                        ${procureUnit.id}
+                        </td>
+                        <td>${procureUnit.material.code}</td>
+                        <td>
+                            #{list items:procureUnit.fees(), as:'fee'}
+                              <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                            #{/list}
+                        </td>
+                        <td class="qty" qty="${procureUnit.planQty}">${procureUnit.planQty}</td>
+                        <td>${procureUnit.getCurrency().symbol()} ${procureUnit.planPrice}</td>
+                        <td class="price" amount="${procureUnit.totalAmount()}">
+                        ${procureUnit.getCurrency().symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
+                        <td>${procureUnit.materialPurchase.state.label()}</td>
+                        <td   #{ifnot procureUnit.hasPrePay() || procureUnit.hasTailPay()}width="150px;"#{/ifnot}>
+                            #{ifnot procureUnit.hasPrePay()}
+                              <a href="@{MaterialUnits.billingPrePay(pid, apply.id)}" class="btn btn-success btn-xs">申请预付款</a>
+                            #{/ifnot}
+                            #{ifnot procureUnit.hasTailPay()}
+                              <a href="@{MaterialUnits.billingTailPay(pid, apply.id)}" class="btn btn-warning btn-xs">申请尾款</a>
+                            #{/ifnot}
+                        </td>
+                        <td><input type="checkbox" name="my-checkbox" data-size="mini"
+                                   url='@{MaterialUnits.editPaySatus(pid)}' feesize="${procureUnit.fees().size()}"
+                                   #{if procureUnit.isNeedPay}checked#{/if} #{else}Unchecked#{/else}>
+                        </td>
+                      </tr>
+                        <tr id="unit_${pid}" style="display:none">
+                          <td colspan="12">
+                            <div class="row-fluid">
+                              <div class="span12">
+                                  #{if procureUnit.fees().size() > 0}
+                                    <table class="table table-bordered table-condensed" style="margin-bottom:0">
+                                      <tr>
+                                        <th>#</th>
+                                        <th>付款单</th>
+                                        <th>状态</th>
+                                        <th>请款类型</th>
+                                        <th>请款数量</th>
+                                        <th>请款金额</th>
+                                        <th>修正值</th>
+                                        <th></th>
+                                      </tr>
+                                        #{list items:procureUnit.fees(), as:'fee'}
+                                          <tr id="paymentUnit${fee.id}" class="${fee.isApproval()? 'muted':''}">
+                                            <td>${fee.id}</td>
+                                            <td>
+                                              <a href="@{Payments.show(fee.payment.id)}#${fee.id}">
+                                              ${fee.payment.paymentNumber}
+                                              </a>
+                                            </td>
+                                            <td>
+                                              <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                                            </td>
+                                            <td>${fee.feeType.nickName}</td>
+                                            <td>${fee.unitQty.format('#')}</td>
+                                            <td>${fee.currency.symbol()} ${new java.math.BigDecimal(fee.amount).setScale(2,4).floatValue().format('#,###.##')}</td>
+                                            <td width="450px">
+                                              <div class="row-fluid">
+                                                  #{if fee.isApproval()}
+                                                  ${fee.currency.symbol()} ${fee.fixValue}
+                                                  #{/if}
+                                                  #{else }
+                                                      #{form @PaymentUnits.fixValueMaterial(fee.id), class:'form-inline', method:'POST'}
+                                                        <span class="add-on">${fee.currency.symbol()}</span>
+                                                        <input type="text" name="fixValue" class="input-small" value="${fee.fixValue}">
+                                                        <input type="text" name="reason" class="input-xlarge" placeholder="修改修正值的原因">
+                                                        <input type="submit" value="修正" class="btn  btn-xs">
+                                                      #{/form}
+                                                  #{/else}
+                                              </div>
+                                            </td>
+                                            <td>
+                                                #{power.ck 'paymentunits.destroy'}
+                                                    #{ifnot fee.remove || fee.isApproval()}
+                                                      <button class="paymentUnitCancel btn btn-xs btn-danger"
+                                                              feeid='${fee.id}'
+                                                              url='@{PaymentUnits.destroyMaterial()}'>取消
+                                                      </button>
+                                                    #{/ifnot}
+                                                #{/power.ck}
+                                            </td>
+                                          </tr>
+                                            #{set fixValueRecords: fee.fixValueRecords()/}
+                                            #{set denyRecords: fee.denyRecords()/}
+                                            #{if (denyRecords.size() + fixValueRecords.size()) > 0}
+                                              <tr class="${fee.isApproval()? 'muted':''}">
+                                                <td colspan="8">
+                                                  <div class="row-fluid">
+                                                    <div class="span6">
+                                                        #{records_ul records:denyRecords /}
+                                                    </div>
+                                                    <div class="span6">
+                                                        #{records_ul records:fixValueRecords /}
+                                                    </div>
+                                                  </div>
+                                                </td>
+                                              </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </table>
+                                  #{/if}
+                                  #{else }
+                                    <span class="text-center">没有请款记录</span>
+                                  #{/else}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      #{/list}
+                    <tr class="table_summary">
+                      <td colspan="3"></td>
+                      <td>总额</td>
+                        #{if apply.type == models.material.MaterialApply.T.PLAN}
+                          <td class="totalNum"></td>
+                        #{/if}
+                        #{else }
+                          <td class="totalNumPurchases"></td>
+                        #{/else}
+                      <td rel='tooltip' title='汇总美金' class="usd"></td>
+                      <td rel='tooltip' title="汇总人民币" class="cny"></td>
+                      <td rel='tooltip' title="汇总其他未知币种" class="unknow"></td>
+                      <td colspan="4"></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr style="border-top: 1px dashed;">
+      #{/list}
+  #{/else}
   </div>
 </div>
-<hr style="border-top: 1px dashed;">
-#{/list}
+
 
 <div class="row-fluid">
   <div class="span3">
@@ -244,63 +460,71 @@
       <tr class="table_summary">
         <td class="col-sm-2">
           <input type="hidden" name="applyid" id="applyid" value="${apply.id}">
-        #{power.ck 'procureunits.billingtailpay'}
-          <button name="applyBtn" data-url="@{MaterialPlanUnits.batchTailPay()}" class="btn btn-primary">批量申请尾款</button>
-        #{/power.ck}
+
         </td>
       </tr>
     </table>
   </div>
 </div>
 
+<div class="box">
+  <div class="box-header with-border"><h3 class="box-title">相关支付单</h3></div>
+  <div class="box-body">
+  #{render './_relate_payments.html', payments: apply.payments, showtotal:true/}
+  </div>
+</div>
+
+#{records_v3 records: apply.records()/}
+
+<div id="modal_home"></div>
 
 #{power.ck 'paymentunits.destroy'}
-<div class="modal hide fade" id="paymentUnit_destroy">
-  <form action="#" method="POST" id="paymentUnit_destroy_form">
-    <div class="modal-header">
-      <input type="hidden" name="id" id="feeid">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3>取消请款</h3>
+<div class="modal fade bs-example-modal-lg" id="paymentUnit_destroy">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form action="#" method="POST" id="paymentUnit_destroy_form">
+        <div class="modal-header">
+          <input type="hidden" name="id" id="feeid">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h3>取消请款</h3>
+        </div>
+        <div class="modal-body">
+          <div class="row-fluid">
+            <label for="destroy_reason">原因</label>
+            <textarea id="destroy_reason" name="reason" rows="4" class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn" data-dismiss="modal">关闭</a>
+          <input type="submit" value="取消请款" class="btn btn-danger">
+        </div>
+      </form>
     </div>
-    <div class="modal-body">
-      <div class="row-fluid">
-        <label for="destroy_reason">原因</label>
-        <textarea id="destroy_reason" name="reason" rows="4" class="span12"></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss="modal">关闭</a>
-      <input type="submit" value="取消请款" class="btn btn-danger">
-    </div>
-  </form>
+  </div>
 </div>
 #{/power.ck }
 
 #{power.ck 'procureunits.billingprepay'}
-<div class="modal hide fade" id="edit_pay">
-  <form action="#" method="POST" id="edit_pay_form">
-    <input type="hidden" name="applyId" id="applyId" value="${apply.id}">
-
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3>更改请款开关</h3>
+<div id="edit_pay" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <form action="#" method="POST" id="edit_pay_form">
+        <div class="modal-header">
+          <h4>更改请款开关</h4>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="applyId" id="applyId" value="${apply.id}">
+          <div class="row-fluid">
+            <label for="destroy_reason">原因</label>
+            <textarea id="eidt_pay_reason" name="reason" class="form-control" rows="4"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="close_modal">关闭</button>
+          <input type="submit" value="更改" class="btn btn-danger">
+        </div>
+      </form>
     </div>
-    <div class="modal-body">
-      <div class="row-fluid">
-        <label for="destroy_reason">原因</label>
-        <textarea id="eidt_pay_reason" name="reason" rows="4" class="span12"></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss="modal">关闭</a>
-      <input type="submit" value="更改" class="btn btn-danger">
-    </div>
-  </form>
+  </div>
 </div>
 #{/power.ck }
-
-#{render './_relate_payments.html', payments: apply.payments, showtotal:true/}
-
-#{records records: apply.records()/}
-
-<div id="modal_home"></div>

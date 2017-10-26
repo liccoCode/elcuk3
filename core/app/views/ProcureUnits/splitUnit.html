@@ -62,11 +62,14 @@
       </tr>
       <tr>
         <th>单价</th>
-        <td>${unit.attrs.price.format("#.##")} ${unit.attrs.currency.name()}</td>
+        <td>
+        ${unit.attrs.price.format("#.##")} ${unit.attrs.currency.name()}
+        #{if unit.containTax}<span class="label label-important">税点：${unit.taxPoint}</span>#{/if}
+        </td>
         <th>阶段</th>
         <td style="color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
         <th>采购单</th>
-        <td>${unit.deliveryment.id}</td>
+        <td><a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a></td>
       </tr>
       <tr>
         <th>运输方式</th>

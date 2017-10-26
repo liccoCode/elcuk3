@@ -1,0 +1,26 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th></th>
+    <th>物料编码</th>
+    <th>物料名称</th>
+    <th>供应商</th>
+    <th>价格</th>
+    <th>规格</th>
+    <th width="150px;">材质</th>
+    <th width="150px;">工艺</th>
+  </tr>
+#{list items:items, as:'i'}
+  <tr>
+    <td><input type="checkbox" name="mids" value="${i.id}"></td>
+    <td data-toggle="tooltip" title="工厂物料代码: ${i.material.version}">
+      <a href="@{Materials.edit(i.material.id)}" target="_blank">${i.material.code}</a>
+    </td>
+    <td data-toggle="tooltip" title="${i.material.name}">${i.material.name.nineLong()}</td>
+    <td>${i.cooperator?.name}</td>
+    <td>${i.currency.symbol()} ${i.price}</td>
+    <td data-toggle="tooltip" title="${i.material.specification}">${i.material.specification.nineLong()}</td>
+    <td data-toggle="tooltip" title="${i.material.texture}">${i.material.texture.nineLong()}</td>
+    <td data-toggle="tooltip" title="${i.material.technology}">${i.material.technology.nineLong()}</td>
+  </tr>
+#{/list}
+</table>

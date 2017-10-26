@@ -92,9 +92,14 @@
   <td>
     <input type="text" id="stage" style="color:${unit.stage.rgb()}" value="${unit.stage?.label()}" readonly>
   </td>
-  <th>采购单</th>
+  <th>是否含税</th>
   <td>
-    <a href="@{Deliveryments.show(unit.deliveryment.id)}" target="_blank">${unit.deliveryment.id}</a>
+    <select class="form-control" name="unit.containTax" style="width:80px;">
+      <option #{if unit.containTax} selected #{/if} value="true">是</option>
+      <option #{if !unit.containTax} selected #{/if} value="false">否</option>
+    </select>
+    <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
+    <input type="hidden" id="taxPointInput" value="0" name="unit.taxPoint">
   </td>
 </tr>
 <tr>

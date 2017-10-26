@@ -144,7 +144,13 @@
     </td>
     <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
-        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>
+        ${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
+            #{if unit.containTax}
+              <br>
+              <span class="label label-important">税点:${unit.taxPoint}</span>
+            #{/if}
+        </td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
         <td>
             #{if unit.type?.name() == 'StockSplit'}
@@ -182,7 +188,7 @@
     <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
     <td>
       <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
-           ${unit.result?.label()}
+      ${unit.result?.label()}
       </a>
     </td>
     <td>${unit.projectName}</td>
@@ -260,8 +266,8 @@
             <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-small btn-info">变更详情</a>
               #{power.ck "procures.dosplitunit"}
                   #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
-                        <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
-                           title="如B2B拆单，样品，试用等操作">SKU分拆</a>
+                    <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-small" rel="tooltip"
+                       title="如B2B拆单，样品，试用等操作">SKU分拆</a>
                     <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-small btn-warning" target="_blank">
                     ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
                   #{/if}

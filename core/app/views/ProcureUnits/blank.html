@@ -1,32 +1,37 @@
-#{extends 'main.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'ProcureUnit Create' /}
 #{set 'moreScripts'}
     #{script 'procureunits/blank.es6'/}
 #{/set}
 
 #{errorMsgs /}
-#{info_row title:'创建采购计划' /}
-<div class="row-fluid">
-#{form @ProcureUnits.create(), method: 'POST', id: 'new_procure_unit'}
-  <table class="table table-bordered">
-      #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus, project:project, brandName:brandName/}
-    <tr>
-      <td colspan="6">
-          #{if unit.selling}
-          #{render 'ProcureUnits/_shipments.html'/}
-        #{/if}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="6">
-        <input type="button" class="btn btn-primary" id="create_unit" value="创建">
-        <input type="button" id="refreshShipmentBtn" title="刷新运输单" class="btn btn-inverse" value="刷新">
-      </td>
-    </tr>
-  </table>
-#{/form}
+#{set product: unit.selling.listing.product/}
+#{set copers:product.cooperators() /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border"><h3 class="box-title">创建采购计划</h3></div>
+      <form action="@{ProcureUnits.create()}" method="post" id="new_procure_unit" class="form-horizontal">
+        <div class="box-body">
+        #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus, project:project/}
+          <div class="form-group">
+            <label class="col-sm-1 control-label">选择运输单(Option)</label>
+            <div class="col-sm-11">
+            #{if unit.selling}
+              #{render 'ProcureUnits/_shipments.html'/}
+            #{/if}
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <input type="button" class="btn btn-primary" id="create_unit" value="创建">
+          <input type="button" id="refreshShipmentBtn" title="刷新运输单" class="btn btn-inverse" value="刷新">
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <input type="hidden" id="unitId" value="${unit.id}">
-
 

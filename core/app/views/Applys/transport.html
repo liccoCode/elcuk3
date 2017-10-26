@@ -108,6 +108,9 @@
 
 #{render './_relate_fees.html', apply: apply/}
 
+#{warning_row title: '相关支付单' /}
+<div class="row-fluid">
 #{render './_relate_payments.html', payments: apply.payments, showtotal:false/}
+</div>
 
 #{records records: apply.records()/}
