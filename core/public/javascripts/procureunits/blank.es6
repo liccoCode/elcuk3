@@ -205,8 +205,9 @@ $(() => {
     LoadMask.mask();
     let shipmentId = $(this).val();
     $.get("/shipment/" + shipmentId + "/dates", "", function (r) {
-      $("input[name='unit.attrs.planShipDate']").data('dateinput').setValue(r['begin']);
-      $("input[name='unit.attrs.planArrivDate']").data('dateinput').setValue(r['end']);
+      $("input[name='unit.attrs.planShipDate']").val(r['begin']);
+      $("input[name='unit.attrs.planArrivDate']").val(r['end']);
+      showDay();
       LoadMask.unmask();
       showTrColor();
     });

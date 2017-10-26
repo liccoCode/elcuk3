@@ -166,7 +166,6 @@ public class Cooperators extends Controller {
     }
 
     public static void saveCooperItem(CooperItem copItem, long cooperId) {
-        checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
         renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
