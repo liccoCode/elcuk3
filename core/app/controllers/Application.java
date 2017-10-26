@@ -32,7 +32,12 @@ public class Application extends Controller {
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
-        DashBoard dashboard = Orderr.frontPageOrderTable(11);
+        DashBoard dashboard = await(new Job<DashBoard>() {
+            @Override
+            public DashBoard doJobWithResult() throws Exception {
+                return Orderr.frontPageOrderTable(11);
+            }
+        }.now());
         render(dashboard);
     }
 
