@@ -217,22 +217,25 @@
 #{/power.ck}
 
 
-
-
-<div id="reason_model" class="modal hide fade">
-  <form action="#" method="POST" id="model_form">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3><span class="text-info" id="model_title"></span></h3>
-    </div>
-    <div class="modal-body">
-      <div class="row-fluid">
-        <label for="model_reason">原因</label>
-        <textarea id="model_reason" rows="3" class="span12" name="reason"></textarea>
+<div id="reason_model" class="modal fade bs-example-modal-lg">
+  <form action="@{Materials.createBom()}" method="post" id="model_form">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4><span class="text-info" id="model_title"></span></h4>
+        </div>
+        <div class="modal-body">
+          <div class="row-fluid">
+            <label for="destroy_reason">原因</label>
+            <textarea id="model_reason" name="reason" rows="4" class="form-control"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-danger" data-disable-with='提交中...' value="驳回">
+        </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <input type="submit" class="btn btn-danger" data-disable-with='提交中...' value="驳回">
     </div>
   </form>
 </div>
+

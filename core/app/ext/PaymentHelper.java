@@ -65,11 +65,11 @@ public class PaymentHelper extends JavaExtensions {
     public static String stateLabel(PaymentUnit unit) {
         switch(unit.state) {
             case APPLY:
-                return "label-primary";
+                return "label-default";
             case DENY:
                 return "label-danger";
             case APPROVAL:
-                return "label-info";
+                return "label-primary";
             case PAID:
                 return "label-success";
             default:

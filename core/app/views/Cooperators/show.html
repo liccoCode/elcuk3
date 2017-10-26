@@ -91,6 +91,7 @@
                         <input type="text" name="cop.address" class="form-control" value="${coper.address}" placeholder="详细地址">
                       </div>
                     </div>
+                    
 
                     <div class="form-group">
                       <label for="" class="col-sm-1 control-label">付款方式</label>
@@ -113,6 +114,25 @@
                         </div>
                       </div>
                     </div>
+
+                  #{if coper.showItemNum(false) > 0 }
+                    <div class="form-group">
+                      <label for="" class="col-sm-1 control-label">物料付款方式</label>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" name="cop.materialFirst" class="form-control" value="${coper.materialFirst}">
+                          <span class="input-group-addon">%首款，</span>
+                        </div>
+                      </div>
+                      <div class="col-sm-2">
+                        <div class="input-group">
+                          <input type="text" name="cop.materialTail" class="form-control" value="${coper.materialTail}">
+                          <span class="input-group-addon">%尾款</span>
+                        </div>
+                      </div>
+                    </div>
+                  #{/if}
+
 
                     <div class="form-group">
                       <label for="" class="col-sm-1 control-label">Memo</label>

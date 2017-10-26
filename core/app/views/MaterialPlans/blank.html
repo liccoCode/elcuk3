@@ -104,8 +104,8 @@
               </td>
               <td>${unit.code}</td>
               <td>${unit.name}</td>
-              <td>${unit.surplusConfirmQty()}</td>
-              <td>${unit.surplusPendingQty()}</td>
+              <td>${unit.surplusConfirmQty(dp?.cooperator?.id)}</td>
+              <td>${unit.surplusPendingQty(dp?.cooperator?.id)}</td>
               <td>
                 <input type="text" style="width:150px;" data-origin="${unit.availableQty()}"
                        class="form-control input-sm" surplusConfirmQty="${unit.surplusConfirmQty()}"

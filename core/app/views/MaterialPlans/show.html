@@ -150,7 +150,7 @@
               <td>${unit.material?.code}</td>
               <td>${unit.material?.name}</td>
               <td>${unit.material?.version}</td>
-              <td>${unit.material?.surplusConfirmQty()}</td>
+              <td>${unit.material?.surplusConfirmQty(dp?.cooperator?.id)}</td>
               <td>
                   #{if qtyEdit}
                     <input type="text" name="qty" class="form-control input-sm" value="${unit.qty}">

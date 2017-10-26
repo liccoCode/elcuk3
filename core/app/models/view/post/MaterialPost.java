@@ -82,7 +82,7 @@ public class MaterialPost extends Post<Material> {
     public F.T2<String, List<Object>> planParams() {
         List<Object> params = new ArrayList<>();
         StringBuilder sbd = new StringBuilder("SELECT m.id, m.code, mb.number, m.name, m.type, c.name as cooperName,");
-        sbd.append(" m.projectName, SUM(IF(p.state='CONFIRM', u.planQty, 0)) AS confirmQty, ");
+        sbd.append(" c.id as cooperId,m.projectName, SUM(IF(p.state='CONFIRM', u.planQty, 0)) AS confirmQty, ");
         sbd.append(" IFNULL((SELECT sum(mu.qty) FROM MaterialPlanUnit mu LEFT JOIN  MaterialPlan mp ON ");
         sbd.append(" mp.id = mu.materialPlan_id WHERE mu.material_id = m.id AND mp.state='DONE' ");
         sbd.append(" AND mp.cooperator_id=i.cooperator_id), 0) AS planQty,");
@@ -175,6 +175,7 @@ public class MaterialPost extends Post<Material> {
             material.number = row.get("number").toString();
             material.type = Material.T.valueOf(row.get("type").toString());
             material.cooperName = row.get("cooperName").toString();
+            material.cooperId = Long.parseLong(row.get("cooperId").toString());
             material.projectName = User.COR.valueOf(row.get("projectName").toString());
             material.qty = Integer.parseInt(row.get("confirmQty").toString())
                     - Integer.parseInt(row.get("planQty").toString());

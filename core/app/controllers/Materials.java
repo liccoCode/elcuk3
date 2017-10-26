@@ -257,8 +257,7 @@ public class Materials extends Controller {
      */
     public static void findMaterial(long id) {
         Material material = Material.findById(id);
-        renderJSON(GTs.newMap("code", material.code).put("name", material.name)
-                .put("surplusPendingQty", material.surplusPendingQty()).build());
+        renderJSON(GTs.newMap("code", material.code).put("name", material.name).build());
     }
 
     /**
