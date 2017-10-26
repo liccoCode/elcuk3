@@ -821,6 +821,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.projectName;
         newUnit.type = T.ProcureSplit;
+        newUnit.containTax = unit.containTax;
+        newUnit.taxPoint = unit.taxPoint;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
@@ -906,6 +908,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.projectName;
         newUnit.isDedicated = unit.isDedicated;
+        newUnit.containTax = unit.containTax;
+        newUnit.taxPoint = unit.taxPoint;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
