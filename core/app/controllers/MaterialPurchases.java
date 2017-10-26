@@ -166,7 +166,7 @@ public class MaterialPurchases extends Controller {
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
                 .put("period", copItem.period).put("boxSize", copItem.boxSize)
-                .put("surplusPendingQty", m.surplusPendingQty()).build());
+                .put("surplusPendingQty", m.surplusPendingQty(cooperId)).build());
     }
 
 
