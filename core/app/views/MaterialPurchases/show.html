@@ -60,13 +60,17 @@
           <textarea rows="5" name="dmt.memo" class="input-block-level">${dmt.memo}</textarea>
         </td>
       </tr>
-    #{power.ck "products.edit"}
+
       <tr>
         <td colspan="4">
+        #{if dmt.applyPurchase}
+          <a href="@{Applys.material(dmt.applyPurchase.id)}" class="btn btn-success">${dmt.applyPurchase.serialNumber}请款单</a>
+        #{/if}
+        #{power.ck "products.edit"}
           <button class="btn btn-primary">更新</button>
+        #{/power.ck}
         </td>
       </tr>
-    #{/power.ck}
     </table>
   </form>
 </div>
