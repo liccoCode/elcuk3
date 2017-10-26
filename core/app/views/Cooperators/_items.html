@@ -3,6 +3,8 @@
     <th>#</th>
     <th>SKU</th>
     <th>价格</th>
+    <th>含税价</th>
+    <th>税点</th>
     <th>生产周期(day)</th>
     <th>每箱数量</th>
     <th>最低采购量</th>
@@ -13,7 +15,9 @@
   <tr>
     <td>${itm.id}</td>
     <td data-toggle="tooltip" title="${itm.memo}">${itm.sku}</td>
-    <td>${itm.price.format('#.##')} ${itm.currency}</td>
+    <td>${itm.currency} ${itm.price.format('#.##')}</td>
+    <td>${itm.taxCurrency} ${itm.taxPrice.format('#.##')} </td>
+    <td>#{if itm.taxPoint} ${itm.taxPoint} % #{/if}</td>
     <td>${itm.period}</td>
     <td>${itm.boxSize}</td>
     <td>${itm.lowestOrderNum}</td>

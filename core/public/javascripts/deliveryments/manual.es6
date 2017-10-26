@@ -29,9 +29,19 @@ $(() => {
     }
   });
 
+  $("select[name='unit.containTax']").change(function () {
+    let cooperId = $("select[name='unit.cooperator.id']").val();
+    let containTax = $(this).val();
+    changeTaxEvent(cooperId, containTax);
+  });
+
   $("select[name='units[0].containTax']").change(function () {
     let cooperId = $("select[name='dmt.cooperator.id']").val();
     let containTax = $(this).val();
+    changeTaxEvent(cooperId, containTax);
+  });
+
+  function changeTaxEvent (cooperId, containTax) {
     if (cooperId) {
       LoadMask.mask();
       $.post("/Cooperators/findTaxPrice", {
@@ -55,7 +65,7 @@ $(() => {
         LoadMask.unmask();
       });
     }
-  });
+  }
 
   function calu_box_size () {
     $("input[name='box_size']").change(function () {
