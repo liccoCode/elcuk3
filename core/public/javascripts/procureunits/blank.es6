@@ -290,6 +290,30 @@ $(() => {
     EF.colorAnimate(targetTr)
   }
 
+  $("select[name='unit.containTax']").change(function () {
+    let cooperId = $("select[name='unit.cooperator.id']").val();
+    let containTax = $(this).val();
+    if (cooperId) {
+      LoadMask.mask();
+      $.post("/Cooperators/findTaxPrice", {
+        cooperId: cooperId,
+        sku: $('#unit_sku').val(),
+        containTax: containTax
+      }, function (r) {
+        if (!r.flag) {
+          alert(r.message);
+        } else {
+          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#unit_price").val(r.price);
+          $("#box_num").attr("boxSize", r.boxSize);
+          let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+          $("#taxSpan").text(text);
+        }
+        LoadMask.unmask();
+      });
+    }
+  });
+
   $(document).ready(function () {
     let $shipType = $("[name='unit.shipType']");
     if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS' && $("#unitId").val()) {

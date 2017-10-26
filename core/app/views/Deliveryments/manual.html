@@ -60,16 +60,14 @@
             </div>
 
             <label for="" class="col-sm-1 control-label">采购数量</label>
-            <div class="col-sm-2">
-              <div class="form-inline">
-                <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty"
-                       value="${units[0]?.attrs?.planQty}" style="width:100px;">
-                <div class="input-group">
-                  <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
-                         style="width:100px;">
-                  <span class="input-group-addon">箱</span>
-                  <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
-                </div>
+            <div class="col-sm-2 form-inline">
+              <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty"
+                     value="${units[0]?.attrs?.planQty}" style="width:100px;">
+              <div class="input-group">
+                <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
+                       style="width:100px;">
+                <span class="input-group-addon">箱</span>
+                <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
               </div>
             </div>
             <label for="" class="col-sm-1 control-label">B2B选项</label>

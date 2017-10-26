@@ -44,7 +44,7 @@
     #{/list}
     </select>
   </div>
-  <label for="sellingId" class="col-sm-1 control-label">单价</label>
+  <label for="unit_price" class="col-sm-1 control-label">单价</label>
   <div class="col-sm-2 form-inline">
     <input type="text" class="form-control" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}">
   #{pickCurrency id:'unit_currency', name:'unit.attrs.currency',class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
@@ -52,6 +52,14 @@
     <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
     <input type="hidden" id="priceFlag" value="1">
   #{/power.ck}
+  </div>
+  <label for="unit_price" class="col-sm-1 control-label">是否含税</label>
+  <div class="col-sm-2 form-inline">
+    <select class="form-control" name="unit.containTax" style="width:80px;">
+      <option #{if unit.containTax} selected #{/if} value="true">是</option>
+      <option #{if !unit.containTax} selected #{/if} value="false">否</option>
+    </select>
+    <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
   </div>
 </div>
 #{if unit.parent}
