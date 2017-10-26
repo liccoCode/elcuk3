@@ -5,6 +5,7 @@ $(() => {
   $('#createPlanBtn').click(function (e) {
     e.stopPropagation();
     let firstCooper = $("input[name='pids']:checked").first().attr("cooperName");
+    let cooperId = $("input[name='pids']:checked").first().attr("cooperId");
     if ($("input[name='pids']:checked").length == 0) {
       noty({
         text: '请选择需要操作的物料',
@@ -31,7 +32,7 @@ $(() => {
       }
 
       if (i == 0 && j == 0) {
-        $("#name_form").val(name);
+        $("#cooperId").val(cooperId);
         $("#planForm").submit();
       }
     }

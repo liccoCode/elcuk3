@@ -72,7 +72,7 @@ public class MaterialPlans extends Controller {
     /**
      * 跳转到创建物料出库单页面
      */
-    public static void blank(List<Long> pids, String planName) {
+    public static void blank(List<Long> pids, Long cooperId) {
         if(pids == null || pids.size() <= 0)
             Validation.addError("", "必须选择物料信息!");
         if(Validation.hasErrors()) {
@@ -80,12 +80,10 @@ public class MaterialPlans extends Controller {
             MaterialPlans.indexMaterial(new MaterialPost());
         }
         List<Material> units = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator cop = Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci "
-                + "WHERE ci.material.id=? ORDER BY ci.id", units.get(0).id).first();
+        Cooperator cop = Cooperator.findById(cooperId);
         MaterialPlan dp = new MaterialPlan();
         dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;
-        dp.name = planName;
         dp.cooperator = cop;
         dp.handler = Login.current();
         dp.projectName = Login.current().projectName.label();
