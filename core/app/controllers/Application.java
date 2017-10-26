@@ -12,7 +12,6 @@ import models.view.dto.DashBoard;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.StockPost;
-import models.whouse.Whouse;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
@@ -33,7 +32,12 @@ public class Application extends Controller {
         if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
             StockRecords.stockIndex(new StockPost());
         }
-        DashBoard dashboard = Orderr.frontPageOrderTable(11);
+        DashBoard dashboard = await(new Job<DashBoard>() {
+            @Override
+            public DashBoard doJobWithResult() throws Exception {
+                return Orderr.frontPageOrderTable(11);
+            }
+        }.now());
         render(dashboard);
     }
 
