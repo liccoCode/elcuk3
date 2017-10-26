@@ -242,7 +242,8 @@ public class MaterialPurchases extends Controller {
     public static void showMaterialUnitList(String id) {
         MaterialPurchase materialPurchase = MaterialPurchase.findById(id);
         List<MaterialUnit> units = materialPurchase.units;
-        render("/MaterialUnits/_unit_list.html", units);
+        Long cooperId = materialPurchase.cooperator.id;
+        render("/MaterialUnits/_unit_list.html", units , cooperId);
     }
 
     public static void validDmtIsNeedApply(String id) {

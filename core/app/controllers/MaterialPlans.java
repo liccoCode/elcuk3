@@ -172,7 +172,7 @@ public class MaterialPlans extends Controller {
     public static void updateUnit(String id, String value) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(Long.valueOf(id));
         //验证交货数量需判断不能大于采购余量
-        if(unit.material.surplusConfirmQty() >= NumberUtils.toInt(value)) {
+        if(unit.material.surplusConfirmQty(unit.materialPlan.cooperator.id) >= NumberUtils.toInt(value)) {
             unit.updateAttr(value);
             renderJSON(new Ret());
         } else {
@@ -209,7 +209,7 @@ public class MaterialPlans extends Controller {
     public static void confirmValidate(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
         //验证交货数量需判断不能大于采购余量
-        long count = dp.units.stream().filter(unit -> unit.material.surplusPendingQty() > 0).count();
+        long count = dp.units.stream().filter(unit -> unit.material.surplusPendingQty(dp.cooperator.id) > 0).count();
         if(count > 0) {
             renderJSON(new Ret(true, "【物料编码】存在未确认的采购数***，是否仍要交货？"));
         }
