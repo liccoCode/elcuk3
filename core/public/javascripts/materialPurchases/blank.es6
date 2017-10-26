@@ -14,7 +14,7 @@ $(() => {
         $("#materialName").val(r.name);
         //采购未确认数赋值
         $("#surplusPendingQty").val(r.surplusPendingQty);
-        
+
         //级联查询供应商
         let $cooperators = $("select[name='purchase.cooperator.id']");
         $.get('/MaterialPurchases/cooperators', {id: id}, function (r) {
@@ -67,6 +67,19 @@ $(() => {
         selectLet = html;
 
       });
+
+      $.get('/MaterialPurchases/price', {
+        cooperId: id,
+        materialId: materialId
+      }, function (r) {
+        if (!r.flag) {
+          alert(r.message);
+        } else {
+          //采购未确认数赋值
+          $("#surplusPendingQty").val(r.surplusPendingQty);
+        }
+      });
+
       LoadMask.unmask();
     } else {
       $("#unit_currency option:contains('CNY')").prop('selected', true);
@@ -95,8 +108,8 @@ $(() => {
     let index = $("select[name$='material.id']").length;
     let html = _.template($("#copy").text())({"num": index});
     html = html.replace("<select></select>", selectLet);
-    html = html.replace("units[<%= num %>].material.id", "units["+index+"].material.id");
-    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units["+index+"].planCurrency");
+    html = html.replace("units[<%= num %>].material.id", "units[" + index + "].material.id");
+    html = html.replace("units[&lt;%= num %&gt;].planCurrency", "units[" + index + "].planCurrency");
     console.log(html);
     $("#btn_tr").before(html);
     window.$ui.dateinput();
@@ -105,9 +118,6 @@ $(() => {
     bind_b2b_checkbox();
   });
 
-
-
-  
   function init () {
     // 动态绑定事件   新增的明细 切换物料名称  寻找价格
     $("select[name$='material.id']:not(:first)").change(function () {
@@ -116,12 +126,12 @@ $(() => {
       let id = $(this).val();
 
       $.get('/Materials/findMaterial', {
-              id: id
-            }, function (r) {
-              //物料code赋值
-              $input.parent("td").parent("tr").find("input[name$='material.name']").val(r.name);
+        id: id
+      }, function (r) {
+        //物料code赋值
+        $input.parent("td").parent("tr").find("input[name$='material.name']").val(r.name);
 
-            });
+      });
 
       $.get('/MaterialPurchases/price', {
         cooperId: cooperId,
@@ -138,7 +148,6 @@ $(() => {
         }
       });
     });
-
 
     $('button[name$="delMt"]').click(function (e) {
       e.preventDefault();
@@ -173,6 +182,5 @@ $(() => {
       }
     });
   }
-
 
 });

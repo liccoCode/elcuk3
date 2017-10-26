@@ -409,8 +409,8 @@ public class MaterialUnit extends Model {
         if(this.hasTailPay()) {
             Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
         }
-        if(this.cooperator.first == 0) {
-            Validation.addError("", "当前预付款比例为空，请先设置供应商预付款比例！");
+        if(this.cooperator.materialFirst == 0) {
+            Validation.addError("", "当前物料预付款比例为空，请先设置供应商物料预付款比例！");
         }
         if(Validation.hasErrors()) {
             return null;
@@ -419,7 +419,7 @@ public class MaterialUnit extends Model {
         PaymentUnit fee = new PaymentUnit(this);
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
-        float pre = (float) this.cooperator.first / 100;
+        float pre = (float) this.cooperator.materialFirst / 100;
         fee.amount = fee.amount * pre;
         fee.save();
         new ERecordBuilder("procureunit.prepay")

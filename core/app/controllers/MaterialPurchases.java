@@ -166,7 +166,7 @@ public class MaterialPurchases extends Controller {
         CooperItem copItem = CooperItem.find(" cooperator.id=? AND material.id =?", cooperId, materialId).first();
         renderJSON(GTs.newMap("price", copItem.price).put("currency", copItem.currency).put("flag", true)
                 .put("period", copItem.period).put("boxSize", copItem.boxSize)
-                .put("surplusPendingQty", m.surplusPendingQty()).build());
+                .put("surplusPendingQty", m.surplusPendingQty(cooperId)).build());
     }
 
 
@@ -242,7 +242,8 @@ public class MaterialPurchases extends Controller {
     public static void showMaterialUnitList(String id) {
         MaterialPurchase materialPurchase = MaterialPurchase.findById(id);
         List<MaterialUnit> units = materialPurchase.units;
-        render("/MaterialUnits/_unit_list.html", units);
+        Long cooperId = materialPurchase.cooperator.id;
+        render("/MaterialUnits/_unit_list.html", units , cooperId);
     }
 
     public static void validDmtIsNeedApply(String id) {
