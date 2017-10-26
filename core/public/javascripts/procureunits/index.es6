@@ -167,6 +167,12 @@ $(() => {
     $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: ids}, function () {
       $.getScript('/public/javascripts/inbounds/boxInfo.js');
     });
+    let stage = $(this).data("stage");
+    if (stage=='IN_STORAGE'){
+      $("#submitBoxInfoBtn").show();
+    }else{
+      $("#submitBoxInfoBtn").hide();
+    }
   });
 
   $("#submitBoxInfoBtn").click(function (e) {

@@ -270,6 +270,22 @@ public class User extends Model {
                 return "fa-briefcase";
             }
         },
+        Tripetals {
+            @Override
+            public String label() {
+                return "Tripetals";
+            }
+
+            @Override
+            public String url() {
+                return "http://e.tripetals.love/";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-female";
+            }
+        },
         MengTop {
             @Override
             public String label() {

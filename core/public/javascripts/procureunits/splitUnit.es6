@@ -30,7 +30,7 @@ $(() => {
     },
     updater: (item) => {
       getSelling(item);
-      getProductNmae(item);
+      getProductName(item);
       return item;
     }
   });
@@ -67,16 +67,21 @@ $(() => {
   });
 
   //通过SKU 和 供应商获取相关信息
-  function getProductNmae (sku) {
+  function getProductName (sku) {
     let cooperId = $("#cooperId").val();
-    $.get("/products/findProductName", {
+    let containTax = $("select[name='unit.containTax']").val();
+    $.get("/Cooperators/findTaxPrice", {
       sku: sku,
-      cooperId: cooperId
+      cooperId: cooperId,
+      containTax: containTax
     }, function (r) {
       $("#productName").val(r.name);
       $("#price_input").val(r['price']);
       $("#unit_currency").prop("value", r['currency']);
       $("#unit_period").html("(生产周期：" + r['period'] + "天)");
+      let text = containTax == "true" ? ("税点：" + r['taxPoint']) : "";
+      $("#taxSpan").text(text);
+      $("#taxPointInput").val(r['taxPoint']);
       if ($("#stage").val() != 'IN_STORAGE') {
         $("#size_of_box").val(r['boxSize']);
       }
@@ -204,5 +209,30 @@ $(() => {
       planArriveDate.next().text((new Date(planArriveDate.val()) - new Date(planShipDate.val())) / (24 * 3600 * 1000) + "天");
     }
   }
+
+  $("select[name='unit.containTax']").change(function () {
+    let cooperId = $("#cooperId").val();
+    let containTax = $(this).val();
+    if (cooperId) {
+      LoadMask.mask();
+      $.post("/Cooperators/findTaxPrice", {
+        cooperId: cooperId,
+        sku: $('#select_sku').val(),
+        containTax: containTax
+      }, function (r) {
+        if (!r.flag) {
+          alert(r.message);
+        } else {
+          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#price_input").val(r.price);
+          $("#size_of_box").attr("boxSize", r.boxSize);
+          let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+          $("#taxPointInput").val(r['taxPoint']);
+          $("#taxSpan").text(text);
+        }
+        LoadMask.unmask();
+      });
+    }
+  });
 
 });

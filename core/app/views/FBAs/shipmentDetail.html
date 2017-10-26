@@ -41,14 +41,15 @@
       <table border="0" width="100%" style="border: none;margin:0 0 0 0;padding:0;">
         <tr>
           <td width="8%">箱号</td>
-          <td width="8%" style="border:1px solid #000000; padding-left:6px;">${box_num}</td>
+          <td width="8%" style="border:1px solid #000000; padding-left:6px;">#{if box_num > 0}${box_num}#{/if}</td>
           <td width="8%" style="text-align:left;">去往国家</td>
           <td width="12%" style="border:1px solid #000000; padding-left:6px;">
           ${procureUnit?.selling?.market?.countryName()}
           </td>
           <td width="8%">整箱重量</td>
           <td width="13%" style="border:1px solid #000000; padding-left:6px;">
-          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null}
+          #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null
+               && procureUnit.fba.dto!=null && procureUnit.fba.dto.singleBoxWeight>0}
                 ${procureUnit.fba.dto.singleBoxWeight} ${procureUnit.selling?.market.name()=='AMAZON_US'?'lb.':'kg'}
             #{/if}
           <td width="10%" style="line-height:0.7em;">

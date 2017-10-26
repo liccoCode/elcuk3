@@ -21,7 +21,6 @@ import java.util.*;
  */
 public class DashBoard implements Serializable {
 
-    private static final long serialVersionUID = -2341111922189827360L;
     public Map<String, OrderInfo> infos = new LinkedHashMap<>();
     public Map<String, OrderInfo> accsInfos = new HashMap<>();
 
