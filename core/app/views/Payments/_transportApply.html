@@ -39,7 +39,7 @@
             <td>${fee.amount()}</td>
             <td>${fee.procureUnit?.result?.label()}</td>
             <td>
-              <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+              <span class="label ${fee.stateLabelV3()}">${fee.state.label()}</span>
             </td>
             <td>
               <a href="@{Applys.transport(payment.tApply.id)}#${fee.id}" target="_blank">
