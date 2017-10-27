@@ -41,7 +41,9 @@ $(() => {
               refreshTopFive(event.point.name);
             },
             afterAnimate: function (event) {
-              refreshTopFive(r["highestMarket"]);
+              if ($("#brandname").val() !== 'EASYACC') {
+                refreshTopFive(r["highestMarket"]);
+              }
             }
           }
         }
