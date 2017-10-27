@@ -308,6 +308,7 @@ $(() => {
           $("#box_num").attr("boxSize", r.boxSize);
           let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
           $("#taxSpan").text(text);
+          $("#taxPointInput").val(r.taxPoint);
         }
         LoadMask.unmask();
       });
