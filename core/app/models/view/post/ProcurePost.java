@@ -116,6 +116,13 @@ public class ProcurePost extends Post<ProcureUnit> {
     public C isConfirm;
     public ProcureUnit.T type;
 
+
+    /**
+     * 屏蔽无效计划
+     */
+    public Boolean shield;
+
+
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
         this.to = new Date();
@@ -258,6 +265,10 @@ public class ProcurePost extends Post<ProcureUnit> {
             categoryList.add("-1");
             sbd.append(" AND p.product.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
         }
+        if(shield != null && shield){
+            sbd.append(" AND p.attrs.planQty > 0 ");
+        }
+
         return new F.T2<>(sbd.toString(), params);
     }
 
