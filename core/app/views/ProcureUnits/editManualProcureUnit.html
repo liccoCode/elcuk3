@@ -39,6 +39,7 @@
                 <option #{if !unit.containTax} selected #{/if} value="false">否</option>
               </select>
               <span id="taxSpan">#{if unit.containTax}税点：${unit.taxPoint} #{/if}</span>
+              <input type="hidden" id="taxPointInput" name="unit.taxPoint" value="${unit.taxPoint}">
             </div>
           </div>
           <div class="form-group">

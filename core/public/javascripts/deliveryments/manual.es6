@@ -19,6 +19,7 @@ $(() => {
           $("#box_num").attr("boxSize", r.boxSize);
           let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
           $("#taxSpan").text(text);
+          $("#taxPointInput").val(r.taxPoint);
           calu_box_size();
         }
         LoadMask.unmask();
@@ -58,6 +59,7 @@ $(() => {
           calu_box_size();
           let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
           $("#taxSpan").text(text);
+          $("#taxPointInput").val(r.taxPoint);
           $("input[name$='product.sku']:not(:first)").each(function () {
             $(this).typeahead('updater', $(this).val());
           });
