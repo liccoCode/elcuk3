@@ -33,12 +33,13 @@ public class Application extends Controller {
         if(Objects.equals("MengTop", brandname)) {
             StockRecords.stockIndex(new StockPost());
         }
-        DashBoard dashboard = await(new Job<DashBoard>() {
+/*        DashBoard dashboard = await(new Job<DashBoard>() {
             @Override
             public DashBoard doJobWithResult() throws Exception {
                 return Orderr.frontPageOrderTable(11);
             }
-        }.now());
+        }.now());*/
+        DashBoard dashboard = new DashBoard();
         render(dashboard, brandname);
     }
 
