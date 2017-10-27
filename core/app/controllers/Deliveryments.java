@@ -116,13 +116,14 @@ public class Deliveryments extends Controller {
     public static void showProcureUnitList(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         List<ProcureUnit> units = dmt.units;
-        String username = Login.currentUserName();
-        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
-                .collect(Collectors.toList());
-        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
-            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        if(units.size() > 0) {
+            String username = Login.currentUserName();
+            List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                    .collect(Collectors.toList());
+            if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+                renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+            }
         }
-
         boolean isB2B = (boolean) renderArgs.get("isB2B");
         renderArgs.put("norecord", true);
         if(isB2B || dmt.deliveryType == Deliveryment.T.MOVE) {
