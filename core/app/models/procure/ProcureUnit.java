@@ -1302,6 +1302,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.projectName;
+        this.taxPoint = unit.taxPoint;
+        this.containTax = unit.containTax;
         if(this.stage.name().equals("IN_STORAGE")) {
             if(diff != 0) {
                 this.availableQty = unit.availableQty;
