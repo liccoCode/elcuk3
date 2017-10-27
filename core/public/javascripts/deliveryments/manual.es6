@@ -3,11 +3,13 @@ $(() => {
   // 切换供应商, 自行寻找价格
   $("select[name='dmt.cooperator.id']").change(function () {
     let id = $(this).val();
+    let containTax = $("select[name='units[0].containTax']").val();
     if (id) {
       LoadMask.mask();
-      $.get('/Cooperators/price', {
-        id: id,
-        sku: $('#unit_sku').val()
+      $.get('/Cooperators/findTaxPrice', {
+        cooperId: id,
+        sku: $('#unit_sku').val(),
+        containTax: containTax
       }, function (r) {
         if (!r.flag) {
           alert(r.message);
@@ -15,6 +17,8 @@ $(() => {
           $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
           $("#unit_price").val(r.price);
           $("#box_num").attr("boxSize", r.boxSize);
+          let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+          $("#taxSpan").text(text);
           calu_box_size();
         }
         LoadMask.unmask();
@@ -25,16 +29,42 @@ $(() => {
     }
   });
 
-  bind_b2b_checkbox();
+  $("select[name='unit.containTax']").change(function () {
+    let cooperId = $("select[name='unit.cooperator.id']").val();
+    let containTax = $(this).val();
+    changeTaxEvent(cooperId, containTax);
+  });
 
-  function bind_b2b_checkbox () {
-    $('input[name$="isb2b"]').click(function () {
-      if ($(this).prop("checked")) {
-        $(this).parent().next().show();
-      } else {
-        $(this).parent().next().hide();
-      }
-    });
+  $("select[name='units[0].containTax']").change(function () {
+    let cooperId = $("select[name='dmt.cooperator.id']").val();
+    let containTax = $(this).val();
+    changeTaxEvent(cooperId, containTax);
+  });
+
+  function changeTaxEvent (cooperId, containTax) {
+    if (cooperId) {
+      LoadMask.mask();
+      $.post("/Cooperators/findTaxPrice", {
+        cooperId: cooperId,
+        sku: $('#unit_sku').val(),
+        containTax: containTax
+      }, function (r) {
+        if (!r.flag) {
+          alert(r.message);
+        } else {
+          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+          $("#unit_price").val(r.price);
+          $("#box_num").attr("boxSize", r.boxSize);
+          calu_box_size();
+          let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+          $("#taxSpan").text(text);
+          $("input[name$='product.sku']:not(:first)").each(function () {
+            $(this).typeahead('updater', $(this).val());
+          });
+        }
+        LoadMask.unmask();
+      });
+    }
   }
 
   function calu_box_size () {
@@ -94,9 +124,11 @@ $(() => {
           });
         },
         updater: (item) => {
-          $.get('/Cooperators/price', {
-            id: cooperId,
-            sku: item
+          let containTax = $("select[name='units[0].containTax']").val();
+          $.get('/Cooperators/findTaxPrice', {
+            cooperId: cooperId,
+            sku: item,
+            containTax: containTax
           }, function (r) {
             if (!r.flag) {
               alert(r.message);
@@ -104,6 +136,8 @@ $(() => {
               $input.parent("div").parent("div").find("input[name$='attrs.price']").val(r.price);
               $input.parent("div").parent("div").parent("div[class='box-body']").find("input[name='box_size']").attr("boxSize", r.boxSize);
               $input.parent("div").parent("div").find("option:contains(" + r.currency + ")").prop('selected', true);
+              let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+              $input.parent("div").parent("div").find("span[name='taxSpan']").text(text);
               calu_box_size();
             }
             LoadMask.unmask();
@@ -126,7 +160,6 @@ $(() => {
     window.$dataui.dateinput();
     init();
     validQty();
-    bind_b2b_checkbox();
     addDeleteBtn();
   });
 

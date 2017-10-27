@@ -35,6 +35,8 @@ public class Attachs extends Controller {
                 Images.resize(attach.file, resizedImag, w, h, true);
                 renderBinary(resizedImag);
             }
+            //File file = new File(attach.location);
+            //renderBinary(file);
         } else
             throw new FastRuntimeException("No File Found.");
     }
@@ -48,6 +50,7 @@ public class Attachs extends Controller {
         a.setUpAttachName();
         Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
         try {
+            //QiniuUtils.upload(a.fid + "-" + a.originName, a.getBytes());
             FileUtils.copyFile(a.file, new File(a.location));
             a.save();
         } catch(Exception e) {
@@ -84,6 +87,7 @@ public class Attachs extends Controller {
         // 如果 fid 能够唯一定位则可以只使用 fid, 如果 fid 无法直接定位, 则需要借助
         List<Attach> imgs = Attach.attaches(fid, p);
         renderJSON(J.g(imgs));
+        //renderJSON(JSON.toJSONString(imgs));
     }
 
 

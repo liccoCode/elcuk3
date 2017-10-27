@@ -195,6 +195,7 @@ window.dropUpload =
           imgEl = $(window.dropUpload.template)
           imgEl.addClass(cls)
           imgUrl = "/attachs/image?a.fileName=" + img['fileName']
+          #imgUrl =  img['location']
           window.dropUpload.imgSrc(img['fileName'], imgEl.find("img"), imgUrl)
           imgEl.find('a.thumbnail').attr("href", imgUrl).attr('title', img['fileName'])
           imgEl.find('a[style]').attr('outName', img['outName']).click(window.dropUpload.rmImage) if removable

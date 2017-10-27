@@ -43,21 +43,28 @@ public class PaymentUnits extends Controller {
     public static void destroyMaterial(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.materialFeeRemove(reason);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-        else
+        } else {
             flash.success("删除成功");
-        Applys.material(payUnit.materialPlan.apply.id);
+        }
+        if(payUnit.materialPlan != null) {
+            Applys.material(payUnit.materialPlan.apply.id);
+        } else {
+            Applys.material(payUnit.materialPurchase.applyPurchase.id);
+        }
     }
 
     @Check("paymentunits.destroy")
     public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()){
             renderJSON(Webs.vJson(Validation.errors()));
-        else
+        }
+        else {
             renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
+        }
     }
 
     @Check("paymentunits.fixvalue")
@@ -81,8 +88,9 @@ public class PaymentUnits extends Controller {
     public static void fixValueMaterial(Long id, Float fixValue, String reason) {
         PaymentUnit paymentUnit = PaymentUnit.findById(id);
         Validation.required("fixValue", fixValue);
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             renderJSON(new Ret(false, Validation.errors().toString()));
+        }
 
         paymentUnit.fixValue(fixValue, reason);
         if(Validation.hasErrors()) {
@@ -91,7 +99,11 @@ public class PaymentUnits extends Controller {
             flash.success("修正值更新成功.");
         }
         // NOTE: 如果 fixValue 的 routes 文件改变, 这里也需要改变
-        Applys.material(paymentUnit.materialPlan.apply.id);
+        if(paymentUnit.materialPlan != null) {
+            Applys.material(paymentUnit.materialPlan.apply.id);
+        } else {
+            Applys.material(paymentUnit.materialPurchase.applyPurchase.id);
+        }
     }
 
     @Check("paymentunits.deny")

@@ -3,7 +3,12 @@ package models.material;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
+import models.embedded.ERecordBuilder;
+import models.finance.FeeType;
+import models.finance.PaymentUnit;
+import models.procure.CooperItem;
 import models.procure.Cooperator;
+import models.procure.ProcureUnit;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -14,8 +19,10 @@ import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 物料采购计划
@@ -185,6 +192,13 @@ public class MaterialUnit extends Model {
     @Required
     public Currency currency;
 
+    @OneToMany(mappedBy = "materialUnit", fetch = FetchType.LAZY)
+    public List<PaymentUnit> fees = new ArrayList<>();
+    /**
+     * 是否需要付款
+     */
+    public boolean isNeedPay = true;
+
 
     /**
      * 手动单采购计划数据验证
@@ -197,16 +211,8 @@ public class MaterialUnit extends Model {
 
     public float totalAmountToCNY() {
         return this.planCurrency.toCNY(new BigDecimal(this.planCurrency.toString())
-                .multiply(new BigDecimal(this.paidQty())).setScale(2, 4).floatValue());
+                .multiply(new BigDecimal(this.planQty)).setScale(2, 4).floatValue());
 
-    }
-
-    public int paidQty() {
-        if(Arrays.asList("IN_STORAGE", "OUTBOUND", "SHIPPING", "SHIP_OVER", "INBOUND", "CLOSE")
-                .contains(this.stage.name()))
-            return qty;
-        else
-            return this.planQty;
     }
 
     /**
@@ -216,7 +222,7 @@ public class MaterialUnit extends Model {
      */
     public float totalAmount() {
         return new BigDecimal(this.planPrice)
-                .multiply(new BigDecimal(this.paidQty()))
+                .multiply(new BigDecimal(this.planQty))
                 .setScale(2, 4)
                 .floatValue();
     }
@@ -297,4 +303,168 @@ public class MaterialUnit extends Model {
         }
         return message.toString();
     }
+
+
+    public Currency getCurrency() {
+        List<CooperItem> cooperItems = this.material.cooperItems;
+        if(cooperItems != null && cooperItems.get(0) != null) {
+            return cooperItems.get(0).currency;
+        }
+        return null;
+    }
+
+
+    public List<PaymentUnit> fees() {
+        List<PaymentUnit> paymentUnits = new ArrayList<>();
+        for(PaymentUnit fee : this.fees) {
+            if(fee.remove) {
+                continue;
+            }
+            paymentUnits.add(fee);
+        }
+        return paymentUnits;
+    }
+
+    /**
+     * 已经申请的金额
+     *
+     * @return
+     */
+    public float appliedAmount() {
+        float appliedAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            appliedAmount += fee.amount();
+        }
+        return appliedAmount;
+    }
+
+    /**
+     * 当前出货计划所有请款的修正总额
+     *
+     * @return
+     */
+    public float fixValueAmount() {
+        float fixValueAmount = 0;
+        for(PaymentUnit fee : this.fees()) {
+            fixValueAmount += fee.fixValue;
+        }
+        return fixValueAmount;
+    }
+
+    /**
+     * 修改付款状态
+     */
+    public void editPayStatus() {
+        this.isNeedPay = !this.isNeedPay;
+        this.save();
+    }
+
+    /**
+     * 1. 出货计划所在的出货单单需要拥有一个请款单
+     * 2. 出货计划需要已经交货
+     */
+    private void billingValid() {
+        if(this.materialPurchase.applyPurchase == null) {
+            Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.materialPurchase.id));
+        }
+    }
+
+
+    /**
+     * 是否拥有了尾款
+     *
+     * @return
+     */
+    public boolean hasTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 剩余的请款金额
+     *
+     * @return
+     */
+    public float leftAmount() {
+        return totalAmount() - appliedAmount();
+    }
+
+    /**
+     * 预付款申请
+     */
+    public PaymentUnit billingPrePay() {
+        /*
+         * 0. 基本检查
+         * 1. 检查是否此采购计划是否已经存在一个预付款
+         * 2. 申请预付款
+         */
+        this.billingValid();
+        if(this.hasPrePay()) {
+            Validation.addError("", "不允许重复申请预付款.");
+        }
+        if(this.hasTailPay()) {
+            Validation.addError("", "已经申请了尾款, 不需要再申请预付款.");
+        }
+        if(this.cooperator.materialFirst == 0) {
+            Validation.addError("", "当前物料预付款比例为空，请先设置供应商物料预付款比例！");
+        }
+        if(Validation.hasErrors()) {
+            return null;
+        }
+        
+        PaymentUnit fee = new PaymentUnit(this);
+        // 预付款的逻辑在这里实现, 总额的 30% 为预付款
+        fee.feeType = FeeType.cashpledge();
+        float pre = (float) this.cooperator.materialFirst / 100;
+        fee.amount = fee.amount * pre;
+        fee.save();
+        new ERecordBuilder("procureunit.prepay")
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
+        return fee;
+    }
+
+    /**
+     * 付款申请
+     */
+    public PaymentUnit billingTailPay() {
+        /**
+         * 0. 基本检查
+         * 1. 申请付款
+         */
+        this.billingValid();
+        if(Validation.hasErrors()) {
+            return null;
+        }
+        if(this.hasTailPay()) {
+            Validation.addError("", "存在重复申请尾款的物料，请查证！");
+        }
+        if(Validation.hasErrors()) {
+            return null;
+        }
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.procurement();
+        fee.amount = this.leftAmount();
+        fee.save();
+        new ERecordBuilder("materialPlanUnit.prepay")
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
+        return fee;
+    }
+
+
+
+    /**
+     * 是否拥有了 预付款
+     *
+     * @return
+     */
+    public boolean hasPrePay() {
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.cashpledge());
+    }
+    
 }

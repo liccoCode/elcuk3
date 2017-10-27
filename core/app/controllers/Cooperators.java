@@ -1,15 +1,20 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.*;
+import helper.GTs;
+import helper.J;
+import helper.Webs;
 import models.ElcukRecord;
 import models.embedded.ERecordBuilder;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
+import models.procure.ProductMaterial;
 import models.view.Ret;
 import models.view.post.CooperatorPost;
 import org.apache.commons.lang.StringUtils;
 import play.data.validation.Validation;
+import play.db.helper.SqlSelect;
+import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -111,9 +116,9 @@ public class Cooperators extends Controller {
     }
 
     public static void saveMaterialItem(CooperItem copItem, Long cooperId, Long copItemId) {
-        CooperItem db =null;
-        if(copItemId != null){
-             db = CooperItem.findById(copItemId);
+        CooperItem db = null;
+        if(copItemId != null) {
+            db = CooperItem.findById(copItemId);
         }
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
@@ -124,7 +129,7 @@ public class Cooperators extends Controller {
         if(copItemId == null) {
             copItem.saveMaterialItem(cop);
         } else {
-            copItem.updateMaterialItem(cop , db);
+            copItem.updateMaterialItem(cop, db);
         }
         if(Validation.hasErrors())
             render("Cooperators/newMaterialItem.html", copItem, cop);
@@ -138,6 +143,7 @@ public class Cooperators extends Controller {
         renderArgs.put("cop", copItem.cooperator);
 
         if(copItem.type.equals(CooperItem.T.SKU)) {
+            renderArgs.put("mats", copItem.mats());
             renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
             render("Cooperators/newCooperItem.html", copItem);
         } else {
@@ -160,7 +166,6 @@ public class Cooperators extends Controller {
     }
 
     public static void saveCooperItem(CooperItem copItem, long cooperId) {
-        checkAuthenticity();
         validation.valid(copItem);
         Cooperator cop = Cooperator.findById(cooperId);
         renderArgs.put("skus", J.json(cop.frontSkuAutoPopulate()));
@@ -284,4 +289,40 @@ public class Cooperators extends Controller {
         Cooperator cop = Cooperator.findById(id);
         renderJSON(GTs.newMap("id", cop.id).put("address", cop.address).build());
     }
+
+    public static void bindMaterialForSku(String[] ids, Long itemId) {
+        CooperItem item = CooperItem.findById(itemId);
+        List<CooperItem> items = CooperItem.find(" id IN " + SqlSelect.inlineParam(ids)).fetch();
+        items.forEach(cooperItem -> {
+            ProductMaterial productMaterial = new ProductMaterial();
+            productMaterial.product = item;
+            productMaterial.material = cooperItem;
+            productMaterial.save();
+        });
+    }
+
+    public static void unBindMaterialForSku(String[] ids, String itemId) {
+        List<ProductMaterial> mats = ProductMaterial.find(" id IN " + SqlSelect.inlineParam(ids)).fetch();
+        mats.forEach(GenericModel::delete);
+    }
+
+    public static void showMaterialForSku(Long itemId) {
+        CooperItem item = CooperItem.findById(itemId);
+        List<ProductMaterial> mats = item.mats();
+        render(mats);
+    }
+
+    public static void findTaxPrice(String sku, Long cooperId, boolean containTax) {
+        validation.required(cooperId);
+        validation.required(sku);
+        if(Validation.hasErrors())
+            renderJSON(new Ret(Webs.v(Validation.errors())));
+        CooperItem copItem = CooperItem.find("product.sku=? AND cooperator.id=?", sku, cooperId).first();
+        renderJSON(GTs.newMap("price", containTax ? copItem.taxPrice : copItem.price)
+                .put("currency", containTax ? copItem.taxCurrency : copItem.currency)
+                .put("taxPoint", containTax ? copItem.taxPoint : 0)
+                .put("flag", true)
+                .put("period", copItem.period).put("boxSize", copItem.boxSize).build());
+    }
+
 }

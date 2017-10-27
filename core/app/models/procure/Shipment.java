@@ -105,6 +105,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "海运";
             }
+
+            @Override
+            public String pic() {
+                return "fa fa-fw fa-ship";
+            }
         },
         /**
          * 空运
@@ -113,6 +118,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             @Override
             public String label() {
                 return "空运";
+            }
+
+            @Override
+            public String pic() {
+                return "fa fa-fw fa-plane";
             }
         },
         /**
@@ -123,6 +133,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "快递";
             }
+
+            @Override
+            public String pic() {
+                return "fa fa-fw fa-archive";
+            }
         },
         /**
          * 专线
@@ -131,6 +146,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             @Override
             public String label() {
                 return "专线";
+            }
+
+            @Override
+            public String pic() {
+                return "fa fa-fw fa-truck";
             }
         },
         /**
@@ -141,9 +161,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             public String label() {
                 return "铁路";
             }
+
+            @Override
+            public String pic() {
+                return "fa fa-fw fa-train";
+            }
         };
 
         public abstract String label();
+
+        public abstract String pic();
     }
 
     public enum S {

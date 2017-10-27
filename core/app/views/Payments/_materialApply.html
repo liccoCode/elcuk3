@@ -1,6 +1,6 @@
 #{form @PaymentUnits.approveFromDeliveryment(payment.id)}
-<div class="row-fluid">
-  <div class="btn-toolbar">
+<div class="box">
+  <div class="box-header with-border">
       #{power.ck 'paymentunits.approve'}
         <input type="submit" class="btn btn-info" value="批准"/>
       #{/power.ck}
@@ -12,76 +12,130 @@
       #{/elseif}
     <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
-  <table class="table table-bordered table-condensed" id="apply_table">
-    <tr>
-      <th><input type="checkbox" id="check_all"></th>
-      <th>出货计划</th>
-      <th>财务审核</th>
-      <th>出货日期</th>
-      <th>物料编码</th>
-      <th>单价</th>
-      <th>数量(交货/签收异常)</th>
-      <th>付款类型</th>
-      <th>总额修正价</th>
-      <th>付款金额</th>
-      <th>请款人</th>
-      <th>状态</th>
-      <th>#</th>
-    </tr>
-      #{list items: units, as:'fee'}
-        <tr id="paymentUnit_${fee.id}">
-            #{set punit: fee.materialPlanUnit/}
-            #{set records:fee.fixValueRecords()/}
-            #{set denyRecords: fee.denyRecords()/}
-          <td><input type="checkbox" name="paymentUnitIds" value="${fee.id}"></td>
-          <td width="200px;">
-            <a href="@{MaterialPlans.show(fee.materialPlan.id)}#${punit?.id}">${fee.materialPlan.id} #${punit.id}</a>
-          </td>
-          <td style="color:${punit.materialPlan.financeState?.rgb()}">${punit.materialPlan.financeState?.label()}</td>
-          <td>#{time_tooltip time:punit.materialPlan.deliveryDate/}</td>
-          <td>${punit.material.code}</td>
-          <td>${payment.currency.symbol()} ${punit.getPrice()}</td>
-          <td class="qty"
-              style="color:${(punit.receiptQty>0&&punit.qty!=punit.receiptQty)? 'red':''}">
-          ${punit.qty}/${punit.receiptQty?:0}
-          </td>
-          <td>${fee.feeType.nickName}</td>
-          <td>${payment.currency.symbol()} ${fee.fixValue}</td>
-          <td>${payment.currency.symbol()} ${fee.amount()}</td>
-          <td>${fee.payee.username}</td>
-          <td>
-            <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
-              #{power.ck 'paymentunits.deny'}
-                  #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
-                    <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-mini paymentUnitDeny">
-                      驳回
-                    </button>
-                  #{/if}
-              #{/power.ck}
-          </td>
-          <td>
-            <a href="@{Applys.material(payment.mApply.id)}#${fee.id}" target="_blank">
-            ${payment.mApply.serialNumber} #${fee.id}
-            </a>
-          </td>
-        </tr>
-        <tr id="unit_${fee.id}" style="display:none">
-          <td colspan="4"></td>
-          <td colspan="4">
-              #{if records.size() > 0}
+  <div class="box-body">
+    <table class="table table-bordered table-condensed" id="apply_table">
+      <tr>
+        <th><input type="checkbox" id="check_all"></th>
+        <th>
+          #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}出货计划#{/if}
+          #{else }采购计划#{/else}
+        </th>
+        <th>财务审核</th>
+        <th>
+          #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}出货日期#{/if}
+          #{else }下单日期#{/else}
+        </th>
+        <th>物料编码</th>
+        <th>单价</th>
+        <th>
+            #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}数量(交货/签收异常)#{/if}
+            #{else }数量#{/else}
+        </th>
+        <th>付款类型</th>
+        <th>总额修正价</th>
+        <th>付款金额</th>
+        <th>请款人</th>
+        <th>状态</th>
+        <th>#</th>
+      </tr>
+        #{list items: units, as:'fee'}
+            #{if payment.mApply.type == models.material.MaterialApply.T.PLAN}
+              <!-- 出货单请款显示 -->
+              <tr id="paymentUnit_${fee.id}">
+                  #{set punit: fee.materialPlanUnit/}
+                  #{set records:fee.fixValueRecords()/}
+                  #{set denyRecords: fee.denyRecords()/}
+                <td><input type="checkbox" name="paymentUnitIds" value="${fee.id}"></td>
+                <td width="200px;">
+                  <a href="@{MaterialPlans.show(fee.materialPlan.id)}#${punit?.id}">${fee.materialPlan.id}
+                    #${punit.id}</a>
+                </td>
+                <td style="color:${punit.materialPlan.financeState?.rgb()}">${punit.materialPlan.financeState?.label()}</td>
+                <td>#{time_tooltip time:punit.materialPlan.deliveryDate/}</td>
+                <td>${punit.material.code}</td>
+                <td>${payment.currency.symbol()} ${punit.getPrice()}</td>
+                <td class="qty"
+                    style="color:${(punit.receiptQty>0&&punit.qty!=punit.receiptQty)? 'red':''}">
+                ${punit.qty}/${punit.receiptQty?:0}
+                </td>
+                <td>${fee.feeType.nickName}</td>
+                <td>${payment.currency.symbol()} ${fee.fixValue}</td>
+                <td>${payment.currency.symbol()} ${fee.amount()}</td>
+                <td>${fee.payee.username}</td>
+                <td>
+                  <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                    #{power.ck 'paymentunits.deny'}
+                        #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
+                          <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-xs paymentUnitDeny">
+                            驳回
+                          </button>
+                        #{/if}
+                    #{/power.ck}
+                </td>
+                <td>
+                  <a href="@{Applys.material(payment.mApply.id)}#${fee.id}" target="_blank">
+                  ${payment.mApply.serialNumber} #${fee.id}
+                  </a>
+                </td>
+              </tr>
+            #{/if}
+            #{else }
+              <!-- 采购单请款显示 -->
+              <tr id="paymentUnit_${fee.id}">
+                  #{set punit: fee.materialUnit/}
+                  #{set records:fee.fixValueRecords()/}
+                  #{set denyRecords: fee.denyRecords()/}
+                <td><input type="checkbox" name="paymentUnitIds" value="${fee.id}"></td>
+                <td width="200px;">
+                  <a href="@{MaterialPurchases.show(fee.materialPurchase.id)}#${punit?.id}">${fee.materialPurchase.id}
+                    #${punit.id}</a>
+                </td>
+                <td style="color:${punit.materialPurchase.financeState?.rgb()}">${punit.materialPurchase.financeState?.label()}</td>
+                <td>#{time_tooltip time:punit.materialPurchase.orderTime/}</td>
+                <td>${punit.material.code}</td>
+                <td>${payment.currency.symbol()} ${punit.planPrice}</td>
+                <td class="qty">
+                ${punit.planQty}
+                </td>
+                <td>${fee.feeType.nickName}</td>
+                <td>${payment.currency.symbol()} ${fee.fixValue}</td>
+                <td>${payment.currency.symbol()} ${fee.amount()}</td>
+                <td>${fee.payee.username}</td>
+                <td>
+                  <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                    #{power.ck 'paymentunits.deny'}
+                        #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
+                          <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-xs paymentUnitDeny">
+                            驳回
+                          </button>
+                        #{/if}
+                    #{/power.ck}
+                </td>
+                <td>
+                  <a href="@{Applys.material(payment.mApply.id)}#${fee.id}" target="_blank">
+                  ${payment.mApply.serialNumber} #${fee.id}
+                  </a>
+                </td>
+              </tr>
+            #{/else}
+          <tr id="unit_${fee.id}" style="display:none">
+            <td colspan="4"></td>
+            <td colspan="4">
+                #{if records.size() > 0}
                   #{records_ul records: records/}
               #{/if}
-          </td>
-          <td colspan="5">
-              #{if denyRecords.size() > 0}
+            </td>
+            <td colspan="5">
+                #{if denyRecords.size() > 0}
                   #{records_ul records: denyRecords/}
               #{/if}
-          </td>
-        </tr>
-      #{/list}
-    <tr>
-      <td colspan="13">#{bootstrap_pager pi:post, url: "/Payments/show/" + payment.id/}</td>
-    </tr>
-  </table>
+            </td>
+          </tr>
+        #{/list}
+    </table>
+  </div>
+  <div class="box-footer">
+      #{bootstrap_pager_v3 pi:post, url: "/Payments/show/" + payment.id/}
+  </div>
 </div>
 #{/form}

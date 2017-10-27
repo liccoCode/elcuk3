@@ -30,10 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
-import play.data.validation.Check;
-import play.data.validation.CheckWith;
-import play.data.validation.Required;
-import play.data.validation.Validation;
+import play.data.validation.*;
 import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.db.jpa.Model;
@@ -373,6 +370,18 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public boolean isPlaced = false;
 
+    /**
+     * 采购单价是否含税，默认为否
+     */
+    public boolean containTax = false;
+
+    /**
+     * 税点
+     * 单位 %
+     */
+    @Expose
+    @Min(0)
+    public Integer taxPoint = 0;
 
     /**
      * 是否需要付款
@@ -812,6 +821,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.sku = unit.product.sku;
         newUnit.projectName = unit.projectName;
         newUnit.type = T.ProcureSplit;
+        newUnit.containTax = unit.containTax;
+        newUnit.taxPoint = unit.taxPoint;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
@@ -897,6 +908,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.projectName;
         newUnit.isDedicated = unit.isDedicated;
+        newUnit.containTax = unit.containTax;
+        newUnit.taxPoint = unit.taxPoint;
         if(unit.selling != null) {
             newUnit.selling = unit.selling;
             newUnit.sid = unit.selling.sellingId;
@@ -1419,7 +1432,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             // 1. 调整为快递运输单, 已经拥有的运输项目全部删除, 重新设计.
             // 2. 用户更改了运输方式但未选择运输单
             if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(this.shipType)
-                              || oldShipType != this.shipType) {
+                    || oldShipType != this.shipType) {
                 this.shipItems.forEach(GenericModel::delete);
             }
             this.changeOutbound(null);

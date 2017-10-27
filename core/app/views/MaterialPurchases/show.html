@@ -60,13 +60,17 @@
           <textarea rows="5" name="dmt.memo" class="input-block-level">${dmt.memo}</textarea>
         </td>
       </tr>
-    #{power.ck "products.edit"}
+
       <tr>
         <td colspan="4">
+        #{if dmt.applyPurchase}
+          <a href="@{Applys.material(dmt.applyPurchase.id)}" class="btn btn-success">${dmt.applyPurchase.serialNumber}请款单</a>
+        #{/if}
+        #{power.ck "products.edit"}
           <button class="btn btn-primary">更新</button>
+        #{/power.ck}
         </td>
       </tr>
-    #{/power.ck}
     </table>
   </form>
 </div>
@@ -104,7 +108,8 @@
   <input type="hidden" name="expressid" id="expressid" value="${expressid}">
   <div class="row-fluid">
     <div class="span12" id="unit_list">
-    #{render 'MaterialPurchases/_unit_list.html', units:dmt.units, checkbox:true, key:'delivery', delivery:true/}
+    #{render 'MaterialPurchases/_unit_list.html',cooperId:dmt.cooperator?.id,
+                units:dmt.units, checkbox:true,key:'delivery', delivery:true/}
     </div>
   </div>
 </form>
@@ -229,7 +234,7 @@
           </td>
         </tr>
         <tr>
-          <td colspan="4">
+          <td colspan="8">
             <input type="hidden" name="id" value="${dmt.id}">
             <input type="button" id="mt_excel_btn" class="btn btn-success" value="生成采购单 Excel">
           </td>
@@ -239,7 +244,6 @@
   </div>
 </div>
 #{/else}
-
 
 #{records records:records/}
 

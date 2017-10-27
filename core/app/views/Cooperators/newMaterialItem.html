@@ -27,14 +27,20 @@
       <tr>
         <th>物料编码</th>
         <td>
+        #{if copItem.id==null}
           <select name="copItem.material.id" class="selectize" style="width:250px;">
             <option value="">请选择</option>
-          #{list items:materials, as:'m'}
-            <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.code}</option>
-          #{/list}
+              #{list items:materials, as:'m'}
+                <option value="${m.id}" ${copItem.material?.id==m.id?'selected':''}>${m.code}</option>
+              #{/list}
           </select>
+        #{/if}
+        #{else }
+          <input type="text" value="${copItem.material.code}" readonly>
+          <input type="hidden" name="copItem.material.id" value="${copItem.material.id}" readonly>
+        #{/else}
           <input type="hidden" name="cooperId" value="${cop.id}">
-          <input type="hidden" name="copItemId"  id="copItemId" value="${copItem.id}">
+          <input type="hidden" name="copItemId" id="copItemId" value="${copItem.id}">
         #{authenticityToken /}
         </td>
 
@@ -44,7 +50,7 @@
             <input class="input input-mini" type="text" readonly='true' name="copItem.price" value="${copItem.price}">
           #{pickCurrency name:'copItem.currency',  class:'input-mini', c:copItem.currency?:helper.Currency.CNY/}
           #{power.ck "cooperitem.price"}
-             <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
+            <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
             <input type="hidden" id="priceFlag" value="1">
           #{/power.ck}
           </div>
@@ -200,12 +206,12 @@
 
 
 <script>
-  var priceFlag  =  $("#priceFlag").val();
-  var copItemId  =   $("#copItemId").val();    //获取copItemId ,为空代表新增,那么不做限制
-  if (priceFlag == 1){
-    $("input[name='copItem.price']").attr({'readOnly':false});
+  var priceFlag = $("#priceFlag").val();
+  var copItemId = $("#copItemId").val();    //获取copItemId ,为空代表新增,那么不做限制
+  if (priceFlag == 1) {
+    $("input[name='copItem.price']").attr({'readOnly': false});
   }
-  if (copItemId == '' ){
-      $("input[name='copItem.price']").attr({'readOnly':false});
+  if (copItemId == '') {
+    $("input[name='copItem.price']").attr({'readOnly': false});
   }
 </script>

@@ -1,100 +1,110 @@
-#{extends 'main.html' /}
-#{set title:'手动单采购计划'/}
+#{extends 'main_full_v3.html' /}
+#{set title:'修改手动单采购计划'/}
 #{set 'moreScripts'}
     #{script 'deliveryments/manual.es6'/}
 #{/set}
-<style>
-  .table td, .table th{
-    vertical-align:middle;
-  }
-</style>
+
 #{errorMsgs /}
 #{flash_alert/}
 
-#{info_row title:'手动单采购计划' /}
-<div class="row-fluid">
-  <div class="span12">
-  #{form @ProcureUnits.updateManual(unit.id), method: 'POST', id: 'new_procureunit'}
-    <table class="table table-condensed table-bordered">
-      <tr>
-        <th>SKU</th>
-        <td>
-          <input type="text" name="unit.product.sku" data-provide="typeahead" data-source="${sids}" value="${unit.product?.sku}" id="unit_sku" readonly>
-        </td>
-
-        <th>供应商</th>
-        <td>
-          <select name="unit.cooperator.id">
+<div class="row">
+  <div class="col-md-12">
+    <form action="@{ProcureUnits.updateManual(unit.id)}" class="form-horizontal" method="post" id="new_procureunit">
+      <div class="box box-primary">
+        <div class="box-header with-border"><h3 class="box-title">修改手动单采购计划</h3></div>
+        <div class="box-body">
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">SKU</label>
+            <div class="col-sm-2">
+              <input class="form-control" name="unit.product.sku" data-provide="typeahead" data-source="${sids}" value="${unit.product?.sku}" id="unit_sku" readonly>
+            </div>
+            <label for="" class="col-sm-1 control-label">供应商</label>
+            <div class="col-sm-2">
+              <select name="unit.cooperator.id" class="form-control">
               #{list items:unit.product?.cooperators(), as:'c'}
                 <option value="${c.id}" #{if c.id == unit.cooperator?.id} selected #{/if}>${c.name}</option>
               #{/list}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th>价格</th>
-        <td>
-          <input type="text" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
+              </select>
+            </div>
+            <label for="unit_price" class="col-sm-1 control-label">价格</label>
+            <div class="col-sm-2 form-inline">
+              <input class="form-control" width="60px;" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
               #{if !Arrays.asList("PLAN","DELIVERY").contains(unit.stage.name())} readonly #{/if}>
-            #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'span2', c:unit.attrs.currency?:helper.Currency.CNY /}
-        </td>
-
-        <th>
+            #{pickCurrency id:'unit_currency', name:'unit.attrs.currency', class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
+            </div>
+            <label for="" class="col-sm-1 control-label">是否含税</label>
+            <div class="col-sm-2 form-inline">
+              <select class="form-control" name="unit.containTax" style="width:80px;">
+                <option #{if unit.containTax} selected #{/if} value="true">是</option>
+                <option #{if !unit.containTax} selected #{/if} value="false">否</option>
+              </select>
+              <span id="taxSpan">#{if unit.containTax}税点：${unit.taxPoint} #{/if}</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">
             #{if unit.stage.name() == 'IN_STORAGE'}库存数量#{/if}
-            #{else }采购数量#{/else}
-        </th>
-        <td>
-            #{if unit.stage.name() == 'IN_STORAGE'}
-              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
-                     value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}>
-            #{/if}
-            #{else }
-              <input type="text" class="input-mini" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
-                  #{if unit.isEditInput()} readonly #{/if}>
-            #{/else}
-          <input type="text" id="box_num" class="input-mini" placeHolder="箱数"  #{if unit.isEditInput()} readonly #{/if}>
-          <span class="add-on">箱</span>
-          <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-        </td>
-      </tr>
-
-      <tr>
-        <th>采购取样</th>
-        <td>
-          <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}"/> <span class="add-on">个</span>
-        </td>
-        <th>质检取样</th>
-        <td>
-          <input type="text" value="0" readonly/><span class="add-on">个</span>
-        </td>
-      </tr>
-      <tr>
-        <th>预计交货日期</th>
-        <td>
-          <input type="date" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
-          ${unit.stage.name()=='DELIVERY'? '' : 'readonly'}>
-          <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
-        </td>
-        <th>所属公司</th>
-        <td>
-          <select name="unit.projectName">
+            #{else }采购数量#{/else}</label>
+            <div class="col-sm-2 form-inline">
+              <div class="form-inline">
+              #{if unit.stage.name() == 'IN_STORAGE'}
+                <input type="text" class="form-control" placeHolder="具体数量" name="unit.availableQty" id="availableQty" required
+                       value="${unit.availableQty}" data-origin="${unit.availableQty}"  #{if unit.isEditInput()} readonly#{/if}
+                       style="width:100px;">
+              #{/if}
+              #{else }
+                <input type="text" class="form-control" placeHolder="具体数量" name="unit.attrs.planQty" value="${unit.attrs.planQty}"
+                    #{if unit.isEditInput()} readonly #{/if} style="width:100px;">
+              #{/else}
+                <div class="input-group">
+                  <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
+                         style="width:100px;" #{if unit.isEditInput()} readonly #{/if}>
+                  <span class="input-group-addon">箱</span>
+                  <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
+                </div>
+              </div>
+            </div>
+            <label for="" class="col-sm-1 control-label">预计交货日期</label>
+            <div class="col-sm-2">
+              <input role="date" class="form-control" name="unit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
+              ${unit.stage.name()=='DELIVERY'? '' : 'readonly'}>
+              <input type="hidden" name="unit.deliveryment.id" value="${unit.deliveryment?.id}">
+            </div>
+            <label for="" class="col-sm-1 control-label">采购取样</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" name="unit.purchaseSample" value="${unit.purchaseSample}" class="form-control"/>
+                <span class="input-group-addon">个</span>
+              </div>
+            </div>
+            <label for="" class="col-sm-1 control-label">质检取样</label>
+            <div class="col-sm-2">
+              <div class="input-group">
+                <input type="text" value="0" class="form-control" readonly/><span class="input-group-addon">个</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="" class="col-sm-1 control-label">所属公司</label>
+            <div class="col-sm-2">
+              <select name="unit.projectName" class="form-control">
               #{list items:models.User.COR, as:'c'}
                   #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
                     <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
                   #{/if}
               #{/list}
-          </select>
-        </td>
-      </tr>
+              </select>
+            </div>
 
-      <tr>
-        <td colspan="4">
+          </div>
+        </div>
+        <div class="box-footer">
           <button class="btn btn-primary">保存</button>
-        </td>
-      </tr>
-    </table>
-  #{/form}
+        </div>
+      </div>
+    </form>
   </div>
 </div>
+
 
 

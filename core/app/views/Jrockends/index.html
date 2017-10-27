@@ -18,13 +18,15 @@
             <th>ClassName</th>
             <th>Memo</th>
             <th>Duration</th>
-            <th>&nbsp;</th>
+            <th>type</th>
+            <th>运行</th>
           </tr>
 
           <tr>
             <td>currencySync</td>
             <td>汇率同步</td>
             <td>每30分钟执行一次</td>
+            <td></td>
             <td><a href="@{Jrockends.run('currencySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
@@ -33,14 +35,16 @@
             <td>shipmentSync</td>
             <td>快递运输单同步</td>
             <td>每 4 个小时执行一次</td>
+            <td></td>
             <td><a href="@{Jrockends.run('shipmentSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
 
           <tr>
-            <td>inventoryCostsReport</td>
+            <td>inventoryCostsReport</td>                             
             <td>inventoryCostsReport</td>
             <td>每个月的最后一天和倒数第二天</td>
+            <td></td>
             <td><a href="@{Jrockends.run('inventoryCostsReport')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -48,6 +52,7 @@
             <td>multiCountryFbaQtySync</td>
             <td>SellingQty (简单版本数据)</td>
             <td>0 10 0,6,15,18 * * ?</td>
+            <td>_GET_AFN_INVENTORY_DATA_BY_COUNTRY_</td>
             <td><a href="@{Jrockends.run('multiCountryFbaQtySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -55,6 +60,7 @@
             <td>amazonFbaQtySync</td>
             <td>SellingQty(完整版本数据)</td>
             <td>0 0 0,6,15,18 * * ?</td>
+            <td>_GET_FBA_MYI_ALL_INVENTORY_DATA_</td>
             <td><a href="@{Jrockends.run('amazonFbaQtySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -62,6 +68,7 @@
             <td>businessOrderJob</td>
             <td>businessOrderJob</td>
             <td>每30分钟执行一次</td>
+            <td></td>
             <td><a href="@{Jrockends.run('businessOrderJob')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -69,6 +76,7 @@
             <td>multiCountryOrderrSync</td>
             <td>reportOrderrxml接口同步订单数据</td>
             <td>每天的 3点11点19点 执行一次</td>
+            <td></td>
             <td><a href="@{Jrockends.run('multiCountryOrderrSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -76,6 +84,7 @@
             <td>ebayFeeSync</td>
             <td>EbayFee 同步</td>
             <td>每 30 分钟执行一次</td>
+            <td></td>
             <td><a href="@{Jrockends.run('ebayFeeSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
@@ -83,6 +92,7 @@
             <td>financeEndAndMonthJob</td>
             <td>自动下载发送 财务所需报表邮件</td>
             <td>每月最后一天 18点</td>
+            <td></td>
             <td><a href="@{Jrockends.run('financeEndAndMonthJob')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>

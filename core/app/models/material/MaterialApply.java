@@ -1,5 +1,6 @@
 package models.material;
 
+import com.google.gson.annotations.Expose;
 import helper.Dates;
 import models.ElcukRecord;
 import models.User;
@@ -20,9 +21,10 @@ import java.util.*;
 /**
  * 物料请款单
  * Created by IntelliJ IDEA.
- * User: Even
  * Date: 17/7/4
  * Time: AM11:41
+ *
+ * @author Even
  */
 @Entity
 public class MaterialApply extends Apply {
@@ -30,6 +32,9 @@ public class MaterialApply extends Apply {
 
     @OneToMany(mappedBy = "apply", cascade = CascadeType.PERSIST)
     public List<MaterialPlan> materialPlans = new ArrayList<>();
+
+    @OneToMany(mappedBy = "applyPurchase", cascade = CascadeType.PERSIST)
+    public List<MaterialPurchase> materialPurchases = new ArrayList<>();
 
     /**
      * 用来记录 MaterialPlan 中指定的 Cooperator. 为方便的冗余数据
@@ -58,6 +63,41 @@ public class MaterialApply extends Apply {
     @Column(columnDefinition = "varchar(20) DEFAULT 'OPEN'")
     public ProcureApply.S status = ProcureApply.S.OPEN;
 
+    /**
+     * 物料请款单类型
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    public T type;
+
+    /**
+     * 物料请款单类型
+     */
+    public enum T {
+        /**
+         * 物料出货单请款单
+         */
+        PLAN {
+            @Override
+            public String label() {
+                return "物料出货单请款单";
+            }
+        },
+        /**
+         * 物料采购单请款单
+         */
+        PURCHASE {
+            @Override
+            public String label() {
+                return "物料采购单请款单";
+            }
+        };
+
+        public abstract String label();
+    }
+
+
     @Override
     public String generateSerialNumber(Cooperator cooper) {
         /**
@@ -83,11 +123,11 @@ public class MaterialApply extends Apply {
      *
      * @return
      */
-    public static List<MaterialApply> unPaidApplies(Long cooperatorId) {
+    public static List<MaterialApply> unPaidApplies(Long cooperatorId , T type) {
         if(cooperatorId == null) {
-            return MaterialApply.find("confirm=false").fetch();
+            return MaterialApply.find("confirm=false AND type = ? " , type).fetch();
         } else {
-            return MaterialApply.find("confirm=false AND cooperator.id=?", cooperatorId).fetch();
+            return MaterialApply.find("confirm=false AND type = ? AND cooperator.id=?", type , cooperatorId).fetch();
         }
     }
 
@@ -99,7 +139,9 @@ public class MaterialApply extends Apply {
      */
     public static MaterialApply buildMaterialApply(List<String> materialPlanIds) {
         F.T2<List<MaterialPlan>, Set<Cooperator>> dmtAndCop = materialApplyCheck(materialPlanIds);
-        if(Validation.hasErrors()) return null;
+        if(Validation.hasErrors()) {
+            return null;
+        }
 
         // 生成 ProcureApply
         MaterialApply apply = new MaterialApply();
@@ -107,9 +149,35 @@ public class MaterialApply extends Apply {
         apply.createdAt = new Date();
         apply.updateAt = new Date();
         apply.applier = User.current();
+        apply.type = T.PLAN;
         apply.save();
         for(MaterialPlan dmt : dmtAndCop._1) {
             dmt.apply = apply;
+            dmt.save();
+        }
+        new ERecordBuilder("materialapply.save")
+                .msgArgs(StringUtils.join(materialPlanIds, ","), apply.serialNumber)
+                .fid(apply.id)
+                .save();
+        return apply;
+    }
+
+    public static MaterialApply buildMaterialApplyPurchase(List<String> materialPlanIds) {
+        F.T2<List<MaterialPurchase>, Set<Cooperator>> dmtAndCop = materialApplyCheckPurchase(materialPlanIds);
+        if(Validation.hasErrors()) {
+            return null;
+        }
+
+        // 生成 ProcureApply
+        MaterialApply apply = new MaterialApply();
+        apply.serialNumber = apply.generateSerialNumber(dmtAndCop._2.iterator().next());
+        apply.createdAt = new Date();
+        apply.updateAt = new Date();
+        apply.applier = User.current();
+        apply.type = T.PURCHASE;
+        apply.save();
+        for(MaterialPurchase dmt : dmtAndCop._1) {
+            dmt.applyPurchase = apply;
             dmt.save();
         }
         new ERecordBuilder("materialapply.save")
@@ -127,25 +195,86 @@ public class MaterialApply extends Apply {
     public void appendMaterialApply(List<String> materialPlanIds) {
         F.T2<List<MaterialPlan>, Set<Cooperator>> dmtAndCop = materialApplyCheck(
                 materialPlanIds);
-        if(dmtAndCop._2.iterator().hasNext() && !dmtAndCop._2.iterator().next().equals(this.cooperator))
+        if(dmtAndCop._2.iterator().hasNext() && !dmtAndCop._2.iterator().next().equals(this.cooperator)) {
             Validation.addError("", "合作伙伴不一样, 无法添加");
-        if(this.confirm)
+        }
+        if(this.confirm) {
             Validation.addError("", "已经确认了, 不允许再向中添加请款");
+        }
 
-        if(Validation.hasErrors()) return;
+        if(Validation.hasErrors()) {
+            return;
+        }
 
         for(MaterialPlan dmt : dmtAndCop._1) {
             dmt.apply = this;
             dmt.save();
         }
         new ERecordBuilder("materialapply.save")
-                .msgArgs(StringUtils.join(materialPlanIds, ","), this.id)
+                .msgArgs(StringUtils.join(materialPlanIds, ","), this.serialNumber)
+                .fid(this.id + "")
+                .save();
+    }
+
+    public void appendMaterialApplyPurchase(List<String> materialPlanIds) {
+        F.T2<List<MaterialPurchase>, Set<Cooperator>> dmtAndCop = materialApplyCheckPurchase(materialPlanIds);
+        if(dmtAndCop._2.iterator().hasNext() && !dmtAndCop._2.iterator().next().equals(this.cooperator)) {
+            Validation.addError("", "合作伙伴不一样, 无法添加");
+        }
+        if(this.confirm) {
+            Validation.addError("", "已经确认了, 不允许再向中添加请款");
+        }
+
+        if(Validation.hasErrors()) {
+            return;
+        }
+
+        for(MaterialPurchase dmt : dmtAndCop._1) {
+            dmt.applyPurchase = this;
+            dmt.save();
+        }
+        new ERecordBuilder("materialapply.save")
+                .msgArgs(StringUtils.join(materialPlanIds, ","), this.serialNumber)
                 .fid(this.id + "")
                 .save();
     }
 
     /**
+     * 校验采购单
+     *
+     * @param materialPurchaseIds
+     * @return
+     */
+    private static F.T2<List<MaterialPurchase>, Set<Cooperator>> materialApplyCheckPurchase(
+            List<String> materialPurchaseIds) {
+        /**
+         * 0. 检查提交的采购单 ID 数量与加载的出货单数量是否一致
+         * 1. 检查请款的供应商是否一致.
+         */
+        List<MaterialPurchase> materialPurchases = MaterialPurchase.find(JpqlSelect.whereIn("id", materialPurchaseIds))
+                .fetch();
+        if(materialPurchases.size() != materialPurchases.size()) {
+            Validation.addError("", "提交的采购单参数与系统内不符.");
+        }
+        Set<Cooperator> coopers = new HashSet<>();
+        for(MaterialPurchase dmt : materialPurchases) {
+            if(dmt.cooperator != null) {
+                coopers.add(dmt.cooperator);
+            }
+        }
+        if(coopers.size() > 1) {
+            Validation.addError("", "请仅对同一个工厂创建请款单.");
+        }
+        if(coopers.size() < 1) {
+            Validation.addError("", "请款单至少需要一个拥有供应商的出货单.");
+        }
+        return new F.T2<>(materialPurchases, coopers);
+    }
+
+
+    /**
      * 校验出货单
+     *
      * @param materialPlanIds
      * @return
      */
@@ -155,17 +284,41 @@ public class MaterialApply extends Apply {
          * 1. 检查请款的供应商是否一致.
          */
         List<MaterialPlan> materialPlans = MaterialPlan.find(JpqlSelect.whereIn("id", materialPlanIds)).fetch();
-        if(materialPlans.size() != materialPlans.size())
+        if(materialPlans.size() != materialPlans.size()) {
             Validation.addError("", "提交的出货单参数与系统内不符.");
-            Set<Cooperator> coopers = new HashSet<>();
-        for(MaterialPlan dmt : materialPlans) {
-            if(dmt.cooperator != null) coopers.add(dmt.cooperator);
         }
-        if(coopers.size() > 1)
+        Set<Cooperator> coopers = new HashSet<>();
+        for(MaterialPlan dmt : materialPlans) {
+            if(dmt.cooperator != null) {
+                coopers.add(dmt.cooperator);
+            }
+        }
+        if(coopers.size() > 1) {
             Validation.addError("", "请仅对同一个工厂创建请款单.");
-        if(coopers.size() < 1)
+        }
+        if(coopers.size() < 1) {
             Validation.addError("", "请款单至少需要一个拥有供应商的出货单.");
+        }
         return new F.T2<>(materialPlans, coopers);
+    }
+
+
+    /**
+     * 返回请款单涉及的 Currency
+     *
+     * @return
+     */
+    public helper.Currency currencyPurchase() {
+        helper.Currency currency = null;
+        for(MaterialPurchase dmt : this.materialPurchases) {
+            for(MaterialUnit unit : dmt.units) {
+                if(currency != null) {
+                    break;
+                }
+                currency = unit.getCurrency();
+            }
+        }
+        return currency;
     }
 
     /**
@@ -177,7 +330,9 @@ public class MaterialApply extends Apply {
         helper.Currency currency = null;
         for(MaterialPlan dmt : this.materialPlans) {
             for(MaterialPlanUnit unit : dmt.units) {
-                if(currency != null) break;
+                if(currency != null) {
+                    break;
+                }
                 currency = unit.getCurrency();
             }
         }
@@ -189,14 +344,47 @@ public class MaterialApply extends Apply {
      *
      * @return
      */
-    public float appliedAmount() {
+    public float appliedAmountPurchase() {
         float appliedAmount = 0;
-        for(MaterialPlan dmt : this.materialPlans) {
-            for(MaterialPlanUnit unit : dmt.units) {
+        for(MaterialPurchase dmt : this.materialPurchases) {
+            for(MaterialUnit unit : dmt.units) {
                 appliedAmount += unit.appliedAmount();
             }
         }
         return appliedAmount;
+    }
+
+    /**
+     * 已经请款的金额(包含 fixValue)
+     *
+     * @return
+     */
+    public float appliedAmount() {
+        float appliedAmount = 0;
+        if(this.type == T.PLAN) {
+            for(MaterialPlan dmt : this.materialPlans) {
+                for(MaterialPlanUnit unit : dmt.units) {
+                    appliedAmount += unit.appliedAmount();
+                }
+            }
+        } else {
+            for(MaterialPurchase dmt : this.materialPurchases) {
+                for(MaterialUnit unit : dmt.units) {
+                    appliedAmount += unit.appliedAmount();
+                }
+            }
+        }
+        return appliedAmount;
+    }
+
+    public float totalAmountPurchase() {
+        float totalAmount = 0;
+        for(MaterialPurchase dmt : this.materialPurchases) {
+            for(MaterialUnit unit : dmt.units) {
+                totalAmount += unit.totalAmount();
+            }
+        }
+        return totalAmount;
     }
 
     public float totalAmount() {
@@ -209,6 +397,16 @@ public class MaterialApply extends Apply {
         return totalAmount;
     }
 
+    public float fixValueAmountPurchase() {
+        float fixValueAmount = 0;
+        for(MaterialPurchase dmt : this.materialPurchases) {
+            for(MaterialUnit unit : dmt.units) {
+                fixValueAmount += unit.fixValueAmount();
+            }
+        }
+        return fixValueAmount;
+    }
+
     public float fixValueAmount() {
         float fixValueAmount = 0;
         for(MaterialPlan dmt : this.materialPlans) {
@@ -217,6 +415,10 @@ public class MaterialApply extends Apply {
             }
         }
         return fixValueAmount;
+    }
+
+    public float leftAmountPurchase() {
+        return this.totalAmountPurchase() - this.appliedAmountPurchase();
     }
 
     public float leftAmount() {
@@ -229,7 +431,7 @@ public class MaterialApply extends Apply {
                 "materialplans.departapply"), 50);
     }
 
-    public void updateAt(long applyId ){
+    public void updateAt(long applyId) {
         MaterialApply materialApply = MaterialApply.findById(applyId);
         materialApply.updateAt = new Date();
         materialApply.save();

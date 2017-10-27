@@ -50,8 +50,8 @@ public class MaterialPlans extends Controller {
     @Before(only = {"index"})
     public static void beforeIndex(MaterialPost p) {
         List<Cooperator> suppliers = Cooperator.suppliers();
-        List<MaterialApply> avaliableApplies = MaterialApply
-                .unPaidApplies(p == null ? null : p.cooperId);
+        List<MaterialApply> avaliableApplies = MaterialApply.unPaidApplies(
+                p == null ? null : p.cooperId , MaterialApply.T.PLAN );
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("avaliableApplies", avaliableApplies);
         renderArgs.put("users", User.find("closed=?", false).fetch());
@@ -72,21 +72,18 @@ public class MaterialPlans extends Controller {
     /**
      * 跳转到创建物料出库单页面
      */
-    public static void blank(List<Long> pids, String planName) {
+    public static void blank(List<Long> pids, Long cooperId) {
         if(pids == null || pids.size() <= 0)
             Validation.addError("", "必须选择物料信息!");
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             MaterialPlans.indexMaterial(new MaterialPost());
         }
-
         List<Material> units = Material.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
-        Cooperator cop = Cooperator.find("SELECT c FROM Cooperator c, IN(c.cooperItems) ci WHERE ci.material.id=? " +
-                " ORDER BY ci.id", units.get(0).id).first();
+        Cooperator cop = Cooperator.findById(cooperId);
         MaterialPlan dp = new MaterialPlan();
         dp.id = MaterialPlan.id();
         dp.state = MaterialPlan.P.CREATE;
-        dp.name = planName;
         dp.cooperator = cop;
         dp.handler = Login.current();
         dp.projectName = Login.current().projectName.label();
@@ -175,7 +172,7 @@ public class MaterialPlans extends Controller {
     public static void updateUnit(String id, String value) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(Long.valueOf(id));
         //验证交货数量需判断不能大于采购余量
-        if(unit.material.surplusConfirmQty() >= NumberUtils.toInt(value)) {
+        if(unit.material.surplusConfirmQty(unit.materialPlan.cooperator.id) >= NumberUtils.toInt(value)) {
             unit.updateAttr(value);
             renderJSON(new Ret());
         } else {
@@ -212,7 +209,7 @@ public class MaterialPlans extends Controller {
     public static void confirmValidate(String id) {
         MaterialPlan dp = MaterialPlan.findById(id);
         //验证交货数量需判断不能大于采购余量
-        long count = dp.units.stream().filter(unit -> unit.material.surplusPendingQty() > 0).count();
+        long count = dp.units.stream().filter(unit -> unit.material.surplusPendingQty(dp.cooperator.id) > 0).count();
         if(count > 0) {
             renderJSON(new Ret(true, "【物料编码】存在未确认的采购数***，是否仍要交货？"));
         }
@@ -330,14 +327,19 @@ public class MaterialPlans extends Controller {
      */
     @Check("materialpurchases.index")
     public static void materialPlanToApply(List<String> pids, MaterialPlanPost p, Long applyId) {
-        if(pids == null) pids = new ArrayList<>();
+        if(pids == null) {
+            pids = new ArrayList<>();
+        }
         if(pids.size() <= 0) {
             flash.error("请选择需纳入请款的出货单(相同供应商).");
             index(p);
         }
         MaterialApply apply = MaterialApply.findById(applyId);
-        if(apply == null) apply = MaterialApply.buildMaterialApply(pids);
-        else apply.appendMaterialApply(pids);
+        if(apply == null) {
+            apply = MaterialApply.buildMaterialApply(pids);
+        } else {
+            apply.appendMaterialApply(pids);
+        }
 
         if(apply == null || Validation.hasErrors()) {
             for(Error error : Validation.errors()) {
@@ -360,11 +362,11 @@ public class MaterialPlans extends Controller {
         long applyId = dmt.apply.id;
         dmt.apply.updateAt(applyId);
         dmt.departFromProcureApply();
-
-        if(Validation.hasErrors())
+        if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
-        else
+        } else {
             flash.success("%s 剥离成功.", id);
+        }
         Applys.material(applyId);
     }
 }

@@ -37,7 +37,7 @@
     #{/if}
     #{else }
       <a href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
-          data-disable-with='确认中...'>确认请款单</a>
+         data-disable-with='确认中...'>确认请款单</a>
     #{/else}
     </div>
   </div>
@@ -372,7 +372,11 @@
 </div>
 #{/power.ck }
 
+
+#{warning_row title: '相关支付单' /}
+<div class="row-fluid">
 #{render './_relate_payments.html', payments: apply.payments, showtotal:true/}
+</div>
 
 #{records records: apply.records()/}
 

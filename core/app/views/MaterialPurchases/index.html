@@ -2,8 +2,7 @@
 #{set title:"物料采购单列表 (${materialPurchases.size()})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
-    #{script 'deliveryments/index.es6'/}
-    #{script 'procureunits/_unit_list.coffee'/}
+    #{script 'materialPurchases/index.es6'/}
 #{/set}
 
 #{flash_alert /}
@@ -48,6 +47,7 @@
               <div class="input-group-addon"><i class="icon-search"></i></div>
               <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 物料编码 or 采购单ID" value="${p.search}">
               <input type="hidden" name="p.page" value="${p.page}">
+              <input type="hidden" name="id" id="planId">
             </div>
             <button class="btn btn-primary" data-loading>搜索</button>
 
@@ -55,34 +55,42 @@
               <a target="_blank" class="btn btn-warning" href='@{MaterialPurchases.blank()}'>
                 <i class="icon-plus"></i>新增物料手动单
               </a>
-              <a href="@{Excels.deliveryments(p)}" class="btn btn-success" target="_blank">
-                <i class="icon-download-alt"></i>下载Excel</a>
+            #{power.ck "materialpurchases.approve"}
+              <a href="javascript:void(0)" data-url='@{MaterialPurchases.approveBatch()}' class="btn btn-warning"
+                 id="approveBatch">财务审核</a>
+            #{/power.ck}
             </div>
           </div>
         </div>
 
         <div class="box-body">
-          <table class="table table-condensed table-bordered">
+          <table class="table table-condensed table-bordered" id="data-table">
             <tr>
               <th width="20px;"></th>
               <th>物料采购单ID</th>
+              <th>请款单</th>
               <th>Name</th>
               <th>供应商</th>
               <th>State</th>
               <th>单据类型</th>
+              <th width="70px;">财务审核</th>
               <th>User</th>
               <th>Create</th>
             </tr>
           #{list items:materialPurchases, as:'dmt'}
             <tr>
-              <td>
-                  #{if dmt.apply == null}
-                    <input type="checkbox" name="deliverymentIds" value="${dmt.id}">
-                  #{/if}
-              </td>
+              <td><input type="checkbox" name="pids" value="${dmt.id}" cooperName="${dmt.supplier()?.name}" financeState="${dmt.financeState}"
+                         #{if dmt.applyPurchase}applyId="${dmt.applyPurchase.id}"#{/if}  ></td>
               <td>
                 <a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a>
               </td>
+              <td>
+                  #{if dmt.applyPurchase}
+                    <a href="@{Applys.material(dmt.applyPurchase.id)}">${dmt.applyPurchase.serialNumber}</a>
+                  #{/if}
+                  #{else }没有请款单#{/else}
+              </td>
+
               <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
                 <span><i class="icon-reorder"></i></span>
                 <span>${dmt.name}</span>
@@ -92,6 +100,19 @@
               <td>${dmt.supplier()?.name}</td>
               <td style="color:${dmt.state?.rgb()}">${dmt.state.label()}</td>
               <td>${dmt.deliveryType?.label()}</td>
+              <td style="width: 80px;">
+                  #{if dmt.financeState.name() == "PENDING_REVIEW"}
+                      #{power.ck "materialpurchases.approve"}
+                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPurchases.approve(dmt.id)}'
+                           class="btn btn-xs btn-warning" uid="${dmt.id}">审核</a>
+                      #{/power.ck}
+                    待审
+                  #{/if}
+                  #{else}
+                  ${dmt.financeState?.label()}
+                  #{/else}
+              </td>
               <td>${dmt.handler.username}</td>
               <td>#{time_tooltip_v3 time:dmt.createDate/}</td>
             </tr>
@@ -100,6 +121,16 @@
         </div>
 
         <div class="box-footer">
+        #{power.ck 'materialpurchases.apply'}
+          <select name="applyId" class="form-control selectize" style="width:250px;">
+            <option value="0">新请款单</option>
+              #{list items:availableApplies, as:'a'}
+                <option value="${a.id}">${a.serialNumber}</option>
+              #{/list}
+          </select>
+          <input url='@{MaterialPurchases.materialPurchaseToApply()}' type="submit"
+                 id="goToApply" class="btn btn-success" value="采购单请款">
+        #{/power.ck}
         #{bootstrap_pager_v3 pi:p, url:'' /}
         </div>
       </div>

@@ -28,15 +28,6 @@ $ ->
     $("#checktask_id_list").val(checkids.join("_"))
     $("#billing_rework_pay_form").submit()
     $('#reworkpay_modal').modal('hide')
-  ).on("change", "#switch_pay", (r) ->
-    self = $(@)
-    feesize = self.parents('tr').find("input[name='feesize']").val()
-    if feesize > 0
-      alert '存在费用明细,不可以更改收款状态!'
-      window.location.reload()
-    else
-      $('#edit_pay_form').attr('action', @getAttribute('url'))
-      $('#edit_pay').modal()
   )
 
   calculateSumery = ->
@@ -70,14 +61,20 @@ $ ->
         .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
         .find('.unknow').text("? #{format_Num(unknown_summery)}")
 
+      table_summary.find('.totalNumPurchases').text("#{qty}").end()
+        .find('.usd').text("$ #{format_Num(usd_summery)}").end()
+        .find('.cny').text("¥ #{format_Num(cny_summery)}").end()
+        .find('.unknow').text("? #{format_Num(unknown_summery)}")
+
       total_plan_qty += receiptQty
       total_qty += qty
       total_cny_summery += cny_summery
       total_usd_summery += usd_summery
       total_unknown_summery += unknown_summery
 
-    $('.totalQty').text("#{total_qty} / #{total_plan_qty} ")
-    $('.totalCost').text("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
+    $('#planTotalQty').val("#{total_qty} / #{total_plan_qty} ")
+    $('#totalQty').val("#{total_qty}")
+    $('#totalCost').val("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
 
     pay_cny = 0
     pay_usd = 0

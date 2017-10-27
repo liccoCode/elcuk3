@@ -331,8 +331,9 @@ public class MaterialPlan extends GenericModel {
         // 这个采购单的采购计划所拥有的 PaymentUnit(支付信息)没有状态为 PAID 的.
         for(MaterialPlanUnit unit : this.units) {
             for(PaymentUnit fee : unit.fees()) {
-                if(fee.state == PaymentUnit.S.PAID)
+                if(fee.state == PaymentUnit.S.PAID){
                     return false;
+                }
             }
         }
         return true;
@@ -356,8 +357,9 @@ public class MaterialPlan extends GenericModel {
          * 1. 剥离没有过成功支付的出货单.
          * 2. 剥离后原有的 PaymentUnit 自动 remove 标记.
          */
-        if(this.apply == null)
+        if(this.apply == null){
             Validation.addError("", "出货单没有添加进入请款单, 不需要剥离");
+        }
         if(!isProcureApplyDepartable()) {
             Validation.addError("", "当前出货单已经拥有成功支付信息, 无法剥离.");
             return;

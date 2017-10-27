@@ -22,10 +22,7 @@ import play.utils.FastRuntimeException;
 import sun.misc.BASE64Decoder;
 //END GENERATED CODE
 import javax.persistence.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -129,6 +126,7 @@ public class Attach extends Model {
          */
         public void delete(Attach attach) {
             attach.delete();
+            //QiniuUtils.delete(attach.fid+"-"+attach.originName);
             String localtion = attach.location;
             FileUtils.deleteQuietly(new File(localtion));
         }
@@ -426,6 +424,29 @@ public class Attach extends Model {
 
         }
         return null;
+    }
+
+    //获得指定文件的byte数组
+    public byte[] getBytes() {
+        byte[] buffer = null;
+        try {
+            File file = this.file;
+            FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
+            byte[] b = new byte[1000];
+            int n;
+            while((n = fis.read(b)) != -1) {
+                bos.write(b, 0, n);
+            }
+            fis.close();
+            bos.close();
+            buffer = bos.toByteArray();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return buffer;
     }
 
 }

@@ -7,7 +7,6 @@
 #{errorMsgs /}
 #{flash_alert/}
 
-
 <div class="row">
   <div class="col-md-12">
     <form action="@{Deliveryments.createManual()}" class="form-horizontal" method="post" id="new_procureunit">
@@ -45,23 +44,30 @@
             <label for="" class="col-sm-1 control-label">价格</label>
             <div class="col-sm-2">
               <div class="form-inline">
-                <input type="text" class="form-control" id="unit_price" name="units[0].attrs.price"
+                <input type="text" class="form-control" id="unit_price" name="units[0].attrs.price" style="width:80px;"
                        value="${units[0]?.attrs?.price}">
               #{pickCurrency id:'unit_currency', name:'units[0].attrs.currency',class: 'form-control',
               c:units[0]?.attrs?.currency?:helper.Currency.CNY, native: 'aaa'/}
+                <span id="taxSpan"></span>
               </div>
             </div>
-            <label for="" class="col-sm-1 control-label">采购数量</label>
+            <label for="" class="col-sm-1 control-label">是否含税</label>
             <div class="col-sm-2">
-              <div class="form-inline">
-                <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty"
-                       value="${units[0]?.attrs?.planQty}" style="width:100px;">
-                <div class="input-group">
-                  <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
-                         style="width:100px;">
-                  <span class="input-group-addon">箱</span>
-                  <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
-                </div>
+              <select class="form-control" name="units[0].containTax">
+                <option #{if unit.containTax} selected #{/if} value="true">是</option>
+                <option #{if !unit.containTax} selected #{/if} value="false">否</option>
+              </select>
+            </div>
+
+            <label for="" class="col-sm-1 control-label">采购数量</label>
+            <div class="col-sm-2 form-inline">
+              <input class="form-control" placeHolder="具体数量" name="units[0].attrs.planQty"
+                     value="${units[0]?.attrs?.planQty}" style="width:100px;">
+              <div class="input-group">
+                <input class="form-control" id="box_num" name="box_size" placeHolder="箱数" boxSize=""
+                       style="width:100px;">
+                <span class="input-group-addon">箱</span>
+                <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
               </div>
             </div>
             <label for="" class="col-sm-1 control-label">B2B选项</label>
@@ -96,12 +102,14 @@
         <label for="" class="col-sm-1 control-label">价格</label>
         <div class="col-sm-2">
           <div class="form-inline">
-            <input type="text" class="form-control" id="unit_price" name="units[<%= num %>].attrs.price">
+            <input type="text" class="form-control" id="unit_price" name="units[<%= num %>].attrs.price"
+                   style="width:80px;">
             <select id="unit_currency" name="units[<%= num %>].attrs.currency" class="form-control">
             #{list items:helper.Currency.values(), as:'cr'}
               <option ${cr == helper.Currency.CNY ? 'selected' : ''} value="${cr}">${cr}</option>
             #{/list}
             </select>
+            <span name="taxSpan"></span>
           </div>
         </div>
         <label for="" class="col-sm-1 control-label">采购数量</label>

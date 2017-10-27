@@ -11,7 +11,7 @@
       <input type="checkbox" name="checkAll" data-index="${dpIndex}">
     </th>
   #{/if}
-    <th width="40px;">#</th>
+    <th width="45px;">#</th>
     <th>父ID</th>
     <th width="40px;">阶段</th>
     <th width="170px;">Selling</th>
@@ -139,7 +139,11 @@
     </td>
     <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
-        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}</td>
+        <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
+            #{if unit.containTax}
+              <br><div class="label label-danger">税点:${unit.taxPoint}</div>
+            #{/if}
+        </td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
         <td>
             #{if unit.type?.name() == 'StockSplit'}
@@ -165,9 +169,7 @@
           </a>
         #{/elseif}
     </td>
-    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}<br>
-      <span style="color:red">${unit.isDedicated?'(专线)':''}</span>
-    </td>
+    <td style="color:${unit.shipType.rgb()}"><i class="${unit.shipType?.pic()}"></i><br>${unit.shipType?.label()}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>

@@ -138,6 +138,10 @@ public class Material extends Model {
     @Transient
     public String cooperName;
 
+    @Transient
+    public Long cooperId;
+
+
     /**
      * 采购余量
      */
@@ -188,13 +192,15 @@ public class Material extends Model {
      *
      * @return
      */
-    public int surplusConfirmQty() {
+    public int surplusConfirmQty(Long cooperId) {
         //1 查询已确认的采购计划总数
         List<MaterialUnit> materialUnitList = MaterialUnit
-                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.CONFIRM).fetch();
+                .find(" material.id=? AND materialPurchase.state = ? AND cooperator.id = ?",
+                        id, MaterialPurchase.S.CONFIRM, cooperId).fetch();
         //2 查询已出库的出货计划总数
         List<MaterialPlanUnit> materialPlanUnitList = MaterialPlanUnit
-                .find(" material.id=? AND materialPlan.state = ?", id, MaterialPlan.P.DONE).fetch();
+                .find(" material.id=? AND materialPlan.state = ? AND materialPlan.cooperator.id = ?",
+                        id, MaterialPlan.P.DONE, cooperId).fetch();
         return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum()
                 - materialPlanUnitList.stream().mapToInt(unit -> unit.qty).sum();
     }
@@ -204,9 +210,10 @@ public class Material extends Model {
      *
      * @return
      */
-    public int surplusPendingQty() {
+    public int surplusPendingQty(Long cooperId) {
         List<MaterialUnit> materialUnitList = MaterialUnit
-                .find(" material.id=? AND materialPurchase.state = ?", id, MaterialPurchase.S.PENDING).fetch();
+                .find(" material.id=? AND materialPurchase.state = ? AND cooperator.id = ?",
+                        id, MaterialPurchase.S.PENDING, cooperId).fetch();
         return materialUnitList.stream().mapToInt(unit -> unit.planQty).sum();
     }
 
