@@ -33,10 +33,10 @@ public class CooperatorPost extends Post<Cooperator> {
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT c FROM Cooperator c LEFT JOIN c.cooperItems i ");
-        sql.append("WHERE  1 = 1 ");
+        sql.append(" LEFT JOIN i.material m WHERE  1 = 1 ");
 
         if(StringUtils.isNotEmpty(search)) {
-            sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? OR i.material.code like ?)");
+            sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? or m.code like ?)");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
             params.add("%" + search + "%");

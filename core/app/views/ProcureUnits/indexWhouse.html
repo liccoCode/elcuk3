@@ -101,6 +101,11 @@
                 #{/if}
             #{/list}
             </select>
+            
+            <select name="p.shield" class="form-control">
+              <option value="1" ${p.shield ? 'selected' : ''}>屏蔽无效计划</option>
+              <option value="0" ${!p.shield ? 'selected' : ''}>不屏蔽无效计划</option>
+            </select>
 
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
