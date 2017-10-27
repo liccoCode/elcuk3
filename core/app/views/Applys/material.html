@@ -129,7 +129,7 @@
                         <td>${procureUnit.material.code}</td>
                         <td>
                             #{list items:procureUnit.fees(), as:'fee'}
-                              <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                              <span class="label ${fee.stateLabelV3()}">${fee.feeType.nickName}</span>
                             #{/list}
                         </td>
                         <td class="qty" qty="${procureUnit.qty}" receiptQty="${procureUnit.receiptQty?:0}"
@@ -179,7 +179,7 @@
                                               </a>
                                             </td>
                                             <td>
-                                              <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                                              <span class="label ${fee.stateLabelV3()}">${fee.state.label()}</span>
                                             </td>
                                             <td>${fee.feeType.nickName}</td>
                                             <td>${fee.unitQty.format('#')}</td>
@@ -321,7 +321,7 @@
                         <td>${procureUnit.material.code}</td>
                         <td>
                             #{list items:procureUnit.fees(), as:'fee'}
-                              <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                              <span class="label ${fee.stateLabelV3()}">${fee.feeType.nickName}</span>
                             #{/list}
                         </td>
                         <td class="qty" qty="${procureUnit.planQty}">${procureUnit.planQty}</td>
@@ -367,7 +367,7 @@
                                               </a>
                                             </td>
                                             <td>
-                                              <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                                              <span class="label ${fee.stateLabelV3()}">${fee.state.label()}</span>
                                             </td>
                                             <td>${fee.feeType.nickName}</td>
                                             <td>${fee.unitQty.format('#')}</td>

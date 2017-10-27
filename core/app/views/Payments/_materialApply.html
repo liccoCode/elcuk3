@@ -63,7 +63,7 @@
                 <td>${payment.currency.symbol()} ${fee.amount()}</td>
                 <td>${fee.payee.username}</td>
                 <td>
-                  <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                  <span class="label ${fee.stateLabelV3()}">${fee.state.label()}</span>
                     #{power.ck 'paymentunits.deny'}
                         #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
                           <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-xs paymentUnitDeny">
@@ -102,7 +102,7 @@
                 <td>${payment.currency.symbol()} ${fee.amount()}</td>
                 <td>${fee.payee.username}</td>
                 <td>
-                  <span class="label ${fee.stateLabel()}">${fee.state.label()}</span>
+                  <span class="label ${fee.stateLabelV3()}">${fee.state.label()}</span>
                     #{power.ck 'paymentunits.deny'}
                         #{if fee.state in [models.finance.PaymentUnit.S.APPLY, models.finance.PaymentUnit.S.APPROVAL]}
                           <button data-url='@{PaymentUnits.deny(fee.id)}' class="btn btn-danger btn-xs paymentUnitDeny">
