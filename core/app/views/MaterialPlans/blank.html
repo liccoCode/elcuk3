@@ -108,7 +108,7 @@
               <td>${unit.surplusPendingQty(dp?.cooperator?.id)}</td>
               <td>
                 <input type="text" style="width:150px;" data-origin="${unit.availableQty()}"
-                       class="form-control input-sm" surplusConfirmQty="${unit.surplusConfirmQty()}"
+                       class="form-control input-sm" surplusConfirmQty="${unit.surplusConfirmQty(cooperId)}"
                        name="dtos[${unit_index-1}].outQty">
               </td>
               <td>${unit.projectName}</td>
