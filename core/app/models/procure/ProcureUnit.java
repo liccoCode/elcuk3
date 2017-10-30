@@ -2685,4 +2685,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ProcureUnit.count("parent.id=?", this.id) > 0;
     }
 
+
+    public boolean includePayment(Long paymentId) {
+        if(paymentId == null) {
+            return false;
+        }
+        return this.fees.stream().filter(unit -> unit.payment.id - paymentId == 0).count() > 0 ? true : false;
+    }
+
+
 }

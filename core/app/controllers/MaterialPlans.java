@@ -87,7 +87,7 @@ public class MaterialPlans extends Controller {
         dp.cooperator = cop;
         dp.handler = Login.current();
         dp.projectName = Login.current().projectName.label();
-        render(units, dp);
+        render(units, dp ,cooperId);
     }
 
     /**

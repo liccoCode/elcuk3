@@ -113,6 +113,34 @@ public class Deliveryments extends Controller {
         render(dmt, expressid, total, applyMsg, deliveryments, isB2b);
     }
 
+    public static void showPayment(String id, Long paymentId) {
+        Deliveryment dmt = Deliveryment.findById(id);
+
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        }
+        notFoundIfNull(dmt);
+        List<Long> expressUnitIds = dmt.units.stream()
+                .filter(unit -> unit.shipType == Shipment.T.EXPRESS)
+                .map(unit -> unit.id)
+                .collect(Collectors.toList());
+        String expressid = StringUtils.join(expressUnitIds, ",");
+        double total = dmt.units.stream().filter(unit -> unit.type != ProcureUnit.T.StockSplit)
+                .mapToDouble(ProcureUnit::totalAmountToCNY).sum();
+        String applyMsg = "";
+        List<Deliveryment> deliveryments = new ArrayList<>();
+        if(dmt.state == Deliveryment.S.PENDING_REVIEW) {
+            applyMsg = dmt.validDmtIsNeedApply().message;
+            deliveryments = dmt.getRelateDelivery();
+        }
+        boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
+        render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, isB2b ,paymentId);
+    }
+
+
     public static void showProcureUnitList(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
         List<ProcureUnit> units = dmt.units;

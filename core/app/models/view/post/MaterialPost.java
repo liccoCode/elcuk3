@@ -86,6 +86,9 @@ public class MaterialPost extends Post<Material> {
         sbd.append(" IFNULL((SELECT sum(mu.qty) FROM MaterialPlanUnit mu LEFT JOIN  MaterialPlan mp ON ");
         sbd.append(" mp.id = mu.materialPlan_id WHERE mu.material_id = m.id AND mp.state='DONE' ");
         sbd.append(" AND mp.cooperator_id=i.cooperator_id), 0) AS planQty,");
+        sbd.append(" IFNULL((SELECT sum(mu.qty) FROM MaterialPlanUnit mu LEFT JOIN  MaterialPlan mp ON ");
+        sbd.append(" mp.id = mu.materialPlan_id WHERE mu.material_id = m.id AND mp.state='CREATE' ");
+        sbd.append(" AND mp.cooperator_id=i.cooperator_id), 0) AS planCreateQty,");
         sbd.append(" SUM(IF(p.state='PENDING',u.planQty, 0)) AS pendingQty, m.version ");
         sbd.append(" FROM Material m LEFT JOIN MaterialBom_Material b ON b.materials_id = m.id ");
         sbd.append(" LEFT JOIN MaterialBom mb ON mb.id = b.boms_id ");
@@ -180,6 +183,7 @@ public class MaterialPost extends Post<Material> {
             material.qty = Integer.parseInt(row.get("confirmQty").toString())
                     - Integer.parseInt(row.get("planQty").toString());
             material.pendingQty = Integer.parseInt(row.get("pendingQty").toString());
+            material.planCreateQty = Integer.parseInt(row.get("planCreateQty").toString());
             material.version = row.get("version").toString();
             materials.add(material);
         }

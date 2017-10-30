@@ -161,6 +161,12 @@ public class Material extends Model {
     public int availableQty;
 
     /**
+     * 出货未确认数量
+     */
+    @Transient
+    public int planCreateQty;
+
+    /**
      * 返回所有物料信息
      */
     public static List<Material> suppliers() {
