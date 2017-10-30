@@ -92,7 +92,7 @@
         <th>SKU</th>
         <th>Selling</th>
         <th>数量(计划/交货/入库)</th>
-        <th>单价</th>
+        <th width="100px;">单价</th>
         <th>单价*入库数量</th>
         <th>剩余请款金额</th>
         <th>阶段</th>
@@ -135,7 +135,11 @@
               style="color:${procureUnit.attrs.planQty!=procureUnit.inboundQty && procureUnit.inboundQty>0 ? 'red':''}">
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
-          <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}</td>
+          <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}
+            #{if procureUnit.containTax}
+               <div class="label label-important">税点:${procureUnit.taxPoint}</div>
+             #{/if}
+          </td>
           <td class="price" amount="${procureUnit.totalAmount()}">
           ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
           <td>${procureUnit.leftAmount()}</td>
