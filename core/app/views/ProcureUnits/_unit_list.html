@@ -41,7 +41,7 @@
     <th width="70px;">创建人/<br>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
-  <tr id="procureUnit_${unit.id}">
+  <tr id="procureUnit_${unit.id}" #{if unit.includePayment(paymentId)} style="background-color:#FFECDA" #{/if}>
       #{if checkbox}
         <td>
           <label class="checkbox">

@@ -36,6 +36,7 @@
             <td>
               <span id="deliverymentId">${dmt.id}</span>
               <input type="hidden" name="dmt.id" value="${dmt.id}">
+              <input type="hidden" name="dmt.id" value="${paymentId}" id="paymentId">
             </td>
 
             <th>State</th>
@@ -69,7 +70,7 @@
             </td>
             <th>交货时间</th>
             <td>
-              <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.date()}">
+              <input type="date" name="dmt.deliveryTime" value="${dmt.deliveryTime?.date()}">  
             </td>
           </tr>
 
@@ -163,7 +164,7 @@
         #{render 'ProcureUnits/_b2b_unit_list.html', units:dmt.units, checkbox:true, key:'delivery', delivery:true/}
     #{/if}
     #{else }
-        #{render 'ProcureUnits/_unit_list.html', units:dmt.units, checkbox:true, key:'delivery', delivery:true/}
+        #{render 'ProcureUnits/_unit_list.html', units:dmt.units, checkbox:true, key:'delivery', delivery:true ,paymentId:paymentId/}
     #{/else}
     </div>
   </div>

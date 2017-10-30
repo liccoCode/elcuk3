@@ -40,7 +40,7 @@
                 #{if (records.size() + denyRecords.size()) > 0}
                   <i class="icon-reorder"></i>
                 #{/if}
-              <a href="@{Deliveryments.show(fee.deliveryment.id)}#${punit.id}">
+              <a href="@{Deliveryments.showPayment(fee.deliveryment.id , payment.id)}#${punit.id}">
               ${fee.deliveryment.id} #${punit.id}
               </a>
             </td>
