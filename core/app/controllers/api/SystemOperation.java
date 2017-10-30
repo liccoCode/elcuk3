@@ -3,6 +3,8 @@ package controllers.api;
 import controllers.Login;
 import models.OperatorConfig;
 import models.User;
+import play.Logger;
+import play.Play;
 import play.libs.Crypto;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -28,6 +30,8 @@ public class SystemOperation extends Controller {
         //这里应该是用于记录整个应用所有 Controller 的数据统计信息.
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
         renderArgs.put("isB2B", isB2B);
+        Logger.info("playurl:%s playpath:%s username:%s ", request.url, Play.ctxPath, user.username);
+
     }
 }
 
