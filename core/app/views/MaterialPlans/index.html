@@ -93,12 +93,16 @@
               </th>
               <th>物料出货单ID</th>
               <th>出货单名称</th>
+            #{if brandName == "EASYACC"}
               <th>请款单</th>
+            #{/if}
               <th>供应商</th>
               <th>状态</th>
               <th>收货类型</th>
               <th>收货方</th>
+            #{if brandName == "EASYACC"}
               <th width="70px;">财务审核</th>
+            #{/if}
               <th width="150px;">出货时间</th>
               <th width="80px;">User</th>
               <th width="90px;">Create</th>
@@ -117,29 +121,33 @@
                 <span>${dp.name}</span>
                 <span class="badge bg-light-blue">${dp.units.size()}</span>
               </td>
-              <td>
-                  #{if dp.apply}
-                    <a href="@{Applys.material(dp.apply.id)}">${dp.apply.serialNumber}</a>
-                  #{/if}
-                  #{else }没有请款单#{/else}
-              </td>
+                #{if brandName == "EASYACC"}
+                  <td>
+                      #{if dp.apply}
+                        <a href="@{Applys.material(dp.apply.id)}">${dp.apply.serialNumber}</a>
+                      #{/if}
+                      #{else }没有请款单#{/else}
+                  </td>
+                #{/if}
               <td>${dp.cooperator?.name}</td>
               <td style="background-color:${dp.state.rgb()}">${dp.state.label()}</td>
               <td>${dp.receipt?.label()}</td>
               <td>${dp.receiveCooperator?.name}</td>
-              <td style="width: 80px;">
-                  #{if dp.financeState.name() == "PENDING_REVIEW"}
-                      #{power.ck "materialplans.approve"}
-                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
-                           class="btn btn-xs btn-warning" uid="${dp.id}">审核</a>
-                      #{/power.ck}
-                    待审
-                  #{/if}
-                  #{else}
-                  ${dp.financeState?.label()}
-                  #{/else}
-              </td>
+                #{if brandName == "EASYACC"}
+                  <td style="width: 80px;">
+                      #{if dp.financeState.name() == "PENDING_REVIEW"}
+                          #{power.ck "materialplans.approve"}
+                            <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                            <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPlans.approve(dp.id)}'
+                               class="btn btn-xs btn-warning" uid="${dp.id}">审核</a>
+                          #{/power.ck}
+                        待审
+                      #{/if}
+                      #{else}
+                      ${dp.financeState?.label()}
+                      #{/else}
+                  </td>
+                #{/if}
               <td>#{time_tooltip_v3 time:dp.deliveryDate, datetime:true/}</td>
               <td>${dp.handler.username}</td>
               <td>#{time_tooltip_v3 time:dp.createDate/}</td>

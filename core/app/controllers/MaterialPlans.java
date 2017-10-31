@@ -55,6 +55,7 @@ public class MaterialPlans extends Controller {
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("avaliableApplies", avaliableApplies);
         renderArgs.put("users", User.find("closed=?", false).fetch());
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
     /**
@@ -251,7 +252,8 @@ public class MaterialPlans extends Controller {
         if(plan.state == MaterialPlan.P.CREATE) {
             qtyEdit = true;
         }
-        render("/MaterialPlans/_unit_list.html", units, qtyEdit);
+        Long cooperId =  plan.cooperator.id;
+        render("/MaterialPlans/_unit_list.html", units, qtyEdit , cooperId);
     }
 
     /**
