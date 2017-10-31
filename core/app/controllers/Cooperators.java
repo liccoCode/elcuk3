@@ -5,6 +5,7 @@ import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.CooperItem;
 import models.procure.Cooperator;
@@ -21,6 +22,7 @@ import play.mvc.With;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -141,14 +143,16 @@ public class Cooperators extends Controller {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
-
+        User user = Login.current();
+        boolean isEdit = user.privileges.stream()
+                .allMatch(privilege -> Objects.equals(privilege.name, "cooperitem.price"));
         if(copItem.type.equals(CooperItem.T.SKU)) {
             renderArgs.put("mats", copItem.mats());
             renderArgs.put("skus", J.json(copItem.cooperator.frontSkuAutoPopulate()));
-            render("Cooperators/newCooperItem.html", copItem);
+            render("Cooperators/newCooperItem.html", copItem, isEdit);
         } else {
             renderArgs.put("materials", copItem.cooperator.findMaterialNotExistCooper());
-            render("Cooperators/newMaterialItem.html", copItem);
+            render("Cooperators/newMaterialItem.html", copItem, isEdit);
         }
     }
 
