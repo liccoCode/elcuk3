@@ -55,6 +55,7 @@ public class MaterialPlans extends Controller {
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("avaliableApplies", avaliableApplies);
         renderArgs.put("users", User.find("closed=?", false).fetch());
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
     /**

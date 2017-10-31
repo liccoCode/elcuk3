@@ -55,6 +55,7 @@ public class MaterialPurchases extends Controller {
                 p == null ? null : p.cooperId , MaterialApply.T.PURCHASE );
         renderArgs.put("suppliers", suppliers);
         renderArgs.put("availableApplies", avaliableApplies);
+        renderArgs.put("brandName", OperatorConfig.getVal("brandname"));
     }
 
     public static void index(MaterialPurchasePost p) {

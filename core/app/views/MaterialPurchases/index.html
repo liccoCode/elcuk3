@@ -68,51 +68,58 @@
             <tr>
               <th width="20px;"></th>
               <th>物料采购单ID</th>
+            #{if brandName != "EASYACC"}
               <th>请款单</th>
+            #{/if}
               <th>Name</th>
               <th>供应商</th>
               <th>State</th>
               <th>单据类型</th>
+            #{if brandName != "EASYACC"}
               <th width="70px;">财务审核</th>
+            #{/if}
               <th>User</th>
               <th>Create</th>
             </tr>
           #{list items:materialPurchases, as:'dmt'}
             <tr>
-              <td><input type="checkbox" name="pids" value="${dmt.id}" cooperName="${dmt.supplier()?.name}" financeState="${dmt.financeState}"
-                         #{if dmt.applyPurchase}applyId="${dmt.applyPurchase.id}"#{/if}  ></td>
+              <td>
+                <input type="checkbox" name="pids" value="${dmt.id}" cooperName="${dmt.supplier()?.name}" financeState="${dmt.financeState}"
+                       #{if dmt.applyPurchase}applyId="${dmt.applyPurchase.id}"#{/if}  ></td>
               <td>
                 <a href="@{MaterialPurchases.show(dmt.id)}" target="_blank">${dmt.id}</a>
               </td>
-              <td>
-                  #{if dmt.applyPurchase}
-                    <a href="@{Applys.material(dmt.applyPurchase.id)}">${dmt.applyPurchase.serialNumber}</a>
-                  #{/if}
-                  #{else }没有请款单#{/else}
-              </td>
-
+                #{if brandName != "EASYACC"}
+                  <td>
+                      #{if dmt.applyPurchase}
+                        <a href="@{Applys.material(dmt.applyPurchase.id)}">${dmt.applyPurchase.serialNumber}</a>
+                      #{/if}
+                      #{else }没有请款单#{/else}
+                  </td>
+                #{/if}
               <td style="cursor:pointer;" data-url="@{MaterialPurchases.showMaterialUnitList(dmt.id)}" data-id="${dmt.id}" name="clickTd">
                 <span><i class="icon-reorder"></i></span>
                 <span>${dmt.name}</span>
                 <span class="badge bg-light-blue">${dmt.units.size()}</span>
               </td>
-
               <td>${dmt.supplier()?.name}</td>
               <td style="color:${dmt.state?.rgb()}">${dmt.state.label()}</td>
               <td>${dmt.deliveryType?.label()}</td>
-              <td style="width: 80px;">
-                  #{if dmt.financeState.name() == "PENDING_REVIEW"}
-                      #{power.ck "materialpurchases.approve"}
-                        <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
-                        <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPurchases.approve(dmt.id)}'
-                           class="btn btn-xs btn-warning" uid="${dmt.id}">审核</a>
-                      #{/power.ck}
-                    待审
-                  #{/if}
-                  #{else}
-                  ${dmt.financeState?.label()}
-                  #{/else}
-              </td>
+                #{if brandName != "EASYACC"}
+                  <td style="width: 80px;">
+                      #{if dmt.financeState.name() == "PENDING_REVIEW"}
+                          #{power.ck "materialpurchases.approve"}
+                            <!-- 只有出货单状态在 已出货 并且财务未审核的情况下 才出现财务审核的按钮 -->
+                            <a href="javascript:void(0)" name="approveBtn" data-url='@{MaterialPurchases.approve(dmt.id)}'
+                               class="btn btn-xs btn-warning" uid="${dmt.id}">审核</a>
+                          #{/power.ck}
+                        待审
+                      #{/if}
+                      #{else}
+                      ${dmt.financeState?.label()}
+                      #{/else}
+                  </td>
+                #{/if}
               <td>${dmt.handler.username}</td>
               <td>#{time_tooltip_v3 time:dmt.createDate/}</td>
             </tr>
