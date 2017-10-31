@@ -171,6 +171,7 @@
           #{/list}
           </table>
         </div>
+      #{if dp.state.name() == "CREATE"}
         <div class="box-footer">
           <div class="col-sm-1">
             <button id="delunit_form_submit" class="btn btn-danger" data-url='@{MaterialPlans.delunits(dp.id)}' data-method="DELETE"
@@ -183,6 +184,7 @@
           <button id="addPlanUnitBtn" class="btn btn-success" data-disable-with='添加中'>快速添加</button>
           <button id="confirmPlanBtn" class="btn btn-primary" data-disable-with='添加中'>确认</button>
         </div>
+      #{/if}
       </div>
     </form>
   </div>
