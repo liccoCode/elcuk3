@@ -39,7 +39,7 @@
                       <label for="" class="col-sm-1 control-label">价格</label>
                       <div class="col-sm-2">
                         <div class="form-inline">
-                          <input class="form-control" name="copItem.price" readonly value="${copItem.price}">
+                          <input class="form-control" name="copItem.price" #{if !isEdit} readonly #{/if} value="${copItem.price}">
                         #{pickCurrency name:'copItem.currency', c:copItem.currency, class:'form-control'/}
                         </div>
                       </div>
@@ -76,6 +76,12 @@
                           <select class="form-control">
                             <option value="CNY">CNY</option>
                           </select>
+
+                        #{power.ck "cooperitem.price"}
+                          <!-- ea系统关闭个人价格更新权限，仅有指定角色可进行更改 -->
+                          <input type="hidden" id="priceFlag" value="1">
+                        #{/power.ck}
+
                         </div>
                       </div>
                     </div>

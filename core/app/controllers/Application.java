@@ -29,16 +29,18 @@ import java.util.Objects;
 public class Application extends Controller {
 
     public static void index() {
-        if(Objects.equals("MengTop", OperatorConfig.getVal("brandname"))) {
+        String brandname = OperatorConfig.getVal("brandname");
+        if(Objects.equals("MengTop", brandname)) {
             StockRecords.stockIndex(new StockPost());
         }
-        DashBoard dashboard = await(new Job<DashBoard>() {
+/*        DashBoard dashboard = await(new Job<DashBoard>() {
             @Override
             public DashBoard doJobWithResult() throws Exception {
                 return Orderr.frontPageOrderTable(11);
             }
-        }.now());
-        render(dashboard);
+        }.now());*/
+        DashBoard dashboard = new DashBoard();
+        render(dashboard, brandname);
     }
 
     public static void perDayOrderNum() {

@@ -1169,6 +1169,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.projectName = unit.projectName;
         this.comment = unit.comment;
         this.purchaseSample = unit.purchaseSample;
+        this.taxPoint = unit.taxPoint;
+        this.containTax = unit.containTax;
         if(logs.size() > 0) {
             if(StringUtils.isBlank(reason)) {
                 new ERecordBuilder("procureunit.update").msgArgs(this.id, StringUtils.join(logs, "<br>"),
@@ -1223,6 +1225,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.autoUpdateComment(unit);
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.projectName;
+        this.taxPoint = unit.taxPoint;
+        this.containTax = unit.containTax;
         if(Validation.hasErrors()) return;
         //仓库加工修改
         int parentCurrQty = 0;
@@ -1298,6 +1302,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.projectName;
+        this.taxPoint = unit.taxPoint;
+        this.containTax = unit.containTax;
         if(this.stage.name().equals("IN_STORAGE")) {
             if(diff != 0) {
                 this.availableQty = unit.availableQty;

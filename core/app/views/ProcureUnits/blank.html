@@ -14,7 +14,7 @@
       <div class="box-header with-border"><h3 class="box-title">创建采购计划</h3></div>
       <form action="@{ProcureUnits.create()}" method="post" id="new_procure_unit" class="form-horizontal">
         <div class="box-body">
-        #{render './_unit_table_trs.html', unit: unit, whouses: whouses, skus: skus, project:project/}
+        #{render './_unit_table_trs.html', unit: unit, whouses: whouses,skus: skus,project:project,brandName: brandName/}
           <div class="form-group">
             <label class="col-sm-1 control-label">选择运输单(Option)</label>
             <div class="col-sm-11">

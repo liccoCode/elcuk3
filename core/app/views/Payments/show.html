@@ -73,17 +73,31 @@
 
   <div class="col-sm-3" id='paymentTargetInfo'>
     <div class="box box-success">
-      <div class="box-body">
-        <dl class="dl-horizontal">
-          <dt>账户</dt>
-          <dd>${payment.target.accountUser}</dd>
-          <dt>账号</dt>
-          <dd>${payment.target.accountNumber}</dd>
-          <dt>名称</dt>
-          <dd>${payment.target.name}</dd>
-          <dt>银行地址</dt>
-          <dd>${payment.target.accountAddress}</dd>
-        </dl>
+      <div class="box-body form-horizontal">
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-3 control-label">账户</label>
+          <div class="col-sm-9">
+            <input class="form-control" value="${payment.target.accountUser}" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-3 control-label">账号</label>
+          <div class="col-sm-9">
+            <input class="form-control" value="${payment.target.accountNumber}" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-3 control-label">名称</label>
+          <div class="col-sm-9">
+            <input class="form-control" value="${payment.target.name}" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="inputEmail3" class="col-sm-3 control-label">银行地址</label>
+          <div class="col-sm-9">
+            <textarea rows="3" class="form-control" readonly>${payment.target.accountAddress}</textarea>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -91,6 +105,8 @@
   <div class="col-sm-3">
     <div class="box box-danger">
       <div class="box-body">
+
+
       #{if payment.state == models.finance.Payment.S.PAID}
         <dl class="dl-horizontal">
           <dt>支付状态</dt>
@@ -117,51 +133,50 @@
       #{/if}
       #{else }
           #{power.ck 'payments.payforit'}
-              #{form @Payments.payForIt(payment.id), method:'POST', class:'form-horizontal', id:'pay_form'}
-                <div class="control-group">
-                  <label class="control-label">供应商</label>
-
-                  <div class="controls">
-                    <input type="text" placeholder="供应商" value="${payment.cooperator.fullName}" readonly="">
-                  </div>
+            <form action="@{Payments.payForIt(payment.id)}" method="post" id="pay_form" class="form-horizontal">
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">供应商</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" placeholder="供应商" value="${payment.cooperator.fullName}" readonly>
                 </div>
-                <div class="control-group">
-                  <label class="control-label">账号</label>
-
-                  <div class="controls">
-                      #{select 'paymentTargetId', items: payment.cooperator.paymentMethods, valueProperty:id}#{/select}
-                  </div>
+              </div>
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">账号</label>
+                <div class="col-sm-9">
+                  <select class="form-control" name="paymentTargetId" id="paymentTargetId">
+                      #{list items:payment.cooperator.paymentMethods, as:'m'}
+                        <option value="${m.id}">${m.name}</option>
+                      #{/list}
+                  </select>
                 </div>
-                <div class="control-group">
-                  <label class="control-label">支付币种</label>
-
-                  <div class="controls">
-                      #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD,
-                      helper.Currency.EUR, helper.Currency.HKD, helper.Currency.GBP], value:payment.currency}
-                          #{option ''}选择币种#{/option}
-                      #{/select}
-                  </div>
+              </div>
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">支付币种</label>
+                <div class="col-sm-9">
+                    #{select 'currency', id:'currency', items:[helper.Currency.CNY, helper.Currency.USD,
+                    helper.Currency.EUR, helper.Currency.HKD, helper.Currency.GBP], value:payment.currency}
+                        #{option ''}选择币种#{/option}
+                    #{/select}
                 </div>
-                <div class="control-group">
-                  <label class="control-label">金额</label>
+              </div>
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">金额</label>
+                <div class="col-sm-9">
                   <input type="hidden" id="ratioInput" name="ratio" value="-1">
                   <input type="hidden" id="ratioDateTimeInput" name="ratioPublishDate">
-
-                  <div class="controls">
-                    <input type="text" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
-                    <input type="submit" value="付款" class="btn btn-success  btn-xs" data-confirm='请再次确认信息后付款'>
+                  <div class="controls form-inline">
+                    <input type="text" class="form-control" placeholder="最终支付金额" name="actualPaid" id="actualPaid">
+                    <input type="submit" value="付款" class="btn btn-success" data-confirm='请再次确认信息后付款'>
                   </div>
                 </div>
-              #{/form}
-            <form action="#" class="form-horizontal" onsubmit="return false;">
-              <div class="control-group">
-                <label class="control-label">应付金额</label>
-
-                <div class="controls">
-                  <div class="input-append">
-                    <input type="text" class="input-small" data-url='@{Payments.shouldPaidUpdate (payment.id)}'
+              </div>
+              <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">应付金额</label>
+                <div class="col-sm-9">
+                  <div class="input-group">
+                    <input type="text" class="form-control" data-url='@{Payments.shouldPaidUpdate (payment.id)}'
                            placeholder="手动输入确认" name="shouldPaid" id="shouldPaid">
-                    <span class="add-on" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
+                    <span class="input-group-addon" id="shouldPaidChanges"><i class="icon-question-sign"></i></span>
                   </div>
                 </div>
               </div>
@@ -175,30 +190,27 @@
 
 <div class="row">
   <div class="col-sm-6">
-    <div class="box box-success">
+    <div class="box box-success box-solid">
+      <div class="box-header">
+        <h3 class="box-title"><a href="http://www.boc.cn/sourcedb/whpj/" target="_blank">中国银行挂牌汇率
+          <i class="icon-external-link"></i></a></h3>
+      </div>
       <div class="box-body">
-        <div class="alert alert-info">
-          <h4>
-            <a href="http://www.boc.cn/sourcedb/whpj/" target="_blank">
-              中国银行挂牌汇率 <i class="icon-external-link"></i>
-            </a>
-          </h4>
-        </div>
         <div id="boc_rate">正在加载...</div>
       </div>
     </div>
   </div>
 
   <div class="col-sm-6">
-    <div class="box box-success">
+    <div class="box box-success box-solid">
+      <div class="box-header">
+        <h3 class="box-title">
+          <a href="http://www.xe.com/zh-CN/currencytables/?from=CNY" target="_blank">
+            Xe.com 实时汇率 <i class="icon-external-link"></i>
+          </a>
+        </h3>
+      </div>
       <div class="box-body">
-        <div class="alert alert-info">
-          <h4>
-            <a href="http://www.xe.com/zh-CN/currencytables/?from=CNY" target="_blank">
-              Xe.com 实时汇率 <i class="icon-external-link"></i>
-            </a>
-          </h4>
-        </div>
         <div id="ex_rate">正在加载...</div>
       </div>
     </div>

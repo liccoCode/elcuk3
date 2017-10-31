@@ -15,11 +15,11 @@
   <div class="box-body">
     <table class="table table-bordered table-condensed" id="apply_table">
       <tr>
-        <th><label><input type="checkbox" id="check_all"></label></th>
-        <th>采购计划</th>
+        <th><input type="checkbox" id="check_all"></th>
+        <th width="160px;">采购计划</th>
         <th>交货日期</th>
         <th>SKU</th>
-        <th>单价</th>
+        <th width="120px">单价</th>
         <th>数量(计划/交货/入库)</th>
         <th>付款类型</th>
         <th>总额修正价</th>
@@ -35,8 +35,7 @@
               #{set records:fee.fixValueRecords()/}
               #{set denyRecords: fee.denyRecords()/}
             <td><input type="checkbox" name="paymentUnitIds" value="${fee.id}"></td>
-            <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${fee.id}'
-                                                                                               width="200px;">
+            <td ${((records.size() + denyRecords.size()) > 0) ? 'data-toggle=\'toggle\'' : ''} data-target='#unit_${fee.id}'>
                 #{if (records.size() + denyRecords.size()) > 0}
                   <i class="icon-reorder"></i>
                 #{/if}
@@ -46,7 +45,11 @@
             </td>
             <td>${punit.attrs.deliveryDate}</td>
             <td>${punit.sku}</td>
-            <td>${payment.currency.symbol()} ${punit.attrs.price}</td>
+            <td>${payment.currency.symbol()} ${punit.attrs.price}
+                #{if punit.containTax}
+                  <div class="label label-danger">税点:${punit.taxPoint}</div>
+                #{/if}
+            </td>
             <td style="color:${punit.attrs.planQty!=punit.inboundQty && punit.inboundQty>0 ? 'red':''}">
             ${punit.attrs.planQty}/${punit.attrs.qty?:0}/${punit.inboundQty}
             </td>

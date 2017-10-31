@@ -38,7 +38,7 @@
         <th>CANCEL</th>
         <th><a href="#" rel="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
       </tr>
-    #{list items:dashboard.infos.keySet(), as:'key'}
+    #{list items:dashboard.infos?.keySet(), as:'key'}
         #{set info:dashboard.infos.get(key)/}
         #{set ukAccinfo:dashboard.accsInfos.get(key + "_1")/}
         #{set deAccinfo:dashboard.accsInfos.get(key + "_2")/}
@@ -94,6 +94,8 @@
     </table>
   </div>
 </div>
+
+<input type="hidden" id="brandname" value="${brandname}">
 
 
 
