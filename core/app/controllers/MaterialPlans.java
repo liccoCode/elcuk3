@@ -252,7 +252,8 @@ public class MaterialPlans extends Controller {
         if(plan.state == MaterialPlan.P.CREATE) {
             qtyEdit = true;
         }
-        render("/MaterialPlans/_unit_list.html", units, qtyEdit);
+        Long cooperId =  plan.cooperator.id;
+        render("/MaterialPlans/_unit_list.html", units, qtyEdit , cooperId);
     }
 
     /**

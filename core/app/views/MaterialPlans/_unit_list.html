@@ -15,7 +15,7 @@
     <td>${unit.material?.code}</td>
     <td>${unit.material?.name}</td>
     <td>${unit.material?.version}</td>
-    <td>${unit.material?.surplusConfirmQty()}</td>
+    <td>${unit.material?.surplusConfirmQty(cooperId)}</td>
     <td>${unit.qty}</td>
       #{if unit.receiptQty == 0 && !qtyEdit}
         <td name="unitUpdateTd">
