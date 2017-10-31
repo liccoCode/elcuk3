@@ -43,6 +43,7 @@
       <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
     #{/list}
     </select>
+    <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">（生产周期：${unit.period}天）</span>
   </div>
   <label for="unit_price" class="col-sm-1 control-label">单价</label>
   <div class="col-sm-2 form-inline">
