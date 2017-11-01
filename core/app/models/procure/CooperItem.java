@@ -2,10 +2,12 @@ package models.procure;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.Currency;
 import helper.J;
 import helper.Reflects;
 import models.ElcukRecord;
+import models.User;
 import models.embedded.ERecordBuilder;
 import models.material.Material;
 import models.product.Product;
@@ -209,6 +211,11 @@ public class CooperItem extends Model {
 
     public Date createDate;
 
+    public Date updateDate;
+
+    @OneToOne
+    public User creator;
+
     public CooperItem checkAndUpdate(CooperItem entity) {
         entity.product = Product.findById(entity.sku);
         entity.check();
@@ -229,6 +236,12 @@ public class CooperItem extends Model {
         this.items = entity.items;
         this.setAttributes();
         this.setDefaultValue();
+        if(this.id == null) {
+            this.creator = Login.current();
+            this.createDate = new Date();
+        } else {
+            this.updateDate = new Date();
+        }
         this.save();
         if(logs.size() > 0) {
             new ElcukRecord(Messages.get("cooperators.updatecooperitem"),

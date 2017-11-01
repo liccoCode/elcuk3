@@ -38,6 +38,7 @@ public class Familys extends Controller {
         try {
             if(f.isExist()) renderJSON(new Ret("Family 已经存在, 不需要添加."));
             f.checkAndCreate();
+            flash.success("创建成功");
             index(new FamilyPost());
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
@@ -49,7 +50,8 @@ public class Familys extends Controller {
         try {
             Family fa = Family.findById(family);
             fa.safeDestroy();
-            renderJSON(new Ret(true, "成功删除"));
+            flash.success("成功删除");
+            index(new FamilyPost());
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
         }

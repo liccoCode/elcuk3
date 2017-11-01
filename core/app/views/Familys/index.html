@@ -58,25 +58,19 @@
             <td>${f.creator?.username}</td>
             <td>
                 #{power.ck "familys.delete"}
-                  <a href="javascript:;" class="btn btn-danger btn-xs" action='remove' data-url='@{Familys.destroy(f.family)}'>删除</a>
+                  <a href="@{Familys.destroy(f.family)}" class="btn btn-danger btn-xs">删除</a>
                 #{/power.ck}
-
-                #{if firstCategoryAndBrand==f.category.categoryId+f.brand.name}
-             
-                #{/if}
-                #{else }
+                #{if firstCategoryAndBrand!=f.category.categoryId+f.brand.name}
                     #{set firstCategoryAndBrand: f.category.categoryId+f.brand.name/}
                   <button name="add_family" class="btn btn-success btn-xs" data-category="${f.category.categoryId}"
                           data-brand="${f.brand.name}">添加Family
                   </button>
-                #{/else}
-
+                #{/if}
             </td>
           </tr>
         #{/list}
         </table>
       </div>
-
       <div class="box-footer">
       #{bootstrap_pager_v3 pi:p, url:''/}
       </div>
