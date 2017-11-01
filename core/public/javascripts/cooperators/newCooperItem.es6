@@ -31,7 +31,7 @@ $(() => {
 
   $("input[name='copItem.taxPoint']").change(function () {
     let price = $("input[name='copItem.price']").val();
-    $("input[name='copItem.taxPrice']").val(price * (1 + $(this).val() / 100));
+    $("input[name='copItem.taxPrice']").val((price * (1 + $(this).val() / 100)).toFixed(2));
   });
 
   $("#bind_btn").click(function (e) {
