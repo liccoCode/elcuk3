@@ -210,7 +210,7 @@ $(() => {
     }
   }
 
-  $("select[name='unit.containTax']").change(function () {
+  $("select[name='newUnit.containTax']").change(function () {
     let cooperId = $("#cooperId").val();
     let containTax = $(this).val();
     if (cooperId) {
