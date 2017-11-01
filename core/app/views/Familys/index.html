@@ -1,48 +1,107 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Family' /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
 #{set 'moreScripts'}
-    #{script 'products/family.coffee'/}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'products/family.es6'/}
 #{/set}
 
 #{flash_alert /}
 
-<div class="row-fluid">
-  <div class="span3">
-    <h2>Category</h2>
-    <ul id="slider" class="nav nav-list nav-collapse" style="font-size:1em;cursor:pointer;">
-    #{list items:cats, as:'cat'}
-      <li>
-        <a data-toggle="collapse" data-target="#${cat.categoryId}" style="display:inline-block;padding-left:5px;">
-          <nobr>${cat}(${cat.brands.size()})</nobr>
-        </a>
-      </li>
-      <ul id="${cat.categoryId}" class="nav nav-list collapse">
-          #{list items:cat.brands, as:'bd'}
-            <li>
-              <a level="brand" style="display:inline;padding-left:0;" cid="${cat.categoryId}" bid="${bd.name}"
-                 fid="${bd.firstFamily(cat.categoryId)}">
-                <nobr>${bd.name} ${bd.families.size() == 0 ? '(0)' :''}</nobr>
-              </a>
-            </li>
-          #{/list}
-      </ul>
-    #{/list}
-    </ul>
-  </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Familys.index()}" method="post" class="form-inline" id="search_Form">
+          <div class="row-fluid">
+            <select name="p.categories" multiple="multiple" id="categories" class="form-control">
+            #{list items:categoryIds, as:'c'}
+              <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+            #{/list}
+            </select>
 
-  <div class="span9">
-    <h2>Family</h2>
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 Family、品牌"
+                     value="${p.search}" autocomplete="off">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+            <button class="btn btn-primary" data-loading>搜索</button>
+          </div>
+        </form>
+      </div>
 
-    <div id="fam_div">
-      请点击左侧加载 Brand 的 Family
-    </div>
-  </div>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>Product</th>
+            <th>CreatDate</th>
+            <th>Creator</th>
+            <th width="150px;">Action</th>
+          </tr>
+        #{list items:families, as:'f'}
 
-  <div class="span9">
-    <h2>Product</h2>
-
-    <div id="pro_div">
-      请点击 Family 加载 Product
+          <tr>
+            <td>${f.family}</td>
+            <td>${f.category} (${f.category.brands.size()})</td>
+            <td>${f.brand.name}</td>
+            <td style="cursor:pointer;" name="clickTd" data-family="${f.family}" data-url="@{Familys.proDiv()}">
+              <i class="icon-reorder"></i> <span style="color:blue;">${f.products.size()}</span>
+            </td>
+            <td>#{time_tooltip_v3 time:f.createDate/}</td>
+            <td>${f.creator?.username}</td>
+            <td>
+                #{power.ck "familys.delete"}
+                  <a href="@{Familys.destroy(f.family)}" class="btn btn-danger btn-xs">删除</a>
+                #{/power.ck}
+                #{if firstCategoryAndBrand!=f.category.categoryId+f.brand.name}
+                    #{set firstCategoryAndBrand: f.category.categoryId+f.brand.name/}
+                  <button name="add_family" class="btn btn-success btn-xs" data-category="${f.category.categoryId}"
+                          data-brand="${f.brand.name}">添加Family
+                  </button>
+                #{/if}
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:''/}
+      </div>
     </div>
   </div>
 </div>
+
+<div id="add_modal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="@{Familys.create()}" class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h3>复制SKU</h3>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">Family</label>
+            <div class="col-sm-6">
+              <input id="add_family_input" name="f.family" class="form-control" value="" autocomplete="off">
+              <input type="hidden" id="add_category_input" name="f.category.categoryId" value="">
+              <input type="hidden" id="add_brand_input" name="f.brand.name" value="">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-primary" name="submitBtn" value="添加"/>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

@@ -203,7 +203,7 @@ public class Cooperator extends Model {
      * 尾款
      */
     public int tail = 70;
-    
+
     /**
      * 物料首付款
      */
@@ -267,6 +267,8 @@ public class Cooperator extends Model {
 
     public Date createDate;
 
+    public Date updateDate;
+
     public enum OP {
         WorkShop {
             @Override
@@ -304,18 +306,19 @@ public class Cooperator extends Model {
     @OneToMany
     public List<Whouse> whouses;
 
-    public Cooperator checkAndUpdate() {
+    public void checkAndUpdate() {
         this.check();
-        if(Validation.hasErrors()) return null;
+        if(Validation.hasErrors()) return;
         this.projectName = Login.current().projectName;
+        if(this.id == null) {
+            this.creator = Login.current();
+            this.createDate = new Date();
+        } else {
+            this.updateDate = new Date();
+        }
         this.creator = Login.current();
         this.createDate = new Date();
-        return this.save();
-    }
-
-    public Cooperator checkAndSave() {
-        this.check();
-        return this.save();
+        this.save();
     }
 
     private void check() {

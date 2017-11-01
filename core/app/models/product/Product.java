@@ -2,6 +2,7 @@ package models.product;
 
 import com.alibaba.fastjson.JSON;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
 import models.User;
@@ -446,6 +447,13 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public String hs_code;
 
+    public Date createDate = new Date();
+
+    public Date updateDate = new Date();
+
+    @OneToOne
+    public User creator;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     public User.COR origin_project;
@@ -528,6 +536,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
         this.checkUPCisRepeat();
         if(Validation.hasErrors()) return;
+        this.createDate = new Date();
+        this.creator = Login.current();
         this.save();
     }
 

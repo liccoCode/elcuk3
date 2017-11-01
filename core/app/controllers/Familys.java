@@ -8,6 +8,8 @@ import models.product.Category;
 import models.product.Family;
 import models.product.Product;
 import models.view.Ret;
+import models.view.post.FamilyPost;
+import org.apache.commons.lang.StringUtils;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -21,22 +23,25 @@ import java.util.List;
  * Date: 4/27/12
  * Time: 11:36 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Familys extends Controller {
+
     @Check("familys.index")
-    public static void index() {
-        List<Category> cats = Category.find("ORDER BY categoryId").fetch();
-        render(cats);
+    public static void index(FamilyPost p) {
+        if(p == null) p = new FamilyPost();
+        List<Family> families = p.query();
+        renderArgs.put("categoryIds", Category.categoryIds());
+        render(p, families);
     }
 
     public static void create(Family f) {
         try {
             if(f.isExist()) renderJSON(new Ret("Family 已经存在, 不需要添加."));
             f.checkAndCreate();
-            renderJSON(new Ret(true, "创建成功."));
+            flash.success("创建成功");
+            index(new FamilyPost());
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
-
         }
     }
 
@@ -45,18 +50,19 @@ public class Familys extends Controller {
         try {
             Family fa = Family.findById(family);
             fa.safeDestroy();
-            renderJSON(new Ret(true, "成功删除"));
+            flash.success("成功删除");
+            index(new FamilyPost());
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
         }
     }
 
-    public static void proDiv(Family f) {
-        List<Product> prods = new ArrayList<>();
-
-        // 查找 Family 相关的 Product
-        if(f != null && f.isPersistent()) prods = f.products;
-        render("Products/_products.html", prods);
+    public static void proDiv(String name) {
+        if(StringUtils.isNotBlank(name)) {
+            Family family = Family.findById(name);
+            List<Product> prods = family.products;
+            render("Products/_products.html", prods);
+        }
     }
 
     public static void famDiv(Brand b, Category c) {
@@ -68,6 +74,7 @@ public class Familys extends Controller {
 
     /**
      * 根据 CategoryId 获取 familyId 集合
+     *
      * @param categoryId
      * @return
      */

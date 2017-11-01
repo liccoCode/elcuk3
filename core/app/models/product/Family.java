@@ -1,15 +1,18 @@
 package models.product;
 
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import helper.Cached;
 import helper.Caches;
 import helper.Webs;
+import models.User;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.GenericModel;
 import play.utils.FastRuntimeException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,6 +25,7 @@ import java.util.List;
 @Entity
 public class Family extends GenericModel {
 
+    private static final long serialVersionUID = -8010874098995850345L;
     @Id
     @Expose
     public String family;
@@ -35,6 +39,11 @@ public class Family extends GenericModel {
     @ManyToOne
     public Brand brand;
 
+    public Date createDate;
+
+    @ManyToOne
+    public User creator;
+
     @PrePersist
     private void prePersist() {
         this.family = this.family.toUpperCase();
@@ -43,11 +52,13 @@ public class Family extends GenericModel {
     /**
      * 检查并且创建
      */
-    public Family checkAndCreate() {
+    public void checkAndCreate() {
         if(this.brand == null || !this.brand.isPersistent()) throw new FastRuntimeException("没有指定 Brand!");
         if(this.category == null || !this.category.isPersistent()) throw new FastRuntimeException("没有指定 Category!");
         this.checkFamilyFormatValid();
-        return this.save();
+        this.createDate = new Date();
+        this.creator = Login.current();
+        this.save();
     }
 
     /**

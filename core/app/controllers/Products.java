@@ -139,6 +139,7 @@ public class Products extends Controller {
             Product dbpro = Product.dbProduct(pro.sku);
             pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
             pro.changePartNumber(dbpro.partNumber);
+            pro.updateDate = new Date();
             pro.save();
             List<String> logs = dbpro.beforeDoneUpdate(pro);
             if(logs.size() > 0) {
