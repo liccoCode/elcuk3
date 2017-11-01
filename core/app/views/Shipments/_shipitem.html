@@ -10,7 +10,7 @@
   #{if useCheckbox}
     <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
   #{/if}
-    <th width="55px;">采购ID</th>
+    <th width="45px;">采购ID</th>
     <th width="40px;">阶段</th>
     <th width="160px;">Sku</th>
     <th width="160px;">Selling</th>
@@ -22,6 +22,7 @@
     <th width="50px;">Receive</th>
     <th width="40px;">Qty1</th>
     <th width="65px;">采购单<br>供应商</th>
+    <th>税点</th>
     <th width="140px;">预计发货时间<br>预计到库时间</th>
     <th width="140px;">预计交货时间<br>实际交货时间</th>
     <th width="50px;">总重量(kg)</th>
@@ -31,7 +32,7 @@
     <th width="35px;">运往<br>仓库</th>
   #{/if}
     <th width="80px;">运营创建人<br>采购创建人</th>
-    <th width="70px;">丢失量<br>/赔偿金额</th>
+    <th width="50px;">丢失量<br>/赔偿金</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
         <th width="30px;">记录运费</th>
@@ -44,9 +45,7 @@
       data-currency='${itm.currency?.name()}' data-compentype='${itm.compentype}'>
       #{if useCheckbox}
         <td>
-          <label class="checkbox">
-            <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
-          </label>
+          <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
         </td>
       #{/if}
     <td>
@@ -114,6 +113,7 @@
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a><br>
     ${itm.unit.cooperator?.name}
     </td>
+    <td>#{if itm.unit.containTax} <div class="label label-important">税点:${itm.unit.taxPoint}</div> #{/if}</td>
     <td style="background:${itm.overdue()}">
       预计发货:#{time_tooltip time: itm.unit.attrs.planShipDate/}<br>
       预计到库:#{time_tooltip time: itm.unit.attrs.planArrivDate/}
