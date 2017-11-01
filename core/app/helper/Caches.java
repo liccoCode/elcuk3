@@ -120,8 +120,10 @@ public class Caches {
     }
 
     public static String get(String key) {
+        long start = System.currentTimeMillis();
         Jedis jr = RedisCacheImpl.getCacheConnection();
         String cache_str = jr.get(key);
+        Logger.info("get redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms ");
         if(cache_str == null || StringUtils.isBlank(cache_str)) return "";
         return cache_str;
     }
