@@ -51,8 +51,8 @@
               #{/list}
           </select>
         </td>
-        <td>#{time_tooltip time:prod.marketTime/}</td>
-        <td>#{time_tooltip time:prod.delistingTime/}</td>
+        <td>#{time_tooltip_v3 time:prod.marketTime/}</td>
+        <td>#{time_tooltip_v3 time:prod.delistingTime/}</td>
         <td>
           <a href="javascript:void(0);" name="copyBtn" class="btn btn-xs btn-success" rel="tooltip" title="同步"
              data-sku="${prod.sku}">
