@@ -89,28 +89,26 @@
     </td>
     <td>
         #{if unit.fba}
-            #{cache unit.fba.cacheKey(), for:'6h'}
-            ${unit.fba.shipmentId}
-                #{set feeds: unit.fba.feeds()/}
-                #{if feeds.size() > 0}
-                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                    #{set lastFeed: feeds.get(0)/}
-                    #{if lastFeed.isFailed()}
-                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
-                    #{/if}
-                    #{elseif lastFeed.isSussess()}
-                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
-                      </i>
-                    #{/elseif}
-                    #{else }
-                      <i class="icon-search" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
-                      </i>
-                    #{/else}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds()/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                #{set lastFeed: feeds.get(0)/}
+                #{if lastFeed.isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
                 #{/if}
-            #{/cache}
+                #{elseif lastFeed.isSussess()}
+                  <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                  </i>
+                #{/elseif}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                  </i>
+                #{/else}
+            #{/if}
             #{set fbaCenter: unit.fba.fbaCenter/}
             #{if fbaCenter}
               <a href="javascript:void(0)" rel="tooltip" placement="top" title="检查 FBA Label 中的 Ship To 是否正确"
@@ -141,7 +139,8 @@
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
             #{if unit.containTax}
-              <br><div class="label label-danger">税点:${unit.taxPoint}</div>
+              <br>
+              <div class="label label-danger">税点:${unit.taxPoint}</div>
             #{/if}
         </td>
         <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
@@ -258,30 +257,30 @@
           </div>
           <div class="box-footer">
               #{if delivery}
-                  <!-- 确认到    货代处 -->
-                    #{if unit.selling}
-                        #{ifnot unit.isPlaced}
-                          <a data-remote='true' data-method='PUT' class="btn btn-xs btn-info" id="isplaced_${unit.id}_btn"
-                             href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
-                        #{/ifnot}
-                    #{/if}
-                  <a href="javascript:void(0)" class="btn btn-xs btn-warning" data-tragettr="procureUnit_${unit.id}"
-                     data-href="@{ProcureUnits.confirmUnit(unit.id)}" name="confirmUnitBtn">已核单</a>
-                  <a href="javascript:void(0)" class="btn btn-xs ${unit.noPayment?'btn-success':'btn-danger'}"
-                     data-tragettr="procureUnit_${unit.id}" data-href="@{ProcureUnits.noPayment(unit.id)}" name="noPaymentBtn"
-                     rel='tooltip' title='因各种原因而不需要纳入 未进请款单金额 统计'>${unit.noPayment?'统计':'不统计'}</a>
-                    #{if unit.fba}
-                        #{power.ck 'fbas.update'}
-                          <a href="javascript:void(0)" class="btn btn-xs btn-warning" id="replaceUnitFBA"
-                             data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
-                          </a>
-                        #{/power.ck}
-                    #{/if}
+                <!-- 确认到    货代处 -->
+                  #{if unit.selling}
+                      #{ifnot unit.isPlaced}
+                        <a data-remote='true' data-method='PUT' class="btn btn-xs btn-info" id="isplaced_${unit.id}_btn"
+                           href="@{ProcureUnits.markPlace(unit.id)}" data-disable-with='更新中'>抵达货代</a>
+                      #{/ifnot}
+                  #{/if}
+                <a href="javascript:void(0)" class="btn btn-xs btn-warning" data-tragettr="procureUnit_${unit.id}"
+                   data-href="@{ProcureUnits.confirmUnit(unit.id)}" name="confirmUnitBtn">已核单</a>
+                <a href="javascript:void(0)" class="btn btn-xs ${unit.noPayment?'btn-success':'btn-danger'}"
+                   data-tragettr="procureUnit_${unit.id}" data-href="@{ProcureUnits.noPayment(unit.id)}" name="noPaymentBtn"
+                   rel='tooltip' title='因各种原因而不需要纳入 未进请款单金额 统计'>${unit.noPayment?'统计':'不统计'}</a>
+                  #{if unit.fba}
+                      #{power.ck 'fbas.update'}
+                        <a href="javascript:void(0)" class="btn btn-xs btn-warning" id="replaceUnitFBA"
+                           data-unit-id="${unit.id}">更换 ${unit.fba?.shipmentId}
+                        </a>
+                      #{/power.ck}
+                  #{/if}
 
-                    #{if unit.fba}
-                      <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-xs btn-success">箱內麦</a>
-                      <a href="javascript:void(0)" class="btn btn-xs btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
-                    #{/if}
+                  #{if unit.fba}
+                    <a href="@{FBAs.packingSlip(unit.fba.id)}" target="_blank" class="btn btn-xs btn-success">箱內麦</a>
+                    <a href="javascript:void(0)" class="btn btn-xs btn-success" name="boxLabelBtn" data-id="${unit.fba.id}">箱外麦</a>
+                  #{/if}
               #{/if}
           </div>
         </div>
@@ -291,11 +290,9 @@
           <div class="box-header with-border"><h3 class="box-title">Record</h3></div>
           <div class="box-body">
               #{ifnot norecord}
-                  #{cache unit.recordsPageCacheKey(), for:'3h'}
-                    <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-                        #{records_ul  records: unit.records()/}
-                    </div>
-                  #{/cache}
+                <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                    #{records_ul  records: unit.records()/}
+                </div>
               #{/ifnot}
           </div>
         </div>

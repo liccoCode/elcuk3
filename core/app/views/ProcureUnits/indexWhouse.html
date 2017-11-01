@@ -24,7 +24,7 @@
       <div class="box-header with-border">
         <form action="@{ProcureUnits.indexWhouse()}" method="get" class="form-inline" id="search_Form">
           <div class="row-fluid">
-            
+
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
@@ -95,7 +95,7 @@
                 #{/if}
             #{/list}
             </select>
-            
+
             <select name="p.shield" class="form-control" style="width:110px;">
               <option value="1" ${p.shield ? 'selected' : ''}>屏蔽无效计划</option>
               <option value="0" ${!p.shield ? 'selected' : ''}>不屏蔽无效计划</option>
@@ -187,28 +187,26 @@
               </td>
               <td>
                   #{if unit.fba}
-                      #{cache unit.fba.cacheKey(), for:'6h'}
-                      ${unit.fba.shipmentId}
-                          #{set feeds: unit.fba.feeds()/}
-                          #{if feeds.size() > 0}
-                              #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                              #{set lastFeed: feeds.get(0)/}
-                              #{if lastFeed.isFailed()}
-                                <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
-                                   data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
-                              #{/if}
-                              #{elseif lastFeed.isSussess()}
-                                <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
-                                   data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
-                                </i>
-                              #{/elseif}
-                              #{else }
-                                <i class="icon-search" name="showFeedsPage"
-                                   data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
-                                </i>
-                              #{/else}
+                  ${unit.fba.shipmentId}
+                      #{set feeds: unit.fba.feeds()/}
+                      #{if feeds.size() > 0}
+                          #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                          #{set lastFeed: feeds.get(0)/}
+                          #{if lastFeed.isFailed()}
+                            <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
                           #{/if}
-                      #{/cache}
+                          #{elseif lastFeed.isSussess()}
+                            <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                            </i>
+                          #{/elseif}
+                          #{else }
+                            <i class="icon-search" name="showFeedsPage"
+                               data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                            </i>
+                          #{/else}
+                      #{/if}
                   #{/if}
                 <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
               </td>
@@ -254,7 +252,7 @@
               </td>
               <td>
                   #{if Arrays.asList("IN_STORAGE","OUTBOUND","SHIPPING","SHIP_OVER","INBOUND","CLOSE").contains(unit.stage.name())}
-                    <input type="button" data-id="${unit.id}" name="editBoxInfo"  data-stage="${unit.stage.name()}"
+                    <input type="button" data-id="${unit.id}" name="editBoxInfo" data-stage="${unit.stage.name()}"
                            #{if unit.stage.name()=='IN_STORAGE'}value="填写"#{/if}  #{else}value="查看" #{/else}
                            class="btn btn-xs ${unit.validBoxInfoIsCorrect() ? 'btn-success' : 'btn-danger'}">
                   #{/if}
@@ -327,11 +325,9 @@
                     <div class="box-header with-border"><h3 class="box-title">Record</h3></div>
                     <div class="box-body">
                         #{ifnot norecord}
-                            #{cache unit.recordsPageCacheKey(), for:'3h'}
-                              <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-                                  #{records_ul  records: unit.records()/}
-                              </div>
-                            #{/cache}
+                          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+                              #{records_ul  records: unit.records()/}
+                          </div>
                         #{/ifnot}
                     </div>
                   </div>

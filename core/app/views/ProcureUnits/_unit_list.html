@@ -94,28 +94,26 @@
     </td>
     <td>
         #{if unit.fba}
-            #{cache unit.fba.cacheKey(), for:'6h'}
-            ${unit.fba.shipmentId}
-                #{set feeds: unit.fba.feeds()/}
-                #{if feeds.size() > 0}
-                    #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
-                    #{set lastFeed: feeds.get(0)/}
-                    #{if lastFeed.isFailed()}
-                      <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
-                    #{/if}
-                    #{elseif lastFeed.isSussess()}
-                      <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
-                      </i>
-                    #{/elseif}
-                    #{else }
-                      <i class="icon-search" name="showFeedsPage"
-                         data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
-                      </i>
-                    #{/else}
+        ${unit.fba.shipmentId}
+            #{set feeds: unit.fba.feeds()/}
+            #{if feeds.size() > 0}
+                #{render '/app/views/gt_templates/feeds.html', feeds: feeds, key: unit.fba.shipmentId, fid: unit.fba.id/}
+                #{set lastFeed: feeds.get(0)/}
+                #{if lastFeed.isFailed()}
+                  <i style="color:#dc143c;" class="icon-warning-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交失败"></i>
                 #{/if}
-            #{/cache}
+                #{elseif lastFeed.isSussess()}
+                  <i style="color:green;" class="icon-ok-sign" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息提交成功">
+                  </i>
+                #{/elseif}
+                #{else }
+                  <i class="icon-search" name="showFeedsPage"
+                     data-feeds-page="${unit.fba.shipmentId}" rel="tooltip" title="FBA 装箱信息正在提交中">
+                  </i>
+                #{/else}
+            #{/if}
             #{set fbaCenter: unit.fba.fbaCenter/}
             #{if fbaCenter}
               <a href="javascript:void(0)" rel="tooltip" placement="top" title="检查 FBA Label 中的 Ship To 是否正确"
@@ -308,11 +306,9 @@
         </div>
       </div>
         #{ifnot norecord}
-            #{cache unit.recordsPageCacheKey(), for:'3h'}
-              <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
-                  #{records_ul  records: unit.records()/}
-              </div>
-            #{/cache}
+          <div style="max-height:160px;overflow:auto;margin-bottom:20px;">
+              #{records_ul  records: unit.records()/}
+          </div>
         #{/ifnot}
     </td>
   </tr>
