@@ -1,11 +1,12 @@
-<!-- 运输单运输进度部分 -->
-<div class="row-fluid">
-  <div class="span11 offset1">
-    <ul class="unstyled inline">
+<div class="box-body">
+#{shipmentWorkflow state: ship.state/}
+  <!-- 运输单运输进度部分 -->
+  <div class="col-sm-11 offset1">
+    <ul class="list-inline">
       <li class="stripe">
         <div class="block">
           <label>开始运输时间</label>
-          <span>#{time_tooltip time: ship.dates.beginDate/}</span>
+          <span></span>
         </div>
         <div class="block">
           <label>预计下一阶段时间</label>
@@ -122,8 +123,8 @@
         <div class="block">
           <label>平均<abbr>总运输</abbr></label>
           <span>
-          ${atport.toInteger() + pick.toInteger() + book.toInteger() + deliver.toInteger() + receipt.toInteger() + inbound.toInteger()}
-          </span>
+                ${atport.toInteger() + pick.toInteger() + book.toInteger() + deliver.toInteger() + receipt.toInteger() + inbound.toInteger()}
+                </span>
         </div>
         <div class="block">
           <label>实际<abbr>总运输</abbr></label>
@@ -136,97 +137,92 @@
     </ul>
   </div>
 </div>
+<div class="box-footer" id="btnFucs">
+#{if ship.apply}
+  <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
+#{/if}
+#{if ship.state == models.procure.Shipment.S.PLAN}
+  <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
+     class="btn  btn-warning" data-disable-with="确认中...">
+    确认运输单
+  </a>
+#{/if}
+#{if ship.state == models.procure.Shipment.S.CONFIRM}
+  <a href="@{Shipments.confirm(ship.id, true)}" data-confirm="确认操作?" data-method="POST"
+     class="btn btn-warning" data-disable-with="确认中...">
+    取消确认运输单
+  </a>
+#{/if}
+#{power.ck "shipments.beginship"}
+    #{if ship.state == models.procure.Shipment.S.CONFIRM}
+      <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
+        开始运输
+      </button>
+    #{/if}
+#{/power.ck}
+#{power.ck "shipments.revertstate"}
+  <a class="btn btn-warning" href="@{Shipments.revertState(ship.id)}" data-method='DELETE'
+     data-confirm='确认操作?' data-disable-with='返回中...'>
+    回到前一个状态
+  </a>
+#{/power.ck}
+#{power.ck "shipments.handleprocess"}
+    #{if ship.state == models.procure.Shipment.S.SHIPPING}
+      <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
+        运输到港
+      </button>
+    #{/if}
 
-<div class="row-fluid" id="btnFucs">
-  <div class="btn-toolbar">
-  #{if ship.apply}
-    <a href="@{Applys.transport(ship.apply.id)}" class="btn btn-success">${ship.apply.serialNumber}</a>
-  #{/if}
-  #{if ship.state == models.procure.Shipment.S.PLAN}
-    <a href="@{Shipments.confirm(ship.id, false)}" data-confirm="确认操作?" data-method="POST"
-       class="btn  btn-warning" data-disable-with="确认中...">
-      确认运输单
-    </a>
-  #{/if}
-  #{if ship.state == models.procure.Shipment.S.CONFIRM}
-    <a href="@{Shipments.confirm(ship.id, true)}" data-confirm="确认操作?" data-method="POST"
-       class="btn btn-warning" data-disable-with="确认中...">
-      取消确认运输单
-    </a>
-  #{/if}
-  #{power.ck "shipments.beginship"}
-      #{if ship.state == models.procure.Shipment.S.CONFIRM}
-        <button class="btn btn-success func" url="@{Shipments.beginShip(ship.id)}">
-          开始运输
-        </button>
-      #{/if}
-  #{/power.ck}
-  #{power.ck "shipments.revertstate"}
-    <a class="btn btn-warning" href="@{Shipments.revertState(ship.id)}" data-method='DELETE'
-       data-confirm='确认操作?' data-disable-with='返回中...'>
-      回到前一个状态
-    </a>
-  #{/power.ck}
-  #{power.ck "shipments.handleprocess"}
-      #{if ship.state == models.procure.Shipment.S.SHIPPING}
-        <button class="btn btn-success func" url="@{Shipments.landPort(ship.id)}">
-          运输到港
-        </button>
-      #{/if}
+    #{if ship.state == models.procure.Shipment.S.CLEARANCE}
+      <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
+        开始提货
+      </button>
+    #{/if}
 
-      #{if ship.state == models.procure.Shipment.S.CLEARANCE}
-        <button class="btn btn-success func" url="@{Shipments.pickGoods(ship.id)}">
-          开始提货
-        </button>
-      #{/if}
+    #{if ship.state == models.procure.Shipment.S.BOOKED}
+      <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
+        派送
+      </button>
+    #{/if}
+    #{if ship.state == models.procure.Shipment.S.DELIVERYING}
+      <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
+        签收
+      </button>
+    #{/if}
+    #{if ship.state == models.procure.Shipment.S.RECEIPTD}
+      <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
+        开始入库
+      </button>
+    #{/if}
+#{/power.ck }
+#{if ship.state == models.procure.Shipment.S.RECEIVING}
+  <button class="btn btn-success func" url="@{Shipments.endShip(ship.id)}">
+    完成运输
+  </button>
+#{/if}
+  <a href="#logForm" class="btn btn-default" data-toggle='modal'>记录事件</a>
 
-      #{if ship.state == models.procure.Shipment.S.BOOKED}
-        <button class="btn btn-success func" url="@{Shipments.deliverying(ship.id)}">
-          派送
-        </button>
-      #{/if}
-      #{if ship.state == models.procure.Shipment.S.DELIVERYING}
-        <button class="btn btn-success func" url="@{Shipments.receipt(ship.id)}">
-          签收
-        </button>
-      #{/if}
-      #{if ship.state == models.procure.Shipment.S.RECEIPTD}
-        <button class="btn btn-success func" url="@{Shipments.inbounding(ship.id)}">
-          开始入库
-        </button>
-      #{/if}
-  #{/power.ck }
-  #{if ship.state == models.procure.Shipment.S.RECEIVING}
-    <button class="btn btn-success func" url="@{Shipments.endShip(ship.id)}">
-      完成运输
-    </button>
-  #{/if}
-    <a href="#logForm" class="btn" data-toggle='modal'>记录事件</a>
+#{power.ck 'shipments.cancel'}
+    #{if ship.state == models.procure.Shipment.S.PLAN}
+      <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
+         data-method="DELETE" data-disable-with="取消中...">
+        取消运输单
+      </a>
+    #{/if}
+#{/power.ck}
 
-
-  #{power.ck 'shipments.cancel'}
-      #{if ship.state == models.procure.Shipment.S.PLAN}
-        <a href="@{Shipments.cancel(ship.id)}" class="btn btn-danger" data-confirm="确认取消运输?"
-           data-method="DELETE" data-disable-with="取消中...">
-          取消运输单
-        </a>
-      #{/if}
-  #{/power.ck}
-
-  #{if !(ship.state in [models.procure.Shipment.S.CANCEL ,models.procure.Shipment.S.PLAN ])}
-    <a href="@{Shipments.invoice(ship.id)}" class="btn btn-success" target="_blank">
-      运输单发票 <i class="icon-download-alt"></i>
-    </a>
-    <a href="@{Excels.declare(ship.id)}" class="btn btn-success" target="_blank">
-      报关要素下载 <i class="icon-download-alt"></i>
-    </a>
-    <a href="@{Shipments.arns(ship.id)}" class="btn btn-success" target="_blank">
-      AmazonReferenceID 下载 <i class="icon-download-alt"></i>
-    </a>
-  #{/if}
-  </div>
+#{if !(ship.state in [models.procure.Shipment.S.CANCEL ,models.procure.Shipment.S.PLAN ])}
+  <a href="@{Shipments.invoice(ship.id)}" class="btn btn-success" target="_blank">
+    运输单发票 <i class="icon-download-alt"></i>
+  </a>
+  <a href="@{Excels.declare(ship.id)}" class="btn btn-success" target="_blank">
+    报关要素下载 <i class="icon-download-alt"></i>
+  </a>
+  <a href="@{Shipments.arns(ship.id)}" class="btn btn-success" target="_blank">
+    AmazonReferenceID 下载 <i class="icon-download-alt"></i>
+  </a>
+#{/if}
 </div>
-
 
 <!-- 隐藏 Model -->
 <div class="modal hide fade" id="funcsForm">
@@ -253,7 +249,6 @@
         </div>
       </div>
     #{/power.ck}
-
     </div>
     <div class="modal-footer">
       <a href="#" class="btn" data-dismiss="modal">Close</a>
