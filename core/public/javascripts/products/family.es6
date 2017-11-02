@@ -36,6 +36,18 @@ $(() => {
     $(this).val($(this).val().toUpperCase());
   });
 
+  $("input[name='brandRadio']").click(function () {
+    if ($(this).prop("checked")) {
+      $("#familyDiv").load($("#familyDiv").data("url"), {
+        brand: $(this).val(),
+        categoryId: $(this).data("category")
+      }, function () {
+        $.getScript("/public/javascripts/products/family.es6");
+      });
+    }
+
+  });
+
 });
 
 
