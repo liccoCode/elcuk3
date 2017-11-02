@@ -1,0 +1,37 @@
+<div class="box box-success">
+  <div class="box-header"></div>
+  <div class="box-body">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Category</th>
+        <th>Brand</th>
+        <th>Name</th>
+        <th>Product</th>
+        <th>CreatDate</th>
+        <th>Creator</th>
+        <th width="150px;">Action</th>
+      </tr>
+    #{list items:families, as:'f'}
+      <tr>
+        <td>${f.category} (${f.category.brands.size()})</td>
+        <td>${f.brand.name}</td>
+        <td>${f.family}</td>
+        <td style="cursor:pointer;" name="clickTd" data-family="${f.family}" data-url="@{Familys.proDiv()}">
+          <i class="icon-reorder"></i> <span style="color:blue;">${f.products.size()}</span>
+        </td>
+        <td>#{time_tooltip_v3 time:f.createDate/}</td>
+        <td>${f.creator?.username}</td>
+        <td>
+            #{power.ck "familys.delete"}
+              <a href="@{Familys.destroy(f.family)}" class="btn btn-danger btn-xs">删除</a>
+            #{/power.ck}
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
+  <div class="box-footer">
+    <button name="add_family" class="btn btn-success btn-xs" data-category="${categoryId}" data-brand="${brand}">添加Family
+    </button>
+  </div>
+</div>

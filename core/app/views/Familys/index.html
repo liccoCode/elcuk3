@@ -12,7 +12,7 @@
 #{flash_alert /}
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-6">
     <div class="box box-primary">
       <div class="box-header with-border">
         <form action="@{Familys.index()}" method="post" class="form-inline" id="search_Form">
@@ -37,45 +37,35 @@
       <div class="box-body">
         <table class="table table-condensed table-bordered">
           <tr>
-            <th>Name</th>
             <th>Category</th>
             <th>Brand</th>
-            <th>Product</th>
-            <th>CreatDate</th>
-            <th>Creator</th>
-            <th width="150px;">Action</th>
           </tr>
-        #{list items:families, as:'f'}
-
+        #{list items:cats, as:'c'}
           <tr>
-            <td>${f.family}</td>
-            <td>${f.category} (${f.category.brands.size()})</td>
-            <td>${f.brand.name}</td>
-            <td style="cursor:pointer;" name="clickTd" data-family="${f.family}" data-url="@{Familys.proDiv()}">
-              <i class="icon-reorder"></i> <span style="color:blue;">${f.products.size()}</span>
-            </td>
-            <td>#{time_tooltip_v3 time:f.createDate/}</td>
-            <td>${f.creator?.username}</td>
-            <td>
-                #{power.ck "familys.delete"}
-                  <a href="@{Familys.destroy(f.family)}" class="btn btn-danger btn-xs">删除</a>
-                #{/power.ck}
-                #{if firstCategoryAndBrand!=f.category.categoryId+f.brand.name}
-                    #{set firstCategoryAndBrand: f.category.categoryId+f.brand.name/}
-                  <button name="add_family" class="btn btn-success btn-xs" data-category="${f.category.categoryId}"
-                          data-brand="${f.brand.name}">添加Family
-                  </button>
-                #{/if}
+            <td data-toggle="toggle" data-target="#${tr_key}_${c.categoryId}" style="cursor:pointer;">
+              <i class="icon-reorder"></i> ${c} <span style="color:red">(${c.brands.size()})</span></td>
+            <td></td>
+          </tr>
+          <tr id="${tr_key}_${c.categoryId}" style="display:none;">
+            <td colspan="2">
+                #{list items:c.brands, as:'b'}
+                  <label class="radio-inline">
+                    <input type="radio" name="brandRadio" data-category="${c.categoryId}" value="${b.name}"> ${b.name}
+                  </label>
+                #{/list}
             </td>
           </tr>
         #{/list}
         </table>
       </div>
-      <div class="box-footer">
-      #{bootstrap_pager_v3 pi:p, url:''/}
-      </div>
     </div>
   </div>
+
+  <div class="col-md-6">
+    <div id="familyDiv" data-url="@{Familys.reloadFamily()}"></div>
+
+  </div>
+
 </div>
 
 <div id="add_modal" class="modal fade" tabindex="-1" role="dialog">

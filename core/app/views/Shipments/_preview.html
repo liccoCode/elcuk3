@@ -1,46 +1,60 @@
 #{if ship}
-<div class="span3">
-  <dl class="dl-horizontal">
-    <dt>ShipmentId</dt>
-    <dd><a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a></dd>
-    <dt>FBAs</dt>
-    <dd>
-        #{list ship.fbas()}
-          <span>${_.shipmentId}</span>
-        #{/list}
-      &nbsp;
-    </dd>
-    <dt>SKUs</dt>
-    <dd>
-        #{list ship.items}
-          <span>${_.unit.sku}</span>
-        #{/list}
-      &nbsp;
-    </dd>
-  </dl>
+<hr>
+<div class="col-sm-4">
+  <div class="box">
+    <div class="box-body">
+      <dl class="dl-horizontal">
+        <dt>ShipmentId</dt>
+        <dd><a href="@{Shipments.show(ship.id)}" target="_blank">${ship.id}</a></dd>
+        <dt>FBAs</dt>
+        <dd>
+            #{list ship.fbas()}
+              <span>${_.shipmentId}</span>
+            #{/list}
+          &nbsp;
+        </dd>
+        <dt>SKUs</dt>
+        <dd>
+            #{list ship.items}
+              <span>${_.unit.sku}</span>
+            #{/list}
+          &nbsp;
+        </dd>
+      </dl>
+    </div>
+  </div>
 </div>
 
-<div class="span3">
-  <dl class="dl-horizontal">
-    <dt>重量</dt>
-    <dd>${ship.totalWeight()} kg</dd>
-    <dt>运输方式</dt>
-    <dd style="color:${ship.type.rgb()}">${ship.type.label()}</dd>
-    <dt>仓库</dt>
-    <dd>${ship.whouse.name()}</dd>
-    <dt>预计发货时间</dt>
-    <dd>#{time_tooltip time: ship.dates.planBeginDate/}</dd>
-  </dl>
+<div class="col-sm-4">
+  <div class="box">
+    <div class="box-body">
+      <dl class="dl-horizontal">
+        <dt>重量</dt>
+        <dd>${ship.totalWeight()} kg</dd>
+        <dt>运输方式</dt>
+        <dd style="color:${ship.type.rgb()}">${ship.type.label()}</dd>
+        <dt>仓库</dt>
+        <dd>${ship.whouse.name()}</dd>
+        <dt>预计发货时间</dt>
+        <dd>#{time_tooltip time: ship.dates.planBeginDate/}</dd>
+      </dl>
+    </div>
+  </div>
 </div>
 
-<div class="span3">
-  <dl class="dl-horizontal">
-    <dt>状态</dt>
-    <dd style="color:${ship.state.rgb()}">${ship.state.label()}</dd>
-    <dt>运输商</dt>
-    <dd>${ship.cooper?.fullName}&nbsp;</dd>
-    <dt>预计抵达时间</dt>
-    <dd>#{time_tooltip time: ship.dates.planArrivDate/}</dd>
-  </dl>
+<div class="col-sm-4">
+  <div class="box">
+    <div class="box-body">
+      <dl class="dl-horizontal">
+        <dt>状态</dt>
+        <dd style="color:${ship.state.rgb()}">${ship.state.label()}</dd>
+        <dt>运输商</dt>
+        <dd>${ship.cooper?.fullName}&nbsp;</dd>
+        <dt>预计抵达时间</dt>
+        <dd>#{time_tooltip time: ship.dates.planArrivDate/}</dd>
+      </dl>
+    </div>
+  </div>
 </div>
+
 #{/if}

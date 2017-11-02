@@ -1,0 +1,276 @@
+<div class="box box-warning box-solid">
+  <div class="box-header"><h3 class="box-title">运输单费用信息</h3></div>
+  <div class="box-body">
+    <table class="table table-bordered table-condensed paymentInfo">
+      <tr>
+        <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
+        <th width="120px;" data-toggle="tooltip" title="黑色: 申请状态; 蓝色: 批准状态; 红色: 驳回状态; 绿色: 支付完成状态">费用类型</th>
+        <th width="50px;">币种</th>
+        <th width="100px;">单价</th>
+        <th width="80px;">数量</th>
+      #{if isExpress}
+        <th width="80px;">计费方式</th>
+      #{/if}
+        <th width="80px;">(3m)均价</th>
+        <th width="80px;">(now)均价</th>
+        <th width="110px;">总价</th>
+        <th width="130px">费用关系人</th>
+        <th width="220px;">支付单</th>
+        <th width="100px;">备注</th>
+        <th width="60px;">申请人</th>
+        <th width="90px;">申请时间</th>
+        <th width="230px;">Action</th>
+      </tr>
+    #{list items:ship.fees, as:'fee'}
+      <tr id='fee_${fee.id}'>
+        <td><input type="checkbox" name="pids" value="${fee.id}"></td>
+        <td><span class="label ${fee.stateLabelV3()}">${fee.feeType.nickName}</span></td>
+        <td>${fee.currency}</td>
+        <td>${fee.currency.symbol()} ${fee.unitPrice.format('#.###')}</td>
+        <td>${fee.unitQty}</td>
+          #{if isExpress}
+            <td>${fee.chargingWay?.label()}</td>
+          #{/if}
+        <td>${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}</td>
+        <td>${helper.Currency.CNY.symbol()} ${fee.currentAvgPrice().format('#.###')}</td>
+        <td data-shipitemid='${fee.shipItem?.id}'>
+        ${fee.currency.symbol()} ${fee.amount()}
+            #{if fee.shipItem}
+              <i class="icon-search"></i>
+            #{/if}
+        </td>
+        <td>${fee.cooperator?.name}</td>
+        <td><a href="@{Payments.show(fee.payment?.id)}" target="_blank">${fee.payment?.paymentNumber}</a></td>
+        <td>${fee.memo}</td>
+        <td>${fee.payee.username}</td>
+        <td>#{time_tooltip time:fee.createdAt /}</td>
+        <td>
+            #{power.ck 'paymentunits.fixunitvalue'}
+              <button class="btn btn-xs btn-info" data-id="${fee.id}">编辑</button>
+            #{/power.ck}
+            #{power.ck 'paymentunits.destroy'}
+              <button class="btn btn-xs btn-warning" data-id="${fee.id}">删除</button>
+            #{/power.ck}
+            #{if !fee.payment}
+                #{power.ck 'paymentunits.approve'}
+                  <button class="btn btn-xs btn-success" data-id="${fee.id}">请款</button>
+                #{/power.ck}
+            #{/if}
+            #{power.ck 'paymentunits.deny'}
+              <button class="btn btn-xs btn-danger" data-id="${fee.id}">驳回</button>
+            #{/power.ck}
+        </td>
+      </tr>
+    #{/list}
+    </table>
+  </div>
+  <div class="box-footer">
+  #{power.ck 'paymentunits.postfromtransport'}
+    <form class="form-inline add_payment" method="GET">
+      <div class="input-prepend input-append inline">
+        <select name="fee.feeType.name" class="form-control selectize" style="width:180px;">
+          <option value="">费用类型</option>
+            #{list items:feeTypes,as:'f'}
+              <option value="${f.name}">${f.nickName}#{if f.shortcut} (${f.shortcut}) #{/if}</option>
+            #{/list}
+        </select>
+      </div>
+
+      <label>币种
+        <select name="fee.currency" class="form-control input-small " style="width:120px;">
+            #{list items:helper.Currency.values(),as:'c'}
+              <option value="${c}" ${c.name()=='CNY'?'selected':''}>${c}</option>
+            #{/list}
+        </select>
+      </label>
+
+      <label>单价
+        <input name="fee.unitPrice" type="number" step="any" class="form-control" value="0" style="width:100px;">
+      </label>
+
+      <label>数量
+        <input name="fee.unitQty" type="number" step="any" class="form-control" value="1" style="width:100px;">
+      </label>
+
+      <label>总价
+        <input type="number" readonly="" class="form-control amount">
+      </label>
+
+      <label>费用关系人
+        <select name="fee.cooperator.id" class="form-control" style="width:150px;">
+            #{list items:cooperators, as:'cooper'}
+              <option ${ship?.cooper == cooper ? 'selected' : ''}  value="${cooper.id}">${cooper.name}</option>
+            #{/list}
+        </select>
+      </label>
+
+      <label>备注
+        <input name="fee.memo" class="form-control" rows="3"/>
+      </label>
+
+      <button type="submit" class="btn btn-warning" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
+        #{if ship.whouse?.country.contains('DE') }
+          <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'
+                  style="display:none">
+            计算剩余关税
+          </button>
+        #{/if}
+    </form>
+      #{if ship.whouse?.country.contains('DE') }
+        <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}' style="display: none">
+          计算预交关税
+        </a>
+      #{/if}
+  #{/power.ck}
+  </div>
+</div>
+
+<div class="modal fade" id="popModal"></div>
+
+<script type="text/template" id='form-destroyfee-model-template'>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="<%= fee.url %>" method="POST" data-method='DELETE' class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">删除 <%= fee.id %></h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="row">
+            <label class="col-sm-2 control-label">原因</label>
+            <div class="col-sm-10">
+              <textarea rows="3" class="form-control" name="reason"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">取消</a>
+          <button class="btn btn-primary" data-id='<%= fee.id %>' data-disable-with='删除中...'>删除</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</script>
+
+<script type="text/template" id='tr-paymentunit-template'>
+  <tr id='fee_<%= fee.id %>'>
+    <td><%= fee.id %></td>
+    <td><span class='label label-<%= label %>'><%= fee.feeType.nickName %></span></td>
+    <td><%= fee.currency %></td>
+    <td><%= fee.symbol %> <%= fee.unitPrice %></td>
+    <td><%= fee.unitQty %></td>
+  #{if isExpress}
+    <td><%= fee.chargingWay %></td>
+  #{/if}
+    <td><%= fee.averagePrice %></td>
+    <td><%= fee.currentAvgPrice %></td>
+    <td data-shipitemid='<%= fee.shipItem.id %>'>
+      <%= fee.symbol %> <%= fee.amount %>
+      <% if(fee.shipItem.id) { %>
+      <i class="icon-search"></i>
+      <% } %>
+    </td>
+    <td><%= fee.cooperator.name %></td>
+    <td></td>
+    <td><%= fee.memo %></td>
+    <td><%= fee.payee.username %></td>
+    <td><%= fee.createdAt %></td>
+    <td>
+    #{power.ck 'paymentunits.fixunitvalue'}
+      <button class="btn btn-mini btn-info">编辑</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.destroy'}
+      <button class="btn btn-mini btn-warning">删除</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.approve'}
+      <button class="btn btn-mini btn-success">批准</button>
+    #{/power.ck}
+    #{power.ck 'paymentunits.deny'}
+      <button class="btn btn-mini btn-danger">驳回</button>
+    #{/power.ck}
+    </td>
+  </tr>
+</script>
+
+<script type='text/template' id='tr-edit-paymentunit-template'>
+  <tr>
+    <td><%= fee.id %></td>
+    <td><%= fee.feeType.nickName %></td>
+    <td>
+    #{select 'fee.currency', items:helper.Currency.values(), class: 'input-small', native: true}#{/select}
+    </td>
+    <td>
+      <input type="number" step='any' class="input-mini" name='fee.unitPrice' value="<%= fee.unitPrice %>">
+    </td>
+    <td>
+      <input type="number" step='any' class="input-mini" name="fee.unitQty" value="<%= fee.unitQty %>">
+    </td>
+  #{if isExpress}
+    <td>
+      <select name="fee.chargingWay" class="input-small" native>
+          #{list items:models.finance.PaymentUnit.W.values(), as:'way'}
+            <option value="${way}">${way.label()}</option>
+          #{/list}
+      </select>
+    </td>
+  #{/if}
+    <td>系统计算得出</td>
+    <td><%= fee.currentAvgPrice %></td>
+    <td>
+      <input type="number" readonly="" class="input-mini amount" value="<%= fee.amount%>">
+    </td>
+    <td>
+      <%= fee.cooperator.name %>
+    </td>
+    <td>
+      <textarea name="fee.memo"><%= fee.memo %></textarea>
+    </td>
+    <td><%= fee.payee.username %></td>
+    <td><%= fee.createdAt %></td>
+    <td>
+      <button class="btn btn-mini btn-success">更新</button>
+      <button class="btn btn-mini btn-danger">取消</button>
+    </td>
+  </tr>
+</script>
+
+<script type="text/template" id="form-deny-paymentunit-template">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="<%= form.url %>" method="POST" data-feeid="<%= form.id %>" class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title"><span class="text-info"><%= form.title %></span></h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <label class="col-sm-2 control-label">原因</label>
+            <div class="col-sm-10">
+              <textarea rows="3" class="form-control" name="reason"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-danger deny-paymentunit" data-disable-with='提交中...' value="驳回">
+        </div>
+      </form>
+    </div>
+  </div>
+</script>
+
+<script type="text/template" id="shipItem-template">
+  <label>#: <%= itm.id %></label>
+  <label>SKU: <%= itm.unit.sku %></label>
+  <label>FBA: <%= itm.unit.fba.shipmentId %></label>
+  <label>Qty: <%= itm.qty %></label>
+  <label>Recived: <%= itm.recivedQty %></label>
+  <label>ShipDate: <%= itm.shipDate %></label>
+</script>
+
+<script type="text/template" id="statisticFee-template">
+  <tr>
+    <td colspan="15"><span style="margin-right:20px;">运输单费用统计</span> <%= msg %></td>
+  </tr>
+</script>

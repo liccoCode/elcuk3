@@ -1,109 +1,112 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"运输单 #" + ship.id /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/workflow.css'/}
+#{/set}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
     #{script 'highstock.js'/}
-    #{script 'timeline/timeline_js/timeline-api.js'/}
-    #{script 'analyzes/timeline.coffee'/}
     #{script 'shipments/show.coffee'/}
     #{script 'shipments/show.es6'/}
     #{script 'shipments/paymentunits.coffee'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
-
-<ul class="nav nav-tabs" id="below_tab">
-  <li class="active">
-    <a href="#" id="shipmentInfoBtn" data-toggle='tab'>运输单信息</a>
-  </li>
-  <li>
-    <a href="#" id="fileManagermentBtn" data-toggle='tab'>附件管理</a>
-  </li>
-</ul>
 
 #{errorMsgs /}
-
-<div id="shipmentInfo">
-#{info_row title:'采购单信息 <i class="icon-caret-down"></i>'.raw() /}
-  <div class="row-fluid">
-    <div class="span12">
-    #{if ship.projectName == models.User.COR.MengTop}
-        #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers, customs:customs/}
-    #{/if}
-      #{else }
-        #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
-    #{/else}
-    </div>
-  </div>
-
 #{flash_alert /}
-#{shipmentWorkflow state: ship.state/}
-#{render './_show_progress.html', ship: ship/}
-#{render './_show_items.html', ship: ship, cooperators: cooperators/}
 
-  <!-- 运输单记录信息 -->
-  <div class="row-fluid" style="margin-top:20px;">
-    <div class="span6">
-    #{records_ul records: records/}
-    </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#shipmentInfoBtn" data-toggle='tab'>基本信息</a></li>
+        <li><a href="#shipmentDetailBtn" data-toggle='tab'>运输单详情</a></li>
+        <li><a href="#paymentDetailBtn" data-toggle='tab'>请款详情</a></li>
+        <li><a href="#fileManagementBtn" data-toggle='tab'>附件管理</a></li>
+      </ul>
 
-    <div class="span6">
-      <div class="row-fluid">
-        <div class="span12">
-          <h4 class="text-warning">
-            运输进度
-            <i class="icon-sort-down"></i>
-            &nbsp;
-            <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-mini btn-danger" data-method='PUT'>
-              <i class="icon-refresh"></i>
-            </a>
-          </h4>
+      <div class="tab-content">
+        <div class="tab-pane active" id='shipmentInfoBtn'>
+        #{if ship.projectName == models.User.COR.MengTop}
+            #{render './_b2b_shipment.html', ship: ship, whouses: whouses, shippers: shippers, customs:customs/}
+        #{/if}
+        #{else }
+            #{render './_shipment.html', ship: ship, whouses: whouses, shippers: shippers/}
+        #{/else}
         </div>
-      </div>
 
-      <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
-      #{set logEvents: ship.logEvents()/}
-      #{records_ul records: ship.logEvents()/}
-      #{if ship.iExpressHTML.trim().size() > 0}
-      ${ship.iExpressHTML.raw()}
-      #{/if}
-      #{elseif logEvents.size() == 0}
-        还没有跟踪信息
-      #{/elseif}
+        <div class="tab-pane" id="shipmentDetailBtn">
+          <div class="box">
+          #{render './_show_progress.html', ship: ship/}
+          </div>
+        #{render './_show_items.html', ship: ship, cooperators: cooperators/}
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="box">
+                <div class="box-body">
+                #{records_ul records: records, nobr:true/}
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">运输进度<i class="icon-sort-down"></i></h3>
+                  <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-xs btn-danger" data-method='PUT'>
+                    <i class="icon-refresh"></i>
+                  </a>
+                </div>
+                <div class="box-body">
+                  <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
+                  #{set logEvents: ship.logEvents()/}
+                  #{records_ul records: ship.logEvents()/}
+                  #{if ship.iExpressHTML.trim().size() > 0}
+                  ${ship.iExpressHTML.raw()}
+                  #{/if}
+                  #{elseif logEvents.size() == 0}
+                    还没有跟踪信息
+                  #{/elseif}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="paymentDetailBtn">
+        #{render './_paymentunits_v3.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type==models.procure.Shipment.T.EXPRESS/}
+        </div>
+
+        <div class="tab-pane" id="fileManagementBtn">
+          <div class="row-fluid">
+            <div class="span12">
+              <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+            </div>
+          </div>
+          <div class="row-fluid">
+            <div style="min-height:300px;" class="span12 well" id="dropbox">
+              <ul class="thumbnails uploaded"></ul>
+              <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
-
-  <!-- 请款信息 -->
-#{render './_paymentunits.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type ==
-models.procure.Shipment.T.EXPRESS/}
-
 </div>
 
-<!-- 附件信息 -->
-<div id="fileManagerment" style="display: none;">
-  <div class="row-fluid">
-    <div class="span12">
-      <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+<div id="fba_carton_contents_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h3 class="modal-title">包装信息</h3></div>
+      <div class="modal-body">
+        <div id="refresh_div"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+      </div>
     </div>
-  </div>
-  <div class="row-fluid">
-    <div style="min-height:300px;" class="span12 well" id="dropbox">
-      <ul class="thumbnails uploaded"></ul>
-      <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-    </div>
-  </div>
-</div>
-
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left:40%;">
-  <div class="modal-body">
-    <div id="refresh_div"></div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
   </div>
 </div>

@@ -28,10 +28,15 @@ public class Familys extends Controller {
 
     @Check("familys.index")
     public static void index(FamilyPost p) {
+        List<Category> cats = Category.find("ORDER BY categoryId").fetch();
         if(p == null) p = new FamilyPost();
         List<Family> families = p.query();
-        renderArgs.put("categoryIds", Category.categoryIds());
-        render(p, families);
+        render(p, families, cats);
+    }
+
+    public static void reloadFamily(String categoryId, String brand) {
+        List<Family> families = Family.find("category.categoryId=? AND brand.name=?", categoryId, brand).fetch();
+        render("Familys/familyIndex.html", families, categoryId, brand);
     }
 
     public static void create(Family f) {

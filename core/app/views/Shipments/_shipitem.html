@@ -10,10 +10,9 @@
   #{if useCheckbox}
     <th width="10px;"><input type="checkbox" class="checkbox_all"/></th>
   #{/if}
-    <th width="45px;">采购ID</th>
+    <th width="55px;">采购ID</th>
     <th width="40px;">阶段</th>
-    <th width="160px;">Sku</th>
-    <th width="160px;">Selling</th>
+    <th width="150px;">Sku</th>
   #{if useCheckbox}
     <th width="90px;">FBA</th>
     <th width="40px;">CenterId</th>
@@ -21,8 +20,8 @@
     <th width="90px;"><abbr rel='tooltip' title='计划数量 | 交货数量 | 运输数量'>Qty</abbr></th>
     <th width="50px;">Receive</th>
     <th width="40px;">Qty1</th>
-    <th width="65px;">采购单<br>供应商</th>
-    <th>税点</th>
+    <th width="60px;">采购单<br>供应商</th>
+    <th width="55px;">税点</th>
     <th width="140px;">预计发货时间<br>预计到库时间</th>
     <th width="140px;">预计交货时间<br>实际交货时间</th>
     <th width="50px;">总重量(kg)</th>
@@ -32,23 +31,23 @@
     <th width="35px;">运往<br>仓库</th>
   #{/if}
     <th width="80px;">运营创建人<br>采购创建人</th>
-    <th width="50px;">丢失量<br>/赔偿金</th>
+    <th width="55px;">丢失量<br>/赔偿金</th>
   #{power.ck 'paymentunits.postfromtransport'}
       #{if isExpress}
-        <th width="30px;">记录运费</th>
+        <th width="35px;">记录运费</th>
       #{/if}
   #{/power.ck}
   </tr>
 #{list items:items, as:'itm'}
-  <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}'
-      data-lossqty='${itm.lossqty}' data-compenamt='${itm.compenamt}'
-      data-currency='${itm.currency?.name()}' data-compentype='${itm.compentype}'>
+  <tr id="${itm.id}" data-received-url='@{ShipItems.received(itm.id)}' data-lossqty='${itm.lossqty}'
+      data-compenamt='${itm.compenamt}' data-currency='${itm.currency?.name()}' data-compentype='${itm.compentype}'>
       #{if useCheckbox}
         <td>
           <input type="checkbox" name="shipItemId" value="${itm.id}" id="checkbox_${itm.id}">
         </td>
       #{/if}
-    <td>
+    <td data-toggle="toggle" style="cursor:pointer;" data-target="#${tr_key}_${itm.id}">
+      <i class="icon-reorder"></i>
       <a href="@{Deliveryments.show(itm.unit?.deliveryment?.id)}#${itm.unit?.id}">${itm.unit?.id}</a>
     </td>
     <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
@@ -56,7 +55,6 @@
       <a href="@{Products.showAttr(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
     ${itm.unit.product?.chineseName}
     </td>
-    <td style="word-break:break-all;"><a id="unitbutton">${itm.unit.sid}</a></td>
       #{if useCheckbox}
           #{if itm.unit.fba}
             <td>
@@ -113,14 +111,15 @@
       <a href="@{Deliveryments.show(itm.unit.deliveryment?.id)}#${itm.unit.id}">${itm.unit.deliveryment?.id}</a><br>
     ${itm.unit.cooperator?.name}
     </td>
-    <td>#{if itm.unit.containTax} <div class="label label-important">税点:${itm.unit.taxPoint}</div> #{/if}</td>
+    <td>#{if itm.unit.containTax}
+      <div class="label label-danger">税点:${itm.unit.taxPoint}</div> #{/if}</td>
     <td style="background:${itm.overdue()}">
       预计发货:#{time_tooltip time: itm.unit.attrs.planShipDate/}<br>
       预计到库:#{time_tooltip time: itm.unit.attrs.planArrivDate/}
     </td>
     <td>
       预计交货:#{time_tooltip time: itm.unit.attrs.planDeliveryDate/}<br>
-      实际交货:#{time_tooltip time: itm.unit.attrs.deliveryDate/}
+      实际交货:#{time_tooltip_v3 time: itm.unit.attrs.deliveryDate/}
     </td>
     <td>${itm.totalWeight().format("#.##")}</td>
     <td>
@@ -144,11 +143,15 @@
       #{power.ck 'paymentunits.postfromtransport'}
           #{if isExpress}
             <td>
-              <a class="btn btn-mini" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
+              <a class="btn btn-xs btn-default" data-url='@{PaymentUnits.fromShipItem(itm.id)}'>L</a>
             </td>
           #{/if}
       #{/power.ck}
   </tr>
+  <tr id="${tr_key}_${itm.id}" style="display:none;">
+    <td colspan="20" style="word-break:break-all;"><a id="unitbutton">${itm.unit.sid}</a></td>
+  </tr>
+
 #{/list}
 #{if shipmentId}
   <tr>
