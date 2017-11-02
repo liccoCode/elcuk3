@@ -2610,7 +2610,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean validBoxInfoIsCorrect() {
-        return this.availableQty == this.totalOutBoundQty();
+        if(this.stage == STAGE.IN_STORAGE) {
+            return this.availableQty == this.totalOutBoundQty();
+        } else {
+            return this.outQty == this.totalOutBoundQty();
+        }
     }
 
     public int totalOutBoundQty() {
