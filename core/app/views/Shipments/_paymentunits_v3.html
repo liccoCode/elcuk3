@@ -105,18 +105,18 @@
       </label>
 
       <label>备注
-        <input name="fee.memo" class="form-control" rows="3"/>
+        <input name="fee.memo" class="form-control"/>
       </label>
 
       <button type="submit" class="btn btn-warning" data-url='@{PaymentUnits.fromShipment(ship.id)}'>添加费用</button>
-        #{if ship.whouse?.country.contains('DE') }
+        #{if ship.whouse?.country?.contains('DE') }
           <button type="submit" class="btn btn-inverse" data-url='@{PaymentUnits.calShipmentLeftDuty(ship.id)}'
                   style="display:none">
             计算剩余关税
           </button>
         #{/if}
     </form>
-      #{if ship.whouse?.country.contains('DE') }
+      #{if ship.whouse?.country?.contains('DE') }
         <a class="btn btn-info" data-method='POST' data-disable-with='申请中...' href='@{PaymentUnits.applyDutyFromShipment(ship.id)}' style="display: none">
           计算预交关税
         </a>
@@ -156,7 +156,7 @@
 
 <script type="text/template" id='tr-paymentunit-template'>
   <tr id='fee_<%= fee.id %>'>
-    <td><%= fee.id %></td>
+    <td><input type="checkbox" name="pids" value="<%= fee.id %>"></td>
     <td><span class='label label-<%= label %>'><%= fee.feeType.nickName %></span></td>
     <td><%= fee.currency %></td>
     <td><%= fee.symbol %> <%= fee.unitPrice %></td>
@@ -179,16 +179,16 @@
     <td><%= fee.createdAt %></td>
     <td>
     #{power.ck 'paymentunits.fixunitvalue'}
-      <button class="btn btn-mini btn-info">编辑</button>
+      <button class="btn btn-xs btn-info">编辑</button>
     #{/power.ck}
     #{power.ck 'paymentunits.destroy'}
-      <button class="btn btn-mini btn-warning">删除</button>
+      <button class="btn btn-xs btn-warning">删除</button>
     #{/power.ck}
     #{power.ck 'paymentunits.approve'}
-      <button class="btn btn-mini btn-success">批准</button>
+      <button class="btn btn-xs btn-success">批准</button>
     #{/power.ck}
     #{power.ck 'paymentunits.deny'}
-      <button class="btn btn-mini btn-danger">驳回</button>
+      <button class="btn btn-xs btn-danger">驳回</button>
     #{/power.ck}
     </td>
   </tr>
