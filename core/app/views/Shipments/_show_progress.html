@@ -225,36 +225,43 @@
 </div>
 
 <!-- 隐藏 Model -->
-<div class="modal hide fade" id="funcsForm">
-  <form action="#" method="POST" class="form-horizontal">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal">×</button>
-      <h4>设置时间</h4>
-    </div>
-    <div class="modal-body">
-      <div class="control-group">
-        <label class="control-label" for="inputEmail">日期:</label>
-        <div class="controls">
-          <input type="date" name="date" date-format='yyyy-MM-dd'>
+<div class="modal fade" id="funcsForm">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="#" method="POST" class="form-horizontal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h4 class="modal-title">设置时间</h4>
         </div>
-      </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="inputEmail">日期:</label>
+            <div class="col-sm-4">
+              <input role="date" name="date" class="form-control">
+            </div>
+          </div>
 
-      <!-- 权限控制判断是否显示 "同步亚马逊" 按钮-->
-    #{power.ck "shipment.syncdatabase"}
-      <div class="control-group">
-        <div class="controls">
-          <label class="checkbox">
-            <input type="checkbox" name="sync"> 是否只同步数据库
-          </label>
+          <!-- 权限控制判断是否显示 "同步亚马逊" 按钮-->
+        #{power.ck "shipment.syncdatabase"}
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="inputEmail"></label>
+            <div class="col-sm-4">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="sync"> 是否只同步数据库
+                </label>
+              </div>
+            </div>
+          </div>
+        #{/power.ck}
         </div>
-      </div>
-    #{/power.ck}
+        <div class="modal-footer">
+          <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
+          <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+            <span id="action">Save Changes</span>
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="modal-footer">
-      <a href="#" class="btn" data-dismiss="modal">Close</a>
-      <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
-        <span id="action">Save Changes</span>
-      </button>
-    </div>
-  </form>
+  </div>
 </div>

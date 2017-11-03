@@ -29,7 +29,7 @@
         <a class="btn btn-success adjust" data-disable-with='调整中...' data-confirm="确认调整?">
           <i class="icon-adjust"></i>调整</a>
       </div>
-     
+
       <div class="row" id="preview"></div>
     #{/power.ck}
     </div>
@@ -41,17 +41,21 @@
 <div class="modal fade" id="logForm">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <form action="@{Shipments.log(ship.id)}" method="POST">
+      <form action="@{Shipments.log(ship.id)}" method="POST" class="form-horizontal">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">×</button>
-          <h4>记录运输状态事件</h4>
+          <h4 class="modal-title">记录运输状态事件</h4>
         </div>
-        <div class="modal-body row-fluid">
-          <label>事件:</label>
-          <textarea role="5" name="msg" class="span11"></textarea>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="col-sm-2">事件:</label>
+            <div class="col-sm-10">
+              <textarea role="5" name="msg" class="form-control"></textarea>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn" data-dismiss="modal">Close</a>
+          <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
           <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
             记录
           </button>
