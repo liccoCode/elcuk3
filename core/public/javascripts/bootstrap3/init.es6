@@ -21,5 +21,11 @@ $(() => {
   window.$dataui.dateinput();
   window.$dataui.selectize();
   $("table").addClass("table-hover");
-  $('[data-toggle="popover"]').popover();
+
+  $("[data-toggle='popover']").popover({
+    html: true,
+    trigger: 'hover'
+  });
+
+
 });

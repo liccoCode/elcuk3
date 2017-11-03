@@ -60,7 +60,7 @@
             <td>
                 #{if itm.unit.fba.records}
                   <a href="${itm.unit.fba.fbaLink()}" target="_blank">
-                  <span rel='popover' placement='bottom' full-width="true" content="${itm.unit.fba?.records()}">
+                  <span data-toggle="popover" data-placement="bottom" data-content="${itm.unit.fba?.records()}">
                   ${itm.unit.fba.shipmentId}
                   </span>
                   </a>
@@ -96,9 +96,10 @@
       #{/else}
 
       #{if itmRecord}
-        <td style="#{if itm.adjustQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}"
-            name='adjustQty' placement='right' rel='popover' content='#{records_ul records: itm.recivedLogs()/}'>
+        <td style="#{if itm.adjustQty != itm.qty || itm.changeFromZero()}background:#F2DEDE#{/if}" name='adjustQty'>
+        <span data-toggle="popover" data-placement="right" data-content='#{records_ul records: itm.recivedLogs()/}'>
         ${itm.adjustQty}<i class="icon-wrench"></i>
+        </span>
         </td>
       #{/if}
       #{else }
