@@ -1,5 +1,7 @@
 package helper;
 
+import controllers.Login;
+import models.User;
 import net.sf.ehcache.concurrent.ReadWriteLockSync;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -123,7 +125,9 @@ public class Caches {
         long start = System.currentTimeMillis();
         Jedis jr = RedisCacheImpl.getCacheConnection();
         String cache_str = jr.get(key);
-        Logger.info("get redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms ");
+        User user = Login.current();
+        Logger.info("get redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms " +
+                " username: " + user ==null ? "API" : user.username);
         if(cache_str == null || StringUtils.isBlank(cache_str)) return "";
         return cache_str;
     }
