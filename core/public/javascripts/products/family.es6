@@ -24,15 +24,16 @@ $(() => {
         });
       }
     });
-  }
 
-  $("button[name='add_family']").click(function (e) {
-    e.preventDefault();
-    $("#add_category_input").val($(this).data("category"));
-    $("#add_brand_input").val($(this).data("brand"));
-    $("#add_family_input").val($(this).data("category") + $(this).data("brand"));
-    $("#add_modal").modal("show");
-  });
+    $("button[name='add_family']").click(function (e) {
+      e.preventDefault();
+      $("#add_category_input").val($(this).data("category"));
+      $("#add_brand_input").val($(this).data("brand"));
+      $("#add_family_input").val($(this).data("category") + $(this).data("brand"));
+      $("#add_modal").modal("show");
+    });
+
+  }
 
   $("#add_family_input").on("keyup", function () {
     $(this).val($(this).val().toUpperCase());
