@@ -225,7 +225,6 @@ public class Shipments extends Controller {
     }
 
     public static void update(Shipment ship, String shipid) {
-        checkAuthenticity();
         Shipment old = Shipment.findById(shipid);
         Date realPlanArrivDate = old.dates != null ? old.dates.planArrivDate : null;
         old.update(ship);
