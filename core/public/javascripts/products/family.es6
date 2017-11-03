@@ -7,22 +7,24 @@ $(() => {
     includeSelectAllOption: true
   });
 
-  $("td[name='clickTd']").click(function () {
-    LoadMask.mask();
-    let tr = $(this).parent("tr");
-    let family = $(this).data("family");
-    if ($("#div" + family).html() != undefined) {
-      tr.next("tr").toggle();
-      LoadMask.unmask();
-    } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='11'>" + family + "下产品<hr>";
-      html += "<div id='div" + family + "'></div></td></tr>";
-      tr.after(html);
-      $("#div" + family).load($(this).data("url"), {name: family}, function () {
+  function bindTrEvent () {
+    $("td[name='clickTd']").click(function () {
+      LoadMask.mask();
+      let tr = $(this).parent("tr");
+      let family = $(this).data("family");
+      if ($("#div" + family).html() != undefined) {
+        tr.next("tr").toggle();
         LoadMask.unmask();
-      });
-    }
-  });
+      } else {
+        let html = "<tr style='background-color:#F2F2F2'><td colspan='11'>" + family + "下产品<hr>";
+        html += "<div id='div" + family + "'></div></td></tr>";
+        tr.after(html);
+        $("#div" + family).load($(this).data("url"), {name: family}, function () {
+          LoadMask.unmask();
+        });
+      }
+    });
+  }
 
   $("button[name='add_family']").click(function (e) {
     e.preventDefault();
@@ -42,7 +44,7 @@ $(() => {
         brand: $(this).val(),
         categoryId: $(this).data("category")
       }, function () {
-        $.getScript("/public/javascripts/products/family.es6");
+        bindTrEvent();
       });
     }
 
