@@ -53,6 +53,8 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     public boolean filterDot2 = true;
     public String categoryId;
 
+    public String flag = "1";
+
     /**
      * 根据 type 指定是 msku 还是 sku
      */
@@ -116,6 +118,9 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
             CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
+        if(Objects.equals(this.flag, "1")) {
+            return dtos.stream().filter(dto -> (dto.day1 > 0 && dto.ps > 0 && dto.qty > 0)).collect(Collectors.toList());
+        }
         return dtos;
     }
 
