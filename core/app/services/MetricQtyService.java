@@ -9,6 +9,7 @@ import models.procure.ProcureUnit;
 import models.procure.ShipItem;
 import models.view.dto.AnalyzeDTO;
 import models.view.report.Profit;
+import play.Logger;
 
 import java.util.List;
 
@@ -38,11 +39,12 @@ public class MetricQtyService {
      */
     public Profit calProfit(Profit profit) {
         List<Selling> sells = Selling.find("listing.product.sku=? and market=?", this.sku, this.market).fetch();
-        for(Selling sell : sells) {
-            String cacke_key = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
-            // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
-            List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacke_key), AnalyzeDTO.class);
-            if(dtos != null) {
+        String cacheKey = SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE;
+        // 这个地方有缓存, 但还是需要一个全局锁, 控制并发, 如果需要写缓存则锁住
+        List<AnalyzeDTO> dtos = JSON.parseArray(Caches.get(cacheKey), AnalyzeDTO.class);
+        if(dtos != null) {
+            long start = System.currentTimeMillis();
+            for(Selling sell : sells) {
                 for(AnalyzeDTO dto : dtos) {
                     if(dto.fid.trim().equals(sell.sellingId.trim())) {
                         profit.workingqty = dto.plan + dto.working + dto.worked;
@@ -51,10 +53,10 @@ public class MetricQtyService {
                         if(profit.workingqty != 0 || profit.wayqty != 0 || profit.inboundqty != 0) {
                             return profit;
                         }
-
                     }
                 }
             }
+            Logger.info("calProfit 耗时: " + (System.currentTimeMillis() - start) + " ms");
         }
         return profit;
     }
