@@ -49,9 +49,15 @@
           <tr id="${tr_key}_${c.categoryId}" style="display:none;">
             <td colspan="2">
                 #{list items:c.brands, as:'b'}
-                  <label class="radio-inline">
-                    <input type="radio" name="brandRadio" data-category="${c.categoryId}" value="${b.name}"> ${b.name}
-                  </label>
+                    #{if b_index % 3 == 0}
+                      <br>
+                    #{/if}
+                    #{else }
+                      <label class="radio-inline col-sm-5">
+                        <input type="radio" name="brandRadio" data-category="${c.categoryId}" value="${b.name}">
+                      ${b.name} (${b.fullName})
+                      </label>
+                    #{/else}
                 #{/list}
             </td>
           </tr>
