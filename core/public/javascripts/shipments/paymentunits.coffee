@@ -74,8 +74,7 @@ $ ->
         noty({text: text, type: 'error'})
       else
         label = feeStateLabel(r['state'])
-        $form.parents('div.top').find('.paymentInfo tr:last')
-          .after(_.template($('#tr-paymentunit-template').html())({fee: r, label: label}))
+        $('table.paymentInfo').find('tr:last').after(_.template($('#tr-paymentunit-template').html())({fee: r, label: label}))
         $form.trigger('reset')
         #计算页面所有运输单费用信息的各种币种的总和
         $('table.paymentInfo').trigger("statisticFee")
