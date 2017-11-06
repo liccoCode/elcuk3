@@ -13,6 +13,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import play.Logger;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 
@@ -91,6 +92,7 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
+        Logger.info("countShipFee: " + search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
