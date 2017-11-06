@@ -18,7 +18,7 @@
     "averagePrice": "${helper.Currency.CNY.symbol()} ${fee.averagePrice().format('#.###')}",
     "currentAvgPrice": "${helper.Currency.CNY.symbol()} ${fee.currentAvgPrice().format('#.###')}",
     "state": "${fee.state}",
-    "createdAt": "${fee.createdAt.format('yyyy-MM-dd HH:mm:ss')}",
+    "createdAt": "${fee.createdAt.format('yyyy-MM-dd')}",
     "shipItem": {
         "id": "${fee.shipItem?.id}"
     },

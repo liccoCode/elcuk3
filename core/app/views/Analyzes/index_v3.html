@@ -76,11 +76,12 @@
           </label>
         </div>
 
-      #{select 'p.aid', items: accs, labelProperty: 'prettyName', valueProperty: 'id', value: p.aid, class:'form-control selectize', style:"width:150px;"}
-          #{option ''}Account#{/option}
-      #{/select}
-
-
+        <select name="p.aid" class="form-control" style="width:100px;">
+          <option value="">Account</option>
+          #{list items:accs, as:'a'}
+          <option value="${a.id}" #{if p.aid==a.id} selected #{/if}>${a.prettyName()}</option>
+          #{/list}
+        </select>
 
         <select name="p.market" style="width: 120px;" class="form-control">
           <option value="">Market</option>
@@ -96,6 +97,11 @@
       #{select 'p.state', items:['Active', 'Inactive', 'All'], value: p.state, class: 'form-control selectize',
       style:"width:80px;"}
       #{/select}
+
+        <select name="p.flag" class="form-control" style="width:80px;">
+          <option value="1">PS day1 库存大于0</option>
+          <option value="2">显示所有</option>
+        </select>
 
         <div class="input-group">
           <div class="input-group-addon"><i class="icon-search"></i></div>
