@@ -12,6 +12,7 @@ import models.view.dto.DashBoard;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.StockPost;
+import org.apache.commons.lang.StringUtils;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
@@ -61,20 +62,32 @@ public class Application extends Controller {
     }
 
     public static void ajaxUnit(String sid) {
-        Selling selling = Selling.findById(sid);
         AnalyzePost p = new AnalyzePost();
-        p.val = selling.merchantSKU;
-        p.market = selling.market.toString();
-        p.type = "sid";
-        HighChart chart = await(new Job<HighChart>() {
-            @Override
-            public HighChart doJobWithResult() throws Exception {
-                return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
-            }
-        }.now());
-        String countryName = selling.market.countryName();
-        chart.series.forEach(se -> se.visible = se.name.contains(countryName));
-        renderJSON(J.json(chart));
+        if(StringUtils.isNotBlank(sid)) {
+            Selling selling = Selling.findById(sid);
+            p.val = selling.merchantSKU;
+            p.market = selling.market.toString();
+            p.type = "sid";
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+                }
+            }.now());
+            String countryName = selling.market.countryName();
+            chart.series.forEach(se -> se.visible = se.name.contains(countryName));
+            renderJSON(J.json(chart));
+        } else {
+            p.state = "Active";
+            p.val = "all";
+            HighChart chart = await(new Job<HighChart>() {
+                @Override
+                public HighChart doJobWithResult() throws Exception {
+                    return OrderItem.ajaxHighChartUnitOrder(p.val, p.type, p.from, p.to);
+                }
+            }.now());
+            renderJSON(J.json(chart));
+        }
     }
 
     public static void oldDashBoard() {
