@@ -9,6 +9,14 @@
   <div class="box-header"></div>
   <div class="box-body">
     <div class="row">
+    #{if brandname=='EASYACC'}
+      <div class="col-md-3">
+        <div id="pieChart1" style="height:300px;"></div>
+      </div>
+      <div class="col-md-9" id="totalAjaxUnitDiv" style="height:300px;">
+      </div>
+    #{/if}
+    #{else }
       <div class="col-md-3">
         <div id="pieChart1" style="height:300px;"></div>
       </div>
@@ -18,84 +26,83 @@
       <div class="col-md-5" id="ajaxUnitDiv" style="height:300px;">
         <h3>请点击左侧SKU查看最近一个月的销量</h3>
       </div>
+    #{/else}
     </div>
+    <div class="box-footer"></div>
   </div>
 
-  <div class="box-footer"></div>
-</div>
-
-<div class="box box-success box-solid">
-  <div class="box-header"><h3 class="box-title">每天订单信息</h3></div>
-  <div class="box-body">
-    <table class="table table-bordered">
-      <tr>
-        <th>日期</th>
-        <th>PENDING</th>
-        <th>PAYMENT</th>
-        <th>SHIPPED</th>
-        <th>REFUNDED</th>
-        <th>RETURNNEW</th>
-        <th>CANCEL</th>
-        <th><a href="#" rel="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
-      </tr>
-    #{list items:dashboard.infos?.keySet(), as:'key'}
-        #{set info:dashboard.infos.get(key)/}
-        #{set ukAccinfo:dashboard.accsInfos.get(key + "_1")/}
-        #{set deAccinfo:dashboard.accsInfos.get(key + "_2")/}
-        #{set usAccinfo:dashboard.accsInfos.get(key + "_131")/}
-      <tr>
-        <td date="${key}">${key}</td>
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+  <div class="box box-success box-solid">
+    <div class="box-header"><h3 class="box-title">每天订单信息</h3></div>
+    <div class="box-body">
+      <table class="table table-bordered">
+        <tr>
+          <th>日期</th>
+          <th>PENDING</th>
+          <th>PAYMENT</th>
+          <th>SHIPPED</th>
+          <th>REFUNDED</th>
+          <th>RETURNNEW</th>
+          <th>CANCEL</th>
+          <th><a href="#" rel="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+        </tr>
+      #{list items:dashboard.infos?.keySet(), as:'key'}
+          #{set info:dashboard.infos.get(key)/}
+          #{set ukAccinfo:dashboard.accsInfos.get(key + "_1")/}
+          #{set deAccinfo:dashboard.accsInfos.get(key + "_2")/}
+          #{set usAccinfo:dashboard.accsInfos.get(key + "_131")/}
+        <tr>
+          <td date="${key}">${key}</td>
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.pendings}<br>
                         EasyAcc.UK: ${ukAccinfo?.pendings}<br>
                         EasyAcc.US: ${usAccinfo?.pendings}<br>
                         ">${info.pendings}</a>
-        </td>
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+          </td>
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.payments}<br>
                         EasyAcc.UK: ${ukAccinfo?.payments}<br>
                         EasyAcc.US: ${usAccinfo?.payments}<br>
                         ">${info.payments}</a>
-        </td>
+          </td>
 
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.shippeds}<br>
                         EasyAcc.UK: ${ukAccinfo?.shippeds}<br>
                         EasyAcc.US: ${usAccinfo?.shippeds}<br>
                         ">${info.shippeds}</a>
-        </td>
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+          </td>
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.refundeds}<br>
                         EasyAcc.UK: ${ukAccinfo?.refundeds}<br>
                         EasyAcc.US: ${usAccinfo?.refundeds}<br>
                         ">${info.refundeds}</a>
-        </td>
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+          </td>
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.returnNews}<br>
                         EasyAcc.UK: ${ukAccinfo?.returnNews}<br>
                         EasyAcc.US: ${usAccinfo?.returnNews}<br>
                         ">${info.returnNews}</a>
-        </td>
-        <td>
-          <a href="#" data-toggle="popover" data-content="
+          </td>
+          <td>
+            <a href="#" data-toggle="popover" data-content="
                         EasyAcc.DE: ${deAccinfo?.cancels}<br>
                         EasyAcc.UK: ${ukAccinfo?.cancels}<br>
                         EasyAcc.US: ${usAccinfo?.cancels}<br>
                         ">${info.cancels}</a>
-        </td>
-        <td>${info.total()}</td>
-      </tr>
-    #{/list}
-    </table>
+          </td>
+          <td>${info.total()}</td>
+        </tr>
+      #{/list}
+      </table>
+    </div>
   </div>
-</div>
 
-<input type="hidden" id="brandname" value="${brandname}">
+  <input type="hidden" id="brandname" value="${brandname}">
 
 
 
