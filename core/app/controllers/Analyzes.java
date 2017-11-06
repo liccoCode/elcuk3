@@ -150,7 +150,7 @@ public class Analyzes extends Controller {
     public static void ajaxSellingRecord(final AnalyzePost p) {
         try {
             String brandname = OperatorConfig.getVal("brandname");
-            if(Arrays.asList("easyacc", "brandworl", "outxe", "reapow").contains(brandname.toLowerCase())) {
+            if(Arrays.asList("easyacc").contains(brandname.toLowerCase())) {
                 String json = await(new Job<String>() {
                     @Override
                     public String doJobWithResult() throws Exception {
@@ -177,7 +177,7 @@ public class Analyzes extends Controller {
     public static void ajaxSellingTurn(final AnalyzePost p) {
         try {
             String brandname = OperatorConfig.getVal("brandname");
-            if(Arrays.asList("easyacc", "brandworl", "outxe", "reapow").contains(brandname.toLowerCase())) {
+            if(Arrays.asList("easyacc").contains(brandname.toLowerCase())) {
                 String json = await(new Job<String>() {
                     @Override
                     public String doJobWithResult() throws Exception {
