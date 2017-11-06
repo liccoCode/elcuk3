@@ -1,5 +1,8 @@
 package models.market;
 
+import com.amazonservices.mws.finances.MWSFinancesServiceClient;
+import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
+import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import com.google.gson.annotations.Expose;
 import helper.Cached;
 import helper.DBUtils;
@@ -7,6 +10,7 @@ import helper.Dates;
 import helper.Promises;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
+import mws.MWSFinances;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -334,9 +338,19 @@ public class Orderr extends GenericModel {
 
     /**
      * 这个订单的当前币种销售额.
-     *
      */
     public float totalCurrencySales() {
+        if(this.fees.size() == 0) {
+            MWSFinancesServiceClient client = MWSFinances.client(this.account, this.account.type);
+            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
+            request.setSellerId(this.account.merchantId);
+            request.setMWSAuthToken(this.account.token);
+            request.setAmazonOrderId(this.orderId);
+            ListFinancialEventsResponse response = client.listFinancialEvents(request);
+            SaleFee.parseFinancesApiResult(response, this.account);
+            Orderr newOne = Orderr.findById(this.orderId);
+            this.fees = newOne.fees;
+        }
         float totalSales = 0;
         if(this.market.name().startsWith("AMAZON")) {
             for(SaleFee fee : this.fees) {
