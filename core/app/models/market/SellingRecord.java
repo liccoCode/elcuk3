@@ -461,7 +461,6 @@ public class SellingRecord extends GenericModel {
             if(acc != null) {
                 getEarDataBymMarket(chart, acc.type, msku, from, to);
             } else {
-
                 for(M market : M.values()) {
                     if(!Objects.equals(market, M.EBAY_UK)) {
                         getEarDataBymMarket(chart, market, msku, from, to);

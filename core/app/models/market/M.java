@@ -1148,7 +1148,7 @@ public enum M {
     }
 
     public String earChannel() {
-        return OperatorConfig.getVal(this.sortName()+"earchannelid");
+        return OperatorConfig.getVal(this.sortName() + "earchannelid");
     }
 
     public static List<M> europeMarkets() {
