@@ -52,7 +52,7 @@ $(() => {
     });
   });
 
-  $.post("/analyzes/ajaxUnit", function (r) {
+  $.post("/application/ajaxUnit", function (r) {
     Highcharts.chart("totalAjaxUnitDiv", {
       credits: {
         text: 'EasyAcc',
