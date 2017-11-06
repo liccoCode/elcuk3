@@ -157,9 +157,35 @@ $(() => {
     });
   }
 
+  let libColor = 'rgba(240,190,50,0.80)', grnColor = 'rgba(90,200,90,0.80)';
+
   Highcharts.mapChart('ajaxMap', {
     chart: {
       borderWidth: 0
+    },
+
+    colorAxis: {
+      dataClasses: [{
+        from: -1,
+        to: 100,
+        color: 'rgba(244,91,91,0.5)',
+        name: 'Republican'
+      }, {
+        from: 100,
+        to: 500,
+        color: 'rgba(124,181,236,0.5)',
+        name: 'Democrat'
+      }, {
+        from: 500,
+        to: 1000,
+        name: 'Libertarian',
+        color: libColor
+      }, {
+        from: 1000,
+        to: 10000,
+        name: 'Green',
+        color: grnColor
+      }]
     },
 
     colors: ['rgba(19,64,117,0.05)', 'rgba(19,64,117,0.2)', 'rgba(19,64,117,0.4)',
@@ -188,29 +214,6 @@ $(() => {
       backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || 'rgba(255, 255, 255, 0.85)',
       symbolRadius: 0,
       symbolHeight: 14
-    },
-
-    colorAxis: {
-      dataClasses: [{
-        to: 3
-      }, {
-        from: 3,
-        to: 10
-      }, {
-        from: 10,
-        to: 30
-      }, {
-        from: 30,
-        to: 100
-      }, {
-        from: 100,
-        to: 300
-      }, {
-        from: 300,
-        to: 1000
-      }, {
-        from: 1000
-      }]
     },
 
     series: [{
@@ -250,14 +253,14 @@ $(() => {
       mapData: Highcharts.maps['custom/world'],
       joinBy: ['iso-a2', 'code'],
       animation: true,
-      name: 'Population density',
+      name: 'Order Nums.',
       states: {
         hover: {
           color: '#a4edba'
         }
       },
       tooltip: {
-        valueSuffix: '/km²'
+        valueSuffix: ''
       },
       shadow: false
     }]

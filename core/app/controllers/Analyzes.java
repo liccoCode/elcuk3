@@ -25,6 +25,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -149,7 +150,7 @@ public class Analyzes extends Controller {
     public static void ajaxSellingRecord(final AnalyzePost p) {
         try {
             String brandname = OperatorConfig.getVal("brandname");
-            if(Objects.equals(brandname, "EASYACC")) {
+            if(Arrays.asList("easyacc", "brandworl", "outxe", "reapow").contains(brandname.toLowerCase())) {
                 String json = await(new Job<String>() {
                     @Override
                     public String doJobWithResult() throws Exception {
@@ -176,7 +177,7 @@ public class Analyzes extends Controller {
     public static void ajaxSellingTurn(final AnalyzePost p) {
         try {
             String brandname = OperatorConfig.getVal("brandname");
-            if(Objects.equals(brandname, "EASYACC")) {
+            if(Arrays.asList("easyacc", "brandworl", "outxe", "reapow").contains(brandname.toLowerCase())) {
                 String json = await(new Job<String>() {
                     @Override
                     public String doJobWithResult() throws Exception {
