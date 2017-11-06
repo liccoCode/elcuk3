@@ -1,7 +1,11 @@
 #{extends 'main_full_v3.html' /}
 #{set title:'Home' /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/highcharts.css'/}
+#{/set}
 #{set 'moreScripts'}
-    #{script 'bootstrap3/highcharts.js'/}
+    #{script 'bootstrap3/highmaps.js'/}
+    #{script 'bootstrap3/world.js'/}
     #{script 'Application/app.js'/}
 #{/set}
 
@@ -13,7 +17,8 @@
       <div class="col-md-3">
         <div id="pieChart1" style="height:300px;"></div>
       </div>
-      <div class="col-md-9" id="totalAjaxUnitDiv" style="height:300px;"></div>
+      <div class="col-md-5" id="totalAjaxUnitDiv" style="height:300px;"></div>
+      <div class="col-md-4" id="ajaxMap" style="height:300px;"></div>
     #{/if}
     #{else }
       <div class="col-md-3">
