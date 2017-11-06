@@ -209,7 +209,8 @@ $ ->
 
   do ->
     paymentId =$("#paymentId").val()
-    procureUntiId = window.location.hash[1..-1]
-    targetTr = $("#procureUnit_#{procureUntiId}")
+    procureUnitId = window.location.hash[1..-1]
+    targetTr = $("#procureUnit_#{procureUnitId}")
     if (targetTr.size() > 0  && paymentId == '')
-      EF.scoll(targetTr) EF.colorAnimate(targetTr)
+      EF.scoll(targetTr)
+      EF.colorAnimate(targetTr)
