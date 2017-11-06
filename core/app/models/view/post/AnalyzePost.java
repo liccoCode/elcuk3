@@ -119,7 +119,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
             CollectionUtils.filter(dtos, new StatePredicate(this.state));
         if(Objects.equals(this.flag, "1")) {
-            return dtos.stream().filter(dto -> (dto.day1 > 0 && dto.ps > 0 && dto.qty > 0)).collect(Collectors.toList());
+            return dtos.stream().filter(dto -> (dto.day1 > 0 || dto.ps > 0 || dto.qty > 0)).collect(Collectors.toList());
         }
         return dtos;
     }
