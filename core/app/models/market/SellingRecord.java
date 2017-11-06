@@ -539,7 +539,7 @@ public class SellingRecord extends GenericModel {
         HttpGet get = new HttpGet();
         get.setHeader("Authorization", "Token hkJ45VHAwTARWHSZ3jqhoeRE");
         for(M market : M.values()) {
-            if(!Objects.equals(market, M.EBAY_UK)) {
+            if(!Objects.equals(market, M.EBAY_UK) && StringUtils.isNotBlank(market.earChannel())) {
                 URI uri = null;
                 try {
                     uri = new URIBuilder(url)
