@@ -79,7 +79,7 @@ public class MetricShipmentService {
         //日期过滤
         qb.must(QueryBuilders.rangeQuery("ship_date").gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)));
         // 运输方式不为空时做 type 过滤
-        if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name().toLowerCase()));
+        if(this.type != null) qb.must(QueryBuilders.termQuery("ship_type", this.type.name()));
         return qb;
     }
 
@@ -92,7 +92,6 @@ public class MetricShipmentService {
                 .query(filterbuilder())
                 .aggregation(builder)
                 .size(0);
-        Logger.info("countShipFee: " + search.toString());
         JSONObject result = ES.search(System.getenv(Constant.ES_INDEX), "shippayunit", search);
         if(result == null) throw new FastRuntimeException("ES 连接异常!");
         JSONObject cost = result.getJSONObject("aggregations").getJSONObject("cost_in_usd");
