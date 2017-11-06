@@ -52,65 +52,111 @@ $(() => {
     });
   });
 
-  function refreshTopFive (market) {
-    let div = $("#progress_by_market");
-    div.mask();
-    div.load("/application/topTenSkuByMarket", {market: market}, function () {
-      div.unmask();
-      let fid = $("#progress_by_market").find("div").data("fid");
-      getSales(fid);
+  $.post("/analyzes/ajaxUnit", function (r) {
+    Highcharts.chart("totalAjaxUnitDiv", {
+      credits: {
+        text: 'EasyAcc',
+        href: ''
+      },
+      title: {
+        text: "All Unit Order"
+      },
+      legend: {
+        enabled: true
+      },
+      navigator: {
+        enabled: true
+      },
+      scrollbar: {
+        enabled: false
+      },
+      rangeSelector: {
+        enabled: true,
+        buttons: [{
+          type: 'week',
+          count: 1,
+          text: '1w'
+        }, {
+          type: 'month',
+          count: 1,
+          text: '1m'
+        }],
+        selected: 1
+      },
+      xAxis: {
+        type: 'datetime',
+        yAxis: {min: 0}
+      },
+      tooltip: {
+        shared: true,
+        crosshairs: true,
+        xDateFormat: '%Y-%m-%d'
+      },
+      series: r['series']
     });
-  }
-
-  $(document).on("click", "a[name='sku_href']", function (r) {
-    getSales($(this).data("fid"));
-  });
-
-  function getSales (fid) {
-    let sid = fid;
-    $.post("/application/ajaxUnit", {sid: sid}, function (r) {
-      Highcharts.chart("ajaxUnitDiv", {
-        credits: {
-          text: 'EasyAcc',
-          href: ''
-        },
-        title: {
-          text: sid
-        },
-        legend: {
-          enabled: true
-        },
-        navigator: {
-          enabled: true
-        },
-        scrollbar: {
-          enabled: false
-        },
-        rangeSelector: {
-          enabled: true,
-          buttons: [{
-            type: 'week',
-            count: 1,
-            text: '1w'
-          }, {
-            type: 'month',
-            count: 1,
-            text: '1m'
-          }],
-          selected: 1
-        },
-        xAxis: {
-          type: 'datetime',
-          yAxis: {min: 0}
-        },
-        tooltip: {
-          shared: true,
-          crosshairs: true,
-          xDateFormat: '%Y-%m-%d'
-        },
-        series: r['series']
-      });
-    });
-  }
-
+  })
 });
+
+function refreshTopFive (market) {
+  let div = $("#progress_by_market");
+  div.mask();
+  div.load("/application/topTenSkuByMarket", {market: market}, function () {
+    div.unmask();
+    let fid = $("#progress_by_market").find("div").data("fid");
+    getSales(fid);
+  });
+}
+
+$(document).on("click", "a[name='sku_href']", function (r) {
+  getSales($(this).data("fid"));
+});
+
+function getSales (fid) {
+  let sid = fid;
+  $.post("/application/ajaxUnit", {sid: sid}, function (r) {
+    Highcharts.chart("ajaxUnitDiv", {
+      credits: {
+        text: 'EasyAcc',
+        href: ''
+      },
+      title: {
+        text: sid
+      },
+      legend: {
+        enabled: true
+      },
+      navigator: {
+        enabled: true
+      },
+      scrollbar: {
+        enabled: false
+      },
+      rangeSelector: {
+        enabled: true,
+        buttons: [{
+          type: 'week',
+          count: 1,
+          text: '1w'
+        }, {
+          type: 'month',
+          count: 1,
+          text: '1m'
+        }],
+        selected: 1
+      },
+      xAxis: {
+        type: 'datetime',
+        yAxis: {min: 0}
+      },
+      tooltip: {
+        shared: true,
+        crosshairs: true,
+        xDateFormat: '%Y-%m-%d'
+      },
+      series: r['series']
+    });
+  });
+}
+
+})
+;
