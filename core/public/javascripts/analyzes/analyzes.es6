@@ -17,7 +17,7 @@ $(() => {
         "sDom": "<'row-fluid'<'col-sm-3'l><'col-sm-9'f>r>t<'row-fluid'<'col-sm-6'i><'col-sm-6'p>>",
         "sPaginationType": "full_numbers",
         "iDisplayLength": 50,
-        "aaSorting": [[16, "desc"]],
+        "aaSorting": [[17, "desc"]],
         "scrollX": true,
         "columnDefs": paramWidth($div.attr("id"))
       });
