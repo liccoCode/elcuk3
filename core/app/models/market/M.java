@@ -1,6 +1,5 @@
 package models.market;
 
-
 import exception.NotSupportChangeRegionFastException;
 import helper.Currency;
 import helper.Dates;
@@ -32,44 +31,57 @@ public enum M {
         public String countryName() {
             return "英国";
         }
-    },
-    AMAZON_DE {
+
+        @Override
+        public String pic() {
+            return "flag-icon-gb";
+        }
+    }, AMAZON_DE {
         @Override
         public String label() {
             return "德国亚马逊";
         }
 
-
         @Override
         public String countryName() {
             return "德国";
         }
-    },
-    AMAZON_FR {
+
+        @Override
+        public String pic() {
+            return "flag-icon-de";
+        }
+    }, AMAZON_FR {
         @Override
         public String label() {
             return "法国亚马逊";
         }
 
-
         @Override
         public String countryName() {
             return "法国";
         }
-    },
-    AMAZON_IT {
+
+        @Override
+        public String pic() {
+                   return "flag-icon-fr";
+               }
+    }, AMAZON_IT {
         @Override
         public String label() {
             return "意大利亚马逊";
         }
 
-
         @Override
         public String countryName() {
             return "意大利";
         }
-    },
-    AMAZON_ES {
+
+        @Override
+        public String pic() {
+                   return "flag-icon-it";
+               }
+    }, AMAZON_ES {
         @Override
         public String label() {
             return "西班牙亚马逊";
@@ -79,8 +91,12 @@ public enum M {
         public String countryName() {
             return "西班牙";
         }
-    },
-    AMAZON_US {
+
+        @Override
+        public String pic() {
+                   return "flag-icon-es";
+               }
+    }, AMAZON_US {
         @Override
         public String label() {
             return "美国亚马逊";
@@ -90,8 +106,12 @@ public enum M {
         public String countryName() {
             return "美国";
         }
-    },
-    EBAY_UK {
+
+        @Override
+        public String pic() {
+                   return "flag-icon-us";
+               }
+    }, EBAY_UK {
         @Override
         public String label() {
             return "英国 Ebay";
@@ -101,19 +121,26 @@ public enum M {
         public String countryName() {
             return "英国";
         }
-    },
-    AMAZON_JP {
+
+        @Override
+        public String pic() {
+                          return "flag-icon-gb";
+                      }
+    }, AMAZON_JP {
         @Override
         public String label() {
             return "日本亚马逊";
         }
-
 
         @Override
         public String countryName() {
             return "日本";
         }
 
+        @Override
+        public String pic() {
+                                 return "flag-icon-jp";
+                             }
     }, AMAZON_CA {
         @Override
         public String label() {
@@ -125,11 +152,17 @@ public enum M {
             return "加拿大";
         }
 
+        @Override
+        public String pic() {
+                          return "flag-icon-ca";
+                      }
     };
 
     public abstract String label();
 
     public abstract String countryName();
+
+    public abstract String pic();
 
     /**
      * 为 Amazon 不同市场的 Id, 与 Market 对应

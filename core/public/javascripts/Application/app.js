@@ -163,7 +163,10 @@ $(() => {
     chart: {
       borderWidth: 0
     },
-
+    credits: {
+      text: 'EasyAcc',
+      href: ''
+    },
     colorAxis: {
       dataClasses: [{
         from: -1,

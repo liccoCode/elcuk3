@@ -4,6 +4,7 @@
   <tr>
     <th title="可双击下面 MerchantSKU">SellingId</th>
     <th>Action</th>
+    <th>市场</th>
     <th>计划中</th>
     <th>制作中</th>
     <th>已交货</th>
@@ -39,6 +40,11 @@
       <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
       <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
       <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
+    </td>
+    <td>
+      <div class="flag-wrapper">
+        <div class="img-thumbnail flag flag-icon-background ${dto.market?.pic()}"></div>
+      </div>
     </td>
     <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
     <td class="text-warning">${dto.working}</td>

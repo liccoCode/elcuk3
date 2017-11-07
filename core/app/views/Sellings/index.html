@@ -102,7 +102,11 @@
             </td>
             <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
             <td>${s.listing?.product?.sku}</td>
-            <td>${s.market.countryName()}</td>
+            <td style="padding: 0px;" data-toggle="tooltip" title="${s.market.countryName()}">
+              <div class="flag-wrapper">
+                <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
+              </div>
+            </td>
             <td>${s.aps.salePrice}</td>
             <td>${s.asin}</td>
             <td>${s.sellingCycle?.label()}</td>
