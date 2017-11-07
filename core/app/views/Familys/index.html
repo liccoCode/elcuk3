@@ -14,25 +14,7 @@
 <div class="row">
   <div class="col-md-6">
     <div class="box box-primary">
-      <div class="box-header with-border">
-        <form action="@{Familys.index()}" method="post" class="form-inline" id="search_Form">
-          <div class="row-fluid">
-            <select name="p.categories" multiple="multiple" id="categories" class="form-control">
-            #{list items:categoryIds, as:'c'}
-              <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
-            #{/list}
-            </select>
-
-            <div class="input-group">
-              <div class="input-group-addon"><i class="icon-search"></i></div>
-              <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 Family、品牌"
-                     value="${p.search}" autocomplete="off">
-              <input type="hidden" name="p.page" value="${p.page}">
-            </div>
-            <button class="btn btn-primary" data-loading>搜索</button>
-          </div>
-        </form>
-      </div>
+      <div class="box-header with-border"><h3 class="box-title">所有品线</h3></div>
 
       <div class="box-body">
         <table class="table table-condensed table-bordered">
@@ -49,7 +31,11 @@
           <tr id="${tr_key}_${c.categoryId}" style="display:none;">
             <td colspan="2">
                 #{list items:c.brands, as:'b'}
-                    #{if b_index % 3 == 0}
+                    #{if b_index % 2 == 0}
+                      <label class="radio-inline col-sm-5">
+                        <input type="radio" name="brandRadio" data-category="${c.categoryId}" value="${b.name}">
+                      ${b.name} (${b.fullName})
+                      </label>
                       <br>
                     #{/if}
                     #{else }
