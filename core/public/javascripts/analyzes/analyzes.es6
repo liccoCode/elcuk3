@@ -135,7 +135,7 @@ function paramWidth (type) {
         "targets": [11]
       },
       {
-        "width": "15px",
+        "width": "28px",
         "targets": [12]
       },
       {
@@ -175,7 +175,7 @@ function paramWidth (type) {
         "targets": [21]
       },
       {
-        "width": "35px",
+        "width": "15px",
         "targets": [22]
       },
       {
@@ -183,16 +183,20 @@ function paramWidth (type) {
         "targets": [23]
       },
       {
-        "width": "15px",
+        "width": "35px",
         "targets": [24]
       },
       {
-        "width": "45px",
+        "width": "15px",
         "targets": [25]
       },
       {
-        "width": "35px",
+        "width": "45px",
         "targets": [26]
+      },
+      {
+        "width": "35px",
+        "targets": [27]
       }
     ]
   } else {
