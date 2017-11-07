@@ -1,3 +1,6 @@
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/flag-icon.css'/}
+#{/set}
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered dataTable" id="unit_table">
   <tr>
@@ -131,13 +134,7 @@
         #{/if}
       <br>${unit.cooperator?.name}
     </td>
-    <td data-toggle="tooltip" title="${unit.whouse?.name}" style="padding: 0;">
-        #{if unit.whouse}
-          <div class="flag-wrapper">
-            <div class="img-thumbnail flag flag-icon-background ${unit.whouse.market.pic()}"></div>
-          </div>
-        #{/if}
-    </td>
+    <td data-toggle="tooltip" title="${unit.whouse?.name}" style="padding: 0;">${unit.whouse?.name}</td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
