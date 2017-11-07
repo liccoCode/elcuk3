@@ -136,7 +136,13 @@
         #{/if}
       <br>${unit.cooperator?.name}
     </td>
-    <td>${unit.whouse?.name}</td>
+    <td rel="tooltip" title="${unit.whouse?.name}">
+        #{if unit.whouse}
+          <div class="flag-wrapper">
+            <div class="img-thumbnail flag flag-icon-background ${unit.whouse.market.pic()}"></div>
+          </div>
+        #{/if}
+    </td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
