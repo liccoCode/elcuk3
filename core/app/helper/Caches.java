@@ -125,10 +125,7 @@ public class Caches {
         long start = System.currentTimeMillis();
         Jedis jr = RedisCacheImpl.getCacheConnection();
         String cache_str = jr.get(key);
-        User user = Login.current();
-        String username = (user == null ? "API" : user.username);
-        Logger.info(
-                "get redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms  username: " + username);
+        Logger.info("get redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms ");
         if(cache_str == null || StringUtils.isBlank(cache_str)) return "";
         return cache_str;
     }
