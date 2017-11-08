@@ -66,7 +66,7 @@ public class Familys extends Controller {
         if(StringUtils.isNotBlank(name)) {
             Family family = Family.findById(name);
             List<Product> prods = family.products;
-            render("Products/_products.html", prods);
+            render("Familys/_products.html", prods);
         }
     }
 
