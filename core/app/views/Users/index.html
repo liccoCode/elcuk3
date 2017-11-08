@@ -51,6 +51,7 @@
           <tr>
             <th>#</th>
             <th>Username</th>
+            <th>Department</th>
             <th>Email</th>
             <th>Team</th>
             <th>Category</th>
@@ -62,6 +63,7 @@
               <tr>
                 <td>${user.id}</td>
                 <td>${user.username}</td>
+                <th>${user.department?.label()}</th>
                 <td data-toggle="toggle">${user.email}</td>
                 <td data-toggle="toggle" data-target="#${user.username}_teams">
                   <i class="icon-reorder"></i> ${user.teams?.size()} 个TEAM(共 ${teams?.size()} 个)
