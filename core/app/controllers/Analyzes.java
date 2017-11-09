@@ -27,7 +27,6 @@ import play.utils.FastRuntimeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -47,6 +46,18 @@ public class Analyzes extends Controller {
         List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
         render("Analyzes/index_v3.html", accs, categoryIds, p);
+    }
+
+    @Check("analyzes.newindex")
+    public static void newIndex() {
+        User user = User.findById(Login.current().id);
+        List<String> categories = user.categories.stream().map(cate -> cate.categoryId).collect(Collectors.toList());
+        List<Account> accs = Account.openedSaleAcc();
+        List<String> categoryIds = Category.categoryIds();
+        AnalyzePost p = new AnalyzePost();
+        List<AnalyzeDTO> dtos = p.query();
+        dtos = p.queryByPrivate(dtos, categories);
+        render(accs, categoryIds, p, dtos);
     }
 
     public static void indexV3() {
