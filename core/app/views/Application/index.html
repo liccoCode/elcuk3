@@ -35,11 +35,11 @@
   </div>
 
   <div class="box box-success box-solid">
-    <div class="box-header"><h3 class="box-title">每天订单信息</h3></div>
+    <div class="box-header"><h3 class="box-title">各市场订单信息</h3></div>
     <div class="box-body">
       <table class="table table-bordered">
         <tr>
-          <th>日期</th>
+          <th width="41px;">Market</th>
           <th>PENDING</th>
           <th>PAYMENT</th>
           <th>SHIPPED</th>
@@ -47,65 +47,33 @@
           <th>RETURNNEW</th>
           <th>CANCEL</th>
           <th><a href="#" rel="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+          <th>比前一天</th>
         </tr>
-      #{list items:dashboard.infos?.keySet(), as:'key'}
-          #{set info:dashboard.infos.get(key)/}
-          #{set ukAccinfo:dashboard.accsInfos.get(key + "_1")/}
-          #{set deAccinfo:dashboard.accsInfos.get(key + "_2")/}
-          #{set usAccinfo:dashboard.accsInfos.get(key + "_131")/}
-        <tr>
-          <td date="${key}">${key}</td>
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.pendings}<br>
-                        EasyAcc.UK: ${ukAccinfo?.pendings}<br>
-                        EasyAcc.US: ${usAccinfo?.pendings}<br>
-                        ">${info.pendings}</a>
-          </td>
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.payments}<br>
-                        EasyAcc.UK: ${ukAccinfo?.payments}<br>
-                        EasyAcc.US: ${usAccinfo?.payments}<br>
-                        ">${info.payments}</a>
-          </td>
-
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.shippeds}<br>
-                        EasyAcc.UK: ${ukAccinfo?.shippeds}<br>
-                        EasyAcc.US: ${usAccinfo?.shippeds}<br>
-                        ">${info.shippeds}</a>
-          </td>
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.refundeds}<br>
-                        EasyAcc.UK: ${ukAccinfo?.refundeds}<br>
-                        EasyAcc.US: ${usAccinfo?.refundeds}<br>
-                        ">${info.refundeds}</a>
-          </td>
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.returnNews}<br>
-                        EasyAcc.UK: ${ukAccinfo?.returnNews}<br>
-                        EasyAcc.US: ${usAccinfo?.returnNews}<br>
-                        ">${info.returnNews}</a>
-          </td>
-          <td>
-            <a href="#" data-toggle="popover" data-content="
-                        EasyAcc.DE: ${deAccinfo?.cancels}<br>
-                        EasyAcc.UK: ${ukAccinfo?.cancels}<br>
-                        EasyAcc.US: ${usAccinfo?.cancels}<br>
-                        ">${info.cancels}</a>
-          </td>
-          <td>${info.total()}</td>
-        </tr>
+      #{list items:models.market.M.values(), as:'m'}
+          #{if m.name()!='EBAY_UK'}
+            <tr>
+              <td style="padding: 0;">
+                <div class="flag-wrapper" style="margin:0;">
+                  <div class="img-thumbnail flag flag-icon-background ${m.pic()}"></div>
+                </div>
+              </td>
+              <td>100</td>
+              <td>100</td>
+              <td>100</td>
+              <td>100</td>
+              <td>100</td>
+              <td>0</td>
+              <td>500</td>
+              <td class="text-success"><span class="glyphicon glyphicon-arrow-up"></span> 30%</td>
+            </tr>
+          #{/if}
       #{/list}
       </table>
     </div>
   </div>
+</div>
 
-  <input type="hidden" id="brandname" value="${brandname}">
+<input type="hidden" id="brandname" value="${brandname}">
 
 
 
