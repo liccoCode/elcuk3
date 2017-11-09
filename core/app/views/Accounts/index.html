@@ -1,13 +1,27 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'用户管理'/}
 #{set 'moreScripts'}
     #{script 'accounts/index.coffee'/}
 #{/set}
 
-<div class="row-fluid" style="margin-bottom:10px;">
-  <a href="@{Accounts.blank()}" class="btn btn-success">添加用户</a>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#saleAccount" data-toggle='tab'>销售账户</a></li>
+        <li><a href="#other" data-toggle='tab'>其他账户</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id='saleAccount'>
+        #{render 'Accounts/_account.html', isSale:true, accs:accs/}
+        </div>
+
+        <div class="tab-pane" id="other">
+        #{render 'Accounts/_account.html', isSale:false, accs:accs/}
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<div class="row-fluid">
-#{render 'Accounts/_account.html', accs:accs,amazontype:null/}
-</div>

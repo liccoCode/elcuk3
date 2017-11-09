@@ -2,7 +2,7 @@
   width: 100%;
   display: inline-block;
   position: relative;
-  box-shadow: 0 0 2px black;
+  box-shadow: 0 0 0px black;
   overflow: hidden;
   margin-bottom: 0px;
 }
