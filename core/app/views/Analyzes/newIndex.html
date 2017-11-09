@@ -1,0 +1,150 @@
+#{extends 'main_full_v3.html'/}
+#{set title:'Analyze'/}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap3/jquery.dataTables.js'/}
+    #{script 'bootstrap3/dataTables.bootstrap.js'/}
+    #{script 'analyzes/newIndex.es6'/}
+#{/set}
+
+<div class="box box-primary">
+  <div class="box-header">
+    <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="form-inline">
+      <div class="row-fluid">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">From:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">To:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+          </div>
+        </div>
+
+        <a class="form-control btn btn-default" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
+          Reload
+        </a>
+
+        <div class="form-group">
+          <label class="checkbox inline">
+            <input type="checkbox" name="p.filterDot2" value="false">
+            包含 ,2
+          </label>
+        </div>
+
+        <select name="p.aid" class="form-control" style="width:100px;">
+          <option value="">Account</option>
+        #{list items:accs, as:'a'}
+          <option value="${a.id}" #{if p.aid==a.id} selected #{/if}>${a.prettyName()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.market" style="width: 120px;" class="form-control">
+          <option value="">Market</option>
+        #{list items:models.market.M.values(), as:'d'}
+          <option value="${d.toString()}">${d.toString()}</option>
+        #{/list}
+        </select>
+
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize',style:"width:100px;"}
+          #{option ''}Category#{/option}
+      #{/select}
+
+      #{select 'p.state', items:['Active', 'Inactive', 'All'], value: p.state, class: 'form-control selectize',
+      style:"width:80px;"}
+      #{/select}
+
+        <select name="p.flag" class="form-control" style="width:80px;">
+          <option value="1">PS day1 库存大于0</option>
+          <option value="2">显示所有</option>
+        </select>
+
+        <div class="input-group">
+          <div class="input-group-addon"><i class="icon-search"></i></div>
+          <input class="form-control" id="a_param" name="p.search" placeholder="搜索 MSKU/SKU/ASIN/^71xx">
+        </div>
+
+        <a class="btn btn-primary" id="a_search">搜索</a>
+        <a class="btn btn-success" id="exceldown">下载Excel(SID)</a>
+
+        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;margin-top:5px;">
+          Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
+        </a>
+
+        <input type="hidden" id="postPage" name="p.page" value="1">
+        <input type="hidden" id="postType" name="p.type" value="sid">
+        <input type="hidden" id="postOrderBy" name="p.orderBy" value="day7">
+        <input type="hidden" id="postVal" name="p.val" value="all">
+        <input type="hidden" id="postDesc" name="p.desc" value="${p.desc}">
+      </div>
+    </form>
+  </div>
+  <div class="box-body">
+    <div class="row-fluid">
+      <div class="nav-tabs-custom">
+        <ul id="below_tab" class="nav nav-tabs">
+          <li class="active"><a href="#sid" data-toggle="tab" data-type="sid">SID</a></li>
+          <li class=""><a href="#sku" data-toggle="tab" data-type="sku">SKU</a></li>
+        </ul>
+
+        <div id="below_tabContent" class="tab-content">
+          <div class="tab-pane fade active in" id="sid">
+            <table id="sortTable" class="table table-condensed table-bordered hover">
+              <thead>
+              <tr>
+                <th title="可双击下面 MerchantSKU">SellingId</th>
+                <th>Action</th>
+                <th>市场</th>
+                <th>计划中</th>
+                <th>制作中</th>
+                <th>已交货</th>
+                <th>在途</th>
+                <th>入库</th>
+                <th>Reserved</th>
+                <th>在库</th>
+                <th>Eur库存</th>
+                <th>生命周期</th>
+                <th>主要运输方式</th>
+                <th>退货数</th>
+              </tr>
+              </thead>
+              <tbody>
+              #{list items:dtos, as:'dto'}
+              <tr>
+                <td class="sid" style="word-break:break-all;cursor: pointer;">${dto.fid}</td>
+                <td>
+                  <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
+                  <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
+                  <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
+                </td>
+                <td>${dto.market?.name()}</td>
+                <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
+                <td class="text-warning">${dto.working}</td>
+                <td style="color:#FE502A;">${dto.worked}</td>
+                <td class="text-info">${dto.way}</td>
+                <td style="color:#CC6615">${dto.inbound}</td>
+                <td class="color:#CC6615">${dto.reserved}</td>
+                <td class="text-success">${dto.qty}</td>
+                <td style="color:#0000E1">${dto.eurQty}</td>
+                <td style="${dto.returnRates > 0.3 ? 'background-color:#FF0000' : ''}" rel="popover" data-content="${dto.returns}/${dto.sales}(${dto.returnRates.format('#.#%')})"
+                    placement="top">${dto.returns}
+                </td>
+              </tr>
+              #{/list}
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="sku">wait</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
