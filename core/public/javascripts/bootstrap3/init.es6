@@ -27,6 +27,5 @@ $(() => {
     trigger: 'hover'
   });
 
-  Highcharts.setOptions({ global: { useUTC: false } });   
 
 });
