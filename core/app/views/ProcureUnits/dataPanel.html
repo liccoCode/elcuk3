@@ -1,21 +1,50 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Analyze'/}
 #{set 'moreScripts'}
     #{script 'highstock.js'/}
     #{script 'procureunits/dataPanel.es6'/}
 #{/set}
 
-
-<div class="tabbable tabs-left">
-  <div id="top_tabContent" class="tab-content">
-    <div class="tab-pane fade in active" id="basic">
-      <div class="row-fluid">
+<div class="row">
+  <div class="col-sm-4">
+    <div class="box">
+      <div class="box-body">
         <div id="a_units" data-method="ajaxUnit" class="span6" style="height:350px"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-sm-4">
+    <div class="box">
+      <div class="box-body">
         <div id="a_turn" data-method="ajaxSellingTurn" style="min-height:350px;" class="span6"></div>
       </div>
-      <div class="row-fluid">
+    </div>
+  </div>
+
+  <div class="col-sm-4">
+    <div class="box">
+      <div class="box-body">
         <div id="payment_div" data-method="ajaxUnit" class="span6" style="height:350px"></div>
       </div>
     </div>
   </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <div class="box">
+      <div class="box-body">
+        <div class="col-md-3">
+          <div id="pieChart1" style="height:300px;"></div>
+        </div>
+        <div class="col-md-4" id="progress_by_market" style="height:300px;"></div>
+        <div class="col-md-5" id="ajaxUnitDiv" style="height:300px;">
+          <h3>请点击左侧SKU查看最近一个月的销量</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
