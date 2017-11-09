@@ -123,7 +123,11 @@
                   <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
                   <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
                 </td>
-                <td>${dto.market?.name()}</td>
+                <td data-toggle="tooltip" title="${dto.market.name()}">
+                  <div class="flag-wrapper" style="margin:0">
+                    <div class="img-thumbnail flag flag-icon-background ${dto.market.pic()}"></div>
+                  </div>
+                </td>
                 <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
                 <td class="text-warning">${dto.working}</td>
                 <td style="color:#FE502A;">${dto.worked}</td>
