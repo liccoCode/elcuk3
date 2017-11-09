@@ -8,6 +8,7 @@ import helper.Dates;
 import helper.J;
 import jobs.analyze.ProfitInventorySearch;
 import jobs.analyze.SellingSaleAnalyzeJob;
+import models.ElcukRecord;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
@@ -21,6 +22,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,13 +45,15 @@ public class Profits extends Controller {
 
     @Check("profits.index")
     public static void index(ProfitPost p) {
+        new ElcukRecord("查询利润分析", J.json(p), Login.current().username).save();
         List<Profit> profits = Collections.emptyList();
         if(p == null) {
             p = new ProfitPost();
         } else {
             profits = p.fetch();
         }
-        render(profits, p);
+        List<ElcukRecord> records = ElcukRecord.records(Collections.singletonList("查询利润分析"), 50);
+        render(profits, p, records);
     }
 
 
