@@ -14,22 +14,11 @@
   <div class="box-header"></div>
   <div class="box-body">
     <div class="row">
-    #{if brandname=='EASYACC'}
       <div class="col-md-3">
         <div id="pieChart1" style="height:300px;"></div>
       </div>
       <div class="col-md-5" id="totalAjaxUnitDiv" style="height:300px;"></div>
       <div class="col-md-4" id="ajaxMap" style="height:300px;"></div>
-    #{/if}
-    #{else }
-      <div class="col-md-3">
-        <div id="pieChart1" style="height:300px;"></div>
-      </div>
-      <div class="col-md-4" id="progress_by_market" style="height:300px;"></div>
-      <div class="col-md-5" id="ajaxUnitDiv" style="height:300px;">
-        <h3>请点击左侧SKU查看最近一个月的销量</h3>
-      </div>
-    #{/else}
     </div>
     <div class="box-footer"></div>
   </div>
