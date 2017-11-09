@@ -85,6 +85,7 @@
       </div>
     </form>
   </div>
+
   <div class="box-body">
     <div class="row-fluid">
       <div class="nav-tabs-custom">
@@ -95,11 +96,11 @@
 
         <div id="below_tabContent" class="tab-content">
           <div class="tab-pane fade active in" id="sid">
-            <table id="sortTable" class="table table-condensed table-bordered hover">
+            <table class="table table-bordered table-condensed no-margin" id="sortTable">
               <thead>
               <tr>
-                <th title="可双击下面 MerchantSKU">SellingId</th>
-                <th>Action</th>
+                <th width="300px;">SellingId</th>
+                <th>Asin</th>
                 <th>市场</th>
                 <th>计划中</th>
                 <th>制作中</th>
@@ -117,27 +118,32 @@
               <tbody>
               #{list items:dtos, as:'dto'}
               <tr>
-                <td class="sid" style="word-break:break-all;cursor: pointer;">${dto.fid}</td>
-                <td>
-                  <a href="@{ProcureUnits.blank(dto.fid)}" target="_blank">采购计划</a>&nbsp;
-                  <a href="@{Sellings.selling(dto.fid)}" target="_blank">Selling</a><br/>
-                  <a href="${dto.asinLink()}" target="_blank">${dto.asin}</a>
-                </td>
-                <td data-toggle="tooltip" title="${dto.market.name()}">
-                  <div class="flag-wrapper" style="margin:0">
+                <td><a href="@{Sellings.selling(dto.fid)}" target="_blank">${dto.fid}</a></td>
+                <td><a href="${dto.asinLink()}" target="_blank">${dto.asin}</a></td>
+                <td style="padding: 0;" data-toggle="tooltip" title="${dto.market.name()}">
+                  <div class="flag-wrapper" style="margin:0;">
                     <div class="img-thumbnail flag flag-icon-background ${dto.market.pic()}"></div>
                   </div>
                 </td>
                 <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
-                <td class="text-warning">${dto.working}</td>
+                <td>${dto.working}</td>
                 <td style="color:#FE502A;">${dto.worked}</td>
                 <td class="text-info">${dto.way}</td>
                 <td style="color:#CC6615">${dto.inbound}</td>
                 <td class="color:#CC6615">${dto.reserved}</td>
                 <td class="text-success">${dto.qty}</td>
                 <td style="color:#0000E1">${dto.eurQty}</td>
-                <td style="${dto.returnRates > 0.3 ? 'background-color:#FF0000' : ''}" rel="popover" data-content="${dto.returns}/${dto.sales}(${dto.returnRates.format('#.#%')})"
-                    placement="top">${dto.returns}
+                <td>
+                  <select name="sellingCycle" data-sellingid="${dto.fid}" style="width: 60px;">
+                    <option value="">无</option>
+                      #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+                        <option value="${cycle}" ${cycle == dto.sellingCycle? 'selected':''}>${cycle.label()}</option>
+                      #{/list}
+                  </select>
+                </td>
+                <td>${dto.main_ship_type}</td>
+                <td style="${dto.returnRates > 0.3 ? 'background-color:#FF0000' : ''}" data-toggle="tooltip"
+                    title="${dto.returns}/${dto.sales}(${dto.returnRates.format('#.#%')})">${dto.returns}
                 </td>
               </tr>
               #{/list}
