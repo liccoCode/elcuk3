@@ -1,19 +1,20 @@
 #{extends 'main.html'/}
 #{set title:'创建新 Team' /}
-#{set 'moreScripts'}
-#{/set}
+
+#{errorMsgs /}
+#{flash_alert row:true/}
 
 #{info_row title:'创建新的 Team', row:true/}
 <div class="row">
-#{flash_alert row:true/}
   <div class="span12">
-  #{errorMsgs /}
     <form action="@{Teams.create()}" method="post">
       <table class="table table-bordered table-condensed">
         <tr>
-          <input type="hidden" name="team.id" value="${team.id}">
           <td>TeamId:</td>
-          <td><input type="text" name="team.teamId" value="${team.teamId}"></td>
+          <td>
+            <input type="text" name="team.teamId" value="${team.teamId}">
+            <input type="hidden" name="team.id" value="${team.id}">
+          </td>
           <td>Name:</td>
           <td><input class="input-medium" type="text" name="team.name" value="${team.name}"></td>
         </tr>
