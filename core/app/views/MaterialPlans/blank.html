@@ -91,6 +91,7 @@
               <th>#</th>
               <th>物料编码</th>
               <th>物料名称</th>
+              <th>工厂物料编码</th>
               <th>采购余量</th>
               <th>采购未确认数量</th>
               <th width="300px;">交货数量</th>
@@ -104,6 +105,7 @@
               </td>
               <td>${unit.code}</td>
               <td>${unit.name}</td>
+              <td>${unit.version}</td>
               <td>${unit.surplusConfirmQty(dp?.cooperator?.id)}</td>
               <td>${unit.surplusPendingQty(dp?.cooperator?.id)}</td>
               <td>
