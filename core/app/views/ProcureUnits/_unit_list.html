@@ -16,21 +16,21 @@
     <th width="40px;">#</th>
     <th>父ID</th>
     <th width="40px;">阶段</th>
-    <th width="170px;">Selling</th>
+    <th width="165px;">Selling</th>
     <th width="100px;">Sku</th>
-    <th width="130px;">FBA-ShipmentId<br>CenterId</th>
-    <th>采购单<br>供应商</th>
+    <th width="125px;">FBA-ShipmentId<br>CenterId</th>
+    <th width="85px;">采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="100px;">数量<br>(计划/交货/入库)</th>
     <th>可用库存</th>
   #{ifnot deliveryplan}
-    <th>单价</th>
+    <th width="55px;">单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
       <abbr>总价</abbr>
     </th>
     <th>剩余请款金额</th>
   #{/ifnot}
-    <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="95px;">FnSku</th>
+    <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="90px;">FnSku</th>
     <th>运输方式</th>
     <th>预计交货时间</th>
     <th>预计运输时间</th>
@@ -164,9 +164,6 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{Sellings.sellingLabel(unit.sid)}" target="_blank" rel="tooltip" title="AMAZON 后台样式">
-            <i class="icon-download-alt"></i> 下载
-          </a>
           <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
             <i class="icon-download-alt"></i> New
           </a>
