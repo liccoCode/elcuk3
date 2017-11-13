@@ -366,11 +366,12 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
     }
 
     public String countryName(boolean sortName) {
-        Selling selling = null;
         if(StringUtils.isNotBlank(this.sellingId)) {
-            selling = Selling.findById(this.sellingId);
+            Selling selling = Selling.findById(this.sellingId);
+            if(selling != null)
+                return sortName ? sortName ? selling.market.sortName() : selling.market.countryName() : "";
         }
-        return selling != null ? sortName ? selling.market.sortName() : selling.market.countryName() : "";
+        return "";
     }
 
 }
