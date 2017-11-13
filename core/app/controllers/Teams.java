@@ -16,24 +16,19 @@ import java.util.List;
  * Date: 3/4/14
  * Time: 11:05 AM
  */
-@With({GlobalExceptionHandler.class, Secure.class,SystemOperation.class})
+@With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Teams extends Controller {
 
-    @Before(only = {"show", "update", "delete"})
+    @Before(only = {"update", "delete"})
     public static void setUpShowPage() {
         List<Team> teams = Team.all().fetch();
         renderArgs.put("teams", teams);
     }
 
     @Check("teams.show")
-    public static void show(Long id) {
-        List<Team> teams = renderArgs.get("teams", List.class);
-        Team team = new Team();
-        if(teams != null && teams.size() > 0) {
-            team = (Team) teams.get(0);
-            if(id != null && id != 0L) team = Team.findById(id);
-        }
-        render(team);
+    public static void show() {
+        List<Team> teams = Team.findAll();
+        render(teams);
     }
 
     public static void update(Team team) {
@@ -49,7 +44,6 @@ public class Teams extends Controller {
 
 
     public static void delete(Long id) {
-        checkAuthenticity();
         Team team = Team.findById(id);
         team.deleteTeam();
         if(Validation.hasErrors()) render("Teams/show.html", team);
@@ -57,8 +51,13 @@ public class Teams extends Controller {
         redirect("/Teams/show");
     }
 
-    public static void blank() {
-        Team team = new Team();
+    public static void blank(Long id) {
+        Team team;
+        if(id != null) {
+            team = Team.findById(id);
+        } else {
+            team = new Team();
+        }
         render(team);
     }
 

@@ -45,8 +45,6 @@
             <th>供应商类型</th>
             <th>订单数</th>
             <th>固定电话</th>
-            <th>联系人</th>
-            <th>手机</th>
             <th>创建人</th>
             <th>创建时间</th>
             <th>操作</th>
@@ -80,8 +78,6 @@
                 #{/else}
             </td>
             <td>${c.tel}</td>
-            <td>${c.contacter}</td>
-            <td>${c.phone}</td>
             <td>${c.creator?.username}</td>
             <td>#{time_tooltip time:c.createDate/}</td>
             <td><a href="@{Cooperators.show(c.id, true)}" target="_blank" class="btn btn-xs btn-primary">编辑条款</a>

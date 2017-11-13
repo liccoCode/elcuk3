@@ -1,132 +1,99 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Team' /}
 #{set 'moreScripts'}
 #{/set}
-<div class="row-fluid">
-#{if teams.size() == 0}
-  <div>
-    等待添加新TEAM
-  </div>
-  <div>
-    <a href="@{Teams.blank()}" class="btn btn-primary">创建新 Team</a>
-  </div>
-#{/if}
-#{else }
-  <div class="row-fluid">
-    <div class="span3 well well-small" id="team_slider">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th class="span1">TeamId</th>
-          <th>Name</th>
-        </tr>
-          #{list items:teams, as:'team_left'}
-            <tr>
-              <td>${team_left.teamId}</td>
-              <td>
-                <a href="@{Teams.show()}/${team_left.id}">${team_left.name}</a>
-              </td>
-            </tr>
-          #{/list}
-      </table>
-      <a href="@{Teams.blank()}" class="btn btn-primary">创建新 Team</a>
 
-      <form action="@{Teams.delete()}" method="post" style="display:inline-block;">
-        <input type="hidden" name="id" value="${team?.id}">
-          #{authenticityToken /}
-        <button data-confirm='确认删除?' class="btn btn-danger">删除 Team: ${team}</button>
-      </form>
-    </div>
+#{flash_alert /}
+#{errorMsgs /}
 
-    <div class="span8 well well-small" id="team_detail">
-        #{flash_alert /}
-        #{errorMsgs /}
-
-        #{info_row title:'Basic Info'}
-          <ul>
-            <li>TEAM要求</li>
-          </ul>
-        #{/info_row}
-      <div>
-        <form action="@{Teams.update()}" method="post">
-          <table class="table table-bordered table-condensed">
-            <tr>
-              <td>TeamId:</td>
-              <td>${team.teamId}</td>
-              <td>Name:</td>
-              <td>
-                <input class="input-medium" type="text" name="team.name" value="${team.name}">
-              </td>
-            </tr>
-            <tr>
-              <td>Memo:</td>
-              <td colspan="3">
-                <textarea name="team.memo" class="span12" rows="5">${team.memo}</textarea>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="4">
-                <input type="hidden" name="team.id" value="${team.id}">
-                <button class="btn btn-primary" data-loading>保存</button>
-              </td>
-            </tr>
-          </table>
-        </form>
+<div class="row">
+  <div class="col-sm-12">
+    <div class="box box-warning" id="team_slider">
+      <div class="box-header"><h3 class="box-title">All Teams</h3></div>
+      <div class="box-body">
+        <table class="table table-bordered table-condensed">
+          <tr>
+            <th>TeamId</th>
+            <th>Category</th>
+            <th>User</th>
+            <th>Name</th>
+            <th>Action</th>
+          </tr>
+        #{list items:teams, as:'team'}
+          <tr>
+            <td>${team.teamId}</td>
+            <td data-toggle="toggle" data-target="#${tr_key}_${team.teamId}_category" style="cursor:pointer;">
+              <i class="icon-reorder"></i> Category:<span style="color:red">${team.getObjCategorys().size()}</span>
+            </td>
+            <td data-toggle="toggle" data-target="#${tr_key}_${team.teamId}_user" style="cursor:pointer;">
+              <i class="fa fa-fw fa-user"></i> Users:<span style="color:blue">${team.users.size()}</span>
+            </td>
+            <td data-toggle="toggle" data-target="#${tr_key}_${team.teamId}_memo" style="cursor:pointer;">
+              <i class="icon-reorder"></i>
+              <a href="javascript:void(0);">${team.name}</a>
+            </td>
+            <td>
+              <a href="@{Teams.delete(team.id)}" class="btn btn-danger btn-xs">删除</a>
+            </td>
+          </tr>
+          <tr id="${tr_key}_${team.teamId}_category" style="display:none;">
+            <td colspan="5">
+              <table class="table table-bordered table-condensed">
+                <tr>
+                  <th>CategoryId</th>
+                  <th>Name</th>
+                </tr>
+                  #{list items:team.getObjCategorys(), as:'cat'}
+                    <tr>
+                      <td>${cat.categoryId}</td>
+                      <td>${cat.name}</td>
+                    </tr>
+                  #{/list}
+              </table>
+            </td>
+          </tr>
+          <tr id="${tr_key}_${team.teamId}_user" style="display:none;">
+            <td colspan="5">
+                #{list items:team.users, as:'usr'}
+                    #{if usr_index % 5 == 0}
+                      <label class="checkbox-inline col-sm-1">
+                        <input type="checkbox" id="" value="${usr.id}"> ${usr.username}
+                      </label>
+                      <br>
+                    #{/if}
+                    #{else }
+                      <label class="checkbox-inline col-sm-2">
+                        <input type="checkbox" id="" value="${usr.id}"> ${usr.username}
+                      </label>
+                    #{/else}
+                #{/list}
+            </td>
+          </tr>
+          <tr id="${tr_key}_${team.teamId}_memo" style="display:none;">
+            <td colspan="5">
+              <form action="@{Teams.update()}" method="post" class="form-horizontal">
+                <div class="row">
+                  <label class="col-sm-1">Name:</label>
+                  <div class="col-sm-2">
+                    <input class="form-control" type="text" name="team.name" value="${team.name}">
+                  </div>
+                  <label class="col-sm-1">Memo:</label>
+                  <div class="col-sm-5">
+                    <textarea name="team.memo" class="form-control" rows="2">${team.memo}</textarea>
+                  </div>
+                  <input type="hidden" name="team.id" value="${team.id}">
+                  <button class="btn btn-primary" data-loading>保存</button>
+                </div>
+              </form>
+            </td>
+          </tr>
+        #{/list}
+        </table>
       </div>
-
-
-      #{info_row title:'Relate Info'/}
-       <div class="row-fluid">
-         <div class="span6">
-             <div style="margin-bottom:10px;">
-               <button class="btn btn-warning">产品类别</button>
-             </div>
-             <table class="table table-bordered table-condensed">
-               <tr>
-                 <th>CategoryId</th>
-                 <th>Name</th>
-               </tr>
-                 #{list items:team.getObjCategorys(), as:'cat'}
-                   <tr>
-                     <td>${cat.categoryId}</td>
-                     <td>${cat.name}</td>
-                   </tr>
-                 #{/list}
-             </table>
-         </div>
-
-
-         <div class="span6">
-             <div style="margin-bottom:10px;">
-               <button class="btn btn-warning">用户</button>
-             </div>
-             <table class="table table-bordered table-condensed">
-               <tr>
-                 <th>username</th>
-                 <th>email</th>
-               </tr>
-                 #{list items:team.users, as:'usr'}
-                   <tr>
-                     <td>${usr.username}</td>
-                     <td>${usr.email}</td>
-                   </tr>
-                 #{/list}
-             </table>
-         </div>
-       </div>
-
-
+      <div class="box-footer">
+        <a href="@{Teams.blank()}" class="btn btn-warning">创建新 Team</a>
+      </div>
     </div>
-
-
-
-
-
-
-
-
-
-
   </div>
 </div>
-#{/else}
-</div>
+
