@@ -39,6 +39,24 @@
             </div>
           </div>
 
+        #{if isB2B || "Lecone"==models.OperatorConfig.getVal("brandname")}
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-1 control-label">对应原始SKU</label>
+            <div class="col-sm-4">
+              <div class="col-sm-3">
+                <select style="width:100px;" name="pro.origin_project" class="form-control">
+                    #{list items:models.User.COR.values(), as:'c'}
+                      <option value="${c.name()}">${c.label()}</option>
+                    #{/list}
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <input type="text" name="pro.origin_sku" value="${pro.origin_sku}" class="form-control">
+              </div>
+            </div>
+          </div>
+        #{/if}
+
           <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
             <div class="col-sm-2">
