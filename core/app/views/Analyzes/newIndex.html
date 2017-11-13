@@ -102,6 +102,7 @@
                 <th width="300px;">SellingId</th>
                 <th>Asin</th>
                 <th>市场</th>
+                <th>Market</th>
                 <th>计划中</th>
                 <th>制作中</th>
                 <th>已交货</th>
@@ -125,6 +126,7 @@
                     <div class="img-thumbnail flag flag-icon-background ${dto.market.pic()}"></div>
                   </div>
                 </td>
+                <td>${dto.market?.shortHand()}</td>
                 <td style="color:#A5B600" data-dtofid='<%= dto.fid %>'>${dto.plan}</td>
                 <td>${dto.working}</td>
                 <td style="color:#FE502A;">${dto.worked}</td>
