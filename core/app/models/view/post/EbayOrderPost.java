@@ -22,6 +22,7 @@ public class EbayOrderPost extends Post<EbayOrder> {
     private static final long serialVersionUID = 9006377542594278217L;
     public M market;
     public Orderr.S state = Orderr.S.SHIPPED;
+    public String category;
     public int perSize = 20;
 
     @Override
@@ -45,6 +46,11 @@ public class EbayOrderPost extends Post<EbayOrder> {
         if(StringUtils.isNotBlank(this.search)) {
             sbd.append(" AND i.product.sku = ? ");
             params.add(this.search);
+        }
+
+        if(StringUtils.isNotBlank(this.category)) {
+            sbd.append(" AND i.product.category.categoryId = ? ");
+            params.add(this.category);
         }
 
         sbd.append(" ORDER BY e.createDate DESC ");
