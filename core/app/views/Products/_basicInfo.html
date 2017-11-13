@@ -23,7 +23,7 @@
             </div>
           </div>
 
-        #{if isB2B}
+        #{if isB2B || "Lecone"==models.OperatorConfig.getVal("brandname")}
           <div class="form-group">
             <label for="p_sku" class="col-sm-1 control-label">对应原始SKU</label>
             <div class="col-sm-4">
