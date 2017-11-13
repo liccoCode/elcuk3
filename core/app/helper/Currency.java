@@ -313,6 +313,47 @@ public enum Currency {
             // 78.309 -> 0.78309
             return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
         }
+
+    },
+
+    MXN {
+        @Override
+        public Float toUSD(Float value) {
+            return value * MXN_USD;
+        }
+
+        @Override
+        public Float toCNY(Float value) {
+            return value * MXN_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return MXN_CNY;
+                case USD:
+                    return MXN_USD;
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "Mex$";
+        }
+
+        @Override
+        public String label() {
+            return "墨西哥元";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+        }
     };
 
     // ------------------------------------------------------- Currency 所有枚举的通用方法 ----------------------------------------
@@ -357,6 +398,10 @@ public enum Currency {
     //CAD
     private static float CAD_CNY = 5.17f;
     private static float CAD_USD = 0.75f;
+
+    private static float MXN_CNY = 0.3481f;
+    private static float MXN_USD = 0.0524f;
+
 
 
     public static void updateCRY() {
