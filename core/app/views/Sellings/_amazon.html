@@ -8,12 +8,14 @@
     </div>
   #{/if}
   #{else }
-    <div class="col-sm-6" style="padding:0">
-      <div class="flag-wrapper" style="margin:0;height:35px;width:55px;">
-        <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
+    <div class="col-sm-1" style="padding:0">
+      <div style="height:40px;width:50px;">
+        <div class="flag-wrapper" style="margin:0;">
+          <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
+        </div>
       </div>
     </div>
-    <div class="col-sm-6" id='btns' style="text-align:right;">
+    <div class="col-sm-11" id='btns' style="text-align:right;">
       <button class="btn btn-info" id="amz-update" data-url="@{Sellings.update()}" title="直接更新到数据库"
               placement='bottom' data-toggle="tooltip">Update
       </button>

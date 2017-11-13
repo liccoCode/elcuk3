@@ -228,9 +228,7 @@ public class Selling extends GenericModel {
     public String productTypeName;
     public String publisher;
 
-
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
-
 
     @PreUpdate
     @PrePersist
@@ -358,6 +356,8 @@ public class Selling extends GenericModel {
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
         results.forEach(result -> {
             com.amazonservices.mws.products.model.Product product = result.getProduct();
+            if(product == null)
+                return;
             String attributeXml = product.getAttributeSets().toXML();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             try {
@@ -373,12 +373,18 @@ public class Selling extends GenericModel {
                     this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
                     this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
                     this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0).getTextContent();
-                    this.aps.quantity = Integer.parseInt(n.getElementsByTagName("ns2:PackageQuantity").item(0)
-                            .getTextContent());
+                    if(n.getElementsByTagName("ns2:PackageQuantity").item(0) != null) {
+                        this.aps.quantity = Integer.parseInt(n.getElementsByTagName("ns2:PackageQuantity").item(0)
+                                .getTextContent());
+                    }
                     this.productGroup = n.getElementsByTagName("ns2:ProductGroup").item(0).getTextContent();
                     this.productTypeName = n.getElementsByTagName("ns2:ProductTypeName").item(0).getTextContent();
                     this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
                     this.aps.title = n.getElementsByTagName("ns2:Title").item(0).getTextContent();
+                    this.aps.imageUrl = n.getElementsByTagName("ns2:SmallImage").item(0).getTextContent();
+                    if(StringUtils.isNotBlank(this.aps.imageUrl)) {
+                        this.aps.imageUrl = this.aps.imageUrl.replace("7575", "");
+                    }
                     this.save();
                 }
             } catch(ParserConfigurationException | SAXException | IOException e) {
