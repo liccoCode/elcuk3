@@ -1788,8 +1788,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
 
         //日期发生改变则记录旧的日期
-        if(this.dates != null && this.dates.planArrivDate != null) {
-            if(this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0
+        if(this.dates != null) {
+            if(this.dates.planArrivDate != null && this.dates.planArrivDate.compareTo(newShip.dates.planArrivDate) != 0
                     && this.dates.oldPlanArrivDate == null)
                 this.dates.oldPlanArrivDate = this.dates.planArrivDate;
             this.dates.planArrivDate = newShip.dates.planArrivDate;
