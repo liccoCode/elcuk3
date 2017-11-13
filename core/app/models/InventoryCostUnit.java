@@ -66,6 +66,10 @@ public class InventoryCostUnit extends GenericModel {
      * 生产中的数量(制作中+已交货)
      */
     public Integer productionQty;
+    /**
+     * Reserved数量
+     */
+    public Integer reservedQty;
 
     /**
      * 主键 ID
@@ -80,6 +84,7 @@ public class InventoryCostUnit extends GenericModel {
 
     public static List<Map<String, Object>> countByCategory(Date target) {
         String sql = "SELECT categoryId, `date`,"
+                + " SUM(reservedQty) AS reservedQty,"
                 + " SUM(productionQty) AS productionQty,"
                 + " SUM(productionCost) AS productionCost,"
                 + " SUM(transitQty) AS transitQty,"
@@ -88,6 +93,7 @@ public class InventoryCostUnit extends GenericModel {
                 + " SUM(stockCost) AS stockCost "
                 + " FROM("
                 + "  SELECT `date`, categoryId,"
+                + "  SUM(reservedQty) AS reservedQty,"
                 + "  productionQty AS productionQty,"
                 + "  productionQty*procurementPrice AS productionCost,"
                 + "  SUM(transitQty) AS transitQty,"
