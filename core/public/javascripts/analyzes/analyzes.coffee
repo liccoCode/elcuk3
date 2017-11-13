@@ -69,20 +69,6 @@ $ ->
     )
   )
 
-  # Form 搜索功能
-  $("#click_param").on("click", ".btn:contains(搜索)", (e) ->
-    e.preventDefault()
-    if $('select[name|="p.categoryId"]').val() is ''
-      $("#postVal").val('all')
-    else
-      ajaxSaleUnitLines()
-    ajaxFreshAcitveTableTab()
-# 重新加载全部的销售线
-  ).on("click", ".btn:contains(Reload)", (e) ->
-    e.preventDefault()
-    ajaxSaleUnitLines()
-  )
-
   #parameters：
   # headName ：标题名称   yName : Y轴名称   plotEvents ：曲线数据节点的事件   noDataDisplayMessage ：无数据时的提示文字
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', (e, headName, yName, plotEvents, noDataDisplayMessage) ->
