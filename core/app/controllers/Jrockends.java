@@ -3,13 +3,16 @@ package controllers;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.AmazonSQS;
+import helper.GTs;
 import helper.Webs;
 import models.ElcukRecord;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,9 +34,15 @@ public class Jrockends extends Controller {
 
 
     @Check("jobs.index")
-    public static void run(String jobName) {
+    public static void run(String jobName, Date from, Date to) {
         Map map = new HashMap();
         map.put("jobName", jobName);  //  任务ID
+
+        if(from != null && to != null) {
+            String beginDate = new SimpleDateFormat("yyyy-MM-dd").format(from);
+            String endDate = new SimpleDateFormat("yyyy-MM-dd").format(to);
+            map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
+        }
         String message = JSONObject.toJSONString(map);
         try {
             AmazonSQS.sendMessage(message);
