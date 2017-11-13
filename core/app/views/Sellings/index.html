@@ -102,9 +102,13 @@
             </td>
             <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
             <td>${s.listing?.product?.sku}</td>
-            <td>${s.market.countryName()}</td>
+            <td style="padding: 0" data-toggle="tooltip" title="${s.market.countryName()}">
+              <div class="flag-wrapper" style="margin:0">
+                <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
+              </div>
+            </td>
             <td>${s.aps.salePrice}</td>
-            <td>${s.asin}</td>
+            <td><a href="${s.showListingLink()}" target="_blank">${s.asin}</a></td>
             <td>${s.sellingCycle?.label()}</td>
             <td>${s.state.name().equals("DOWN") ? '否' : '是'}</td>
             <td>#{time_tooltip_v3 time:s.recentlyFeed()?.createdAt, datetime:true/}</td>

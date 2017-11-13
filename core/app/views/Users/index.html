@@ -51,6 +51,7 @@
           <tr>
             <th>#</th>
             <th>Username</th>
+            <th>Department</th>
             <th>Email</th>
             <th>Team</th>
             <th>Category</th>
@@ -62,6 +63,7 @@
               <tr>
                 <td>${user.id}</td>
                 <td>${user.username}</td>
+                <th>${user.department?.label()}</th>
                 <td data-toggle="toggle">${user.email}</td>
                 <td data-toggle="toggle" data-target="#${user.username}_teams">
                   <i class="icon-reorder"></i> ${user.teams?.size()} 个TEAM(共 ${teams?.size()} 个)
@@ -84,7 +86,7 @@
               </tr>
 
               <tr id="${user.username}_categories" style="display:none;">
-                <td colspan="7">
+                <td colspan="8">
                   <form method="post" action="@{Users.categories()}" class="form-inline" name="data-form">
                     <table class="table table-bordered table-condensed">
                     <tr>
@@ -114,7 +116,7 @@
               </tr>
 
               <tr id="${user.username}_teams" style="display:none;">
-                <td colspan="7">
+                <td colspan="8">
                   <form method="post" action="@{Users.teams()}" class="form-inline" name="data-form">
                     <table class="table table-bordered table-condensed">
                     <tr>
@@ -143,7 +145,7 @@
               </tr>
 
               <tr id="${user.username}_roles" style="display:none;">
-                <td colspan="7">
+                <td colspan="8">
                   <form method="post" action="@{Users.roles()}" class="form-inline" name="data-form">
                     <table class="table table-bordered table-condensed">
                     <tr>

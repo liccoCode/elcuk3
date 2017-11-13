@@ -24,7 +24,8 @@ $(() => {
 
   $("[data-toggle='popover']").popover({
     html: true,
-    trigger: 'hover'
+    trigger: 'hover',
+    container: 'body'
   });
 
 

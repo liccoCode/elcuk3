@@ -1,5 +1,5 @@
 $(() => {
-  $('table[name=fbacenterList]').on('click', 'a[name=enableAutoSync], a[name=disableAutoSync]', function () {
+  $("#fbaCenterTable").on('click', 'a[name=enableAutoSync], a[name=disableAutoSync]', function () {
     if (!confirm('确认操作?')) return;
 
     const $a = $(this);
@@ -38,13 +38,13 @@ $(() => {
 
   class FbaShipToBuilder {
     constructor (tds) {
-      this.addressLine1 = $(tds[1]).text();
-      this.addressLine2 = $(tds[2]).text();
-      this.city = $(tds[3]).text();
-      this.name = $(tds[4]).text();
-      this.countryCode = $(tds[5]).text();
-      this.stateOrProvinceCode = $(tds[6]).text();
-      this.postalCode = $(tds[7]).text();
+      this.addressLine1 = $(tds[2]).text();
+      this.addressLine2 = $(tds[3]).text();
+      this.city = $(tds[4]).text();
+      this.name = $(tds[5]).text();
+      this.countryCode = $(tds[6]).text();
+      this.stateOrProvinceCode = $(tds[7]).text();
+      this.postalCode = $(tds[8]).text();
     }
 
     static get countryCodeMap () {

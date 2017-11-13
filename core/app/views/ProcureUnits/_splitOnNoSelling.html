@@ -54,7 +54,7 @@
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
     <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
-    <input type="hidden" id="taxPointInput" value="0" name="newUnit.taxPoint">
+    <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
   </td>
   <th>所属公司</th>
   <td>

@@ -39,6 +39,9 @@
               #{power.ck "analyzes.index"}
                 <li><a href="@{Analyzes.index()}">销量分析</a></li>
               #{/power.ck}
+              #{power.ck "analyzes.newindex"}
+                <li><a href="@{Analyzes.newIndex()}">销量分析(New)</a></li>
+              #{/power.ck}
               #{power.ck "analyzes.trafficrate"}
                 <li><a href="@{Analyzes.trafficRate()}">Selling 流量转化率统计</a></li>
               #{/power.ck}
@@ -123,6 +126,9 @@
               #{/power.ck}
               #{power.ck "procures.btborderindex"}
                 <li><a href="@{BtbCustoms.btbOrderIndex()}">B2B销售订单信息</a></li>
+              #{/power.ck}
+              #{power.ck "orders.indexebay"}
+                <li><a href="@{Orders.indexEbay()}">Ebay订单(AMAZON部分)</a></li>
               #{/power.ck}
               #{power.ck "shipitems.indexb2b"}
                 <li><a href="@{ShipItems.indexB2B()}">B2B运输</a></li>

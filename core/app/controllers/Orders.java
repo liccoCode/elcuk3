@@ -56,7 +56,8 @@ public class Orders extends Controller {
     public static void indexEbay(EbayOrderPost p) {
         if(p == null) p = new EbayOrderPost();
         List<EbayOrder> orders = p.query();
-        render(p, orders);
+        List<String> categoryIds = Category.categoryIds();
+        render(p, orders, categoryIds);
     }
 
     public static void show(String id) {

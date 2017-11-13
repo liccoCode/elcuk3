@@ -40,3 +40,5 @@ $ ->
     $("tr[aid=#{args[0]}]").css('background', '#FF6A78')
 
   activeAccount()
+
+

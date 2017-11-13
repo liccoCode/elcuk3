@@ -35,17 +35,7 @@ $(() => {
           dataLabels: {
             enabled: false
           },
-          showInLegend: true,
-          events: {
-            click: function (event) {
-              refreshTopFive(event.point.name);
-            },
-            afterAnimate: function (event) {
-              if ($("#brandname").val() !== 'EASYACC') {
-                refreshTopFive(r["highestMarket"]);
-              }
-            }
-          }
+          showInLegend: true
         }
       },
       series: r["series"]
@@ -96,94 +86,36 @@ $(() => {
     });
   });
 
-  function refreshTopFive (market) {
-    let div = $("#progress_by_market");
-    div.mask();
-    div.load("/application/topTenSkuByMarket", {market: market}, function () {
-      div.unmask();
-      let fid = $("#progress_by_market").find("div").data("fid");
-      getSales(fid);
-    });
-  }
-
-  $(document).on("click", "a[name='sku_href']", function (r) {
-    getSales($(this).data("fid"));
-  });
-
-  function getSales (fid) {
-    let sid = fid;
-    $.post("/application/ajaxUnit", {sid: sid}, function (r) {
-      Highcharts.chart("ajaxUnitDiv", {
-        credits: {
-          text: 'EasyAcc',
-          href: ''
-        },
-        title: {
-          text: sid
-        },
-        legend: {
-          enabled: true
-        },
-        navigator: {
-          enabled: true
-        },
-        scrollbar: {
-          enabled: false
-        },
-        rangeSelector: {
-          enabled: true,
-          buttons: [{
-            type: 'week',
-            count: 1,
-            text: '1w'
-          }, {
-            type: 'month',
-            count: 1,
-            text: '1m'
-          }],
-          selected: 1
-        },
-        xAxis: {
-          type: 'datetime',
-          yAxis: {min: 0}
-        },
-        tooltip: {
-          shared: true,
-          crosshairs: true,
-          xDateFormat: '%Y-%m-%d'
-        },
-        series: r['series']
-      });
-    });
-  }
-
   let libColor = 'rgba(240,190,50,0.80)', grnColor = 'rgba(90,200,90,0.80)';
 
   Highcharts.mapChart('ajaxMap', {
     chart: {
       borderWidth: 0
     },
-
+    credits: {
+      text: 'EasyAcc',
+      href: ''
+    },
     colorAxis: {
       dataClasses: [{
-        from: -1,
-        to: 100,
+        from: 2000,
+        to: 10000,
         color: 'rgba(244,91,91,0.5)',
-        name: 'Republican'
+        name: '2000+'
       }, {
-        from: 100,
-        to: 500,
+        from: 1000,
+        to: 2000,
         color: 'rgba(124,181,236,0.5)',
-        name: 'Democrat'
+        name: '1000-2000'
       }, {
         from: 500,
         to: 1000,
-        name: 'Libertarian',
+        name: '500-1000',
         color: libColor
       }, {
         from: 1000,
         to: 10000,
-        name: 'Green',
+        name: '0-500',
         color: grnColor
       }]
     },

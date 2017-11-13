@@ -1,84 +1,93 @@
-#{extends 'main.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'FBACenter(' + centers.size() + ')'/}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
     #{script 'fbacenters/index.js'/}
 #{/set}
 #{flash_alert /}
-#{info_row title:'FBACenters' /}
-<div class="row-fluid">
-  <table class="table table-condensed table-bordered" name="fbacenterList">
-    <thead>
-    <!-- WARNING: 请勿随意更改 th 的位置.
-    受影响代码: fbacenters/index.js 内对 a[name=checkFBALabel] 对象绑定的 click 事件.
-    -->
-    <tr>
-      <th rel="popover" content="<img src='/img/helper/fbaCenterId.jpg'>"
-          full-width="true" placement="bottom">CenterId
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaAddressLine1.jpg'>"
-          full-width="true" placement="bottom">AddressLine1
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaAddressLine2.jpg'>"
-          full-width="true" placement="bottom">AddressLine2
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaCity.jpg'>"
-          full-width="true" placement="bottom">City
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaName.jpg'>"
-          full-width="true" placement="bottom">Name
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaCountryCode.jpg'>"
-          full-width="true" placement="bottom">CountryCode
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaStateOrProvinceCode.jpg'>"
-          full-width="true" placement="bottom">StateOrProvinceCode
-      </th>
-      <th rel="popover" content="<img src='/img/helper/fbaPostalCode.jpg'>"
-          full-width="true" placement="bottom">PostalCode
-      </th>
-      <th width="6%">Auto Sync Switch</th>
-      <th width="5%">Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    #{list items:centers, as:'center'}
-    <tr>
-      <td><a href="@{FBACenters.show(center.id)}">${center.centerId}</a></td>
-      <td>${center.addressLine1}</td>
-      <td>${center.addressLine2}</td>
-      <td>${center.city}</td>
-      <td>${center.name}</td>
-      <td>${center.countryCode}</td>
-      <td>${center.stateOrProvinceCode}</td>
-      <td>${center.postalCode}</td>
-      <td>
-          #{yesOrNo f:center.autoSync, id:center.id/}
-          #{if center.autoSync}
-            <a href="#" rel="tooltip" placement="top" title="禁用自动同步" data-centerid="${center.id}"
-               name="disableAutoSync">Disable</a>
-          #{/if}
-          #{else}
-            <a href="#" rel="tooltip" placement="top" title="启用自动同步" data-centerid="${center.id}"
-               name="enableAutoSync">Enable</a>
-          #{/else}
-      </td>
-      <td>
-        <a rel="tooltip" placement="top" title="检查 FBA Label 是否正确" name="checkFBALabel">
-          <i class="icon-download-alt"></i> Check
-        </a>
-      </td>
-    </tr>
-    #{/list}
-    </tbody>
-  </table>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border"><h3 class="box-title">FBACenters</h3></div>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered" name="" id="fbaCenterTable">
+          <!-- WARNING: 请勿随意更改 th 的位置.
+          受影响代码: fbacenters/index.js 内对 a[name=checkFBALabel] 对象绑定的 click 事件.
+          -->
+          <tr>
+            <th width="30px;">Country</th>
+            <th data-toggle="popover" data-content="<img src='/img/helper/fbaCenterId.jpg'>" data-placement="bottom">
+              CenterId
+            </th>
+            <th data-toggle="popover" data-content="<img src='/img/helper/fbaAddressLine1.jpg'>" data-placement="bottom">
+              AddressLine1
+            </th>
+            <th data-toggle="popover" data-content="<img src='/img/helper/fbaAddressLine2.jpg'>" data-placement="bottom">
+              AddressLine2
+            </th>
+            <th data-toggle="popover" data-content="<img src='/img/helper/fbaCity.jpg'>" data-placement="bottom">City
+            </th>
+            <th data-toggle="popover" data-content="<img src='/img/helper/fbaName.jpg'>" data-placement="bottom">Name
+            </th>
+            <th rel="popover" content="<img src='/img/helper/fbaCountryCode.jpg'>" data-placement="bottom">CountryCode
+            </th>
+            <th rel="popover" data-content="<img src='/img/helper/fbaStateOrProvinceCode.jpg'>" data-placement="bottom">
+              StateOrProvinceCode
+            </th>
+            <th rel="popover" data-content="<img src='/img/helper/fbaPostalCode.jpg'>" data-placement="bottom">
+              PostalCode
+            </th>
+            <th width="100px;">Auto Sync</th>
+            <th width="80px;">Action</th>
+          </tr>
+        #{list items:centers, as:'center'}
+          <tr>
+            <td style="padding: 0" data-toggle="tooltip" title="${models.market.M.val(center.countryCode)?.countryName()}">
+              <div class="flag-wrapper" style="margin:0">
+                <div class="img-thumbnail flag flag-icon-background  ${models.market.M.val(center.countryCode)?.pic()}"></div>
+              </div>
+            </td>
+            <td><a href="@{FBACenters.show(center.id)}">${center.centerId}</a></td>
+            <td>${center.addressLine1}</td>
+            <td>${center.addressLine2}</td>
+            <td>${center.city}</td>
+            <td>${center.name}</td>
+            <td>${center.countryCode}</td>
+            <td>${center.stateOrProvinceCode}</td>
+            <td>${center.postalCode}</td>
+            <td>
+                #{yesOrNo f:center.autoSync, id:center.id/}
+                #{if center.autoSync}
+                  <a href="#" data-toggle="tooltip" title="禁用自动同步" data-centerid="${center.id}"
+                     name="disableAutoSync">Disable</a>
+                #{/if}
+                #{else}
+                  <a href="#" data-toggle="tooltip" title="启用自动同步" data-centerid="${center.id}"
+                     name="enableAutoSync">Enable</a>
+                #{/else}
+            </td>
+            <td>
+              <a data-toggle="tooltip" title="检查 FBA Label 是否正确" name="checkFBALabel">
+                <i class="icon-download-alt"></i> Check
+              </a>
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
-
 <!-- Ship To Modal -->
-<div id="fba_ship_to_modal" class="modal hide fade">
-  <div class="modal-body" id="fba_ship_to_body"></div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+<div id="fba_ship_to_modal" class="modal fade" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body" id="fba_ship_to_body"></div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">OK</button>
+      </div>
+    </div>
   </div>
 </div>

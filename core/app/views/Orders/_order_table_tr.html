@@ -1,65 +1,69 @@
 <tr>
-    <th>Market</th>
-    <th style="width:180px;">Fees Percent(USD)</th>
-    <th>Address1</th>
-    <th>Country</th>
-    <th rel="popover" title="数字是什么?" content="(a | b), a: 订单重销售产品的个数. b: 支付信息个数" style="width:200px;">
-        <i class="icon-question-sign"></i> OrderId
-    </th>
-    <th>Buyer</th>
-    <th>SKU</th>
-    <th style="width:100px;">PromotionIDs</th>
-    <th>Email</th>
-    <th style="width:90px;">Create</th>
-    <th style="width:90px;">ShipDate</th>
-    <th style="width:90px;">Payment</th>
-    <th>State</th>
-    <th>Invoice</th>
+  <th>Market</th>
+  <th style="width:180px;">Fees Percent(USD)</th>
+  <th>Address1</th>
+  <th>Country</th>
+  <th rel="popover" title="数字是什么?" content="(a | b), a: 订单重销售产品的个数. b: 支付信息个数" style="width:200px;">
+    <i class="icon-question-sign"></i> OrderId
+  </th>
+  <th>Buyer</th>
+  <th>SKU</th>
+  <th style="width:100px;">PromotionIDs</th>
+  <th>Email</th>
+  <th style="width:90px;">Create</th>
+  <th style="width:90px;">ShipDate</th>
+  <th style="width:90px;">Payment</th>
+  <th>State</th>
+  <th>Invoice</th>
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-    <td>${ord.market.countryName()}</td>
-    <td data-toggle="toggle" data-target="#order_index_${ord_index}">
-        <i class="icon-reorder"></i>
-        <span class="badge bg-light-blue">${ord?.fees?.size()}</span>
-        #{set percent: (ord.totalMarketFee() / ord.totalUSDSales())/}
-        #{if percent >= 0.25}
-            <span style="color:red">${percent.format("#.##%")}</span>
-        #{/if}
-        #{else }
-        ${percent.format("#.##%")}
-        #{/else}
-        (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
-    </td>
-    <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
-    <td rel="popover" title="地址信息: ${ord.address.raw()}">${ord.country}</td>
-    <td>
-        <a target="_blank" href="@{Orders.show(ord.orderId)}">
-        ${ord.orderId} (${ord.itemCount()} | ${ord.fees.size()})
-        </a>
-    </td>
-    <td>${ord.buyer}</td>
-    <td>${ord.showItemSku()}</td>
-    <td data-toggle="tooltip" title="${ord.showDiscountPrice()}">${ord.showPromotionIDs()}</td>
-    <td>
-        <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
-    </td>
-    <td>#{time_tooltip_v3 time:ord.createDate/}</td>
-    <td>#{time_tooltip_v3 time:ord.shipDate/}</td>
-    <td>#{time_tooltip_v3 time:ord.paymentDate/}</td>
-    <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
-    <td>
-    #{if ord.invoiceState=='yes'}
+  <td>${ord.market.countryName()}</td>
+  <td data-toggle="toggle" data-target="#order_index_${ord_index}">
+    <i class="icon-reorder"></i>
+    <span class="badge bg-light-blue">${ord?.fees?.size()}</span>
+      #{set percent: (ord.totalMarketFee() / ord.totalUSDSales())/}
+      #{if percent >= 0.25}
+        <span style="color:red">${percent.format("#.##%")}</span>
+      #{/if}
+      #{else }
+      ${percent.format("#.##%")}
+      #{/else}
+    (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
+  </td>
+  <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
+  <td style="padding:0;" data-toggle="tooltip" title="地址信息: ${ord.address.raw()}">
+    <div class="flag-wrapper" style="margin:0">
+      <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country?.toLowerCase()}"></div>
+    </div>
+  </td>
+  <td>
+    <a target="_blank" href="@{Orders.show(ord.orderId)}">
+    ${ord.orderId} (${ord.itemCount()} | ${ord.fees.size()})
+    </a>
+  </td>
+  <td>${ord.buyer}</td>
+  <td>${ord.showItemSku()}</td>
+  <td data-toggle="tooltip" title="${ord.showDiscountPrice()}">${ord.showPromotionIDs()}</td>
+  <td>
+    <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
+  </td>
+  <td>#{time_tooltip_v3 time:ord.createDate/}</td>
+  <td>#{time_tooltip_v3 time:ord.shipDate/}</td>
+  <td>#{time_tooltip_v3 time:ord.paymentDate/}</td>
+  <td style="color:${'#' + ord.state.color()}">${ord.state}</td>
+  <td>
+      #{if ord.invoiceState=='yes'}
         <b>sent</b>
-    #{/if}
-    #{else }
+      #{/if}
+      #{else }
         unsent
-    #{/else}
-    </td>
+      #{/else}
+  </td>
 </tr>
 <tr style="display:none" id="order_index_${ord_index}">
-    <td colspan="16">
-        #{render './_order_fees.html', fees: ord.fees/}
-    </td>
+  <td colspan="16">
+      #{render './_order_fees.html', fees: ord.fees/}
+  </td>
 </tr>
 #{/list}

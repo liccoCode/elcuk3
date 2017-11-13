@@ -1,3 +1,6 @@
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/flag-icon.css'/}
+#{/set}
 #{set tr_key: key ? key : 'unit'/}
 <table class="table table-condensed table-bordered dataTable" id="unit_table">
   <tr>
@@ -17,7 +20,7 @@
     <th width="170px;">Selling</th>
     <th width="120px">Sku</th>
     <th width="145px;">FBA-ShipmentId<br>CenterId</th>
-    <th>采购单<br>供应商</th>
+    <th width="100px;">采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="120px;">数量<br>(计划/交货/入库)</th>
     <th>可用库存</th>
@@ -131,7 +134,7 @@
         #{/if}
       <br>${unit.cooperator?.name}
     </td>
-    <td>${unit.whouse?.name}</td>
+    <td data-toggle="tooltip" title="${unit.whouse?.name}">${unit.whouse?.name}</td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
     </td>
