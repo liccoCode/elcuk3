@@ -10,6 +10,7 @@
     <th>入库</th>
     <th>在库</th>
     <th>Reviews</th>
+    <th>Reserved</th>
     <th>Rating</th>
     <th>评分趋势</th>
     <th>PS</th>
@@ -34,6 +35,7 @@
     <td style="color:#CC6615">${dto.inbound}</td>
     <td class="text-success">${dto.qty}</td>
     <td><a href="javascript:;" rel="tooltip" title="${dto.reviewRatio}">${dto.reviews}</a></td>
+    <td class="text-info">${dto.reserved}</td>
     <td>${dto.rating.format('#.##')}</td>
     <td>#{render 'Analyzes/_rating_icon.html', dto:dto/}</td>
     <td>${dto.ps_cal.format('#.##')}</td>
