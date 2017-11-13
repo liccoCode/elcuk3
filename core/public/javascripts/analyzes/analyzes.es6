@@ -1,6 +1,7 @@
 $(() => {
 
   $("#click_param").on("change", "[name=p\\.market]", function () {
+    ajaxSaleUnitLines();
     ajaxFreshActiveTableTab();
   }).on("click", ".btn:contains(Excel)", function (e) {
     e.preventDefault();
@@ -82,7 +83,7 @@ $(() => {
   $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', function (e, headName, yName, plotEvents, noDataDisplayMessage) {
     let $div = $(this);
     LoadMask.mask($div);
-    $.post("/analyzes/" + $div.data('method'), function (r) {
+    $.post("/analyzes/" + $div.data('method'), $('#click_param').serialize(), function (r) {
       if (!r.flag) {
         noty({
           text: r.message.split("|F")[0],
