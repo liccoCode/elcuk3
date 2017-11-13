@@ -34,7 +34,7 @@
   <td rel="tooltip" title="${ord.address1}">${ord.address1.xxLong()}</td>
   <td style="padding:0;" data-toggle="tooltip" title="地址信息: ${ord.address.raw()}">
     <div class="flag-wrapper" style="margin:0">
-      <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country}"></div>
+      <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country?.toLowerCase()}"></div>
     </div>
   </td>
   <td>
