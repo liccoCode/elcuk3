@@ -3,9 +3,9 @@ package controllers;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.AmazonSQS;
-import helper.GTs;
 import helper.Webs;
 import models.ElcukRecord;
+import org.apache.commons.lang3.StringUtils;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -34,16 +34,20 @@ public class Jrockends extends Controller {
 
 
     @Check("jobs.index")
-    public static void run(String jobName, Date from, Date to) {
-        Map map = new HashMap();
-        map.put("jobName", jobName);  //  任务ID
-
+    public static void run(String jobName, Date from, Date to, String market) {
+        Map jobMap = new HashMap();
+        //任务ID
+        jobMap.put("jobName", jobName);
+        Map jobParameters = new HashMap();
         if(from != null && to != null) {
-            String beginDate = new SimpleDateFormat("yyyy-MM-dd").format(from);
-            String endDate = new SimpleDateFormat("yyyy-MM-dd").format(to);
-            map.put("args", GTs.newMap("beginDate", beginDate).put("endDate", endDate).build());  //开始日期和结束日期
+            jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
+            jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
         }
-        String message = JSONObject.toJSONString(map);
+        if(StringUtils.isNotBlank(market)) {
+            jobParameters.put("marketErp", market);
+        }
+        jobMap.put("args", jobParameters);
+        String message = JSONObject.toJSONString(jobMap);
         try {
             AmazonSQS.sendMessage(message);
         } catch(Exception e) {
