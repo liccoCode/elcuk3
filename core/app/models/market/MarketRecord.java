@@ -7,9 +7,7 @@ import helper.J;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +23,7 @@ public class MarketRecord extends Model {
 
     private static final long serialVersionUID = 4418184038845182213L;
 
+    @Temporal(TemporalType.DATE)
     public Date createDate;
 
     @Enumerated(EnumType.STRING)
@@ -65,7 +64,7 @@ public class MarketRecord extends Model {
                 return records;
             }
         }
-        List<MarketRecord> records = MarketRecord.find("createDate =? ", yesterday).fetch();
+        List<MarketRecord> records = MarketRecord.find("createDate =? ", Dates.date2JDate(yesterday)).fetch();
         Caches.set(cacheKey, J.json(records), 4);
         return records;
     }
