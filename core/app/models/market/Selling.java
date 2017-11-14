@@ -371,15 +371,22 @@ public class Selling extends GenericModel {
                     Element n = (Element) nodeList.item(i);
                     this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
                     this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
-                    this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
-                    this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Manufacturer").item(0) != null) {
+                        this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
+                    }
+                    if(n.getElementsByTagName("ns2:PartNumber").item(0) != null) {
+                        this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0)
+                                .getTextContent();
+                    }
                     if(n.getElementsByTagName("ns2:PackageQuantity").item(0) != null) {
                         this.aps.quantity = Integer.parseInt(n.getElementsByTagName("ns2:PackageQuantity").item(0)
                                 .getTextContent());
                     }
                     this.productGroup = n.getElementsByTagName("ns2:ProductGroup").item(0).getTextContent();
                     this.productTypeName = n.getElementsByTagName("ns2:ProductTypeName").item(0).getTextContent();
-                    this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Publisher").item(0) != null) {
+                        this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
+                    }
                     this.aps.title = n.getElementsByTagName("ns2:Title").item(0).getTextContent();
                     this.aps.imageUrl = n.getElementsByTagName("ns2:SmallImage").item(0).getTextContent();
                     if(StringUtils.isNotBlank(this.aps.imageUrl)) {
