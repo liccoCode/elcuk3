@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Caches;
 import helper.Dates;
 import helper.J;
 import helper.Webs;
@@ -41,7 +42,8 @@ public class Application extends Controller {
             }
         }.now());*/
         DashBoard dashboard = new DashBoard();
-        render(dashboard, brandname);
+        List<MarketRecord> records = MarketRecord.queryYesterdayRecords();
+        render(dashboard, brandname, records);
     }
 
     public static void perDayOrderNum() {

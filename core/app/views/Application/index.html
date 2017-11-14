@@ -36,28 +36,26 @@
           <th>REFUNDED</th>
           <th>RETURNNEW</th>
           <th>CANCEL</th>
-          <th><a href="#" rel="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+          <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
           <th>比前一天</th>
         </tr>
-      #{list items:models.market.M.values(), as:'m'}
-          #{if m.name()!='EBAY_UK'}
-            <tr>
-              <td style="padding: 0;">
-                <div class="flag-wrapper" style="margin:0;">
-                  <div class="img-thumbnail flag flag-icon-background ${m.pic()}"></div>
-                </div>
-              </td>
-              <td>${m.countryName()}</td>
-              <td>100</td>
-              <td>100</td>
-              <td>100</td>
-              <td>100</td>
-              <td>100</td>
-              <td>0</td>
-              <td>500</td>
-              <td class="text-success"><span class="glyphicon glyphicon-arrow-up"></span> 30%</td>
-            </tr>
-          #{/if}
+      #{list items:records, as:'m'}
+        <tr>
+          <td style="padding: 0;">
+            <div class="flag-wrapper" style="margin:0;">
+              <div class="img-thumbnail flag flag-icon-background ${m.market?.pic()}"></div>
+            </div>
+          </td>
+          <td>${m.market?.countryName()}</td>
+          <td>${m.pendingOrders}</td>
+          <td>${m.paymentOrders}</td>
+          <td>${m.shippedOrders}</td>
+          <td>${m.refundOrders}</td>
+          <td>${m.returnNewOrders}</td>
+          <td>${m.cancelOrders}</td>
+          <td>${m.totalOrders}</td>
+          <td class="text-success"><span class="glyphicon glyphicon-arrow-up"></span> 30%</td>
+        </tr>
       #{/list}
       </table>
     </div>

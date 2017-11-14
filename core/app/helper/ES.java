@@ -74,4 +74,17 @@ public class ES {
         }
         return StringUtils.replaceEach(esfield, new String[]{"-", ",", "|", "."}, new String[]{"", "", "", ""});
     }
+
+    /**
+     * 删除es数据
+     * @param index
+     * @param type
+     * @param builder
+     * @return
+     */
+    public static JSONObject deleteByQuery(String index, String type, SearchSourceBuilder builder) {
+        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_delete_by_query",
+                builder.toString(), HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(3)));
+    }
+
 }
