@@ -3,6 +3,7 @@ package models.market;
 import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.Dates;
+import helper.J;
 import org.apache.commons.lang.StringUtils;
 import play.db.jpa.Model;
 
@@ -64,7 +65,9 @@ public class MarketRecord extends Model {
                 return records;
             }
         }
-        return MarketRecord.find("createDate =? ", yesterday).fetch();
+        List<MarketRecord> records = MarketRecord.find("createDate =? ", yesterday).fetch();
+        Caches.set(cacheKey, J.json(records), 4);
+        return records;
     }
 
 }
