@@ -1,7 +1,7 @@
 #{extends 'main_full_v3.html'/}
 #{set title:'Asynchronous Jobs'/}
 #{set 'moreScripts'}
-  #{script 'jrockends/index.es6'/}
+    #{script 'jrockends/index.es6'/}
 #{/set}
 
 #{flash_alert /}
@@ -11,23 +11,29 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
-      <div class="box-header with-border">
-        <div class="row-fluid">
-          <div class="form-group">
-            <div class="input-group">
-              <div class="input-group-addon">From:</div>
-              <input style="width:100px;" class="form-control" role="date" name="from">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="from">
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <div class="input-group">
-              <div class="input-group-addon">To:</div>
-              <input style="width:100px;" class="form-control" role="date" name="to">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="to">
+              </div>
             </div>
+            <select name="market" style="width: 120px;" class="form-control">
+              <option value="">Market</option>
+            #{list items:models.market.M.values(), as:'d'}
+              <option value="${d.name()}">${d.name()}</option>
+            #{/list}
+            </select>
           </div>
+          <input name="jobName" id="jobName" type="hidden">
         </div>
-        <input name="jobName" id="jobName" type="hidden">
-      </div>
       </form>
       <div class="box-body">
         <table class="table table-condensed table-bordered" id="data-table">
@@ -122,6 +128,18 @@
                    data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
+          
+
+          <tr>
+            <td>marketRecordWatchTrigger</td>
+            <td>marketRecord报表</td>
+            <td> 0点8点16点 30分</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="marketRecordWatchTrigger"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            </td>
+          </tr>
+
 
         </table>
       </div>
