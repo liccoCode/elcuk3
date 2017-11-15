@@ -1,6 +1,6 @@
 $(() => {
 
-  $("#click_param").on("change", "[name=p\\.market]", function () {
+  $("#click_param").on("change", "[name='p.market']", function () {
     ajaxSaleUnitLines();
     ajaxFreshActiveTableTab();
   }).on("click", ".btn:contains(Excel)", function (e) {
