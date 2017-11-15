@@ -344,15 +344,12 @@ public class Selling extends GenericModel {
      */
     public void syncAmazonInfoFromApi() {
         MarketplaceWebServiceProductsClient client = MWSProducts.client(this.account, this.account.type);
-        GetMatchingProductRequest request = new GetMatchingProductRequest();
-        request.setSellerId(account.merchantId);
-        request.setMWSAuthToken(account.token);
-        request.setMarketplaceId(account.type.amid().name());
         ASINListType asinList = new ASINListType();
         asinList.getASIN().add(this.asin);
-        request.setASINList(asinList);
+        GetMatchingProductRequest request = new GetMatchingProductRequest(account.merchantId,
+                account.type.amid().name(), asinList);
+        request.setMWSAuthToken(account.token);
         GetMatchingProductResponse response = client.getMatchingProduct(request);
-
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
         results.forEach(result -> {
             com.amazonservices.mws.products.model.Product product = result.getProduct();
@@ -369,7 +366,9 @@ public class Selling extends GenericModel {
                 NodeList nodeList = doc.getElementsByTagName("ns2:ItemAttributes");
                 for(int i = 0; i < nodeList.getLength(); i++) {
                     Element n = (Element) nodeList.item(i);
-                    this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Binding").item(0) != null) {
+                        this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
+                    }
                     this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
                     if(n.getElementsByTagName("ns2:Manufacturer").item(0) != null) {
                         this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
@@ -398,7 +397,23 @@ public class Selling extends GenericModel {
                 Logger.error(e.getMessage());
             }
         });
-
+        GetMyPriceForASINRequest asinRequest = new GetMyPriceForASINRequest(account.merchantId,
+                account.type.amid().name(), asinList);
+        asinRequest.setMWSAuthToken(account.token);
+        GetMyPriceForASINResponse priceForASINResponse = client.getMyPriceForASIN(asinRequest);
+        List<GetMyPriceForASINResult> asinResults = priceForASINResponse.getGetMyPriceForASINResult();
+        asinResults.forEach(result -> {
+            com.amazonservices.mws.products.model.Product prodcut = result.getProduct();
+            OffersList offers = prodcut.getOffers();
+            List<OfferType> list = offers.getOffer();
+            list.forEach(offerType -> {
+                MoneyType moneyType = offerType.getRegularPrice();
+                this.aps.standerPrice = moneyType.getAmount().floatValue();
+                PriceType priceType = offerType.getBuyingPrice();
+                this.aps.salePrice = priceType.getListingPrice().getAmount().floatValue();
+                this.save();
+            });
+        });
     }
 
     /**
