@@ -179,7 +179,7 @@ public class Cooperators extends Controller {
         flash.success("创建成功.");
         new ElcukRecord(Messages.get("cooperators.savecooperitem"),
                 Messages.get("cooperators.savecooperitem.msg", copItem.id), copItem.id.toString()).save();
-        redirect("/cooperators/index#" + copItem.cooperator.id);
+        show(cooperId, false);
     }
 
     public static void agreeCooperItem(Long id) {

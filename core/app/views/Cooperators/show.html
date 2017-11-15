@@ -91,7 +91,7 @@
                         <input type="text" name="cop.address" class="form-control" value="${coper.address}" placeholder="详细地址">
                       </div>
                     </div>
-                    
+
 
                     <div class="form-group">
                       <label for="" class="col-sm-1 control-label">付款方式</label>
@@ -166,7 +166,8 @@
                       <th>生产周期(day)</th>
                       <th>每箱数量</th>
                       <th>最低采购量</th>
-                      <th width="70px;"></th>
+                      <th>状态</th>
+                      <th width="120px;">Action</th>
                     </tr>
                       #{list items:coper.cooperItems, as:'itm'}
                         <tr>
@@ -176,9 +177,12 @@
                           <td>${itm.period}</td>
                           <td>${itm.boxSize}</td>
                           <td>${itm.lowestOrderNum}</td>
+                          <td style="color:${itm.status.rgb()}">${itm.status?.label()}</td>
                           <td>
-                            <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-xs"><i class="icon-edit"></i></a>
-                            <button copItemId='${itm.id}' class="btn btn-xs"><i class="icon-remove"></i></button>
+                            <a href="@{Cooperators.editCooperItem(itm.id)}" class="btn btn-xs btn-info"><i class="icon-pencil"></i></a>
+                            <button copItemId='${itm.id}' class="btn btn-danger btn-xs">
+                              <i class="icon-remove"></i>
+                            </button>
                           </td>
                         </tr>
                       #{/list}
