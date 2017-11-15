@@ -5,7 +5,6 @@ $.extend $.fn.dataTableExt.oStdClasses,
 
 $ ->
   Highcharts.setOptions(global: {useUTC: false})
-# 分页事件
   $("#below_tabContent").on("click", ".sid,.sku", (e) ->
     $td = $(@)
     sidOrSku = $td.text().trim()
