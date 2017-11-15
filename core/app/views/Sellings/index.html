@@ -80,9 +80,10 @@
         <table class="table table-bordered table-condensed no-margin" id="data-table">
           <tr>
             <th><input type="checkbox" class="checkall"></th>
-            <th width="330px;">SellingID</th>
+            <th>Image</th>
+            <th width="300px;">SellingID</th>
+            <th width="40px;">市场</th>
             <th>SKU</th>
-            <th>市场</th>
             <th>实时价格</th>
             <th>ASIN</th>
             <th>生命周期</th>
@@ -100,13 +101,16 @@
                   <input type="checkbox" value="${s.sellingId}">
                 #{/if}
             </td>
-            <td><a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a></td>
-            <td>${s.listing?.product?.sku}</td>
-            <td style="padding: 0" data-toggle="tooltip" title="${s.market.countryName()}">
+            <td style="text-align:center;"><img height="30px;" width="40px;" src="${s.aps.imageUrl}"></td>
+            <td style="word-break:break-all;">
+              <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a>
+            </td>
+            <td style="padding: 0; vertical-align:middle;" data-toggle="tooltip" title="${s.market.countryName()}">
               <div class="flag-wrapper" style="margin:0">
                 <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
               </div>
             </td>
+            <td>${s.listing?.product?.sku}</td>
             <td>${s.aps.salePrice}</td>
             <td><a href="${s.showListingLink()}" target="_blank">${s.asin}</a></td>
             <td>${s.sellingCycle?.label()}</td>
@@ -120,11 +124,11 @@
                  data-url='@{Sellings.destroy(s.sellingId)}'>Del</a>
               <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-xs btn-info">Edit</a>
                 #{if !s.state.name().equals("DOWN")}
-                  <button class="btn btn-xs btn-warning" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
+                  <button class="btn btn-xs btn-success" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
                           data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
                   </button>
                 #{/if}
-              <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-xs btn-success" rel="popover"
+              <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-xs btn-github" rel="popover"
                  title="创建采购计划">Create</a>
             </td>
           </tr>

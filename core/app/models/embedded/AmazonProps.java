@@ -213,6 +213,8 @@ public class AmazonProps implements Serializable {
     @Expose
     public String hardwarePlatforms;
 
+    public String imageUrl;
+
     @Transient
     public List<String> hardwarePlatformss = new ArrayList<>();
 

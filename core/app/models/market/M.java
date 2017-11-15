@@ -957,7 +957,7 @@ public enum M {
                 || s.equals("www.amazon.it") || s.equals("fba_it")) {
             return AMAZON_IT;
         } else if(s.equals("ajp") || s.equals("amazon_jp") || s.equals("amazon.jp") || s.equals("jp")
-                || s.equals("www.amazon.co.jp") || s.equals("fba_jp")) {
+                || s.equals("www.amazon.co.jp") || s.equals("fba_jp") || s.equals("amazon.co.jp")) {
             return AMAZON_JP;
         } else if(s.equals("aus") || s.equals("amazon_us") || s.equals("amazon.com") || s.equals("us")
                 || s.equals("www.amazon.com") || s.equals("fba_us")) {
