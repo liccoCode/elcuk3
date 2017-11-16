@@ -23,7 +23,6 @@ public class MWSProducts {
         String key = String.format("ProductsServiceClient_%s_%s", account.id, market.name());
         MarketplaceWebServiceProductsClient client;
         if(cached.containsKey(key)) return cached.get(key);
-        if(cached.containsKey(key)) return cached.get(key);
         else {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
