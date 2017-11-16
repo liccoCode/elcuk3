@@ -1,6 +1,7 @@
 #{extends 'main_full_v3.html'/}
 #{set title:'Asynchronous Jobs'/}
 #{set 'moreScripts'}
+    #{script 'jrockends/index.es6'/}
 #{/set}
 
 #{flash_alert /}
@@ -9,9 +10,31 @@
 <div class="row">
   <div class="col-md-12">
     <div class="box box-primary">
-      <div class="box-header with-border">
-      </div>
-
+      <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="from">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="to">
+              </div>
+            </div>
+            <select name="market" style="width: 120px;" class="form-control">
+              <option value="">Market</option>
+            #{list items:models.market.M.values(), as:'d'}
+              <option value="${d.name()}">${d.name()}</option>
+            #{/list}
+            </select>
+          </div>
+          <input name="jobName" id="jobName" type="hidden">
+        </div>
+      </form>
       <div class="box-body">
         <table class="table table-condensed table-bordered" id="data-table">
           <tr>
@@ -27,7 +50,8 @@
             <td>汇率同步</td>
             <td>每30分钟执行一次</td>
             <td></td>
-            <td><a href="@{Jrockends.run('currencySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="currencySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
 
@@ -36,16 +60,18 @@
             <td>快递运输单同步</td>
             <td>每 4 个小时执行一次</td>
             <td></td>
-            <td><a href="@{Jrockends.run('shipmentSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="shipmentSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
 
           <tr>
-            <td>inventoryCostsReport</td>                             
+            <td>inventoryCostsReport</td>
             <td>inventoryCostsReport</td>
             <td>每个月的最后一天和倒数第二天</td>
             <td></td>
-            <td><a href="@{Jrockends.run('inventoryCostsReport')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="inventoryCostsReport"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -53,7 +79,8 @@
             <td>SellingQty (简单版本数据)</td>
             <td>0 10 0,6,15,18 * * ?</td>
             <td>_GET_AFN_INVENTORY_DATA_BY_COUNTRY_</td>
-            <td><a href="@{Jrockends.run('multiCountryFbaQtySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryFbaQtySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -61,7 +88,8 @@
             <td>SellingQty(完整版本数据)</td>
             <td>0 0 0,6,15,18 * * ?</td>
             <td>_GET_FBA_MYI_ALL_INVENTORY_DATA_</td>
-            <td><a href="@{Jrockends.run('amazonFbaQtySync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonFbaQtySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -69,7 +97,8 @@
             <td>businessOrderJob</td>
             <td>每30分钟执行一次</td>
             <td></td>
-            <td><a href="@{Jrockends.run('businessOrderJob')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="businessOrderJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -77,7 +106,8 @@
             <td>reportOrderrxml接口同步订单数据</td>
             <td>每天的 3点11点19点 执行一次</td>
             <td>_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_</td>
-            <td><a href="@{Jrockends.run('multiCountryOrderrSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryOrderrSync" data-confirm="确认运行?"
+                   class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -85,7 +115,8 @@
             <td>EbayFee 同步</td>
             <td>每 30 分钟执行一次</td>
             <td></td>
-            <td><a href="@{Jrockends.run('ebayFeeSync')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="ebayFeeSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a></td>
           </tr>
 
           <tr>
@@ -93,9 +124,22 @@
             <td>自动下载发送 财务所需报表邮件</td>
             <td>每月最后一天 18点</td>
             <td></td>
-            <td><a href="@{Jrockends.run('financeEndAndMonthJob')}" data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="financeEndAndMonthJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>
+          
+
+          <tr>
+            <td>marketRecordWatchTrigger</td>
+            <td>marketRecord报表</td>
+            <td> 0点8点16点 30分</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="marketRecordWatchTrigger"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            </td>
+          </tr>
+
 
         </table>
       </div>

@@ -5,11 +5,14 @@ import controllers.api.SystemOperation;
 import helper.AmazonSQS;
 import helper.Webs;
 import models.ElcukRecord;
+import org.apache.commons.lang3.StringUtils;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,10 +34,20 @@ public class Jrockends extends Controller {
 
 
     @Check("jobs.index")
-    public static void run(String jobName) {
-        Map map = new HashMap();
-        map.put("jobName", jobName);  //  任务ID
-        String message = JSONObject.toJSONString(map);
+    public static void run(String jobName, Date from, Date to, String market) {
+        Map jobMap = new HashMap();
+        //任务ID
+        jobMap.put("jobName", jobName);
+        Map jobParameters = new HashMap();
+        if(from != null && to != null) {
+            jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
+            jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
+        }
+        if(StringUtils.isNotBlank(market)) {
+            jobParameters.put("marketErp", market);
+        }
+        jobMap.put("args", jobParameters);
+        String message = JSONObject.toJSONString(jobMap);
         try {
             AmazonSQS.sendMessage(message);
         } catch(Exception e) {
