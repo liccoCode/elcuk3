@@ -19,7 +19,7 @@ import java.util.Map;
 public class LinkHelper extends JavaExtensions {
     /**
      * 生成 Listing 在 Amazon 展示的页面链接
-     *
+     *                                 gs
      * @param s
      * @return
      */
@@ -36,6 +36,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_FR:
             case AMAZON_IT:
+            case AMAZON_MX:
                 return String.format("http://www.%s/gp/product/%s", s.market, s.asin);
             default:
                 return "#";

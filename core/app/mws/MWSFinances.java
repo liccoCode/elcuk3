@@ -29,6 +29,7 @@ public class MWSFinances {
                 if(cached.containsKey(key)) return cached.get(key);
                 MWSFinancesServiceConfig config = new MWSFinancesServiceConfig();
                 switch(market) {
+                    case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
@@ -37,6 +38,7 @@ public class MWSFinances {
                         //                        config.setServiceURL(MWSEndpoint.UK.toString());
                         config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
+                    case AMAZON_ES:
                     case AMAZON_DE:
                         config.setServiceURL("https://mws.amazonservices.de");
                         break;
