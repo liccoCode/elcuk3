@@ -60,12 +60,7 @@ public class MarketRecord extends GenericModel {
      */
     public BigDecimal totalFbafee;
 
-    /**
-     * 当前总订单
-     */
-    @Transient
-    public int dayTotalOrders;
-
+    public Date updateDate;
 
     public static Map<String, List<MarketRecord>> queryYesterdayRecords() {
         Map<String, List<MarketRecord>> map = new HashMap<>();
