@@ -36,6 +36,7 @@ public class LinkHelper extends JavaExtensions {
             case AMAZON_JP:
             case AMAZON_FR:
             case AMAZON_IT:
+            case AMAZON_MX:
                 return String.format("http://www.%s/gp/product/%s", s.market, s.asin);
             default:
                 return "#";
