@@ -48,7 +48,6 @@ public class Application extends Controller {
     }
 
     public static void perDayOrderNum() {
-        DashBoard dashboard = Orderr.frontPageOrderTable(11);
         Date now = Dates.yesterday();
         HighChart chart = DashBoard.todayOrderNum("", "sid", now, now);
         renderJSON(J.json(chart));
