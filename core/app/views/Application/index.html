@@ -60,14 +60,14 @@
                       </div>
                     </td>
                     <td>${m.market?.countryName()}</td>
-                    <td>${m.pendingOrders}</td>
-                    <td>${m.paymentOrders}</td>
-                    <td>${m.shippedOrders}</td>
-                    <td>${m.refundOrders}</td>
+                    <td class="text-success">${m.pendingOrders}</td>
+                    <td class="text-orange">${m.paymentOrders}</td>
+                    <td class="text-info">${m.shippedOrders}</td>
+                    <td class="text-red">${m.refundOrders}</td>
                     <td>${m.returnNewOrders}</td>
-                    <td>${m.cancelOrders}</td>
-                    <td>${m.totalOrders}</td>
-                    <td class="${m.rose>0?'text-success' : 'text-danger'}">
+                    <td class="text-purple">${m.cancelOrders}</td>
+                    <td class="text-blue">${m.totalOrders}</td>
+                    <td class="${m.rose>0?'text-green' : 'text-red'}">
                       <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
                     </td>
                   </tr>
