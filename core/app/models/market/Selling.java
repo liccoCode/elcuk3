@@ -346,8 +346,8 @@ public class Selling extends GenericModel {
         MarketplaceWebServiceProductsClient client = MWSProducts.client(this.account, this.account.type);
         ASINListType asinList = new ASINListType();
         asinList.getASIN().add(this.asin);
-        GetMatchingProductRequest request = new GetMatchingProductRequest(account.merchantId,
-                account.type.amid().name(), asinList);
+        GetMatchingProductRequest request = new GetMatchingProductRequest(account.merchantId, this.market.amid().name(),
+                asinList);
         request.setMWSAuthToken(account.token);
         GetMatchingProductResponse response = client.getMatchingProduct(request);
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
@@ -398,7 +398,7 @@ public class Selling extends GenericModel {
             }
         });
         GetMyPriceForASINRequest asinRequest = new GetMyPriceForASINRequest(account.merchantId,
-                account.type.amid().name(), asinList);
+                this.market.amid().name(), asinList);
         asinRequest.setMWSAuthToken(account.token);
         GetMyPriceForASINResponse priceForASINResponse = client.getMyPriceForASIN(asinRequest);
         List<GetMyPriceForASINResult> asinResults = priceForASINResponse.getGetMyPriceForASINResult();

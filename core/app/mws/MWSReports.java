@@ -228,7 +228,6 @@ public class MWSReports {
         String key = String.format("WebServiceClient_%s_%s", account.id, market.name());
         MarketplaceWebService client;
         if(cached.containsKey(key)) return cached.get(key);
-        if(cached.containsKey(key)) return cached.get(key);
         else {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);

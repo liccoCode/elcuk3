@@ -33,6 +33,8 @@ public class MarketRecord extends GenericModel {
 
     public int totalOrders;
 
+    public int yesterdayTotalOrders;
+
     public int pendingOrders;
 
     public int paymentOrders;

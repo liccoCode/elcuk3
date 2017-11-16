@@ -38,6 +38,7 @@
         <div class="tab-content">
         #{list items:map.keySet(), as:'key'}
             #{set current_total_orders: 0 /}
+            #{set yesterday_total_orders: 0 /}
           <div class="tab-pane ${key_isFirst? 'active' : ''}" id='${key}'>
             <table class="table table-bordered">
               <tr>
@@ -69,14 +70,16 @@
                     <td class="text-blue">${m.totalOrders}</td>
                     <td class="${m.rose>0?'text-green' : 'text-red'}">
                         #{if m.rose > 0}
-                          <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
+                          <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose}%
                         #{/if}
                         #{else }
-                          <span class="glyphicon glyphicon-arrow-down"></span> ${m.rose} %
+                          <span class="glyphicon glyphicon-arrow-down"></span> ${m.rose}%
                         #{/else}
+                      (${m.yesterdayTotalOrders})
                     </td>
                   </tr>
                     #{set current_total_orders:  m.totalOrders + current_total_orders/}
+                    #{set yesterday_total_orders:  m.yesterdayTotalOrders + yesterday_total_orders/}
                 #{/list}
               <tr>
                 <td></td>
@@ -88,7 +91,16 @@
                 <td></td>
                 <th>总和:</th>
                 <td class="text-blue">${current_total_orders}</td>
-                <td></td>
+                  #{set diff: current_total_orders - yesterday_total_orders /}
+                <td class="${diff>0?'text-green' : 'text-red'}">
+                    #{if diff > 0}
+                      <span class="glyphicon glyphicon-arrow-up"></span>
+                    #{/if}
+                    #{else }
+                      <span class="glyphicon glyphicon-arrow-down"></span>
+                    #{/else}
+                ${diff/(yesterday_total_orders==0 ? 1 : yesterday_total_orders)}%
+                </td>
               </tr>
             </table>
           </div>
