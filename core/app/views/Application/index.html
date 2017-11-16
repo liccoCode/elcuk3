@@ -68,7 +68,12 @@
                     <td class="text-purple">${m.cancelOrders}</td>
                     <td class="text-blue">${m.totalOrders}</td>
                     <td class="${m.rose>0?'text-green' : 'text-red'}">
-                      <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
+                        #{if m.rose > 0}
+                          <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
+                        #{/if}
+                        #{else }
+                          <span class="glyphicon glyphicon-arrow-down"></span> ${m.rose} %
+                        #{/else}
                     </td>
                   </tr>
                     #{set current_total_orders:  m.totalOrders + current_total_orders/}
