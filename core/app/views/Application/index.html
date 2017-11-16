@@ -37,6 +37,7 @@
 
         <div class="tab-content">
         #{list items:map.keySet(), as:'key'}
+            #{set current_total_orders: 0 /}
           <div class="tab-pane ${key_isFirst? 'active' : ''}" id='${key}'>
             <table class="table table-bordered">
               <tr>
@@ -70,7 +71,20 @@
                       <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
                     </td>
                   </tr>
+                    #{set current_total_orders:  m.totalOrders + current_total_orders/}
                 #{/list}
+              <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <th>总和:</th>
+                <td class="text-blue">${current_total_orders}</td>
+                <td></td>
+              </tr>
             </table>
           </div>
         #{/list}
