@@ -5,6 +5,7 @@ import helper.GTs;
 import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.User;
 import models.market.Account;
 import models.market.M;
 import models.market.Selling;
@@ -47,8 +48,9 @@ public class Products extends Controller {
 
     @Before(only = {"index", "indexForShipment"})
     public static void setIndexLog() {
-        renderArgs.put("categoryIds", Category.categoryIds());
-        renderArgs.put("records", ElcukRecord.fid("product.destroy").<ElcukRecord>fetch(50));
+        User user = User.findById(Login.current().id);
+        renderArgs.put("categoryIds", user.categories);
+        renderArgs.put("records", ElcukRecord.fid("product.destroy").fetch(50));
     }
 
     /**

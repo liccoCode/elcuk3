@@ -38,8 +38,8 @@
 
           <select class="form-control" style="width:100px;" name="p.category">
             <option value="">Category</option>
-          #{list items:categorys, as:'c'}
-            <option value="${c}" ${p.category==c?'selected':''}>${c}</option>
+          #{list items:categories, as:'c'}
+            <option value="${c.categoryId}" ${p.category==c.categoryId?'selected':''}>${c.categoryId}</option>
           #{/list}
           </select>
 
