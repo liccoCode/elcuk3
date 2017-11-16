@@ -9,6 +9,7 @@ import helper.J;
 import jobs.analyze.ProfitInventorySearch;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.ElcukRecord;
+import models.User;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
@@ -36,8 +37,8 @@ public class Profits extends Controller {
 
     @Before(only = {"index"})
     public static void setUpIndexPage() {
-        List<String> categoryIds = Category.categoryIds();
-        renderArgs.put("categorys", categoryIds);
+        User user = User.findById(Login.current().id);
+        renderArgs.put("categories", user.categories);
         F.T2<List<String>, List<String>> skusToJson = Product.fetchSkusJson();
         renderArgs.put("skus", J.json(skusToJson._2));
     }
