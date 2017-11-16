@@ -197,7 +197,7 @@ public class OrderItemESQuery {
                                 .field("date")
                                 .dateHistogramInterval(DateHistogramInterval.DAY)
                                 .timeZone(Dates.timeZone(market))
-                                .subAggregation(AggregationBuilders.sum("quantity").field("quØØØantity"))
+                                .subAggregation(AggregationBuilders.sum("quantity").field("quantity"))
                         )
                 ).size(0);
         if(StringUtils.isBlank(val)) {
