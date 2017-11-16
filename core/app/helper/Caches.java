@@ -131,7 +131,9 @@ public class Caches {
     }
 
     public static void set(String key, String value, int expiration) {
+        long start = System.currentTimeMillis();
         Jedis jr = RedisCacheImpl.getCacheConnection();
+        Logger.info("set redis key:" + key + " 耗时:" + (System.currentTimeMillis() - start) + " ms ");
         jr.set(key, value);
         jr.expire(key, expiration);
     }

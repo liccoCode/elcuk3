@@ -88,12 +88,13 @@ public class Deliveryments extends Controller {
 
     public static void show(String id) {
         Deliveryment dmt = Deliveryment.findById(id);
-
-        String username = Login.currentUserName();
-        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
-                .collect(Collectors.toList());
-        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
-            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        if(dmt.units.size() > 0) {
+            String username = Login.currentUserName();
+            List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                    .collect(Collectors.toList());
+            if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+                renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+            }
         }
         notFoundIfNull(dmt);
         List<Long> expressUnitIds = dmt.units.stream()
@@ -115,12 +116,13 @@ public class Deliveryments extends Controller {
 
     public static void showPayment(String id, Long paymentId) {
         Deliveryment dmt = Deliveryment.findById(id);
-
-        String username = Login.currentUserName();
-        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
-                .collect(Collectors.toList());
-        if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
-            renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+        if(dmt.units.size() > 0) {
+            String username = Login.currentUserName();
+            List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                    .collect(Collectors.toList());
+            if(dmt.units.stream().noneMatch(unit -> categoryList.contains(unit.product.category.categoryId))) {
+                renderText("对不起，您没有查看此采购单的权限，如要查看请联系管理员！");
+            }
         }
         notFoundIfNull(dmt);
         List<Long> expressUnitIds = dmt.units.stream()
@@ -137,7 +139,7 @@ public class Deliveryments extends Controller {
             deliveryments = dmt.getRelateDelivery();
         }
         boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
-        render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, isB2b ,paymentId);
+        render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, isB2b, paymentId);
     }
 
 

@@ -42,8 +42,9 @@ public class Analyzes extends Controller {
 
     @Check("analyzes.index")
     public static void index() {
+        User user = User.findById(Login.current().id);
         List<Account> accs = Account.openedSaleAcc();
-        List<String> categoryIds = Category.categoryIds();
+        List<String> categoryIds = user.categories.stream().map(cate -> cate.categoryId).collect(Collectors.toList());
         AnalyzePost p = new AnalyzePost();
         render("Analyzes/index_v3.html", accs, categoryIds, p);
     }
