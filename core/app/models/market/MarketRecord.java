@@ -1,16 +1,15 @@
 package models.market;
 
-import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.Dates;
 import helper.J;
-import org.apache.commons.lang.StringUtils;
-import play.db.jpa.Model;
+import org.joda.time.DateTime;
+import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,9 +18,12 @@ import java.util.List;
  * Time: 上午11:43
  */
 @Entity
-public class MarketRecord extends Model {
+public class MarketRecord extends GenericModel {
 
     private static final long serialVersionUID = 4418184038845182213L;
+
+    @Id
+    public String id;
 
     @Temporal(TemporalType.DATE)
     public Date createDate;
@@ -44,6 +46,11 @@ public class MarketRecord extends Model {
     public int returnNewOrders;
 
     /**
+     * 涨跌率
+     */
+    public float rose;
+
+    /**
      * 总销售额
      */
     public BigDecimal totalSale;
@@ -54,19 +61,20 @@ public class MarketRecord extends Model {
     public BigDecimal totalFbafee;
 
 
-    public static List<MarketRecord> queryYesterdayRecords() {
-        Date yesterday = Dates.yesterday();
-        String cacheKey = "MarketRecords_" + Dates.date2Date(yesterday);
-        String json = Caches.get(cacheKey);
-        if(StringUtils.isNotBlank(json)) {
-            List<MarketRecord> records = JSON.parseArray(json, MarketRecord.class);
-            if(records != null && records.size() > 0) {
-                return records;
-            }
+    public static Map<String, List<MarketRecord>> queryYesterdayRecords() {
+        Map<String, List<MarketRecord>> map = new HashMap<>();
+        int i = 1;
+        while(i <= 7) {
+            Date date = DateTime.now().minusDays(i).toDate();
+            List<MarketRecord> records = MarketRecord.find("createDate =? ", Dates.date2JDate(date)).fetch();
+            map.put(Dates.date2Date(date), records);
+            Caches.set("MarketRecords_" + Dates.date2Date(date), J.json(records), 4);
+            i++;
         }
-        List<MarketRecord> records = MarketRecord.find("createDate =? ", Dates.date2JDate(yesterday)).fetch();
-        Caches.set(cacheKey, J.json(records), 4);
-        return records;
+        /* 倒序排序 */
+        map = map.entrySet().stream().sorted((e1, e2) -> e2.getKey().compareTo(e1.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+        return map;
     }
 
 }

@@ -25,6 +25,7 @@ import play.utils.FastRuntimeException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
@@ -42,8 +43,8 @@ public class Application extends Controller {
             }
         }.now());*/
         DashBoard dashboard = new DashBoard();
-        List<MarketRecord> records = MarketRecord.queryYesterdayRecords();
-        render(dashboard, brandname, records);
+        Map<String, List<MarketRecord>> map = MarketRecord.queryYesterdayRecords();
+        render(dashboard, brandname, map);
     }
 
     public static void perDayOrderNum() {

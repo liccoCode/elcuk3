@@ -26,38 +26,56 @@
   <div class="box box-success box-solid">
     <div class="box-header"><h3 class="box-title">各市场订单信息</h3></div>
     <div class="box-body">
-      <table class="table table-bordered">
-        <tr>
-          <th width="45px;">国家</th>
-          <th>Market</th>
-          <th>PENDING</th>
-          <th>PAYMENT</th>
-          <th>SHIPPED</th>
-          <th>REFUNDED</th>
-          <th>RETURNNEW</th>
-          <th>CANCEL</th>
-          <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
-          <th>比前一天</th>
-        </tr>
-      #{list items:records, as:'m'}
-        <tr>
-          <td style="padding: 0;">
-            <div class="flag-wrapper" style="margin:0;">
-              <div class="img-thumbnail flag flag-icon-background ${m.market?.pic()}"></div>
-            </div>
-          </td>
-          <td>${m.market?.countryName()}</td>
-          <td>${m.pendingOrders}</td>
-          <td>${m.paymentOrders}</td>
-          <td>${m.shippedOrders}</td>
-          <td>${m.refundOrders}</td>
-          <td>${m.returnNewOrders}</td>
-          <td>${m.cancelOrders}</td>
-          <td>${m.totalOrders}</td>
-          <td class="text-success"><span class="glyphicon glyphicon-arrow-up"></span> 30%</td>
-        </tr>
-      #{/list}
-      </table>
+      <div class="nav-tabs-custom">
+        <ul class="nav nav-tabs">
+        #{list items:map.keySet(), as:'key'}
+          <li #{if key_isFirst} class="active" #{/if}>
+            <a href="#${key}" data-toggle='tab'><i class="fa fa-calendar"></i> ${key}</a>
+          </li>
+        #{/list}
+        </ul>
+
+        <div class="tab-content">
+        #{list items:map.keySet(), as:'key'}
+          <div class="tab-pane ${key_isFirst? 'active' : ''}" id='${key}'>
+            <table class="table table-bordered">
+              <tr>
+                <th width="45px;">国家</th>
+                <th>Market</th>
+                <th>PENDING</th>
+                <th>PAYMENT</th>
+                <th>SHIPPED</th>
+                <th>REFUNDED</th>
+                <th>RETURNNEW</th>
+                <th>CANCEL</th>
+                <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+                <th>比前一天</th>
+              </tr>
+                #{list items:map.get(key), as:'m'}
+                  <tr>
+                    <td style="padding: 0;">
+                      <div class="flag-wrapper" style="margin:0;">
+                        <div class="img-thumbnail flag flag-icon-background ${m.market?.pic()}"></div>
+                      </div>
+                    </td>
+                    <td>${m.market?.countryName()}</td>
+                    <td>${m.pendingOrders}</td>
+                    <td>${m.paymentOrders}</td>
+                    <td>${m.shippedOrders}</td>
+                    <td>${m.refundOrders}</td>
+                    <td>${m.returnNewOrders}</td>
+                    <td>${m.cancelOrders}</td>
+                    <td>${m.totalOrders}</td>
+                    <td class="${m.rose>0?'text-success' : 'text-danger'}">
+                      <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose} %
+                    </td>
+                  </tr>
+                #{/list}
+            </table>
+          </div>
+        #{/list}
+        </div>
+      </div>
     </div>
   </div>
 </div>
