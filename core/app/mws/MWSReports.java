@@ -235,6 +235,7 @@ public class MWSReports {
 
                 MarketplaceWebServiceConfig config = new MarketplaceWebServiceConfig();
                 switch(market) {
+                    case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
@@ -243,6 +244,7 @@ public class MWSReports {
                         //                        config.setServiceURL(MWSEndpoint.UK.toString());
                         config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
+                    case AMAZON_ES:
                     case AMAZON_DE:
                         config.setServiceURL("https://mws.amazonservices.de");
                         break;

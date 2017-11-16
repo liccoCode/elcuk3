@@ -19,7 +19,7 @@ import java.util.Map;
 public class LinkHelper extends JavaExtensions {
     /**
      * 生成 Listing 在 Amazon 展示的页面链接
-     *
+     *                                 gs
      * @param s
      * @return
      */
