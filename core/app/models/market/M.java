@@ -922,8 +922,6 @@ public enum M {
                 return -15;
             case AMAZON_CA:
                 return -16;
-            case AMAZON_JP:
-                return 1;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
