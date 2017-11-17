@@ -24,7 +24,7 @@
   </div>
 
   <div class="box box-success box-solid">
-    <div class="box-header"><h3 class="box-title">各市场订单信息</h3></div>
+    <div class="box-header"><h3 class="box-title">近7日各市场订单信息汇总</h3></div>
     <div class="box-body">
       <div class="nav-tabs-custom">
         <ul class="nav nav-tabs">
@@ -51,16 +51,16 @@
                 <th>RETURNNEW</th>
                 <th>CANCEL</th>
                 <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
-                <th>比前一天</th>
+                <th width="180px;"  data-toggle="tooltip" title="括号内代表昨日销量">比前一天</th>
               </tr>
                 #{list items:map.get(key), as:'m'}
                   <tr>
                     <td style="padding: 0;">
                       <div class="flag-wrapper" style="margin:0;">
-                        <div class="img-thumbnail flag flag-icon-background ${m.market?.pic()}"></div>
+                        <div class="img-thumbnail flag flag-icon-background ${m.marketEnum?.pic()}"></div>
                       </div>
                     </td>
-                    <td>${m.market?.countryName()}</td>
+                    <td>${m.marketEnum?.countryName()}</td>
                     <td class="text-success">${m.pendingOrders}</td>
                     <td class="text-orange">${m.paymentOrders}</td>
                     <td class="text-info">${m.shippedOrders}</td>
@@ -68,14 +68,17 @@
                     <td>${m.returnNewOrders}</td>
                     <td class="text-purple">${m.cancelOrders}</td>
                     <td class="text-blue">${m.totalOrders}</td>
-                    <td class="${m.rose>0?'text-green' : 'text-red'}">
+                    <td class="${m.rose > 0 ? 'text-red' : m.rose==0 ? 'text-info' : 'text-green'}">
                         #{if m.rose > 0}
-                          <span class="glyphicon glyphicon-arrow-up"></span> ${m.rose}%
+                          <span class="glyphicon glyphicon-arrow-up"></span>
                         #{/if}
+                        #{elseif m.rose == 0}
+                         <i class="fa fa-arrows-h"></i>
+                        #{/elseif}
                         #{else }
-                          <span class="glyphicon glyphicon-arrow-down"></span> ${m.rose}%
+                          <span class="glyphicon glyphicon-arrow-down"></span>
                         #{/else}
-                      (${m.yesterdayTotalOrders})
+                    ${m.rose}% (${m.yesterdayTotalOrders})
                     </td>
                   </tr>
                     #{set current_total_orders:  m.totalOrders + current_total_orders/}
@@ -92,14 +95,18 @@
                 <th>总和:</th>
                 <td class="text-blue">${current_total_orders}</td>
                   #{set diff: current_total_orders - yesterday_total_orders /}
-                <td class="${diff>0?'text-green' : 'text-red'}">
+                <td class="${diff > 0 ? 'text-red' : diff ==0 ? '' : 'text-green'}">
                     #{if diff > 0}
                       <span class="glyphicon glyphicon-arrow-up"></span>
                     #{/if}
-                    #{else }
+                    #{elseif diff == 0}
+                      <span class="glyphicon glyphicon-option-horizontal"></span>
+                    #{/elseif}
+                    #{elseif diff < 0}
                       <span class="glyphicon glyphicon-arrow-down"></span>
-                    #{/else}
-                ${diff/(yesterday_total_orders==0 ? 1 : yesterday_total_orders)}%
+                    #{/elseif}
+                ${(diff*100/(yesterday_total_orders==0 ? 1 : yesterday_total_orders)).format("#.##")}%
+                  (${yesterday_total_orders})
                 </td>
               </tr>
             </table>
