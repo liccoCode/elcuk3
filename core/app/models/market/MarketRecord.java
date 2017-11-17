@@ -1,8 +1,10 @@
 package models.market;
 
+import com.alibaba.fastjson.JSON;
 import helper.Caches;
 import helper.Dates;
 import helper.J;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.db.jpa.GenericModel;
 
@@ -28,8 +30,7 @@ public class MarketRecord extends GenericModel {
     @Temporal(TemporalType.DATE)
     public Date createDate;
 
-    @Enumerated(EnumType.STRING)
-    public M market;
+    public String market;
 
     public int totalOrders;
 
@@ -64,14 +65,31 @@ public class MarketRecord extends GenericModel {
 
     public Date updateDate;
 
+    @Transient
+    public M marketEnum;
+
+    @PostLoad
+    public void initMarketEnum() {
+        this.marketEnum = M.val(market);
+    }
+
     public static Map<String, List<MarketRecord>> queryYesterdayRecords() {
         Map<String, List<MarketRecord>> map = new HashMap<>();
         int i = 1;
         while(i <= 7) {
             Date date = DateTime.now().minusDays(i).toDate();
+            String key = "MarketRecords_" + Dates.date2Date(date);
+            if(StringUtils.isNotBlank(Caches.get(key))) {
+                List<MarketRecord> records = JSON.parseArray(Caches.get(key), MarketRecord.class);
+                if(records != null && records.size() > 0) {
+                    map.put(Dates.date2Date(date), records);
+                    i++;
+                    continue;
+                }
+            }
             List<MarketRecord> records = MarketRecord.find("createDate =? ", Dates.date2JDate(date)).fetch();
             map.put(Dates.date2Date(date), records);
-            Caches.set("MarketRecords_" + Dates.date2Date(date), J.json(records), 4);
+            Caches.set(key, J.json(records), 14400);
             i++;
         }
         /* 倒序排序 */
