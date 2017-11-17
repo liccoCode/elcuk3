@@ -14,6 +14,7 @@ import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
 import models.view.post.StockPost;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.Play;
 import play.cache.Cache;
 import play.db.jpa.JPA;
@@ -23,10 +24,7 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Application extends Controller {
@@ -61,6 +59,20 @@ public class Application extends Controller {
             dtos = dtos.subList(0, 5);
         }
         render(dtos, market);
+    }
+
+    public static void mapJsonReturn() {
+        Date date = Dates.yesterday();
+        List<MarketRecord> records = MarketRecord.find("createDate =? ", Dates.date2JDate(date)).fetch();
+        List<Map<String, Object>> list = new ArrayList<>();
+        records.forEach(record -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("code", record.marketEnum.country());
+            data.put("value", record.totalOrders);
+            data.put("name", record.marketEnum.label());
+            list.add(data);
+        });
+        renderJSON(J.json(list));
     }
 
     public static void ajaxUnit(String sid) {
