@@ -90,7 +90,6 @@ public class CooperItem extends Model {
     /***
      * 其他价格（包含包材配件价格）
      */
-    @Required
     @Expose
     @Min(0)
     public Float otherPrice = 0f;
