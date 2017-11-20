@@ -1,8 +1,6 @@
 <header class="main-header">
   <a href="@{Application.index()}" class="logo">
-    <!-- mini logo for sidebar mini 50x50 pixels -->
     <span class="logo-mini"><b>EA</b></span>
-    <!-- logo for regular state and mobile devices -->
     <span class="logo-lg"><b>${models.OperatorConfig.getVal("brandname")}</b></span>
   </a>
 
@@ -17,8 +15,8 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">首页 <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="@{Application.oldDashBoard()}">DashBoard</a></li>
-            <li><a href="@{Users.home()}">Home</a></li>
             <li><a href="@{Notifications.index()}">Notys</a></li>
+            <li><a href="@{Users.home()}">User Info.</a></li>
             <li><a href="@{Secure.logout()}">Logout</a></li>
           </ul>
         </li>
