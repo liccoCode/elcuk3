@@ -336,11 +336,11 @@ function paramWidth (type) {
         "targets": [9]
       },
       {
-        "width": "40px",
+        "width": "60px",
         "targets": [10]
       },
       {
-        "width": "60px",
+        "width": "45px",
         "targets": [11]
       },
       {
@@ -348,11 +348,11 @@ function paramWidth (type) {
         "targets": [12]
       },
       {
-        "width": "45px",
+        "width": "90px",
         "targets": [13]
       },
       {
-        "width": "90px",
+        "width": "40px",
         "targets": [14]
       },
       {
@@ -374,10 +374,6 @@ function paramWidth (type) {
       {
         "width": "40px",
         "targets": [19]
-      },
-      {
-        "width": "40px",
-        "targets": [20]
       }
     ]
   }
