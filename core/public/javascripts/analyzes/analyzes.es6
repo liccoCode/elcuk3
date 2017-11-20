@@ -182,7 +182,7 @@ function paramWidth (type) {
   if (type === "sid") {
     return [
       {
-        "width": "150px",
+        "width": "180px",
         "targets": [0]
       },
       {
@@ -327,33 +327,32 @@ function paramWidth (type) {
       {
         "width": "40px",
         "targets": [7]
-      },
-      {
+      }, {
         "width": "40px",
         "targets": [8]
       },
       {
-        "width": "60px",
+        "width": "40px",
         "targets": [9]
       },
       {
-        "width": "45px",
+        "width": "40px",
         "targets": [10]
       },
       {
-        "width": "45px",
+        "width": "60px",
         "targets": [11]
       },
       {
-        "width": "90px",
+        "width": "45px",
         "targets": [12]
       },
       {
-        "width": "40px",
+        "width": "45px",
         "targets": [13]
       },
       {
-        "width": "40px",
+        "width": "90px",
         "targets": [14]
       },
       {
@@ -371,6 +370,14 @@ function paramWidth (type) {
       {
         "width": "40px",
         "targets": [18]
+      },
+      {
+        "width": "40px",
+        "targets": [19]
+      },
+      {
+        "width": "40px",
+        "targets": [20]
       }
     ]
   }
