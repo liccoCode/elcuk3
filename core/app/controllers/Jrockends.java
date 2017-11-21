@@ -11,10 +11,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,17 +25,17 @@ public class Jrockends extends Controller {
 
     @Check("jobs.index")
     public static void index() {
-        renderArgs.put("logs", ElcukRecord.records(Arrays.asList("jrockends.run"), 50));
+        renderArgs.put("logs", ElcukRecord.records(Collections.singletonList("jrockends.run"), 50));
         render();
     }
 
 
     @Check("jobs.index")
     public static void run(String jobName, Date from, Date to, String market) {
-        Map jobMap = new HashMap();
+        Map<String, Object> jobMap = new HashMap<>();
         //任务ID
         jobMap.put("jobName", jobName);
-        Map jobParameters = new HashMap();
+        Map<String, Object> jobParameters = new HashMap<>();
         if(from != null && to != null) {
             jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
             jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
@@ -54,8 +51,7 @@ public class Jrockends extends Controller {
             flash.error("Job [%s] 因 [%s] 调用失败.", jobName, Webs.e(e));
         }
         flash.success("Job [%s] 调用成功", jobName);
-        new ElcukRecord(Messages.get("jrockends.run"),
-                Messages.get("jrockends.run.msg", jobName), jobName).save();
+        new ElcukRecord(Messages.get("jrockends.run"), Messages.get("jrockends.run.msg", jobName), jobName).save();
         redirect("/Jrockends/index");
     }
 }

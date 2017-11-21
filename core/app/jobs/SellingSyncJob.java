@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.Webs;
 import jobs.driver.BaseJob;
 import models.market.Selling;
 import play.Logger;
@@ -21,9 +22,13 @@ public class SellingSyncJob extends BaseJob {
                 false, Selling.S.DOWN).fetch(10);
         sellings.forEach(selling -> {
             Logger.info("selling:" + selling.sellingId + " 开始执行 syncAmazonInfoFromApi 方法 ");
-            selling.syncAmazonInfoFromApi();
-            selling.sync = true;
-            selling.save();
+            try {
+                selling.syncAmazonInfoFromApi();
+                selling.sync = true;
+                selling.save();
+            } catch(Exception e) {
+                Logger.error(Webs.e(e));
+            }
         });
     }
 
