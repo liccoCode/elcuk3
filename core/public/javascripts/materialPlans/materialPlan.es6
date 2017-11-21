@@ -4,7 +4,7 @@ $(() => {
     e.preventDefault();
     if ($("input[name='unitids']:checked").length == 0) {
       noty({
-        text: '请选择需要操作的出货单元',
+        text: '请选择需要操作的单元数据',
         type: 'error'
       });
       return false;

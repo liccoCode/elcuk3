@@ -55,12 +55,20 @@
             </div>
             <label for="p_sku" class="col-sm-1 control-label"></label>
             <div class="col-sm-2">
-            #{power.ck 'procureunits.billingprepay'}
-              <button name="applyBtn" data-url="@{MaterialUnits.batchPrePay()}" class="btn btn-success">批量申请预付款</button>
-            #{/power.ck}
-            #{power.ck 'procureunits.billingtailpay'}
-              <button name="applyBtn" data-url="@{MaterialUnits.batchTailPay()}" class="btn btn-warning">批量申请尾款</button>
-            #{/power.ck}
+              
+            #{if apply.type == models.material.MaterialApply.T.PLAN}
+                #{power.ck 'procureunits.billingtailpay'}
+                  <button name="applyBtn" class="btn btn-warning" data-url="@{MaterialPlanUnits.batchTailPay()}">批量申请尾款</button>
+                #{/power.ck}
+            #{/if}
+            #{else }
+                #{power.ck 'procureunits.billingprepay'}
+                  <button name="applyBtn" data-url="@{MaterialUnits.batchPrePay()}" class="btn btn-success">批量申请预付款 </button>
+                #{/power.ck}
+                #{power.ck 'procureunits.billingtailpay'}
+                  <button name="applyBtn" class="btn btn-warning" data-url="@{MaterialUnits.batchTailPay()}">批量申请尾款 </button>
+                #{/power.ck}
+            #{/else}
             </div>
           </div>
         </div>
@@ -161,7 +169,6 @@
                                   #{if procureUnit.fees().size() > 0}
                                     <table class="table table-bordered table-condensed" style="margin-bottom:0">
                                       <tr>
-                                        <th></th>
                                         <th>#</th>
                                         <th>付款单</th>
                                         <th>状态</th>
