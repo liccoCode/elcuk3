@@ -519,7 +519,7 @@ public class FBA {
         } else if(errMsg.contains("NOT_ELIGIBLE_FC_FOR_ITEM")) {
             return FBA_ERROR_TYPE.NOT_ELIGIBLE_FC_FOR_ITEM;
         } else {
-            Webs.systemMail("FBA 相关操作出现未知错误", Webs.s(e), Arrays.asList("duan@easya.cc", "licco@easya.cc"));
+            Webs.systemMail("FBA 相关操作出现未知错误", Webs.s(e), Arrays.asList("even@easya.cc", "licco@easya.cc"));
             return FBA_ERROR_TYPE.UNKNOWN_ERROR;
         }
     }
