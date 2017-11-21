@@ -228,6 +228,11 @@ public class Selling extends GenericModel {
     public String productTypeName;
     public String publisher;
 
+    /**
+     * 系统自动同步
+     */
+    public boolean sync = false;
+
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
     @PreUpdate
@@ -369,7 +374,9 @@ public class Selling extends GenericModel {
                     if(n.getElementsByTagName("ns2:Binding").item(0) != null) {
                         this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
                     }
-                    this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Brand").item(0) != null) {
+                        this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
+                    }
                     if(n.getElementsByTagName("ns2:Manufacturer").item(0) != null) {
                         this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
                     }
