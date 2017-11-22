@@ -257,6 +257,7 @@ public class MWSReports {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
+                        break;
                     case AMAZON_CA:
                         config.setServiceURL("https://mws.amazonservices.ca");
                         break;
