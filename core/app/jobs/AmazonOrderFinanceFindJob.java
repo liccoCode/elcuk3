@@ -14,7 +14,7 @@ import java.util.List;
  * Date: 2017/11/22
  * Time: 下午4:22
  */
-@Every("2mn")
+@Every("3s")
 public class AmazonOrderFinanceFindJob extends BaseJob {
 
     public void doit() {
