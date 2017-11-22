@@ -17,7 +17,7 @@ import java.util.List;
  * Date: 2017/11/22
  * Time: 下午4:22
  */
-@Every("4mn")
+@Every("5mn")
 public class AmazonOrderFinanceFindJob extends BaseJob {
 
 /*    public void doit() {
@@ -46,14 +46,16 @@ public class AmazonOrderFinanceFindJob extends BaseJob {
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(20);
         items.forEach(item -> {
             Logger.info("OrderId:" + item.order.orderId + " 所属市场" + item.order.market.name() + " 订单日期 "
-                    + Dates.date2DateTime(item.order.createDate) + " 开始执行 AmazonFinanceCheckJob 方法 ");
+                    + Dates.date2DateTime(item.order.createDate) + " 开始执行 AmazonOrderFinanceFindJob 方法 ");
             try {
                 item.order.refreshFee();
-            } catch(Exception e) {
-                Logger.error(Webs.e(e));
-            } finally {
                 item.order.synced = true;
                 item.order.feeflag = 2;
+                item.order.memo = "AmazonOrderFinanceFindJob";
+            } catch(Exception e) {
+                item.order.memo = Webs.e(e);
+                Logger.error(Webs.e(e));
+            } finally {
                 item.order.save();
             }
         });
