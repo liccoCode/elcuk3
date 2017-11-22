@@ -100,17 +100,9 @@ public class Orders extends Controller {
     }
 
     public static void refreshFee(String id) {
-        Orderr orderr = Orderr.findById(id);
-        orderr.fees.forEach(GenericModel::delete);
         try {
-            Account account = Account.findById(orderr.account.id);
-            MWSFinancesServiceClient client = MWSFinances.client(account, account.type);
-            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
-            request.setSellerId(account.merchantId);
-            request.setMWSAuthToken(account.token);
-            request.setAmazonOrderId(id);
-            ListFinancialEventsResponse response = client.listFinancialEvents(request);
-            boolean flag = SaleFee.parseFinancesApiResult(response, account);
+            Orderr orderr = Orderr.findById(id);
+            boolean flag = orderr.refreshFee();
             renderJSON(new Ret(flag, "重新抓取费用成功！"));
         } catch(Exception e) {
             renderJSON(new Ret(false, e.getMessage()));
