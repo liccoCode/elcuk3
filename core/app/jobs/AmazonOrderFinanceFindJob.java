@@ -1,5 +1,6 @@
 package jobs;
 
+import helper.Webs;
 import jobs.driver.BaseJob;
 import models.market.Orderr;
 import play.Logger;
@@ -17,11 +18,15 @@ import java.util.List;
 public class AmazonOrderFinanceFindJob extends BaseJob {
 
     public void doit() {
-        List<Orderr> orders = Orderr.find("synced=false AND feeflag=0 AND state IN ('SHIPPED','REFUNDED') "
-                + "ORDER BY createDate DESC").fetch(20);
+        List<Orderr> orders = Orderr.find("synced=false AND feeflag=0 AND state IN (?,?) "
+                + "ORDER BY createDate DESC", Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(20);
         orders.forEach(order -> {
-            Logger.info("OrderId:" + order.orderId + " 开始执行 AmazonFinanceCheckJob 方法 ");
-            order.refreshFee();
+            Logger.info("OrderId:" + order.orderId + " 所属市场" + order.market.name() + " 开始执行 AmazonFinanceCheckJob 方法 ");
+            try {
+                order.refreshFee();
+            } catch(Exception e) {
+                Logger.error(Webs.e(e));
+            }
             order.synced = true;
             order.feeflag = 2;
             order.save();
