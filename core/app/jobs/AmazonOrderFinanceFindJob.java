@@ -42,7 +42,7 @@ public class AmazonOrderFinanceFindJob extends BaseJob {
         List<OrderItem> items = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?"
                         + " AND order.synced=false AND order.feeflag=0 AND order.state IN (?,?) "
                         + " ORDER BY createDate DESC",
-                "11UNMIC5P-2A5FTUK", DateTime.now().toDate(), DateTime.now().minusMonths(1).toDate(),
+                "11UNMIC5P-2A5FTUK", DateTime.now().minusMonths(2).toDate(), DateTime.now().toDate(),
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(20);
         items.forEach(item -> {
             Logger.info("OrderId:" + item.order.orderId + " 所属市场" + item.order.market.name() + " 订单日期 "
