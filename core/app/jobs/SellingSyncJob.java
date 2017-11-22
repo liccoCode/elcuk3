@@ -24,12 +24,11 @@ public class SellingSyncJob extends BaseJob {
             Logger.info("selling:" + selling.sellingId + " 开始执行 syncAmazonInfoFromApi 方法 ");
             try {
                 selling.syncAmazonInfoFromApi();
-                selling.sync = true;
-                selling.save();
             } catch(Exception e) {
+                Logger.error(Webs.e(e));
+            } finally {
                 selling.sync = true;
                 selling.save();
-                Logger.error(Webs.e(e));
             }
         });
     }
