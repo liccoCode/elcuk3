@@ -27,6 +27,8 @@ public class SellingSyncJob extends BaseJob {
                 selling.sync = true;
                 selling.save();
             } catch(Exception e) {
+                selling.sync = true;
+                selling.save();
                 Logger.error(Webs.e(e));
             }
         });
