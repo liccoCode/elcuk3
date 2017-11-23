@@ -3,6 +3,7 @@ package jobs;
 import helper.Dates;
 import helper.Webs;
 import jobs.driver.BaseJob;
+import models.market.M;
 import models.market.OrderItem;
 import models.market.Orderr;
 import org.joda.time.DateTime;
@@ -39,10 +40,10 @@ public class AmazonOrderFinanceFindJob extends BaseJob {
     }*/
 
     public void doit() {
-        List<OrderItem> items = OrderItem.find("product.sku=? AND createDate>=? AND createDate<=?"
+        List<OrderItem> items = OrderItem.find("market=? AND createDate>=? AND createDate<=?"
                         + " AND order.synced=false AND order.feeflag=0 AND order.state IN (?,?) "
                         + " ORDER BY createDate DESC",
-                "11UNMIC5P-2A5FTUK", DateTime.now().minusMonths(2).toDate(), DateTime.now().toDate(),
+                M.AMAZON_ES, DateTime.now().minusMonths(2).toDate(), DateTime.now().toDate(),
                 Orderr.S.SHIPPED, Orderr.S.REFUNDED).fetch(20);
         items.forEach(item -> {
             Logger.info("OrderId:" + item.order.orderId + " 所属市场" + item.order.market.name() + " 订单日期 "
