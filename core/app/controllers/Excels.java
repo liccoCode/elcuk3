@@ -797,9 +797,9 @@ public class Excels extends Controller {
                 Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
         List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
         if(units != null && units.size() > 0) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat dateFormat =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls", dateFormat.format(target)));
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls",  new SimpleDateFormat("yyyyMMdd").format(target)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(units, summaries, dateFormat);
         } else {
