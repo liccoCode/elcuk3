@@ -1,6 +1,7 @@
 window.$dataui = {
   dateinput: function () {
     $("input[role='date']").datepicker({
+      todayHighlight: true,
       format: 'yyyy-mm-dd',
       autoclose: true
     });
@@ -27,6 +28,5 @@ $(() => {
     trigger: 'hover',
     container: 'body'
   });
-
 
 });
