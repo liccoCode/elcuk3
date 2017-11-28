@@ -3,6 +3,7 @@ package models.procure;
 import com.google.gson.annotations.Expose;
 import controllers.Login;
 import models.User;
+import models.embedded.ERecordBuilder;
 import models.finance.Payment;
 import models.finance.PaymentTarget;
 import models.material.Material;
@@ -463,6 +464,20 @@ public class Cooperator extends Model {
             default:
                 return Cooperator.findById(208L);
         }
+    }
+
+    public void createItemByProduct(CooperItem item, Product product) {
+        item.cooperator = this;
+        item.sku = product.sku.trim();
+        item.product = product;
+        item.createDate = new Date();
+        item.type = CooperItem.T.SKU;
+        item.status = CooperItem.S.Pending;
+        item.creator = Login.current();
+        item.createDate = new Date();
+        item.save();
+        new ERecordBuilder("copItem.save").msgArgs(this.name, item.sku, item.currency.symbol() + item.price).fid(item.id)
+                .save();
     }
 
 }

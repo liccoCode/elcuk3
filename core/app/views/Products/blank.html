@@ -40,19 +40,31 @@
           </div>
 
         #{if isB2B || "Lecone"==models.OperatorConfig.getVal("brandname")}
-          <div class="form-group">
+          <div class="form-group form-inline">
             <label for="p_sku" class="col-sm-1 control-label">对应原始SKU</label>
-            <div class="col-sm-4">
-              <div class="col-sm-3">
-                <select style="width:100px;" name="pro.origin_project" class="form-control">
-                    #{list items:models.User.COR.values(), as:'c'}
-                      <option value="${c.name()}">${c.label()}</option>
-                    #{/list}
-                </select>
-              </div>
-              <div class="col-sm-6">
-                <input type="text" name="pro.origin_sku" value="${pro.origin_sku}" class="form-control">
-              </div>
+            <div class="col-sm-3">
+              <select style="width:100px;" name="pro.origin_project" class="form-control">
+                  #{list items:models.User.COR.values(), as:'c'}
+                    <option value="${c.name()}">${c.label()}</option>
+                  #{/list}
+              </select>
+              <input type="text" name="pro.origin_sku" value="${pro.origin_sku}" class="form-control">
+            </div>
+            <label class="col-sm-1 control-label">供应商信息</label>
+            <div class="col-sm-7">
+              <select style="width:100px;" name="cooperatorId" class="form-control">
+                  #{list items:cooperators, as:'c'}
+                    <option value="${c.id}">${c.name}</option>
+                  #{/list}
+              </select>
+                #{pickCurrency name:'copItem.currency', c:helper.Currency.CNY, class:'form-control'/}
+              <input class="form-control" placeholder="采购单价" name="copItem.price">
+              <input class="form-control" placeholder="生产周期(day)" name="copItem.period">
+              <input class="form-control" placeholder="最低采购量" name="copItem.lowestOrderNum">
+              <input class="form-control" placeholder="其他价格" name="copItem.otherPrice">
+              <select class="form-control">
+                <option value="CNY">CNY</option>
+              </select>
             </div>
           </div>
         #{/if}

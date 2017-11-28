@@ -111,11 +111,11 @@ public class Products extends Controller {
         render(pro, qtys, templates);
     }
 
-    public static void showAttr(String sku ,String tab) {
+    public static void showAttr(String sku, String tab) {
         Product pro = Product.findByMerchantSKU(sku);
         List<Template> templates = pro.category.templates;
         List<SellingQTY> qtys = SellingQTY.qtysAccodingSKU(pro);
-        render(pro, qtys, templates ,tab);
+        render(pro, qtys, templates, tab);
     }
 
     public static void copy(String choseid, String skuid, String base, String extend, String attach) {
@@ -192,15 +192,20 @@ public class Products extends Controller {
 
     public static void blank(Product pro) {
         if(pro == null) pro = new Product();
+        List<Cooperator> cooperators = Cooperator.find("type=?", Cooperator.T.SUPPLIER).fetch();
         pro.beforeData();
         List<Category> cats = Category.all().fetch();
-        render(pro, cats);
+        render(pro, cats, cooperators);
     }
 
-    public static void create(Product pro) {
+    public static void create(Product pro, Long cooperatorId, CooperItem copItem) {
         validation.valid(pro);
         pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
-        pro.createProduct();
+        pro = pro.createProduct();
+        if(pro != null && cooperatorId != null) {
+            Cooperator cooperator = Cooperator.findById(cooperatorId);
+            cooperator.createItemByProduct(copItem, pro);
+        }
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);
         redirect("/Products/show/" + pro.sku);
@@ -364,7 +369,7 @@ public class Products extends Controller {
         ProductAttr attr = ProductAttr.findById(id);
         attr.delete();
         flash.success("删除成功");
-        showAttr(sku , "attr");
+        showAttr(sku, "attr");
     }
 
     /**
@@ -440,7 +445,7 @@ public class Products extends Controller {
         new_attr.attribute = attribute;
         new_attr.product = product;
         new_attr.save();
-        showAttr(sku , "attr");
+        showAttr(sku, "attr");
     }
 
     /**
