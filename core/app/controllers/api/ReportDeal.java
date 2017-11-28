@@ -1,15 +1,20 @@
 package controllers.api;
 
+import com.amazonservices.mws.finances.MWSFinancesServiceClient;
+import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
+import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import helper.*;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
 import models.ReportRecord;
+import models.finance.SaleFee;
 import models.market.OrderInvoice;
 import models.market.Orderr;
 import models.view.Ret;
 import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
+import mws.MWSFinances;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -112,6 +117,17 @@ public class ReportDeal extends Controller {
                 orderId, flag, taxNumber));
         Orderr ord = Orderr.findById(orderId);
         if(ord == null) renderJSON(new Ret(false, "this order is not exist"));
+        if(ord.fees.size() == 0) {
+            MWSFinancesServiceClient client = MWSFinances.client(ord.account, ord.account.type);
+            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
+            request.setSellerId(ord.account.merchantId);
+            request.setMWSAuthToken(ord.account.token);
+            request.setAmazonOrderId(ord.orderId);
+            ListFinancialEventsResponse response = client.listFinancialEvents(request);
+            SaleFee.parseFinancesApiResult(response, ord.account);
+            Orderr newOne = Orderr.findById(ord.orderId);
+            ord.fees = newOne.fees;
+        }
 
         if(flag == null || !flag.equals("1")) {
             if(!(ord.state.equals(Orderr.S.SHIPPED) || ord.state.equals(Orderr.S.PAYMENT)))
@@ -164,7 +180,7 @@ public class ReportDeal extends Controller {
             ord.invoiceState = "yes";
             if(ord.invoiceDate == null)
                 ord.invoiceDate = new Date();
-            ord.totalSale = ord.totalCurrencySales();
+            ord.totalSale = ord.totalAmount;
             ord.save();
             if(StringUtils.isNotEmpty(taxNumber)) {
                 invoice.invoiceto += "," + taxNumber;

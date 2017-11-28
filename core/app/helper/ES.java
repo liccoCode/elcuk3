@@ -27,7 +27,7 @@ public class ES {
     }
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
-        Logger.info(builder.toString());
+        //Logger.info(builder.toString());
         return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 
@@ -74,4 +74,17 @@ public class ES {
         }
         return StringUtils.replaceEach(esfield, new String[]{"-", ",", "|", "."}, new String[]{"", "", "", ""});
     }
+
+    /**
+     * 删除es数据
+     * @param index
+     * @param type
+     * @param builder
+     * @return
+     */
+    public static JSONObject deleteByQuery(String index, String type, SearchSourceBuilder builder) {
+        return HTTP.postJson(System.getenv(Constant.ES_HOST) + "/" + index + "/" + type + "/_delete_by_query",
+                builder.toString(), HTTP.requestConfigWithTimeout((int) TimeUnit.SECONDS.toMillis(3)));
+    }
+
 }

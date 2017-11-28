@@ -784,4 +784,15 @@ public class Orderr extends GenericModel {
     public boolean canBeProvidedInvoice() {
         return M.europeMarkets().contains(this.market);
     }
+
+    public boolean refreshFee() {
+        this.fees.forEach(GenericModel::delete);
+        MWSFinancesServiceClient client = MWSFinances.client(this.account, this.account.type);
+        ListFinancialEventsRequest request = new ListFinancialEventsRequest();
+        request.setSellerId(this.account.merchantId);
+        request.setMWSAuthToken(this.account.token);
+        request.setAmazonOrderId(orderId);
+        ListFinancialEventsResponse response = client.listFinancialEvents(request);
+        return SaleFee.parseFinancesApiResult(response, this.account);
+    }
 }

@@ -23,12 +23,12 @@ public class MWSProducts {
         String key = String.format("ProductsServiceClient_%s_%s", account.id, market.name());
         MarketplaceWebServiceProductsClient client;
         if(cached.containsKey(key)) return cached.get(key);
-        if(cached.containsKey(key)) return cached.get(key);
         else {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
                 MarketplaceWebServiceProductsConfig config = new MarketplaceWebServiceProductsConfig();
                 switch(market) {
+                    case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
@@ -37,6 +37,7 @@ public class MWSProducts {
                         //                        config.setServiceURL(MWSEndpoint.UK.toString());
                         config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
+                    case AMAZON_ES:
                     case AMAZON_DE:
                         config.setServiceURL("https://mws.amazonservices.de");
                         break;
@@ -48,6 +49,7 @@ public class MWSProducts {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
+                        break;
                     case AMAZON_CA:
                         config.setServiceURL("https://mws.amazonservices.ca");
                         break;

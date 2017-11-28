@@ -293,7 +293,7 @@ public class Cooperator extends Model {
     }
 
     /**
-     *
+     * 性质
      */
     @Enumerated(EnumType.STRING)
     @Expose

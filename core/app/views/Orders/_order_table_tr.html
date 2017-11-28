@@ -1,14 +1,14 @@
 <tr>
-  <th>Market</th>
+  <th width="80px;">Market</th>
+  <th width="40px;" data-toggle="tooltip" title="送往国家">国家</th>
   <th style="width:180px;">Fees Percent(USD)</th>
-  <th>Address1</th>
-  <th width="45px;">国家</th>
+  <th width="130px;">Address Detail</th>
   <th data-toggle="popover" title="数字是什么?" content="(a | b), a: 订单重销售产品的个数. b: 支付信息个数" style="width:200px;">
     <i class="icon-question-sign"></i> OrderId
   </th>
-  <th>Buyer</th>
   <th>SKU</th>
-  <th style="width:100px;">PromotionIDs</th>
+  <th style="width:70px;">优惠</th>
+  <th>Buyer</th>
   <th>Email</th>
   <th style="width:90px;">Create</th>
   <th style="width:90px;">ShipDate</th>
@@ -18,7 +18,12 @@
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-  <td>${ord.market.countryName()}</td>
+  <td>${ord.market.name()}</td>
+  <td style="padding:0;" data-toggle="tooltip" title="地址信息: ${ord.address.raw()}">
+    <div class="flag-wrapper" style="margin:0">
+      <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country?.toLowerCase()}"></div>
+    </div>
+  </td>
   <td data-toggle="toggle" data-target="#order_index_${ord_index}">
     <i class="icon-reorder"></i>
     <span class="badge bg-light-blue">${ord?.fees?.size()}</span>
@@ -31,20 +36,22 @@
       #{/else}
     (${ord.totalMarketFee().format('#.#')} / ${ord.totalUSDSales().format('#.#')})
   </td>
-  <td style="word-break:break-all;">${ord.address1}</td>
-  <td style="padding:0;" data-toggle="tooltip" title="地址信息: ${ord.address.raw()}">
-    <div class="flag-wrapper" style="margin:0">
-      <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country?.toLowerCase()}"></div>
-    </div>
+  <td data-toggle="toggle" data-target="#order_info_${ord_index}" style="cursor:pointer;">
+    <i class="fa fa-university"></i> <a href="">${ord.address1?.overLong()}</a>
   </td>
+
   <td>
     <a target="_blank" href="@{Orders.show(ord.orderId)}">
     ${ord.orderId} (${ord.itemCount()} | ${ord.fees.size()})
     </a>
   </td>
-  <td>${ord.buyer}</td>
   <td>${ord.showItemSku()}</td>
-  <td data-toggle="tooltip" title="${ord.showDiscountPrice()}">${ord.showPromotionIDs()}</td>
+  <td data-toggle="toggle" data-target="#order_promotion_${ord_index}" style="cursor:pointer;">
+      #{if ord.showPromotionIDs()}
+        <i class="fa fa-check" style="color:green"></i> <a>Detail</a>
+      #{/if}
+  </td>
+  <td>${ord.buyer}</td>
   <td>
     <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
   </td>
@@ -64,6 +71,47 @@
 <tr style="display:none" id="order_index_${ord_index}">
   <td colspan="16">
       #{render './_order_fees.html', fees: ord.fees/}
+  </td>
+</tr>
+<tr style="display:none" id="order_info_${ord_index}">
+  <td colspan="16">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th>Province</th>
+        <td>${ord.province}</td>
+        <th>City</th>
+        <td>${ord.city}</td>
+        <th>PostalCode</th>
+        <td>${ord.postalCode}</td>
+      </tr>
+      <tr>
+        <th>address</th>
+        <td>${ord.address}</td>
+        <th>Address1</th>
+        <td>${ord.address1}</td>
+        <th>Reciver</th>
+        <td>${ord.reciver}</td>
+      </tr>
+      <tr>
+        <th width="150px;">地址信息:</th>
+        <td colspan="5">${ord.address1.raw()}</td>
+      </tr>
+
+    </table>
+
+  </td>
+</tr>
+<tr style="display:none" id="order_promotion_${ord_index}">
+  <td colspan="16">
+    <table class="table table-condensed table-bordered">
+      <tr>
+        <th width="20%">PromotionIDs</th>
+        <td width="30%">${ord.showPromotionIDs()}</td>
+        <th width="20%">DiscountPrice</th>
+        <td width="30%">${ord.showDiscountPrice()}</td>
+      </tr>
+    </table>
+
   </td>
 </tr>
 #{/list}

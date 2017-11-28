@@ -80,10 +80,10 @@
         <table class="table table-bordered table-condensed no-margin" id="data-table">
           <tr>
             <th><input type="checkbox" class="checkall"></th>
-            <th>Image</th>
-            <th width="300px;">SellingID</th>
+            <th width="40px;">Image</th>
+            <th width="350px;">SellingID</th>
             <th width="40px;">市场</th>
-            <th>SKU</th>
+            <th width="120px;">FnSku</th>
             <th>实时价格</th>
             <th>ASIN</th>
             <th>生命周期</th>
@@ -110,7 +110,7 @@
                 <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
               </div>
             </td>
-            <td>${s.listing?.product?.sku}</td>
+            <td>${s.fnSku}</td>
             <td>${s.aps.salePrice}</td>
             <td><a href="${s.showListingLink()}" target="_blank">${s.asin}</a></td>
             <td>${s.sellingCycle?.label()}</td>

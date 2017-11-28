@@ -1,6 +1,5 @@
 package query;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import helper.*;
 import models.market.M;
@@ -191,7 +190,8 @@ public class OrderItemESQuery {
                 .aggregation(AggregationBuilders.filter("aggs_filters", QueryBuilders.boolQuery()
                                 .must(QueryBuilders.termQuery("market", market.name().toLowerCase()))
                                 .must(QueryBuilders.rangeQuery("date")
-                                        .gte(fromD.toString(isoFormat)).lt(toD.toString(isoFormat)))
+                                        .gte(fromD.toString(isoFormat))
+                                        .lt(toD.toString(isoFormat)))
                                 .mustNot(QueryBuilders.termQuery("state", "cancel"))
                         ).subAggregation(AggregationBuilders.dateHistogram("units")
                                 .field("date")

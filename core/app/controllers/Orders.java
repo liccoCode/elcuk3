@@ -8,6 +8,7 @@ import helper.Constant;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import models.ElcukRecord;
+import models.User;
 import models.finance.EbayFee;
 import models.finance.SaleFee;
 import models.market.Account;
@@ -47,10 +48,11 @@ public class Orders extends Controller {
 
     public static void index(OrderPOST p) {
         List<Account> accounts = Account.openedSaleAcc();
-        List<String> categoryIds = Category.categoryIds();
+        User user = User.findById(Login.current().id);
+        renderArgs.put("categories", user.categories);
         if(p == null) p = new OrderPOST();
         List<Orderr> orders = p.query();
-        render(p, orders, accounts, categoryIds);
+        render(p, orders, accounts);
     }
 
     public static void indexEbay(EbayOrderPost p) {
@@ -98,17 +100,9 @@ public class Orders extends Controller {
     }
 
     public static void refreshFee(String id) {
-        Orderr orderr = Orderr.findById(id);
-        orderr.fees.forEach(GenericModel::delete);
         try {
-            Account account = Account.findById(orderr.account.id);
-            MWSFinancesServiceClient client = MWSFinances.client(account, account.type);
-            ListFinancialEventsRequest request = new ListFinancialEventsRequest();
-            request.setSellerId(account.merchantId);
-            request.setMWSAuthToken(account.token);
-            request.setAmazonOrderId(id);
-            ListFinancialEventsResponse response = client.listFinancialEvents(request);
-            boolean flag = SaleFee.parseFinancesApiResult(response, account);
+            Orderr orderr = Orderr.findById(id);
+            boolean flag = orderr.refreshFee();
             renderJSON(new Ret(flag, "重新抓取费用成功！"));
         } catch(Exception e) {
             renderJSON(new Ret(false, e.getMessage()));

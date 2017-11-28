@@ -916,20 +916,20 @@ public enum M {
      */
     public int timeZoneOffset() {
         switch(this) {
+            case AMAZON_MX:
+                return -14;
+            case AMAZON_US:
+                return -15;
             case AMAZON_CA:
                 return -16;
-            case AMAZON_JP:
-                return 1;
             case AMAZON_DE:
             case AMAZON_ES:
             case AMAZON_FR:
             case AMAZON_IT:
-                return -6;
-            case AMAZON_UK:
                 return -7;
-            case AMAZON_MX:
-            case AMAZON_US:
-                return -15;
+            case EBAY_UK:
+            case AMAZON_UK:
+                return -8;
             default:
                 return 0;
         }

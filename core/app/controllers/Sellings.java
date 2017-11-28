@@ -234,7 +234,7 @@ public class Sellings extends Controller {
             Selling selling = Selling.findById(sid);
             selling.syncAmazonInfoFromApi();
             renderJSON(new Ret());
-        } catch(FastRuntimeException e) {
+        } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
         }
     }

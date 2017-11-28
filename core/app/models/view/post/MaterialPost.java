@@ -184,7 +184,9 @@ public class MaterialPost extends Post<Material> {
                     - Integer.parseInt(row.get("planQty").toString());
             material.pendingQty = Integer.parseInt(row.get("pendingQty").toString());
             material.planCreateQty = Integer.parseInt(row.get("planCreateQty").toString());
-            material.version = row.get("version").toString();
+            if(row.get("version") != null) {
+                material.version = row.get("version").toString();
+            }
             materials.add(material);
         }
         return materials;

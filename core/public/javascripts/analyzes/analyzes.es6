@@ -1,11 +1,23 @@
 $(() => {
 
-  $("#click_param").on("change", "[name=p\\.market]", function () {
+  // Form 搜索功能
+  $("#click_param").on("change", "[name='p.market']", function () {
     ajaxSaleUnitLines();
     ajaxFreshActiveTableTab();
   }).on("click", ".btn:contains(Excel)", function (e) {
     e.preventDefault();
     window.location.href = '/Excels/analyzes?' + $('#click_param').serialize();
+  }).on("click", ".btn:contains(搜索)", function (e) {
+    e.preventDefault();
+    if ($("select[name|='p.categoryId']").val() === '') {
+      $("#postVal").val('all');
+    } else {
+      ajaxSaleUnitLines()
+    }
+    ajaxFreshActiveTableTab()
+  }).on("click", ".btn:contains(Reload)", function (e) {
+    e.preventDefault();
+    ajaxSaleUnitLines();
   });
 
   $("#below_tabContent").on("ajaxFresh", "#sid,#sku", function () {
@@ -43,7 +55,7 @@ $(() => {
     } else {
       $desc.val(true);
     }
-    ajaxFreshActiveTableTab()
+    ajaxFreshActiveTableTab();
   });
 
   $("#sid").on('change', 'select[name=sellingCycle]', function (e) {
@@ -74,23 +86,17 @@ $(() => {
     $(type).trigger("ajaxFresh");
   }
 
-  //Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshAcitveTableTab()不然会得到旧的TYPE
+  //Tab 切换添加事件 bootstrap  shown 事件：点击后触发，ajaxFreshActiveTableTab()不然会得到旧的TYPE
   $("a[data-toggle='tab']").on('shown.bs.tab', function (e) {
     $('#postPage').val(1);
     ajaxFreshActiveTableTab();
   });
 
-  $("#basic").on('ajaxFresh', '#a_units, #a_turn, #a_ss', function (e, headName, yName, plotEvents, noDataDisplayMessage) {
+  $("#basic").on('ajaxFreshUnit', '#a_units, #a_turn, #a_ss', function (e, headName, yName, plotEvents, noDataDisplayMessage) {
     let $div = $(this);
     LoadMask.mask($div);
     $.post("/analyzes/" + $div.data('method'), $('#click_param').serialize(), function (r) {
-      if (!r.flag) {
-        noty({
-          text: r.message.split("|F")[0],
-          type: 'warning',
-          timeout: 5000
-        });
-      } else if (r['series'].length != 0) {
+      if (r['series'].length != 0) {
         $div.highcharts('StockChart', {
           credits: {
             text: "EasyAcc",
@@ -155,11 +161,6 @@ $(() => {
     });
   });
 
-  function ajaxFreshAcitveTableTab () {
-    let type = $("#below_tab li.active a").attr("href");
-    $("#" + type).trigger("ajaxFresh");
-  }
-
   function ajaxSaleUnitLines () {
     let categoryId = $("select[name|='p.categoryId']").val();
     let $postVal = $("#postVal");
@@ -171,31 +172,17 @@ $(() => {
       $postVal.val(categoryId);
     }
     let head = "Selling [<span style='color:orange'>" + displayStr + "</span> | " + $('#postType').val().toUpperCase() + "] Unit Order";
-    $("#a_units").trigger("ajaxFresh", [head, "Units", {}, '没有数据, 无法绘制曲线...']);
+    $("#a_units").trigger("ajaxFreshUnit", [head, "Units", {}, '没有数据, 无法绘制曲线...']);
   }
 
-  // Form 搜索功能
-  $("#click_param").on("click", ".btn:contains(搜索)", function (e) {
-    e.preventDefault();
-    if ($("select[name|='p.categoryId']").val() === '') {
-      $("#postVal").val('all');
-    } else {
-      ajaxSaleUnitLines()
-    }
-    ajaxFreshAcitveTableTab()
-  }).on("click", ".btn:contains(Reload)", function (e) {
-    e.preventDefault();
-    ajaxSaleUnitLines();
-  });
   ajaxFreshActiveTableTab();
-
 });
 
 function paramWidth (type) {
   if (type === "sid") {
     return [
       {
-        "width": "150px",
+        "width": "180px",
         "targets": [0]
       },
       {
@@ -340,17 +327,16 @@ function paramWidth (type) {
       {
         "width": "40px",
         "targets": [7]
-      },
-      {
+      }, {
         "width": "40px",
         "targets": [8]
       },
       {
-        "width": "60px",
+        "width": "40px",
         "targets": [9]
       },
       {
-        "width": "45px",
+        "width": "60px",
         "targets": [10]
       },
       {
@@ -358,11 +344,11 @@ function paramWidth (type) {
         "targets": [11]
       },
       {
-        "width": "90px",
+        "width": "45px",
         "targets": [12]
       },
       {
-        "width": "40px",
+        "width": "90px",
         "targets": [13]
       },
       {
@@ -384,6 +370,10 @@ function paramWidth (type) {
       {
         "width": "40px",
         "targets": [18]
+      },
+      {
+        "width": "40px",
+        "targets": [19]
       }
     ]
   }

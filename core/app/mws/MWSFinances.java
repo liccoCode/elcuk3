@@ -23,12 +23,12 @@ public class MWSFinances {
         String key = String.format("FinancesServiceClient_%s_%s", account.id, market.name());
         MWSFinancesServiceClient client;
         if(cached.containsKey(key)) return cached.get(key);
-        if(cached.containsKey(key)) return cached.get(key);
         else {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
                 MWSFinancesServiceConfig config = new MWSFinancesServiceConfig();
                 switch(market) {
+                    case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
@@ -37,6 +37,7 @@ public class MWSFinances {
                         //                        config.setServiceURL(MWSEndpoint.UK.toString());
                         config.setServiceURL("https://mws.amazonservices.co.uk");
                         break;
+                    case AMAZON_ES:
                     case AMAZON_DE:
                         config.setServiceURL("https://mws.amazonservices.de");
                         break;
@@ -48,6 +49,7 @@ public class MWSFinances {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
+                        break;
                     case AMAZON_CA:
                         config.setServiceURL("https://mws.amazonservices.ca");
                         break;

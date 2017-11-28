@@ -60,8 +60,8 @@
 
             <select name="p.category" id="categories" class="form-control">
               <option value="">品线</option>
-            #{list items:categoryIds, as:'c'}
-              <option value="${c}" ${c.equals(p.category) ? 'selected':''}>${c}</option>
+            #{list items:categories, as:'c'}
+              <option value="${c.categoryId}" ${c.categoryId.equals(p.category) ? 'selected':''}>${c.categoryId}</option>
             #{/list}
             </select>
 

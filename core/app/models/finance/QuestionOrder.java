@@ -45,7 +45,4 @@ public class QuestionOrder extends Model {
     public int flag;
 
 
-
-
-
 }

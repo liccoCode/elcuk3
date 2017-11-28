@@ -68,7 +68,7 @@
 
             <select name="p.categories" multiple="multiple" id="categories" class="form-control">
             #{list items:categoryIds, as:'c'}
-              <option value="${c}" ${p.categories.contains(c) ? 'selected':''}>${c}</option>
+              <option value="${c.categoryId}" ${p.categories.contains(c.categoryId) ? 'selected':''}>${c.categoryId}</option>
             #{/list}
             </select>
 

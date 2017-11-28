@@ -148,6 +148,7 @@ public class Excels extends Controller {
      * 下载采购单综合Excel表格
      */
     public static void analyzes(AnalyzePost p) {
+        p.flag = "2";
         List<AnalyzeDTO> dtos = p.query();
         if(dtos != null && dtos.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");

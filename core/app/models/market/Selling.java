@@ -228,6 +228,11 @@ public class Selling extends GenericModel {
     public String productTypeName;
     public String publisher;
 
+    /**
+     * 系统自动同步
+     */
+    public boolean sync = false;
+
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
     @PreUpdate
@@ -344,15 +349,12 @@ public class Selling extends GenericModel {
      */
     public void syncAmazonInfoFromApi() {
         MarketplaceWebServiceProductsClient client = MWSProducts.client(this.account, this.account.type);
-        GetMatchingProductRequest request = new GetMatchingProductRequest();
-        request.setSellerId(account.merchantId);
-        request.setMWSAuthToken(account.token);
-        request.setMarketplaceId(account.type.amid().name());
         ASINListType asinList = new ASINListType();
         asinList.getASIN().add(this.asin);
-        request.setASINList(asinList);
+        GetMatchingProductRequest request = new GetMatchingProductRequest(account.merchantId, this.market.amid().name(),
+                asinList);
+        request.setMWSAuthToken(account.token);
         GetMatchingProductResponse response = client.getMatchingProduct(request);
-
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
         results.forEach(result -> {
             com.amazonservices.mws.products.model.Product product = result.getProduct();
@@ -369,17 +371,28 @@ public class Selling extends GenericModel {
                 NodeList nodeList = doc.getElementsByTagName("ns2:ItemAttributes");
                 for(int i = 0; i < nodeList.getLength(); i++) {
                     Element n = (Element) nodeList.item(i);
-                    this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
-                    this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
-                    this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
-                    this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Binding").item(0) != null) {
+                        this.binding = n.getElementsByTagName("ns2:Binding").item(0).getTextContent();
+                    }
+                    if(n.getElementsByTagName("ns2:Brand").item(0) != null) {
+                        this.aps.brand = n.getElementsByTagName("ns2:Brand").item(0).getTextContent();
+                    }
+                    if(n.getElementsByTagName("ns2:Manufacturer").item(0) != null) {
+                        this.aps.manufacturer = n.getElementsByTagName("ns2:Manufacturer").item(0).getTextContent();
+                    }
+                    if(n.getElementsByTagName("ns2:PartNumber").item(0) != null) {
+                        this.aps.manufacturerPartNumber = n.getElementsByTagName("ns2:PartNumber").item(0)
+                                .getTextContent();
+                    }
                     if(n.getElementsByTagName("ns2:PackageQuantity").item(0) != null) {
                         this.aps.quantity = Integer.parseInt(n.getElementsByTagName("ns2:PackageQuantity").item(0)
                                 .getTextContent());
                     }
                     this.productGroup = n.getElementsByTagName("ns2:ProductGroup").item(0).getTextContent();
                     this.productTypeName = n.getElementsByTagName("ns2:ProductTypeName").item(0).getTextContent();
-                    this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
+                    if(n.getElementsByTagName("ns2:Publisher").item(0) != null) {
+                        this.publisher = n.getElementsByTagName("ns2:Publisher").item(0).getTextContent();
+                    }
                     this.aps.title = n.getElementsByTagName("ns2:Title").item(0).getTextContent();
                     this.aps.imageUrl = n.getElementsByTagName("ns2:SmallImage").item(0).getTextContent();
                     if(StringUtils.isNotBlank(this.aps.imageUrl)) {
@@ -391,7 +404,23 @@ public class Selling extends GenericModel {
                 Logger.error(e.getMessage());
             }
         });
-
+        GetMyPriceForASINRequest asinRequest = new GetMyPriceForASINRequest(account.merchantId,
+                this.market.amid().name(), asinList);
+        asinRequest.setMWSAuthToken(account.token);
+        GetMyPriceForASINResponse priceForASINResponse = client.getMyPriceForASIN(asinRequest);
+        List<GetMyPriceForASINResult> asinResults = priceForASINResponse.getGetMyPriceForASINResult();
+        asinResults.forEach(result -> {
+            com.amazonservices.mws.products.model.Product prodcut = result.getProduct();
+            OffersList offers = prodcut.getOffers();
+            List<OfferType> list = offers.getOffer();
+            list.forEach(offerType -> {
+                MoneyType moneyType = offerType.getRegularPrice();
+                this.aps.standerPrice = moneyType.getAmount().floatValue();
+                PriceType priceType = offerType.getBuyingPrice();
+                this.aps.salePrice = priceType.getListingPrice().getAmount().floatValue();
+                this.save();
+            });
+        });
     }
 
     /**

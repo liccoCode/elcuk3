@@ -130,19 +130,20 @@ public class Dates {
     public static DateTimeZone timeZone(M market) {
         if(market == null) return Dates.CN;
         switch(market) {
-            case AMAZON_JP:
-                return DateTimeZone.forOffsetHours(1);
-            case AMAZON_UK:
-            case EBAY_UK:
-                return DateTimeZone.forOffsetHours(0);
+            case AMAZON_MX:
+                return DateTimeZone.forOffsetHours(-6);
+            case AMAZON_US:
+                return DateTimeZone.forOffsetHours(-7);
+            case AMAZON_CA:
+                return DateTimeZone.forOffsetHours(-8);
             case AMAZON_DE:
             case AMAZON_IT:
             case AMAZON_FR:
             case AMAZON_ES:
                 return DateTimeZone.forOffsetHours(1);
-            case AMAZON_CA:
-            case AMAZON_US:
-                return DateTimeZone.forOffsetHours(-7);
+            case AMAZON_UK:
+            case EBAY_UK:
+                return DateTimeZone.forOffsetHours(0);
             default:
                 return Dates.CN;
         }

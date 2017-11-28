@@ -35,10 +35,10 @@ $ ->
   $("button[name='amz-sync']").click ->
     return false if !confirm("确认要从 Amazon 同步吗? 同步后系统内的数据将被 Amazon 上的数据覆盖.")
     sid = $(@).data("sid")
-    btnGroup = $(@).parent()
+    btnGroup = $(@).parent().parent()
     btnGroup.mask('同步中...')
     $.post('/sellings/syncAmazon',
-      sid: $('input[name="s.sellingId"]').val(),
+      sid: sid,
       (r) ->
         if r.flag is true
           alert('同步成功, 请刷新页面查看最新数据')
