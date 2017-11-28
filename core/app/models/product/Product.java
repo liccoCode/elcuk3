@@ -505,7 +505,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     /**
      * 创建一个全新的 Product
      */
-    public void createProduct() {
+    public Product createProduct() {
         /**
          * 1. 检查 SKU 是否合法
          * 2. 检查废弃的 SKU
@@ -516,7 +516,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          */
         if(Product.findById(this.sku) != null) {
             Validation.addError("", String.format("Product[%s]已经存在, 不允许重复创建!", sku));
-            return;
+            return null;
         }
         if(StringUtils.isBlank(this.sku))
             Validation.addError("", "SKU 必须存在");
@@ -535,10 +535,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(this.category == null)
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
         this.checkUPCisRepeat();
-        if(Validation.hasErrors()) return;
+        if(Validation.hasErrors()) return null;
         this.createDate = new Date();
         this.creator = Login.current();
-        this.save();
+        return this.save();
     }
 
     public void checkUPCisRepeat() {

@@ -297,6 +297,7 @@ public class CooperItem extends Model {
         this.cooperator = cooperator;
         this.type = T.SKU;
         this.status = S.Pending;
+        this.creator = Login.current();
 
         if(this.cooperator.cooperItems.stream().filter(item -> Objects.equals(item.type, T.SKU))
                 .anyMatch(item -> Objects.equals(item.sku, this.sku)))
