@@ -1,9 +1,9 @@
 package controllers;
 
+import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.*;
 import models.ElcukRecord;
-import models.User;
 import models.embedded.AmazonProps;
 import models.market.*;
 import models.product.Category;
@@ -28,9 +28,7 @@ import play.utils.FastRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -232,7 +230,11 @@ public class Sellings extends Controller {
     public static void syncAmazon(final String sid) {
         try {
             Selling selling = Selling.findById(sid);
-            selling.syncAmazonInfoFromApi();
+            Map map = new HashMap();
+            map.put("jobName", "sellingInfoSyncJob");  //  任务ID
+            map.put("args", GTs.newMap("sellingId", selling.sellingId).build());  //sellingId
+            String message = JSONObject.toJSONString(map);
+            AmazonSQS.sendMessage(message);
             renderJSON(new Ret());
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
