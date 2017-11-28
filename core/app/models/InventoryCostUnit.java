@@ -82,11 +82,10 @@ public class InventoryCostUnit extends GenericModel {
     public Date date;
 
     public static List<Map<String, Object>> countByCategory(Date target) {
-        StringBuilder sql = new StringBuilder(" select a.*,b.price from ( ");
+        StringBuilder sql = new StringBuilder(" select a.*,IFNULL(b.price,0) as productionCost from ( ");
         sql.append(" SELECT categoryId, `date`, ");
         sql.append(" SUM(reservedQty) AS reservedQty, ");
         sql.append(" SUM(productionQty) AS productionQty, ");
-        sql.append(" SUM(productionCost) AS productionCost, ");
         sql.append(" SUM(transitQty) AS transitQty, ");
         sql.append(" SUM(transitCost) AS transitCost, ");
         sql.append(" SUM(stockQty) AS stockQty, ");
@@ -95,7 +94,6 @@ public class InventoryCostUnit extends GenericModel {
         sql.append(" SELECT `date`, categoryId, ");
         sql.append(" SUM(reservedQty) AS reservedQty, ");
         sql.append(" productionQty AS productionQty, ");
-        sql.append(" productionQty*procurementPrice AS productionCost, ");
         sql.append(" SUM(transitQty) AS transitQty, ");
         sql.append(" SUM(transitQty*procurementPrice+transitQty*transportPrice) AS transitCost, ");
         sql.append(" SUM(stockQty) AS stockQty, ");
