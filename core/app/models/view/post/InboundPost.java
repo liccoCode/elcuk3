@@ -28,6 +28,7 @@ public class InboundPost extends Post<Inbound> {
     public Inbound.S status;
     public Long cooperatorId;
     public Inbound.T type;
+    public Inbound.DM deliveryMethod;
     public InboundUnit.R result;
     public String search;
     public String searchPage = "inbound";
@@ -74,6 +75,10 @@ public class InboundPost extends Post<Inbound> {
         if(type != null) {
             sbd.append(" AND i.type = ? ");
             params.add(type);
+        }
+        if(deliveryMethod != null) {
+            sbd.append(" AND i.deliveryMethod = ? ");
+            params.add(deliveryMethod);
         }
         sbd.append(" ORDER BY i.createDate DESC ");
         return new F.T2<>(sbd.toString(), params);
