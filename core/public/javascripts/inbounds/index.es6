@@ -23,7 +23,7 @@ $(() => {
     if ($("#div" + format_id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='11'><hr>";
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='12'><hr>";
       html += "<div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       $("#div" + format_id).load("/Inbounds/showProcureUnitList", {id: id}, function () {
