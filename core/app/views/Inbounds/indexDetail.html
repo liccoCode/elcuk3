@@ -87,8 +87,7 @@
             <th style="width:15px;">
               <input type="checkbox" id="checkbox_all" class="checkall">
             </th>
-            <th>ID</th>
-            <th width="70px;">采购计划ID</th>
+            <th width="40px;">采购ID</th>
             <th width="90px;">收货入库单ID</th>
             <th>名称</th>
             <th>SKU</th>
@@ -96,25 +95,24 @@
             <th>供应商</th>
             <th>状态</th>
             <th width="130px;">制单时间</th>
-            <th>采购数量</th>
-            <th>收货数量</th>
+            <th>采购</th>
+            <th>收货</th>
             <th>预计收货时间</th>
             <th width="120px;">收货人/收货日期</th>
             <th width="120px;">质检人/质检日期</th>
             <th>质检结果</th>
-            <th>合格数</th>
-            <th>不良品数</th>
+            <th>合格</th>
+            <th>不良品</th>
             <th>目标仓库</th>
             <th>可用库存</th>
           </tr>
         #{list items: units, as: 'i'}
           <tr>
             <td><input type="checkbox" name="ids" value="${i.id}"></td>
-            <td>${i.id}</td>
             <td>${i.unit.id}</td>
             <td><a href="@{Inbounds.edit(i.inbound.id)}">${i.inbound.id}</a></td>
-            <td>${i.inbound.name}</td>
-            <td>${i.unit?.product.sku}</td>
+            <td>${i.inbound.name.overLong()}</td>
+            <td>${i.unit?.product?.sku}</td>
             <td><i class="${i.inbound.type.flag()}"> </i>${i.inbound.type?.label()}</td>
             <td>${i.unit.cooperator?.name}</td>
             <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>

@@ -126,6 +126,31 @@ public class Inbound extends GenericModel {
         public abstract String label();
     }
 
+    public enum DM {
+        Factory {
+            @Override
+            public String label() {
+                return "工厂送货";
+            }
+        },
+
+        Express {
+            @Override
+            public String label() {
+                return "快递送货";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 交货方式
+     */
+    @Expose
+    @Enumerated(EnumType.STRING)
+    public DM deliveryMethod;
+
     /**
      * 创建时间
      */
@@ -433,6 +458,7 @@ public class Inbound extends GenericModel {
         logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));
         logs.addAll(Reflects.logFieldFade(this, "receiveDate", inbound.receiveDate));
         logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
+        logs.addAll(Reflects.logFieldFade(this, "deliveryMethod", inbound.deliveryMethod));
         if(logs.size() > 0) {
             new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
                     .save();

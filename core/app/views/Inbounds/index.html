@@ -54,6 +54,13 @@
             #{/list}
             </select>
 
+            <select name="p.deliveryMethod" class="form-control">
+              <option value="">交货方式</option>
+            #{list items:models.whouse.Inbound.DM, as:'t'}
+              <option #{if p.deliveryMethod == t} selected #{/if} value="${t.name()}">${t.label()}</option>
+            #{/list}
+            </select>
+
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
               <input style="width:200px;" class="form-control" name="p.search" placeHolder="收货入库单ID or SKU or 采购计划ID" value="${p.search}">
@@ -79,11 +86,12 @@
               <th>收货类型</th>
               <th>供应商</th>
               <th>状态</th>
+              <th>交货方式</th>
               <th width="150px;">制单时间</th>
               <th width="150px;">收货人/收货日期</th>
               <th width="150px;">质检人/质检日期</th>
               <th width="150px;">确认人/入库日期</th>
-              <th width="250px;">备注</th>
+              <th width="200px;">备注</th>
             </tr>
           #{list items: inbounds, as: 'i'}
             <tr>
@@ -97,6 +105,7 @@
               <td><i class="${i.type.flag()}"> </i>${i.type?.label()}</td>
               <td>${i.cooperator?.name}</td>
               <td style="background-color:${i.status.rgb()}">${i.status?.label()}</td>
+              <td>${i.deliveryMethod?.label()}</td>
               <td>#{time_tooltip time:i.createDate, datetime:true/}</td>
               <td>${i.receiver?.username} / #{time_tooltip time:i.receiveDate, datetime:false/}</td>
               <td>
@@ -109,7 +118,7 @@
                   ${d}<br>
                   #{/list}
               </td>
-              <td data-toggle="tooltip" title="${i.memo}">${i.memo.xxLong()}</td>
+              <td data-toggle="tooltip" title="${i.memo}">${i.memo.overLong()}</td>
             </tr>
           #{/list}
           </table>

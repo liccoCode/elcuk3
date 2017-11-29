@@ -65,6 +65,10 @@ public class Orderr extends GenericModel {
         SHIPPED,
 
         /**
+         * 预售，未发货
+         */
+        UNSHIPPED,
+        /**
          * 做了 refund 返款的的
          */
         REFUNDED,
