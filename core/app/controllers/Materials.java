@@ -63,7 +63,12 @@ public class Materials extends Controller {
         if(Material.find("code =? and isDel =0", m.code).first() != null) {
             Validation.addError("", "物料编码" + m.code + "已经存在");
         }
-        if(Validation.hasErrors()) render("/Materials/blank.html", m);
+        if(!Product.validSKU(m.code)) {
+            Validation.addError("", "物料编码[ " + m.code + " ] 不合法!");
+        }
+        if(Validation.hasErrors()) {
+            render("/Materials/blank.html", m);
+        }
         m.save();
         boms.forEach(unit -> {
             if(unit.id != null) {
@@ -166,12 +171,19 @@ public class Materials extends Controller {
     }
 
     public static void createBom(MaterialBom b) {
+        if(!Product.validSKU(b.number)) {
+            Validation.addError("", "B0M—ID[ " + b.number + " ] 不合法!");
+            Webs.errorToFlash(flash);
+            Materials.indexBom(new MaterialBomPost());
+        }
+
         List<MaterialBom> materialBoms = MaterialBom.find("number = ? and isDel = false", b.number).fetch();
         if(materialBoms != null && materialBoms.size() > 0) {
             Validation.addError("", "B0M—ID[" + b.number + "]已存在,不允许二次创建!");
             Webs.errorToFlash(flash);
             Materials.indexBom(new MaterialBomPost());
         }
+
         b.creator = Login.current();
         b.createDate = new Date();
         b.updateDate = new Date();
