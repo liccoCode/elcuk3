@@ -30,6 +30,7 @@ import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
@@ -797,7 +798,12 @@ public class Excels extends Controller {
                 "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
                 Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
         List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
-        summaries = InventoryCostUnit.countPrice(units, summaries);
+        ImmutablePair<List<InventoryCostUnit>, List<Map<String, Object>>> immutablePair =
+                InventoryCostUnit.countPrice(units, summaries);
+
+        units = immutablePair.getLeft();
+        summaries = immutablePair.getRight();
+
         if(units != null && units.size() > 0) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             request.format = "xls";
