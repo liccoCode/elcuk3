@@ -1,5 +1,6 @@
 package models;
 
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.market.M;
@@ -85,7 +86,6 @@ public class InventoryCostUnit extends GenericModel {
     @Transient
     public Float transportPriceTemp;
     public Float taxPriceTemp;
-    
 
 
     public static List<Map<String, Object>> countByCategory(Date target) {
@@ -108,8 +108,8 @@ public class InventoryCostUnit extends GenericModel {
         sql.append(" FROM InventoryCostUnit WHERE date BETWEEN ? AND ? GROUP BY sku ) AS TMP GROUP BY categoryId) a  ");
         sql.append(" left join (select  pd.`category_categoryId` as categoryId ,  ");
         sql.append(" sum(IF(t.qty IS NOT NULL AND t.qty>0 AND t.qty<>'', t.qty, t.planQty) *t.`price` ) as price ");
-        sql.append(" from ProcureUnit t left join `Product` pd on pd.`sku` = t.`product_sku` GROUP BY pd" +
-                ".`category_categoryId`) b ");
+        sql.append(" from ProcureUnit t left join `Product` pd on pd.`sku` = t.`product_sku` ");
+        sql.append(" GROUP BY pd.`category_categoryId`) b  ");
         sql.append(" on a.categoryId = b.categoryId ");
         return DBUtils.rows(sql.toString(), Dates.monthBegin(target), Dates.monthEnd(target));
     }
@@ -150,6 +150,10 @@ public class InventoryCostUnit extends GenericModel {
             map.put("reservedCost", totalMap.get(String.format("%s-%s", map.get("categoryId"), "reservedCost")));
             map.put("transitCost", totalMap.get(String.format("%s-%s", map.get("categoryId"), "transitCost")));
         }
+
+        /** 4 汇总结果 匹配计算 制作中、已交货成本 **/
+        summaries = countProductionCost(summaries);
+
         return new ImmutablePair<>(units, summaries);
     }
 
@@ -179,6 +183,12 @@ public class InventoryCostUnit extends GenericModel {
         return transportPrice;
     }
 
+    /**
+     * 匹配计算 制作中、已交货成本
+     *
+     * @param unit
+     * @param totalMap
+     */
     public static void setTotalMap(InventoryCostUnit unit, Map<String, BigDecimal> totalMap) {
         BigDecimal price = new BigDecimal(unit.procurementPrice).add(new BigDecimal(unit.transportPriceTemp)).add(new
                 BigDecimal(unit.taxPriceTemp));
@@ -203,4 +213,44 @@ public class InventoryCostUnit extends GenericModel {
             totalMap.put(transitCostKey, transitCost);
         }
     }
+
+
+    public static List<Map<String, Object>> countProductionCost(List<Map<String, Object>> summaries) {
+
+        Map<String, BigDecimal> totalMap = new HashMap<>();
+
+        StringBuilder sql = new StringBuilder(" select  pd.`category_categoryId` as categoryId ,  ");
+        sql.append(" CASE t.`stage` WHEN 'DELIVERY' THEN t.`planQty` WHEN 'DONE' THEN t.`qty` ");
+        sql.append(" WHEN 'IN_STORAGE' THEN t.`availableQty` ");
+        sql.append(" WHEN 'OUTBOUND' THEN t.`outQty` end  as qty ,t.`stage`,t.`price` ,t.`currency`  ");
+        sql.append(" from ProcureUnit t left join `Product` pd on pd.`sku` = t.`product_sku` ");
+        sql.append("where (t.`stage`='DELIVERY' or t.`stage`='DONE' or t.`stage`='IN_STORAGE' or t.`stage`='OUTBOUND')");
+        sql.append(" AND t.deliveryment_id IS NOT NULL AND t.stage!='CLOSE' AND t.projectName<> 'MengTop' ");
+        sql.append(" AND t.`currency`is not null AND (t.isInventory='yes' OR t.isInventory IS NULL) ");
+        sql.append(" HAVING qty > 0 and price >0 ");
+
+        /** 1 查询所有品线 采购计划的 制作中、已交货成本 **/
+        List<Map<String, Object>> rowMap = DBUtils.rows(sql.toString());
+        for(Map map : rowMap) {
+            String categoryId = (String) map.get("categoryId");
+            BigDecimal qty = new BigDecimal(map.get("qty").toString());
+            BigDecimal price = new BigDecimal(map.get("price").toString());
+            Currency currency = Currency.valueOf(map.get("currency").toString());
+            BigDecimal productionCost = qty.multiply(new BigDecimal(currency.toUSD(price.floatValue())));
+
+            String productionCostKey = String.format("%s-%s", categoryId, "productionCost");
+            if(totalMap.containsKey(productionCostKey)) {
+                totalMap.put(productionCostKey, totalMap.get(productionCostKey).add(productionCost));
+            } else {
+                totalMap.put(productionCostKey, productionCost);
+            }
+        }
+
+        /** 2 循环 所有品线 匹配 制作中、已交货成本 **/
+        for(Map<String, Object> map : summaries) {
+            map.put("productionCost", totalMap.get(String.format("%s-%s", map.get("categoryId"), "productionCost")));
+        }
+        return summaries;
+    }
+
 }
