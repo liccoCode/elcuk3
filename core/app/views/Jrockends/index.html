@@ -16,19 +16,19 @@
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
-                <input style="width:100px;" class="form-control" role="date" name="from">
+                <input style="width:100px;" class="form-control" role="date" name="from" value="${from.date()}">
               </div>
             </div>
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">To:</div>
-                <input style="width:100px;" class="form-control" role="date" name="to">
+                <input style="width:100px;" class="form-control" role="date" name="to" value="${to.date()}">
               </div>
             </div>
             <select name="market" style="width: 120px;" class="form-control">
               <option value="">Market</option>
             #{list items:models.market.M.values(), as:'d'}
-              <option value="${d.name()}">${d.name()}</option>
+              <option value="${d.name()}" ${d.name()=='market'? 'selected':''}>${d.name()}</option>
             #{/list}
             </select>
           </div>
