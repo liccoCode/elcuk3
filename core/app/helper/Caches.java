@@ -1,7 +1,6 @@
 package helper;
 
-import controllers.Login;
-import models.User;
+
 import net.sf.ehcache.concurrent.ReadWriteLockSync;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
@@ -137,4 +136,20 @@ public class Caches {
         jr.set(key, value);
         jr.expire(key, expiration);
     }
+
+
+    /**
+     * 批量匹配删除 *key*
+     * @param key
+     */
+    public static void batchDelete(String key) {
+        Set<String> keys = RedisCacheImpl.getCacheConnection().keys("*"+key+"*");
+        if(keys != null && keys.size() > 0) {
+            Logger.info("Delete running keys: %s", StringUtils.join(keys, ","));
+            RedisCacheImpl.getCacheConnection().del(keys.toArray(new String[keys.size()]));
+        }
+    }
+
+    
+
 }
