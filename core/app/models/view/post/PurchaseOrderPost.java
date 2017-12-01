@@ -142,8 +142,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append("          p.currency,");
         sql.append("          IFNULL(round(sum(p.price * CASE p.`stage` WHEN 'DELIVERY' ");
         sql.append("  THEN p.`planQty` WHEN 'DONE' THEN p.`qty`  ");
-        sql.append("  WHEN 'IN_STORAGE' THEN p.`availableQty`  ");
-        sql.append("  WHEN 'OUTBOUND' THEN p.`outQty` end  ),2),0) AS 'a1' ");
+        sql.append("  ELSE p.`inboundQty` end ),2),0) AS 'a1' ");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN ProcureUnit p ON p.deliveryment_id = m.id");
         sql.append("   LEFT JOIN Cooperator c ON c.id = m.cooperator_id ");
