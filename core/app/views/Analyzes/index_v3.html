@@ -37,6 +37,9 @@
     <button class="btn btn-xs" data-market='amazon.jp'>日本</button>
     <button class="btn btn-xs" data-market='amazon.ca'>加拿大</button>
     <button class="btn btn-xs" data-market=''>汇总</button>
+  #{power.ck "elcuk.index"}
+    <a class="btn btn-xs btn-danger" name="refreshCache" key="unit">清除缓存</a>
+  #{/power.ck}
   </div>
 </div>
 
@@ -78,9 +81,9 @@
 
         <select name="p.aid" class="form-control" style="width:100px;">
           <option value="">Account</option>
-          #{list items:accs, as:'a'}
+        #{list items:accs, as:'a'}
           <option value="${a.id}" #{if p.aid==a.id} selected #{/if}>${a.prettyName()}</option>
-          #{/list}
+        #{/list}
         </select>
 
         <select name="p.market" style="width: 120px;" class="form-control">
@@ -110,6 +113,9 @@
 
         <a class="btn btn-primary" id="a_search">搜索</a>
         <a class="btn btn-success" id="exceldown">下载Excel(SID)</a>
+      #{power.ck "elcuk.index"}
+        <a class="btn btn-danger" name="refreshCache" key="analyze_post_sid">清除缓存</a>
+       #{/power.ck}
 
         <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;margin-top:5px;">
           Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
