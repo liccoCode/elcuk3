@@ -8,6 +8,7 @@ import play.Logger;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -447,6 +448,40 @@ public class Dates {
         cal.set(Calendar.YEAR, dateTime.getYear());
         cal.set(Calendar.MONTH, dateTime.getMonthOfYear() - 1);
         return cal.getActualMaximum(Calendar.DATE);
+    }
+
+    /**
+     * 给定开始结束时间，按照给定的天数进行切割
+     * 返回map，格式 yyyy-MM-dd, type为string
+     *
+     * @param begin
+     * @param end
+     * @param splitDay
+     * @return
+     */
+    public static Map<String, String> splitDayForDate(Date begin, Date end, int splitDay) {
+        Calendar c = Calendar.getInstance();
+        Map<String, String> map = new TreeMap<>();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        int day = (int) ((end.getTime() - begin.getTime()) / (1000 * 3600 * 24));
+        if(day > splitDay) {
+            Date to;
+            for(int i = 0; i <= Math.floor(day / (splitDay)); i++) {
+                c.setTime(begin);
+                if(i == Math.floor(day / (splitDay ))) {
+                    map.put(format.format(begin), format.format(end));
+                } else {
+                    c.add(Calendar.DATE, splitDay-1);
+                    to = c.getTime();
+                    map.put(format.format(begin), format.format(to));
+                    c.add(Calendar.DATE, 1);
+                    begin = c.getTime();
+                }
+            }
+        } else {
+            map.put(format.format(begin), format.format(end));
+        }
+        return map;
     }
 
     public static Date aMonthAgo() {
