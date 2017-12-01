@@ -111,7 +111,7 @@ public class InventoryCostUnit extends GenericModel {
         sql.append(" from ProcureUnit t left join `Product` pd on pd.`sku` = t.`product_sku` ");
         sql.append(" GROUP BY pd.`category_categoryId`) b  ");
         sql.append(" on a.categoryId = b.categoryId ");
-        return DBUtils.rows(sql.toString(), Dates.monthBegin(target), Dates.monthEnd(target));
+        return DBUtils.rows(sql.toString(), Dates.morning(Dates.monthBegin(target)), Dates.monthEnd(target));
     }
 
 

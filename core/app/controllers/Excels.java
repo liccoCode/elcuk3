@@ -796,7 +796,7 @@ public class Excels extends Controller {
         Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
         List<InventoryCostUnit> units = InventoryCostUnit.find(
                 "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
-                Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+                Dates.morning( Dates.monthBegin(target))  , Dates.monthEnd(target)).fetch();
         List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
         ImmutablePair<List<InventoryCostUnit>, List<Map<String, Object>>> immutablePair =
                 InventoryCostUnit.countPrice(units, summaries);
