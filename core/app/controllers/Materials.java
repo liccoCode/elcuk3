@@ -15,6 +15,7 @@ import models.view.post.CooperItemPost;
 import models.view.post.MaterialBomPost;
 import models.view.post.MaterialPost;
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.helper.StringUtil;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -171,7 +173,7 @@ public class Materials extends Controller {
     }
 
     public static void createBom(MaterialBom b) {
-        if(!Product.validSKU(b.number)) {
+        if(StringUtil.isBlank(b.number) || Pattern.compile("[\u4e00-\u9fa5]").matcher(b.number).find()) {
             Validation.addError("", "B0M—ID[ " + b.number + " ] 不合法!");
             Webs.errorToFlash(flash);
             Materials.indexBom(new MaterialBomPost());
