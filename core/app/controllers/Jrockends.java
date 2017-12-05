@@ -53,16 +53,18 @@ public class Jrockends extends Controller {
                     render("/Jrockends/index.html", from, to, market);
                 } else if(day > 4) {
 
+                    int i = 1;
                     Map<String, String> map = Dates.splitDayForDate(from, to, 4);
-                    map.keySet().forEach(key -> {
+                    for(String key : map.keySet()) {
                         jobParameters.put("beginDate", key);
                         jobParameters.put("endDate", map.get(key));
                         if(StringUtils.isNotBlank(market)) {
                             jobParameters.put("marketErp", market);
                         }
                         jobMap.put("args", jobParameters);
-                        AmazonSQS.sendMessage(JSONObject.toJSONString(jobMap));
-                    });
+                        AmazonSQS.sendMessage(JSONObject.toJSONString(jobMap), i * 60);
+                        i++;
+                    }
                     render("/Jrockends/index.html", from, to, market);
                 }
             }
