@@ -52,7 +52,7 @@
         <td>
           <select name="outbound.type">
               #{list items:models.whouse.StockRecord.C, as:'t'}
-                  #{if proUnit.projectName == 'EASYACC'}
+                  #{if proUnit.projectName != 'MengTop'}
                       #{if t.name().equals("Normal")}
                         <option value="${t.name()}">${t.label()}</option>
                       #{/if}
