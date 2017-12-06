@@ -49,7 +49,6 @@
   </div>
 </div>
 
-
 <div class="box box-primary">
   <div class="box-header">
     <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="form-inline">
@@ -72,21 +71,14 @@
           Reload
         </a>
 
-        <div class="form-group">
-          <label class="checkbox inline">
-            <input type="checkbox" name="p.filterDot2" value="false">
-            包含 ,2
-          </label>
-        </div>
-
-        <select name="p.aid" class="form-control" style="width:100px;">
+        <select name="p.aid" class="form-control" style="width:80px;">
           <option value="">Account</option>
         #{list items:accs, as:'a'}
           <option value="${a.id}" #{if p.aid==a.id} selected #{/if}>${a.prettyName()}</option>
         #{/list}
         </select>
 
-        <select name="p.market" style="width: 120px;" class="form-control">
+        <select name="p.market" style="width: 100px;" class="form-control">
           <option value="">Market</option>
         #{list items:models.market.M.values(), as:'d'}
           <option value="${d.toString()}">${d.toString()}</option>
