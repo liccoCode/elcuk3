@@ -32,15 +32,7 @@ public class Jrockends extends Controller {
         renderArgs.put("logs", ElcukRecord.records(Collections.singletonList("jrockends.run"), 50));
         render();
     }
-
-    public static void main(String[] args) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.DATE, -30);
-
-        Map<String, String> map = Dates.splitDayForDate(c.getTime(), new Date(), 2);
-        System.out.print(map);
-    }
+    
 
     /**
      * @param jobName   任务ID

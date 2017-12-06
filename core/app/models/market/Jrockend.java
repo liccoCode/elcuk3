@@ -65,35 +65,31 @@ public class Jrockend {
      * @return
      */
     public static int getSplitDate(M market) {
-        //加拿大 40     180分割
-        //德国   4000   4天分割
-        //西班牙 100    180分割
-        //法国   200    90天分割
-        //意大利 400    45天分割
-        //日本   60     180分割
+        //加拿大 40     30天分割
+        //西班牙 100    30天分割
+        //墨西哥  20    30天分割
+        //日本   60     30天分割
+        //法国   200    30天分割
+        //意大利 400    30天分割
         //英国   700    20天分割
         //美国   800    15天分割
-        //墨西哥  20    180天分割
+        //德国   4000   4天分割
         switch(market) {
             case AMAZON_CA:
             case AMAZON_ES:
             case AMAZON_JP:
             case AMAZON_MX:
-                return 188;
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return 30;
             case AMAZON_DE:
                 return 4;
-            case AMAZON_FR:
-                return 92;
-            case AMAZON_IT:
-                return 46;
             case AMAZON_UK:
                 return 20;
             case AMAZON_US:
                 return 16;
-            case EBAY_UK:
-                return 0;
             default:
-                return 10;
+                return 0;
         }
     }
 
