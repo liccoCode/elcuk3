@@ -25,6 +25,12 @@
                 <input style="width:100px;" class="form-control" role="date" name="to" value="${to.date()}">
               </div>
             </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">分割天数:</div>
+                <input style="width:100px;" class="form-control" name="splitDate" value="${splitDate}">
+              </div>
+            </div>
             <select name="market" style="width: 120px;" class="form-control">
               <option value="">Market</option>
             #{list items:models.market.M.values(), as:'d'}
@@ -122,9 +128,19 @@
           <tr>
             <td>financeEndAndMonthJob</td>
             <td>自动下载发送 财务所需报表邮件</td>
-            <td>每月最后一天 18点</td>
+            <td>每月1号 9点</td>
             <td></td>
             <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="financeEndAndMonthJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>operateReportJob</td>
+            <td>自动下载发送 运营所需报表邮件</td>
+            <td>每月2号 10点</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="operateReportJob"
                    data-confirm="确认运行?" class="btn btn-xs btn-danger">运行一次</a>
             </td>
           </tr>

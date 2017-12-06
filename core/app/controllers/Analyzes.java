@@ -1,6 +1,7 @@
 package controllers;
 
 import controllers.api.SystemOperation;
+import helper.Caches;
 import helper.J;
 import helper.Webs;
 import models.OperatorConfig;
@@ -230,4 +231,16 @@ public class Analyzes extends Controller {
         renderJSON(J.g(sell.ps(ps)));
     }
 
+
+    /**
+     * 删除页面缓存
+     */
+    public static void batchDelete( String key) {
+        try {
+            Caches.batchDelete(key);
+            renderJSON(new Ret());
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.e(e)));
+        }
+    }
 }

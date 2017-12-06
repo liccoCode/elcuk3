@@ -13,7 +13,7 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
  */
 public class AmazonSQS {
 
-    private AmazonSQS(){
+    private AmazonSQS() {
     }
 
     private static final String SQS_QUEUE = String.format("https://sqs.us-west-2.amazonaws.com/866320605929/%s",
@@ -36,4 +36,18 @@ public class AmazonSQS {
     public static void sendMessage(String message) {
         client().sendMessage(new SendMessageRequest(SQS_QUEUE, message));
     }
+
+    
+    /**
+     *  延迟发送sqs消息队列
+     * @param message      消息内容
+     * @param delaySeconds 延迟秒数
+     */
+    public static void sendMessage(String message, Integer delaySeconds) {
+        client().sendMessage(new SendMessageRequest()
+                .withQueueUrl(SQS_QUEUE)
+                .withDelaySeconds(delaySeconds)
+                .withMessageBody(message));
+    }
+
 }

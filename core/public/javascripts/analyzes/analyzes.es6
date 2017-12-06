@@ -1,5 +1,8 @@
 $(() => {
 
+
+
+
   // Form 搜索功能
   $("#click_param").on("change", "[name='p.market']", function () {
     ajaxSaleUnitLines();
@@ -176,6 +179,27 @@ $(() => {
   }
 
   ajaxFreshActiveTableTab();
+
+  $("a[name='refreshCache']").click(function () {
+    let key = $(this).attr("key");
+    $.post("/Analyzes/batchDelete", {
+      key: key
+    },
+    function (r) {
+      if (r.flag) {
+        noty({
+          text: '缓存清除成功',
+          type: 'success'
+        });
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+  });
+
 });
 
 function paramWidth (type) {
@@ -378,3 +402,4 @@ function paramWidth (type) {
     ]
   }
 }
+

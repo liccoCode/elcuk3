@@ -30,6 +30,7 @@ import models.whouse.StockRecord;
 import models.whouse.WhouseItem;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
@@ -795,12 +796,19 @@ public class Excels extends Controller {
         Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
         List<InventoryCostUnit> units = InventoryCostUnit.find(
                 "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
-                Dates.monthBegin(target), Dates.monthEnd(target)).fetch();
+                Dates.morning( Dates.monthBegin(target))  , Dates.monthEnd(target)).fetch();
         List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
+        ImmutablePair<List<InventoryCostUnit>, List<Map<String, Object>>> immutablePair =
+                InventoryCostUnit.countPrice(units, summaries);
+
+        units = immutablePair.getLeft();
+        summaries = immutablePair.getRight();
+
         if(units != null && units.size() > 0) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             request.format = "xls";
-            renderArgs.put(RenderExcel.RA_FILENAME, String.format("库存占用资金报表%s.xls", dateFormat.format(target)));
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("库存占用资金报表%s.xls", new SimpleDateFormat("yyyyMMdd").format(target)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             render(units, summaries, dateFormat);
         } else {

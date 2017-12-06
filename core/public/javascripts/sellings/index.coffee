@@ -41,7 +41,7 @@ $ ->
       sid: sid,
       (r) ->
         if r.flag is true
-          alert('同步成功, 请刷新页面查看最新数据')
+          alert('正在同步, 请10秒刷新页面查看最新数据')
         else
           alert(r.message)
         btnGroup.unmask()
