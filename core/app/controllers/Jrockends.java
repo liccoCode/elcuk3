@@ -6,7 +6,10 @@ import helper.AmazonSQS;
 import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.market.Jrockend;
+import models.market.M;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.helper.StringUtil;
 import play.i18n.Messages;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -39,54 +42,57 @@ public class Jrockends extends Controller {
         System.out.print(map);
     }
 
+    /**
+     * @param jobName   任务ID
+     * @param from      开始时间
+     * @param to        结束时间
+     * @param splitDate 分割时间
+     * @param market    执行市场
+     */
     @Check("jobs.index")
-    public static void run(String jobName, Date from, Date to, String market) {
+    public static void run(String jobName, Date from, Date to, Integer splitDate, String market) {
         Map<String, Object> jobMap = new HashMap<>();
-        Map<String, Object> jobParameters = new HashMap<>();
-        //任务ID
         jobMap.put("jobName", jobName);
-        if(Objects.equals(jobName, "multiCountryOrderrSync")) {
+        Map<String, Object> jobParameters = new HashMap<>();
+
+        if(!Objects.equals(jobName, "multiCountryOrderrSync")) {
+            /***************************  一般任务正常处理  ***************************/
             if(from != null && to != null) {
-                int day = (int) ((to.getTime() - from.getTime()) / (1000 * 3600 * 24));
-                if(day > 31) {
-                    flash.error("此Job调用时间差不能大于一个月");
-                    render("/Jrockends/index.html", from, to, market);
-                } else if(day > 4) {
-
-                    int i = 1;
-                    Map<String, String> map = Dates.splitDayForDate(from, to, 4);
-                    for(String key : map.keySet()) {
-                        jobParameters.put("beginDate", key);
-                        jobParameters.put("endDate", map.get(key));
-                        if(StringUtils.isNotBlank(market)) {
-                            jobParameters.put("marketErp", market);
-                        }
-                        jobMap.put("args", jobParameters);
-                        AmazonSQS.sendMessage(JSONObject.toJSONString(jobMap), i * 60);
-                        i++;
-                    }
-                    render("/Jrockends/index.html", from, to, market);
-                }
+                jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
+                jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
             }
-        }
-
-        if(from != null && to != null) {
-            jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
-            jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
-        }
-        if(StringUtils.isNotBlank(market)) {
-            jobParameters.put("marketErp", market);
-        }
-        jobMap.put("args", jobParameters);
-        String message = JSONObject.toJSONString(jobMap);
-        try {
-            AmazonSQS.sendMessage(message);
-        } catch(Exception e) {
-            flash.error("Job [%s] 因 [%s] 调用失败.", jobName, Webs.e(e));
+            if(StringUtils.isNotBlank(market)) {
+                jobParameters.put("marketErp", market);
+            }
+            jobMap.put("args", jobParameters);
+            String message = JSONObject.toJSONString(jobMap);
+            try {
+                AmazonSQS.sendMessage(message);
+            } catch(Exception e) {
+                flash.error("Job [%s] 因 [%s] 调用失败.", jobName, Webs.e(e));
+                render("/Jrockends/index.html", from, to, splitDate, market);
+            }
+        } else {
+            /***************************  订单xml同步任务特速处理  ***************************/
+            if(from != null && to != null) {
+                if(!StringUtil.isBlank(market)) {
+                    //页面传递了market,那么只执行该市场的订单抓取
+                    Jrockend.orderProcess(jobMap, jobParameters, from, to, splitDate, market);
+                } else {
+                    //页面未传递market,那么只执行所有市场的订单抓取
+                    for(M m : M.values()) {
+                        Jrockend.orderProcess(jobMap, jobParameters, from, to, splitDate, m.name());
+                    }
+                }
+            } else {
+                flash.error("Job [%s] 订单XML同步必须选择时间", jobName);
+                render("/Jrockends/index.html", from, to, splitDate, market);
+            }
         }
         flash.success("Job [%s] 调用成功", jobName);
         new ElcukRecord(Messages.get("jrockends.run"), Messages.get("jrockends.run.msg", jobName), jobName).save();
-        render("/Jrockends/index.html", from, to, market);
+        render("/Jrockends/index.html", from, to, splitDate, market);
     }
+
 
 }
