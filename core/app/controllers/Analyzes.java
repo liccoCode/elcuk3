@@ -68,6 +68,11 @@ public class Analyzes extends Controller {
         render("Analyzes/index_v3.html", accs, categoryIds, p);
     }
 
+    public static void operateInfo() {
+        AnalyzePost p = new AnalyzePost();
+        render(p);
+    }
+
     @Before(only = {"analyzes", "ajaxUnit"})
     public static void countTime() {
         if(Play.mode.isProd()) return;
@@ -158,7 +163,6 @@ public class Analyzes extends Controller {
     /**
      * 查看某一个 Selling 在一段时间内的 PageView & Session 数量
      */
-    @CacheFor("30mn")
     public static void ajaxSellingRecord(final AnalyzePost p) {
         try {
             String brandname = OperatorConfig.getVal("brandname");
