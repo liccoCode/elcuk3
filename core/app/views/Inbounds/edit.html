@@ -3,11 +3,6 @@
 #{set 'moreScripts'}
     #{script 'inbounds/edit.js'/}
 #{/set}
-<style type="text/css">
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 
 #{errorMsgs /}
 #{flash_alert/}
@@ -26,7 +21,7 @@
           </div>
           <label for="pro_family" class="col-sm-2 control-label">状态</label>
           <div class="col-sm-2">
-            <input class="form-control" style="color:${inbound.status.rgb()}" value="${inbound.status.label()}" readonly>
+            <input class="form-control" value="${inbound.status.label()}" readonly>
           </div>
           <label for="pro_category" class="col-sm-2 control-label">出货单</label>
           <div class="col-sm-2">
