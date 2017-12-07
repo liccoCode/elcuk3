@@ -290,7 +290,7 @@ public class Shipments extends Controller {
             ship.beginShip(date, sync);
         } catch(Exception e) {
             Validation.addError("", Webs.e(e));
-            Logger.error(e.getMessage());
+            Logger.error(e.toString());
         }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
