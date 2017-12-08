@@ -65,9 +65,6 @@ public class Materials extends Controller {
         if(Material.find("code =? and isDel =0", m.code).first() != null) {
             Validation.addError("", "物料编码" + m.code + "已经存在");
         }
-        if(!Product.validSKU(m.code)) {
-            Validation.addError("", "物料编码[ " + m.code + " ] 不合法!");
-        }
         if(Validation.hasErrors()) {
             render("/Materials/blank.html", m);
         }
