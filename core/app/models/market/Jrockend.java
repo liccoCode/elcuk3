@@ -21,19 +21,19 @@ public class Jrockend {
     public static void orderProcess(Map<String, Object> jobMap, Map<String, Object> jobParameters,
                                     Date from, Date to, Integer splitDate, String market) {
         //如果未传入分割天数,那么系统根据 每日市场的销量确定抓取的时间段
-        if(splitDate == null) {
+        if (splitDate == null) {
             splitDate = getSplitDate(M.valueOf(market));
         }
-        if(splitDate == 0) {
+        if (splitDate == 0) {
             return;
         }
 
         int day = (int) ((to.getTime() - from.getTime()) / (1000 * 3600 * 24));
-        if(day > splitDate) {
+        if (day > splitDate) {
             //开始结束时间大于分割日期,那么需要按照分割日期分割,按端执行
             int i = 1;
             Map<String, String> map = Dates.splitDayForDate(from, to, splitDate);
-            for(String key : map.keySet()) {
+            for (String key : map.keySet()) {
                 sendSqs(jobMap, jobParameters, key, map.get(key), i * 60, market);
                 i++;
             }
@@ -66,26 +66,21 @@ public class Jrockend {
      */
     public static int getSplitDate(M market) {
         //加拿大 40     30天分割
-        //西班牙 100    30天分割
         //墨西哥  20    30天分割
         //日本   60     30天分割
-        //法国   200    30天分割
-        //意大利 400    30天分割
-        //英国   700    20天分割
         //美国   800    15天分割
-        //德国   4000   4天分割
-        switch(market) {
+        //欧洲五国 同一个账号跑一次德国账号即可  2天分割
+        switch (market) {
             case AMAZON_CA:
-            case AMAZON_ES:
             case AMAZON_JP:
             case AMAZON_MX:
+                return 30;
             case AMAZON_FR:
             case AMAZON_IT:
-                return 30;
+            case AMAZON_ES:
             case AMAZON_DE:
-                return 4;
             case AMAZON_UK:
-                return 20;
+                return 2;
             case AMAZON_US:
                 return 16;
             default:
