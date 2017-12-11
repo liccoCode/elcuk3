@@ -3,11 +3,12 @@ package controllers;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.AmazonSQS;
-import helper.Dates;
 import helper.Webs;
 import models.ElcukRecord;
+import models.market.Account;
 import models.market.Jrockend;
 import models.market.M;
+import models.view.Ret;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.helper.StringUtil;
 import play.i18n.Messages;
@@ -32,7 +33,7 @@ public class Jrockends extends Controller {
         renderArgs.put("logs", ElcukRecord.records(Collections.singletonList("jrockends.run"), 50));
         render();
     }
-    
+
 
     /**
      * @param jobName   任务ID
@@ -47,32 +48,32 @@ public class Jrockends extends Controller {
         jobMap.put("jobName", jobName);
         Map<String, Object> jobParameters = new HashMap<>();
 
-        if(!Objects.equals(jobName, "multiCountryOrderrSync")) {
+        if (!Objects.equals(jobName, "multiCountryOrderrSync")) {
             /***************************  一般任务正常处理  ***************************/
-            if(from != null && to != null) {
+            if (from != null && to != null) {
                 jobParameters.put("beginDate", new SimpleDateFormat("yyyy-MM-dd").format(from));
                 jobParameters.put("endDate", new SimpleDateFormat("yyyy-MM-dd").format(to));
             }
-            if(StringUtils.isNotBlank(market)) {
+            if (StringUtils.isNotBlank(market)) {
                 jobParameters.put("marketErp", market);
             }
             jobMap.put("args", jobParameters);
             String message = JSONObject.toJSONString(jobMap);
             try {
                 AmazonSQS.sendMessage(message);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 flash.error("Job [%s] 因 [%s] 调用失败.", jobName, Webs.e(e));
                 render("/Jrockends/index.html", from, to, splitDate, market);
             }
         } else {
             /***************************  订单xml同步任务特速处理  ***************************/
-            if(from != null && to != null) {
-                if(!StringUtil.isBlank(market)) {
+            if (from != null && to != null) {
+                if (!StringUtil.isBlank(market)) {
                     //页面传递了market,那么只执行该市场的订单抓取
                     Jrockend.orderProcess(jobMap, jobParameters, from, to, splitDate, market);
                 } else {
                     //页面未传递market,那么只执行所有市场的订单抓取
-                    for(M m : M.values()) {
+                    for (M m : M.values()) {
                         Jrockend.orderProcess(jobMap, jobParameters, from, to, splitDate, m.name());
                     }
                 }
@@ -86,5 +87,28 @@ public class Jrockends extends Controller {
         render("/Jrockends/index.html", from, to, splitDate, market);
     }
 
+
+    public static void syncOrderr(String reportId, String market) {
+        if (StringUtils.isBlank(reportId) || StringUtils.isBlank(market)){
+            renderJSON(new Ret("reportId/market为空"));
+        }
+        Account account = Account.find("type=?", M.val(market)).first();
+        Map<String, Object> jobMap = new HashMap<>();
+        jobMap.put("jobName", "amazonMwsJob");
+        Map<String, Object> jobParameters = new HashMap<>();
+        jobParameters.put("accountId", account.id);
+        jobParameters.put("reportId", reportId);
+        jobParameters.put("method", "GetReport");
+        jobParameters.put("market", market);
+        jobParameters.put("reportType","_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_");
+        jobMap.put("args", jobParameters);
+        String message = JSONObject.toJSONString(jobMap);
+        try {
+            AmazonSQS.sendMessage(message);
+        } catch (Exception e) {
+            renderJSON(new Ret(Webs.e(e)));
+        }
+        renderJSON(new Ret());
+    }
 
 }
