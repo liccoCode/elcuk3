@@ -776,6 +776,34 @@ public class Excels extends Controller {
         render(shipments);
     }
 
+    /**
+     * 运输单装箱单
+     * @param shipmentId
+     */
+    public static void packingList(List<String> shipmentId) {
+            if(shipmentId == null || shipmentId.size() == 0) {
+                renderText("请选择需要打印的运输单！");
+            } else {
+                Shipment ship  = Shipment.find("id = ? " , shipmentId.get(0)).first();
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
+                request.format = "xls";
+                renderArgs.put(RenderExcel.RA_FILENAME,
+                        String.format("装箱单表格%s.xls", formatter.format(new Date())));
+                renderArgs.put(RenderExcel.RA_ASYNC, false);
+                Date date = ship.dates.planBeginDate;
+
+                Calendar begin=Calendar.getInstance();
+                begin.setTime(date);
+                begin.add(Calendar.DAY_OF_MONTH,-1);
+
+                renderArgs.put("date", new SimpleDateFormat("yyyy/MM/dd").format(begin.getTime()));
+                renderArgs.put("user", Login.current());
+                List<ShipItem> items = ShipItem.find("shipment.id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
+                render(items);
+            }
+        }
+
+
     public static void exportInboundUnitReport(InboundPost p) {
         if(p == null) p = new InboundPost();
         p.pagination = false;
