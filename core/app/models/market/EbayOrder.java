@@ -3,6 +3,7 @@ package models.market;
 import com.google.gson.annotations.Expose;
 import models.finance.EbayFee;
 import org.hibernate.annotations.DynamicUpdate;
+import play.data.validation.Required;
 import play.db.jpa.GenericModel;
 
 import javax.persistence.*;
@@ -57,6 +58,9 @@ public class EbayOrder extends GenericModel {
         MANUAL
     }
 
+    @Required
+    @Expose
+    @Enumerated(EnumType.STRING)
     public T type;
 
     /**
