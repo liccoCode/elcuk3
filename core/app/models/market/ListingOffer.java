@@ -14,6 +14,9 @@ import javax.persistence.*;
  */
 @Entity
 public class ListingOffer extends GenericModel {
+
+    private static final long serialVersionUID = -3014130524486318573L;
+
     public enum C {
         NEW,
         USED,

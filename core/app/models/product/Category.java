@@ -8,7 +8,6 @@ import models.User;
 import models.embedded.CategorySettings;
 import models.market.M;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
@@ -28,30 +27,35 @@ import java.util.stream.Collectors;
  * Time: 上午11:44
  */
 @Entity
-@DynamicUpdate
 public class Category extends GenericModel {
 
     private static final long serialVersionUID = -140523263681790753L;
 
     private static final Map<String, List<Category>> CATEGORY_CACHE = new ConcurrentHashMap<>();
 
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE})
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.REFRESH,
+            CascadeType.MERGE}, fetch = FetchType.LAZY)
     @OrderBy("sku")
+    @Expose
     public List<Product> products;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @Expose
     public List<Brand> brands;
 
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @Expose
     public Team team;
 
     @ManyToMany(cascade = {CascadeType.REFRESH}, mappedBy = "categories", fetch = FetchType.LAZY)
+    @Expose
     public List<User> users = new ArrayList<>();
 
     /**
      * Category拥有哪些模板
      */
-    @ManyToMany(mappedBy = "categorys", cascade = CascadeType.PERSIST)
+    @ManyToMany(mappedBy = "categorys", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @Expose
     public List<Template> templates;
 
     @Id
