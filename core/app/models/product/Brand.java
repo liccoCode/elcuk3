@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class Brand extends GenericModel {
 
     private static final long serialVersionUID = 2582809738694904003L;
+
     @OneToMany(mappedBy = "brand", fetch = FetchType.EAGER)
     public List<Family> families;
 
