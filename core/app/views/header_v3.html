@@ -331,7 +331,7 @@
               <ul class="menu">
               #{list items:models.User.COR.values(), as:'c'}
                 <li><!-- start notification -->
-                  <a href="${c.url()}">
+                  <a href="${c.url()}" target="_blank">
                     <i class="fa ${c.pic()}" style="color:red"></i> ${c.label()}
                   </a>
                 </li>

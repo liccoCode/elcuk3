@@ -23,7 +23,7 @@
             <div class="col-md-12">
               <div class="box box-primary ">
                 <form id="data-form" cid="${coper.id}" class="form-horizontal">
-                  <div class="box-header"><h3 class="box-title">合作者信息</h3></div>
+                  <div class="box-header with-border"><h3 class="box-title">合作者信息</h3></div>
                   <div class="box-body">
                     <div class="form-group">
                       <label for="" class="col-sm-1 control-label">全称</label>
@@ -65,7 +65,7 @@
                       <div class="col-sm-2">
                         <input class="form-control" name="cop.wangwang" value="${coper.wangwang}">
                       </div>
-                      <label for="" class="col-sm-1 control-label">Type</label>
+                      <label for="" class="col-sm-1 control-label">类型</label>
                       <div class="col-sm-2">
                         <input class="form-control" value="${coper.type.label()}" required readonly>
                       </div>
@@ -91,7 +91,6 @@
                         <input type="text" name="cop.address" class="form-control" value="${coper.address}" placeholder="详细地址">
                       </div>
                     </div>
-
 
                     <div class="form-group">
                       <label for="" class="col-sm-1 control-label">付款方式</label>
@@ -156,7 +155,7 @@
 
             #{if coper.type == models.procure.Cooperator.T.SUPPLIER}
               <div class="box box-success">
-                <div class="box-header"><h3 class="box-title">${coper.fullName} 生产的产品</h3></div>
+                <div class="box-header with-border"><h3 class="box-title">${coper.fullName} 生产的产品</h3></div>
                 <div class="box-body">
                   <table id="cooperItemList" class="table table-condensed table-bordered">
                     <tr>
@@ -188,9 +187,11 @@
                       #{/list}
                     <!-- 为此供应商关联新的产品 -->
                     <tr>
-                      <td colspan="7">
+                      <td colspan="8">
                         <a href="@{Cooperators.newCooperItem(null, coper.id)}" class="btn btn-xs btn-warning">添加SKU</a>
                         <a href="@{Cooperators.newMaterialItem(coper.id)}" class="btn btn-xs btn-success">添加物料</a>
+
+                        <a href="@{Cooperators.batchAddCooperItem(coper.id)}" class="btn btn-xs btn-warning">批量添加sku</a>
                       </td>
                     </tr>
                   </table>

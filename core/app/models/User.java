@@ -182,7 +182,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.ecooe.com/";
+                return "https://ecooe.elcuk-erp.com";
             }
 
             @Override
@@ -198,7 +198,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.brandworl.com/";
+                return "https://brandworl.elcuk-erp.com";
             }
 
             @Override
@@ -214,7 +214,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.outxe.com/";
+                return "https://outxe.elcuk-erp.com";
             }
 
             @Override
@@ -230,28 +230,12 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.redimp.com/";
+                return "https://redimp.elcuk-erp.com";
             }
 
             @Override
             public String pic() {
                 return "fa-gamepad";
-            }
-        },
-        Lecone {
-            @Override
-            public String label() {
-                return "Lecone";
-            }
-
-            @Override
-            public String url() {
-                return "https://e.ilecone.com/";
-            }
-
-            @Override
-            public String pic() {
-                return "fa-sliders";
             }
         },
         Visio {
@@ -262,7 +246,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.visioa.com/";
+                return "https://visio.elcuk-erp.com";
             }
 
             @Override
@@ -278,12 +262,44 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "http://e.tripetals.love/";
+                return "https://tripetals.elcuk-erp.com";
             }
 
             @Override
             public String pic() {
                 return "fa-female";
+            }
+        },
+        Wisle {
+            @Override
+            public String label() {
+                return "Wisle";
+            }
+
+            @Override
+            public String url() {
+                return "https://wisle.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-child";
+            }
+        },
+        Lecone {
+            @Override
+            public String label() {
+                return "Lecone";
+            }
+
+            @Override
+            public String url() {
+                return "https://lecone.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-sliders";
             }
         },
         MengTop {
@@ -294,7 +310,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.mengtop.com/";
+                return "https://mengtop.elcuk-erp.com";
             }
 
             @Override
