@@ -901,7 +901,7 @@ public class Excels extends Controller {
         String projectName = outbounds.get(0).projectName;
         List<ProcureUnit> procureUnits = new ArrayList<>();
 
-        outbounds.stream().forEach(outbound -> procureUnits.addAll(outbound.units));
+        outbounds.forEach(outbound -> procureUnits.addAll(outbound.units));
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, "出库单明细报表.xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
