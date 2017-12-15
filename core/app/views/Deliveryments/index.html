@@ -112,9 +112,10 @@
                   #{/if}
                   #{else }没有请款单#{/else}
               </td>
-              <td style="cursor:pointer;" name="clickTd" data-id="${dmt.id}" data-url="@{Deliveryments.showProcureUnitList()}">
+              <td style="cursor:pointer;" name="clickTd" data-id="${dmt.id}" data-toggle="tooltip" title="${dmt.name}"
+                  data-url="@{Deliveryments.showProcureUnitList()}">
                 <span><i class="icon-reorder"></i></span>
-                <span>${dmt.name}</span>
+                <span>${dmt.name.xxLong()}</span>
                 <span class="badge bg-light-blue">${dmt.units.size()}</span>
               </td>
               <td style="color:${dmt.state.rgb()}">${dmt.state.label()}</td>

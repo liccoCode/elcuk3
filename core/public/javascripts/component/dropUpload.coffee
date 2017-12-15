@@ -1,6 +1,6 @@
 window.dropUpload =
 # 图片的 Drag&Drop DIV 初始化
-  template: '<li>' +
+  template: '<li class="col-md-1">' +
     '<a href="#" target="_blank" class="thumbnail"><img/></a>' +
     '<div class="progress"><div class="bar"></div></div>' +
     '<div class="title" style="position:relative;word-break:break-all;font-weight:bold"></div>' +

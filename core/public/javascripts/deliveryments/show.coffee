@@ -152,11 +152,12 @@ $ ->
 
   fidCallBack = () ->
     {
-      fid: $('#deliverymentId').text(),
+      fid: $('#deliverymentId').val(),
       p: 'DELIVERYMENT'
     }
+
   dropbox = $('#dropbox')
-  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1')
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'col-md-1')
   window.dropUpload.iniDropbox(fidCallBack, dropbox)
 
   $("#chosebuyer").change (e) ->
@@ -183,10 +184,14 @@ $ ->
     $(@).css('cursor': 'pointer')
   ).on("click", ".selling_id a", (e) ->
     $("#tl").show()
+    $("#col-body").show()
     $("#tl").parent().parent().show();
     $td = $(@)
     loadTimeLine('sid', $td.text().trim())
   )
+
+  $('#tl').show()
+  $("#col-body").hide()
 
   loadTimeLine = (type, val)->
     $time_line_home = $("#tl")
