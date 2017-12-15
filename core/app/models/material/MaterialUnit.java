@@ -246,14 +246,6 @@ public class MaterialUnit extends Model {
         }
     }
 
-    /**
-     * 预计单价金额格式化
-     *
-     * @return
-     */
-    public float formatPlanPrice() {
-        return new BigDecimal(this.planPrice).setScale(2, 4).floatValue();
-    }
 
     /**
      * 总共需要申请的金额
@@ -261,10 +253,7 @@ public class MaterialUnit extends Model {
      * @return
      */
     public float totallanPrice() {
-        return new BigDecimal(this.planPrice)
-                .multiply(new BigDecimal(planQty))
-                .setScale(2, 4)
-                .floatValue();
+        return this.planPrice*this.planQty;
     }
 
     /**
