@@ -136,6 +136,7 @@ $ ->
 
   paintProcureUnitInTimeline = (type, val)->
     $("#tl").show()
+    $("#col-body").show()
     $time_line_home = $("#tl")
     LoadMask.mask($time_line_home)
     $.post('/analyzes/ajaxProcureUnitTimeline', {type: type, val: val},
@@ -168,11 +169,9 @@ $ ->
     $("#fileManagerment").fadeIn()
     $("#shipmentInfo").fadeOut()
 
-  $("#tl").hide()
-
-
   $('input[name="editBoxInfo"]').click ->
     $("#fba_carton_contents_modal").modal('show')
     id = $(this).data("id")
     $("#refresh_div").load("/ProcureUnits/refreshFbaCartonContentsByIds", {ids: id})
 
+  $("#col-body").hide()
