@@ -1,123 +1,161 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Category' /}
-#{set 'moreScripts'}
-#{/set}
-<div class="row-fluid">
-#{if cates.size() == 0}
-  <div>
-    等待添加新类别
-  </div>
-#{/if}
-#{else }
-  <div class="row-fluid">
-    <div class="span3 well well-small" id="cat_slider">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th class="span1">CategoryId</th>
-          <th>Name</th>
-          <th>Team</th>
-        </tr>
-          #{list items:cates, as:'cat_left'}
-            <tr>
-              <td>${cat_left.categoryId}</td>
-              <td>
-                <a href="@{Categorys.show()}/${cat_left.categoryId}">${cat_left.name}</a>
-              </td>
-              <td>${cat_left.team?.name}</td>
-            </tr>
-          #{/list}
-      </table>
-      <a href="@{Categorys.blank()}" class="btn btn-primary">创建新 Category</a>
 
-      <form action="@{Categorys.delete()}" method="post" style="display:inline-block;">
-        <input type="hidden" name="id" value="${cat.categoryId}">
-          #{authenticityToken /}
-        <button data-confirm='确认删除?' class="btn btn-danger">删除 Category: ${cat}</button>
-      </form>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="box">
+      <div class="box-body">
+        <table class="table table-bordered table-condensed">
+          <tr>
+            <th data-toggle="tooltip" title="勾选已经绑定的brand">CategoryId</th>
+            <th>Name</th>
+            <th>Team</th>
+            <th data-toggle="tooltip" title="勾选未绑定的brand">未绑定</th>
+          </tr>
+        #{list items:cates, as:'c'}
+          <tr>
+            <td data-toggle="toggle" data-target="#${tr_key}_${c.categoryId}" style="cursor:pointer;">
+              <i class="icon-reorder"></i> ${c.categoryId}
+              <span style="color:green">(${c.brands.size()})</span>
+            </td>
+            <td>
+              <a href="@{Categorys.show()}/${c.categoryId}">${c.name}</a>
+            </td>
+            <td>${c.team?.name}</td>
+            <td data-toggle="toggle" data-target="#${tr_key}_${c.categoryId}_unbind" style="cursor:pointer;">
+              <i class="icon-reorder"></i> ${c.categoryId}
+              <span style="color:red">(${c.unbrands().size()})</span>
+            </td>
+          </tr>
+          <tr id="${tr_key}_${c.categoryId}" style="display:none;">
+            <td colspan="4">
+              <form method="post" action="@{Categorys.unbrand()}">
+                  #{list items:c.brands, as:'b'}
+                      #{if b_index % 2 == 0}
+                        <label class="radio-inline col-sm-5">
+                          <input type="radio" name="brandIds" data-category="${c.categoryId}" value="${b.name}">
+                        ${b.name} (${b.fullName.nineLong()})
+                        </label>
+                        <br>
+                      #{/if}
+                      #{else }
+                        <label class="radio-inline col-sm-5">
+                          <input type="radio" name="brandIds" data-category="${c.categoryId}" value="${b.name}">
+                        ${b.name} (${b.fullName.nineLong()})
+                        </label>
+                      #{/else}
+                  #{/list}
+                <br>
+                <button class="btn btn-warning btn-xs">解除绑定</button>
+                <input type="hidden" name="id" value="${cat.categoryId}">
+              </form>
+            </td>
+          </tr>
+          <tr id="${tr_key}_${c.categoryId}_unbind" style="display:none;">
+            <td colspan="4">
+              <form method="post" action="@{Categorys.brand()}">
+                  #{list items:c.unbrands(), as:'b'}
+                      #{if b_index % 2 == 0}
+                        <label class="checkbox-inline col-sm-5">
+                          <input type="checkbox" name="brandIds" value="${b.name}">${b.name}(${b.fullName.nineLong()})
+                        </label>
+                        <br>
+                      #{/if}
+                      #{else }
+                        <label class="checkbox-inline col-sm-5">
+                          <input type="checkbox" name="brandIds" value="${b.name}">${b.name}(${b.fullName.nineLong()})
+                        </label>
+                      #{/else}
+                  #{/list}
+                <br>
+                <button class="btn btn-primary btn-xs">绑定</button>
+                <input type="hidden" name="id" value="${cat.categoryId}">
+              </form>
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+      <div class="box-footer">
+        <a href="@{Categorys.blank()}" class="btn btn-primary">创建新 Category</a>
+        <form action="@{Categorys.delete()}" method="post" style="display:inline-block;">
+          <input type="hidden" name="id" value="${cat.categoryId}">
+        #{authenticityToken /}
+          <button data-confirm='确认删除?' class="btn btn-danger">删除 Category: ${cat}</button>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <div class="span8 well well-small" id="cat_detail">
-        #{flash_alert /}
-        #{errorMsgs /}
-
-        #{info_row title:'Basic Info'}
-          <ul>
-            <li>产品要求: 每一个条款占据一行, 不要换行</li>
-            <li>不需要填写前缀 1. 2. 之类的, 系统会自行处理</li>
-          </ul>
-        #{/info_row}
-      <div>
-        <form action="@{Categorys.update()}" method="post">
+  <div class="col-md-7">
+    <div class="box">
+      <div class="box-header with-border"><h3 class="box-title">Basic Info</h3></div>
+      <div class="box-body">
+        <form action="@{Categorys.update()}" method="post" class="form-horizontal">
           <table class="table table-bordered table-condensed">
             <tr>
-              <td>CategoryId:</td>
-              <td class="span6">${cat.categoryId}</td>
-              <td>TEAM组</td>
+              <th width="120px">CategoryId:</th>
+              <td>${cat.categoryId}</td>
+              <th width="120px">TEAM组</th>
               <td>
-                  #{select 'cat.team.id', items: teams, labelProperty: 'name',
-                  value: cat.team?.id}
-                      #{option ''}选择Team组#{/option}
-                  #{/select}
+              #{select 'cat.team.id', items: teams, labelProperty: 'name',value: cat.team?.id, class: 'form-control'}
+                  #{option ''}选择Team组#{/option}
+              #{/select}
               </td>
             </tr>
             <tr>
-              <td>Name:</td>
-              <td colspan="3">
-                <input class="span12" type="text" name="cat.name" value="${cat.name}">
+              <th>Name:</th>
+              <td>
+                <input class="form-control" type="text" name="cat.name" value="${cat.name}">
+              </td>
+              <th>AmzNode:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonNode" value="${cat.settings?.amazonNode}" placeHolder="此类别需要检查的 Node 值[,]分割">
               </td>
             </tr>
             <tr>
-              <td>AmzNode:</td>
-              <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonNode" value="${cat.settings?.amazonNode}" placeHolder="此类别需要检查的 Node 值[,]分割">
+              <th>AmzCategory:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonCategory" value="${cat.settings?.amazonCategory}" placeHolder="Amazon.com CLASSIFY 阶段的类型">
+              </td>
+              <th>AmzESCategory:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonESCategory" value="${cat.settings?.amazonESCategory}" placeHolder="Amazon.es CLASSIFY 阶段的类型">
               </td>
             </tr>
             <tr>
-              <td style="width:100px;">AmzCategory:</td>
-              <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonCategory" value="${cat.settings?.amazonCategory}" placeHolder="Amazon.com CLASSIFY 阶段的类型">
+              <th>AmzUKCategory:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonUKCategory" value="${cat.settings?.amazonUKCategory}" placeHolder="Amazon.co.uk CLASSIFY 阶段的类型">
+              </td>
+              <th>AmzDECategory:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonDECategory" value="${cat.settings?.amazonDECategory}" placeHolder="Amazon.de CLASSIFY 阶段的类型">
               </td>
             </tr>
             <tr>
-              <td style="width:100px;">AmzUKCategory:</td>
-              <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonUKCategory" value="${cat.settings?.amazonUKCategory}" placeHolder="Amazon.co.uk CLASSIFY 阶段的类型">
+              <th>AmzFRCategory:</th>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonFRCategory" value="${cat.settings?.amazonFRCategory}" placeHolder="Amazon.fr CLASSIFY 阶段的类型">
+              </td>
+              <td>AmzITCategory:</td>
+              <td>
+                <input type="text" class="form-control" name="cat.settings.amazonITCategory" value="${cat.settings?.amazonITCategory}" placeHolder="Amazon.it CLASSIFY 阶段的类型">
               </td>
             </tr>
             <tr>
-              <td style="width:100px;">AmzDECategory:</td>
+              <th>产品要求</th>
               <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonDECategory" value="${cat.settings?.amazonDECategory}" placeHolder="Amazon.de CLASSIFY 阶段的类型">
+                <textarea name="cat.productTerms" class="form-control" rows="10">${cat.productTerms}</textarea>
               </td>
             </tr>
             <tr>
-              <td style="width:100px;">AmzFRCategory:</td>
+              <th>Memo:</th>
               <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonFRCategory" value="${cat.settings?.amazonFRCategory}" placeHolder="Amazon.fr CLASSIFY 阶段的类型">
-              </td>
-            </tr>
-            <tr>
-              <td style="width:100px;">AmzITCategory:</td>
-              <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonITCategory" value="${cat.settings?.amazonITCategory}" placeHolder="Amazon.it CLASSIFY 阶段的类型">
-              </td>
-            </tr>
-            <tr>
-              <td style="width:100px;">AmzESCategory:</td>
-              <td colspan="3">
-                <input type="text" class="span12" name="cat.settings.amazonESCategory" value="${cat.settings?.amazonESCategory}" placeHolder="Amazon.es CLASSIFY 阶段的类型">
-              </td>
-            </tr>
-            <tr>
-              <td>产品要求</td>
-              <td colspan="3">
-                <textarea name="cat.productTerms" class="span12" rows="10">${cat.productTerms}</textarea>
-              </td>
-            </tr>
-            <tr>
-              <td>Memo:</td>
-              <td colspan="3">
-                <textarea name="cat.memo" class="span12" rows="5">${cat.memo}</textarea>
+                <textarea name="cat.memo" class="form-control" rows="5">${cat.memo}</textarea>
               </td>
             </tr>
             <tr>
@@ -129,64 +167,7 @@
           </table>
         </form>
       </div>
-
-
-        #{info_row title:'Relate Brand'/}
-      <div class="row-fluid">
-        <div class="span6">
-          <form method="post" action="@{Categorys.brand()}">
-            <div style="margin-bottom:10px;">
-              <input type="hidden" name="id" value="${cat.categoryId}">
-              <button class="btn btn-primary">绑定</button>
-            </div>
-            <table class="table table-bordered table-condensed">
-              <tr>
-                <th></th>
-                <th>Brand</th>
-                <th>FullName</th>
-                <th>Memo</th>
-              </tr>
-                #{list items:cat.unbrands(), as:'brand'}
-                  <tr>
-                    <td>
-                      <label><input type="checkbox" name="brandIds" value="${brand.name}"></label>
-                    </td>
-                    <td>${brand.name}</td>
-                    <td>${brand.fullName}</td>
-                    <td>${brand.memo}</td>
-                  </tr>
-                #{/list}
-            </table>
-          </form>
-        </div>
-        <div class="span6">
-          <form method="post" action="@{Categorys.unbrand()}">
-            <div style="margin-bottom:10px;">
-              <input type="hidden" name="id" value="${cat.categoryId}">
-              <button class="btn btn-warning">解除绑定</button>
-            </div>
-            <table class="table table-bordered table-condensed">
-              <tr>
-                <th></th>
-                <th>Brand</th>
-                <th>FullName</th>
-                <th>Memo</th>
-              </tr>
-                #{list items:cat.brands, as:'b'}
-                  <tr>
-                    <td>
-                      <label><input type="checkbox" name="brandIds" value="${b.name}"></label>
-                    </td>
-                    <td>${b.name}</td>
-                    <td>${b.fullName}</td>
-                    <td>${b.memo}</td>
-                  </tr>
-                #{/list}
-            </table>
-          </form>
-        </div>
-      </div>
     </div>
   </div>
-#{/else}
 </div>
+

@@ -17,7 +17,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class="box box-primary box-solid">
+    <div class="box box-primary">
       <div class="box-header with-border"><h3 class="box-title">采购单信息</h3></div>
       <form action="@{Deliveryments.update()}" method="post" name="updateDeliverymentForm" id="updateDeliverymentForm"
             class="form-horizontal">
@@ -156,16 +156,19 @@
       </div>
     </div>
 
-    <div class="box box-warning box-solid">
-      <div class="box-header">
+  #{if !isB2B}
+    <div class="box">
+      <div class="box-header with-border">
         <h3 class="box-title">Timeline <i class="icon-reorder" data-widget="collapse" href="#id"></i></h3>
       </div>
       <div class="box-body" id="col-body">
         <div id="tl" class="col-md-12" style="height:350px;"></div>
       </div>
     </div>
+  #{/if}
 
-    <div class="box box-success box-solid">
+
+    <div class="box">
       <div class="box-header"><h3 class="box-title">已经添加进入[采购单]的[采购单元]</h3></div>
       <form action="#" id="bulkpost" method="POST" class="form-inline">
         <div class="box-body" id="unit_list">
@@ -209,7 +212,7 @@
   #{render 'Deliveryments/_fba_carton_contents.html'/}
 
   #{if dmt.state != models.procure.Deliveryment.S.CANCEL}
-    <div class="box box-warning box-solid collapsed-box">
+    <div class="box box-warning collapsed-box">
       <div class="box-header">
         <h3 class="box-title">生成采购单信息 <i class="icon-reorder" data-widget="collapse"></i></h3>
       </div>
@@ -337,7 +340,7 @@
   #{/if}
 
   #{if Arrays.asList('PENDING','CONFIRM').contains(dmt.state.name())}
-    <div class="box box-info box-solid">
+    <div class="box">
       <div class="box-header"><h3 class="box-title">可添加进入[采购单]的[采购单元]</h3></div>
       <form action="@{Deliveryments.addunits(dmt.id)}" method="post" class="form-inline">
         <div class="box-body">
@@ -360,7 +363,7 @@
     </div>
   #{/if}
 
-    <div class="box box-info box-solid">
+    <div class="box">
       <div class="box-header with-border"><h3 class="box-title">附件 <i class="icon-sort-down"></i></h3></div>
       <div class="box-body">
         <div style="min-height:300px;" class="col-md-12 well" id="dropbox">
