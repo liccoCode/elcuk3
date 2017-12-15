@@ -187,13 +187,13 @@
   <tr id="${tr_key}_${unit.id}" style="display:none;">
     <td colspan="${checkbox ? '22' : '20'}" style="background-color:#F0F0F0;">
       <div class="col-md-3">
-        <div class="box box-warning box-solid">
+        <div class="box box-warning">
           <div class="box-header with-border"><h3 class="box-title">Comment</h3></div>
           <div class="box-body">${unit.comment}</div>
         </div>
       </div>
       <div class="col-md-3">
-        <div class="box box-info box-solid">
+        <div class="box box-info">
           <div class="box-header with-border"><h3 class="box-title">关联运输单</h3></div>
           <div class="box-body">
               #{list items:unit.relateShipment(), as:'sp'}
@@ -204,7 +204,7 @@
               #{/list}
           </div>
         </div>
-        <div class="box box-info box-solid">
+        <div class="box box-info">
           <div class="box-header with-border"><h3 class="box-title">关联 FBA</h3></div>
           <div class="box-body">
               #{if unit.fba}
@@ -220,7 +220,7 @@
         </div>
       </div>
       <div class="col-md-3">
-        <div class="box box-success box-solid">
+        <div class="box box-success">
           <div class="box-header with-border"><h3 class="box-title">实际交货量</h3></div>
           <div class="box-body">
             <table class="table table-condensed table-bordered">
@@ -289,7 +289,7 @@
         </div>
       </div>
       <div class="col-md-3">
-        <div class="box box-warning box-solid">
+        <div class="box box-warning">
           <div class="box-header with-border"><h3 class="box-title">Record</h3></div>
           <div class="box-body">
               #{ifnot norecord}
