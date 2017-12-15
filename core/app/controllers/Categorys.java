@@ -49,6 +49,7 @@ public class Categorys extends Controller {
         validation.valid(cat);
         if(Validation.hasErrors()) render("Categorys/show.html", cat);
         cat.save();
+        flash.success("修改成功");
         redirect("/Categorys/show/" + cat.categoryId);
     }
 
