@@ -15,8 +15,8 @@
   <tr>
     <td>${itm.id}</td>
     <td data-toggle="tooltip" title="${itm.memo}">${itm.sku}</td>
-    <td>${itm.currency} ${itm.price.format('#.##')}</td>
-    <td>${itm.taxCurrency} ${itm.taxPrice.format('#.##')} </td>
+    <td>${itm.currency} ${itm.price}</td>
+    <td>${itm.taxCurrency} ${itm.taxPrice} </td>
     <td>#{if itm.taxPoint} ${itm.taxPoint} % #{/if}</td>
     <td>${itm.period}</td>
     <td>${itm.boxSize}</td>

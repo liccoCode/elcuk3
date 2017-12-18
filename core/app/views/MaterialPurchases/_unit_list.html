@@ -36,8 +36,8 @@
     <td>${unit.material?.version}</td>
     <td>${unit.planQty}</td>
     <td>${unit.material?.surplusConfirmQty(cooperId)}</td>
-    <td>${unit.planCurrency?.symbol()} ${unit.formatPlanPrice().format('#,###.##')}</td>
-    <td>${unit.planCurrency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
+    <td>${unit.planCurrency?.symbol()} ${unit.planPrice}</td>
+    <td>${unit.planCurrency?.symbol()} ${unit.totalAmount()}</td>
     <td>
       <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-mini btn-primary" uid="${unit.id}">修改</a>
     </td>
