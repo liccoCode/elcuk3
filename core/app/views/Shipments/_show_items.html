@@ -1,14 +1,15 @@
-
-<div class="box box-warning box-solid">
-  <div class="box-header"><h3 class="box-title" data-toggle="toggle" data-target="#tl">Timeline
-    <i class="icon-reorder"></i></h3></div>
-  <div class="box-body">
+<div class="box">
+  <div class="box-header with-border">
+    <h3 class="box-title">Timeline
+      <i class="icon-reorder" data-widget="collapse"></i></h3>
+  </div>
+  <div class="box-body" id="col-body">
     <div id="tl" class="col-sm-12" style="height:350px;"></div>
   </div>
 </div>
 
-<div class="box box-success box-solid">
-  <div class="box-header"><h3 class="box-title">运输项目</h3></div>
+<div class="box">
+  <div class="box-header with-border"><h3 class="box-title">运输项目</h3></div>
   <form action="@{ShipItems.adjust()}" method="POST" id="adjust_ship_items" class="form-inline">
     <div class="box-body">
     #{if ship.projectName == models.User.COR.MengTop}
