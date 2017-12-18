@@ -104,3 +104,35 @@
     </div>
   </div>
 </div>
+
+
+
+<!--  导入运输费用 弹出div begin   -->
+<div id="payment_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>导入运输费用</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{Shipments.importPayment()}" method="POST" enctype="multipart/form-data"   id="payment_form">
+          <input type="hidden" name="shipId" id="shipId" value="${ship.id}">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">运输费用xlsx附件</th>
+              <td>
+                <input type="file" multiple id="attachment" name="attachment">
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--  导入运输费用 弹出div end   -->
+

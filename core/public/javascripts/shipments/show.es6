@@ -12,4 +12,15 @@ $(() => {
     });
   });
 
+  $("#improtPayment").click(function (e) {
+    e.preventDefault();
+    $("#payment_modal").modal('show');
+    e.preventDefault();
+  });
+
+
+  $("#submitUpdateBtn").click(function () {
+    $("#payment_form").submit();
+  });
+
 });

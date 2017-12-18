@@ -59,6 +59,7 @@ require:
     - com.amazonaws -> aws-java-sdk-sqs 1.11.18
     - checkStyle -> checkStyle 8.1
     - com.qiniu -> qiniu-java-sdk 7.2.+
+    - net.sf.jxls -> jxls-reader 1.0.6
 
 repositories:
     - factoryBoy:
