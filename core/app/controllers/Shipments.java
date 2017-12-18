@@ -8,18 +8,23 @@ import models.ElcukRecord;
 import models.User;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
+import models.finance.PaymentUnit;
 import models.procure.*;
 import models.view.Ret;
 import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
 import models.whouse.Outbound;
 import models.whouse.Whouse;
+import net.sf.jxls.reader.ReaderBuilder;
+import net.sf.jxls.reader.XLSReadStatus;
+import net.sf.jxls.reader.XLSReader;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.Logger;
+import play.data.Upload;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
@@ -30,6 +35,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
+import java.io.*;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -530,4 +536,84 @@ public class Shipments extends Controller {
         renderArgs.put(RenderExcel.RA_ASYNC, false);
         render(shipment);
     }
+
+    /**
+     * 导入运输费用
+     *
+     * @param xlsx
+     * @param shipId
+     */
+    public static void importPayment(String xlsx, String shipId) {
+        try {
+            /** 第一步上传excel文件 **/
+            List<Upload> files = (List<Upload>) request.args.get("__UPLOADS");
+            Upload upload = files.get(0);
+            List<ShipmentPayment> shipmentPaymentList = new ArrayList<>();
+
+
+            /** 第二步根据定义好xml进行jxls映射 **/
+            File directory = new File("");
+            String courseFile = directory.getCanonicalPath();
+            String xmlPath = courseFile + "/app/views/Shipments/shipmentPayment.xml";
+            InputStream inputXML = new BufferedInputStream(new FileInputStream(xmlPath));
+            XLSReader mainReader = ReaderBuilder.buildFromXML(inputXML);
+            InputStream inputXLS = new BufferedInputStream(new FileInputStream(upload.asFile()));
+            Map<String, Object> beans = new HashMap<>();
+            beans.put("shipmentPaymentList", shipmentPaymentList);
+            XLSReadStatus readStatus = mainReader.read(inputXLS, beans);
+            if(readStatus.isStatusOK()) {
+                StringBuilder error = new StringBuilder();
+                List<PaymentUnit> paymentUnitList = new ArrayList<>();
+
+                if(shipmentPaymentList.size() == 0) {
+                    error.append("未读取道费用信息,请确保Excel第一个Sheet页的名字为'Sheet1'");
+                } else {
+                    /** 第三步 把excel对象解析成PaymentUnit  **/
+                    Date date = new Date();
+                    Shipment shipment = Shipment.findById(shipId);
+                    notFoundIfNull(shipment);
+
+                    for(int i = 0; i < shipmentPaymentList.size(); i++) {
+                        ShipmentPayment sp = shipmentPaymentList.get(i);
+                        PaymentUnit unit = new PaymentUnit();
+                        StringBuilder rowError = new StringBuilder();
+                        unit.amount = sp.getTotalAmount().floatValue();
+                        unit.currency = helper.Currency.valueOf(sp.getCurrency());
+                        unit.createdAt = date;
+                        unit.memo = sp.getMeno();
+                        unit.state = PaymentUnit.S.PAID;
+                        FeeType feeType = FeeType.findById(sp.getType());
+                        if(feeType == null) rowError.append("费用类型未找到,");
+                        unit.feeType = feeType;
+                        unit.payee = Login.current();
+                        unit.shipment = shipment;
+                        unit.unitPrice = sp.getPrice();
+                        unit.unitQty = sp.getQty();
+                        Cooperator cooperator = Cooperator.find("type=? and fullName=?", Cooperator.T.SHIPPER, sp
+                                .getFullName()).first();
+                        if(cooperator == null) rowError.append("费用关系人未找到,");
+                        unit.cooperator = cooperator;
+                        paymentUnitList.add(unit);
+                        if(rowError.length() > 0)
+                            error.append(String.format("第%s行 ", i + 2)).append(rowError.toString());
+                    }
+                }
+                if(error.length() > 0) {
+                    flash.error(error.substring(0, error.length() - 1));
+                } else {
+                    /** 第四步 数据插入PaymentUnit **/
+                    paymentUnitList.forEach(unit -> {
+                        unit.save();
+                    });
+                    flash.success(String.format("已成功上传 %s 条运输费用", paymentUnitList.size()));
+                }
+            } else {
+                flash.error("上传失败!");
+            }
+        } catch(Exception e) {
+            flash.error(String.format("上传失败!原因:[%s]", e.toString()));
+        }
+        show(shipId);
+    }
+
 }
