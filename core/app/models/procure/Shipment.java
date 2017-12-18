@@ -39,7 +39,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 /**
  * 一张运输单
  * User: wyattpan
@@ -1132,10 +1131,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.amount = fee.unitQty * fee.unitPrice;
         this.fees.add(fee);
         this.save();
-        new ERecordBuilder("paymentunit.applynew")
-                .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
-                .fid(fee.shipment.id)
-                .save();
+        new ERecordBuilder("paymentunit.applynew").msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
+                .fid(fee.shipment.id).save();
     }
 
     /**
@@ -1826,6 +1823,16 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public boolean isPaid() {
         return this.fees.size() > 0 && this.fees.get(0).payment.paymentDate != null;
+    }
+
+    public double totalPaidCNYCost() {
+        return fees.stream().filter(unit -> Objects.equals(unit.state, PaymentUnit.S.PAID))
+                .mapToDouble(unit-> unit.currency.toCNY(unit.amount())).sum();
+    }
+
+    public double totalNoPaidCNYCost() {
+        return fees.stream().filter(unit -> !Objects.equals(unit.state, PaymentUnit.S.PAID))
+                .mapToDouble(unit-> unit.currency.toCNY(unit.amount())).sum();
     }
 
     public Date getPaidDate() {
