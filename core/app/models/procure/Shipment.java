@@ -418,11 +418,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @Transient
     public Integer realDay;
 
-    /**
-     * 是否专线
-     */
-    public boolean isDedicated = false;
-
     public enum W {
         PrePay {
             @Override
@@ -562,9 +557,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.creater = Login.current();
         this.projectName = User.COR.MengTop;
-        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
-            this.isDedicated = true;
-        }
         this.save();
         procureUnits.forEach(unit -> {
             ShipItem shipitem = new ShipItem(unit);
@@ -620,9 +612,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.dates.planBeginDate = earlyPlanBeginDate;
         this.calcuPlanArriveDate();
         this.creater = Login.current();
-        if(procureUnits.stream().anyMatch(unit -> unit.isDedicated)) {
-            this.isDedicated = true;
-        }
         this.save();
         procureUnits.forEach(this::addToShip);
         return this;
@@ -763,6 +752,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         float totalShipWeight = this.totalWeight();
         float totalShipVolume = this.totalVolume();
         float totalRealWeight = this.totalRealWeight();
+        double totalRealVolume = this.totalRealVolume();
         int num = this.items.size();
         float totalWeightRatio = 0f;
         float totalVolumeRatio = 0f;
@@ -777,30 +767,28 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 item.finalRatio = BigDecimal.valueOf(1 - totalRealWeightRatio).setScale(
                         4, BigDecimal.ROUND_HALF_UP).floatValue();
             } else {
-                float itemWeight = 0f;
-                Float weight = item.unit.product.weight;
-                Float itemVolume = item.totalVolume();
-                if(weight != null) {
-                    itemWeight += item.qty * weight;
+                double itemWeight = 0f;
+                double weight = item.unit.mainBox.singleBoxWeight;
+                double itemVolume = item.totalVolume();
+                if(weight > 0) {
+                    itemWeight = item.unit.mainBox.singleBoxWeight * item.unit.mainBox.boxNum;
                 }
                 if(totalShipWeight > 0)
                     item.weightRatio = BigDecimal.valueOf(itemWeight)
                             .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
                 if(totalShipVolume > 0)
                     item.volumeRatio = BigDecimal.valueOf(itemVolume)
-                            .divide(BigDecimal.valueOf(totalShipVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                            .divide(BigDecimal.valueOf(totalRealVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
                 if(totalRealWeight > 0) {
                     if(Objects.equals(this.type, T.SEA)) {
                         item.finalRatio = item.volumeRatio;
                     } else {
-                        float currentWeight = 0f;
-                        Float volume = (item.unit.product.lengths == null ? 0 : item.unit.product.lengths)
-                                * (item.unit.product.width == null ? 0 : item.unit.product.width)
-                                * (item.unit.product.heigh == null ? 0 : item.unit.product.heigh);
-                        if(((volume / 1000) / 5000) > item.unit.product.weight) {
-                            currentWeight = (volume / 1000) * item.qty / 5000;
+                        double currentWeight = 0f;
+                        double volume = item.unit.mainBox.length * item.unit.mainBox.width * item.unit.mainBox.height;
+                        if((volume / 5000) > item.unit.mainBox.singleBoxWeight) {
+                            currentWeight = (volume * item.unit.mainBox.boxNum) / 5000;
                         } else {
-                            currentWeight = item.unit.product.weight * item.qty;
+                            currentWeight = item.unit.mainBox.singleBoxWeight * item.unit.mainBox.boxNum;
                         }
                         item.finalRatio = BigDecimal.valueOf(currentWeight).divide(BigDecimal.valueOf(totalRealWeight),
                                 4, BigDecimal.ROUND_HALF_UP).floatValue();
@@ -1250,15 +1238,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public float totalRealWeight() {
         float totalWeight = 0f;
         for(ShipItem itm : this.items) {
-            if(itm.unit == null) continue;
-            Float volume = (itm.unit.product.lengths == null ? 0 : itm.unit.product.lengths)
-                    * (itm.unit.product.width == null ? 0 : itm.unit.product.width)
-                    * (itm.unit.product.heigh == null ? 0 : itm.unit.product.heigh);
+            if(itm.unit == null || itm.unit.mainBox == null) continue;
+            Double volume = itm.unit.mainBox.length * itm.unit.mainBox.width * itm.unit.mainBox.height;
             Logger.info(itm.unit.product.sku);
-            if(((volume / 1000) / 5000) > itm.unit.product.weight) {
-                totalWeight += (volume / 1000) * itm.qty / 5000;
+            if((volume / 5000) > itm.unit.mainBox.singleBoxWeight) {
+                totalWeight += (volume * itm.unit.mainBox.boxNum) / 5000;
             } else {
-                totalWeight += itm.unit.product.weight * itm.qty;
+                totalWeight += itm.unit.mainBox.singleBoxWeight * itm.unit.mainBox.boxNum;
             }
         }
         return totalWeight;
@@ -1274,6 +1260,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             totalVolume += itm.qty * volume / 1000000000;
         }
         return totalVolume;
+    }
+
+    public double totalRealVolume() {
+        return this.items.stream().filter(item -> item.unit != null && item.unit.mainBox != null)
+                .mapToDouble(item -> (item.unit.mainBox.length * item.unit.mainBox.length
+                        * item.unit.mainBox.length * item.unit.mainBox.boxNum) / 1000000).sum();
     }
 
     /**
@@ -1827,12 +1819,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public double totalPaidCNYCost() {
         return fees.stream().filter(unit -> Objects.equals(unit.state, PaymentUnit.S.PAID))
-                .mapToDouble(unit-> unit.currency.toCNY(unit.amount())).sum();
+                .mapToDouble(unit -> unit.currency.toCNY(unit.amount())).sum();
     }
 
     public double totalNoPaidCNYCost() {
         return fees.stream().filter(unit -> !Objects.equals(unit.state, PaymentUnit.S.PAID))
-                .mapToDouble(unit-> unit.currency.toCNY(unit.amount())).sum();
+                .mapToDouble(unit -> unit.currency.toCNY(unit.amount())).sum();
     }
 
     public Date getPaidDate() {

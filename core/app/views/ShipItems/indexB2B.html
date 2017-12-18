@@ -23,7 +23,7 @@
         <span class="add-on">To:</span>
         <input type="date" name="p.to" value="${p.to.date()}">
       </div>
-      
+
       <select name="p.dateType" class="inline">
       #{list items:p.dateTypes, as:'t'}
         <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
@@ -76,9 +76,7 @@
         <td>${unit.availableQty}</td>
         <td>${unit.cooperator?.name}</td>
         <td>${unit.totalWeight()} kg</td>
-        <td style="color:${unit.shipType?.rgb()}">
-        ${unit.shipType?.label()}<span style="color:red">${unit.isDedicated?'(专线)':''}</span>
-        </td>
+        <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
         <td>#{time_tooltip time: unit.attrs.planShipDate/}</td>
         <td>#{time_tooltip time: unit.attrs.planArrivDate/}</td>
         <td>#{time_tooltip time: unit.attrs.planDeliveryDate/}</td>

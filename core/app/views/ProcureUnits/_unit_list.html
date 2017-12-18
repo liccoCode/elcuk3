@@ -174,9 +174,7 @@
           </a>
         #{/elseif}
     </td>
-    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}<br>
-      <span style="color:red">${unit.isDedicated?'(专线)':''}</span>
-    </td>
+    <td style="color:${unit.shipType.rgb()}">${unit.shipType?.label()}</td>
     <td>#{time_tooltip time:unit.attrs.planDeliveryDate/}</td>
     <td>#{time_tooltip time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip time:unit.attrs.deliveryDate/}</td>

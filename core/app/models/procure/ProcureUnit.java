@@ -649,11 +649,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     @Transient
     public boolean isReturn;
 
-    /**
-     * 是否专用渠道，默认为否
-     */
-    public boolean isDedicated = false;
-
     public enum WS {
         SAME_DAY {
             @Override
@@ -829,7 +824,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.attrs.planQty = unit.attrs.planQty;
         newUnit.comment = unit.comment;
-        newUnit.isDedicated = unit.isDedicated;
         if(type)
             newUnit.validate();
         List<Shipment> shipments = Shipment
@@ -907,7 +901,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.result = InboundUnit.R.Qualified;
         newUnit.attrs.deliveryDate = this.attrs.deliveryDate;
         newUnit.projectName = unit.projectName;
-        newUnit.isDedicated = unit.isDedicated;
         newUnit.containTax = unit.containTax;
         newUnit.taxPoint = unit.taxPoint;
         if(unit.selling != null) {
@@ -1135,9 +1128,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
         }
-        if(unit.isDedicated && !Objects.equals(unit.shipType, Shipment.T.EXPRESS)) {
-            Validation.addError("", "运输方式必须是快递，才能选择专线渠道！");
-        }
         if(Validation.hasErrors()) return;
         if(this.stage == STAGE.CLOSE) {
             this.comment = unit.comment;
@@ -1215,9 +1205,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             if(!shipment.type.name().equals(unit.shipType.name())) {
                 Validation.addError("", "运输单的运输方式与采购计划的运输方式不符，请重新选择！");
             }
-        }
-        if(unit.isDedicated && !Objects.equals(unit.shipType, Shipment.T.EXPRESS)) {
-            Validation.addError("", "运输方式必须是快递，才能选择专线渠道！");
         }
         if(Validation.hasErrors()) return;
         List<String> logs = new ArrayList<>();
@@ -1362,7 +1349,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
         logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
-        logs.addAll(Reflects.logFieldFade(this, "isDedicated", unit.isDedicated));
         return logs;
     }
 
@@ -1379,7 +1365,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "availableQty", unit.availableQty));
         logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
-        logs.addAll(Reflects.logFieldFade(this, "isDedicated", unit.isDedicated));
         return logs;
     }
 
