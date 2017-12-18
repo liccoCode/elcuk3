@@ -104,9 +104,7 @@
               </td>
               <td>${unit.totalWeight()} kg</td>
               <td>${unit.whouse?.name}</td>
-              <td style="color:${unit.shipType?.rgb()}">
-              ${unit.shipType?.label()}<span style="color:red">${unit.isDedicated?'(专线)':''}</span>
-              </td>
+              <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
               <td>${unit.fba?.fbaCenter?.centerId}</td>
               <td>${unit.fba?.shipmentId}</td>
               <td>#{time_tooltip time: unit.attrs.planShipDate/}</td>
