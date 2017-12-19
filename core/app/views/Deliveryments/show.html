@@ -52,6 +52,10 @@
             <div class="col-sm-2">
               <input type="text" readonly class="form-control" name="dmt.createDate" value="${dmt.createDate.datetime()}">
             </div>
+            <label for="p_sku" class="col-sm-1 control-label">Creator</label>
+            <div class="col-sm-2">
+              <input type="text" class="form-control" value="${dmt.handler.username}" readonly>
+            </div>
           </div>
 
           <div class="form-group">
@@ -63,10 +67,7 @@
             <div class="col-sm-2">
               <input type="text" class="form-control" value="${total.format('#,###.##')}" readonly>
             </div>
-            <label for="p_sku" class="col-sm-1 control-label">Creator</label>
-            <div class="col-sm-2">
-              <input type="text" class="form-control" value="${dmt.handler.username}" readonly>
-            </div>
+
           </div>
 
           <div class="form-group">
@@ -100,60 +101,49 @@
         #{/if}
         </div>
         <div class="box-footer">
+        #{if dmt.apply}
+          <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
+            请款单</a>
+        #{/if}
         #{power.ck "products.edit"}
-          <button class="btn btn-primary">更新</button>
+          <button class="btn btn-primary" data-toggle="popover" data-content="更新采购单部分信息">更新</button>
+        #{/power.ck}
+        #{if isPending}
+          <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;" id="confirmForm">
+            <input type="hidden" name="id" value="${dmt.id}">
+              #{power.ck "products.edit"}
+                <input type="button" class="btn btn-warning" id="confirmBtn" value="确认" data-toggle="tooltip"
+                       title="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划">
+              #{/power.ck}
+          </form>
+        #{/if}
+
+        #{power.ck 'deliveryments.cancel'}
+          <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;" class="form-inline">
+            <input type="hidden" name="id" value="${dmt.id}">
+            <input style="width:220px;" name="msg" value="${msg}" placeHolder="简要填写关闭的原因" class="form-control">
+            <button class="btn btn-danger">取消采购单</button>
+          </form>
+        #{/power.ck}
+
+        #{power.ck 'deliveryments.review'}
+            #{if dmt.state.name().equals("PENDING_REVIEW")}
+              <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
+                <input type="hidden" name="id" value="${dmt.id}">
+                <div class="input-append" style="float:left;margin-left:10px;">
+                  <select style="width:80px;" name="result" class="form-control">
+                    <option value="">请选择</option>
+                    <option value="true">通过</option>
+                    <option value="false">驳回</option>
+                  </select>
+                  <input type="text" name="msg" value="${msg}" id="apply_input" style="display:none;" placeHolder="如果驳回，简要填写驳回的原因">
+                  <button class="btn btn-warning">提交审核</button>
+                </div>
+              </form>
+            #{/if}
         #{/power.ck}
         </div>
       </form>
-    </div>
-
-    <div class="box">
-      <div class="box-header form-inline">
-      #{if isPending}
-        <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;" id="confirmForm">
-          <div class="input-prepend input-append" style="float:left;">
-            <span class="add-on" rel="popover" content="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划" placement="right"><i class="icon-question-sign"></i></span>
-            <input type="hidden" name="id" value="${dmt.id}">
-              #{power.ck "products.edit"}
-                <input type="button" class="btn btn-primary" id="confirmBtn" value="确认">
-              #{/power.ck}
-          </div>
-        </form>
-      #{/if}
-      #{power.ck 'deliveryments.cancel'}
-        <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;" class="form-inline">
-          <input type="hidden" name="id" value="${dmt.id}">
-          <div class="input-append" style="float:left;margin-left:10px;">
-            <input type="text" name="msg" value="${msg}" placeHolder="简要填写关闭的原因" class="form-control">
-            <button class="btn btn-danger">取消采购单</button>
-          </div>
-        </form>
-      #{/power.ck}
-
-      #{power.ck 'deliveryments.review'}
-          #{if dmt.state.name().equals("PENDING_REVIEW")}
-            <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
-              <input type="hidden" name="id" value="${dmt.id}">
-              <div class="input-append" style="float:left;margin-left:10px;">
-                <select style="width:80px;" name="result" class="form-control">
-                  <option value="">请选择</option>
-                  <option value="true">通过</option>
-                  <option value="false">驳回</option>
-                </select>
-                <input type="text" name="msg" value="${msg}" id="apply_input" style="display:none;"
-                       placeHolder="如果驳回，简要填写驳回的原因">
-                <button class="btn btn-warning">提交审核</button>
-              </div>
-            </form>
-          #{/if}
-      #{/power.ck}
-      #{if dmt.apply}
-        <div style="float:left;display:inline-block">
-          <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
-            请款单</a>
-        </div>
-      #{/if}
-      </div>
     </div>
 
   #{if !isB2B}
@@ -181,9 +171,8 @@
         <div class="box-footer">
         #{power.ck "products.edit"}
           <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-             id="delunit_form_submit" rel="popover" content="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right" class="btn btn-warning">
-            解除
-          </a>
+             id="delunit_form_submit" data-toggle="popover" data-content="将 DELIVERY 状态的采购计划从采购单中移除出去"
+             class="btn btn-warning">解除</a>
         #{/power.ck}
         #{power.ck 'fbas.deploytoamazon'}
           <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("Deliveryments", dmt.id)}' data-method="POST"
@@ -205,10 +194,11 @@
           </a>
           <input id='form_method' type="hidden" name="x-http-method-override" value="POST">
         </div>
+      #{render 'Deliveryments/_box_number_model.html'/}
+      #{render 'Deliveryments/_fba_carton_contents.html'/}
       </form>
     </div>
-  #{render 'Deliveryments/_box_number_model.html'/}
-  #{render 'Deliveryments/_fba_carton_contents.html'/}
+
 
   #{if dmt.state != models.procure.Deliveryment.S.CANCEL}
     <div class="box box-warning collapsed-box">
@@ -351,12 +341,11 @@
         #{/else}
         </div>
         <div class="box-footer">
-          <div class="pull-left input-prepend input-append">
-            <span class="add-on" rel="popover" content="将 PLAN 状态的采购计划添加到采购单中" placement="right"><i class="icon-question-sign"></i></span>
-              #{power.ck "products.edit"}
-                <button id="plan_form_submit" class="btn btn-primary">添加</button>
-              #{/power.ck}
-          </div>
+            #{power.ck "products.edit"}
+              <button id="plan_form_submit" class="btn btn-primary" data-toggle="popover" data-content="将 PLAN 状态的采购计划添加到采购单中">
+                添加
+              </button>
+            #{/power.ck}
         </div>
       </form>
     </div>
