@@ -9,7 +9,6 @@ public class ShipmentPayment {
     private String currency;
     private Float price;
     private Float qty;
-    private Float totalAmount;
     private String fullName;
     private String meno;
 
@@ -45,13 +44,6 @@ public class ShipmentPayment {
         this.qty = qty;
     }
 
-    public Float getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(Float totalAmount) {
-        this.totalAmount = totalAmount;
-    }
 
     public String getFullName() {
         return fullName;
