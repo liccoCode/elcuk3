@@ -577,20 +577,20 @@ public class Shipments extends Controller {
                         ShipmentPayment sp = shipmentPaymentList.get(i);
                         PaymentUnit unit = new PaymentUnit();
                         StringBuilder rowError = new StringBuilder();
-                        unit.amount = sp.getTotalAmount().floatValue();
-                        unit.currency = helper.Currency.valueOf(sp.getCurrency());
+                        unit.currency = helper.Currency.valueOf(sp.getCurrency().toUpperCase());
                         unit.createdAt = date;
                         unit.memo = sp.getMeno();
                         unit.state = PaymentUnit.S.PAID;
-                        FeeType feeType = FeeType.findById(sp.getType());
+                        FeeType feeType = FeeType.find(" nickName = ?" , sp.getType()).first();
                         if(feeType == null) rowError.append("费用类型未找到,");
                         unit.feeType = feeType;
                         unit.payee = Login.current();
                         unit.shipment = shipment;
                         unit.unitPrice = sp.getPrice();
                         unit.unitQty = sp.getQty();
-                        Cooperator cooperator = Cooperator.find("type=? and fullName=?", Cooperator.T.SHIPPER, sp
-                                .getFullName()).first();
+                        unit.amount = unit.unitQty * unit.unitPrice;
+                        Cooperator cooperator = Cooperator.find("type=? and name=?",
+                                Cooperator.T.SHIPPER, sp.getFullName()).first();
                         if(cooperator == null) rowError.append("费用关系人未找到,");
                         unit.cooperator = cooperator;
                         paymentUnitList.add(unit);

@@ -1058,4 +1058,13 @@ public class Excels extends Controller {
         }
     }
 
+
+    public static void downloadShipmentTemplate() {
+        request.format = "xlsx";
+        renderArgs.put(RenderExcel.RA_FILENAME, "运输费用明细导入.xlsx");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render();
+    }
+
+
 }

@@ -117,6 +117,9 @@
         #{/if}
     </form>
 
+    <a href="@{Excels.downloadShipmentTemplate()}" target="_blank"  class="btn btn-primary">
+      <i class="icon-download-alt"></i>下載运输费用模板
+    </a>
     <button id="improtPayment" class="btn btn-success">导入运输费用</button>
 
       #{if ship.whouse?.country?.contains('DE') }
