@@ -161,7 +161,7 @@
         </div>
         <label for="" class="col-sm-1 control-label">实际总重量/总体积</label>
         <div class="col-sm-2">
-          <input class="form-control" name="ship.totalVolumeShipment" value="${ship.totalRealWeight()} kg / ${ship.totalRealVolume()} m³" readonly/>
+          <input class="form-control" value="${ship.totalRealWeight()} kg /${ship.totalRealVolume().format('#.####')} m³" readonly/>
         </div>
       </div>
 
