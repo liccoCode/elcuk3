@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook>
+  <worksheet name="Sheet1">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="shipmentPaymentList" var="shipmentPayment"
+          varType="models.procure.ShipmentPayment">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentPayment.type</mapping>
+        <mapping row="1" col="1">shipmentPayment.currency</mapping>
+        <mapping row="1" col="2">shipmentPayment.price</mapping>
+        <mapping row="1" col="3">shipmentPayment.qty</mapping>
+        <mapping row="1" col="4">shipmentPayment.totalAmount</mapping>
+        <mapping row="1" col="5">shipmentPayment.fullName</mapping>
+        <mapping row="1" col="6">shipmentPayment.meno</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+</workbook>
