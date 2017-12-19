@@ -140,7 +140,7 @@ $ ->
   # Form 提交
   submitForm = (btn)->
     $('#form_method').val(btn.data('method'))
-    $form = btn.parents('form')
+    $form = $("#bulkpost")
     $form.data('method', btn.data('method')).attr('action', btn.data('url')).submit()
 
   # 为两个 table 的全选 checkbox:label 添加功能
