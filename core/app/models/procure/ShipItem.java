@@ -449,16 +449,13 @@ public class ShipItem extends GenericModel {
         return message;
     }
 
-    public float totalRealWeight() {
-        float totalWeight = 0f;
-        Float volume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
-                * (this.unit.product.width == null ? 0 : this.unit.product.width)
-                * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
-        Logger.info(this.unit.product.sku);
-        if(((volume / 1000) / 5000) > this.unit.product.weight) {
-            totalWeight += (volume / 1000) * this.qty / 5000;
+    public double totalRealWeight() {
+        double totalWeight = 0f;
+        double volume = this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height;
+        if((volume / 5000) > this.unit.mainBox.singleBoxWeight) {
+            totalWeight = volume * this.unit.mainBox.boxNum;
         } else {
-            totalWeight += this.unit.product.weight * this.qty;
+            totalWeight = this.unit.mainBox.singleBoxWeight * this.unit.mainBox.boxNum;
         }
         return totalWeight;
     }
