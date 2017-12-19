@@ -9,9 +9,8 @@
         <mapping row="1" col="1">shipmentPayment.currency</mapping>
         <mapping row="1" col="2">shipmentPayment.price</mapping>
         <mapping row="1" col="3">shipmentPayment.qty</mapping>
-        <mapping row="1" col="4">shipmentPayment.totalAmount</mapping>
-        <mapping row="1" col="5">shipmentPayment.fullName</mapping>
-        <mapping row="1" col="6">shipmentPayment.meno</mapping>
+        <mapping row="1" col="4">shipmentPayment.fullName</mapping>
+        <mapping row="1" col="5">shipmentPayment.meno</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
