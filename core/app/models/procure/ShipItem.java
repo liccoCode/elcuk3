@@ -450,10 +450,10 @@ public class ShipItem extends GenericModel {
     }
 
     public double totalRealWeight() {
-        double totalWeight = 0f;
+        double totalWeight;
         double volume = this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height;
         if((volume / 5000) > this.unit.mainBox.singleBoxWeight) {
-            totalWeight = volume * this.unit.mainBox.boxNum;
+            totalWeight = volume * this.unit.mainBox.boxNum / 5000;
         } else {
             totalWeight = this.unit.mainBox.singleBoxWeight * this.unit.mainBox.boxNum;
         }
