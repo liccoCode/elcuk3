@@ -23,10 +23,7 @@ import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -354,6 +351,7 @@ public class Deliveryments extends Controller {
         dmt.name = dmt.name.trim();
         dmt.deliveryType = Deliveryment.T.MANUAL;
         dmt.projectName = Login.current().projectName;
+        dmt.createDate = new Date();
         boolean containTax = units.get(0).containTax;
         units.stream().filter(unit -> unit.product != null).forEach(unit -> {
             unit.cooperator = dmt.cooperator;
