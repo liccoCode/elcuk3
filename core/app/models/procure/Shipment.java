@@ -255,7 +255,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     @OneToMany(mappedBy = "shipment", cascade = {CascadeType.PERSIST})
     public List<ShipItem> items = new ArrayList<>();
 
-    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @OneToMany(mappedBy = "shipment", orphanRemoval = true, cascade = {CascadeType.PERSIST})
     public List<PaymentUnit> fees = new ArrayList<>();
 
