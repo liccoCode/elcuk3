@@ -9,6 +9,7 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
+import play.Logger;
 
 
 /**
@@ -19,22 +20,14 @@ import com.qiniu.util.Auth;
  */
 public class QiniuUtils {
 
-    private QiniuUtils() {
-    }
-
-//    private static final String accessKey = System.getenv("AWS_SQS_QUEUE");
-//    private static final String secretKey = System.getenv("AWS_SQS_QUEUE");
-//    private static final String bucket = System.getenv("AWS_SQS_QUEUE");
-
-    private static final String accessKey = "yaaXtE79fydbE-ar7Mro7cjBQUzYqx9FmEZylEVN";
-    private static final String secretKey = "BMwtTVa5g9-_DsgJfBd5XXNYmUp4OXNav0kNoavm";
-    private static final String bucket = "elcuk2";
+    private static final String accessKey = "JgQLOVYJKRuj8JlFRu2jbZ5T9MU4UR12LshWzmKR";
+    private static final String secretKey = "u1om-WYy_0pJYkqszjJJou2minprsXcirM_GJqXQ";
 
 
     private static Configuration cfg;
     private static Auth auth;
 
-    public static synchronized void init() {
+    public static void init() {
         //构造一个带指定Zone对象的配置类
         cfg = new Configuration(Zone.zone2());
         auth = Auth.create(accessKey, secretKey);
@@ -48,28 +41,31 @@ public class QiniuUtils {
      * @param uploadBytes
      * @throws Exception
      */
-    public static void upload(String fileName, byte[] uploadBytes) throws Exception {
+    public static String upload(String fileName, String bucket, byte[] uploadBytes) {
+        init();
         UploadManager uploadManager = new UploadManager(cfg);
-        //默认不指定key的情况下，以文件内容的hash值作为文件名
-        String key = fileName;
+        String key = fileName; //默认不指定key的情况下，以文件内容的hash值作为文件名
         try {
             String upToken = auth.uploadToken(bucket);
             try {
+                /** 上传文件并解析结果 **/
                 Response response = uploadManager.put(uploadBytes, key, upToken);
-                //解析上传成功的结果
                 DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+
+                /** 获取七牛云存储空间url **/
+                String bucketUrl = getBucketUrl(bucket);
+
+                /** 返回 七牛云网址url+文件名 **/
+                return String.format("%s%s/%s", "http://", bucketUrl, putRet.key);
+
             } catch(QiniuException ex) {
                 Response r = ex.response;
-                System.err.println(r.toString());
-                try {
-                    System.err.println(r.bodyString());
-                } catch(QiniuException ex2) {
-                    //ignore
-                }
+                Logger.info(r.toString());
             }
         } catch(Exception ex) {
-            ex.printStackTrace();
+            Logger.info(String.format("七牛云上传失败,详细信息:[%s]", ex.toString()));
         }
+        return null;
     }
 
 
@@ -79,34 +75,35 @@ public class QiniuUtils {
      * @param fileName
      * @throws Exception
      */
-    public static void delete(String fileName) {
-        BucketManager bucketManager = new BucketManager(auth, cfg);
+    public static void delete(String fileName, String bucket) {
         try {
+            init();
+            BucketManager bucketManager = new BucketManager(auth, cfg);
             bucketManager.delete(bucket, fileName);
         } catch(QiniuException ex) {
-            //如果遇到异常，说明删除失败
-            System.err.println(ex.code());
-            System.err.println(ex.response.toString());
+            Logger.info(String.format("bucket:[%s]删除文件:[%s]失败,失败code:[%s],详细信息:[%s]", bucket, fileName, ex.code(),
+                    ex.response.toString()));
         }
     }
 
 
     /**
-     * 删除文件
-     * @throws Exception
+     * 获取七牛云存储空间url
+     *
+     * @param bucket 存储空间名称
+     * @return
      */
-    public static String  getBucketUrl() {
+    public static String getBucketUrl(String bucket) {
         BucketManager bucketManager = new BucketManager(auth, cfg);
         try {
             String[] urls = bucketManager.domainList(bucket);
-            if(urls.length >0) return urls[0];
+            if(urls.length > 0) return urls[0];
         } catch(QiniuException ex) {
-            //如果遇到异常，说明删除失败
-            System.err.println(ex.code());
-            System.err.println(ex.response.toString());
+            Logger.info(String.format("bucket:[%s]获取url失败,失败code:[%s],详细信息:[%s]", bucket, ex.code(),
+                    ex.response.toString()));
         }
-        return  null;
+        return null;
     }
-    
+
 
 }
