@@ -110,6 +110,8 @@ $ ->
       else
         $("#generate_excel").submit()
     )
+  ).on('click', "#update_btn", () ->
+    $("#updateDeliverymentForm").submit()
   )
 
   $("select[name='result']").change(->

@@ -100,50 +100,49 @@
         </div>
         #{/if}
         </div>
-        <div class="box-footer">
-        #{if dmt.apply}
-          <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
-            请款单</a>
-        #{/if}
-        #{power.ck "products.edit"}
-          <button class="btn btn-primary" data-toggle="popover" data-content="更新采购单部分信息">更新</button>
-        #{/power.ck}
-        #{if isPending}
-          <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;" id="confirmForm">
-            <input type="hidden" name="id" value="${dmt.id}">
-              #{power.ck "products.edit"}
-                <input type="button" class="btn btn-warning" id="confirmBtn" value="确认" data-toggle="tooltip"
-                       title="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划">
-              #{/power.ck}
-          </form>
-        #{/if}
-
-        #{power.ck 'deliveryments.cancel'}
-          <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;" class="form-inline">
-            <input type="hidden" name="id" value="${dmt.id}">
-            <input style="width:220px;" name="msg" value="${msg}" placeHolder="简要填写关闭的原因" class="form-control">
-            <button class="btn btn-danger">取消采购单</button>
-          </form>
-        #{/power.ck}
-
-        #{power.ck 'deliveryments.review'}
-            #{if dmt.state.name().equals("PENDING_REVIEW")}
-              <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
-                <input type="hidden" name="id" value="${dmt.id}">
-                <div class="input-append" style="float:left;margin-left:10px;">
-                  <select style="width:80px;" name="result" class="form-control">
-                    <option value="">请选择</option>
-                    <option value="true">通过</option>
-                    <option value="false">驳回</option>
-                  </select>
-                  <input type="text" name="msg" value="${msg}" id="apply_input" style="display:none;" placeHolder="如果驳回，简要填写驳回的原因">
-                  <button class="btn btn-warning">提交审核</button>
-                </div>
-              </form>
-            #{/if}
-        #{/power.ck}
-        </div>
       </form>
+      <div class="box-footer form-inline">
+      #{if dmt.apply}
+        <a href="@{Applys.procure(dmt.apply.id)}" class="btn btn-success">${dmt.apply.serialNumber}
+          请款单</a>
+      #{/if}
+      #{power.ck "products.edit"}
+        <button class="btn btn-primary" data-toggle="popover" data-content="更新采购单部分信息" id="update_btn">更新</button>
+      #{/power.ck}
+      #{if isPending}
+        <form action="@{Deliveryments.confirm()}" method="post" style="display:inline-block;" id="confirmForm">
+          <input type="hidden" name="id" value="${dmt.id}">
+            #{power.ck "products.edit"}
+              <input type="button" class="btn btn-warning" id="confirmBtn" value="确认" data-toggle="tooltip"
+                     title="确认采购单, 采购单进行确认以后, 才可以在运输单中进行挑选, 并且不再允许添加新的采购计划">
+            #{/power.ck}
+        </form>
+      #{/if}
+
+      #{power.ck 'deliveryments.cancel'}
+        <form action="@{Deliveryments.cancel()}" method="post" style="display:inline-block;" class="form-inline">
+          <input type="hidden" name="id" value="${dmt.id}">
+          <input style="width:220px;" name="msg" value="${msg}" placeHolder="简要填写关闭的原因" class="form-control">
+          <button class="btn btn-danger">取消采购单</button>
+        </form>
+      #{/power.ck}
+
+      #{power.ck 'deliveryments.review'}
+          #{if dmt.state.name().equals("PENDING_REVIEW")}
+            <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
+              <input type="hidden" name="id" value="${dmt.id}">
+                <select style="width:80px;" name="result" class="form-control">
+                  <option value="">请选择</option>
+                  <option value="true">通过</option>
+                  <option value="false">驳回</option>
+                </select>
+                <input class="form-control" name="msg" value="${msg}" id="apply_input" style="display:none; width:260px;"
+                       placeHolder="如果驳回，简要填写驳回的原因">
+                <button class="btn btn-warning">提交审核</button>
+            </form>
+          #{/if}
+      #{/power.ck}
+      </div>
     </div>
 
   #{if !isB2B}
