@@ -63,12 +63,12 @@
   #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
   </div>
   <label class="col-sm-1 control-label">是否含税</label>
-  <div class="col-sm-2">
+  <div class="col-sm-2 form-inline">
     <select class="form-control" name="newUnit.containTax" style="width:80px;">
       <option #{if unit.containTax} selected #{/if} value="true">是</option>
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
-    <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
+    <a class="btn btn-danger" id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</a>
     <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
   </div>
 </div>
