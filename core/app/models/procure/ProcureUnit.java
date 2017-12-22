@@ -794,6 +794,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "分拆的子采购计划必须要有selling！");
         if(!this.isBeforeDONE())
             Validation.addError("", "已经交货或者成功运输, 不需要分拆采购计划.");
+        if(this.unqualifiedQty > 0)
+            Validation.addError("", "此采购计划存在不良品，请处理不良品后再进行分拆！");
         if(CooperItem.count("product.sku=? AND cooperator.id=?", unit.product.sku, this.cooperator.id) == 0)
             Validation.addError("", "该供应商下无此SKU产品，请确认！");
         ProcureUnit newUnit = new ProcureUnit();
@@ -846,7 +848,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.fba.updateFBAShipment(null);
         this.save();
 
-        /**
+        /*
          * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
          */
         newUnit.parent = this.parent != null ? this.parent : this;
@@ -2087,7 +2089,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unitIds
      * @param dtos
-     * @return List<F.Promise<FBAShipment>>
+     * @return List<F.Promise       <       FBAShipment>>
      */
     public static void postFbaShipments(final List<Long> unitIds, final List<CheckTaskDTO> dtos) {
         final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();

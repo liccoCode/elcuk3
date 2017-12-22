@@ -10,11 +10,22 @@ $(() => {
     LoadMask.mask();
     let shipmentId = $(this).val();
     $.get("/shipment/" + shipmentId + "/dates", "", function (r) {
-      $("input[name='newUnit.attrs.planShipDate']").data('dateinput').setValue(r['begin']);
-      $("input[name='newUnit.attrs.planArrivDate']").data('dateinput').setValue(r['end']);
+      $("input[name='newUnit.attrs.planShipDate']").datepicker('setDate', r['begin']);
+      $("input[name='newUnit.attrs.planArrivDate']").datepicker('setDate', r['end']);
+      showTrColor();
       LoadMask.unmask();
     });
   });
+
+  function showTrColor () {
+    $("#shipments input[type='radio']").each(function () {
+      if ($(this).prop("checked")) {
+        $(this).parent("td").parent("tr").attr("style", "background-color:#F2DEDE;");
+      } else {
+        $(this).parent("td").parent("tr").attr("style", "");
+      }
+    });
+  }
 
   let $sku = $("#select_sku");
   let cooperId = $("#cooperId").val();
@@ -31,6 +42,7 @@ $(() => {
     updater: (item) => {
       getSelling(item);
       getProductName(item);
+      refreshTaxPrice(item);
       return item;
     }
   });
@@ -117,14 +129,14 @@ $(() => {
       if (shipType === 'EXPRESS' || shipType === 'DEDICATED') {
         $('#shipments').html('因快递单情况变化很多, 快递单的选择由物流决定, 可不用选择快递单.');
       } else {
-        shipment.mask();
+        LoadMask.mask();
         $.get('/shipments/unitShipments', {
           whouseId: whouseId,
           shipType: shipType,
           planDeliveryDate: planDeliveryDate
         }, function (html) {
           shipment.html(html);
-          shipment.unmask();
+          LoadMask.unmask();
         });
       }
     } else {
@@ -178,11 +190,11 @@ $(() => {
       return;
     }
     let planShipDate = $("[name='newUnit.attrs.planShipDate']").val();
-    let warehouseid = $("[name='newUnit.whouse.id']").val()
+    let warehouseid = $("[name='newUnit.whouse.id']").val();
     $.get('/shipments/planArriveDate', {
       planShipDate: planShipDate,
       shipType: shipType,
-      warehouseid
+      warehouseid: warehouseid
     }, function (r) {
       $("[name='newUnit.attrs.planArrivDate']").val(r['arrivedate']);
       showDay();
@@ -211,28 +223,30 @@ $(() => {
   }
 
   $("select[name='newUnit.containTax']").change(function () {
-    let cooperId = $("#cooperId").val();
-    let containTax = $(this).val();
-    if (cooperId) {
-      LoadMask.mask();
-      $.post("/Cooperators/findTaxPrice", {
-        cooperId: cooperId,
-        sku: $('#select_sku').val(),
-        containTax: containTax
-      }, function (r) {
-        if (!r.flag) {
-          alert(r.message);
-        } else {
-          $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
-          $("#price_input").val(r.price);
-          $("#size_of_box").attr("boxSize", r.boxSize);
-          let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
-          $("#taxPointInput").val(r['taxPoint']);
-          $("#taxSpan").text(text);
-        }
-        LoadMask.unmask();
-      });
-    }
+    refreshTaxPrice($('#select_sku').val());
   });
+
+  function refreshTaxPrice (sku) {
+    let cooperId = $("#cooperId").val();
+    let containTax = $("select[name='newUnit.containTax']").val();
+    LoadMask.mask();
+    $.post("/Cooperators/findTaxPrice", {
+      cooperId: cooperId,
+      sku: sku,
+      containTax: containTax
+    }, function (r) {
+      if (!r.flag) {
+        alert(r.message);
+      } else {
+        $("select[name$='attrs.currency'] option:contains(" + r.currency + ")").prop('selected', true);
+        $("#price_input").val(r.price);
+        $("#size_of_box").attr("boxSize", r.boxSize);
+        let text = containTax == "true" ? ("税点：" + r.taxPoint) : "";
+        $("#taxPointInput").val(r['taxPoint']);
+        $("#taxSpan").text(text);
+      }
+      LoadMask.unmask();
+    });
+  }
 
 });

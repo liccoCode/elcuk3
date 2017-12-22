@@ -1,70 +1,71 @@
 #{set copers:newUnit.product?.cooperators() /}
 
-<tr>
-  <th>采购计划ID</th>
-  <td></td>
-  <th>SKU</th>
-  <td>
-    <input type="text" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off"></td>
-  </td>
-  <th>供应商</th>
-  <td>${unit.cooperator.name}
+<div class="form-group">
+  <label class="col-sm-1 control-label">SKU</label>
+  <div class="col-sm-2">
+    <input class="form-control" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off">
+  </div>
+  <label class="col-sm-1 control-label">供应商</label>
+  <div class="col-sm-2 form-inline">
+    <input class="form-control" value="${unit.cooperator.name}" readonly>
     <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
     <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
     <input type="hidden" id="size_of_box" value="${unit.boxSize}">
-  </td>
-</tr>
-<tr>
+  </div>
 #{if unit.stage.name()=='IN_STORAGE'}
-  <th><i class="icon-asterisk" style="color:red"></i>库存数量</th>
-  <td>
-    <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
-           data-max="${unit.availableQty}" required autocomplete="off">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
-  </td>
+  <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>库存数量</label>
+  <div class="col-sm-2 form-inline">
+    <input class="form-control" name="newUnit.availableQty" id="planQty" data-max="${unit.availableQty}"
+           placeholder="小于${unit.availableQty}" required autocomplete="off" style="width:155px;">
+    <div class="input-group">
+      <input type="text" style="width:80px;" id="box_num" class="form-control" placeHolder="箱数">
+      <div class="input-group-addon">箱</div>
+    </div>
+  </div>
 #{/if}
 #{else }
-  <th><i class="icon-asterisk" style="color:red"></i>采购数量</th>
-  <td>
-    <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required autocomplete="off"
-           placeholder="小于${unit.attrs.planQty}">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
-  </td>
+  <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>采购数量</label>
+  <div class="col-sm-2 form-inline">
+    <input type="text" class="form-control" name="newUnit.attrs.planQty" id="planQty" required autocomplete="off"
+           placeholder="小于${unit.attrs.planQty}" data-max="${unit.attrs.planQty}" style="width:155px;">
+    <div class="input-group">
+      <input type="text" id="box_num" class="form-control" placeHolder="箱数" style="width:80px;">
+      <div class="input-group-addon">箱</div>
+    </div>
+  </div>
 #{/else}
-  <th>预计交货时间</th>
-  <td>
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required
-    ${unit.stage.name()=='IN_STORAGE'?'readonly':''}>
-  </td>
-  <th>单价</th>
-  <td>
-    <input type="text" class="span3" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
-  #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'span3', c:unit.attrs.currency?:helper.Currency.CNY /}
-  </td>
-</tr>
-<tr>
-  <th>阶段</th>
-  <td style="color:${unit.stage.rgb()}">${unit.stage.label()}</td>
-  <th>是否含税</th>
-  <td>
+  <label class="col-sm-1 control-label">单价</label>
+  <div class="col-sm-2 form-inline">
+    <input class="form-control" style="width:150px;" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-sm-1 control-label">预计交货时间</label>
+  <div class="col-sm-2">
+    <input role="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" required
+    ${unit.stage.name()=='IN_STORAGE'?'readonly':''} class="form-control">
+  </div>
+  <label class="col-sm-1 control-label">是否含税</label>
+  <div class="col-sm-2 form-inline">
     <select class="form-control" name="newUnit.containTax" style="width:80px;">
       <option #{if unit.containTax} selected #{/if} value="true">是</option>
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
-    <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
+    <a class="btn btn-danger" id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</a>
     <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
-  </td>
-  <th>所属公司</th>
-  <td>
-    <select name="newUnit.projectName">
+  </div>
+  <label class="col-sm-1 control-label">所属公司</label>
+  <div class="col-sm-2">
+    <select name="newUnit.projectName" class="form-control">
     #{list items:models.User.COR, as:'c'}
         #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
           <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
         #{/if}
     #{/list}
     </select>
-  </td>
-</tr>
+  </div>
+</div>
+
 
