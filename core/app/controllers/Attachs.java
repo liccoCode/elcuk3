@@ -1,14 +1,14 @@
 package controllers;
 
 import controllers.api.SystemOperation;
-import helper.Constant;
 import helper.J;
+import helper.QiniuUtils;
 import helper.Webs;
 import models.product.Attach;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
-import play.libs.Images;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -28,15 +28,8 @@ public class Attachs extends Controller {
     public static void image(Attach a, Integer w, Integer h) {
         Attach attach = Attach.findAttach(a);
         if(attach != null) {
-            if(w == null || h == null)
-                renderBinary(attach.file);
-            else {
-                File resizedImag = new File(String.format("%s/%s", Constant.TMP, attach.fileName));
-                Images.resize(attach.file, resizedImag, w, h, true);
-                renderBinary(resizedImag);
-            }
-            //File file = new File(attach.location);
-            //renderBinary(file);
+            File file = new File(attach.location);
+            renderBinary(file);
         } else
             throw new FastRuntimeException("No File Found.");
     }
@@ -50,8 +43,10 @@ public class Attachs extends Controller {
         a.setUpAttachName();
         Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
         try {
-            //QiniuUtils.upload(a.fid + "-" + a.originName, a.getBytes());
-            FileUtils.copyFile(a.file, new File(a.location));
+            // String bucket = String.format("%s-%s", models.OperatorConfig.getVal("brandname"), a.attachType);
+            String bucket = "easyacc";
+            String url = QiniuUtils.upload(a.fid + "-" + a.originName, bucket, a.getBytes());
+            a.location = url;
             a.save();
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
@@ -86,8 +81,21 @@ public class Attachs extends Controller {
     public static void images(String fid, String p) {
         // 如果 fid 能够唯一定位则可以只使用 fid, 如果 fid 无法直接定位, 则需要借助
         List<Attach> imgs = Attach.attaches(fid, p);
-        renderJSON(J.g(imgs));
-        //renderJSON(JSON.toJSONString(imgs));
+        StringBuilder buff = new StringBuilder();
+        buff.append("[");
+        for(Attach img : imgs) {
+            buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(img.id)
+                    .append("\"").append(",").append("\"").append("location").append("\"").append(":").append("\"")
+                    .append(img.location).append("\"").append(",").append("\"").append("fileName").append("\"")
+                    .append(":").append("\"").append(img.fileName).append("\"")
+                    .append(",").append("\"").append("outName").append("\"").append(":").append("\"")
+                    .append(img.outName).append("\"").append(",").append("\"")
+                    .append("originName").append("\"").append(":").append("\"")
+                    .append(img.originName)
+                    .append("\"").append("},");
+        }
+        buff.append("]");
+        renderJSON(StringUtils.replace(buff.toString(), "},]", "}]"));
     }
 
 

@@ -125,10 +125,10 @@ public class Attach extends Model {
          * @param attach
          */
         public void delete(Attach attach) {
+            // String bucket = String.format("%s-%s", models.OperatorConfig.getVal("brandname"), a.attachType);
+            String bucket = "easyacc";
+            QiniuUtils.delete(attach.fid + "-" + attach.originName, bucket);
             attach.delete();
-            //QiniuUtils.delete(attach.fid+"-"+attach.originName);
-            String localtion = attach.location;
-            FileUtils.deleteQuietly(new File(localtion));
         }
     }
 
@@ -430,8 +430,7 @@ public class Attach extends Model {
     public byte[] getBytes() {
         byte[] buffer = null;
         try {
-            File file = this.file;
-            FileInputStream fis = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(this.file);
             ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
             byte[] b = new byte[1000];
             int n;
@@ -441,10 +440,8 @@ public class Attach extends Model {
             fis.close();
             bos.close();
             buffer = bos.toByteArray();
-        } catch(FileNotFoundException e) {
-            e.printStackTrace();
         } catch(IOException e) {
-            e.printStackTrace();
+            Logger.info(e.toString());
         }
         return buffer;
     }

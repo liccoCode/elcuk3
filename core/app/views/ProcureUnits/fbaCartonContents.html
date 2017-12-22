@@ -1,13 +1,13 @@
 <table class="table table-bordered table-condensed" id="fba_carton_contents_table" width="1000px;">
   <tr>
-    <td>采购计划</td>
-    <td><abbr title="多少个箱子(不包含尾箱)">箱数(仅含主箱)</abbr></td>
-    <td><abbr title="单个主箱内货物的个数">个数(主箱)</abbr></td>
-    <td><abbr title="单个尾箱内货物的个数(默认只有一个尾箱)">个数(尾箱)</abbr></td>
-    <td><abbr title="单个箱子的重量">箱重</abbr></td>
-    <td><abbr title="单个箱子的长度">箱长</abbr></td>
-    <td><abbr title="单个箱子的宽度">箱宽</abbr></td>
-    <td><abbr title="单个箱子的高度">箱高</abbr></td>
+    <th width="65px;">采购ID</th>
+    <th width="120px;"><abbr title="多少个箱子(不包含尾箱)">箱数(仅含主箱)</abbr></th>
+    <th width="120px;"><abbr title="单个主箱内货物的个数">个数(主箱)</abbr></th>
+    <th width="80px;"><abbr title="单个尾箱内货物的个数(默认只有一个尾箱)">个数(尾箱)</abbr></th>
+    <th width="80px;"><abbr title="单个箱子的重量">箱重</abbr></th>
+    <th width="80px;"><abbr title="单个箱子的长度">箱长</abbr></th>
+    <th width="80px;"><abbr title="单个箱子的宽度">箱宽</abbr></th>
+    <th width="80px;"><abbr title="单个箱子的高度">箱高</abbr></th>
     <td>选择方案</td>
   </tr>
 #{list items:list, as:'unit'}
@@ -15,69 +15,110 @@
       #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
       #{if unit.fba && unit.fba.dto}
           #{set dto: unit.fba.dto/}
-        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${dto.boxNum}'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value='${dto.num}'/></td>
         <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${dto.lastCartonNum}' placeholder='可选'/>
+          <input class="form-control input-sm" readonly value="${unit.id}" style="width:60px;">
+          <input type="hidden" name="pids" value="${unit.id}">
         </td>
         <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${dto.singleBoxWeight}'/>
+          <input style='width:115px;' name='dtos[${unit_index-1}].boxNum' value='${dto.boxNum}' class="form-control input-sm"/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${dto.length}'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${dto.width}'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${dto.height}'/></td>
+        <td>
+          <input type='text' style='width: 115px;' name='dtos[${unit_index-1}].num' value='${dto.num}'
+                 class="form-control input-sm"/>
+        </td>
+        <td>
+          <input type='text' style='width: 75px;' name='dtos[${unit_index-1}].lastCartonNum'
+                 value='${dto.lastCartonNum}' placeholder='可选' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input type='text' style='width: 75px;' name='dtos[${unit_index-1}].singleBoxWeight'
+                 value='${dto.singleBoxWeight}' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input type='text' style='width: 75px;' name='dtos[${unit_index-1}].length' value='${dto.length}' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input type='text' style='width: 75px;' name='dtos[${unit_index-1}].width' value='${dto.width}' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input type='text' style='width: 75px;' name='dtos[${unit_index-1}].height' value='${dto.height}' class="form-control input-sm"/>
+        </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
           <span><i class="icon-reorder"></i></span>
             #{if unit.items != null}
-              <span class="badge badge-info">${unit.items.size()}</span>
+              <span class="badge bg-light-blue">${unit.items.size()}</span>
             #{/if}
             #{else }
-              <span class="badge badge-info">0</span>
+              <span class="badge bg-light-blue">0</span>
             #{/else}
         </td>
       #{/if}
       #{elseif cooperItem}
-        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
         <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value='${cooperItem.boxNum(unit.qty())}'/>
-        </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value='${cooperItem.boxSize}'/></td>
-        <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' value='${cooperItem.lastCartonNum(unit.qty())}' placeholder='可选'/>
+          <input class="form-control input-sm" readonly value="${unit.id}" style="width:60px;">
+          <input type="hidden" name="pids" value="${unit.id}">
         </td>
         <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value='${cooperItem.singleBoxWeight}'/>
+          <input class="form-control input-sm" name='dtos[${unit_index-1}].boxNum' style="width:115px;" value='${cooperItem.boxNum(unit.qty())}'/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value='${cooperItem.length}'/>
+        <td>
+          <input class="form-control input-sm" name='dtos[${unit_index-1}].num' value='${cooperItem.boxSize}' style="width:115px;"/>
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value='${cooperItem.width}'/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value='${cooperItem.height}'/>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].lastCartonNum' class="form-control input-sm"
+                 value='${cooperItem.lastCartonNum(unit.qty())}' placeholder='可选'/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].singleBoxWeight' class="form-control input-sm" value='${cooperItem.singleBoxWeight}'/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].length' value='${cooperItem.length}' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].width' value='${cooperItem.width}' class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].height' value='${cooperItem.height}' class="form-control input-sm"/>
         </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
           <span><i class="icon-reorder"></i></span>
             #{if unit.items != null}
-              <span class="badge badge-info">${unit.items.size()}</span>
+              <span class="badge bg-light-blue">${unit.items.size()}</span>
             #{/if}
             #{else }
-              <span class="badge badge-info">0</span>
+              <span class="badge bg-light-blue">0</span>
             #{/else}
         </td>
       #{/elseif}
       #{else }
-        <td>${unit.id}<input type="hidden" name="pids" value="${unit.id}"></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].boxNum' value="0"/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].num' value="0"/></td>
         <td>
-          <input type='text' style='width: 30px;' name='dtos[${unit_index-1}].lastCartonNum' placeholder='可选' value="0"/>
+          <input class="form-control input-sm" readonly value="${unit.id}" style="width:60px;">
+          <input type="hidden" name="pids" value="${unit.id}">
         </td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].singleBoxWeight' value="0"/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].length' value="0"/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].width' value="0"/></td>
-        <td><input type='text' style='width: 30px;' name='dtos[${unit_index-1}].height' value="0"/></td>
+        <td>
+          <input style='width:115px;' name='dtos[${unit_index-1}].boxNum' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:115px;' name='dtos[${unit_index-1}].num' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].lastCartonNum' placeholder='可选' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].singleBoxWeight' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].length' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].width' value="0" class="form-control input-sm"/>
+        </td>
+        <td>
+          <input style='width:75px;' name='dtos[${unit_index-1}].height' value="0" class="form-control input-sm"/>
+        </td>
         <td style="cursor:pointer;" data-toggle="toggle" data-target="#unit_${unit_index}">
           <span><i class="icon-reorder"></i></span>
-          <span class="badge badge-info">${unit.items.size()}</span>
+          <span class="badge bg-light-blue">${unit.items.size()}</span>
         </td>
       #{/else}
   </tr>
@@ -115,6 +156,5 @@
       </table>
     </td>
   </tr>
-
 #{/list}
 </table>

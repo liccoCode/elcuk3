@@ -40,11 +40,11 @@ $ ->
 
       tr = "<tr>" +
         "<td>#{$checkbox.val()}</td>" +
-        "<td><div class='input-append'>" +
-        "<input type='text' class='input-mini' name='boxNumbers' value='#{boxNum}' maxlength='3'/>" +
-        "<span class='add-on'>" +
+        "<td><div class='input-group'>" +
+        "<input type='text' class='form-control' name='boxNumbers' value='#{boxNum}' maxlength='3'/>" +
+        "<div class='input-group-addon'>" +
         "箱 #{if expressids.includes($checkbox.val()) > 0 then '(不加后缀)' else ''}" +
-        "</span>" +
+        "</div>" +
         "</div></td>" +
         "</tr>"
       $table.append(tr)
@@ -141,7 +141,7 @@ $ ->
   submitForm = (btn)->
     $('#form_method').val(btn.data('method'))
     $form = $("#bulkpost")
-    $form.data('method', btn.data('method')).attr('action', btn.data('url')).submit()
+    $form.attr('action', btn.data('url')).submit()
 
   # 为两个 table 的全选 checkbox:label 添加功能
   $('input:checkbox[id*=checkbox_all]').each ->

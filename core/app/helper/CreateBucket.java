@@ -16,9 +16,10 @@ import java.io.IOException;
 public class CreateBucket {
 
 
-    private static final String accessKey = "yaaXtE79fydbE-ar7Mro7cjBQUzYqx9FmEZylEVN";
-    private static final String secretKey = "BMwtTVa5g9-_DsgJfBd5XXNYmUp4OXNav0kNoavm";
-    private static final String bucketName = "elcuk100";
+
+    private static final String accessKey = "JgQLOVYJKRuj8JlFRu2jbZ5T9MU4UR12LshWzmKR";
+    private static final String secretKey = "u1om-WYy_0pJYkqszjJJou2minprsXcirM_GJqXQ";
+    private static final String bucketName = "EASYACC-MATERIALPURCHASES";
 
     Auth auth = Auth.create(accessKey, secretKey);
 
@@ -26,11 +27,12 @@ public class CreateBucket {
      * 创建空间
      */
     public void createBucket() {
-        String path = "/mkbucket/" + bucketName + "/public/1\n";
+        String path = "/mkbucketv2/" + bucketName + "/public/0";
         String access_token = auth.sign(path);
         System.out.println(access_token);
 
-        String url = "http://rs.qiniu.com/mkbucket/" + bucketName + "/public/1";
+        String url = "http://rs.qiniu.com/mkbucketv2/" + bucketName + "/public/0";
+
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url)
