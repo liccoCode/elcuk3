@@ -1,132 +1,140 @@
 #{if unit.stage.name()=='DELIVERY' && showNotice}
-<tr>
-  <td colspan="6">
+<div class="form-group">
+  <label class="col-sm-12">
     <span style="color:red">注意：该采购计划已到预计交货期，请核实货物在工厂还是到了深圳仓，如果已经到了深圳仓，请在深圳仓办理完入库手续后再进行分拆!</span>
-  </td>
-</tr>
+  </label>
+</div>
 #{/if}
-<tr>
-  <th>采购计划ID</th>
-  <td width="320px;">&nbsp;</td>
-  <th>类型</th>
-  <td width="300px;">
-  #{if unit.stage.name()=='IN_STORAGE'} 库存分拆 #{/if}
-  #{else } 采购分拆 #{/else}
-  </td>
-  <th>供应商</th>
-  <td>${unit.cooperator.name}
+
+<div class="form-group">
+  <label class="col-sm-1 control-label" for="sellingId">Selling</label>
+  <div class="col-sm-2">
+    <input class="form-control" id="sellingId" name="newUnit.selling.sellingId" readonly
+           value="${unit.selling?.sellingId}" data-origin="${unit.selling?.sellingId}">
+  </div>
+  <label class="col-sm-1 control-label" for="select_sku">SKU</label>
+  <div class="col-sm-2">
+    <input class="form-control" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off">
+  </div>
+  <label class="col-sm-1 control-label" for="productName">产品名称</label>
+  <div class="col-sm-2">
+    <input class="form-control" id="productName" style="width:300px;" value="${unit.product?.abbreviation}" readonly>
+  </div>
+  <label class="col-sm-1 control-label">供应商</label>
+  <div class="col-sm-2 form-inline">
+    <input class="form-control" value="${unit.cooperator.name}" readonly>
     <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
     <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
-  </td>
-</tr>
-<tr>
-  <th>Selling</th>
-  <td><input type="text" id="sellingId" name="newUnit.selling.sellingId" style="width:300px;" readonly
-             value="${unit.selling?.sellingId}" data-origin="${unit.selling?.sellingId}"></td>
-  <th>SKU</th>
-  <td><input type="text" id="select_sku" name="newUnit.product.sku" value="${unit.sku}" autocomplete="off"></td>
-  <th>产品名称</th>
-  <td><input type="text" id="productName" style="width:300px;" value="${unit.product?.abbreviation}" readonly></td>
-</tr>
-<tr>
+  </div>
+</div>
+
+<div class="form-group">
 #{if unit.stage.name()=='IN_STORAGE'}
-  <th><i class="icon-asterisk" style="color:red"></i>库存数量</th>
-  <td colspan="3">
-    <input type="text" class="input-mini" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
+  <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>库存数量</label>
+  <div class="col-sm-5 form-inline">
+    <input type="text" class="form-control" name="newUnit.availableQty" id="planQty" placeholder="小于${unit.availableQty}"
            data-max="${unit.availableQty}" required autocomplete="off">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
+    <div class="input-group">
+      <input type="text" style="width:80px;" id="box_num" class="form-control" placeHolder="箱数">
+      <div class="input-group-addon">箱</div>
+    </div>
     <input type="hidden" id="size_of_box" value="${unit.mainBox?.num}">
     <input type="hidden" id="lastBoxNum" value="${unit.lastBox?.num}">
     <span id="boxInfo"></span>
     <span id="warningText" style="display:none;color:red;">分拆个数不符合包装箱规格，请联系仓库部门确认分拆信息</span>
-  </td>
+  </div>
 #{/if}
 #{else }
-  <th><i class="icon-asterisk" style="color:red"></i>采购数量</th>
-  <td colspan="3">
-    <input type="text" class="input-mini" name="newUnit.attrs.planQty" id="planQty" required placeholder="小于${unit.attrs.planQty}"
+  <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>采购数量</label>
+  <div class="col-sm-5 form-inline">
+    <input type="text" class="form-control" name="newUnit.attrs.planQty" id="planQty" required placeholder="小于${unit.attrs.planQty}"
            data-max="${unit.attrs.planQty}" autocomplete="off">
-    <input type="text" id="box_num" class="input-mini" placeHolder="箱数">
-    <span class="add-on">箱</span>
+    <div class="input-group">
+      <input type="text" style="width:80px;" id="box_num" class="form-control" placeHolder="箱数">
+      <div class="input-group-addon">箱</div>
+    </div>
     <input type="hidden" id="size_of_box" value="${unit.boxSize}">
-  </td>
-#{/else}
-  <th>单价</th>
-  <td>
-    <input type="text" class="span3" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
-  #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'span3', c:unit.attrs.currency?:helper.Currency.CNY /}
-  </td>
-</tr>
-<tr>
-  <th><i class="icon-asterisk" style="color:red"></i>预计交货时间</th>
-  <td>
-  #{if unit.stage.name()=='IN_STORAGE'}
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}" readonly>
-  #{/if}
-  #{else }
-    <input type="date" name="newUnit.attrs.planDeliveryDate" value="${newUnit.attrs.planDeliveryDate.date()}" required>
-  #{/else}
-  </td>
-  <th>预计运输时间</th>
-  <td>
-    <input type="date" name="newUnit.attrs.planShipDate" value="${newUnit.attrs.planShipDate.date()}">
-  </td>
-  <th>预计到库时间</th>
-  <td>
-    <input type="date" name="newUnit.attrs.planArrivDate" value="${newUnit.attrs.planArrivDate.date()}">
-    <span class="add-on">? 天</span>
-  </td>
-</tr>
+  </div>
 
-<tr>
-  <th>去往仓库</th>
-  <td>
-    <select name="newUnit.whouse.id" id="warehouse_select" data-origin="${unit.id}">
-    #{list items:whouses, as:'w'}
-      <option value="${w.id}" #{if w.id==unit.whouse?.id} selected #{/if}>${w.name}</option>
-    #{/list}
-    </select>
-  </td>
-  <th>阶段</th>
-  <td>
-    <input type="text" id="stage" style="color:${unit.stage.rgb()}" value="${unit.stage?.label()}" readonly>
-  </td>
-  <th>是否含税</th>
-  <td>
+#{/else}
+  <label class="col-sm-1 control-label">单价</label>
+  <div class="col-sm-2 form-inline">
+    <input type="text" class="form-control" id="price_input" name="newUnit.attrs.price" value="${unit.attrs.price}">
+  #{pickCurrency id:'unit_currency', name:'newUnit.attrs.currency', class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
+  </div>
+  <label class="col-sm-1 control-label">是否含税</label>
+  <div class="col-sm-2">
     <select class="form-control" name="newUnit.containTax" style="width:80px;">
       <option #{if unit.containTax} selected #{/if} value="true">是</option>
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
     <span id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</span>
     <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
-  </td>
-</tr>
-<tr>
-  <th>运输方式</th>
-  <td>
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-sm-1 control-label">去往仓库</label>
+  <div class="col-sm-2">
+    <select name="newUnit.whouse.id" id="warehouse_select" data-origin="${unit.id}" class="form-control">
+    #{list items:whouses, as:'w'}
+      <option value="${w.id}" #{if w.id==unit.whouse?.id} selected #{/if}>${w.name}</option>
+    #{/list}
+    </select>
+  </div>
+  <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>预计交货时间</label>
+  <div class="col-sm-2">
+    <input role="date" name="newUnit.attrs.planDeliveryDate" value="${unit.attrs.planDeliveryDate.date()}"
+    ${unit.stage.name()=='IN_STORAGE'?'readonly':'required'} class="form-control">
+  </div>
+  <label class="col-sm-1 control-label">预计运输时间</label>
+  <div class="col-sm-2">
+    <input role="date" class="form-control" name="newUnit.attrs.planShipDate" value="${newUnit.attrs.planShipDate.date()}">
+  </div>
+  <label class="col-sm-1 control-label">预计到库时间</label>
+  <div class="col-sm-2 form-inline">
+    <input role="date" class="form-control" name="newUnit.attrs.planArrivDate" value="${newUnit.attrs.planArrivDate.date()}">
+    <span class="add-on">? 天</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <label for="" class="col-sm-1 control-label">运输方式</label>
+  <div class="col-sm-5">
   #{list items:models.procure.Shipment.T.values(), as:'t'}
-    <label class="radio">
-      <input type="radio" name="newUnit.shipType" value="${t.name()}" ${ t == unit.shipType ? 'checked': 'unchecked'}
+    <label class="radio-inline">
+      <input type="radio" name="newUnit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}
           #{if unit.projectName=='B2B' && t.name()!='EXPRESS'} style="display:none;"#{/if}>
-    ${t.label()}
+      <i class="${t.pic()}"></i>${t.label()}
     </label>
   #{/list}
-  </td>
-  <th>所属公司</th>
-  <td>
-    <select name="newUnit.projectName">
+  </div>
+  <label class="col-sm-1 control-label">阶段</label>
+  <div class="col-sm-2">
+    <input type="text" id="stage" style="color:${unit.stage.rgb()}" value="${unit.stage?.label()}" readonly class="form-control">
+  </div>
+  <label for="" class="col-sm-1 control-label">所属公司</label>
+  <div class="col-sm-2">
+    <select name="newUnit.projectName" class="form-control">
     #{list items:models.User.COR, as:'c'}
         #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
           <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
         #{/if}
     #{/list}
     </select>
-  </td>
-</tr>
+  </div>
+</div>
 
-<tr>
-  <td colspan="6">
-  #{render 'ProcureUnits/_shipments.html'/}
-  </td>
-</tr>
+<div class="form-group">
+  <label class="col-sm-1 control-label">选择运输单(Option)</label>
+  <div class="col-sm-11">
+    <span style="color:red">注意：带有 <i style="color:#C09853;" class="icon-star"></i> 符号表示此运输单为周期型的运输单</span><br>
+    <span style="color:red">PM 的采购计划直接进入某一个周期型运输单, 具体运输计划由运输人员负责制作</span>
+  </div>
+</div>
+
+<div class="form-group">
+  <div class="col-sm-offset-1 col-sm-11">
+    <div id="shipments"></div>
+  </div>
+</div>

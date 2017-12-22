@@ -30,14 +30,20 @@
       <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm" class="form-horizontal">
         <div class="box-body">
         #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses, brandName: brandName/}
+        #{if unit.selling}
           <div class="form-group">
             <label class="col-sm-1 control-label">选择运输单(Option)</label>
             <div class="col-sm-11">
-            #{if unit.selling}
-              #{render 'ProcureUnits/_shipments.html'/}
-            #{/if}
+              <span style="color:red">注意：带有 <i style="color:#C09853;" class="icon-star"></i> 符号表示此运输单为周期型的运输单</span><br>
+              <span style="color:red">PM 的采购计划直接进入某一个周期型运输单, 具体运输计划由运输人员负责制作</span>
             </div>
           </div>
+          <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-11">
+              <div id="shipments"></div>
+            </div>
+          </div>
+        #{/if}
         </div>
         <div class="box-footer form-inline">
           <input type="hidden" id="oldPlanQty" name="oldPlanQty" value="${oldPlanQty}">
