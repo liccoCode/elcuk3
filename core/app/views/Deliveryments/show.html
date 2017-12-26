@@ -6,6 +6,7 @@
     #{script 'timeline/timeline_js/timeline-api.js'/}
     #{script 'analyzes/timeline.coffee'/}
     #{script 'deliveryments/show.coffee'/}
+    #{script 'deliveryments/show.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
     #{script 'deliveryments/fba_carton_contents.coffee'/}
 #{/set}
@@ -169,9 +170,8 @@
         </div>
         <div class="box-footer">
         #{power.ck "products.edit"}
-          <a href="javascript:void(0);" data-url='@{Deliveryments.delunits(dmt.id)}' data-method="DELETE"
-             id="delunit_form_submit" data-toggle="popover" data-content="将 DELIVERY 状态的采购计划从采购单中移除出去"
-             class="btn btn-warning">解除</a>
+          <a href="javascript:void(0);" data-url="@{Deliveryments.deleteUnits(dmt.id)}" id="delete_unit_btn"
+             data-toggle="popover" data-content="将 DELIVERY 状态的采购计划从采购单中移除出去" class="btn btn-warning">解除</a>
         #{/power.ck}
         #{power.ck 'fbas.deploytoamazon'}
           <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("Deliveryments", dmt.id)}' data-method="POST"

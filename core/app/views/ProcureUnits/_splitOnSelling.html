@@ -22,7 +22,7 @@
   </div>
   <label class="col-sm-1 control-label">供应商</label>
   <div class="col-sm-2 form-inline">
-    <input class="form-control" value="${unit.cooperator.name}" readonly>
+    <input class="form-control" value="${unit.cooperator.name}" readonly style="width:130px;">
     <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
     <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
   </div>

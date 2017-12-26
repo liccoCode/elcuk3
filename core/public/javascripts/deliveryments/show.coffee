@@ -1,15 +1,6 @@
 window.jQuery = window.$
 $ ->
-  $(document).on('click', "#delunit_form_submit,  #downloadProcureunitsOrder", (e) ->
-    $btn = $(@)
-    checkboxs = $btn.parents('form').find('input[name="pids"]')
-    msg = "确认 #{$btn.text().trim()} ?"
-    # 移除出货单选中全部 checkbox
-    if $btn.attr('id') == 'delunit_form_submit' && $btn.data('url').indexOf('deliverplans') != -1 && checkboxs.size() != 0 && checkboxs.size() == checkboxs.filter(':checked').size()
-      msg += " (注: 移除所有的采购单元后默认会删除掉当前出货单)"
-    return false unless confirm(msg)
-    submitForm($btn)
-  ).on("blur", "input[name='boxNumbers']", (e) ->
+  $(document).on("blur", "input[name='boxNumbers']", (e) ->
     $input = $(@)
     if($input.val() is "" or $input.val() <= 0 or isNaN($input.val())) then $input.val("1") # 确保用户填写的是大于零的数字
   ).on('click', '#submitDownloadFBAZIP', (e) ->

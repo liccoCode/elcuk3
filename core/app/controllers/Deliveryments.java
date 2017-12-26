@@ -225,7 +225,7 @@ public class Deliveryments extends Controller {
     /**
      * 将 ProcureUnit 从 Deliveryment 中解除
      */
-    public static void delunits(String id, List<Long> pids) {
+    public static void deleteUnits(String id, List<Long> pids) {
         Deliveryment dmt = Deliveryment.findById(id);
         Validation.required("deliveryments.delunits", pids);
         if(Validation.hasErrors())
