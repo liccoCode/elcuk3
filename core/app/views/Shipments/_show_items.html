@@ -51,13 +51,13 @@
           <div class="form-group">
             <label class="col-sm-2">事件:</label>
             <div class="col-sm-10">
-              <textarea role="5" name="msg" class="form-control"></textarea>
+              <textarea rows="5" name="msg" class="form-control"></textarea>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
-          <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+          <a href="#" class="btn btn-default btn-xs" data-dismiss="modal">Close</a>
+          <button href="#" class="btn btn-primary btn-xs" data-disable-with="更新中..." data-confirm="确认操作?">
             记录
           </button>
         </div>
@@ -74,60 +74,52 @@
       <form action="<%= url %>" data-method='PUT' method="POST">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">×</button>
-          <h4>手动修改入库数量</h4>
+          <h4 class="modal-title">手动修改入库数量</h4>
         </div>
         <div class="modal-body row-fluid">
-          <table>
+          <table class="table table-condensed table-bordered form-inline">
             <tr>
+              <th>数量</th>
+              <td><input type="text" class="form-control input-sm" name="qty" value="<%= qty %>"></td>
+              <th>当前入库数量</th>
+              <td> <%= qty %></td>
+            </tr>
+            <tr>
+              <th>赔偿类型</th>
               <td>
-                <label>数量</label>
-
-                <div class=" input-append">
-                  <input type="text" class="input-mini" name="qty" value="<%= qty %>">
-                  <span class="add-on">当前入库数量 <%= qty %></span>
-                </div>
+                <select name="compentype" id="compentype" class="form-control input-sm" style="width:110px;">
+                  <option value="" selected="selected">选择</option>
+                  <option value="amazon">Amazon</option>
+                  <option value="${models.OperatorConfig.getVal("addressname")}">${models.OperatorConfig.getVal("addressname")}</option>
+                  <option value="other">Other</option>
+                </select>
+              </td>
+              <th>丢失量</th>
+              <td><input type="text" class="form-control input-sm" name="lossqty" value="<%= lossqty %>"></td>
+            </tr>
+            <tr>
+              <th>赔偿金额</th>
+              <td colspan="3">
+                <input type="text" class="form-control input-sm" name="compenamt" value="<%= compenamt %>">
+                <select name="currency" id="currency" class="form-control input-sm" style="width:100px;">
+                #{list items:helper.Currency.values(), as: 'c'}
+                  <option value="${c}">${c}</option>
+                #{/list}
+                </select>
               </td>
             </tr>
             <tr>
-              <td>
-                <div class=" input-append">
-                  <span class="add-on">赔偿类型</span>
-                  <select name="compentype" id="compentype" class="inline" style="width:110px;">
-                    <option value="" selected="selected">选择</option>
-                    <option value="amazon">Amazon</option>
-                    <option value="${models.OperatorConfig.getVal("addressname")}">${models.OperatorConfig.getVal("addressname")}</option>
-                    <option value="other">Other</option>
-                  </select>
-                  <span class="add-on" style="margin-left:100px;">丢失量</span>
-                  <input type="text" class="input-mini" name="lossqty" value=<%= lossqty %> >
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="input-append">
-                  <span class="add-on">赔偿金额</span>
-                  <input type="text" class="input-mini" name="compenamt" value=<%= compenamt %>>
-                  <select name="currency" id="currency" class="inline" style="width:100px;">
-                  #{list items:helper.Currency.values(), as: 'c'}
-                    <option value="${c}">${c}</option>
-                  #{/list}
-                  </select>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <label>备注:</label>
-                <textarea role="5" name="msg" class="span12"></textarea>
+              <th>备注</th>
+              <td colspan="3">
+                <textarea rows="5" style="width:100%;" name="msg" class="form-control"></textarea>
               </td>
             </tr>
           </table>
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn" data-dismiss="modal">Close</a>
+          <a href="#" class="btn btn-default btn-xs" data-dismiss="modal">Close</a>
         #{power.ck "shipitems.received"}
-          <button href="#" class="btn btn-primary" data-disable-with="更新中..." data-confirm="确认操作?">
+          <button href="#" class="btn btn-primary btn-xs" data-disable-with="更新中..." data-confirm="确认操作?">
             修改
           </button>
         #{/power.ck}
