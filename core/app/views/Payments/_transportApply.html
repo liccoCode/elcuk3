@@ -1,11 +1,15 @@
 #{form @PaymentUnits.approvePaymentFromShipment(payment.id)}
 <div class="box">
   <div class="box-header with-border">
+      #{power.ck 'paymentunits.approve'}
+        <input type="submit" class="btn btn-info" value="批准"/>
+      #{/power.ck}
     <a href="@{Payments.pdf(payment.id)}" target="_blank" class="btn btn-success">下载 PDF</a>
   </div>
   <div class="box-body">
     <table class="table table-bordered table-condensed">
       <tr>
+        <th width="20px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
         <th width="200px;">关联运输资料</th>
         <th width="150px;">实际到货时间</th>
         <th width="150px;">费用类型</th>
@@ -20,6 +24,11 @@
       </tr>
         #{list items: units, as:'fee'}
           <tr>
+            <td>
+                #{if fee.state.name()=='APPLY'}
+                  <input type="checkbox" name="paymentUnitIds" value="${fee.id}">
+                #{/if}
+            </td>
             <td>
                 #{if fee.shipItem}
                   <a href="@{Shipments.show(fee.shipment.id)}#${fee.shipItem.id}" target="_blank">
