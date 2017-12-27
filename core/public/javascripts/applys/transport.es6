@@ -39,7 +39,7 @@ $(() => {
     EF.colorAnimate(targetTr);
   }
 
-  $("#batch_apply_btn").click(function (e) {
+  $("input[name='batch_apply_btn']").click(function (e) {
     if ($("input[name='pids']:checked").length === 0) {
       noty({
         text: "请选择请款的费用记录",
@@ -69,7 +69,7 @@ $(() => {
     }
   });
 
-  $("#batch_approve_btn").click(function (e) {
+  $("input[name='batch_approve_btn']").click(function (e) {
     if ($("input[name='pids']:checked").length === 0) {
       noty({
         text: "请选择批准的费用记录",
