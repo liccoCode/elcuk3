@@ -37,7 +37,7 @@
     <input type="text" id="box_num" class="form-control" placeHolder="箱数"  #{if unit.isEditInput()} readonly#{/if}>
     <span class="add-on">箱</span>
     <input type="hidden" name="unit.attrs.qty" value="${unit.attrs.qty}">
-    <select name="unit.cooperator.id" native='true' class="form-control" required>
+    <select name="unit.cooperator.id" class="form-control" required>
       <option value="">供应商</option>
     #{list items:copers, as:'c'}
       <option value="${c.id}" #{if c.id == unit.cooperator?.id}selected#{/if}>${c.name}</option>
