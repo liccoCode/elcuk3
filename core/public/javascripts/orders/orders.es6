@@ -1,6 +1,6 @@
 $(() => {
 
-  $("#refresh_btn").click(function () {
+  $("input[name='refresh_btn']").click(function () {
     LoadMask.mask();
     $.post($(this).data("url"), function (r) {
       let type = r.flag ? "success" : "error";

@@ -103,6 +103,13 @@ public class SaleFee extends Model {
 
     public String transaction_type;
 
+    /**
+     * 新增字段，由MWS提供，
+     * 加入到md5的计算中
+     *
+     */
+    public String orderItemId;
+
     public String md5_id;
 
     public String orderitem_sku;
@@ -443,6 +450,7 @@ public class SaleFee extends Model {
         fee.transaction_type = type;
         fee.product_sku = item.getSellerSKU().split(",")[0];
         fee.account = account;
+        fee.orderItemId = item.getOrderItemId();
         Map<String, Object> map = new HashMap<>();
         map.put("order_orderId", fee.orderId);
         map.put("account_id", fee.account.id);

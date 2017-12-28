@@ -221,6 +221,12 @@ public class Selling extends GenericModel {
     @Embedded
     @Expose
     public AmazonProps aps;
+
+    /**
+     * 这个 Selling 所属的哪一个用户
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Account account;
     // ---- Images ????
 
     public String binding;
@@ -285,12 +291,6 @@ public class Selling extends GenericModel {
         }
         return sku;
     }
-
-    /**
-     * 这个 Selling 所属的哪一个用户
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    public Account account;
 
     /**
      * 用来修复 Selling 关联的 Listing 错误的问题.
@@ -1136,5 +1136,15 @@ public class Selling extends GenericModel {
         saleAmazonFeed.submit(this.saleAmazonParams());
         assignAmazonListingPriceFeed.submit(this.assignAmazonListingPriceParams());
         setFulfillmentByAmazonFeed.submit(this.setFulfillmentByAmazonParams());
+    }
+
+    public static Selling querySellingByAPI(String sku, M market, Long accountId) {
+        List<Selling> sellings = Selling.find("merchantSKU=? AND market=? AND account.id=?", sku, market, accountId)
+                .fetch();
+        if(sellings.size() > 0) {
+            return sellings.get(0);
+        } else {
+            return null;
+        }
     }
 }
