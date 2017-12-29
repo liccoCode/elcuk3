@@ -214,7 +214,7 @@
                           仓库地址：深圳市光明新区玉律村汉海达科技创新园 1 栋 A 区 6 楼
                           电   话：0755-21383192-8060/8061
                           收货联系人：
-                                  Jie：  18692275630
+                                  旷杰：  18692275630
                                   杨上德：13724219110
               </textarea>
             </div>
@@ -322,6 +322,9 @@
         <div class="box-footer">
           <input type="hidden" name="id" value="${dmt.id}">
           <input type="button" id="generate_excel_btn" class="btn btn-success" value="生成采购单 Excel">
+
+          <input type="button" id="generate_export_excel_btn" data-url="@{Excels.exportDeliveryment()}" class="btn btn-warning"
+                 value="生成进出口采购合同">
         </div>
       </form>
     </div>

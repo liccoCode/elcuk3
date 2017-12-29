@@ -75,6 +75,25 @@ public class Excels extends Controller {
     }
 
     /**
+     * 进出口版合同下载
+     *
+     * @param id
+     * @param excel
+     */
+    public static void exportDeliveryment(String id, DeliveryExcel excel) {
+        excel.dmt = Deliveryment.findById(id);
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        ProcureUnit unit = excel.dmt.units.get(0);
+        String currency = unit.attrs.currency.symbol();
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
+                ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+        render("Excels/exportdeliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
+
+    }
+
+    /**
      * 下载采购单综合Excel表格
      */
     public static void deliveryments(DeliveryPost p) {

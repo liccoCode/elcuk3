@@ -103,6 +103,17 @@ $ ->
     )
   ).on('click', "#update_btn", () ->
     $("#updateDeliverymentForm").submit()
+  ).on('click', '#generate_export_excel_btn', (e) ->
+    action = $(@).data("url")
+    e.preventDefault()
+    $.post("/Deliveryments/validDmtIsNeedApply", {id: $("input[name='dmt.id']").val()}, (r)->
+      if r.flag
+        return false if !confirm(r.message)
+        $("#confirmForm").submit()
+      else
+        $("#generate_excel").attr("action", action)
+        $("#generate_excel").submit()
+    )
   )
 
   $("select[name='result']").change(->
@@ -174,7 +185,8 @@ $ ->
     a.removeAttribute("target")
   )
   $("#unit_table").on("mouseenter focus", "table td.selling_id a", (e) ->
-    $(@).css('cursor': 'pointer')
+    $(@).css(
+      'cursor': 'pointer')
   ).on("click", ".selling_id a", (e) ->
     $("#tl").show()
     $("#col-body").show()
@@ -206,9 +218,9 @@ $ ->
     )
 
   do ->
-    paymentId =$("#paymentId").val()
+    paymentId = $("#paymentId").val()
     procureUnitId = window.location.hash[1..-1]
     targetTr = $("#procureUnit_#{procureUnitId}")
-    if (targetTr.size() > 0  && paymentId == '')
+    if (targetTr.size() > 0 && paymentId == '')
       EF.scoll(targetTr)
       EF.colorAnimate(targetTr)

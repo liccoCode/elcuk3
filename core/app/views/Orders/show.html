@@ -100,8 +100,11 @@
               </table>
             </div>
             <div class="box-footer">
-              <button data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning" id="refresh_btn">重新抓取费用</button>
-              <a href="@{Orders.show(ord.orderId)}" class="btn btn-success">刷新</a>
+              <input type="button" data-url="@{Orders.refreshFee(ord.orderId)}" class="btn btn-warning"
+                     name="refresh_btn" value="重新抓取费用"/>
+              <input type="button" data-url="@{Orders.refreshOrder(ord.orderId)}" class="btn btn-info"
+                     name="refresh_btn" value="重新抓取订单详情"/>
+              <a href="@{Orders.show(ord.orderId)}" class="btn btn-default">刷新</a>
             #{if ord.feedback}
               <a href="@{Feedbacks.show(ord.orderId)}" class="btn btn-success btn-small">跳转到 Feedback</a>
             #{/if}
