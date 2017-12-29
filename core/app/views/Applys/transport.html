@@ -30,10 +30,10 @@
       </form>
     </div>
     <div class="span3">
-      <input type="button" class="btn btn-success" id="batch_apply_btn" value="批量请款"
+      <input type="button" class="btn btn-success" name="batch_apply_btn" value="批量请款"
              data-url="@{PaymentUnits.batchApplyFromShipment()}">
     #{power.ck 'paymentunits.approve'}
-      <input type="button" class="btn btn-warning" id="batch_approve_btn" value="批量批准"
+      <input type="button" class="btn btn-warning" name="batch_approve_btn" value="批量批准"
              data-url="@{PaymentUnits.batchApproveFromShipment()}">
     #{/power.ck}
     </div>
@@ -104,7 +104,18 @@
   <hr style="border-top: 1px dashed;">
 #{/list}
 </div>
+
+<div class="span3">
+  <input type="button" class="btn btn-success" name="batch_apply_btn" value="批量请款"
+         data-url="@{PaymentUnits.batchApplyFromShipment()}">
+#{power.ck 'paymentunits.approve'}
+  <input type="button" class="btn btn-warning" name="batch_approve_btn" value="批量批准"
+         data-url="@{PaymentUnits.batchApproveFromShipment()}">
+#{/power.ck}
+</div>
+<div class="span9">
 #{bootstrap_pager pi:p, url: ''/}
+</div>
 
 #{render './_relate_fees.html', apply: apply/}
 

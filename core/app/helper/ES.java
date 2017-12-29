@@ -3,7 +3,6 @@ package helper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import play.Logger;
 
 import java.util.concurrent.TimeUnit;
 

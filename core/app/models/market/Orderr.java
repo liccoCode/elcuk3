@@ -12,7 +12,6 @@ import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import mws.MWSFinances;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -86,7 +85,6 @@ public class Orderr extends GenericModel {
 
     //-------------- Object ----------------
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     public List<OrderItem> items = new ArrayList<>();
 
     /**

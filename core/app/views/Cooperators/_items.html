@@ -29,9 +29,9 @@
       
       #{power.ck 'cooperitem.skuauditing'}
           #{if itm.status?.name() != 'Agree'}
-            <a class="btn btn-xs" style="color:green;" rel="tooltip" title="审核通过"
+            <a class="btn btn-xs btn-success" style="color:green;" data-toggle="tooltip" title="审核通过"
                href="@{Cooperators.agreeCooperItem(itm.id)}"><i class="icon-ok"></i></a>
-            <a class="btn btn-xs" style="color:red;" rel="tooltip" title="审核不通过"
+            <a class="btn btn-xs btn-warning" style="color:red;" data-toggle="tooltip" title="审核不通过"
                href="@{Cooperators.disAgreeCooperItem(itm.id)}"><i class="icon-remove"></i></a>
           #{/if}
       #{/power.ck}

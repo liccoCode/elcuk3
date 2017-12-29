@@ -43,6 +43,13 @@ public class OrderItem extends GenericModel {
     @Id
     public String id;
 
+    /**
+     * 新增字段，由MWS提供，
+     * 加入到md5的计算中
+     * 
+     */
+    public String orderItemId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Orderr order;
 

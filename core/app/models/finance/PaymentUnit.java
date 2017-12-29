@@ -134,7 +134,7 @@ public class PaymentUnit extends Model {
         this.payee = User.current();
         this.payment.save();
     }
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     public Payment payment;
 

@@ -10,7 +10,6 @@ import helper.OrderInvoiceFormat;
 import models.ElcukRecord;
 import models.User;
 import models.finance.EbayFee;
-import models.finance.SaleFee;
 import models.market.Account;
 import models.market.EbayOrder;
 import models.market.OrderInvoice;
@@ -20,10 +19,10 @@ import models.view.Ret;
 import models.view.post.EbayOrderPost;
 import models.view.post.OrderPOST;
 import mws.MWSFinances;
+import mws.MWSOrders;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -122,6 +121,16 @@ public class Orders extends Controller {
             EbayFee.parseFinancesApiResult(response, orderr);
             flash.success("重新抓取费用成功");
             indexEbay(new EbayOrderPost());
+        } catch(Exception e) {
+            renderJSON(new Ret(false, e.getMessage()));
+        }
+    }
+
+    public static void refreshOrder(String orderId) {
+        Orderr orderr = Orderr.findById(orderId);
+        try {
+            MWSOrders.invokeListOrderItems(orderr);
+            renderJSON(new Ret(true, "重新抓取订单明细成功！"));
         } catch(Exception e) {
             renderJSON(new Ret(false, e.getMessage()));
         }
