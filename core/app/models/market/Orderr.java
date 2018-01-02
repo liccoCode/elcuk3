@@ -4,16 +4,19 @@ import com.amazonservices.mws.finances.MWSFinancesServiceClient;
 import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
 import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import com.google.gson.annotations.Expose;
-import helper.Cached;
-import helper.DBUtils;
-import helper.Dates;
-import helper.Promises;
+import helper.*;
 import models.finance.SaleFee;
 import models.view.dto.DashBoard;
 import mws.MWSFinances;
 import org.apache.commons.lang.StringUtils;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.ISODateTimeFormat;
 import play.Logger;
 import play.cache.Cache;
 import play.data.validation.Email;
@@ -25,12 +28,12 @@ import query.OrderrQuery;
 import query.vo.OrderrVO;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 /**
  * 系统内的核心订单
@@ -789,6 +792,11 @@ public class Orderr extends GenericModel {
 
     public boolean refreshFee() {
         this.fees.forEach(GenericModel::delete);
+        TransportClient esClient = ES.client();
+        QueryBuilder builder = QueryBuilders.boolQuery()
+                .must(QueryBuilders.termQuery("_type", "salefee"))
+                .must(QueryBuilders.termQuery("order_id", this.esOrderId()));
+        ES.deleteByQuery(esClient, System.getenv(Constant.ES_INDEX), builder);
         MWSFinancesServiceClient client = MWSFinances.client(this.account, this.account.type);
         ListFinancialEventsRequest request = new ListFinancialEventsRequest();
         request.setSellerId(this.account.merchantId);
@@ -796,5 +804,37 @@ public class Orderr extends GenericModel {
         request.setAmazonOrderId(orderId);
         ListFinancialEventsResponse response = client.listFinancialEvents(request);
         return SaleFee.parseFinancesApiResult(response, this.account);
+    }
+
+    public void refreshESFee() {
+        BulkRequestBuilder bulkRequest = ES.client().prepareBulk();
+        this.save();
+        this.fees.forEach(fee -> {
+            try {
+                String esSku = fee.product_sku.replace("-", "");
+                bulkRequest.add(ES.client().prepareIndex(System.getenv(Constant.ES_INDEX), "salefee", fee.id.toString())
+                        .setSource(jsonBuilder().startObject()
+                                .field("transaction_type", fee.transaction_type)
+                                .field("sku", esSku)
+                                .field("date", fee.date, ISODateTimeFormat.dateTimeNoMillis().withZone(DateTimeZone.UTC))
+                                .field("selling_id", Selling.esSellingId(fee.product_sku, fee.market, this.account))
+                                .field("market", fee.market.name())
+                                .field("fee_type", fee.type.name)
+                                .field("cost_in_usd", fee.usdCost)
+                                .field("cost", fee.cost)
+                                .field("currency", fee.currency.name())
+                                .field("quantity", fee.qty)
+                                .field("order_id", fee.order.esOrderId())
+                                .endObject()));
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        });
+        bulkRequest.get();
+        Objects.requireNonNull(ES.client()).close();
+    }
+
+    public String esOrderId() {
+        return this.orderId.replace("-", "_");
     }
 }

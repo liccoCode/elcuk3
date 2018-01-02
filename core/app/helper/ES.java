@@ -2,8 +2,18 @@ package helper;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.bulk.byscroll.BulkByScrollResponse;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import play.Logger;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,6 +38,23 @@ public class ES {
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
         //Logger.info(builder.toString());
         return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
+    }
+
+    public static TransportClient client() {
+        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY);
+        try {
+            client.addTransportAddress(
+                    new InetSocketTransportAddress(InetAddress.getByName("192.168.1.170"), 9300));
+            return client;
+        } catch(UnknownHostException e) {
+            e.printStackTrace();
+            Logger.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public static BulkByScrollResponse deleteByQuery(TransportClient client, String index, QueryBuilder queryBuilder) {
+        return DeleteByQueryAction.INSTANCE.newRequestBuilder(client).filter(queryBuilder).source(index).get();
     }
 
     /**
@@ -76,6 +103,7 @@ public class ES {
 
     /**
      * 删除es数据
+     *
      * @param index
      * @param type
      * @param builder

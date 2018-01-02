@@ -5,11 +5,13 @@ import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
 import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import controllers.api.SystemOperation;
 import helper.Constant;
+import helper.ES;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import models.ElcukRecord;
 import models.User;
 import models.finance.EbayFee;
+import models.finance.SaleFee;
 import models.market.Account;
 import models.market.EbayOrder;
 import models.market.OrderInvoice;
@@ -23,6 +25,7 @@ import mws.MWSOrders;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.elasticsearch.action.get.GetResponse;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -30,9 +33,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -64,7 +67,6 @@ public class Orders extends Controller {
     public static void show(String id) {
         Orderr ord = Orderr.findById(id);
         notFoundIfNull(ord, "未找到相关订单,请稍后再来查看 : )");
-
         if(ord.orderrate() != 0) {
             OrderInvoice invoice = OrderInvoice.findById(id);
             if(invoice != null) {
@@ -102,6 +104,8 @@ public class Orders extends Controller {
         try {
             Orderr orderr = Orderr.findById(id);
             boolean flag = orderr.refreshFee();
+            orderr.refresh();
+            orderr.refreshESFee();
             renderJSON(new Ret(flag, "重新抓取费用成功！"));
         } catch(Exception e) {
             renderJSON(new Ret(false, e.getMessage()));
@@ -132,6 +136,7 @@ public class Orders extends Controller {
             MWSOrders.invokeListOrderItems(orderr);
             renderJSON(new Ret(true, "重新抓取订单明细成功！"));
         } catch(Exception e) {
+            e.printStackTrace();
             renderJSON(new Ret(false, e.getMessage()));
         }
     }

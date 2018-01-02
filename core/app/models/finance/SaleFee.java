@@ -35,7 +35,6 @@ import java.util.regex.Pattern;
  * Time: 10:58 AM
  */
 @Entity
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class SaleFee extends Model {
 
     private static final long serialVersionUID = -8565064073185613540L;
@@ -106,7 +105,6 @@ public class SaleFee extends Model {
     /**
      * 新增字段，由MWS提供，
      * 加入到md5的计算中
-     *
      */
     public String orderItemId;
 
@@ -355,9 +353,8 @@ public class SaleFee extends Model {
     public static void deleteOrderRelateFee(String orderId) {
         PreparedStatement ps = null;
         try {
-            ps = DB.getConnection().prepareStatement(
-                    // 不要使用 orderId 这个没索引,速度太慢了.
-                    "DELETE FROM SaleFee WHERE order_orderId=?");
+            // 不要使用 orderId 这个没索引,速度太慢了.
+            ps = DB.getConnection().prepareStatement("DELETE FROM SaleFee WHERE order_orderId=?");
             ps.setString(1, orderId);
             ps.executeUpdate();
         } catch(Exception e) {
