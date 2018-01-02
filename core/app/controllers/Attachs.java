@@ -3,10 +3,12 @@ package controllers;
 import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.J;
+import helper.QiniuUtils;
 import helper.Webs;
 import models.product.Attach;
 import models.view.Ret;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import play.Logger;
 import play.libs.Images;
 import play.mvc.Controller;
@@ -50,7 +52,12 @@ public class Attachs extends Controller {
         a.setUpAttachName();
         Logger.info("%s File save to %s.[%s kb]", a.fid, a.location, a.fileSize / 1024);
         try {
-            //QiniuUtils.upload(a.fid + "-" + a.originName, a.getBytes());
+            /**
+             String bucket = String.format("%s-%s", models.OperatorConfig.getVal("brandname"), a.p.name()).toLowerCase();
+             String url = QiniuUtils.upload(a.fid + "-" + a.originName, bucket, a.getBytes());
+             a.location = url;
+             **/
+
             FileUtils.copyFile(a.file, new File(a.location));
             a.save();
         } catch(Exception e) {
@@ -87,7 +94,23 @@ public class Attachs extends Controller {
         // 如果 fid 能够唯一定位则可以只使用 fid, 如果 fid 无法直接定位, 则需要借助
         List<Attach> imgs = Attach.attaches(fid, p);
         renderJSON(J.g(imgs));
-        //renderJSON(JSON.toJSONString(imgs));
+        /**
+         StringBuilder buff = new StringBuilder();
+         buff.append("[");
+         for(Attach img : imgs) {
+         buff.append("{").append("\"").append("id").append("\"").append(":").append("\"").append(img.id)
+         .append("\"").append(",").append("\"").append("location").append("\"").append(":").append("\"")
+         .append(img.location).append("\"").append(",").append("\"").append("fileName").append("\"")
+         .append(":").append("\"").append(img.fileName).append("\"")
+         .append(",").append("\"").append("outName").append("\"").append(":").append("\"")
+         .append(img.outName).append("\"").append(",").append("\"")
+         .append("originName").append("\"").append(":").append("\"")
+         .append(img.originName)
+         .append("\"").append("},");
+         }
+         buff.append("]");
+         renderJSON(StringUtils.replace(buff.toString(), "},]", "}]"));
+         **/
     }
 
 

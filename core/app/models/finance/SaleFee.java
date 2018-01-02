@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import play.Logger;
 import play.db.DB;
 import play.db.jpa.Model;
@@ -100,7 +101,8 @@ public class SaleFee extends Model {
 
     public String product_sku;
 
-    public String transaction_type;
+    @Enumerated(EnumType.STRING)
+    public T transaction_type;
 
     /**
      * 新增字段，由MWS提供，
@@ -111,6 +113,20 @@ public class SaleFee extends Model {
     public String md5_id;
 
     public String orderitem_sku;
+
+
+    /**
+     * transaction_type
+     */
+    public enum T {
+        Chargeback,
+
+        Order,
+
+        OtherTransaction,
+
+        Refund
+    }
 
 
     /**
@@ -392,18 +408,43 @@ public class SaleFee extends Model {
             events.forEach(event -> event.getShipmentItemList()
                     .forEach(item -> {
                         item.getItemChargeList().forEach(
-                                component -> SaleFee.saveChargeFeeForApi(component, event, item, "Order", account));
+                                component -> SaleFee.saveChargeFeeForApi(component, event, item, T.Order, account));
                         item.getItemFeeList()
-                                .forEach(itemFee -> SaleFee.saveItemFeeForApi(itemFee, event, item, "Order", account));
+                                .forEach(itemFee -> SaleFee.saveItemFeeForApi(itemFee, event, item, T.Order, account));
                         item.getPromotionList().forEach(
-                                promotion -> SaleFee.savePromotionForApi(promotion, event, item, "Order", account));
+                                promotion -> SaleFee.savePromotionForApi(promotion, event, item, T.Order, account));
                     }));
         }
+        /** 解析 Refund 退款费用 **/
+        if(financialEvents.getRefundEventList().size() > 0) {
+            List<ShipmentEvent> events = financialEvents.getRefundEventList();
+            events.forEach(event ->
+                    event.getShipmentItemAdjustmentList().forEach(item -> {
+                        item.getItemFeeAdjustmentList().forEach(
+                                component -> SaleFee.saveFeeAdjustment(component, event, item, T.Refund, account));
+                        item.getItemChargeAdjustmentList().forEach(
+                                component -> SaleFee.saveChargeAdjust(component, event, item, T.Refund, account));
+                    }));
+        }
+
+
+        /** 解析 Chargeback 费用 **/
+        if(financialEvents.getChargebackEventList().size() > 0) {
+            List<ShipmentEvent> events = financialEvents.getChargebackEventList();
+            events.forEach(event ->
+                    event.getShipmentItemAdjustmentList().forEach(item -> {
+                        item.getItemFeeAdjustmentList().forEach(
+                                component -> SaleFee.saveFeeAdjustment(component, event, item, T.Chargeback, account));
+                        item.getItemChargeAdjustmentList().forEach(
+                                component -> SaleFee.saveChargeAdjust(component, event, item, T.Chargeback, account));
+                    }));
+        }
+
         return true;
     }
 
     private static void saveChargeFeeForApi(ChargeComponent component, ShipmentEvent event, ShipmentItem item,
-                                            String type, Account account) {
+                                            T type, Account account) {
         if(component.getChargeAmount().getCurrencyAmount().floatValue() > 0) {
             SaleFee fee = new SaleFee();
             fee.type = FeeType.findById(FeeType.mappingTypeName(component.getChargeType().toLowerCase()));
@@ -413,7 +454,7 @@ public class SaleFee extends Model {
         }
     }
 
-    private static void saveItemFeeForApi(FeeComponent component, ShipmentEvent event, ShipmentItem item, String type,
+    private static void saveItemFeeForApi(FeeComponent component, ShipmentEvent event, ShipmentItem item, T type,
                                           Account account) {
         if(component.getFeeAmount().getCurrencyAmount().floatValue() != 0) {
             SaleFee fee = new SaleFee();
@@ -424,7 +465,7 @@ public class SaleFee extends Model {
         }
     }
 
-    private static void savePromotionForApi(Promotion component, ShipmentEvent event, ShipmentItem item, String type,
+    private static void savePromotionForApi(Promotion component, ShipmentEvent event, ShipmentItem item, T type,
                                             Account account) {
         if(component.getPromotionAmount().getCurrencyAmount().floatValue() != 0) {
             SaleFee fee = new SaleFee();
@@ -435,7 +476,32 @@ public class SaleFee extends Model {
         }
     }
 
-    private static void commonField(SaleFee fee, ShipmentEvent event, ShipmentItem item, String type, Account account) {
+
+    private static SaleFee saveFeeAdjustment(FeeComponent component, ShipmentEvent event, ShipmentItem item, T type,
+                                             Account account) {
+        if(component.getFeeAmount().getCurrencyAmount().floatValue() != 0) {
+            SaleFee fee = new SaleFee();
+            fee.type = FeeType.findById(FeeType.mappingTypeName(component.getFeeType().toLowerCase()));
+            fee.currency = Currency.valueOf(component.getFeeAmount().getCurrencyCode());
+            fee.cost = component.getFeeAmount().getCurrencyAmount().floatValue();
+            SaleFee.commonField(fee, event, item, type, account);
+        }
+        return null;
+    }
+
+    private static SaleFee saveChargeAdjust(ChargeComponent component, ShipmentEvent event, ShipmentItem item, T type,
+                                            Account account) {
+        if(component.getChargeAmount().getCurrencyAmount().floatValue() != 0) {
+            SaleFee fee = new SaleFee();
+            fee.type = FeeType.findById(FeeType.mappingTypeName(component.getChargeType().toLowerCase()));
+            fee.currency = Currency.valueOf(component.getChargeAmount().getCurrencyCode());
+            fee.cost = component.getChargeAmount().getCurrencyAmount().floatValue();
+            SaleFee.commonField(fee, event, item, type, account);
+        }
+        return null;
+    }
+
+    private static void commonField(SaleFee fee, ShipmentEvent event, ShipmentItem item, T type, Account account) {
         M market = M.val(event.getMarketplaceName());
         fee.usdCost = fee.currency.toUSD(fee.cost);
         fee.market = market;
