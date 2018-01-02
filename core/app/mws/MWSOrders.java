@@ -82,11 +82,13 @@ public class MWSOrders {
             orderItem.createDate = orderr.paymentDate;
             orderItem.price = Float.parseFloat(item.getItemPrice().getAmount());
             orderItem.currency = Currency.valueOf(item.getItemPrice().getCurrencyCode());
-            orderItem.discountPrice = Float.parseFloat(item.getShippingDiscount().getAmount());
+            if(item.getShippingDiscount() != null)
+                orderItem.discountPrice = Float.parseFloat(item.getShippingDiscount().getAmount());
             orderItem.memo = "ERP订单项重新抓取";
             orderItem.listingName = item.getTitle();
             orderItem.quantity = item.getQuantityOrdered();
-            orderItem.shippingPrice = Float.parseFloat(item.getShippingPrice().getAmount());
+            if(item.getShippingPrice() != null)
+                orderItem.shippingPrice = Float.parseFloat(item.getShippingPrice().getAmount());
             orderItem.order = orderr;
             orderItem.product = Product.findByMerchantSKU(item.getSellerSKU());
             Selling selling = Selling.querySellingByAPI(item.getSellerSKU(), orderr.market, orderr.account.id);

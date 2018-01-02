@@ -1147,4 +1147,13 @@ public class Selling extends GenericModel {
             return null;
         }
     }
+
+    public static String esSellingId(String sku, M market, Account account) {
+        List<Selling> sellings = Selling.find("listing.product.sku=? AND market=? AND account.id=?",
+                sku, market, account.id).fetch();
+        if(sellings.size() > 0) {
+            return sellings.get(0).sellingId.replace("|", "").replace(",", "").replace("-", "");
+        }
+        return "";
+    }
 }
