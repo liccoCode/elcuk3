@@ -195,6 +195,10 @@ public class Attach extends Model {
      */
     @Column(nullable = false)
     public String location;
+    /**
+     * 七牛云 服务器 url地址
+     */
+    public String qiniuLocation;
 
     public enum T {
         /**
@@ -230,6 +234,11 @@ public class Attach extends Model {
      */
     @Expose
     public Date createDate = new Date();
+
+    /**
+     * 七牛云是否同步
+     */
+    public int sync;
 
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
@@ -430,7 +439,9 @@ public class Attach extends Model {
     public byte[] getBytes() {
         byte[] buffer = null;
         try {
-            File file = this.file;
+            if(this.file == null) {
+                this.file = new File(this.location);
+            }
             FileInputStream fis = new FileInputStream(file);
             ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
             byte[] b = new byte[1000];
