@@ -3,7 +3,6 @@ package models.market;
 import com.amazonservices.mws.finances.MWSFinancesServiceClient;
 import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
 import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
-import com.amazonservices.mws.reports.MarketplaceWebServiceException;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.finance.SaleFee;
