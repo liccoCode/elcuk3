@@ -5,11 +5,13 @@ import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
 import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
 import controllers.api.SystemOperation;
 import helper.Constant;
+import helper.ES;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
 import models.ElcukRecord;
 import models.User;
 import models.finance.EbayFee;
+import models.finance.SaleFee;
 import models.market.Account;
 import models.market.EbayOrder;
 import models.market.OrderInvoice;
@@ -23,6 +25,7 @@ import mws.MWSOrders;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.elasticsearch.action.get.GetResponse;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -30,9 +33,9 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
 
@@ -50,7 +53,7 @@ public class Orders extends Controller {
         User user = User.findById(Login.current().id);
         renderArgs.put("categories", user.categories);
         if(p == null) p = new OrderPOST();
-        List<Orderr> orders = Orderr.find("").fetch(50);
+        List<Orderr> orders = p.query();
         render(p, orders, accounts);
     }
 
