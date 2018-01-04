@@ -3,6 +3,7 @@ package models.market;
 import com.amazonservices.mws.finances.MWSFinancesServiceClient;
 import com.amazonservices.mws.finances.model.ListFinancialEventsRequest;
 import com.amazonservices.mws.finances.model.ListFinancialEventsResponse;
+import com.amazonservices.mws.reports.MarketplaceWebServiceException;
 import com.google.gson.annotations.Expose;
 import helper.*;
 import models.finance.SaleFee;
@@ -836,5 +837,24 @@ public class Orderr extends GenericModel {
 
     public String esOrderId() {
         return this.orderId.replace("-", "_");
+    }
+
+    public static Orderr.S getState(String earState) {
+        switch(earState) {
+            case "pending":
+                return Orderr.S.PENDING;
+            case "confirmed":
+                return Orderr.S.UNSHIPPED;
+            case "packaged":
+            case "shipped":
+                return Orderr.S.SHIPPED;
+            case "invoiceunconfirmed":
+            case "canceled":
+                return Orderr.S.CANCEL;
+            case "unfulfillable":
+                return Orderr.S.UNSHIPPED;
+            default:
+                return null;
+        }
     }
 }
