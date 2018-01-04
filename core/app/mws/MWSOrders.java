@@ -129,7 +129,6 @@ public class MWSOrders {
             orderItem.usdCost = orderItem.currency.toUSD(orderItem.price);
             if(item.getGiftWrapPrice() != null)
                 orderItem.giftWrap = Float.parseFloat(item.getGiftWrapPrice().getAmount());
-            orderItem.orderItemId = item.getOrderItemId();
             if(item.getPromotionIds().size() > 0) {
                 StringBuffer promotionIds = new StringBuffer();
                 item.getPromotionIds().forEach(promotion -> promotionIds.append(promotion).append(";"));
