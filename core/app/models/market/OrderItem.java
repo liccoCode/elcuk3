@@ -37,18 +37,12 @@ import java.util.stream.Collectors;
 @DynamicUpdate
 public class OrderItem extends GenericModel {
 
+    private static final long serialVersionUID = -6723970885712000807L;
     /**
      * 为保持更新的时候的唯一性, 所以将起 Id 设置为 orderId_sku
      */
     @Id
     public String id;
-
-    /**
-     * 新增字段，由MWS提供，
-     * 加入到md5的计算中
-     * 
-     */
-    public String orderItemId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Orderr order;

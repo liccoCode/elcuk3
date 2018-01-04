@@ -11,8 +11,6 @@ import models.market.Orderr;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.springframework.jdbc.core.JdbcTemplate;
 import play.Logger;
 import play.db.DB;
 import play.db.jpa.Model;
@@ -27,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
 
 /**
  * 记录在销售过程中, 不同市场产生的不同的费用;
