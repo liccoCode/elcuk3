@@ -8,247 +8,258 @@
 #{errorMsgs /}
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="box box-primary">
-            <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
-                <div class="box-header with-border">
-                    <div class="row-fluid">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
 
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon">From:</div>
-                                <input style="width:100px;" class="form-control" role="date" name="from"
-                                       value="${from.date()}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon">To:</div>
-                                <input style="width:100px;" class="form-control" role="date" name="to"
-                                       value="${to.date()}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon">分割天数:</div>
-                                <input style="width:100px;" class="form-control" name="splitDate" value="${splitDate}">
-                            </div>
-                        </div>
-                        <select name="market" style="width: 120px;" class="form-control">
-                            <option value="">Market</option>
-                        #{list items:models.market.M.values(), as:'d'}
-                            <option value="${d.name()}" ${d.name()=='market'? 'selected':''}>${d.name()}</option>
-                        #{/list}
-                        </select>
-                    </div>
-                    <input name="jobName" id="jobName" type="hidden">
-                </div>
-            </form>
-            <div class="box-body">
-                <table class="table table-condensed table-bordered" id="data-table">
-                    <tr>
-                        <th>ClassName</th>
-                        <th>Memo</th>
-                        <th>Duration</th>
-                        <th>type</th>
-                        <th>备注</th>
-                        <th>运行</th>
-                    </tr>
-
-                    <tr>
-                        <td>currencySync</td>
-                        <td>汇率同步</td>
-                        <td>每30分钟执行一次</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="currencySync"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>shipmentSync</td>
-                        <td>快递运输单同步</td>
-                        <td>每 4 个小时执行一次</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="shipmentSync"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>inventoryCostsReport</td>
-                        <td>inventoryCostsReport</td>
-                        <td>每个月1号0点</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="inventoryCostsReport"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>multiCountryFbaQtySync</td>
-                        <td>SellingQty (简单版本数据)</td>
-                        <td>0 10 0,6,15,18 * * ?</td>
-                        <td>_GET_AFN_INVENTORY_DATA_BY_COUNTRY_
-                        </td>
-                        <td><span style="color: red">easycc不执行</span></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryFbaQtySync"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>amazonFbaQtySync</td>
-                        <td>SellingQty(完整版本数据)</td>
-                        <td>0 0 0,6,15,18 * * ?</td>
-                        <td>_GET_FBA_MYI_ALL_INVENTORY_DATA_</td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonFbaQtySync"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>businessOrderJob</td>
-                        <td>businessOrderJob</td>
-                        <td>每30分钟执行一次</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="businessOrderJob"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>multiCountryOrderrSync</td>
-                        <td>reportOrderrxml接口同步订单数据</td>
-                        <td>每天的 3点11点19点 执行一次</td>
-                        <td>_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_</td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryOrderrSync"
-                               data-confirm="确认运行?"
-                               class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>ebayFeeSync</td>
-                        <td>EbayFee 同步</td>
-                        <td>每 30 分钟执行一次</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="ebayFeeSync"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
-                    </tr>
-
-                    <tr>
-                        <td>financeEndAndMonthJob</td>
-                        <td>自动下载发送 财务所需报表邮件</td>
-                        <td>每月1号 9点</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="financeEndAndMonthJob"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>operateReportJob</td>
-                        <td>自动下载发送 运营所需报表邮件</td>
-                        <td>每月2号 10点</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="operateReportJob"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-
-                    <tr>
-                        <td>marketRecordWatchTrigger</td>
-                        <td>marketRecord报表</td>
-                        <td> 0点8点16点 30分</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="marketRecordWatchTrigger"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>amazonOrderFinanceSyncByGroup</td>
-                        <td>通过group获取salefee</td>
-                        <td> 0点8点16点 30分</td>
-                        <td></td>
-                        <td></td>
-                        <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonOrderFinanceSyncByGroup"
-                               data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                        </td>
-                    </tr>
-
-                  <tr>
-                      <td>amazonRefundOrderrSync</td>
-                      <td>report同步退款订单数据</td>
-                      <td> 0 0 0 * * SUN</td>
-                      <td>_GET_FBA_FULFILLMENT_CUSTOMER_RETURNS_DATA_</td>
-                      <td></td>
-                      <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonRefundOrderrSync"
-                             data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-                      </td>
-                  </tr>
-                </table>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="from"
+                       value="${from.date()}">
+              </div>
             </div>
-
-            <div class="box-footer clearfix">
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button id="syncOrderr" class="btn btn-primary" data-disable-with='同步中'>同步报表
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="to"
+                       value="${to.date()}">
+              </div>
             </div>
-
-
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">分割天数:</div>
+                <input style="width:100px;" class="form-control" name="splitDate" value="${splitDate}">
+              </div>
+            </div>
+            <select name="market" style="width: 120px;" class="form-control">
+              <option value="">Market</option>
+            #{list items:models.market.M.values(), as:'d'}
+              <option value="${d.name()}" ${d.name()=='market'? 'selected':''}>${d.name()}</option>
+            #{/list}
+            </select>
+          </div>
+          <input name="jobName" id="jobName" type="hidden">
         </div>
+      </form>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered" id="data-table">
+          <tr>
+            <th>ClassName</th>
+            <th>Memo</th>
+            <th>Duration</th>
+            <th>type</th>
+            <th>备注</th>
+            <th>运行</th>
+          </tr>
 
-    #{records_v3 records:logs/}
+          <tr>
+            <td>currencySync</td>
+            <td>汇率同步</td>
+            <td>每30分钟执行一次</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="currencySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>shipmentSync</td>
+            <td>快递运输单同步</td>
+            <td>每 4 个小时执行一次</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="shipmentSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>inventoryCostsReport</td>
+            <td>inventoryCostsReport</td>
+            <td>每个月1号0点</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="inventoryCostsReport"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>multiCountryFbaQtySync</td>
+            <td>SellingQty (简单版本数据)</td>
+            <td>0 10 0,6,15,18 * * ?</td>
+            <td>_GET_AFN_INVENTORY_DATA_BY_COUNTRY_
+            </td>
+            <td><span style="color: red">easycc不执行</span></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryFbaQtySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>amazonFbaQtySync</td>
+            <td>SellingQty(完整版本数据)</td>
+            <td>0 0 0,6,15,18 * * ?</td>
+            <td>_GET_FBA_MYI_ALL_INVENTORY_DATA_</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonFbaQtySync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>businessOrderJob</td>
+            <td>businessOrderJob</td>
+            <td>每30分钟执行一次</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="businessOrderJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>multiCountryOrderrSync</td>
+            <td>reportOrderrxml接口同步订单数据</td>
+            <td>每天的 3点11点19点 执行一次</td>
+            <td>_GET_XML_ALL_ORDERS_DATA_BY_ORDER_DATE_</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="multiCountryOrderrSync"
+                   data-confirm="确认运行?"
+                   class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>ebayFeeSync</td>
+            <td>EbayFee 同步</td>
+            <td>每 30 分钟执行一次</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="ebayFeeSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a></td>
+          </tr>
+
+          <tr>
+            <td>financeEndAndMonthJob</td>
+            <td>自动下载发送 财务所需报表邮件</td>
+            <td>每月1号 9点</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="financeEndAndMonthJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>operateReportJob</td>
+            <td>自动下载发送 运营所需报表邮件</td>
+            <td>每月2号 10点</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="operateReportJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>marketRecordWatchTrigger</td>
+            <td>marketRecord报表</td>
+            <td> 0点8点16点 30分</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="marketRecordWatchTrigger"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>amazonOrderFinanceSyncByGroup</td>
+            <td>通过group获取salefee</td>
+            <td> 0点8点16点 30分</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonOrderFinanceSyncByGroup"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>amazonRefundOrderrSync</td>
+            <td>report同步退款订单数据</td>
+            <td> 0 0 0 * * SUN</td>
+            <td>_GET_FBA_FULFILLMENT_CUSTOMER_RETURNS_DATA_</td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="amazonRefundOrderrSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>saleFeeEsSync</td>
+            <td>SaleFee ES同步更新</td>
+            <td> 8点20点 30分</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="saleFeeEsSync"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="box-footer clearfix">
+        <div class="col-md-3">
+          <div class="input-group">
+            <div class="input-group-btn">
+              <button id="syncOrderr" class="btn btn-primary" data-disable-with='同步中'>同步报表
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
     </div>
+
+  #{records_v3 records:logs/}
+
+  </div>
 </div>
 
 
 <div id="syncOrderr_modal" class="modal fade bs-example-modal-lg">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4>订单同步</h4>
-            </div>
-            <div class="modal-body">
-                <form action="@{Jrockends.syncOrderr()}" method="post" id="create_form">
-                    <table class="table table-condensed table-bordered">
-                        <tr>
-                            <th>reportId</th>
-                            <td><input type="text" name="reportId" id="reportId" required></td>
-                        </tr>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>订单同步</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{Jrockends.syncOrderr()}" method="post" id="create_form">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>reportId</th>
+              <td><input type="text" name="reportId" id="reportId" required></td>
+            </tr>
 
-                        <tr>
-                            <th>市场</th>
-                            <td>
-                                <select name="market" id="market" style="width: 120px;" class="form-control">
-                                    <option value="">Market</option>
-                                #{list items:models.market.M.values(), as:'d'}
-                                    <option value="${d.name()}" ${d.name()=='market'? 'selected':''}>${d.name()}</option>
-                                #{/list}
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-                <button class="btn btn-primary" id="submitSyncOrderBtn">提交</button>
-            </div>
-        </div>
+            <tr>
+              <th>市场</th>
+              <td>
+                <select name="market" id="market" style="width: 120px;" class="form-control">
+                  <option value="">Market</option>
+                #{list items:models.market.M.values(), as:'d'}
+                  <option value="${d.name()}" ${d.name()=='market'? 'selected':''}>${d.name()}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitSyncOrderBtn">提交</button>
+      </div>
     </div>
+  </div>
 </div>
