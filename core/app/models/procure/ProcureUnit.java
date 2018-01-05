@@ -2090,7 +2090,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unitIds
      * @param dtos
-     * @return List<F.Promise       <       FBAShipment>>
+     * @return List<F.Promise                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               FBAShipment>>
      */
     public static void postFbaShipments(final List<Long> unitIds, final List<CheckTaskDTO> dtos) {
         final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
@@ -2685,5 +2685,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return this.fees.stream().filter(unit -> unit.payment.id - paymentId == 0).count() > 0 ? true : false;
     }
 
+
+    public Date yesterdayPlanShipDate() {
+        if(this.attrs == null || this.attrs.planShipDate == null) return null;
+        return new Date((this.attrs.planShipDate.getTime() - 24 * 60 * 60 * 1000));
+    }
 
 }
