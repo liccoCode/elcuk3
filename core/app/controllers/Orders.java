@@ -53,7 +53,7 @@ public class Orders extends Controller {
         User user = User.findById(Login.current().id);
         renderArgs.put("categories", user.categories);
         if(p == null) p = new OrderPOST();
-        List<Orderr> orders = p.query();
+        List<Orderr> orders = Orderr.find("").fetch(50);
         render(p, orders, accounts);
     }
 
