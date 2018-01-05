@@ -107,12 +107,9 @@
                   </div>
                   <div class="box-footer">
                   #{power.ck "products.edit"}
-                    <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
+                    <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' class="btn btn-danger"
                        id="del_unit_form_submit" data-toggle="tooltip" data-placement="right" title="将 DELIVERY
-                       状态的采购计划从采购单中移除出去" placement="right"
-                       class="btn btn-danger">
-                      解除
-                    </a>
+                       状态的采购计划从采购单中移除出去" >解除</a>
                   #{/power.ck}
                   #{power.ck 'fbas.deploytoamazon'}
                     <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
