@@ -2090,7 +2090,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unitIds
      * @param dtos
-     * @return List<F.Promise                                                                                                                                                                                                                                                               <                                                                                                                                                                                                                                                               FBAShipment>>
      */
     public static void postFbaShipments(final List<Long> unitIds, final List<CheckTaskDTO> dtos) {
         final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
@@ -2098,7 +2097,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "加载的数量不一致");
         }
         if(Validation.hasErrors()) return;
-
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             try {
