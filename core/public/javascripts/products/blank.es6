@@ -1,7 +1,7 @@
 $(() => {
 
-  $("#pro_family").change(function () {
-    $('#pro_sku').val($(this).val() + "-").focus();
+  $("#pro_category").change(function () {
+    $('#pro_sku').val($(this).val()).focus();
   });
 
   $("#pro_sku").keyup(function () {
@@ -31,18 +31,6 @@ $(() => {
       textareas[1].value = "";
     }
   }
-
-  $("#pro_category").change(function () {
-    let categoryId = $(this).val();
-    if (categoryId.length >= 2) {
-      $.get("/familys/categoryRelateFamily", {categoryId: categoryId}, function (c) {
-        let data_source = c;
-        $("#pro_family").typeahead({
-          source: data_source
-        });
-      });
-    }
-  });
 
   $(document).on("change", "#pro_weight_g, #pro_productWeight_g", function () {
     let $input = $(this);
@@ -74,13 +62,9 @@ $(() => {
     }
   });
 
-  $('#pro_family').popover({trigger: 'focus', content: "<a href='/familys/index' target='_blank'>新增一个 Family</a>", html: true, placement: "top"})
-
-
   $("#create_product_form").on("click", "[name^='delete_locate_row'], [name^='delete_selling_point_row']", function () {
     let $btn = $(this);
     $btn.parent("div").parent().remove()
   });
-
 
 });

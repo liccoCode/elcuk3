@@ -68,30 +68,12 @@ public class Sellings extends Controller {
         renderArgs.put("feeds", s.feeds());
 
         List<ElcukRecord> logs =
-                ElcukRecord.find("fid=? AND (action=? or action=? or action=?) ORDER BY createAt DESC", id.toString(),
+                ElcukRecord.find("fid=? AND (action=? or action=? or action=?) ORDER BY createAt DESC", id,
                         "selling.image", "selling.sync.back", "selling.update").fetch(4);
         renderArgs.put("records", logs);
         SellingAmzPost p = new SellingAmzPost();
         render(s, p);
     }
-
-    /**
-     * 加载指定 Product 所属的 Family 下的所有的 SellingId
-     *
-     * @param msku
-     */
-    public static void sameFamilySellings(String msku) {
-        List<String> sids = new ArrayList<>();
-        Product product = Product.findByMerchantSKU(msku);
-        if(product != null && product.family != null) {
-            List<Selling> sellings = Selling.find("listing.product.family=?", product.family).fetch();
-            if(!sellings.isEmpty()) {
-                sids.addAll(sellings.stream().map(s -> s.sellingId).collect(Collectors.toList()));
-            }
-        }
-        renderJSON(J.json(sids));
-    }
-
 
     /**
      * 加载指定 Sid 下的所有的 SellingId

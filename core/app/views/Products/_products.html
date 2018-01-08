@@ -6,7 +6,7 @@
   <tr>
     <th style="width:40px;"></th>
     <th style="width:150px;">SKU</th>
-    <th style="width:100px;">Family</th>
+    <th style="width:100px;">Category</th>
     <th style="width:350px;">Name</th>
     <th style="width:100px;">最近采购价格</th>
     <th style="width:120px;">最近采购供应商</th>
@@ -24,7 +24,7 @@
           </a>
         </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
-        <td>${prod.family?.family}</td>
+        <td>${prod.category}</td>
         <td>${prod.productName}
             #{if prod.origin_sku}<br>
               <span style="color:red">同${prod.origin_project?.name()} sku:
@@ -54,16 +54,16 @@
         <td>#{time_tooltip_v3 time:prod.marketTime/}</td>
         <td>#{time_tooltip_v3 time:prod.delistingTime/}</td>
         <td>
-          <a href="javascript:void(0);" name="copyBtn" class="btn btn-xs btn-success" rel="tooltip" title="同步"
+          <a href="javascript:void(0);" name="copyBtn" class="btn btn-xs btn-success" data-toggle="tooltip" title="同步"
              data-sku="${prod.sku}">
             <i class="icon-refresh"></i>
           </a>
-          <a href="javascript:void(0);" name="backupBtn" class="btn btn-xs btn-info" rel="tooltip" title="复制"
-             data-sku="${prod.sku}" data-family="${prod.family?.family}">
+          <a href="javascript:void(0);" name="backupBtn" class="btn btn-xs btn-info" data-toggle="tooltip" title="复制"
+             data-sku="${prod.sku}" data-family="">
             <i class="icon-copy"></i>
           </a>
             #{power.ck "products.destroy"}
-              <a href="javascript:void(0);" name="deleteBtn" class="btn btn-xs btn-danger" rel="tooltip" title="删除"
+              <a href="javascript:void(0);" name="deleteBtn" class="btn btn-xs btn-danger" data-toggle="tooltip" title="删除"
                  data-sku="${prod.sku}"><i class="icon-trash"></i></a>
             #{/power.ck}
           <a href="" class="btn btn-xs btn-warning" rel="tooltip" title="物料配置">

@@ -143,6 +143,9 @@ public class Selling extends GenericModel {
     @ManyToOne(fetch = FetchType.LAZY)
     public Listing listing;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Product product;
+
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<>();
 
@@ -357,10 +360,10 @@ public class Selling extends GenericModel {
         GetMatchingProductResponse response = client.getMatchingProduct(request);
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
         results.forEach(result -> {
-            com.amazonservices.mws.products.model.Product product = result.getProduct();
-            if(product == null)
+            com.amazonservices.mws.products.model.Product mwsProduct = result.getProduct();
+            if(mwsProduct == null)
                 return;
-            String attributeXml = product.getAttributeSets().toXML();
+            String attributeXml = mwsProduct.getAttributeSets().toXML();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             try {
                 DocumentBuilder db = dbf.newDocumentBuilder();
@@ -536,11 +539,10 @@ public class Selling extends GenericModel {
      * 产品上架时，验证包材信息是否全部填写完整
      **/
     public void productPackageDimensionValid() {
-        Product product = Product.findByMerchantSKU(this.merchantSKU);
-        if(product.lengths == null) Webs.error("产品长(包材)需填写!");
-        if(product.width == null) Webs.error("产品宽(包材)需填写!");
-        if(product.heigh == null) Webs.error("产品高(包材)需填写!");
-        if(product.weight == null) Webs.error("产品重量(包材)需填写!");
+        if(this.product.lengths == null) Webs.error("产品长(包材)需填写!");
+        if(this.product.width == null) Webs.error("产品宽(包材)需填写!");
+        if(this.product.heigh == null) Webs.error("产品高(包材)需填写!");
+        if(this.product.weight == null) Webs.error("产品重量(包材)需填写!");
     }
 
     /**
@@ -631,17 +633,15 @@ public class Selling extends GenericModel {
      */
     public Selling patchToListing() {
         if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
-        Product product = Product.findByMerchantSKU(this.merchantSKU);
-        if(product == null) Webs.error("SKU 产品不存在");
-
-        List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
+        if(this.product == null) Webs.error("SKU 产品不存在");
+        List<Attach> images = Attach.attaches(this.product.sku, Attach.P.SKU.name());
         if(images != null && images.size() != 0) {
             this.aps.imageName = images.get(0).fileName;
         }
 
         Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
         if(lst == null) {
-            lst = Listing.blankListing(asin, market, product).save();
+            lst = Listing.blankListing(asin, market, this.product).save();
             lst.recordingListingState(DateTime.now().toDate());
         }
         this.listing = lst;
@@ -725,12 +725,11 @@ public class Selling extends GenericModel {
     /**
      * 加载指定 Product 所属的 Family 下的所有 Selling 与 SellingId
      *
-     * @param msku
+     * @param sku
      * @return
      */
-    public static F.T2<List<Selling>, List<String>> sameFamilySellings(String msku) {
-        List<Selling> sellings = Selling
-                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
+    public static F.T2<List<Selling>, List<String>> sameFamilySellings(String sku) {
+        List<Selling> sellings = Selling.find("product.sku like ? ", sku + "%").fetch();
         List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
         return new F.T2<>(sellings, sids);
     }

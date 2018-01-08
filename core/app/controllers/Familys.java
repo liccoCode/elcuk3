@@ -65,7 +65,7 @@ public class Familys extends Controller {
     public static void proDiv(String name) {
         if(StringUtils.isNotBlank(name)) {
             Family family = Family.findById(name);
-            List<Product> prods = family.products;
+            List<Product> prods = family.productList();
             render("Familys/_products.html", prods);
         }
     }
