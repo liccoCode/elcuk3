@@ -148,7 +148,7 @@ public class MetricReviewService {
                 ListingStateRecord record = records.get(j);
                 //如果时间小于等于 end, 且 state 为 DOWN， 删除该 asin  找到时间小于 end 但是状态不为 SELLING 需要保留此 asin
                 if(record.changedDate.getTime() <= end.getTime()) {
-                    if(record.state == ListingStateRecord.S.DOWN) asins.remove(record.listing.asin.toLowerCase());
+                    if(record.state == ListingStateRecord.S.DOWN) asins.remove(record.selling.asin.toLowerCase());
                     break;
                 }
             }

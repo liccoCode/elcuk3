@@ -61,7 +61,7 @@
       </div>
 
       <div class="box-body">
-      #{render 'Products/_products.html', prods:prods, pi:p,products:products,families:families/}
+      #{render 'Products/_products.html', prods:prods /}
       </div>
 
       <div class="box-footer">
@@ -79,7 +79,7 @@
       <form action="@{Products.copy()}" id="update_form" class="form-horizontal">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          <h3>同步SKU</h3>
+          <h4 class="modal-title">同步SKU</h4>
         </div>
         <div class="modal-body">
           <div class="form-group">
@@ -120,8 +120,8 @@
           <input type="hidden" id="target_choseid" name="choseid" value="0">
         </div>
         <div class="modal-footer">
-          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-          <input type="submit" class="btn btn-primary" name="submitBtn" value="同步"/>
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-primary btn-xs" name="submitBtn" value="同步"/>
         </div>
       </form>
     </div>
@@ -134,19 +134,11 @@
       <form action="@{Products.backup()}" class="form-horizontal">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          <h3>复制SKU</h3>
+          <h4 class="modal-title">复制SKU</h4>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label class="col-sm-3 control-label">Family</label>
-            <div class="col-sm-3">
-              <input style="width:150px" id="back_families" name="family" data-provide="typeahead" class="form-control"
-                     data-source="${families}" value="" autocomplete="off">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-sm-3 control-label">SKU</label>
+            <label class="col-sm-3 control-label" data-toggle="tooltip" title="填写新sku">新SKU</label>
             <div class="col-sm-3">
               <input style="width:200px" id="back_sku" type="text" name="sku" value="" autocomplete="off" class="form-control">
             </div>
@@ -183,8 +175,8 @@
           <input type="hidden" id="backup_choseid" name="choseid" value="0">
         </div>
         <div class="modal-footer">
-          <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-          <input type="submit" class="btn btn-primary" name="submitBtn" value="复制"/>
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" class="btn btn-primary btn-xs" name="submitBtn" value="复制"/>
         </div>
       </form>
     </div>

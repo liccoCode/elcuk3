@@ -16,7 +16,6 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.AnalyzePost;

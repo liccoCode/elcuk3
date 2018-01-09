@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  * User: wyattpan
  * Date: 4/25/12
  * Time: 3:21 PM
+ * @deprecated
  */
 @Entity
 public class Brand extends GenericModel {
