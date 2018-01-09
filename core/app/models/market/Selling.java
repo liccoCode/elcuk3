@@ -501,10 +501,27 @@ public class Selling extends GenericModel {
     public Selling buildFromProduct() {
         this.saleAmazonValid();
         this.asin = this.aps.upc;
+        this.saveSelling();
         this.saleAmazon();
         this.assignAmazonListingPrice();
         this.setFulfillmentByAmazon();
         return this;
+    }
+
+    private void saveSelling() {
+        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
+        Product pro = Product.findByMerchantSKU(this.merchantSKU);
+        if(pro == null) Webs.error("SKU 产品不存在");
+        List<Attach> images = Attach.attaches(pro.sku, Attach.P.SKU.name());
+        if(images != null && images.size() != 0) {
+            this.aps.imageName = images.get(0).fileName;
+        }
+        this.product = pro;
+        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+        if(!Selling.exist(this.sid()))
+            this.save();
+        else
+            throw new FastRuntimeException("Selling 已经存在！");
     }
 
     public void saleAmazonValid() {
@@ -788,14 +805,17 @@ public class Selling extends GenericModel {
         return Selling.find("sellingId=?", merchantSKU).first() != null;
     }
 
-    public static Selling blankSelling(String msku, String asin, String upc, Account acc, M market) {
+    public static Selling blankSelling(String sku, String asin, String upc, Account acc, M market) {
         Selling selling = new Selling();
+        String msku = String.format("%s,%s", sku.trim(), upc.trim());
         selling.account = acc;
         selling.merchantSKU = msku;
+        selling.product = Product.findById(sku);
         selling.asin = asin;
         selling.aps.upc = upc;
         selling.market = market;
         selling.sid();
+        selling.createDate = new Date();
         return selling;
     }
 
@@ -905,8 +925,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(asin) || asin.length() != 10) Webs.error("ASIN 无效.");
         if(market == null) Webs.error("Market 无效.");
         if(StringUtils.isBlank(args[4]) || acc == null) Webs.error("Account 无效.");
-        String msku = String.format("%s,%s", sku.trim(), upc.trim());
-        Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
+        Selling newSelling = Selling.blankSelling(sku, asin, upc, acc, market);
     }
 
 
