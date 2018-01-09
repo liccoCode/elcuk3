@@ -318,6 +318,7 @@
           </ul>
         </li>}*
 
+      #{power.ck "project.change"}
         <li class="dropdown notifications-menu">
           <!-- Menu toggle button -->
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -329,19 +330,20 @@
             <li>
               <!-- Inner Menu: contains the notifications -->
               <ul class="menu">
-              #{list items:models.User.COR.values(), as:'c'}
-                <li><!-- start notification -->
-                  <a href="${c.url()}" target="_blank">
-                    <i class="fa ${c.pic()}" style="color:red"></i> ${c.label()}
-                  </a>
-                </li>
-              #{/list}
+                  #{list items:models.User.COR.values(), as:'c'}
+                    <li><!-- start notification -->
+                      <a href="${c.url()}" target="_blank">
+                        <i class="fa ${c.pic()}" style="color:red"></i> ${c.label()}
+                      </a>
+                    </li>
+                  #{/list}
                 <!-- end notification -->
               </ul>
             </li>
             <li class="footer"><a href="#">View all</a></li>
           </ul>
         </li>
+      #{/power.ck}
         <!-- Tasks Menu -->
         <li class="dropdown tasks-menu">
           <!-- Menu Toggle Button -->
