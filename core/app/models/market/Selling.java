@@ -66,6 +66,15 @@ public class Selling extends GenericModel {
 
     private static final long serialVersionUID = -4124213853478159984L;
 
+    /**
+     * 上架后用来唯一标示这个 Selling 的 Id;
+     * sellingId: msku|market.nickName|acc.id
+     */
+    @Id
+    @Column(length = 70)
+    @Expose
+    public String sellingId;
+
     public Selling() {
         this.aps = new AmazonProps();
         this.state = S.NEW;
@@ -141,23 +150,10 @@ public class Selling extends GenericModel {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    public Listing listing;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     public Product product;
 
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<>();
-
-    /**
-     * 上架后用来唯一标示这个 Selling 的 Id;
-     * sellingId: msku|market.nickName|acc.id
-     */
-    @Id
-    @Column(length = 70)
-    @Expose
-    public String sellingId;
-
 
     /**
      * 1. 在 Amazon 上架的唯一的 merchantSKU(SKU,UPC);
@@ -295,17 +291,12 @@ public class Selling extends GenericModel {
         return sku;
     }
 
-    /**
-     * 用来修复 Selling 关联的 Listing 错误的问题.
-     */
-    public Selling changeListing(Listing listing) {
-        String sku = Product.merchantSKUtoSKU(this.merchantSKU);
-        if(listing.listingId.equals(this.listing.listingId)) Webs.error("Listing 是一样的, 不需要更改");
-        if(!sku.equals(listing.product.sku)) Webs.error("不可以切换到不同的 SKU");
-        this.listing = listing;
-        this.asin = listing.asin;
-        this.market = listing.market;
-        return this.save();
+    public void recordingListingState(Date changedDate, String state) {
+        ListingStateRecord record = new ListingStateRecord();
+        record.changedDate = changedDate;
+        record.state = ListingStateRecord.S.valueOf(state);
+        record.selling = this;
+        record.save();
     }
 
     /**
@@ -510,7 +501,6 @@ public class Selling extends GenericModel {
     public Selling buildFromProduct() {
         this.saleAmazonValid();
         this.asin = this.aps.upc;
-        patchToListing();
         this.saleAmazon();
         this.assignAmazonListingPrice();
         this.setFulfillmentByAmazon();
@@ -627,31 +617,6 @@ public class Selling extends GenericModel {
         Feed feed = Feed.setFulfillmentByAmazonFeed(MWSUtils.fulfillmentByAmazonXml(this), this);
         feed.submit(this.setFulfillmentByAmazonParams());
     }
-
-    /**
-     * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
-     */
-    public Selling patchToListing() {
-        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
-        if(this.product == null) Webs.error("SKU 产品不存在");
-        List<Attach> images = Attach.attaches(this.product.sku, Attach.P.SKU.name());
-        if(images != null && images.size() != 0) {
-            this.aps.imageName = images.get(0).fileName;
-        }
-
-        Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
-        if(lst == null) {
-            lst = Listing.blankListing(asin, market, this.product).save();
-            lst.recordingListingState(DateTime.now().toDate());
-        }
-        this.listing = lst;
-        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-        if(!Selling.exist(this.sid()))
-            return this.save();
-        else
-            throw new FastRuntimeException("Selling 已经存在！");
-    }
-
 
     /**
      * 更新数据库, 同时还需要更新缓存
@@ -777,8 +742,8 @@ public class Selling extends GenericModel {
     }
 
     public Date showDownDate() {
-        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? "
-                + " ORDER BY changedDate DESC", this.listing.listingId, ListingStateRecord.S.DOWN).first();
+        ListingStateRecord record = ListingStateRecord.find("selling.sellingId = ? AND state = ? "
+                + " ORDER BY changedDate DESC", this.sellingId, ListingStateRecord.S.DOWN).first();
         return record == null ? null : record.changedDate;
     }
 
@@ -942,7 +907,6 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(args[4]) || acc == null) Webs.error("Account 无效.");
         String msku = String.format("%s,%s", sku.trim(), upc.trim());
         Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
-        newSelling.patchToListing();
     }
 
 
@@ -1148,7 +1112,7 @@ public class Selling extends GenericModel {
     }
 
     public static String esSellingId(String sku, M market, Account account) {
-        List<Selling> sellings = Selling.find("listing.product.sku=? AND market=? AND account.id=?",
+        List<Selling> sellings = Selling.find("product.sku=? AND market=? AND account.id=?",
                 sku, market, account.id).fetch();
         if(sellings.size() > 0) {
             return sellings.get(0).sellingId.replace("|", "").replace(",", "").replace("-", "");

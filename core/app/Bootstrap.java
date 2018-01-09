@@ -81,15 +81,15 @@ public class Bootstrap extends Job {
         Caches.clearRedisRunningKeys();
         //QiniuUtils.init();
 
-        /**
+        /*
          * 流程activiti的初始化
          */
         //ActivitiEngine.initEngine();
 
-        /**
+        /*
          * 为所有 Listing 做一个状态的变化过程记录的初始化
          */
-        ListingStateRecord.initAllListingRecords();
+        //ListingStateRecord.initAllListingRecords();
         Currency.initCurrency();
 /*        if(Play.mode.isProd()) {
             Account.initLogin();

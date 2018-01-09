@@ -62,7 +62,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public ProcureUnit(Selling selling) {
         if(selling != null) {
             this.selling = selling;
-            this.product = this.selling.listing.product;
+            this.product = this.selling.product;
         }
     }
 

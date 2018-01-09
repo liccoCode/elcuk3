@@ -24,7 +24,7 @@ public class ListingStateRecord extends Model {
     private static final long serialVersionUID = -7279223067180390522L;
 
     @ManyToOne
-    public Listing listing;
+    public Selling selling;
 
     public enum S {
         /**
@@ -52,18 +52,6 @@ public class ListingStateRecord extends Model {
      */
     public Date changedDate = DateTime.now().toDate();
 
-    /**
-     * 为所有 Listing 做一个状态的变化过程记录的初始化
-     */
-    public static void initAllListingRecords() {
-        if(ListingStateRecord.count() == 0) {
-            Date firstReviewDate = AmazonListingReview.firstReviewDate();
-            for(Listing listing : Listing.<Listing>findAll()) {
-                listing.recordingListingState(firstReviewDate);
-            }
-        }
-    }
-
     public static List<ListingStateRecord> getCacheByListingId(String listingId) {
         String cacheKey = ListingStateRecord.cacheKey(listingId);
         List<ListingStateRecord> cachedRecords = Cache.get(cacheKey, List.class);
@@ -84,7 +72,7 @@ public class ListingStateRecord extends Model {
      * 增加单个到缓存中
      */
     public void pushRecordToCache() {
-        String cacheKey = ListingStateRecord.cacheKey(this.listing.listingId);
+        String cacheKey = ListingStateRecord.cacheKey(this.selling.sellingId);
         List<ListingStateRecord> cachedRecords = Cache.get(cacheKey, List.class);
         if(cachedRecords != null) {
             cachedRecords.add(this);

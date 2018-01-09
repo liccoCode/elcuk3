@@ -59,6 +59,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<Listing> listings = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    public List<Selling> sellings = new ArrayList<>();
+
     @ManyToOne
     public Category category;
 
@@ -1151,11 +1155,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public void changePartNumber(String oldNumber) {
         if(StringUtils.isNotBlank(this.partNumber) && !this.partNumber.equals(oldNumber)) {
-            for(Listing listing : this.listings) {
-                for(Selling selling : listing.sellings) {
-                    selling.aps.manufacturerPartNumber = this.partNumber;
-                    selling.save();
-                }
+            for(Selling selling : this.sellings) {
+                selling.aps.manufacturerPartNumber = this.partNumber;
+                selling.save();
             }
         }
     }

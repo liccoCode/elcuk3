@@ -1,11 +1,9 @@
 package controllers.api;
 
-import models.market.Listing;
 import models.market.OrderItem;
 import models.market.Orderr;
 import models.market.Selling;
 import models.view.Ret;
-
 import play.mvc.Controller;
 import play.mvc.With;
 
@@ -61,14 +59,12 @@ public class OrderCheck extends Controller {
                 renderJSON(new Ret(false, "order不存在!"));
             }
         } else if(checktype.equals("sku")) {
-            List<Listing> listings = Listing.find("product.sku=?", checkinfo).fetch();
-            if(listings.size() > 0) {
-                for(Listing listing : listings) {
-                    if(listing.sellings != null) {
-                        String category = listing.sellings.get(0).sellingId.substring(0, 2);
-                        renderJSON(new Ret(true, category));
-                        break;
-                    }
+            List<Selling> sellings = Selling.find("product.sku=?", checkinfo).fetch();
+            if(sellings.size() > 0) {
+                for(Selling selling : sellings) {
+                    String category = selling.product.category.categoryId;
+                    renderJSON(new Ret(true, category));
+                    break;
                 }
             } else {
                 renderJSON(new Ret(false, "sku不存在!"));
