@@ -1,85 +1,243 @@
-<div class="row-fluid">
-#{form @Products.saleAmazonListing(), class: 'form-horizontal', id: 'saleAmazonForm'}
-  <div class="span5">
-      #{text_field id:'msku', name: 's.merchantSKU', readonly: true, label: 'Merchant SKU', value: product.sku+","+product.upc/}
-      #{text_field id:'upc', name: 's.aps.upc', label: 'UPC', value: product.upc/}
-      #{text_field id:'manufacturer', name: 's.aps.manufacturer', label: 'Manufacturer', value: "${models.OperatorConfig.getVal("addressname")}" /}
-      #{text_field id:'brand', name: 's.aps.brand', label: '品牌', value: "${models.OperatorConfig.getVal("addressname")}"/}
-      #{text_field id:'standerPrice', name: 's.aps.standerPrice', label: '标准价格', value: '' /}
-      #{text_field id:'startDate', name: 's.aps.startDate', label: '优惠价格开始日期',  value: '2013-12-01' /}
-      #{text_field id:'RBN', name: 's.aps.rbns[0]', label: 'Recommanded Browser Nodes',  value: '' /}
-      #{text_field id:'itemType', name: 's.aps.itemType', label: 'ItemType',  value: '' /}
-      #{checkbox_wrap id:'giftwrap', label: '附加选项'}
-        <label class="checkbox">
-          <input type="checkbox" id='giftwrap' checked name="s.aps.isGiftWrap" value="true">
-          GiftWrap
-        </label>
-      #{/checkbox_wrap}
+<form action="@{Products.saleAmazonListing()}" method="post" class="form-horizontal" id="saleAmazonForm">
+  <div class="form-group">
+    <label for="msku" class="col-sm-2 control-label">Merchant SKU</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="msku" name="s.merchantSKU" value="${product.sku},${product.upc}" readonly>
+    </div>
+    <label for="account" class="col-sm-1 control-label">上架账户</label>
+    <div class="col-sm-2">
+      <select class="form-control" name="s.account.id" id="account">
+        <option value="">请选择</option>
+      #{list items:accs, as:'a'}
+        <option value="${a.id}">${a.toString()}</option>
+      #{/list}
+      </select>
+    </div>
+    <label for="market" class="col-sm-1 control-label">市场</label>
+    <div class="col-sm-2">
+      <select class="form-control" name="s.market" id="account">
+        <option value="">请选择</option>
+      #{list items:models.market.M.values(), as:'m'}
+        <option value="${m.name()}">${m.name()}</option>
+      #{/list}
+      </select>
+    </div>
   </div>
-  <div class="span5">
-      #{select_field id:'account', name: 's.account.id', label: '上架账户', blank: true, items: accs /}
-      #{select_field id:'market', name: 's.market', label:'市场', blank: true, items: models.market.M.values() /}
-      #{select_field id: 'templateType', name: 's.aps.templateType', label: '模板类型', items: ['Computers',
-      'ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports', 'Lighting']/}
-      #{select_field id:'feedProductType', name: 's.aps.feedProductType', label: 'Feed Product Type', items:null,
-      native: true /}
-      #{text_field id:'salePrice', name: 's.aps.salePrice', label: '优惠销售价格', value: '' /}
-      #{text_field id:'endDate', name: 's.aps.endDate', label: '优惠价格截止日期', value: '2018-01-01' /}
-      #{text_field id:'partNumber',readonly: true, name: 's.aps.manufacturerPartNumber', label: 'Part Number', value: product.partNumber /}
-      #{text_field id:'fnSku', name: 's.fnSku', label: 'FBA 的 FNSKU', value: s.fnSku /}
-    <div class="control-group">
-      <label class="control-label" for="sellingCycle">生命周期</label>
 
-      <div class="controls">
-        <select name="s.sellingCycle" class="span10">
-            #{list items:models.market.Selling.SC.values(), as: 'cycle'}
-              <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
-            #{/list}
-        </select>
+  <div class="form-group">
+    <label for="upc" class="col-sm-2 control-label">UPC</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="upc" name="s.aps.upc" value="${product.upc}">
+    </div>
+
+    <label for="manufacturer" class="col-sm-1 control-label">Manufacturer</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="manufacturer" name="s.aps.manufacturer" value="${models.OperatorConfig.getVal("addressname")}">
+    </div>
+
+    <label for="templateType" class="col-sm-1 control-label">模板类型</label>
+    <div class="col-sm-2">
+      <select id="templateType" class="form-control" name="s.aps.templateType">
+      #{list items:['Computers','ConsumerElectronics', 'Wireless', 'HomeImprovement','Home', 'Games', 'Sports',
+      'Lighting'], as:'t'}
+        <option value="${t}">${t}</option>
+      #{/list}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="brand" class="col-sm-2 control-label">品牌</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="brand" name="s.aps.brand" value="${models.OperatorConfig.getVal("addressname")}">
+    </div>
+    <label for="itemType" class="col-sm-1 control-label">ItemType</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="itemType" name="s.aps.itemType" value="">
+    </div>
+    <label for="feedProductType" class="col-sm-1 control-label">Feed Product Type</label>
+    <div class="col-sm-2">
+      <select id="feedProductType" class="form-control" name="s.aps.feedProductType">
+        <option value="">请选择</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="standerPrice" class="col-sm-2 control-label">标准价格</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="standerPrice" name="s.aps.standerPrice" value="">
+    </div>
+    <label for="salePrice" class="col-sm-1 control-label">优惠销售价格</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="standerPrice" name="s.aps.salePrice" value="">
+    </div>
+    <label for="RBN" class="col-sm-1 control-label" title="Recommanded Browser Nodes" data-toggle="tooltip">RBN</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="RBN" name="s.aps.rbns[0]" value="">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="startDate" class="col-sm-2 control-label">优惠价格开始日期</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="startDate" name="s.aps.startDate" value="2013-12-01" role="date">
+    </div>
+    <label for="endDate" class="col-sm-1 control-label">优惠价格截止日期</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="endDate" name="s.aps.endDate" value="2028-12-01" role="date">
+    </div>
+    <label for="partNumber" class="col-sm-1 control-label">Part Number</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="partNumber" name="s.aps.manufacturerPartNumber" value="${product.partNumber}" readonly>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="giftwrap" class="col-sm-2 control-label">附加选项</label>
+    <div class="col-sm-2 checkbox">
+      <input type="checkbox" id="giftwrap" name="s.aps.isGiftWrap" value="true" checked> GiftWrap
+    </div>
+    <label for="fnSku" class="col-sm-1 control-label">FBA 的 FNSKU</label>
+    <div class="col-sm-2">
+      <input class="form-control" id="fnSku" name="s.fnSku" value="${s.fnSku}">
+    </div>
+    <label for="sellingCycle" class="col-sm-1 control-label">生命周期</label>
+    <div class="col-sm-2">
+      <select name="s.sellingCycle" class="form-control" id="sellingCycle">
+      #{list items:models.market.Selling.SC.values(), as: 'cycle'}
+        <option value="${cycle}" ${cycle == s.sellingCycle? 'selected':''}>${cycle.label()}</option>
+      #{/list}
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="title" class="col-sm-2 control-label">标题</label>
+    <div class="col-sm-8">
+      <textarea class="form-control" rows="3" name="s.aps.title" id="title"></textarea>
+    </div>
+  </div>
+
+  <div id="hardwarePlatform" style="display:none;">
+    <div class="form-group">
+      <label for="title" class="col-sm-2 control-label">Hardware Platform</label>
+      <div class="col-sm-8">
+        <input class="form-control" name="s.aps.hardwarePlatformss[0]" value="" id="hardwarePlatform1">
       </div>
     </div>
+
+
   </div>
 
-  <div class="span5" style="text-align:right;">
-      #{input_append /}
-  </div>
 
-  <div class="span10">
-      #{textarea_field id:'title', name: 's.aps.title', rows: 3, label: '标题', value: '' /}
-  </div>
-
-  <div class="span10">
-    <div id="hardwarePlatformHome" style="display: none">
-        #{text_field id:'hardwarePlatform1', name: 's.aps.hardwarePlatformss[0]', label: 'Hardware Platform 1~5', value: '' /}
-         #{text_field id:'hardwarePlatform2', name: 's.aps.hardwarePlatformss[1]', label: '', value: '' /}
-         #{text_field id:'hardwarePlatform3', name: 's.aps.hardwarePlatformss[2]', label: '', value: '' /}
-         #{text_field id:'hardwarePlatform4', name: 's.aps.hardwarePlatformss[3]', label: '', value: '' /}
-         #{text_field id:'hardwarePlatform5', name: 's.aps.hardwarePlatformss[4]', label: '', value: '' /}
+  <div class="form-group">
+    <label for="bulletPoint1" class="col-sm-2 control-label">BulletPoint</label>
+    <div class="col-sm-8">
+      <input class="form-control" id="bulletPoint1" name="s.aps.keyFeturess[0]" placeholder="bulletPoint 1">
     </div>
-
-      #{text_field id:'bulletPoint1', name: 's.aps.keyFeturess[0]', label: 'BulletPoint 1~5',  value: ''/}
-      #{text_field id:'bulletPoint2', name: 's.aps.keyFeturess[1]', label: '', value: '' /}
-      #{text_field id:'bulletPoint3', name: 's.aps.keyFeturess[2]', label: '', value: ''/}
-      #{text_field id:'bulletPoint4', name: 's.aps.keyFeturess[3]', label: '', value: ''/}
-      #{text_field id:'bulletPoint5', name: 's.aps.keyFeturess[4]', label: '', value: ''/}
-
-      #{text_field id:'searchTerms1', name: 's.aps.searchTermss[0]', label: 'SearchTerms 1~5', value: ''/}
-      #{text_field id:'searchTerms2', name: 's.aps.searchTermss[1]', label: '', value: ''/}
-      #{text_field id:'searchTerms3', name: 's.aps.searchTermss[2]', label: '', value: ''/}
-      #{text_field id:'searchTerms4', name: 's.aps.searchTermss[3]', label: '', value: ''/}
-      #{text_field id:'searchTerms5', name: 's.aps.searchTermss[4]', label: '', value: ''/}
-      #{textarea_field id:'productDesc', name: 's.aps.productDesc', rows: 10, label: '产品详细描述', value: '' /}
+    <div class="col-sm-1">
+      <span class="help-inline" id="bulletPoint1_hint"></span>
+    </div>
   </div>
-  <div class="offset1 span9" id="previewDesc"></div>
-#{/form}
+
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="bulletPoint2" name="s.aps.keyFeturess[1]" placeholder="bulletPoint 2">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="bulletPoint2_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="bulletPoint3" name="s.aps.keyFeturess[2]" placeholder="bulletPoint 3">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="bulletPoint3_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="bulletPoint4" name="s.aps.keyFeturess[3]" placeholder="bulletPoint 4">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="bulletPoint4_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="bulletPoint5" name="s.aps.keyFeturess[4]" placeholder="bulletPoint 5">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="bulletPoint5_hint"></span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="searchTerms1" class="col-sm-2 control-label">SearchTerms</label>
+    <div class="col-sm-8">
+      <input class="form-control" id="searchTerms1" name="s.aps.searchTermss[0]" placeholder="searchTerms 1">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="searchTerms1_hint"></span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="searchTerms2" name="s.aps.searchTermss[1]" placeholder="searchTerms 2">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="searchTerms2_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="searchTerms3" name="s.aps.searchTermss[2]" placeholder="searchTerms 3">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="searchTerms3_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="searchTerms4" name="s.aps.searchTermss[3]" placeholder="searchTerms 4">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="searchTerms4_hint"></span>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2">
+      <input class="form-control" id="searchTerms5" name="s.aps.searchTermss[4]" value="${s.aps.searchTermss[4]}"
+             placeholder="searchTerms 5">
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="searchTerms5_hint"></span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="productDesc" class="col-sm-2 control-label">产品详细描述</label>
+    <div class="col-sm-8">
+      <textarea class="form-control" id="productDesc" name="s.aps.productDesc" rows="15">${s.aps.productDesc}</textarea>
+    </div>
+    <div class="col-sm-1">
+      <span class="help-inline" id="productDesc_hint"></span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-8 col-sm-offset-2" id="previewDesc"></div>
+  </div>
+</form>
 
 #{include 'Sellings/_invalid_characters.html'/}
-</div>
 
 <input type="hidden" id="upc_init" value="${product.upc}"/>
 <input type="hidden" id="partNumber_init" value="${product.partNumber}"/>
 <input type="hidden" id="upc_jp" value="${product.upcJP}"/>
 <input type="hidden" id="partNumber_jp" value="${product.partNumberJP}"/>
-
 
 #{tsp_show_template /}

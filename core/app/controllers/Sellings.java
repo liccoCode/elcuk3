@@ -101,9 +101,7 @@ public class Sellings extends Controller {
             if(StringUtils.isBlank(upc)) Webs.error("UPC 必须存在");
             if(StringUtils.isBlank(asin)) Webs.error("ASIN 必须存在");
             if(StringUtils.isBlank(market)) Webs.error("Market 必须存在");
-
-            String msku = String.format("%s,%s", sku.trim(), upc.trim());
-            Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
+            Selling selling = Selling.blankSelling(sku, asin, upc, acc, M.val(market));
             renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
@@ -315,7 +313,6 @@ public class Sellings extends Controller {
     }
 
     public static void createSelling(Selling s) {
-
         render(s);
     }
 
