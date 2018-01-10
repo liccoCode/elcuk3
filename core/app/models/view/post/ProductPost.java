@@ -9,6 +9,7 @@ import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,7 @@ public class ProductPost extends Post<Product> {
     public F.T2<String, List<Object>> params() {
         StringBuilder sbd = new StringBuilder("SELECT DISTINCT p FROM Product p")
                 .append(" LEFT JOIN p.productAttrs a")
-                .append(" LEFT JOIN p.listings l")
-                .append(" LEFT JOIN l.sellings s")
+                .append(" LEFT JOIN p.sellings s")
                 .append(" WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -74,10 +74,9 @@ public class ProductPost extends Post<Product> {
             if(StringUtils.equalsIgnoreCase(this.state, "Active")) {
                 sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.NEW, Product.S.SELLING)));
             } else {
-                sbd.append(SqlSelect.inlineParam(Arrays.asList(Product.S.DOWN)));
+                sbd.append(SqlSelect.inlineParam(Collections.singletonList(Product.S.DOWN)));
             }
         }
-        
         String username = Login.currentUserName();
         List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
                 .collect(Collectors.toList());
