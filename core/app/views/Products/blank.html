@@ -35,6 +35,7 @@
             <label for="p_sku" class="col-sm-1 control-label">对应原始SKU</label>
             <div class="col-sm-3">
               <select style="width:100px;" name="pro.origin_project" class="form-control">
+                <option value="">请选择</option>
                   #{list items:models.User.COR.values(), as:'c'}
                     <option value="${c.name()}">${c.label()}</option>
                   #{/list}
