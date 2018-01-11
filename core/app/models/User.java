@@ -286,6 +286,22 @@ public class User extends Model {
                 return "fa-child";
             }
         },
+        Glastal {
+            @Override
+            public String label() {
+                return "Glastal";
+            }
+
+            @Override
+            public String url() {
+                return "https://glastal.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-cutlery";
+            }
+        },
         Lecone {
             @Override
             public String label() {
