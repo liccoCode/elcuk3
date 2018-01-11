@@ -1219,8 +1219,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.autoUpdateComment(unit);
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.projectName;
-        this.taxPoint = unit.taxPoint;
-        this.containTax = unit.containTax;
         if(Validation.hasErrors()) return;
         //仓库加工修改
         int parentCurrQty = 0;

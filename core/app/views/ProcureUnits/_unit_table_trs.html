@@ -48,12 +48,12 @@
   <label for="unit_price" class="col-sm-1 control-label">单价</label>
   <div class="col-sm-2 form-inline">
     <input type="text" class="form-control" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
-           #{if !isEdit} readonly #{/if}/>
+    #{if !isEdit} readonly #{/if}/>
   #{pickCurrency id:'unit_currency', name:'unit.attrs.currency',class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
   </div>
   <label for="unit_price" class="col-sm-1 control-label">是否含税</label>
   <div class="col-sm-2 form-inline">
-    <select class="form-control" name="unit.containTax" style="width:80px;">
+    <select class="form-control" name="unit.containTax" style="width:80px;" #{if !isEdit } disabled #{/if}>
       <option #{if unit.containTax} selected #{/if} value="true">是</option>
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
@@ -77,12 +77,12 @@
       <div class="col-sm-11">
         <label class="radio-inline inline">
           <input type="radio" value="true" name="unit.isReturn" checked>退回到父计划
-          #{if unit.realParent}
-            <a href="@{ProcureUnits.detail(unit.realParent.id)}" target="_blank">${unit.realParent.id}</a>
-          #{/if}
-          #{else }
-            <a href="@{ProcureUnits.detail(unit.parent.id)}" target="_blank">${unit.parent.id}</a>
-          #{/else}
+            #{if unit.realParent}
+              <a href="@{ProcureUnits.detail(unit.realParent.id)}" target="_blank">${unit.realParent.id}</a>
+            #{/if}
+            #{else }
+              <a href="@{ProcureUnits.detail(unit.parent.id)}" target="_blank">${unit.parent.id}</a>
+            #{/else}
         </label>
         <label class="radio-inline inline">
           <input type="radio" value="false" name="unit.isReturn">否
