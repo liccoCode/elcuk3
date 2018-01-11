@@ -18,7 +18,8 @@
       <div class="box-header with-border"><h3 class="box-title">修改采购计划</h3></div>
       <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm" class="form-horizontal">
         <div class="box-body">
-        #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses, brandName: brandName/}
+        #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses,
+        brandName:brandName, isEdit:isEdit/}
         #{if unit.selling}
           <div class="form-group">
             <label class="col-sm-1 control-label">选择运输单(Option)</label>
@@ -52,12 +53,3 @@
 <input type="hidden" id="unitId" value="${unit.id}">
 
 #{records_v3 records:logs/}
-
-<script>
-  var priceFlag = $("#priceFlag").val();
-  if (priceFlag == 1) {
-    $("input[name='unit.attrs.price']").attr({'readOnly': false});
-  } else {
-    $("input[name='unit.attrs.price']").attr({'readOnly': true});
-  }
-</script>
