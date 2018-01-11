@@ -17,6 +17,7 @@ import java.util.List;
  * Date: 2017/11/21
  * Time: 上午10:25
  */
+@Every("3mn")
 public class AttachSyncJob extends BaseJob {
 
     public void doit() {
@@ -24,11 +25,10 @@ public class AttachSyncJob extends BaseJob {
         attachs.forEach(attach -> {
             Logger.info(String.format("Attach:[%s] 开始执行 七牛云迁移 方法", attach.location));
             try {
-
                 File tempFile = new File(attach.location);
-                String fileName = String.format("%s/%s", models.OperatorConfig.getVal("brandname"), tempFile.getName())
-                        .toLowerCase();
-                String url = QiniuUtils.upload(fileName, models.OperatorConfig.getVal("brandname"), attach.getBytes());
+                String fileName = String.format("%s/%s", attach.p.name(), tempFile.getName());
+                String bucket = String.format("erp-%s", models.OperatorConfig.getVal("brandname")).toLowerCase();
+                String url = QiniuUtils.upload(fileName, bucket, attach.getBytes());
                 if(StringUtils.isNotBlank(url)) {
                     attach.qiniuLocation = url;
                     attach.sync = 1;
