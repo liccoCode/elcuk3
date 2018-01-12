@@ -1,5 +1,6 @@
 package models.view.post;
 
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.procure.Cooperator;
@@ -9,9 +10,8 @@ import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -79,6 +79,23 @@ public class StockPost extends Post<ProcureUnit> {
             return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
         else
             return ProcureUnit.find(sql, params._2.toArray()).fetch();
+    }
+
+    public Map<String, String> total() {
+        Map<String, String> map = new HashMap<>();
+        F.T2<String, List<Object>> params = this.params();
+        List<ProcureUnit> units = ProcureUnit.find(params._1, params._2.toArray()).fetch();
+        Integer totalQty = units.stream().mapToInt(unit -> unit.availableQty).sum();
+        map.put("totalQty", totalQty.toString());
+        Double totalCNY = units.stream().filter(unit -> Objects.equals(Currency.CNY, unit.attrs.currency))
+                .mapToDouble(unit -> unit.availableQty * unit.attrs.price).sum();
+        BigDecimal b = new BigDecimal(totalCNY);
+        map.put("totalCNY", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        Double totalUSD = units.stream().filter(unit -> Objects.equals(Currency.USD, unit.attrs.currency))
+                .mapToDouble(unit -> unit.availableQty * unit.attrs.price).sum();
+        b = new BigDecimal(totalUSD);
+        map.put("totalUSD", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        return map;
     }
 
 
