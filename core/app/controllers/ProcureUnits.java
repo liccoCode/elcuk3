@@ -314,7 +314,7 @@ public class ProcureUnits extends Controller {
         List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
         List<Whouse> currWhouses = Whouse.findAll();
         unit.setPeriod();
-        User user = Login.current();
+        User user = User.findByUserName(Login.current().username.toLowerCase());
         boolean isEdit = user.roles.stream().anyMatch(role -> role.privileges.stream().anyMatch(privilege -> Objects
                 .equals(privilege.name, "cooperitem.price")));
         if(unit.stage == ProcureUnit.STAGE.IN_STORAGE) {
