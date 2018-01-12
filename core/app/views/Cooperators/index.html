@@ -50,8 +50,13 @@
             <th>操作</th>
           </tr>
         #{list items:coopers, as:'c'}
+          #{set category:c.containCategory() /}
           <tr style="background:#{if c.showRed()} red #{/if}">
-            <td>${c.fullName}</td>
+            <td data-toggle="tooltip" title="涉及品线【${category}】">${c.fullName}
+              #{if category}
+                <span style="color:blue">【${category}】</span>
+              #{/if}
+            </td>
             <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
               <span><i class="icon-reorder"></i></span>
                 #{if c.type==models.procure.Cooperator.T.SUPPLIER}
