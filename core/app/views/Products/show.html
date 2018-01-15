@@ -4,7 +4,6 @@
     #{script 'highstock.js'/}
     #{script 'jquery.filedrop.js' /}
     #{script 'component/dropUpload.coffee'/}
-    #{script 'products/show.coffee'/}
     #{script 'products/show.es6'/}
     #{script 'products/skulinechart.coffee'/}
     #{script 'mobileBUGFix.mini.js'/}
@@ -72,8 +71,12 @@
 
         <div class="tab-pane" id="newattach">
           <div class="row-fluid">
-            <iframe frameBorder=0 scrolling=no src='https://kod.easya.cc/index.php?explorer/index&path=SKU/${pro.sku}'
-                    width="100%" height="1000px"></iframe>
+            <div style="min-height:300px;" class="span12 well" id="dropbox">
+              <ul class="thumbnails uploaded"></ul>
+            #{power.ck "products.edit"}
+              <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+            #{/power.ck}
+            </div>
           </div>
         </div>
 

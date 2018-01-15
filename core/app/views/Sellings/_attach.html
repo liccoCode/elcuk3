@@ -1,4 +1,10 @@
+
+<input class="form-control" value="${s.merchantSKU.split(",")[0]}" id="p_sku" name="pro.sku" type="hidden">
 <div class="row-fluid">
-  <iframe frameBorder=0 scrolling=no src='https://kod.easya.cc/index.php?explorer/index&path=SKU/${s.merchantSKU.split(",")[0]}'
-          width="100%" height="1000px"></iframe>
+  <div style="min-height:300px;" class="span12 well" id="dropbox">
+    <ul class="thumbnails uploaded"></ul>
+  #{power.ck "products.edit"}
+    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+  #{/power.ck}
+  </div>
 </div>
