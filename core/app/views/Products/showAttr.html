@@ -40,16 +40,7 @@
                       <div class="col-sm-2">
                         <input class="form-control" value="${pro.category}" readonly>
                       </div>
-                      <label for="" class="col-sm-1 control-label">Family</label>
-                      <div class="col-sm-2">
-                        <input class="form-control" value="${pro.family?.family}" readonly>
-                      </div>
-                      <label for="" class="col-sm-1 control-label">Brand</label>
-                      <div class="col-sm-2">
-                        <input class="form-control" value="${pro.family?.brand}" readonly>
-                      </div>
                     </div>
-
 
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
@@ -258,14 +249,15 @@
 
 
         <div class="tab-pane" id="newattach">
-          <div class="row-fluid">
-            <div style="min-height:300px;" class="span12 well" id="dropbox">
-              <ul class="thumbnails uploaded"></ul>
-            #{power.ck "products.edit"}
-              <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-            #{/power.ck}
+          <div class="box">
+              <div class="box-header with-border"><h3 class="box-title">附件 <i class="icon-sort-down"></i></h3></div>
+              <div class="box-body">
+                <div style="min-height:300px;" class="col-md-12 well" id="dropbox">
+                  <ul class="thumbnails uploaded"></ul>
+                  <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+                </div>
+              </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
