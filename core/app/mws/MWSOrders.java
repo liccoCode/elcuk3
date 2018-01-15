@@ -3,16 +3,14 @@ package mws;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrders;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersClient;
 import com.amazonservices.mws.orders.MarketplaceWebServiceOrdersConfig;
-import com.amazonservices.mws.orders.model.ListOrderItemsRequest;
-import com.amazonservices.mws.orders.model.ListOrderItemsResponse;
-import com.amazonservices.mws.orders.model.ListOrderItemsResult;
+import com.amazonservices.mws.orders.model.*;
 import helper.Currency;
 import models.market.*;
+import models.market.OrderItem;
 import models.product.Product;
 import play.db.jpa.GenericModel;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -70,7 +68,42 @@ public class MWSOrders {
 
     public static void invokeListOrderItems(Orderr orderr) {
         MarketplaceWebServiceOrders client = MWSOrders.client(orderr.account, orderr.market);
-        ListOrderItemsRequest request = new ListOrderItemsRequest(orderr.account.merchantId, orderr.orderId);
+        String sellerId = orderr.account.merchantId;
+        GetOrderRequest orderRequest = new GetOrderRequest(sellerId, Collections.singletonList(orderr.orderId));
+        /*订单信息同步*/
+        GetOrderResponse orderResponse = client.getOrder(orderRequest);
+        List<Order> orderList = orderResponse.getGetOrderResult().getOrders();
+        orderList.forEach(order -> {
+            orderr.shipDate = order.getEarliestShipDate().toGregorianCalendar().getTime();
+            orderr.createDate = order.getPurchaseDate().toGregorianCalendar().getTime();
+            orderr.paymentDate = order.getPurchaseDate().toGregorianCalendar().getTime();
+            orderr.state = Orderr.getState(order.getOrderStatus().toLowerCase());
+            orderr.market = M.toM(order.getSalesChannel());
+
+            orderr.buyer = order.getBuyerName();
+            if(order.getShippingAddress() != null) {
+                orderr.city = order.getShippingAddress().getCity();
+                orderr.postalCode = order.getShippingAddress().getPostalCode();
+                orderr.province = order.getShippingAddress().getStateOrRegion();
+                orderr.country = order.getShippingAddress().getCountryCode();
+                orderr.reciver = order.getShippingAddress().getName();
+                orderr.address = order.getShippingAddress().getAddressLine1();
+                orderr.address1 = order.getShippingAddress().getAddressLine2();
+            }
+
+            orderr.email = order.getBuyerEmail();
+            orderr.businessOrder = order.getIsBusinessOrder();
+
+            orderr.memo = "重新抓取订单信息";
+            if(order.getOrderTotal() != null) {
+                orderr.totalAmount = Float.parseFloat(order.getOrderTotal().getAmount());
+            }
+            orderr.shipLevel = order.getShipServiceLevel();
+            orderr.save();
+        });
+
+        /*订单项同步*/
+        ListOrderItemsRequest request = new ListOrderItemsRequest(sellerId, orderr.orderId);
         request.setMWSAuthToken(orderr.account.token);
         ListOrderItemsResponse response = client.listOrderItems(request);
         ListOrderItemsResult result = response.getListOrderItemsResult();
@@ -96,7 +129,6 @@ public class MWSOrders {
             orderItem.usdCost = orderItem.currency.toUSD(orderItem.price);
             if(item.getGiftWrapPrice() != null)
                 orderItem.giftWrap = Float.parseFloat(item.getGiftWrapPrice().getAmount());
-            orderItem.orderItemId = item.getOrderItemId();
             if(item.getPromotionIds().size() > 0) {
                 StringBuffer promotionIds = new StringBuffer();
                 item.getPromotionIds().forEach(promotion -> promotionIds.append(promotion).append(";"));
@@ -104,7 +136,6 @@ public class MWSOrders {
             }
             orderItem.save();
         });
-
     }
 
 

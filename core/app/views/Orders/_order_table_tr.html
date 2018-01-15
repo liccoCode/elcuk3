@@ -1,14 +1,14 @@
 <tr>
-  <th width="80px;">Market</th>
+  <th width="40px;">Market</th>
   <th width="40px;" data-toggle="tooltip" title="送往国家">国家</th>
-  <th style="width:180px;">Fees Percent(USD)</th>
-  <th width="130px;">Address Detail</th>
+  <th style="width:185px;">Fees Percent(USD)</th>
+  <th width="140px;">Address Detail</th>
   <th data-toggle="popover" title="数字是什么?" content="(a | b), a: 订单重销售产品的个数. b: 支付信息个数" style="width:200px;">
     <i class="icon-question-sign"></i> OrderId
   </th>
   <th>SKU</th>
   <th style="width:70px;">优惠</th>
-  <th>Buyer</th>
+  <th style="width:110px;">Buyer</th>
   <th>Email</th>
   <th style="width:90px;">Create</th>
   <th style="width:90px;">ShipDate</th>
@@ -18,7 +18,7 @@
 </tr>
 #{list items:items, as:'ord'}
 <tr class="order_info" id="orderInfo_${ord.orderId}" data-toggle="collapse" data-target="#orderDetail_${ord.orderId}">
-  <td>${ord.market.name()}</td>
+  <td>${ord.market.countryName()}</td>
   <td style="padding:0;" data-toggle="tooltip" title="地址信息: ${ord.address.raw()}">
     <div class="flag-wrapper" style="margin:0">
       <div class="img-thumbnail flag flag-icon-background flag-icon-${ord.country?.toLowerCase()}"></div>
@@ -51,7 +51,7 @@
         <i class="fa fa-check" style="color:green"></i> <a>Detail</a>
       #{/if}
   </td>
-  <td>${ord.buyer}</td>
+  <td data-toggle="tooltip" title="${ord.buyer}">${ord.buyer?.overLong()}</td>
   <td>
     <a href="javascript:void(0)" rel="tooltip" title="${ord.email}">${ord.email != null ? ord.email.split("@")[0] : ord.email}</a>
   </td>

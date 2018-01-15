@@ -59,11 +59,12 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             CascadeType.REFRESH}, fetch = FetchType.LAZY)
     public List<Listing> listings = new ArrayList<>();
 
-    @ManyToOne
-    public Category category;
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
+            CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    public List<Selling> sellings = new ArrayList<>();
 
     @ManyToOne
-    public Family family;
+    public Category category;
 
     /**
      * 产品拥有哪些扩展属性
@@ -506,10 +507,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 创建一个全新的 Product
      */
     public Product createProduct() {
-        /**
+        /*
          * 1. 检查 SKU 是否合法
          * 2. 检查废弃的 SKU
-         * 3. Family 不能为空!
          * 4. 检查 SKU 前缀是否与 Family 一致
          * 5. Category 不能为空
          * 6. 产品的名称不能为空
@@ -528,12 +528,10 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
         if(Product.unUsedSKU(this.sku))
             Validation.addError("", "SKU[ " + this.sku + " ] 为废弃 SKU, 不能使用!");
-        if(this.family == null)
-            Validation.addError("", "Family 不存在,请先添加后再创建 Product!");
-        if(this.family != null && !StringUtils.startsWith(this.sku, this.family.family))
-            Validation.addError("", "Family(" + this.family.family + ") 与 SKU(" + this.sku + ") 不匹配!");
         if(this.category == null)
             Validation.addError("", "Category 不存在, 请创添加后再创建 Product!");
+        if(this.category != null && !StringUtils.startsWith(this.sku, this.category.categoryId))
+            Validation.addError("", "Category(" + this.category.categoryId + ") 与 SKU(" + this.sku + ") 不匹配!");
         this.checkUPCisRepeat();
         if(Validation.hasErrors()) return null;
         this.createDate = new Date();
@@ -1031,28 +1029,25 @@ public class Product extends GenericModel implements ElcukRecord.Log {
      * 复制另一个SKU的信息，将会保存
      *
      * @param skuid
-     * @param base
      * @param extend
      * @param attach
      * @return
      */
-    public static Product backupProduct(String skuid, String base, String extend, String attach, String sku,
-                                        String family) {
+    public static Product backupProduct(String skuid, String extend, String attach, String sku) {
         Product pro = Product.findByMerchantSKU(skuid);
         pro.arryParamSetUP(Product.FLAG.STR_TO_ARRAY);
-
         Product backupsku = new Product();
-
         Product validpro = Product.findByMerchantSKU(sku);
         if(validpro != null) {
             Validation.addError("", String.format("已经存在SKU%s!", sku));
             return backupsku;
         }
-
-        Family fm = Family.findById(family);
+        if(pro.category != null && !StringUtils.startsWith(sku, pro.category.categoryId)) {
+            Validation.addError("", "Category(" + pro.category.categoryId + ") 与 SKU(" + sku + ") 不匹配!");
+            return backupsku;
+        }
         backupsku.sku = sku;
-        backupsku.family = fm;
-        backupsku.category = fm.category;
+        backupsku.category = pro.category;
         backupsku.lengths = pro.lengths;
         backupsku.productName = pro.productName;
         backupsku.heigh = pro.heigh;
@@ -1160,11 +1155,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     public void changePartNumber(String oldNumber) {
         if(StringUtils.isNotBlank(this.partNumber) && !this.partNumber.equals(oldNumber)) {
-            for(Listing listing : this.listings) {
-                for(Selling selling : listing.sellings) {
-                    selling.aps.manufacturerPartNumber = this.partNumber;
-                    selling.save();
-                }
+            for(Selling selling : this.sellings) {
+                selling.aps.manufacturerPartNumber = this.partNumber;
+                selling.save();
             }
         }
     }

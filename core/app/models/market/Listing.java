@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import helper.Crawl;
 import helper.DBUtils;
-import helper.Webs;
 import jobs.ListingSchedulJob;
 import jobs.works.ListingOffersWork;
 import models.product.Product;
@@ -64,12 +63,6 @@ public class Listing extends GenericModel {
         this.product = prod;
     }
 
-    /**
-     * 不能级联删除, 并且删除 Listing 的时候需要保证 Selling 都已经处理了
-     */
-    @OneToMany(mappedBy = "listing", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-            CascadeType.REFRESH})
-    public List<Selling> sellings;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL)
     public List<ListingOffer> offers;
@@ -162,9 +155,6 @@ public class Listing extends GenericModel {
 
     @Expose
     public Long lastUpdateTime;
-
-    @OneToMany(mappedBy = "listing")
-    public List<ListingStateRecord> stateRecords;
 
     /**
      * 上一次做 Review Check 的时间
@@ -522,42 +512,7 @@ public class Listing extends GenericModel {
     }
 
     public void safeDelete() {
-        long size = this.sellings.size();
-        if(this.sellings.size() > 0) {
-            Webs.error("此 Listing 拥有 " + size + " 个 Selling 关联, 无法删除");
-        }
-        this.stateRecords.forEach(ListingStateRecord::delete);
         this.delete();
-    }
-
-    /**
-     * 记录 Listing 的状态变更历史记录
-     * 咨询运营得出: 基本上一个 Listing 对应一个 Selling, 所以 Listing 的状态等同于 Selling 的状态
-     * 1. 所有的 Selling 都下架了,记录: Listing 的状态变更为 "DOWN"
-     * 2. 所有 Selling 都上架,记录: Listing 的状态变更为 "Selling"(这个 Listing 不再销售了)
-     * 3. 同时包含 Selling 和 New, 记录: Listing 的状态变更为 "Selling"(表示这个 Listing 还在销售?)
-     * 4. 同时包含 Selling 和 Down, 记录: Listing 的状态变更为 "Selling"(表示这个 Listing 还在销售?)
-     * 综上所述:
-     * 只要还有一个 Selling 在销售, 则 Listing 为 Selling 状态
-     * 反之所有 Selling 都下架则 Listing 状态为 Down 状态
-     */
-    public void recordingListingState(Date changedDate) {
-        long count = Selling.count("state='SELLING' AND listing_listingId=?", this.listingId);
-        long num = Selling.count("listing_listingId=? ", this.listingId);
-        ListingStateRecord record = new ListingStateRecord();
-        record.listing = this;
-        if(count > 0) {
-            record.changedDate = changedDate;
-            record.state = ListingStateRecord.S.SELLING;
-        } else {
-            if(num == 0) {
-                record.state = ListingStateRecord.S.NEW;
-            } else {
-                record.state = ListingStateRecord.S.DOWN;
-            }
-        }
-        record.save();
-        record.pushRecordToCache();
     }
 
     public static String handleAsinBySku(String sku) {

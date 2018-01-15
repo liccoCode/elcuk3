@@ -21,9 +21,9 @@
     <td>${itm.material?.name}</td>
     <td>${itm.material?.type?.label()}</td>
     <td></td>
-    <td title="${itm.material?.specification}" rel="tooltip">${itm.material?.specification.xxLong()}</td>
-    <td title="${itm.material?.technology}" rel="tooltip">${itm.material?.technology.overLong()}</td>
-    <td title="${itm.material?.version}" rel="tooltip">${itm.material?.version.overLong()}</td>
+    <td title="${itm.material?.specification}" data-toggle="tooltip">${itm.material?.specification?.nineLong()}</td>
+    <td title="${itm.material?.technology}" data-toggle="tooltip">${itm.material?.technology?.nineLong()}</td>
+    <td title="${itm.material?.version}" data-toggle="tooltip">${itm.material?.version?.overLong()}</td>
     <td>${itm.price.format('#.##')} ${itm.currency}</td>
     <td>${itm.period}</td>
     <td>${itm.boxSize}</td>

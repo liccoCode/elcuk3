@@ -16,7 +16,6 @@ import models.procure.CooperItem;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
-import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
@@ -315,7 +314,13 @@ public class ProcureUnits extends Controller {
         List<Whouse> whouses = Whouse.findByType(Whouse.T.FBA);
         List<Whouse> currWhouses = Whouse.findAll();
         unit.setPeriod();
-        render(unit, oldPlanQty, whouses, currWhouses);
+        User user = User.findByUserName(Login.current().username.toLowerCase());
+        boolean isEdit = user.roles.stream().anyMatch(role -> role.privileges.stream().anyMatch(privilege -> Objects
+                .equals(privilege.name, "cooperitem.price")));
+        if(unit.stage == ProcureUnit.STAGE.IN_STORAGE) {
+            isEdit = false;
+        }
+        render(unit, oldPlanQty, whouses, currWhouses, isEdit);
     }
 
     /**

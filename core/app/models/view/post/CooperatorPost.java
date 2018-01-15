@@ -4,8 +4,10 @@ import controllers.Login;
 import helper.DBUtils;
 import models.User;
 import models.procure.Cooperator;
+import models.product.Category;
 import org.apache.commons.lang.StringUtils;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 
@@ -33,10 +35,11 @@ public class CooperatorPost extends Post<Cooperator> {
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT c FROM Cooperator c LEFT JOIN c.cooperItems i ");
+        sql.append(" LEFT JOIN i.product t ");
         sql.append(" LEFT JOIN i.material m WHERE  1 = 1 ");
 
         if(StringUtils.isNotEmpty(search)) {
-            sql.append(" AND (i.product.sku like ? OR c.fullName like ? OR c.name like ? or m.code like ?)");
+            sql.append(" AND (t.sku like ? OR c.fullName like ? OR c.name like ? or m.code like ?)");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
             params.add("%" + search + "%");
@@ -56,6 +59,19 @@ public class CooperatorPost extends Post<Cooperator> {
         }
         sql.append(" AND c.visible = ? ");
         params.add(visible);
+
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        if(categoryList != null && categoryList.size() > 0) {
+            sql.append(" AND (t.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
+            sql.append(" OR t.sku is null)");
+        } else {
+            categoryList = new ArrayList<>();
+            categoryList.add("-1");
+            sql.append(" AND i.product.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
+        }
+
         sql.append(" ORDER BY c.name ASC ");
         return new F.T2<>(sql.toString(), params);
     }

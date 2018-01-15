@@ -3,8 +3,10 @@
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
-    #{script 'timeline/timeline_js/timeline-api.js'/}
-    #{script 'analyzes/timeline.coffee'/}
+    #{if !isB2B}
+        #{script 'timeline/timeline_js/timeline-api.js'/}
+        #{script 'analyzes/timeline.coffee'/}
+    #{/if}
     #{script 'deliveryments/show.coffee'/}
     #{script 'deliveryments/show.es6'/}
     #{script 'procureunits/_unit_list.coffee'/}
@@ -51,7 +53,7 @@
             </div>
             <label for="subtitle_input" class="col-sm-1 control-label">CreateDate</label>
             <div class="col-sm-2">
-              <input type="text" readonly class="form-control" name="dmt.createDate" value="${dmt.createDate.datetime()}">
+              <input type="text" readonly class="form-control" value="${dmt.createDate.datetime()}">
             </div>
             <label for="p_sku" class="col-sm-1 control-label">Creator</label>
             <div class="col-sm-2">
@@ -132,14 +134,14 @@
           #{if dmt.state.name().equals("PENDING_REVIEW")}
             <form action="@{Deliveryments.review()}" method="post" style="display:inline-block;">
               <input type="hidden" name="id" value="${dmt.id}">
-                <select style="width:80px;" name="result" class="form-control">
-                  <option value="">请选择</option>
-                  <option value="true">通过</option>
-                  <option value="false">驳回</option>
-                </select>
-                <input class="form-control" name="msg" value="${msg}" id="apply_input" style="display:none; width:260px;"
-                       placeHolder="如果驳回，简要填写驳回的原因">
-                <button class="btn btn-warning">提交审核</button>
+              <select style="width:80px;" name="result" class="form-control">
+                <option value="">请选择</option>
+                <option value="true">通过</option>
+                <option value="false">驳回</option>
+              </select>
+              <input class="form-control" name="msg" value="${msg}" id="apply_input" style="display:none; width:260px;"
+                     placeHolder="如果驳回，简要填写驳回的原因">
+              <button class="btn btn-warning">提交审核</button>
             </form>
           #{/if}
       #{/power.ck}

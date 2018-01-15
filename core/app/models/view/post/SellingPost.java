@@ -32,7 +32,7 @@ public class SellingPost extends Post<Selling> {
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s LEFT JOIN s.listing l WHERE 1 = 1 ");
+        StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s WHERE 1 = 1 ");
 
         if(StringUtils.isNotBlank(analyzeResult)) {
             params.add(analyzeResult);
@@ -55,11 +55,11 @@ public class SellingPost extends Post<Selling> {
             params.add(Selling.S.DOWN);
         }
         if(StringUtils.isNotBlank(categoryid)) {
-            sql.append(" AND s.listing.product.category.categoryId = ? ");
+            sql.append(" AND s.product.category.categoryId = ? ");
             params.add(categoryid);
         }
         if(StringUtils.isNotBlank(keywords)) {
-            sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.listing.product.sku LIKE ? ) ");
+            sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.product.sku LIKE ? ) ");
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
@@ -69,11 +69,11 @@ public class SellingPost extends Post<Selling> {
         List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
                 .collect(Collectors.toList());
         if(categoryList != null && categoryList.size() > 0) {
-            sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
+            sql.append(" AND s.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
         } else {
             categoryList = new ArrayList<>();
             categoryList.add("-1");
-            sql.append(" AND l.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
+            sql.append(" AND s.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
         }
 
         sql.append(" ORDER BY s.createDate DESC ");

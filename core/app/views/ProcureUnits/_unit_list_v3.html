@@ -25,7 +25,7 @@
     <th width="120px;">数量<br>(计划/交货/入库)</th>
     <th>可用库存</th>
   #{ifnot deliveryplan}
-    <th>单价</th>
+    <th width="60px;">单价</th>
     <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
       <abbr>总价</abbr>
     </th>
@@ -186,7 +186,7 @@
 
   <tr id="${tr_key}_${unit.id}" style="display:none;">
     <td colspan="${checkbox ? '23' : '21'}" style="background-color:#F0F0F0;">
-      
+
       <div class="col-md-3">
         <div class="box box-warning">
           <div class="box-header with-border"><h3 class="box-title">Comment【所属项目:${unit.projectName}】</h3></div>
@@ -249,10 +249,12 @@
                   <a href="@{ProcureUnits.detail(unit.id)}#${unit?.id}" target="_blank" class="btn btn-xs btn-info">变更详情</a>
                     #{power.ck "procures.dosplitunit"}
                         #{if Arrays.asList('DELIVERY','IN_STORAGE').contains(unit.stage.name())}
-                          <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-xs btn-default"
-                             rel="tooltip" title="如B2B拆单，样品，试用等操作">SKU分拆</a>
                           <a href="@{ProcureUnits.splitUnit(unit.id, true)}" class="btn btn-xs btn-warning" target="_blank">
                           ${unit.stage.name()=='DELIVERY'?'采购分拆':'库存分拆'}</a>
+                            #{if !unit.selling}
+                              <a href="@{ProcureUnits.splitUnit(unit.id, false)}" target="_blank" class="btn btn-xs btn-default"
+                                 rel="tooltip" title="如B2B拆单，样品，试用等操作">SKU分拆</a>
+                            #{/if}
                         #{/if}
                     #{/power.ck}
                 </td>

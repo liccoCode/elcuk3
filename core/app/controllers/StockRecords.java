@@ -17,6 +17,7 @@ import play.mvc.With;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -45,11 +46,12 @@ public class StockRecords extends Controller {
     public static void stockIndex(StockPost p) {
         if(p == null) p = new StockPost();
         List<ProcureUnit> units = p.query();
+        Map<String, String> total = p.total();
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
         if(isB2B) {
-            render("/StockRecords/stockIndexB2B.html", p, units);
+            render("/StockRecords/stockIndexB2B.html", p, units, total);
         } else {
-            render(p, units);
+            render(p, units, total);
         }
     }
 

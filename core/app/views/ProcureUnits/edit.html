@@ -6,17 +6,6 @@
 
 #{errorMsgs /}
 
-<div class="alert alert-warning alert-dismissible">
-  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-  <h4><i class="icon fa fa-warning">采购计划在不同状态修改会有限制</i></h4>
-  <ol>
-    <li>如果该采购计划为父采购计划，则不能修改数量</li>
-    <li>计划中: 仓库, 合作伙伴, 价格, 数量, 运输类型, 预计到库时间, 预计交货时间, 预计运输时间, 运输单</li>
-    <li>采购中: 仓库, 价格, 数量, 运输类型, 预计到库时间, 预计交货时间, 预计运输时间, 运输单</li>
-    <li>完成交货: 预计到库时间, 预计运输时间, 运输单</li>
-  </ol>
-</div>
-
 #{if unit.isShipmentPlan()}
     #{error_row }
     <li>当前采购计划所在的运输单已不是“计划中”状态，请与物流确认后再操作</li>
@@ -29,7 +18,8 @@
       <div class="box-header with-border"><h3 class="box-title">修改采购计划</h3></div>
       <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm" class="form-horizontal">
         <div class="box-body">
-        #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses, brandName: brandName/}
+        #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses,
+        brandName:brandName, isEdit:isEdit/}
         #{if unit.selling}
           <div class="form-group">
             <label class="col-sm-1 control-label">选择运输单(Option)</label>
@@ -63,12 +53,3 @@
 <input type="hidden" id="unitId" value="${unit.id}">
 
 #{records_v3 records:logs/}
-
-<script>
-  var priceFlag = $("#priceFlag").val();
-  if (priceFlag == 1) {
-    $("input[name='unit.attrs.price']").attr({'readOnly': false});
-  } else {
-    $("input[name='unit.attrs.price']").attr({'readOnly': true});
-  }
-</script>

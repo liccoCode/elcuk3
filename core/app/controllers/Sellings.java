@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.DateTime;
-import org.jsoup.helper.Validate;
 import play.data.validation.Error;
 import play.data.validation.Validation;
 import play.jobs.Job;
@@ -40,26 +39,6 @@ import java.util.stream.Collectors;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Sellings extends Controller {
 
-
-    /**
-     * 将指定 merchantSKU 的 Selling 与指定的 listingId 进行关联
-     *
-     * @param msku
-     * @param listingId
-     */
-    public static void assoListing(String msku, String listingId) {
-        validation.required(msku);
-        validation.required(listingId);
-
-        Selling selling = Selling.find("merchantSKU=?", msku).first();
-        Validate.notNull(selling);
-        Listing listing = Listing.find("listingId=?", listingId).first();
-        Validate.notNull(listing);
-        selling.listing = listing;
-
-        selling.save();
-    }
-
     public static void selling(String id) {
         Selling s = Selling.findById(id);
         s.aps.arryParamSetUP(AmazonProps.T.STR_TO_ARRAY);
@@ -68,30 +47,12 @@ public class Sellings extends Controller {
         renderArgs.put("feeds", s.feeds());
 
         List<ElcukRecord> logs =
-                ElcukRecord.find("fid=? AND (action=? or action=? or action=?) ORDER BY createAt DESC", id.toString(),
+                ElcukRecord.find("fid=? AND (action=? or action=? or action=?) ORDER BY createAt DESC", id,
                         "selling.image", "selling.sync.back", "selling.update").fetch(4);
         renderArgs.put("records", logs);
         SellingAmzPost p = new SellingAmzPost();
         render(s, p);
     }
-
-    /**
-     * 加载指定 Product 所属的 Family 下的所有的 SellingId
-     *
-     * @param msku
-     */
-    public static void sameFamilySellings(String msku) {
-        List<String> sids = new ArrayList<>();
-        Product product = Product.findByMerchantSKU(msku);
-        if(product != null && product.family != null) {
-            List<Selling> sellings = Selling.find("listing.product.family=?", product.family).fetch();
-            if(!sellings.isEmpty()) {
-                sids.addAll(sellings.stream().map(s -> s.sellingId).collect(Collectors.toList()));
-            }
-        }
-        renderJSON(J.json(sids));
-    }
-
 
     /**
      * 加载指定 Sid 下的所有的 SellingId
@@ -140,30 +101,12 @@ public class Sellings extends Controller {
             if(StringUtils.isBlank(upc)) Webs.error("UPC 必须存在");
             if(StringUtils.isBlank(asin)) Webs.error("ASIN 必须存在");
             if(StringUtils.isBlank(market)) Webs.error("Market 必须存在");
-
-            String msku = String.format("%s,%s", sku.trim(), upc.trim());
-            Selling selling = Selling.blankSelling(msku, asin, upc, acc, M.val(market));
-            selling.patchToListing();
+            Selling selling = Selling.blankSelling(sku, asin, upc, acc, M.val(market));
             renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
         }
     }
-
-    public static void changeListing(Selling s, String listingId) {
-        try {
-            Listing lst = Listing.findById(listingId);
-            if(lst == null) Webs.error("Listing " + listingId + "不存在");
-            String oldListingId = s.listing.listingId;
-            s.changeListing(lst);
-            flash.success("成功将 Selling %s 从 %s 转移到 %s", s.sellingId, oldListingId, listingId);
-            Sellings.selling(s.sellingId);
-        } catch(FastRuntimeException e) {
-            flash.error(e.getMessage());
-            Sellings.selling(s.sellingId);
-        }
-    }
-
 
     public static void imageUpload(final String sid, final String imgs) {
         if(StringUtils.isBlank(imgs)) renderJSON(new Ret("图片信息不能为空!"));
@@ -292,7 +235,7 @@ public class Sellings extends Controller {
             //修改 Product 在系统内的状态
             Product.changeProductType(selling.merchantSKU);
             //存储 Listing 状态变更记录
-            selling.listing.recordingListingState(DateTime.now().toDate());
+            selling.recordingListingState(DateTime.now().toDate(), selling.state.name());
             renderJSON(new Ret(true, sellingId));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
@@ -370,7 +313,6 @@ public class Sellings extends Controller {
     }
 
     public static void createSelling(Selling s) {
-
         render(s);
     }
 
@@ -385,16 +327,16 @@ public class Sellings extends Controller {
 
     public static void batchDownSelling(String[] sellingIds) {
         try {
-            for(int i = 0; i < sellingIds.length; i++) {
-                Selling selling = Selling.findById(sellingIds[i]);
+            for(String sellingId : sellingIds) {
+                Selling selling = Selling.findById(sellingId);
                 selling.state = Selling.S.DOWN;
                 selling.save();
                 //修改 Product 在系统内的状态
                 Product.changeProductType(selling.merchantSKU);
                 //存储 Listing 状态变更记录
-                selling.listing.recordingListingState(DateTime.now().toDate());
+                selling.recordingListingState(DateTime.now().toDate(), selling.state.name());
             }
-            renderJSON(new Ret(true, sellingIds.toString()));
+            renderJSON(new Ret(true, Arrays.toString(sellingIds)));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
         }
@@ -430,7 +372,7 @@ public class Sellings extends Controller {
 
     public static void findSellingBySkuAndMarket(String sku, String market, Long id) {
         Whouse whouse = Whouse.findById(id);
-        List<Selling> list = Selling.find("listing.product.sku=? AND market=? AND state <>? AND account.id = ? ",
+        List<Selling> list = Selling.find("product.sku=? AND market=? AND state <>? AND account.id = ? ",
                 sku, M.valueOf(market), Selling.S.DOWN, whouse.account.id).fetch();
         List<String> sids = new ArrayList<>();
         for(Selling s : list) sids.add(s.sellingId);

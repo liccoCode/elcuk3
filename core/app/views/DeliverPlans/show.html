@@ -81,7 +81,7 @@
                 </div>
               </div>
 
-              <div class="box box-warning collapsed-box box-solid">
+              <div class="box collapsed-box">
                 <div class="box-header with-border">
                   <h3 class="box-title" data-toggle="toggle" data-target="#tl">
                     Timeline <i class="icon-reorder"></i>
@@ -99,7 +99,7 @@
               </div>
 
               <form action="#" id="bulkpost" method="POST" class="form-horizontal">
-                <div class="box box-success box-solid">
+                <div class="box">
                   <div class="box-header with-border"><h3 class="box-title">已经添加进入[出货单]的[采购单元]</h3></div>
                   <div class="box-body">
                   #{render 'ProcureUnits/_unit_list_v3.html', units:dp.units, checkbox:true,
@@ -107,11 +107,9 @@
                   </div>
                   <div class="box-footer">
                   #{power.ck "products.edit"}
-                    <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' data-method="DELETE"
-                       id="delunit_form_submit" data-toggle="tooltip" data-placement="right" title="将 DELIVERY 状态的采购计划从采购单中移除出去" placement="right"
-                       class="btn btn-danger">
-                      解除
-                    </a>
+                    <a href="javascript:void(0);" data-url='@{DeliverPlans.delunits(dp.id)}' class="btn btn-danger"
+                       id="del_unit_form_submit" data-toggle="tooltip" data-placement="right" title="将 DELIVERY
+                       状态的采购计划从采购单中移除出去" >解除</a>
                   #{/power.ck}
                   #{power.ck 'fbas.deploytoamazon'}
                     <a href="javascript:void(0);" data-url='@{FBAs.deploysToAmazon("DeliverPlans", dp.id)}' data-method="POST"
@@ -131,7 +129,7 @@
 
             #{if showAdd}
                 #{form @DeliverPlans.addunits(dp.id), method: 'POST'}
-                  <div class="box box-primary box-solid">
+                  <div class="box">
                     <div class="box-header with-border"><h3 class="box-title">可添加进入[出货单]的[采购单元]</h3></div>
                     <div class="box-body">
                         #{render 'ProcureUnits/_unit_list_v3.html', units:plan_units, checkbox:true, key:'plan',deliveryplan:true/}

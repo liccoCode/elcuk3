@@ -7,15 +7,6 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-<section class="content-max-width">
-  <div class="callout callout-info">
-    <h4><i class="icon fa fa-info"></i>基础信息!</h4>
-    <p>请尽可能填写 长,宽,高,重量 这些参数, 因为这些参数是运输所需要的用到的计算参数!</p>
-    <p>长(包材)、宽(包材)、高(包材)、重量(包材)：是指包装好包材后整个产品的长宽高重量</p>
-    <p>长(产品)、宽(产品)、高(产品)、重量(产品)：是指还未包装的裸产品的长宽高重量</p>
-  </div>
-</section>
-
 <div class="row">
   <div class="col-md-12">
     <div class="box box-primary">
@@ -23,19 +14,19 @@
       <form action="@{Products.create()}" method="post" id="create_product_form" role="form" class="form-horizontal" autocomplete="off">
         <div class="box-body">
           <div class="form-group">
-            <label for="pro_category" class="col-sm-1 control-label">Category</label>
+            <label for="pro_category" class="col-sm-1 control-label">Category<i class="icon-asterisk" style="color:red"></i></label>
             <div class="col-sm-2">
-              <input class="form-control" id="pro_category" name="pro.category.categoryId" required
-                     value="${pro.category?.categoryId}" data-provide="typeahead" data-source="${categorys}">
-            </div>
-            <label for="pro_family" class="col-sm-1 control-label">Family</label>
-            <div class="col-sm-2">
-              <input id="pro_family" name="pro.family.family" data-provide="typeahead" required class="form-control"
-                     data-source="${families}" value="${pro.family?.family}">
+              <select name="pro.category.categoryId" class="form-control" id="pro_category">
+                <option value="">请选择</option>
+              #{list items:categorys, as:'c'}
+                <option value="${c}" ${c==pro.category?.categoryId? 'selected':''}>${c}</option>
+              #{/list}
+              </select>
             </div>
             <label for="inputEmail3" class="col-sm-1 control-label">SKU</label>
-            <div class="col-sm-2">
-              <input type="text" class="form-control" id="pro_sku" name="pro.sku" value="${pro.sku}" required>
+            <div class="col-sm-7 form-inline">
+              <input class="form-control" id="pro_sku" name="pro.sku" value="${pro.sku}" style="width:244px;" required>
+              <span style="color:red">sku命名推荐是品线 + 自定义英文+ "-" + 颜色,例如 20BSPB12000-BY</span>
             </div>
           </div>
 
@@ -44,6 +35,7 @@
             <label for="p_sku" class="col-sm-1 control-label">对应原始SKU</label>
             <div class="col-sm-3">
               <select style="width:100px;" name="pro.origin_project" class="form-control">
+                <option value="">请选择</option>
                   #{list items:models.User.COR.values(), as:'c'}
                     <option value="${c.name()}">${c.label()}</option>
                   #{/list}
@@ -53,6 +45,7 @@
             <label class="col-sm-1 control-label">供应商信息</label>
             <div class="col-sm-7">
               <select style="width:100px;" name="cooperatorId" class="form-control">
+                <option value="">请选择</option>
                   #{list items:cooperators, as:'c'}
                     <option value="${c.id}">${c.name}</option>
                   #{/list}
@@ -70,7 +63,9 @@
         #{/if}
 
           <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
+            <label for="inputEmail3" class="col-sm-1 control-label" title="指包装好包材后整个产品的长宽高重量"
+                   data-toggle="tooltip">长(包材)
+            </label>
             <div class="col-sm-2">
               <div class="input-group">
                 <input type="text" class="form-control" name="pro.lengths" value="${pro.lengths}">
@@ -106,7 +101,9 @@
           </div>
 
           <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">长(产品)</label>
+            <label for="inputEmail3" class="col-sm-1 control-label" title="是指还未包装的裸产品的长宽高重量"
+                   data-toggle="tooltip">长(产品)
+            </label>
             <div class="col-sm-2">
               <div class="input-group">
                 <input type="text" class="form-control" name="pro.productLengths" value="${pro.productLengths}">
@@ -200,11 +197,11 @@
           </div>
 
           <div class="form-group">
-            <label class="col-sm-1 control-label">UPC</label>
+            <label class="col-sm-1 control-label">UPC<i class="icon-asterisk" style="color:red"></i></label>
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.upc" value="${pro.upc}" required>
             </div>
-            <label class="col-sm-1 control-label">Part Number</label>
+            <label class="col-sm-1 control-label">Part Number<i class="icon-asterisk" style="color:red"></i></label>
             <div class="col-sm-2">
               <input type="text" class="form-control" name="pro.partNumber" value="${pro.partNumber}" required>
             </div>
@@ -219,6 +216,11 @@
           </div>
 
           <div class="form-group">
+            <label for="pro_abbreviation" class="col-sm-1 control-label">产品名称<i class="icon-asterisk" style="color:red"></i></label>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="pro.abbreviation" id="pro_abbreviation" required
+                     value="${pro.abbreviation}">
+            </div>
             <label for="inputEmail3" class="col-sm-1 control-label">上市时间</label>
             <div class="col-sm-2">
               <div class="input-group">
@@ -233,26 +235,16 @@
                 <input role="date" class="form-control" name="pro.delistingTime" value="${pro.delistingTime}">
               </div>
             </div>
-
-          </div>
-
-          <div class="form-group">
-            <label for="inputEmail3" class="col-sm-1 control-label">产品名称</label>
-            <div class="col-sm-6">
-              <input type="text" class="form-control" name="pro.abbreviation" id="pro_abbreviation" required
-                     value="${pro.abbreviation}">
-            </div>
-
           </div>
 
           <div class="form-group">
             <label for="inputEmail3" class="col-sm-1 control-label">标题</label>
-            <div class="col-sm-2">
+            <div class="col-sm-5">
               <input type="text" class="form-control" name="pro.productName" value="${pro.productName}">
             </div>
             <label for="inputEmail3" class="col-sm-1 control-label">副标题</label>
-            <div class="col-sm-6">
-              <input type="text" class="form-control" name="pro.subtitle" value="${pro.subtitle}" required>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="pro.subtitle" value="${pro.subtitle}">
             </div>
           </div>
 

@@ -12,13 +12,6 @@
 #{errorMsgs /}
 #{flash_alert /}
 
-<section class="content-max-width">
-  <div class="callout callout-warning">
-    <p>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</p>
-    <p>如果附件管理不能正常显示，请联系开发部</p>
-  </div>
-</section>
-
 #{if pro == null}
 读取的 Product 不存在!
 #{/if}
@@ -70,6 +63,12 @@
         </div>
 
         <div class="tab-pane" id="newattach">
+          <section class="content-max-width">
+            <div class="callout callout-warning">
+              <p>如果想在首页看到对应图片，可以在附件管理页面添加名字为0.jpg的图片</p>
+              <p>如果附件管理不能正常显示，请联系开发部</p>
+            </div>
+          </section>
           <div class="row-fluid">
             <div style="min-height:300px;" class="span12 well" id="dropbox">
               <ul class="thumbnails uploaded"></ul>

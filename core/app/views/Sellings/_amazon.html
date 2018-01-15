@@ -163,7 +163,7 @@
         <label for="productWeight" class="col-sm-2 control-label">重量(产品)</label>
         <div class="col-sm-2">
           <div class="form-inline">
-            <input class="form-control" readonly style="width:100px;" name="p.proWeight" value="${s.listing.product.productWeight}">
+            <input class="form-control" readonly style="width:100px;" name="p.proWeight" value="${s.product.productWeight}">
             <select style="width:100px;" id="sweight" name="p.weightUnit" class="form-control">
               <option value="KG">kg</option>
               <option value="OZ">oz</option>
@@ -178,11 +178,11 @@
         </label>
         <div class="col-sm-3">
           <div class="form-inline">
-            <input class="form-control" value="${s.listing.product.lengths}" id="standerPrice" name="p.productLengths"
+            <input class="form-control" value="${s.product.lengths}" id="standerPrice" name="p.productLengths"
                    style="width:60px;" readonly>
-            <input class="form-control" value="${s.listing.product.width}" id="standerPrice" name="p.productWidth"
+            <input class="form-control" value="${s.product.width}" id="standerPrice" name="p.productWidth"
                    style="width:60px;" readonly>
-            <input class="form-control" value="${s.listing.product.heigh}" id="standerPrice" name="p.productHeigh"
+            <input class="form-control" value="${s.product.heigh}" id="standerPrice" name="p.productHeigh"
                    style="width: 60px;" readonly>
             <select style="width:60px;" id="volumeunit" name="p.volumeunit" class="form-control">
               <option value="MM">mm</option>
@@ -195,7 +195,7 @@
         </label>
         <div class="col-sm-2">
           <div class="form-inline">
-            <input class="form-control" value="${s.listing.product.weight}" id="weight" name="p.packWeight"
+            <input class="form-control" value="${s.product.weight}" id="weight" name="p.packWeight"
                    style="width:80px;" readonly>
             <select style="width:100px;" id="sweight" name="p.weightUnit" class="form-control">
               <option value="KG">kg</option>

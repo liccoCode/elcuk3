@@ -5,18 +5,18 @@
 $(() => {
   //创建出货单blank预览页面验证出货数量js方法
   $('#unit_table').on('change', 'td>:input[name$=outQty]', function () {
-      let $input = $(this);
-      let surplusConfirmQty = $input.attr('surplusConfirmQty');
+    let $input = $(this);
+    let surplusConfirmQty = $input.attr('surplusConfirmQty');
 
-      //交货数量
-      if ($(this).val() < 0) {
-        noty({
-          text: '收货数量不能小于0!',
-          type: 'error'
-        });
-        $(this).val(0);
-        return;
-      }
+    //交货数量
+    if ($(this).val() < 0) {
+      noty({
+        text: '收货数量不能小于0!',
+        type: 'error'
+      });
+      $(this).val(0);
+      return;
+    }
     //交货数量
     if (parseInt($(this).val()) > parseInt(surplusConfirmQty)) {
       noty({
@@ -26,7 +26,7 @@ $(() => {
       $(this).val(0);
       return;
     }
-    });
+  });
 
   //修改出货单 show页面验证出货数量js方法
   $('#unit_table').on('change', 'td>:input[name$=qty]', function () {
@@ -170,7 +170,6 @@ $(() => {
         text: '请选择需要解除的出货单元!',
         type: 'error'
       });
-      returbn
     } else {
       $('#bulkpost').attr('action', $(this).data('url')).submit();
     }
@@ -181,13 +180,13 @@ $(() => {
     let val = $(this).val();
     if (val == 'FACTORY') {
       //工厂代收
-      $("#receiveTr").css('display' ,'');
+      $("#receiveTr").css('display', '');
       $('#outCooperator').removeAttr("disabled");
       $("#whouse").val("");
     } else if (val == 'WAREHOUSE') {
       //仓库自收
-      $("#receiveTr").css('display' ,'none');
-      $('#outCooperator').attr("disabled",true);
+      $("#receiveTr").css('display', 'none');
+      $('#outCooperator').attr("disabled", true);
       $("#whouse").val("深圳市光明新区玉律村第七工业区汉海达科技创新园1栋A区6楼");
 
     }

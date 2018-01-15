@@ -123,8 +123,8 @@ public class Products extends Controller {
         render("Products/show.html", pro);
     }
 
-    public static void backup(String choseid, String base, String extend, String attach, String sku, String family) {
-        Product pro = Product.backupProduct(choseid, base, extend, attach, sku, family);
+    public static void backup(String choseid, String extend, String attach, String sku) {
+        Product pro = Product.backupProduct(choseid, extend, attach, sku);
         render("Products/show.html", pro);
     }
 
@@ -182,12 +182,9 @@ public class Products extends Controller {
 
     @Before(only = {"blank", "create", "index", "backup"})
     public static void setUpCreatePage() {
-        List<String> families = Family.familys(true);
         List<String> products = Product.skus(true);
-        List<String> categorys = Category.allcategorys();
-        renderArgs.put("families", J.json(families));
         renderArgs.put("products", J.json(products));
-        renderArgs.put("categorys", J.json(categorys));
+        renderArgs.put("categorys", Category.allcategorys());
     }
 
     public static void blank(Product pro) {
@@ -201,10 +198,10 @@ public class Products extends Controller {
     public static void create(Product pro, Long cooperatorId, CooperItem copItem) {
         validation.valid(pro);
         pro.arryParamSetUP(Product.FLAG.ARRAY_TO_STR);
-        pro = pro.createProduct();
-        if(pro != null && cooperatorId != null) {
+        Product entity = pro.createProduct();
+        if(entity != null && cooperatorId != null) {
             Cooperator cooperator = Cooperator.findById(cooperatorId);
-            cooperator.createItemByProduct(copItem, pro);
+            cooperator.createItemByProduct(copItem, entity);
         }
         if(Validation.hasErrors()) render("Products/blank.html", pro);
         flash.success("Sku %s 添加成功", pro.sku);

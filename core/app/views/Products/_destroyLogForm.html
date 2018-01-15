@@ -4,20 +4,20 @@
     <form action="@{Products.destroy()}" class="form-horizontal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>记录删除原因</h3>
+          <h4 class="modal-title">记录删除原因</h4>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label class="col-sm-2 control-label">原因</label>
             <div class="col-sm-10">
-              <textarea role="5" name="reason" class="form-control"></textarea>
+              <textarea rows="5" name="reason" class="form-control"></textarea>
               <input name="id" type="hidden" id="delete_sku_input">
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn" data-dismiss="modal">Close</button>
-          <button class="btn btn-primary" data-disable-with="删除中..." data-confirm="确认操作?">确认</button>
+          <button class="btn btn-default btn-xs" data-dismiss="modal">Close</button>
+          <button class="btn btn-primary btn-xs" data-disable-with="删除中..." data-confirm="确认操作?">确认</button>
         </div>
       </div>
     </form>

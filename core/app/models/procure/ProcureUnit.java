@@ -62,7 +62,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public ProcureUnit(Selling selling) {
         if(selling != null) {
             this.selling = selling;
-            this.product = this.selling.listing.product;
+            this.product = this.selling.product;
         }
     }
 
@@ -608,6 +608,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public ProcureUnit parent;
 
     /**
+     * 真实父节点ID
+     */
+    @ManyToOne
+    public ProcureUnit realParent;
+
+    /**
      * 出库单
      */
     @ManyToOne
@@ -848,9 +854,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.fba.updateFBAShipment(null);
         this.save();
 
-        /*
-         * 此段代码已经在 this.shipItemQty(this.attrs.planQty) 体现，下面代码存在意义不知
-         */
+        newUnit.realParent = this;
         newUnit.parent = this.parent != null ? this.parent : this;
         // 分拆出的新采购计划变更
         newUnit.save();
@@ -966,6 +970,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 原采购计划数量变更
         this.save();
         newUnit.parent = this.parent != null ? this.parent : this;
+        newUnit.realParent = this;
         // 分拆出的新采购计划变更
         newUnit.save();
         if(unit.selling != null && shipments.size() > 0) shipment.addToShip(newUnit);
@@ -1098,11 +1103,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public void update(ProcureUnit unit, String shipmentId, String reason) {
         Shipment.T oldShipType = this.shipType;
-        /**
+        /*
          * 1. 修改不同阶段可以修改的信息
          * 2. 根据运输类型修改运输单
          */
-        // 1
         //采购计划的FBA已存在后再次编辑该采购计划的 运输方式 或采购数量 时对修改原因做不为空校验
         if(this.fba != null
                 && (unit.shipType != this.shipType || !Objects.equals(unit.attrs.planQty, this.attrs.planQty)))
@@ -1139,7 +1143,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
             if(this.parent != null && unit.isReturn) {
-                ProcureUnit it = ProcureUnit.findById(this.parent.id);
+                ProcureUnit it = this.realParent != null ? ProcureUnit.findById(this.realParent.id)
+                        : ProcureUnit.findById(this.parent.id);
                 if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(it.stage)) {
                     it.attrs.planQty += (this.attrs.planQty - unit.attrs.planQty);
                     it.save();
@@ -1186,7 +1191,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      */
     public void stockUpdate(ProcureUnit unit, String shipmentId, String reason) {
         Shipment.T oldShipType = this.shipType;
-        /**
+        /*
          * 1. 修改不同阶段可以修改的信息
          * 2. 根据运输类型修改运输单
          */
@@ -1214,13 +1219,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.autoUpdateComment(unit);
         this.purchaseSample = unit.purchaseSample;
         this.projectName = unit.projectName;
-        this.taxPoint = unit.taxPoint;
-        this.containTax = unit.containTax;
         if(Validation.hasErrors()) return;
         //仓库加工修改
         int parentCurrQty = 0;
         if(this.parent != null && unit.isReturn) {
-            ProcureUnit it = ProcureUnit.findById(this.parent.id);
+            ProcureUnit it = this.realParent != null ? ProcureUnit.findById(this.realParent.id)
+                    : ProcureUnit.findById(this.parent.id);
             if(it.stage == STAGE.IN_STORAGE) {
                 it.availableQty += (this.availableQty - unit.availableQty);
                 it.save();
@@ -2090,7 +2094,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      *
      * @param unitIds
      * @param dtos
-     * @return List<F.Promise       <       FBAShipment>>
      */
     public static void postFbaShipments(final List<Long> unitIds, final List<CheckTaskDTO> dtos) {
         final List<ProcureUnit> units = ProcureUnit.find(SqlSelect.whereIn("id", unitIds)).fetch();
@@ -2098,7 +2101,6 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.addError("", "加载的数量不一致");
         }
         if(Validation.hasErrors()) return;
-
         for(int i = 0; i < units.size(); i++) {
             ProcureUnit unit = units.get(i);
             try {
@@ -2685,5 +2687,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return this.fees.stream().filter(unit -> unit.payment.id - paymentId == 0).count() > 0 ? true : false;
     }
 
+
+    public Date yesterdayPlanShipDate() {
+        if(this.attrs == null || this.attrs.planShipDate == null) return null;
+        return new Date((this.attrs.planShipDate.getTime() - 24 * 60 * 60 * 1000));
+    }
 
 }

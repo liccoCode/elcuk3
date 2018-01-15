@@ -44,7 +44,7 @@ public class ES {
         TransportClient client = new PreBuiltTransportClient(Settings.EMPTY);
         try {
             client.addTransportAddress(
-                    new InetSocketTransportAddress(InetAddress.getByName("192.168.1.170"), 9300));
+                    new InetSocketTransportAddress(InetAddress.getByName("45.77.1.232"), 9300));
             return client;
         } catch(UnknownHostException e) {
             e.printStackTrace();

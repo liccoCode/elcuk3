@@ -66,6 +66,15 @@ public class Selling extends GenericModel {
 
     private static final long serialVersionUID = -4124213853478159984L;
 
+    /**
+     * 上架后用来唯一标示这个 Selling 的 Id;
+     * sellingId: msku|market.nickName|acc.id
+     */
+    @Id
+    @Column(length = 70)
+    @Expose
+    public String sellingId;
+
     public Selling() {
         this.aps = new AmazonProps();
         this.state = S.NEW;
@@ -141,20 +150,10 @@ public class Selling extends GenericModel {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    public Listing listing;
+    public Product product;
 
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<>();
-
-    /**
-     * 上架后用来唯一标示这个 Selling 的 Id;
-     * sellingId: msku|market.nickName|acc.id
-     */
-    @Id
-    @Column(length = 70)
-    @Expose
-    public String sellingId;
-
 
     /**
      * 1. 在 Amazon 上架的唯一的 merchantSKU(SKU,UPC);
@@ -292,17 +291,12 @@ public class Selling extends GenericModel {
         return sku;
     }
 
-    /**
-     * 用来修复 Selling 关联的 Listing 错误的问题.
-     */
-    public Selling changeListing(Listing listing) {
-        String sku = Product.merchantSKUtoSKU(this.merchantSKU);
-        if(listing.listingId.equals(this.listing.listingId)) Webs.error("Listing 是一样的, 不需要更改");
-        if(!sku.equals(listing.product.sku)) Webs.error("不可以切换到不同的 SKU");
-        this.listing = listing;
-        this.asin = listing.asin;
-        this.market = listing.market;
-        return this.save();
+    public void recordingListingState(Date changedDate, String state) {
+        ListingStateRecord record = new ListingStateRecord();
+        record.changedDate = changedDate;
+        record.state = ListingStateRecord.S.valueOf(state);
+        record.selling = this;
+        record.save();
     }
 
     /**
@@ -357,10 +351,10 @@ public class Selling extends GenericModel {
         GetMatchingProductResponse response = client.getMatchingProduct(request);
         List<GetMatchingProductResult> results = response.getGetMatchingProductResult();
         results.forEach(result -> {
-            com.amazonservices.mws.products.model.Product product = result.getProduct();
-            if(product == null)
+            com.amazonservices.mws.products.model.Product mwsProduct = result.getProduct();
+            if(mwsProduct == null)
                 return;
-            String attributeXml = product.getAttributeSets().toXML();
+            String attributeXml = mwsProduct.getAttributeSets().toXML();
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             try {
                 DocumentBuilder db = dbf.newDocumentBuilder();
@@ -507,11 +501,27 @@ public class Selling extends GenericModel {
     public Selling buildFromProduct() {
         this.saleAmazonValid();
         this.asin = this.aps.upc;
-        patchToListing();
+        this.saveSelling();
         this.saleAmazon();
         this.assignAmazonListingPrice();
         this.setFulfillmentByAmazon();
         return this;
+    }
+
+    private void saveSelling() {
+        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
+        Product pro = Product.findByMerchantSKU(this.merchantSKU);
+        if(pro == null) Webs.error("SKU 产品不存在");
+        List<Attach> images = Attach.attaches(pro.sku, Attach.P.SKU.name());
+        if(images != null && images.size() != 0) {
+            this.aps.imageName = images.get(0).fileName;
+        }
+        this.product = pro;
+        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
+        if(!Selling.exist(this.sid()))
+            this.save();
+        else
+            throw new FastRuntimeException("Selling 已经存在！");
     }
 
     public void saleAmazonValid() {
@@ -536,11 +546,10 @@ public class Selling extends GenericModel {
      * 产品上架时，验证包材信息是否全部填写完整
      **/
     public void productPackageDimensionValid() {
-        Product product = Product.findByMerchantSKU(this.merchantSKU);
-        if(product.lengths == null) Webs.error("产品长(包材)需填写!");
-        if(product.width == null) Webs.error("产品宽(包材)需填写!");
-        if(product.heigh == null) Webs.error("产品高(包材)需填写!");
-        if(product.weight == null) Webs.error("产品重量(包材)需填写!");
+        if(this.product.lengths == null) Webs.error("产品长(包材)需填写!");
+        if(this.product.width == null) Webs.error("产品宽(包材)需填写!");
+        if(this.product.heigh == null) Webs.error("产品高(包材)需填写!");
+        if(this.product.weight == null) Webs.error("产品重量(包材)需填写!");
     }
 
     /**
@@ -627,33 +636,6 @@ public class Selling extends GenericModel {
     }
 
     /**
-     * 用于修补通过 Product 上架没有获取到 ASIN 没有进入系统的 Selling.
-     */
-    public Selling patchToListing() {
-        if(Selling.exist(this.sid())) Webs.error(String.format("Selling[%s] 已经存在", this.sellingId));
-        Product product = Product.findByMerchantSKU(this.merchantSKU);
-        if(product == null) Webs.error("SKU 产品不存在");
-
-        List<Attach> images = Attach.attaches(product.sku, Attach.P.SKU.name());
-        if(images != null && images.size() != 0) {
-            this.aps.imageName = images.get(0).fileName;
-        }
-
-        Listing lst = Listing.findById(Listing.lid(this.asin, this.market));
-        if(lst == null) {
-            lst = Listing.blankListing(asin, market, product).save();
-            lst.recordingListingState(DateTime.now().toDate());
-        }
-        this.listing = lst;
-        this.aps.arryParamSetUP(AmazonProps.T.ARRAY_TO_STR);
-        if(!Selling.exist(this.sid()))
-            return this.save();
-        else
-            throw new FastRuntimeException("Selling 已经存在！");
-    }
-
-
-    /**
      * 更新数据库, 同时还需要更新缓存
      *
      * @param ps
@@ -725,12 +707,11 @@ public class Selling extends GenericModel {
     /**
      * 加载指定 Product 所属的 Family 下的所有 Selling 与 SellingId
      *
-     * @param msku
+     * @param sku
      * @return
      */
-    public static F.T2<List<Selling>, List<String>> sameFamilySellings(String msku) {
-        List<Selling> sellings = Selling
-                .find("listing.product.family=?", Product.findByMerchantSKU(msku).family).fetch();
+    public static F.T2<List<Selling>, List<String>> sameFamilySellings(String sku) {
+        List<Selling> sellings = Selling.find("product.sku like ? ", sku + "%").fetch();
         List<String> sids = sellings.stream().map(s -> s.sellingId).collect(Collectors.toList());
         return new F.T2<>(sellings, sids);
     }
@@ -778,8 +759,8 @@ public class Selling extends GenericModel {
     }
 
     public Date showDownDate() {
-        ListingStateRecord record = ListingStateRecord.find("listing.listingId = ? AND state = ? "
-                + " ORDER BY changedDate DESC", this.listing.listingId, ListingStateRecord.S.DOWN).first();
+        ListingStateRecord record = ListingStateRecord.find("selling.sellingId = ? AND state = ? "
+                + " ORDER BY changedDate DESC", this.sellingId, ListingStateRecord.S.DOWN).first();
         return record == null ? null : record.changedDate;
     }
 
@@ -824,14 +805,18 @@ public class Selling extends GenericModel {
         return Selling.find("sellingId=?", merchantSKU).first() != null;
     }
 
-    public static Selling blankSelling(String msku, String asin, String upc, Account acc, M market) {
+    public static Selling blankSelling(String sku, String asin, String upc, Account acc, M market) {
         Selling selling = new Selling();
+        String msku = String.format("%s,%s", sku.trim(), upc.trim());
         selling.account = acc;
         selling.merchantSKU = msku;
+        selling.product = Product.findById(sku);
         selling.asin = asin;
         selling.aps.upc = upc;
         selling.market = market;
         selling.sid();
+        selling.createDate = new Date();
+        selling.save();
         return selling;
     }
 
@@ -941,9 +926,7 @@ public class Selling extends GenericModel {
         if(StringUtils.isBlank(asin) || asin.length() != 10) Webs.error("ASIN 无效.");
         if(market == null) Webs.error("Market 无效.");
         if(StringUtils.isBlank(args[4]) || acc == null) Webs.error("Account 无效.");
-        String msku = String.format("%s,%s", sku.trim(), upc.trim());
-        Selling newSelling = Selling.blankSelling(msku, asin, upc, acc, market);
-        newSelling.patchToListing();
+        Selling newSelling = Selling.blankSelling(sku, asin, upc, acc, market);
     }
 
 
@@ -1149,7 +1132,7 @@ public class Selling extends GenericModel {
     }
 
     public static String esSellingId(String sku, M market, Account account) {
-        List<Selling> sellings = Selling.find("listing.product.sku=? AND market=? AND account.id=?",
+        List<Selling> sellings = Selling.find("product.sku=? AND market=? AND account.id=?",
                 sku, market, account.id).fetch();
         if(sellings.size() > 0) {
             return sellings.get(0).sellingId.replace("|", "").replace(",", "").replace("-", "");

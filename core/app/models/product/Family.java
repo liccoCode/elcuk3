@@ -21,6 +21,7 @@ import java.util.List;
  * User: wyattpan
  * Date: 4/25/12
  * Time: 3:21 PM
+ * @deprecated
  */
 @Entity
 public class Family extends GenericModel {
@@ -29,9 +30,6 @@ public class Family extends GenericModel {
     @Id
     @Expose
     public String family;
-
-    @OneToMany(mappedBy = "family")
-    public List<Product> products;
 
     @ManyToOne
     public Category category;
@@ -131,7 +129,7 @@ public class Family extends GenericModel {
     }
 
     public void safeDestroy() {
-        long size = this.products.size();
+        long size = this.productList().size();
         if(size > 0) {
             Webs.error("此 Family 下拥有" + size + "个 Product 关联, 无法删除");
         }

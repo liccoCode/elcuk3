@@ -137,28 +137,6 @@ $ ->
 
   $("#feedProductType").trigger('adjust')
 
-  $("#upAndDownForm").on("click", "#sellingUp, #sellingDown", (r) ->
-    LoadMask.mask()
-    $btn = $(@)
-    flag = if $btn.attr("id") == "sellingUp"
-      true
-    else
-      false
-    $.ajax("/sellings/changeSellingType",
-      {type: 'POST', data: {sellingId: $("#sellingId").val(), flag: flag}, dataType: 'json'})
-    .done((r) ->
-      msg = if r.flag is true and flag is true
-        $("#sellingState").val("SELLING")
-        {text: "#{r.message} 系统上架成功", type: 'success'}
-      else if r.flag is true and flag is false
-        $("#sellingState").val("DOWN")
-        {text: "#{r.message} 系统下架成功", type: 'warning'}
-      else
-        {text: r.message, type: 'error'}
-      noty(msg)
-      LoadMask.unmask()
-    )
-  )
   # 刪除 Selling
   $('#btns').on('click', 'a[action=remove]', (li) ->
     return unless confirm('确认删除?')

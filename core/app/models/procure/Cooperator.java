@@ -480,4 +480,13 @@ public class Cooperator extends Model {
                 .save();
     }
 
+    public String containCategory() {
+        StringBuffer sb = new StringBuffer();
+        List<String> categories = this.cooperItems.stream()
+                .filter(item -> Objects.equals(item.type, CooperItem.T.SKU))
+                .map(item -> item.product.category.categoryId).distinct().collect(Collectors.toList());
+        categories.forEach(category -> sb.append(category).append(","));
+        return sb.toString().substring(0, sb.toString().length() > 0 ? sb.toString().length() - 1 : 0);
+    }
+
 }

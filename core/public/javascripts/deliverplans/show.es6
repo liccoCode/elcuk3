@@ -21,6 +21,19 @@ $(() => {
     });
   });
 
+  $("#del_unit_form_submit").click(function (e) {
+    e.preventDefault();
+    let num = $("input[name='pids']:checked").length;
+    if (num === 0) {
+      noty({
+        text: '请选择需要解除的出货单元!',
+        type: 'error'
+      });
+    } else {
+      LoadMask.mask();
+      $('#bulkpost').attr('action', $(this).data('url')).submit();
+    }
+  });
 
   function fidCallBack () {
     return {
