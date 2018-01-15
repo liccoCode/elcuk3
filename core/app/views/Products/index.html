@@ -56,6 +56,10 @@
           #{power.ck "products.edit"}
             <a href="@{Products.blank()}" class="btn btn-warning" target="_blank">添加新产品</a>
           #{/power.ck}
+          #{power.ck "elcuk.index"}
+            <a href="@{Attachs.productSync()}" data-method='post' class="btn btn-warning">同步附件</a>
+          #{/power.ck}
+
           </div>
         </form>
       </div>
