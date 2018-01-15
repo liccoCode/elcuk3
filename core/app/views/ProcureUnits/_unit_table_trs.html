@@ -145,11 +145,7 @@
   <label for="" class="col-sm-1 control-label">所属公司</label>
   <div class="col-sm-2">
     <select name="unit.projectName" class="form-control">
-    #{list items:models.User.COR, as:'c'}
-        #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
-          <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
-        #{/if}
-    #{/list}
+      <option value="${unit.projectName}">${unit.projectName}</option>
     </select>
   </div>
 </div>
