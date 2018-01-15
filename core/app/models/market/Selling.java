@@ -816,6 +816,7 @@ public class Selling extends GenericModel {
         selling.market = market;
         selling.sid();
         selling.createDate = new Date();
+        selling.save();
         return selling;
     }
 
