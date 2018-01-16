@@ -56,6 +56,13 @@
     <a class="btn btn-danger" id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</a>
     <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
   </div>
+  <label class="col-sm-1 control-label">是否取样</label>
+  <div class="col-sm-2 form-inline">
+    <select class="form-control" name="newUnit.sample" style="width:80px;">
+      <option #{if !unit.sample} selected #{/if} value="false">否</option>
+      <option #{if unit.sample} selected #{/if} value="true">是</option>
+    </select>
+  </div>
   <label class="col-sm-1 control-label">所属公司</label>
   <div class="col-sm-2">
     <select name="newUnit.projectName" class="form-control">
