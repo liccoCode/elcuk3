@@ -40,16 +40,7 @@
                       <div class="col-sm-2">
                         <input class="form-control" value="${pro.category}" readonly>
                       </div>
-                      <label for="" class="col-sm-1 control-label">Family</label>
-                      <div class="col-sm-2">
-                        <input class="form-control" value="${pro.family?.family}" readonly>
-                      </div>
-                      <label for="" class="col-sm-1 control-label">Brand</label>
-                      <div class="col-sm-2">
-                        <input class="form-control" value="${pro.family?.brand}" readonly>
-                      </div>
                     </div>
-
 
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-1 control-label">长(包材)</label>
@@ -229,9 +220,9 @@
 
                     <select name="templateIdSelect" id="templateId" class="form-control" style="width:202px;">
                       <option value="">请选择模板</option>
-                      #{list items:templates, as:'template'}
-                        <option value="${template.id}">${template.name}</option>
-                      #{/list}
+                    #{list items:templates, as:'template'}
+                      <option value="${template.id}">${template.name}</option>
+                    #{/list}
                     </select>
                     <input type="hidden" name="sku" value="${pro.sku}">
                     <a class="btn btn-warning" rel="popover" content="将属性模板内的属性字段添加到下方" id="add_template_btn">添加属性</a>
@@ -258,10 +249,15 @@
 
 
         <div class="tab-pane" id="newattach">
-          <div class="row-fluid">
-            <iframe frameBorder=0 scrolling=no src='https://kod.easya.cc/index.php?explorer/index&path=SKU/${pro.sku}'
-                    width="100%" height="1000px"></iframe>
-          </div>
+          <div class="box">
+              <div class="box-header with-border"><h3 class="box-title">附件 <i class="icon-sort-down"></i></h3></div>
+              <div class="box-body">
+                <div style="min-height:300px;" class="col-md-12 well" id="dropbox">
+                  <ul class="thumbnails uploaded"></ul>
+                  <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
     </div>

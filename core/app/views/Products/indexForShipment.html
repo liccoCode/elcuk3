@@ -57,7 +57,7 @@
         <table class="table table-condensed table-bordered">
           <tr>
             <th style="width:180px;">SKU</th>
-            <th style="width:140px;">Family</th>
+            <th style="width:140px;">Category</th>
             <th>Name</th>
             <th style="width:70px;">产品状态</th>
             <th width="250px;">HS CODE</th>
@@ -66,7 +66,7 @@
         #{list items:prods, as:'prod'}
           <tr>
             <td><a target="_blank" href="@{Products.showAttr(prod.sku)}">${prod.sku}</a></td>
-            <td>${prod.family?.family}</td>
+            <td>${prod.category?.categoryId}</td>
             <td>${prod.productName}</td>
             <td>
               <select name='pro.state' class="form-control" style="width:90px;height:24px;padding:0px;">
