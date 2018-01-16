@@ -82,7 +82,12 @@
         #{/if}<br>
     ${unit.id}
     </td>
-    <td>${unit.parent?.id}</td>
+    <td>
+        ${unit.parent?.id}<br>
+        #{if unit.sample}
+        <span style="color:red">样品</span>
+        #{/if}
+    </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
     <td class="selling_id" style="word-break:break-all;">
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>

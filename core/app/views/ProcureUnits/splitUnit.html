@@ -134,12 +134,12 @@
 
         </div>
         <div class="box-footer">
-          <a href="@{Deliveryments.show(unit.deliveryment.id)}" class="btn btn-success">回到采购单</a>
         #{power.ck "procures.dosplitunit"}
           <button data-confirm="确认分拆前, 请再确认一次分拆的数量,地址等信息" class="btn btn-primary">
             分拆
           </button>
         #{/power.ck}
+          <a href="@{Deliveryments.show(unit.deliveryment.id)}" class="btn btn-default">返回采购单</a>
           <input type="hidden" name="newUnit.attrs.deliveryDate" value="${newUnit.attrs.deliveryDate.date()}">
           <input type="hidden" name="type" id="splitType" value="${type}">
         </div>

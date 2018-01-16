@@ -376,6 +376,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     public boolean containTax = false;
 
     /**
+     * 是否采购取样
+     */
+    public boolean sample = false;
+
+    /**
      * 税点
      * 单位 %
      */
@@ -810,7 +815,14 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.deliveryment = this.deliveryment;
         newUnit.noPayment = this.noPayment;
         newUnit.whouse = unit.whouse;
-        newUnit.stage = STAGE.DELIVERY;
+        newUnit.sample = unit.sample;
+        if(unit.sample) {
+            newUnit.stage = STAGE.IN_STORAGE;
+            newUnit.attrs.qty = unit.attrs.planQty;
+            newUnit.inboundQty = unit.attrs.planQty;
+        } else {
+            newUnit.stage = STAGE.DELIVERY;
+        }
         newUnit.planstage = PLANSTAGE.PLAN;
         newUnit.shipType = unit.shipType;
         newUnit.attrs.planQty = unit.attrs.planQty;
