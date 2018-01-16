@@ -1302,6 +1302,16 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 修改手动单数据
      */
     public void updateManualData(ProcureUnit unit, int diff) {
+        if(this.parent != null && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
+        if(this.parent != null && this.stage == STAGE.IN_STORAGE) {
+            if(unit.availableQty - this.availableQty > this.parent.availableQty) {
+                Validation.addError("", "修改值过大，请重新填写数量！");
+            }
+        }
         this.attrs.price = unit.attrs.price;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
