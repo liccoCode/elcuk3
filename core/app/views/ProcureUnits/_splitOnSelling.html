@@ -117,7 +117,7 @@
   <div class="col-sm-2">
     <select name="newUnit.projectName" class="form-control">
     #{list items:models.User.COR, as:'c'}
-        #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+        #{if java.util.Arrays.asList(brandName).contains(c.name())}
           <option value="${c.name()}" ${c.name()==unit.projectName?'selected':''}>${c.label()}</option>
         #{/if}
     #{/list}
