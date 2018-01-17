@@ -135,8 +135,6 @@ public class Attachs extends Controller {
                             Logger.info(String.format("开始上传七牛云附件,附件:[%s]", a.getName()));
                             attach.qiniuLocation = QiniuUtils.upload(fileName, bucket, attach.getBytes());
                             attach.save();
-                            JPA.em().flush();
-                            JPA.em().getTransaction().commit();
                             Logger.info(String.format("完成上传七牛云附件,url:[%s]", attach.qiniuLocation));
                         }
                     }
