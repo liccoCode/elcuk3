@@ -120,7 +120,7 @@ public class Attachs extends Controller {
                 if(atta != null && atta.length > 0) {
                     for(File a : atta) {
                         //这里将列出所有的文件
-                        if(!a.isDirectory()) {
+                        if(!a.isDirectory() && a.getName().indexOf(".") > -1) {
                             Attach attach = new Attach();
                             attach.file = a;
                             attach.fileName = a.getName();
@@ -129,10 +129,11 @@ public class Attachs extends Controller {
                             attach.setUpAttachName();
 
                             String fileName = String.format("%s/%s", attach.p.name(), attach.fileName);
-                            String bucket = "erp-lanhai";
-                            String url = QiniuUtils.upload(fileName, bucket, attach.getBytes());
-                            attach.qiniuLocation = url;
+                            String bucket = String.format("erp-%s", models.OperatorConfig.getVal("brandname")).toLowerCase();
+                            Logger.info(String.format("开始上传七牛云附件,附件:[%s]",a.getName()));
+                            attach.qiniuLocation = QiniuUtils.upload(fileName, bucket, attach.getBytes());
                             attach.save();
+                            Logger.info(String.format("完成上传七牛云附件,url:[%s]",attach.qiniuLocation));
                         }
                     }
                 }
