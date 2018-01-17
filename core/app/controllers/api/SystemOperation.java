@@ -23,9 +23,10 @@ public class SystemOperation extends Controller {
     static void monitBefore() throws Throwable {
         User user = Login.current();
         String brandName = OperatorConfig.getVal("brandname");
+        renderArgs.put("brandName", brandName);
         if(user.passwordDigest.equals(Crypto.encryptAES("123456"))) {
             flash.error("请先修改您的初始密码，不能为123456！");
-            render("Users/home.html", user, brandName);
+            render("Users/home.html", user);
         }
         //这里应该是用于记录整个应用所有 Controller 的数据统计信息.
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());

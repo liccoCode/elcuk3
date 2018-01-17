@@ -720,7 +720,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         return log;
     }
 
-
     /**
      * 验证这个 SKU 是否合法
      */
@@ -732,9 +731,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(parts.length == 2) { //做一次兼容
             parts = new String[]{part0, parts[0].substring(2), parts[1]};
         }
-        if(parts.length != 3) return false;
-        if(!Product.Nub.matcher(part0).matches()) return false;
-        return true;
+        return parts.length == 3 && Product.Nub.matcher(part0).matches();
     }
 
     /**
