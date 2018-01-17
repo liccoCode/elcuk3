@@ -56,12 +56,6 @@ public class Deliveryments extends Controller {
         renderArgs.put("avaliableApplies", avaliableApplies);
     }
 
-    @Before(only = {"index"})
-    public static void beforeCooperatorJson() {
-        String suppliersJson = J.json(Cooperator.supplierNames());
-        renderArgs.put("suppliersJson", suppliersJson);
-    }
-
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
         List<Deliveryment> deliveryments = null;

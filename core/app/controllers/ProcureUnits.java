@@ -72,12 +72,6 @@ public class ProcureUnits extends Controller {
         renderArgs.put("tomorrow3", dateTime.plusDays(3).toString("yyyy-MM-dd"));
     }
 
-    @Before(only = {"index"})
-    public static void beforeCooperatorJson() {
-        String suppliersJson = J.json(Cooperator.supplierNames());
-        renderArgs.put("suppliersJson", suppliersJson);
-    }
-
     @Before(only = {"edit", "update"})
     public static void beforeLog(Long id) {
         List<ElcukRecord> logs = ElcukRecord.records(id.toString(),
