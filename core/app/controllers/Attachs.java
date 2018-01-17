@@ -9,6 +9,7 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
+import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;
@@ -129,15 +130,19 @@ public class Attachs extends Controller {
                             attach.setUpAttachName();
 
                             String fileName = String.format("%s/%s", attach.p.name(), attach.fileName);
-                            String bucket = String.format("erp-%s", models.OperatorConfig.getVal("brandname")).toLowerCase();
-                            Logger.info(String.format("开始上传七牛云附件,附件:[%s]",a.getName()));
+                            String bucket = String.format("erp-%s", models.OperatorConfig.getVal("brandname"))
+                                    .toLowerCase();
+                            Logger.info(String.format("开始上传七牛云附件,附件:[%s]", a.getName()));
                             attach.qiniuLocation = QiniuUtils.upload(fileName, bucket, attach.getBytes());
                             attach.save();
-                            Logger.info(String.format("完成上传七牛云附件,url:[%s]",attach.qiniuLocation));
+                            JPA.em().flush();
+                            JPA.em().getTransaction().commit();
+                            Logger.info(String.format("完成上传七牛云附件,url:[%s]", attach.qiniuLocation));
                         }
                     }
                 }
-
+                JPA.em().flush();
+                JPA.em().clear();
             }
         }
     }
