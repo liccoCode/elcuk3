@@ -110,13 +110,13 @@ public class Attachs extends Controller {
     }
 
 
-    public static void productSync() {
+    public static void productSync(String name) {
         File file = new File("/var/www/kod/data/User/elcuk2/home/SKU/");
         File[] listFiles = file.listFiles();
         for(int i = 0; i < listFiles.length; i++) {
             File sku = listFiles[i];
-            Logger.info(String.format("当前进度 %s/%s,路径:[%s]", i + 1, listFiles.length, sku.getAbsolutePath()));
-            if(sku.isDirectory()) {
+            if(sku.isDirectory() && sku.getName().indexOf(name) == 0) {
+                Logger.info(String.format("当前进度 %s/%s,路径:[%s]", i + 1, listFiles.length, sku.getAbsolutePath()));
                 File[] atta = sku.listFiles();
                 if(atta != null && atta.length > 0) {
                     for(File a : atta) {
@@ -139,10 +139,9 @@ public class Attachs extends Controller {
                         }
                     }
                 }
-                JPA.em().flush();
-                JPA.em().clear();
             }
         }
+        renderJSON(new Ret("上传成功!"));
     }
 
 }
