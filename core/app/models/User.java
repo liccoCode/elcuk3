@@ -318,6 +318,22 @@ public class User extends Model {
                 return "fa-sliders";
             }
         },
+        LanHai {
+            @Override
+            public String label() {
+                return "LanHai";
+            }
+
+            @Override
+            public String url() {
+                return "https://lanhai.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-female";
+            }
+        },
         MengTop {
             @Override
             public String label() {
