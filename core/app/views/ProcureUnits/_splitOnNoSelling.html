@@ -7,7 +7,8 @@
   </div>
   <label class="col-sm-1 control-label">供应商</label>
   <div class="col-sm-2 form-inline">
-    <input class="form-control" value="${unit.cooperator.name}" readonly>
+    <input class="form-control" value="${unit.cooperator.name}" readonly style="width:125px;" data-toggle="tooltip"
+           title="${unit.cooperator.name}">
     <span style="width:200px;display:${unit.period?: 'none'}" id="unit_period">(生产周期：${unit.period}天)</span>
     <input type="hidden" id="cooperId" value="${unit.cooperator.id}">
     <input type="hidden" id="size_of_box" value="${unit.boxSize}">
@@ -27,7 +28,7 @@
   <label class="col-sm-1 control-label"><i class="icon-asterisk" style="color:red"></i>采购数量</label>
   <div class="col-sm-2 form-inline">
     <input type="text" class="form-control" name="newUnit.attrs.planQty" id="planQty" required autocomplete="off"
-           placeholder="小于${unit.attrs.planQty}" data-max="${unit.attrs.planQty}" style="width:155px;">
+           placeholder="小于${unit.attrs.planQty}" data-max="${unit.attrs.planQty}" style="width:115px;">
     <div class="input-group">
       <input type="text" id="box_num" class="form-control" placeHolder="箱数" style="width:80px;">
       <div class="input-group-addon">箱</div>
@@ -55,6 +56,13 @@
     </select>
     <a class="btn btn-danger" id="taxSpan">#{if unit.taxPoint>0}税点：${unit.taxPoint} #{/if}</a>
     <input type="hidden" id="taxPointInput" value="${unit.taxPoint}" name="newUnit.taxPoint">
+  </div>
+  <label class="col-sm-1 control-label">是否取样</label>
+  <div class="col-sm-2 form-inline">
+    <select class="form-control" name="newUnit.sample" style="width:80px;">
+      <option #{if !unit.sample} selected #{/if} value="false">否</option>
+      <option #{if unit.sample} selected #{/if} value="true">是</option>
+    </select>
   </div>
   <label class="col-sm-1 control-label">所属公司</label>
   <div class="col-sm-2">
