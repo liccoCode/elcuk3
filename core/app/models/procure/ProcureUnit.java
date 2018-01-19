@@ -1312,6 +1312,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
+        if(Validation.hasErrors()) return;
         this.attrs.price = unit.attrs.price;
         this.attrs.currency = unit.attrs.currency;
         this.attrs.planDeliveryDate = unit.attrs.planDeliveryDate;
