@@ -19,8 +19,8 @@
     #{list items:prods, as:'prod'}
       <tr data-toggle="collapse" data-target="#prod_details_${prod.sku}">
         <td>
-          <a href="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg" target="_blank">
-            <img src="https://kod.easya.cc/data/User/elcuk2/home/SKU/${prod.sku}/0.jpg" style="width:40px;height:40px;">
+          <a href="${prod.showImg()}" target="_blank">
+            <img src="${prod.showImg()}" style="width:40px;height:40px;">
           </a>
         </td>
         <td><a target="_blank" href="@{Products.show(prod.sku)}">${prod.sku}</a></td>
