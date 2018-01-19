@@ -311,7 +311,7 @@ public class ProcureUnits extends Controller {
         User user = User.findByUserName(Login.current().username.toLowerCase());
         boolean isEdit = user.roles.stream().anyMatch(role -> role.privileges.stream().anyMatch(privilege -> Objects
                 .equals(privilege.name, "cooperitem.price")));
-        if(unit.stage == ProcureUnit.STAGE.IN_STORAGE) {
+        if(unit.stage == ProcureUnit.STAGE.IN_STORAGE || unit.isEditInput()) {
             isEdit = false;
         }
         render(unit, oldPlanQty, whouses, currWhouses, isEdit);
