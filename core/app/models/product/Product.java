@@ -1200,5 +1200,16 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         else
             return products.get(0);
     }
+
+
+    public String showImg() {
+        Attach attach = Attach.find(" fid=? and originName=?", this.sku,"0.jpg").first();
+        if(attach == null)
+            return null;
+        else
+            return attach.qiniuLocation;
+    }
+
+
 }
 
