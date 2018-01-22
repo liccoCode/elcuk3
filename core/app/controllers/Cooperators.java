@@ -143,7 +143,7 @@ public class Cooperators extends Controller {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();
         renderArgs.put("cop", copItem.cooperator);
-        User user = Login.current();
+        User user = User.findByUserName(Login.current().username.toLowerCase());
         boolean isEdit = user.privileges.stream()
                 .allMatch(privilege -> Objects.equals(privilege.name, "cooperitem.price"));
         if(copItem.type.equals(CooperItem.T.SKU)) {
