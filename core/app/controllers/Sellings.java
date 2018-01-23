@@ -173,7 +173,8 @@ public class Sellings extends Controller {
     public static void syncAmazon(final String sid) {
         try {
             Selling selling = Selling.findById(sid);
-            Map map = new HashMap();
+            selling.syncAmazonInfoFromApi();
+            Map<String, Object> map = new HashMap<>();
             map.put("jobName", "sellingInfoSyncJob");  //  任务ID
             map.put("args", GTs.newMap("sellingId", selling.sellingId).build());  //sellingId
             String message = JSONObject.toJSONString(map);
