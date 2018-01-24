@@ -353,6 +353,7 @@ public class Deliveryments extends Controller {
             unit.deliveryment = dmt;
             unit.stage = ProcureUnit.STAGE.DELIVERY;
             unit.containTax = containTax;
+            unit.projectName = dmt.projectName.name();
             if(containTax) {
                 CooperItem item = CooperItem.find("product.sku=? AND cooperator.id=?",
                         unit.product.sku, unit.cooperator.id).first();
