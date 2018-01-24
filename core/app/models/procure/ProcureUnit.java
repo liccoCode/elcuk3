@@ -1733,7 +1733,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
-        fee.amount = fee.amount * pre;
+        fee.amount = new BigDecimal(fee.amount) .multiply(new BigDecimal(pre)) .setScale(2, 4) .floatValue();
         fee.save();
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
@@ -1755,7 +1755,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.mediumPayment();
         float second = (float) this.cooperator.second / 100;
-        fee.amount = fee.amount * second;
+        fee.amount = new BigDecimal(fee.amount) .multiply(new BigDecimal(second)) .setScale(2, 4) .floatValue();
         if(fee.amount + this.appliedAmount() >= this.totalAmount()) {
             Validation.addError("", "中期请款已经超过采购计划总额，请验证或者直接申请尾款！");
             return null;
