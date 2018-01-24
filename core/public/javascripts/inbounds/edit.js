@@ -54,7 +54,7 @@ $(() => {
 
     if (attr == 'qty' && $(this).val() == $(this).data('qty')) {
       $(this).parent('td').next().find('select').hide();
-      $(this).attr("style", "width:35px;");
+      $(this).attr("style", "width:58px; padding:10px;");
     } else if (attr == 'qty' && $(this).val() != $(this).data('qty')) {
       if ($(this).val() != $(this).data('qty')) {
         $(this).attr("style", "width:58px; padding:10px; background-color:red;");
@@ -71,7 +71,7 @@ $(() => {
         $input.attr("style", "width:35px;background-color:yellow;");
       }
     } else {
-      $(this).parent('td').prev().find("input").attr("style", "width:35px;");
+      $(this).parent('td').prev().find("input").attr("style", "width:58px; padding:10px;");
     }
 
     //质检结果

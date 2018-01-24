@@ -638,6 +638,7 @@ public class ProcureUnits extends Controller {
         }
         managedUnit.updateManualData(unit, diff);
         managedUnit.validateManual();
+        unit = managedUnit;
         if(Validation.hasErrors()) {
             render("ProcureUnits/editManualProcureUnit.html", unit);
         }

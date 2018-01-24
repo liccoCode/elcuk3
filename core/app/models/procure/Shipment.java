@@ -1761,6 +1761,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.tracknolist = newShip.tracknolist;
         this.trackNo = newShip.trackNo;
         this.memo = newShip.memo;
+        this.source = newShip.source;
+        this.target = newShip.target;
         if(newShip.dates != null && newShip.dates.planBeginDate != null) {
             if(this.dates == null) {
                 this.dates = new ShipmentDates();

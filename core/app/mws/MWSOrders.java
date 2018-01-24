@@ -70,7 +70,7 @@ public class MWSOrders {
             orderr.createDate = order.getPurchaseDate().toGregorianCalendar().getTime();
             orderr.paymentDate = order.getPurchaseDate().toGregorianCalendar().getTime();
             orderr.state = Orderr.getState(order.getOrderStatus().toLowerCase());
-            orderr.market = M.toM(order.getSalesChannel());
+            orderr.market = M.toM(order.getSalesChannel().toLowerCase());
 
             orderr.buyer = order.getBuyerName();
             if(order.getShippingAddress() != null) {
