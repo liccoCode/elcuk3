@@ -158,19 +158,36 @@ $(() => {
     form.submit().remove();
   });
 
-    $("#packingBtn").click(function (e) {
-         e.preventDefault();
-         let $btn = $(this);
-         let checkboxs = $btn.parents('form').find("input:checkbox[name='shipmentId']:checked");
-         if (checkboxs.length == 0) {
-             noty({
-                 text: "请选择运输单！",
-                 type: 'warning'
-             });
-             return;
-         }else {
-             let $form = $("#search_form");
-             window.open('/Excels/packingList?' + $form.serialize() , "_blank");
-         }
-     });
+  $("#packingBtn").click(function (e) {
+    e.preventDefault();
+    let $btn = $(this);
+    let checkboxs = $btn.parents('form').find("input:checkbox[name='shipmentId']:checked");
+    if (checkboxs.length == 0) {
+      noty({
+        text: "请选择运输单！",
+        type: 'warning'
+      });
+      return;
+    } else {
+      let $form = $("#search_form");
+      window.open('/Excels/packingList?' + $form.serialize(), "_blank");
+    }
+  });
+
+  $("#deliverymentBtn").click(function (e) {
+    e.preventDefault();
+    let $btn = $(this);
+    let checkboxs = $btn.parents('form').find("input:checkbox[name='shipmentId']:checked");
+    if (checkboxs.length == 0) {
+      noty({
+        text: "请选择运输单！",
+        type: 'warning'
+      });
+      return;
+    } else {
+      let $form = $("#search_form");
+      window.open('/Excels/exportDeliverymentByShipment?' + $form.serialize(), "_blank");
+    }
+  });
+
 });

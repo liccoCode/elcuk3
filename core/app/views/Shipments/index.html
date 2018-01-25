@@ -104,6 +104,11 @@
                 <i class="icon-download-alt"></i> 物流费用报表</a>
               <a href="javascript:void(0)" data-url="@{Excels.packingList()}" target="_blank" id="packingBtn" class="btn btn-primary">
                 <i class="icon-download-alt"></i> 装箱单</a>
+            #{power.ck 'shipments.deliveryment'}
+              <a href="javascript:void(0)" data-url="@{Excels.exportDeliverymentByShipment()}" target="_blank"
+                 id="deliverymentBtn" class="btn btn-warning">
+                <i class="icon-download-alt"></i>生成进出口采购合同</a>
+            #{/power.ck}
             </div>
           </div>
         </div>

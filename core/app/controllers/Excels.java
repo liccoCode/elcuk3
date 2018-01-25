@@ -90,8 +90,30 @@ public class Excels extends Controller {
         String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
                 ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/exportdeliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
-
     }
+
+
+    /**
+     * 进出口版合同下载
+     */
+    public static void exportDeliverymentByShipment(List<String> shipmentId) {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
+
+        String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN " +
+                JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
+        List<ProcureUnit> units = ProcureUnit.find(sql).fetch();
+        String currency = units.get(0).attrs.currency.symbol();
+        if(units.stream().noneMatch(unit -> unit.taxPoint != null && unit.taxPoint > 0)) {
+            renderText("没有含税数据无法生成Excel文件！");
+        } else {
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME, String.format("进出口合同%s.xls", formatter.format(new Date())));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(units, currency);
+        }
+    }
+
 
     /**
      * 下载采购单综合Excel表格
@@ -804,6 +826,10 @@ public class Excels extends Controller {
         if(shipmentId == null || shipmentId.size() == 0) {
             renderText("请选择需要打印的运输单！");
         } else {
+            List<ShipItem> items = ShipItem.find("shipment.id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
+            if(items.stream().noneMatch(item -> item.unit != null && item.unit.taxPoint != null && item.unit.taxPoint > 0)) {
+                       renderText("没有含税数据无法生成Excel文件！");
+            }
             Shipment ship = Shipment.find("id = ? ", shipmentId.get(0)).first();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
             request.format = "xls";
@@ -818,7 +844,6 @@ public class Excels extends Controller {
 
             renderArgs.put("date", new SimpleDateFormat("yyyy/MM/dd").format(begin.getTime()));
             renderArgs.put("user", Login.current());
-            List<ShipItem> items = ShipItem.find("shipment.id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
             render(items);
         }
     }
