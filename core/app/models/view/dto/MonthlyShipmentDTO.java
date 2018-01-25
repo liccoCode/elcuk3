@@ -27,14 +27,20 @@ public class MonthlyShipmentDTO implements Serializable {
     public int seaQty;
     public int airQty;
     public int expressQty;
+    public int dedicatedQty;
+    public int railwayQty;
 
     public Float seaWeight;
     public Float airWeight;
     public Float expressWeight;
+    public Float dedicatedWeight;
+    public Float railwayWeight;
 
     public Float seaCbm;
     public Float airCbm;
     public Float expressCbm;
+    public Float dedicatedCbm;
+    public Float railwayCbm;
 
     public String centerId;
 
