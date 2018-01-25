@@ -1,10 +1,9 @@
-#{ifnot part}
-    #{extends 'main_full_v3.html'/}
-    #{set title:'Orders'/}
-    #{set 'moreScripts'}
-        #{script 'orders/orders.es6'/}
-    #{/set}
-#{/ifnot}
+#{extends 'main_full_v3.html'/}
+#{set title:'Orders'/}
+#{set 'moreScripts'}
+    #{script 'orders/orders.es6'/}
+#{/set}
+
 #{flash_alert /}
 #{errorMsgs /}
 
@@ -25,7 +24,7 @@
 
       <div class="tab-content">
         <div class="tab-pane active" id='orderinfo'>
-          <div class="box box-primary box-solid">
+          <div class="box box-primary">
             <div class="box-header with-border">
               <h3 class="box-title">Order Basic</h3>
             </div>
@@ -166,7 +165,6 @@
             #{/if}
         </div>
       </div>
-
     </div>
   </div>
 </div>

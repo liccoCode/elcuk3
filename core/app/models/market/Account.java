@@ -155,6 +155,18 @@ public class Account extends Model {
     @Expose
     public boolean isAJP = false;
 
+    @Expose
+    public boolean isAES = false;
+
+    @Expose
+    public boolean isAMX = false;
+
+    @Expose
+    public boolean isACA = false;
+
+    @Expose
+    public boolean isAIN = false;
+
     /**
      * 将 CookieStore 按照 Account 区分开来以后, 那么在系统中对应的 sellercentral.amazon.co.uk 可以有多个 Account 登陆 , 他们的 Cookie 各不影响
      * 添加 Market 参数, 同一个账号可以再不同市场登陆
