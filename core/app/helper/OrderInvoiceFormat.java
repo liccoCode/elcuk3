@@ -209,7 +209,7 @@ public class OrderInvoiceFormat {
         format.itemamount = "Importe(€)";
         format.notaxamount = "Subtotal";
         format.taxamount = "VAT";
-        format.taxamountper = "VAT(20%)";
+        format.taxamountper = "VAT(21%)";
         format.totalamount = "Total";
         format.rate = "Tipo de cambio: 1 EUR = 0,8358 GBP";
         format.country = "España";
