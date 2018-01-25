@@ -58,10 +58,9 @@ public class Deliveryments extends Controller {
 
     @Check("deliveryments.index")
     public static void index(DeliveryPost p, List<String> deliverymentIds) {
-        List<Deliveryment> deliveryments = null;
         if(deliverymentIds == null) deliverymentIds = new ArrayList<>();
         if(p == null) p = new DeliveryPost();
-        deliveryments = p.query();
+        List<Deliveryment> deliveryments = p.query();
         render(deliveryments, p, deliverymentIds);
     }
 

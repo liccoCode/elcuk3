@@ -6,42 +6,97 @@
     <table class="table table-bordered table-condensed no-margin account_list">
       <tr>
         <th>#</th>
-        <th width="40px;">Market</th>
         <th>UniqueName</th>
         <th>Type</th>
         <th>MerchantId</th>
         <th>AccessKey</th>
         <th>IsSaleAcc</th>
-        <th>IsAUK</th>
-        <th>IsADE</th>
-        <th>IsAUS</th>
-        <th>IsAFR</th>
-        <th>IsAIT</th>
-        <th>IsAJP</th>
-        <th><a href="#" data-toggle="tooltip" title="关闭使用此账户">Closeable</a>
-        </th>
+        <th width="40px;">UK</th>
+        <th width="40px;">DE</th>
+        <th width="40px;">FR</th>
+        <th width="40px;">IT</th>
+        <th width="40px;">ES</th>
+        <th width="40px;">US</th>
+        <th width="40px;">CA</th>
+        <th width="40px;">MX</th>
+        <th width="40px;">JP</th>
+        <th><a href="#" data-toggle="tooltip" title="关闭使用此账户">Closeable</a></th>
       </tr>
     #{if isSale}
         #{list items:accs, as:'acc'}
             #{if acc.isSaleAcc}
               <tr data-toggle="toggle" data-target="#toogle_${acc.id}" style="cursor:pointer">
                 <td>${acc.id}</td>
-                <td style="padding: 0">
-                  <div class="flag-wrapper" style="margin:0">
-                    <div class="img-thumbnail flag flag-icon-background ${acc.type.pic()}"></div>
-                  </div>
-                </td>
                 <td rel="popover" content="${acc.token}" title="Token" width="auto">${acc.uniqueName}</td>
                 <td>${acc.type.name()}</td>
                 <td>${acc.merchantId}</td>
                 <td>${acc.accessKey}</td>
                 <td>#{yesOrNo f:acc.isSaleAcc /}</td>
-                <td>#{yesOrNo f:acc.isAUK/}</td>
-                <td>#{yesOrNo f:acc.isADE/}</td>
-                <td>#{yesOrNo f:acc.isAUS/}</td>
-                <td>#{yesOrNo f:acc.isAFR/}</td>
-                <td>#{yesOrNo f:acc.isAIT/}</td>
-                <td>#{yesOrNo f:acc.isAJP/}</td>
+                <td style="padding:0;">
+                    #{if acc.isAUK}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-gb"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isADE}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-de"></div>
+                      </div>
+                    #{/if}
+                </td>
+
+                <td style="padding:0;">
+                    #{if acc.isAFR}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-fr"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isAIT}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-it"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isAES}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-es"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isAUS}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-us"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isACA}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-ca"></div>
+                      </div>
+                    #{/if}
+                </td>
+                <td style="padding:0;">
+                    #{if acc.isAMX}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-mx"></div>
+                      </div>
+                    #{/if}
+                </td>
+
+                <td style="padding:0;">
+                    #{if acc.isAJP}
+                      <div class="flag-wrapper" style="margin:0">
+                        <div class="img-thumbnail flag flag-icon-background flag-icon-jp"></div>
+                      </div>
+                    #{/if}
+                </td>
                 <td>#{yesOrNo f:acc.closeable/}</td>
               </tr>
             #{/if}
