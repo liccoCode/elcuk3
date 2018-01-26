@@ -60,7 +60,7 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
 
     private SqlSelect buildSql() {
         SqlSelect sql = new SqlSelect()
-                .select("u.product_sku, i.qty, d.category_categoryId as categoryId, "
+                .select(" u.product_sku, i.qty, d.category_categoryId as categoryId, "
                         + "s.type, sum(i.qty) as totalQty, "
                         + "round(ifnull(sum(d.lengths*d.width*d.heigh*i.qty/1000000),0),2) as totalCbm,"
                         + "w.market, f.centerId ")
@@ -79,7 +79,7 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
 
     private SqlSelect buildProcureUnitSql() {
         SqlSelect sql = new SqlSelect()
-                .select(" u.mainBoxInfo,u.product_sku as sku,s.type ")
+                .select(" i.qty,u.mainBoxInfo,u.product_sku as sku,s.type ")
                 .from("ShipItem i ")
                 .leftJoin(" Shipment s ON s.id = i.shipment_id ")
                 .leftJoin(" ProcureUnit u ON i.unit_id= u.id ")
@@ -95,31 +95,33 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
         dto.categoryId = row.get("categoryId").toString();
         dto.market = row.get("market") == null ? null : M.valueOf(row.get("market").toString());
         dto.centerId = row.get("centerId") == null ? "" : row.get("centerId").toString();
-        String key = String.format("%s_%s", sku, row.get("type").toString());
+        String kgsKey = String.format("kgs_%s_%s", sku, row.get("type").toString());
+        String cbmKey = String.format("cbm_%s_%s", sku, row.get("type").toString());
+
         if(Objects.equals(Shipment.T.AIR, type)) {
             dto.airQty = Integer.parseInt(row.get("totalQty").toString());
-            dto.airWeight = skuMap.get(key) == null ? 0f : skuMap.get(key).floatValue();
-            dto.airCbm = Float.parseFloat(row.get("totalCbm").toString());
+            dto.airWeight = skuMap.get(kgsKey) == null ? 0f : skuMap.get(kgsKey).floatValue();
+            dto.airCbm = skuMap.get(cbmKey) == null ? 0f : skuMap.get(cbmKey).floatValue();
         }
         if(Objects.equals(Shipment.T.SEA, type)) {
             dto.seaQty = Integer.parseInt(row.get("totalQty").toString());
-            dto.seaWeight = skuMap.get(key) == null ? 0f : skuMap.get(key).floatValue();
-            dto.seaCbm = Float.parseFloat(row.get("totalCbm").toString());
+            dto.seaWeight = skuMap.get(kgsKey) == null ? 0f : skuMap.get(kgsKey).floatValue();
+            dto.seaCbm = skuMap.get(cbmKey) == null ? 0f : skuMap.get(cbmKey).floatValue();
         }
         if(Objects.equals(Shipment.T.EXPRESS, type)) {
             dto.expressQty = Integer.parseInt(row.get("totalQty").toString());
-            dto.expressWeight = skuMap.get(key) == null ? 0f : skuMap.get(key).floatValue();
-            dto.expressCbm = Float.parseFloat(row.get("totalCbm").toString());
+            dto.expressWeight = skuMap.get(kgsKey) == null ? 0f : skuMap.get(kgsKey).floatValue();
+            dto.expressCbm = skuMap.get(cbmKey) == null ? 0f : skuMap.get(cbmKey).floatValue();
         }
         if(Objects.equals(Shipment.T.DEDICATED, type)) {
             dto.dedicatedQty = Integer.parseInt(row.get("totalQty").toString());
-            dto.dedicatedWeight = skuMap.get(key) == null ? 0f : skuMap.get(key).floatValue();
-            dto.dedicatedCbm = Float.parseFloat(row.get("totalCbm").toString());
+            dto.dedicatedWeight = skuMap.get(kgsKey) == null ? 0f : skuMap.get(kgsKey).floatValue();
+            dto.dedicatedCbm = skuMap.get(cbmKey) == null ? 0f : skuMap.get(cbmKey).floatValue();
         }
         if(Objects.equals(Shipment.T.RAILWAY, type)) {
             dto.railwayQty = Integer.parseInt(row.get("totalQty").toString());
-            dto.railwayWeight = skuMap.get(key) == null ? 0f : skuMap.get(key).floatValue();
-            dto.railwayCbm = Float.parseFloat(row.get("totalCbm").toString());
+            dto.railwayWeight = skuMap.get(kgsKey) == null ? 0f : skuMap.get(kgsKey).floatValue();
+            dto.railwayCbm = skuMap.get(cbmKey) == null ? 0f : skuMap.get(cbmKey).floatValue();
         }
     }
 
@@ -132,15 +134,38 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
     public void calculation(Map<String, BigDecimal> skuMap, Map<String, Object> unitMap) {
         String sku = (String) unitMap.get("sku");
         String type = (String) unitMap.get("type");
-        String key = String.format("%s_%s", sku, type);
+        int qty = (int) unitMap.get("qty");
+        String kgsKey = String.format("kgs_%s_%s", sku, type);
+        String cbmKey = String.format("cbm_%s_%s", sku, type);
+
+        if(sku.equals("11CAR2U1C68A-B")) {
+            System.out.println(11111);
+        }
+
         if(unitMap.get("mainBoxInfo") != null && StringUtils.isNotBlank(unitMap.get("mainBoxInfo").toString())) {
             CheckTaskDTO mainBox = JSON.parseObject(unitMap.get("mainBoxInfo").toString(), CheckTaskDTO.class);
+            /** 1 计算kgs**/
             if(mainBox != null && mainBox.boxNum > 0 && mainBox.singleBoxWeight > 0) {
                 BigDecimal kg = new BigDecimal(mainBox.boxNum).
                         multiply(new BigDecimal(mainBox.singleBoxWeight)).setScale(4, 4);
-                if(skuMap.containsKey(key)) skuMap.put(key, skuMap.get(key).add(kg));
-                else skuMap.put(key, kg);
+                if(skuMap.containsKey(kgsKey)) skuMap.put(kgsKey, skuMap.get(kgsKey).add(kg));
+                else skuMap.put(kgsKey, kg);
             }
+
+            /** 2 计算cbm**/
+            if(mainBox != null && mainBox.length > 0 && mainBox.width > 0 && mainBox.height > 0 && mainBox.boxNum > 0) {
+
+
+                BigDecimal cmb = new BigDecimal(mainBox.length).
+                        multiply(new BigDecimal(mainBox.width)).
+                        multiply(new BigDecimal(mainBox.height)).
+                        multiply(new BigDecimal(mainBox.boxNum)).
+                        divide(new BigDecimal(1000)).
+                        setScale(4, 4);
+                if(skuMap.containsKey(cbmKey)) skuMap.put(cbmKey, skuMap.get(cbmKey).add(cmb));
+                else skuMap.put(cbmKey, cmb);
+            }
+
         }
     }
 
