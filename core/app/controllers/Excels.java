@@ -979,11 +979,12 @@ public class Excels extends Controller {
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, id + ".xls");
         renderArgs.put(RenderExcel.RA_ASYNC, false);
-
         MaterialUnit unit = excel.dmt.units.get(0);
         String currency = unit.planCurrency.symbol();
 
-        render("Excels/materialPurchases.xls", excel, currency);
+        String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
+                       ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+        render("Excels/material/materialPurchases" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
 
