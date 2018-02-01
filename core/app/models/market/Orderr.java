@@ -250,11 +250,13 @@ public class Orderr extends GenericModel {
     /**
      * 如果导入salefee则feeflag=2
      */
+    @Column(columnDefinition = "int(11) DEFAULT '0'")
     public int feeflag;
 
     /**
      * 是否使用 MWS 同步过 SaleFee 数据
      */
+    @Column(columnDefinition = "tinyint(1) DEFAULT '0'")
     public boolean synced = false;
 
     /**
@@ -276,6 +278,7 @@ public class Orderr extends GenericModel {
     /**
      * 是否使用 商务订单(用于JRockend 发送合同)
      */
+    @Column(columnDefinition = "tinyint(1) DEFAULT '0'")
     public boolean businessOrder;
     /**
      * 是否发送商务合同(用于JRockend 发送合同)

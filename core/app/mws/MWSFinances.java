@@ -28,30 +28,20 @@ public class MWSFinances {
                 if(cached.containsKey(key)) return cached.get(key);
                 MWSFinancesServiceConfig config = new MWSFinancesServiceConfig();
                 switch(market) {
+                    case AMAZON_CA:
                     case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
                     case AMAZON_UK:
-                        // 无法使用这个地址, 因为 toString() 使用了 FulfillmentInventory
-                        //                        config.setServiceURL(MWSEndpoint.UK.toString());
-                        config.setServiceURL("https://mws.amazonservices.co.uk");
-                        break;
+                    case AMAZON_IT:
+                    case AMAZON_FR:
                     case AMAZON_ES:
                     case AMAZON_DE:
-                        config.setServiceURL("https://mws.amazonservices.de");
-                        break;
-                    case AMAZON_FR:
-                        config.setServiceURL("https://mws.amazonservices.fr");
-                        break;
-                    case AMAZON_IT:
-                        config.setServiceURL("https://mws.amazonservices.it");
+                        config.setServiceURL("https://mws-eu.amazonservices.com/");
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
-                        break;
-                    case AMAZON_CA:
-                        config.setServiceURL("https://mws.amazonservices.ca");
                         break;
                     default:
                         break;

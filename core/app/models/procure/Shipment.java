@@ -18,8 +18,6 @@ import models.whouse.Outbound;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.joda.time.DateTime;
 import play.Logger;
@@ -1761,6 +1759,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.tracknolist = newShip.tracknolist;
         this.trackNo = newShip.trackNo;
         this.memo = newShip.memo;
+        this.source = newShip.source;
+        this.target = newShip.target;
         if(newShip.dates != null && newShip.dates.planBeginDate != null) {
             if(this.dates == null) {
                 this.dates = new ShipmentDates();

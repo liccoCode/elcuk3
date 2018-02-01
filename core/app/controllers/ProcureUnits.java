@@ -391,6 +391,8 @@ public class ProcureUnits extends Controller {
     @Check("procures.dosplitunit")
     public static void doSplitUnit(long id, ProcureUnit newUnit, boolean type) {
         checkAuthenticity();
+        String brandName = OperatorConfig.getVal("brandname");
+        renderArgs.put("brandName", brandName);
         ProcureUnit unit = ProcureUnit.findById(id);
         newUnit.handler = User.current();
         ProcureUnit nUnit;
@@ -636,6 +638,7 @@ public class ProcureUnits extends Controller {
         }
         managedUnit.updateManualData(unit, diff);
         managedUnit.validateManual();
+        unit = managedUnit;
         if(Validation.hasErrors()) {
             render("ProcureUnits/editManualProcureUnit.html", unit);
         }

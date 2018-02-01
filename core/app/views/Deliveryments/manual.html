@@ -70,14 +70,6 @@
                 <input type="hidden" name="units[0].attrs.qty" value="${units[0]?.attrs?.qty}">
               </div>
             </div>
-            <label for="" class="col-sm-1 control-label">B2B选项</label>
-            <div class="col-sm-2">
-              <select name="units[0].projectName" class="form-control">
-              #{list items:models.User.COR, as:'c'}
-                <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
-              #{/list}
-              </select>
-            </div>
           </div>
         </div>
         <div class="box-footer">
@@ -130,14 +122,7 @@
         </div>
       </div>
       <div class="form-group" id="tail-form-<%= num %>">
-        <label for="" class="col-sm-1 control-label">B2B选项</label>
-        <div class="col-sm-2">
-          <select name="units[<%= num %>].projectName" class="form-control">
-          #{list items:models.User.COR, as:'c'}
-            <option value="${c.name()}" ${c.name()==project?'selected':''}>${c.label()}</option>
-          #{/list}
-          </select>
-        </div>
+        
       </div>
     </div>
   </div>

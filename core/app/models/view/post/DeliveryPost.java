@@ -126,7 +126,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         if(StringUtils.isNotBlank(this.search) && !specialSearch._1) {
             String word = this.word();
             sbd.append(" AND (")
-                    .append(" u.sid LIKE ?")
+                    .append(" u.product.sku LIKE ?")
                     .append(" OR d.name LIKE ?")
                     .append(")");
             for(int i = 0; i < 2; i++) params.add(word);

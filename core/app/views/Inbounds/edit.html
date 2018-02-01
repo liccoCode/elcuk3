@@ -10,8 +10,8 @@
 <div class="row">
   <div class="col-md-12">
   #{form @Inbounds.update(), method:'POST', id: 'edit_inbound_form', class: "form-horizontal"}
-    <div class="box box-primary box-solid">
-      <div class="box-header"><h3 class="box-title">编辑收货入库单</h3></div>
+    <div class="box box-primary">
+      <div class="box-header with-border"><h4 class="box-title">编辑收货入库单</h4></div>
       <div class="box-body">
         <div class="form-group">
           <label for="pro_category" class="col-sm-1 control-label">收货入库单ID</label>
@@ -92,7 +92,7 @@
       </div>
     </div>
 
-    <div class="box box-success box-solid">
+    <div class="box box-success">
       <div class="box-header with-border"><h3 class="box-title">已添加进入【采购收货入库单】的【采购单元】</h3></div>
       <div class="box-body">
           #{render 'Inbounds/_units.html', units:inbound.units, is_check: false, whouses:whouses,is_b2b: inbound.projectName?.name() == "MengTop"/}

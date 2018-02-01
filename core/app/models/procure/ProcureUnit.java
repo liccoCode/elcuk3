@@ -1125,15 +1125,15 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             Validation.required("procureunit.update.reason", reason);
 
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
-        if(this.parent != null && unit.isReturn
+        if(this.realParent != null && unit.isReturn
                 && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
-                Validation.addError("", "修改值过大，请重新填写数量！");
+            if(unit.attrs.planQty - this.attrs.planQty > this.realParent.attrs.planQty) {
+                Validation.addError("", "修改值" + unit.attrs.planQty + " 过大，请重新填写数量！");
             }
         }
         if(this.parent != null && unit.isReturn && this.stage == STAGE.IN_STORAGE) {
             if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
-                Validation.addError("", "修改值过大，请重新填写数量！");
+                Validation.addError("", "修改值" + unit.attrs.planQty + " 过大，请重新填写数量！");
             }
         }
         if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId) && unit.stage != STAGE.DONE
@@ -1154,7 +1154,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         List<String> logs = new ArrayList<>();
         if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            if(this.parent != null && unit.isReturn) {
+            if(this.realParent != null && unit.isReturn) {
                 ProcureUnit it = this.realParent != null ? ProcureUnit.findById(this.realParent.id)
                         : ProcureUnit.findById(this.parent.id);
                 if(Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(it.stage)) {
@@ -1302,9 +1302,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * 修改手动单数据
      */
     public void updateManualData(ProcureUnit unit, int diff) {
-        if(this.parent != null && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY).contains(this.stage)) {
-            if(unit.attrs.planQty - this.attrs.planQty > this.parent.attrs.planQty) {
-                Validation.addError("", "修改值过大，请重新填写数量！");
+        if((this.parent != null || this.realParent != null) && Arrays.asList(STAGE.APPROVE, STAGE.PLAN, STAGE.DELIVERY)
+                .contains(this.stage)) {
+            if(unit.attrs.planQty - this.attrs.planQty > this.realParent.attrs.planQty) {
+                Validation.addError("", "修改值" + unit.attrs.planQty + " 过大，请重新填写数量！");
             }
         }
         if(this.parent != null && this.stage == STAGE.IN_STORAGE) {
@@ -1337,10 +1338,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             this.currWhouse = Whouse.autoMatching(this.shipType, this.projectName.equals("B2B") ? "B2B" : "", this.fba);
         } else if(diff != 0) {
             this.attrs.planQty = unit.attrs.planQty;
-            if(this.parent != null) {
-                this.parent.attrs.planQty += diff;
-                this.parent.originQty += diff;
-                this.parent.save();
+            if(this.realParent != null) {
+                this.realParent.attrs.planQty += diff;
+                this.realParent.originQty += diff;
+                this.realParent.save();
             }
         }
     }
@@ -1733,7 +1734,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
-        fee.amount = new BigDecimal(fee.amount) .multiply(new BigDecimal(pre)) .setScale(2, 4) .floatValue();
+        fee.amount = new BigDecimal(fee.amount).multiply(new BigDecimal(pre)).setScale(2, 4).floatValue();
         fee.save();
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
@@ -1755,7 +1756,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.mediumPayment();
         float second = (float) this.cooperator.second / 100;
-        fee.amount = new BigDecimal(fee.amount) .multiply(new BigDecimal(second)) .setScale(2, 4) .floatValue();
+        fee.amount = new BigDecimal(fee.amount).multiply(new BigDecimal(second)).setScale(2, 4).floatValue();
         if(fee.amount + this.appliedAmount() >= this.totalAmount()) {
             Validation.addError("", "中期请款已经超过采购计划总额，请验证或者直接申请尾款！");
             return null;
@@ -1856,6 +1857,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public float appliedAmount() {
+        if(Objects.equals(T.StockSplit, this.type)) return 0f;
         float appliedAmount = 0;
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
         float second = this.cooperator.second / 100;
@@ -2577,12 +2579,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     public boolean isEditInput() {
-        int size = ProcureUnit.find("parent.id =?", this.id).fetch().size();
+        int size = ProcureUnit.find("realParent.id =?", this.id).fetch().size();
         if(size > 0) {
             return true;
         }
-        if(this.parent != null) {
-            /**如果父采购计划是采购中，入库中才能修改**/
+        if(this.realParent != null) {
+            /*如果父采购计划是采购中，入库中才能修改**/
             if(Arrays.asList(STAGE.IN_STORAGE, STAGE.DELIVERY).contains(this.parent.stage)
                     && T.StockSplit == this.type) {
                 return false;
@@ -2591,7 +2593,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             } else if(Arrays.asList(STAGE.DONE, STAGE.OUTBOUND).contains(this.stage)) {
                 return true;
             }
-            return this.stage != this.parent.stage;
+            return this.stage != this.realParent.stage;
         }
         return !Arrays.asList(STAGE.PLAN, STAGE.DELIVERY).contains(this.stage);
     }

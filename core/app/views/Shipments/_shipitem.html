@@ -51,9 +51,9 @@
       <a href="@{Deliveryments.show(itm.unit?.deliveryment?.id)}#${itm.unit?.id}">${itm.unit?.id}</a>
     </td>
     <td style="background-color:${itm.unit.stage.rgb()}">${itm.unit.stage.label()}</td>
-    <td style="word-break:break-all;">
+    <td style="word-break:break-all;" data-toggle="tooltip" title="${itm.unit.product?.chineseName}">
       <a href="@{Products.showAttr(itm.unit.sku)}" target="_blank">${itm.unit.sku}</a><br>
-    ${itm.unit.product?.chineseName}
+    ${itm.unit.product?.chineseName?.nineLong()}
     </td>
       #{if useCheckbox}
           #{if itm.unit.fba}

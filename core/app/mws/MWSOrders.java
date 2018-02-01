@@ -31,28 +31,20 @@ public class MWSOrders {
                 if(cached.containsKey(key)) return cached.get(key);
                 MarketplaceWebServiceOrdersConfig config = new MarketplaceWebServiceOrdersConfig();
                 switch(market) {
+                    case AMAZON_CA:
                     case AMAZON_MX:
                     case AMAZON_US:
                         config.setServiceURL("https://mws.amazonservices.com");
                         break;
                     case AMAZON_UK:
-                        config.setServiceURL("https://mws.amazonservices.co.uk");
-                        break;
+                    case AMAZON_IT:
+                    case AMAZON_FR:
                     case AMAZON_ES:
                     case AMAZON_DE:
-                        config.setServiceURL("https://mws.amazonservices.de");
-                        break;
-                    case AMAZON_FR:
-                        config.setServiceURL("https://mws.amazonservices.fr");
-                        break;
-                    case AMAZON_IT:
-                        config.setServiceURL("https://mws.amazonservices.it");
+                        config.setServiceURL("https://mws-eu.amazonservices.com/");
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
-                        break;
-                    case AMAZON_CA:
-                        config.setServiceURL("https://mws.amazonservices.ca");
                         break;
                     default:
                         break;
@@ -78,7 +70,7 @@ public class MWSOrders {
             orderr.createDate = order.getPurchaseDate().toGregorianCalendar().getTime();
             orderr.paymentDate = order.getPurchaseDate().toGregorianCalendar().getTime();
             orderr.state = Orderr.getState(order.getOrderStatus().toLowerCase());
-            orderr.market = M.toM(order.getSalesChannel());
+            orderr.market = M.toM(order.getSalesChannel().toLowerCase());
 
             orderr.buyer = order.getBuyerName();
             if(order.getShippingAddress() != null) {
