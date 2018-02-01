@@ -43,7 +43,7 @@ public class Jrockends extends Controller {
      * @param market    执行市场
      */
     @Check("jobs.index")
-    public static void run(String jobName, Date from, Date to, Integer splitDate, String market) {
+    public static void run(String jobName,String esType, Date from, Date to, Integer splitDate, String market) {
         Map<String, Object> jobMap = new HashMap<>();
         jobMap.put("jobName", jobName);
         Map<String, Object> jobParameters = new HashMap<>();
@@ -57,6 +57,7 @@ public class Jrockends extends Controller {
             if (StringUtils.isNotBlank(market)) {
                 jobParameters.put("marketErp", market);
             }
+            jobParameters.put("esType", esType);
             jobMap.put("args", jobParameters);
             String message = JSONObject.toJSONString(jobMap);
             try {
