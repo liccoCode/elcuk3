@@ -1,29 +1,30 @@
-#{extends 'main.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'添加仓库'/}
 #{set 'moreScripts'}
     #{script 'whouse/blank.coffee'/}
 #{/set}
 
 #{errorMsgs /}
-
 #{flash_alert /}
 
-#{info_row title:'添加仓库'/}
-
 <div class="row">
-    <div class="span12">
-        <form action="@{Whouses.create()}" method="post">
-            <table class="table table-condensed table-bordered">
-            #{render 'Whouses/_whouse_tr.html', wh:wh, accs:accs, cooperators: cooperators/}
+  <div class="col-md-12">
+    <div class="box">
+      <form action="@{Whouses.create()}" method="post" class="form-horizontal">
+        <div class="box-header with-border"><h4 class="box-title">添加仓库</h4></div>
+        <div class="box-body">
+          <table class="table table-condensed table-bordered">
+          #{render 'Whouses/_whouse_tr.html', wh:wh, accs:accs, cooperators: cooperators/}
+          </table>
+        </div>
+        <div class="box-footer">
+          <button class="btn btn-success">添加</button>
+          <a href="@{Whouses.index()}" class="btn btn-default">返回</a>
+        </div>
 
-                <tr>
-                    <td colspan="6">
-                        <a href="@{Whouses.index()}" class="btn btn-success">返回</a>
-                        <button class="btn btn-primary">添加</button>
-                    </td>
-                </tr>
-
-            </table>
-        </form>
+      </form>
     </div>
+
+  </div>
 </div>
+
