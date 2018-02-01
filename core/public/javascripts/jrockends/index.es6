@@ -7,7 +7,9 @@ $(() => {
 
     $("a[name='unitUpdateBtn']").click(function () {
         let job = $(this).data('job');
+        let estype = $(this).data('estype');
         $("#jobName").val(job);
+        $("#esType").val(estype);
         $('#job_form').submit();
     });
 

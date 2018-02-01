@@ -42,6 +42,7 @@
             </select>
           </div>
           <input name="jobName" id="jobName" type="hidden">
+          <input name="esType" id="esType" type="hidden">
         </div>
       </form>
       <div class="box-body">
@@ -196,17 +197,6 @@
           </tr>
 
           <tr>
-            <td>saleFeeEsSync</td>
-            <td>SaleFee ES同步更新</td>
-            <td> 8点20点 30分</td>
-            <td></td>
-            <td></td>
-            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="saleFeeEsSync"
-                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
-            </td>
-          </tr>
-
-          <tr>
             <td>amazonFulfilledOrderrSync</td>
             <td>report同步运输订单</td>
             <td>每30分钟执行</td>
@@ -216,6 +206,64 @@
                    data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
             </td>
           </tr>
+
+          <tr>
+            <td>saleFeeEsSync</td>
+            <td>SaleFee ES同步更新</td>
+            <td> 8点20点 30分</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="saleFeeEsSync"   data-esType="salefee"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>orderrEsSync</td>
+            <td>Order ES同步更新</td>
+            <td> 0 30 8,16,23 * * ?</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="orderrEsSync" data-esType="order"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>ordertemEsSync</td>
+            <td>OrderItem ES同步更新</td>
+            <td> 0 45 8,16,23 * * ?</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="ordertemEsSync" data-esType="orderitem"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>paymentUnitEsSync</td>
+            <td>PaymentUnit ES同步更新</td>
+            <td>0 0 9,22 * * ?</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="paymentUnitEsSync" data-esType="procurepayunit"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>shippayunitEsSync</td>
+            <td>Shippayunit ES同步更新</td>
+            <td>0 10 9,22 * * ?</td>
+            <td></td>
+            <td></td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="shippayunitEsSync" data-estype="shippayunit"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
+
+          
+
         </table>
       </div>
 
