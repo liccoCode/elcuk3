@@ -1,18 +1,18 @@
 <tr>
-  <th>仓库名称</th>
-  <td><input type="text" name="wh.name" value="${wh.name}"></td>
-  <th>仓库类型</th>
+  <th width="150px;">仓库名称</th>
+  <td><input type="text" name="wh.name" value="${wh.name}" class="form-control"></td>
+  <th width="150px;">仓库类型</th>
   <td>
-    <select name="wh.type" style="width: 100px;">
+    <select name="wh.type" style="width: 200px;" class="form-control">
       <option value="">选择类型</option>
     #{list items:models.whouse.Whouse.T.values(), as:'t'}
       <option ${t == wh.type ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
     #{/list}
     </select>
   </td>
-  <th>Account</th>
+  <th width="150px;">Account</th>
   <td>
-    <select name="wh.account.id">
+    <select name="wh.account.id" class="form-control" style="width:200px;">
       <option value="">请选择</option>
     #{list items:accs, as:'acc'}
       <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.prettyName()}</option>
@@ -22,30 +22,30 @@
 </tr>
 <tr>
   <th>Address</th>
-  <td><input type="text" name="wh.address" value="${wh.address}"></td>
+  <td><input type="text" name="wh.address" value="${wh.address}" class="form-control"></td>
   <th>City</th>
   <td>
-    <input type="text" name="wh.city" value="${wh.city}">
+    <input type="text" name="wh.city" value="${wh.city}" class="form-control">
   </td>
   <th>Country</th>
   <td>
-    <input type="text" name="wh.country" value="${wh.country}">
+    <input type="text" name="wh.country" value="${wh.country}" class="form-control">
   </td>
 </tr>
 <tr>
   <th>PostalCode</th>
   <td>
-    <input type="text" name="wh.postalCode" value="${wh.postalCode}">
+    <input type="text" name="wh.postalCode" value="${wh.postalCode}" class="form-control">
   </td>
   <th>Province</th>
   <td>
-    <input type="text" name="wh.province" value="${wh.province}">
+    <input type="text" name="wh.province" value="${wh.province}" class="form-control">
   </td>
   <th>对应市场</th>
   <td>
-    <select name="wh.market">
+    <select name="wh.market" class="form-control" style="width:200px;">
     #{list items:models.market.M.values(), as:'m'}
-      <option value="${m.name()}">${m.name()}</option>
+      <option value="${m.name()}" ${m.name()==wh.market?.name()? 'selected' : ''}>${m.name()}</option>
     #{/list}
     </select>
   </td>
@@ -53,7 +53,7 @@
 <tr style="display:none" id="forward_shipment_tr">
   <th>货代</th>
   <td>
-    <select name="wh.cooperator.id">
+    <select name="wh.cooperator.id" class="form-control" style="width:200px">
       <option value="">请选择</option>
     #{list items:cooperators, as:'c'}
       <option ${c.id == wh.cooperator?.id ? 'selected' : ''} value="${c.id}">${c.name}</option>
@@ -62,18 +62,20 @@
   </td>
   <th>运输方式</th>
   <td colspan="3">
-    <label class="checkbox inline">
-      <input type="hidden" name="wh.isSEA" value="${wh.isSEA}" id="sea_hidden">
-      <input type="checkbox" name="wh.isSEA" value="${wh.isSEA}" data-id="sea_hidden" ${wh.isSEA ? 'checked' : ''}>海运
-    </label>
-    <label class="checkbox inline">
-      <input type="hidden" name="wh.isAIR" value="${wh.isAIR}" id="air_hidden">
-      <input type="checkbox" name="wh.isAIR" value="${wh.isAIR}" data-id="air_hidden" ${wh.isAIR ? 'checked' : ''}>空运
-    </label>
-    <label class="checkbox inline">
-      <input type="hidden" name="wh.isEXPRESS" value="${wh.isEXPRESS}" id="express_hidden">
-      <input type="checkbox" name="wh.isEXPRESS" value="${wh.isEXPRESS}" data-id="express_hidden" ${wh.isEXPRESS ?
-      'checked' : ''}>快递
-    </label>
+    <div class="checkbox">
+      <label class="checkbox inline">
+        <input type="hidden" name="wh.isSEA" value="${wh.isSEA}" id="sea_hidden">
+        <input type="checkbox" name="wh.isSEA" value="${wh.isSEA}" data-id="sea_hidden" ${wh.isSEA ? 'checked' : ''}>海运
+      </label>
+      <label class="checkbox inline">
+        <input type="hidden" name="wh.isAIR" value="${wh.isAIR}" id="air_hidden">
+        <input type="checkbox" name="wh.isAIR" value="${wh.isAIR}" data-id="air_hidden" ${wh.isAIR ? 'checked' : ''}>空运
+      </label>
+      <label class="checkbox inline">
+        <input type="hidden" name="wh.isEXPRESS" value="${wh.isEXPRESS}" id="express_hidden">
+        <input type="checkbox" name="wh.isEXPRESS" value="${wh.isEXPRESS}" data-id="express_hidden" ${wh.isEXPRESS ?
+        'checked' : ''}>快递
+      </label>
+    </div>
   </td>
 </tr>
