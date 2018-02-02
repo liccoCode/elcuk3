@@ -14,7 +14,6 @@ import models.view.dto.AnalyzeDTO;
 import models.whouse.Outbound;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
-import play.Logger;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
@@ -458,6 +457,15 @@ public class ShipItem extends GenericModel {
             totalWeight = this.unit.mainBox.singleBoxWeight * this.unit.mainBox.boxNum;
         }
         return totalWeight;
+    }
+
+    public void endShipByHand() {
+        Date date = new Date();
+        if(date.getTime() < this.shipment.dates.inbondDate.getTime())
+            Validation.addError("", "结束时间不可能早于入库事件");
+        if(Validation.hasErrors()) return;
+        this.unitStage(ProcureUnit.STAGE.CLOSE);
+        new ElcukRecord("shipitem.endShipByHand", "手动完成", this.id.toString()).save();
     }
 
 }

@@ -966,9 +966,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             Validation.addError("", "结束时间不可能早于入库事件");
         if(Validation.hasErrors()) return;
         endShip(date);
-
-        new ElcukRecord("shipment.endShipByHand",
-                "手动完成", this.id).save();
+        new ElcukRecord("shipment.endShipByHand", "手动完成", this.id).save();
     }
 
     private void endShip(Date date) {
