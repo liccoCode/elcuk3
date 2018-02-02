@@ -23,7 +23,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import play.Logger;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -431,6 +430,15 @@ public class Shipments extends Controller {
         show(id);
     }
 
+    public static void endShipByItem(Long id) {
+        ShipItem item = ShipItem.findById(id);
+        item.endShipByHand();
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success(" 运输项目 %s 完成运输!", id);
+        show(item.shipment.id);
+    }
 
     public static void refreshProcuress(final String id) {
         Shipment ship = Shipment.findById(id);
@@ -581,7 +589,7 @@ public class Shipments extends Controller {
                         unit.createdAt = date;
                         unit.memo = sp.getMeno();
                         unit.state = PaymentUnit.S.PAID;
-                        FeeType feeType = FeeType.find(" nickName = ?" , sp.getType()).first();
+                        FeeType feeType = FeeType.find(" nickName = ?", sp.getType()).first();
                         if(feeType == null) rowError.append("费用类型未找到,");
                         unit.feeType = feeType;
                         unit.payee = Login.current();

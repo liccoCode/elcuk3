@@ -150,7 +150,12 @@
       #{/power.ck}
   </tr>
   <tr id="${tr_key}_${itm.id}" style="display:none;">
-    <td colspan="20"><a id="unitbutton">${itm.unit.sid}</a></td>
+    <td colspan="10"><a id="unitbutton">${itm.unit.sid}</a></td>
+    <td colspan="10">
+      #{if itm.shipment.state.name()=='RECEIVING'}
+        <a href="@{Shipments.endShipByItem(itm.id)}" class="btn btn-xs btn-warning">完成运输</a>
+      #{/if}
+    </td>
   </tr>
 
 #{/list}
