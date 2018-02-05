@@ -372,6 +372,19 @@ public class Payment extends Model {
         this.state = S.PAID;
         this.shouldPaid = new BigDecimal(Webs.scalePointUp(4, Float.parseFloat(this.approvalAmount()) * this.rate));
         this.save();
+
+        //2018-02-05 要求付款单付款操作修改请款单的paymentDate
+        if(this.pApply != null) {
+            this.pApply.paymentDate = new Date();
+            this.pApply.save();
+        } else if(this.tApply != null) {
+            this.tApply.paymentDate = new Date();
+            this.tApply.save();
+        } else if(this.mApply != null) {
+            this.mApply.paymentDate = new Date();
+            this.mApply.save();
+        }
+        
         new ERecordBuilder("payment.payit")
                 .msgArgs(this.target.toString(),
                         this.actualCurrency.symbol() + " " + this.actualPaid,

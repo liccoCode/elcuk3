@@ -32,6 +32,11 @@ public abstract class Apply extends Model {
     public Date updateAt;
 
     /**
+     * 实际支付时间
+     */
+    public Date paymentDate;
+
+    /**
      * NOTE:
      * 1. 请款人 User
      * 2. 涉及的付款单 Payments

@@ -26,7 +26,6 @@ public class PaymentsPost extends Post<Payment> {
         DateTime now = DateTime.now(Dates.timeZone(null));
         this.from = now.minusMonths(2).toDate();
         this.to = now.toDate();
-        this.states = Arrays.asList(Payment.S.LOCKED, Payment.S.WAITING);
         this.dateType = DateType.CREATE;
         this.perSize = 25;
     }

@@ -1736,6 +1736,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         float pre = this.cooperator.first == 0 ? (float) 0.3 : (float) this.cooperator.first / 100;
         fee.amount = new BigDecimal(fee.amount).multiply(new BigDecimal(pre)).setScale(2, 4).floatValue();
         fee.save();
+        //2018-02-05 要求请款操作修改请款单的 updateAt
+        this.deliveryment.apply.updateAt = new Date();
+        this.deliveryment.apply.save();
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
@@ -1762,6 +1765,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return null;
         }
         fee.save();
+        //2018-02-05 要求请款操作修改请款单的 updateAt
+        this.deliveryment.apply.updateAt = new Date();
+        this.deliveryment.apply.save();
         new ERecordBuilder("procureunit.mediumpay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
@@ -1798,6 +1804,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         fee.feeType = FeeType.procurement();
         fee.amount = this.leftAmount();
         fee.save();
+        //2018-02-05 要求请款操作修改请款单的 updateAt
+        this.deliveryment.apply.updateAt = new Date();
+        this.deliveryment.apply.save();
         new ERecordBuilder("procureunit.tailpay")
                 .msgArgs(this.product.sku, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class)
