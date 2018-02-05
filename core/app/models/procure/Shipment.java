@@ -1116,6 +1116,11 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         fee.amount = fee.unitQty * fee.unitPrice;
         this.fees.add(fee);
         this.save();
+
+        //2018-02-05 要求请款操作修改请款单的 updateAt
+        this.apply.updateAt = new Date();
+        this.apply.save();
+
         new ERecordBuilder("paymentunit.applynew").msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
                 .fid(fee.shipment.id).save();
     }
