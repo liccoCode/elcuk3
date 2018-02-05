@@ -411,6 +411,10 @@ public class MaterialUnit extends Model {
         float pre = (float) this.cooperator.materialFirst / 100;
         fee.amount = fee.amount * pre;
         fee.save();
+
+        this.materialPurchase.applyPurchase.updateAt = new Date();
+        this.materialPurchase.applyPurchase.save();
+        
         new ERecordBuilder("procureunit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
@@ -439,6 +443,10 @@ public class MaterialUnit extends Model {
         fee.feeType = FeeType.procurement();
         fee.amount = this.leftAmount();
         fee.save();
+
+        this.materialPurchase.applyPurchase.updateAt = new Date();
+        this.materialPurchase.applyPurchase.save();
+        
         new ERecordBuilder("materialPlanUnit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();

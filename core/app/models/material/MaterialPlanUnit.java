@@ -209,6 +209,10 @@ public class MaterialPlanUnit extends Model {
         PaymentUnit fee = new PaymentUnit(this);
         fee.feeType = FeeType.procurement();
         fee.save();
+
+        this.materialPlan.apply.updateAt = new Date();
+        this.materialPlan.apply.save();
+
         new ERecordBuilder("materialPlanUnit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
@@ -232,7 +236,7 @@ public class MaterialPlanUnit extends Model {
      */
     public boolean hasTailPay() {
         for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.procurement()){
+            if(fee.feeType == FeeType.procurement()) {
                 return true;
             }
         }
