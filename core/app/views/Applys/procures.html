@@ -59,6 +59,7 @@
               <th>剩余请款金额</th>
               <th>总需要请款金额</th>
               <th>修正值总额</th>
+              <th>最新支付时间</th>
               <th>最新更新时间</th>
               <th>创建时间</th>
             </tr>
@@ -72,6 +73,7 @@
               <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.leftAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
               <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.totalAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
               <td>${currency?.symbol()} ${new java.math.BigDecimal(apply.fixValueAmount()).setScale(2, 4).floatValue().format('#,###.##')}</td>
+              <td>#{time_tooltip_v3 time:apply.paymentDate, datetime:true/}</td>
               <td>#{time_tooltip_v3 time:apply.updateAt, datetime:true/}</td>
               <td>#{time_tooltip_v3 time:apply.createdAt, datetime:true/}</td>
             </tr>
