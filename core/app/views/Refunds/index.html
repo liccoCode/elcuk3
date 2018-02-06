@@ -1,137 +1,138 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"退货单列表"  /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'refunds/index.js'/}
     #{script 'refunds/edit.es6'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
+
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{Refunds.index()}" method="get" class="search_form" id="search_Form">
-    <div class="span12">
-      <div class="input-prepend input-append inline">
-        <span class="add-on">From:</span>
-        <input type="date" name="p.from" value="${p.from.date()}">
-        <span class="add-on">To:</span>
-        <input type="date" name="p.to" value="${p.to.date()}">
-      </div>
-
-      <select name="p.status" class="inline">
-        <option value="">状态</option>
-      #{list items:models.whouse.Refund.S, as:'t'}
-        <option value="${t.name()}" #{if t==p.status} selected #{/if}>${t.label()}</option>
-      #{/list}
-      </select>
-
-      <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
-        <option value="">供应商</option>
-      #{list items:cooperators, as:'cop'}
-        <option value="${cop.id}" #{if cop.id==p.cooperatorId} selected #{/if}>${cop.name}</option>
-      #{/list}
-      </select>
-
-      <select name="p.type" class="inline">
-        <option value="">退货类型</option>
-      #{list items:models.whouse.Refund.T, as:'t'}
-        <option value="${t.name()}" #{if t==p.type} selected #{/if}>${t.label()}</option>
-      #{/list}
-      </select>
-
-      <div class="input-prepend input-append inline">
-        <span class="add-on"><i class="icon-search"></i></span>
-        <input type="text" class="input-medium" style="width:220px;" name="p.search"
-               placeholder="退货单ID,采购计划ID,SKU" value="${p.search}">
-        <input type="hidden" name="p.page" value="${p.page}">
-        <button class="btn btn-primary" data-loading>搜索</button>
-      </div>
-    </div>
-
-    <div class="row-fluid">
-      <div class="span12">
-        <div class="inline">
-          <a href="javascript:void(0)" class="btn btn btn-primary" id="confirmRefundBtn">确认退货</a>
-          <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-info inline" id="printBtn">
-            <i class="icon-print"></i> 打印退货单</a>
-        </div>
-      </div>
-    </div>
-  </form>
-</div>
-
-<div class="row-fluid">
-  <form method="post" id="submit_form" action="@{Refunds.confirmRefund()}">
-    <div class="span12">
-      <table class="table table-condensed table-bordered">
-        <tr>
-          <th style="width:15px;">
-            <input type="checkbox" id="checkbox_all" class="checkall">
-          </th>
-          <th>退货单ID</th>
-          <th width="250px;">名称</th>
-          <th>物流信息</th>
-          <th>供应商</th>
-          <th>退货类型</th>
-          <th>状态</th>
-          <th width="150px;">退货日期</th>
-          <th width="100px;">制单人</th>
-          <th width="100px;">仓库交接人</th>
-          <th width="200px;">备注</th>
-        </tr>
-      #{list items: refunds, as: 'r'}
-        <tr>
-          <td><input type="checkbox" name="ids" value="${r.id}"></td>
-          <td><a href="@{Refunds.edit(r.id)}">${r.id}</a></td>
-          <td style="cursor:pointer;" data-toggle="toggle" data-target="#ptt_${r_index}">
-            <span><i class="icon-reorder"></i></span>
-            <span>${r.name}</span>
-            <span class="badge badge-info">${r.unitList.size()}</span>
-          </td>
-          <td>${r.info}</td>
-          <td>${r.cooperator?.name}</td>
-          <td>${r.type?.label()}</td>
-          <td style="background-color:${r.status.rgb()}">${r.status?.label()}</td>
-          <td>#{time_tooltip time:r.refundDate/}</td>
-          <td>${r.creator?.username}</td>
-          <td>${r.whouseUser?.username}</td>
-          <td title="${r.memo}">${r.memo}</td>
-        </tr>
-        <tr id="ptt_${r_index}" style="display:none; background-color:#F2F2F2">
-          <td colspan="11">
-            <div>
-                #{render 'Refunds/_units.html', units:r.unitList, is_check: false/}
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <form action="@{Refunds.index()}" method="post" class="form-inline" id="search_Form">
+        <div class="box-header with-border">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+              </div>
             </div>
-          </td>
-        </tr>
-      #{/list}
-        <tr>
-          <td colspan="12">
-          #{if refunds.size() == 0}
-            暂时还没有入库记录
-          #{/if}
-          #{else }
-              #{bootstrap_pager pi:p, url:'' /}
-          #{/else}
-          </td>
-        </tr>
-      </table>
+
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
+
+            <select name="p.status" class="form-control">
+              <option value="">状态</option>
+            #{list items:models.whouse.Refund.S, as:'t'}
+              <option value="${t.name()}" #{if t==p.status} selected #{/if}>${t.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.cooperatorId" class="form-control selectize" style="width:150px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'cop'}
+              <option value="${cop.id}" #{if cop.id==p.cooperatorId} selected #{/if}>${cop.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.type" class="form-control">
+              <option value="">退货类型</option>
+            #{list items:models.whouse.Refund.T, as:'t'}
+              <option value="${t.name()}" #{if t==p.type} selected #{/if}>${t.label()}</option>
+            #{/list}
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeholder="退货单ID,采购计划ID,SKU" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+            <button class="btn btn-primary" data-loading>搜索</button>
+            <a href="javascript:void(0)" class="btn btn btn-warning" id="confirmRefundBtn">确认退货</a>
+            <a href="javascript:void(0)" data-url="@{Inbounds.blank()}" class="btn btn-info inline" id="printBtn">
+              <i class="icon-print"></i> 打印退货单</a>
+          </div>
+        </div>
+      </form>
+      <form method="post" id="submit_form" action="@{Refunds.confirmRefund()}">
+        <div class="box-body">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th style="width:15px;"><input type="checkbox" id="checkbox_all" class="checkall"></th>
+              <th style="width:110px;">退货单ID</th>
+              <th width="300px;">名称</th>
+              <th>物流信息</th>
+              <th>供应商</th>
+              <th width="100px;">退货类型</th>
+              <th width="80px;">状态</th>
+              <th width="120px;">退货日期</th>
+              <th width="100px;">制单人</th>
+              <th width="100px;">仓库交接人</th>
+              <th width="250px;">备注</th>
+            </tr>
+          #{list items: refunds, as: 'r'}
+            <tr>
+              <td><input type="checkbox" name="ids" value="${r.id}"></td>
+              <td><a href="@{Refunds.edit(r.id)}">${r.id}</a></td>
+              <td style="cursor:pointer;" data-toggle="toggle" data-target="#ptt_${r_index}">
+                <span><i class="icon-reorder"></i></span>
+                <span>${r.name}</span>
+                <span class="badge bg-light-blue">${r.unitList.size()}</span>
+              </td>
+              <td>${r.info}</td>
+              <td>${r.cooperator?.name}</td>
+              <td>${r.type?.label()}</td>
+              <td style="background-color:${r.status.rgb()}">${r.status?.label()}</td>
+              <td>#{time_tooltip_v3 time:r.refundDate/}</td>
+              <td>${r.creator?.username}</td>
+              <td>${r.whouseUser?.username}</td>
+              <td data-toggle="tooltip" title="${r.memo}">${r.memo}</td>
+            </tr>
+            <tr id="ptt_${r_index}" style="display:none; background-color:#F2F2F2">
+              <td colspan="11">
+                <div>
+                    #{render 'Refunds/_units.html', units:r.unitList, is_check: false/}
+                </div>
+              </td>
+            </tr>
+          #{/list}
+          </table>
+        </div>
+      </form>
+      <div class="box-footer">
+      #{if refunds.size() == 0}
+        暂时还没有入库记录
+      #{/if}
+      #{else }
+          #{bootstrap_pager_v3 pi:p, url:'' /}
+      #{/else}
+      </div>
     </div>
-  </form>
+  </div>
 </div>
 
-<div id="refund_box_info_modal" class="modal hide fade" style="width:1000px;left: 40%">
-  <div class="modal-body">
-    <div id="refresh_div"></div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Refunds.updateBoxInfo()}">提交</a>
+<div id="refund_box_info_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">包装信息</h4>
+      </div>
+      <div class="modal-body">
+        <div id="refresh_div"></div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-primary btn-xs" id="submitBoxInfoBtn" data-action="@{Refunds.updateBoxInfo()}">提交</a>
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+      </div>
+    </div>
   </div>
 </div>
 

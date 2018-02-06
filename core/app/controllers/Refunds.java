@@ -99,6 +99,9 @@ public class Refunds extends Controller {
     public static void updateBoxInfo(List<RefundUnit> units) {
         try {
             Refund.updateBoxInfo(units);
+            if(Validation.hasErrors()) {
+                renderJSON(new Ret(false, "包装信息超过计划退货数"));
+            }
             renderJSON(new Ret(true));
         } catch(Exception e) {
             renderJSON(new Ret(false));

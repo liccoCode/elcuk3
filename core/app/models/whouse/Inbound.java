@@ -446,7 +446,12 @@ public class Inbound extends GenericModel {
         units.forEach(unit -> {
             InboundUnit old = InboundUnit.findById(unit.id);
             if(old.status.name().equals("Create")) {
-                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+                if(unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num > old.planQty) {
+                    Validation.addError("", "包装信息超过计划退货数");
+                    return;
+                } else {
+                    old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+                }
             }
             unit.marshalBoxs(old);
             old.save();

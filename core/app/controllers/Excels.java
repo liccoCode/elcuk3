@@ -71,7 +71,7 @@ public class Excels extends Controller {
         String currency = unit.attrs.currency.symbol();
         String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
                 ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
-        render("Excels/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
+        render("Excels/deliveryment/deliveryment" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
     /**
