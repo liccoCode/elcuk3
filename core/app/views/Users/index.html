@@ -77,10 +77,10 @@
                 <td>
                     #{yesOrNo f:!user.closed, id:user.id/}
                     #{if user.closed}
-                      <a href="#" rel="tooltip" placement="top" title="打开此账户" data-userid="${user.id}" id="openUser">Open</a>
+                      <a href="#" data-toggle="tooltip" title="打开此账户" data-userid="${user.id}" id="openUser">Open</a>
                     #{/if}
                     #{else}
-                      <a href="#" rel="tooltip" placement="top" title="关闭此账户" data-userid="${user.id}" id="closeUser">Close</a>
+                      <a href="#" data-toggle="tooltip" title="关闭此账户" data-userid="${user.id}" id="closeUser">Close</a>
                     #{/else}
                 </td>
               </tr>
@@ -108,6 +108,7 @@
                         <td colspan="8">
                           <input type="hidden" name="id" value="${user.id}">
                           <button class="btn btn-primary btn-xs">提交</button>
+                          <a class="btn btn-default btn-xs" id="select_all_category">全选</a>
                         </td>
                       </tr>
                     </table>
