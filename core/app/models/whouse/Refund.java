@@ -407,8 +407,14 @@ public class Refund extends GenericModel {
     public static void updateBoxInfo(List<RefundUnit> units) {
         units.forEach(unit -> {
             RefundUnit old = RefundUnit.findById(unit.id);
-            if(old.refund.status == S.Create)
-                old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+            if(old.refund.status == S.Create) {
+                if(unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num > old.planQty) {
+                    Validation.addError("", "包装信息超过计划退货数");
+                    return;
+                } else {
+                    old.qty = unit.mainBox.boxNum * unit.mainBox.num + unit.lastBox.boxNum * unit.lastBox.num;
+                }
+            }
             unit.marshalBoxs(old);
             old.save();
         });

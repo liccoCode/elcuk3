@@ -14,7 +14,7 @@ $(() => {
     let form = $("<form method='post' action='#{action}'></form>")
     form = form.append($("#box_info_table").clone())
     $.post('/Refunds/updateBoxInfo', form.serialize(), function (re) {
-      if (re) {
+      if (re.flag) {
         $("#refund_box_info_modal").modal('hide');
         noty({
           text: '更新包装信息成功!',
@@ -22,7 +22,7 @@ $(() => {
         });
       } else {
         noty({
-          text: r.message,
+          text: re.message,
           type: 'error'
         });
       }
