@@ -57,6 +57,12 @@ public class ProcreApplyPost extends Post<Apply> {
             public String label() {
                 return "更新时间";
             }
+        },
+        PAYMENT {
+            @Override
+            public String label() {
+                return "支付时间";
+            }
         };
 
         public abstract String label();
@@ -85,6 +91,8 @@ public class ProcreApplyPost extends Post<Apply> {
         if(this.dateType != null) {
             if(this.dateType == DateType.CREATE) {
                 sql.append(" AND p.createdAt>=?  AND p.createdAt <=?");
+            } else if(this.dateType == DateType.PAYMENT) {
+                sql.append(" AND p.paymentDate>=?  AND p.paymentDate <=?");
             } else {
                 sql.append(" AND p.updateAt>=? AND p.updateAt<=?");
             }
