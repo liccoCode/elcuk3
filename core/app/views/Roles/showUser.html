@@ -1,0 +1,14 @@
+<table class="table table-bordered table-condensed">
+  <tr>
+    <th>username</th>
+    <th>email</th>
+    <th>closed</th>
+  </tr>
+#{list items:role.users, as:'usr'}
+  <tr>
+    <td>${usr.username}</td>
+    <td>${usr.email}</td>
+    <td>#{yesOrNo f:!usr.closed, id:usr.id/}</td>
+  </tr>
+#{/list}
+</table>

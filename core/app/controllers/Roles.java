@@ -93,4 +93,9 @@ public class Roles extends Controller {
         int size = role.privileges.size();
         renderJSON(new Ret(true, String.format("添加成功, 共 %s 个权限", size)));
     }
+
+    public static void showUser(Long roleId) {
+        Role role = Role.findById(roleId);
+        render(role);
+    }
 }
