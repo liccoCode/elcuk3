@@ -16,7 +16,8 @@
         <tr>
         #{list items:roles, as:'role_left'}
           <td>
-            <a href="@{Roles.show()}/${role_left.roleId}">${role_left.roleName}</a>
+            <a href="@{Roles.show()}/${role_left.roleId}"
+                #{if role.roleId==role_left.roleId} style="color:red;" #{/if}>${role_left.roleName}</a>
             <span name="show_user_btn" data-url="@{Roles.showUser()}" data-id="${role_left.roleId}" style="cursor:pointer;">
               <i class="icon-reorder"></i>
             </span>
