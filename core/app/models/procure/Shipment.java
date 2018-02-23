@@ -379,6 +379,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String target;
 
     /**
+     * 清关地
+     */
+    @Expose
+    public String clearance;
+
+    /**
      * 国际运输的运输信息的记录
      */
     @Lob
@@ -431,6 +437,30 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
         public abstract String label();
     }
+
+    public enum V {
+        SelfVAT {
+            @Override
+            public String label() {
+                return "自有VAT";
+            }
+        },
+        FreightVAT {
+            @Override
+            public String label() {
+                return "货代VAT";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * VAT选择
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public V vat;
 
     /**
      * 贸易方式
@@ -1755,7 +1785,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             this.btbCustom = BtbCustom.findById(newShip.customId);
             this.type = newShip.type;
         }
-
         this.cooper = newShip.cooper;
         this.whouse = newShip.whouse;
         this.title = newShip.title;
@@ -1765,6 +1794,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.memo = newShip.memo;
         this.source = newShip.source;
         this.target = newShip.target;
+        this.vat = newShip.vat;
+        this.clearance = newShip.clearance;
         if(newShip.dates != null && newShip.dates.planBeginDate != null) {
             if(this.dates == null) {
                 this.dates = new ShipmentDates();
