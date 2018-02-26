@@ -166,7 +166,8 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" data-toggle="tooltip"
+             title="增加了 国家 信息，供应商SKU为${unit.product?.supplierSku}">
             <i class="icon-download-alt"></i> New
           </a>
         #{/if}

@@ -40,6 +40,9 @@
         <td style="padding-left: 18px;">
         ${selling.aps?.sortTitle()}
           <br>
+          #{if selling.product.display}
+            <div style="float:left;"><b>${selling.product?.supplierSku}</b></div><br>
+          #{/if}
           <div style="float:left;"><b>NEW</b></div>
           <div style="float:right;padding-right:10px;"><b>${selling.market?.uropeShow()}</b></div>
           <br>
