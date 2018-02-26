@@ -217,7 +217,7 @@ $(() => {
           text: "同步成功",
           type: 'success',
           timeout: 2000
-        }
+        };
         noty(msg);
       });
     }
@@ -243,7 +243,7 @@ $(() => {
   if ("attr" == $("#attrVal").val()) {
     $("#attrBtn").click();
   }
-
+  
   $("#whouseAttrs").on("click", "#save_whouse_atts_btn", function () {
     LoadMask.mask();
     $.post("/products/update", $("#whouse_attrs_form").serialize(), function (r) {
@@ -270,19 +270,19 @@ $(() => {
       base64File: $file_home.data('base64_file'),
       originName: $file_home.data('origin_name')
     }, function (r) {
-      alert(r.message)
-      window.location.reload()
+      alert(r.message);
+      window.location.reload();
     });
   });
-
-  function fidCallBack () {
-      return {
-        fid: $('#p_sku').val(),
-        p: 'SKU'
-      }
-    }
-    let dropbox = $('#dropbox');
-    window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
-    window.dropUpload.iniDropbox(fidCallBack, dropbox);
-
 });
+
+function fidCallBack () {
+  return {
+    fid: $('#p_sku').val(),
+    p: 'SKU'
+  }
+}
+
+let dropbox = $('#dropbox');
+window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
+window.dropUpload.iniDropbox(fidCallBack, dropbox);
