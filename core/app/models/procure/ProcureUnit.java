@@ -1210,8 +1210,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.fba != null && (unit.shipType != this.shipType || unit.availableQty != this.availableQty))
             Validation.required("procureunit.update.reason", reason);
         if(unit.cooperator == null) Validation.addError("", "供应商不能为空!");
-        if(this.parent != null && unit.isReturn && STAGE.IN_STORAGE == this.stage) {
-            if(unit.availableQty - this.availableQty > this.parent.availableQty) {
+        if(this.realParent != null && unit.isReturn && STAGE.IN_STORAGE == this.stage) {
+            if(unit.availableQty - this.availableQty > this.realParent.availableQty) {
                 Validation.addError("", "修改值过大，请重新填写数量！");
             }
         }
