@@ -36,7 +36,7 @@ public class ES {
     }
 
     public static JSONObject search(String index, String type, SearchSourceBuilder builder) {
-        //Logger.info(builder.toString());
+        Logger.info(builder.toString());
         return processSearch(index, type, builder, System.getenv(Constant.ES_HOST));
     }
 

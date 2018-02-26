@@ -97,9 +97,11 @@ public class Excels extends Controller {
      * 进出口版合同下载
      */
     public static void exportDeliverymentByShipment(List<String> shipmentId) {
+
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN "
-                + JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
+
+        String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN " +
+                JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
         List<ProcureUnit> units = ProcureUnit.find(sql).fetch();
         String currency = units.get(0).attrs.currency.symbol();
         if(units.stream().noneMatch(unit -> unit.taxPoint != null && unit.taxPoint > 0)) {
@@ -825,9 +827,8 @@ public class Excels extends Controller {
             renderText("请选择需要打印的运输单！");
         } else {
             List<ShipItem> items = ShipItem.find("shipment.id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
-            if(items.stream()
-                    .noneMatch(item -> item.unit != null && item.unit.taxPoint != null && item.unit.taxPoint > 0)) {
-                renderText("没有含税数据无法生成Excel文件！");
+            if(items.stream().noneMatch(item -> item.unit != null && item.unit.taxPoint != null && item.unit.taxPoint > 0)) {
+                       renderText("没有含税数据无法生成Excel文件！");
             }
             Shipment ship = Shipment.find("id = ? ", shipmentId.get(0)).first();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
@@ -982,7 +983,7 @@ public class Excels extends Controller {
         String currency = unit.planCurrency.symbol();
 
         String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
-                ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+                       ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/material/materialPurchases" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 
