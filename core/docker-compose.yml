@@ -24,8 +24,4 @@ es:
   ports:
    - "9200:9200"
    - "9300:9300"
-rb:
-  image: rabbitmq:3.6-management-alpine
-  container_name: elcuk2-rabbitmq
-  ports:
-   - "15672:15672"
+
