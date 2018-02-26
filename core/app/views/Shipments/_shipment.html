@@ -80,8 +80,7 @@
           #{/else}
             <tr>
               <td>
-                <a class="btn" rel="popover" content="不够?再来一行" placement="right"
-                   id="more_trackno_btn" data-table="trackno_table">
+                <a class="btn" rel="popover" content="不够?再来一行" placement="right" id="more_trackno_btn" data-table="trackno_table">
                   <i class="icon-plus"></i>
                 </a>
               </td>
@@ -91,6 +90,15 @@
         <label for="jobNumber" class="col-sm-1 control-label">工作号</label>
         <div class="col-sm-2">
           <input class="form-control" name="ship.jobNumber" value="${ship.jobNumber}" id="jobNumber"/>
+        </div>
+        <label for="vat" class="col-sm-1 control-label">VAT选择</label>
+        <div class="col-sm-2">
+          <select class="form-control" id="vat" name="ship.vat">
+            <option value="">请选择</option>
+          #{list items:models.procure.Shipment.V.values(), as:'v'}
+            <option value="${v.name()}" #{if v.name()==ship.vat?.name()} selected #{/if}>${v.label()}</option>
+          #{/list}
+          </select>
         </div>
       </div>
 
@@ -136,6 +144,10 @@
         <label for="" class="col-sm-1 control-label">目的地</label>
         <div class="col-sm-2">
           <input class="form-control" value="${ship.target}" name="ship.target">
+        </div>
+        <label for="clearance" class="col-sm-1 control-label">清关地</label>
+        <div class="col-sm-2">
+          <input class="form-control" value="${ship.clearance}" name="ship.clearance" id="clearance" autocomplete="off">
         </div>
         <label for="shipmentTpyeSelect" class="col-sm-1 control-label">货代计费方式</label>
         <div class="col-sm-2">

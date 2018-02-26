@@ -173,6 +173,19 @@
               <input id="proabbreviation" class="form-control" name="pro.abbreviation" value="${pro.abbreviation}">
               <input type="hidden" name="pro.iscopy" value="${pro.iscopy}">
             </div>
+            <label for="" class="col-sm-1 control-label">供应商SKU</label>
+            <div class="col-sm-2">
+              <input id="" class="form-control" name="pro.supplierSku" value="${pro.supplierSku}">
+            </div>
+            <label for="display" class="col-sm-1 control-label">是否显示</label>
+            <div class="col-sm-2">
+              <label class="radio-inline">
+                <input type="radio" name="pro.display" value="true" #{if pro.display} checked #{/if} id="display"> 是
+              </label>
+              <label class="radio-inline">
+                <input type="radio" name="pro.display" value="false" #{if !pro.display} checked #{/if}> 否
+              </label>
+            </div>
           </div>
 
           <div class="form-group">

@@ -1,192 +1,126 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'Role' /}
 #{set 'moreScripts'}
-    #{script 'roles/show.coffee'/}
+    #{script 'roles/show.es6'/}
 #{/set}
-<div class="row-fluid" xmlns="http://www.w3.org/1999/html">
-#{if roles.size() == 0}
-  <div>
-    等待添加新Role
-  </div>
-  <div>
-    <a href="@{Roles.blank()}" class="btn btn-primary">创建新 Role</a>
-  </div>
-#{/if}
-#{else }
-  <div class="row-fluid">
-    <div class="span2 well well-small" id="role_slider">
-      <table class="table table-bordered table-condensed">
-        <tr>
-          <th>Name</th>
-        </tr>
-          #{list items:roles, as:'role_left'}
-            <tr>
-              <td>
-                <a href="@{Roles.show()}/${role_left.roleId}">${role_left.roleName}</a>
-              </td>
-            </tr>
-          #{/list}
-      </table>
-      <a href="@{Roles.blank()}" class="btn btn-primary">创建新 Role</a>
 
-      <form action="@{Roles.delete()}" method="post" style="display:inline-block;">
-        <input type="hidden" name="id" value="${role?.roleId}">
-          #{authenticityToken /}
-        <button data-confirm='确认删除?' class="btn btn-danger">删除 Role: ${role}</button>
-      </form>
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">角色【${role.roleName}】</h4></div>
+      <div class="box-body">
+        <table class="table table-bordered table-condensed">
+        <tr>
+        #{list items:roles, as:'role_left'}
+          <td>
+            <a href="@{Roles.show()}/${role_left.roleId}"
+                #{if role.roleId==role_left.roleId} style="color:red;" #{/if}>${role_left.roleName}</a>
+            <span name="show_user_btn" data-url="@{Roles.showUser()}" data-id="${role_left.roleId}" style="cursor:pointer;">
+              <i class="icon-reorder"></i>
+            </span>
+            <span class="badge bg-light-blue"> ${role_left.users.size()}</span>
+          </td>
+            #{if role_left_index % 7==0}
+            </tr>
+            <tr>
+            #{/if}
+        #{/list}
+        </tr>
+        </table>
+      </div>
+      <div class="box-footer">
+        <a href="@{Roles.blank()}" class="btn btn-primary">创建新 Role</a>
+      </div>
     </div>
 
-    <div class="span8 well well-small" id="team_detail">
-        #{flash_alert /}
-        #{errorMsgs /}
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+      #{list items:modules, as:'module'}
+        <li #{if module_index==1} class="active" #{/if}>
+          <a href="#${module.name}" data-toggle='tab'>${module.memo}</a>
+        </li>
+      #{/list}
+      </ul>
 
-        #{info_row title:'Basic Info'}
-        #{/info_row}
-      <div>
-        <form action="@{Roles.update()}" method="post">
-          <table class="table table-bordered table-condensed">
-            <tr>
-              <td>RoleName:</td>
-              <td>
-                <input class="input-medium" type="text" name="role.roleName" value="${role.roleName}">
-              </td>
-              <td>Memo:</td>
-              <td>
-                <textarea name="role.memo" class="span12" rows="1">${role.memo}</textarea>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="4">
-                <input type="hidden" name="role.roleId" value="${role.roleId}">
-                <button class="btn btn-primary" data-loading>保存</button>
-              </td>
-            </tr>
-          </table>
-        </form>
-      </div>
-
-
-        #{info_row title:'菜单权限'/}
-      <div class="row-fluid">
-        <div class="span12">
-          <table class="table table-bordered table-condensed">
-            <tr>
-              <form method="post" action="@{Roles.addPrivileges()}" class="privilege_form">
-                <table class="table table-condensed table-bordered">
+      <form action="@{Roles.addPrivileges()}" method="post" id="privilege_form">
+        <div class="tab-content">
+        #{list items:modules, as:'module'}
+          <div class="tab-pane #{if module_index==1} active#{/if}" id="${module.name}">
+            <div class="box">
+              <div class="box-body">
+                <table class="table table-bordered table-condensed">
                   <tr>
                     <th colspan="4">模块名称</th>
                     <th colspan="4">菜单名称</th>
                     <th colspan="4">权限</th>
                   </tr>
+                <tr>
+                    #{set menucount: maps.get(module.id).size/}
+                    #{list items:maps.get(module.id), as:'function'}
+                        #{if ((List)maps.get(function.id)).size>0}
+                            #{set menucount: menucount + ((List)maps.get(function.id)).size /}
+                        #{/if}
+                        #{else}
+                            #{set menucount: menucount + 1/}
+                        #{/else}
+                    #{/list}
+                  <td colspan="4" rowspan="${menucount+1}">
+                    <input type="checkbox" name="privilegeId" value="${module.id}"
+                    ${role.isHavePrivilege(module) ?'checked' : ''}>
+                    <a href="javascript:;" rel="tooltip" title="${module.name}">${module.memo}</a>
+                  </td>
+                    #{list items:maps.get(module.id), as:'function'}
+                    <tr id="menu">
+                        #{if ((List)maps.get(function.id)).size>0}
+                        <td colspan="4" rowspan="${((List)maps.get(function.id)).size+1}">
+                        #{/if}
+                        #{else}
+                        <td colspan="4" rowspan="${((List)maps.get(function.id)).size+2}">
+                        #{/else}
 
-                    #{list items:modules, as:'module'}
-                    <tr>
-                        #{set menucount: maps.get(module.id).size/}
-                        #{list items:maps.get(module.id), as:'function'}
-                            #{if ((List)maps.get(function.id)).size>0}
-                                #{set menucount: menucount + ((List)maps.get(function.id)).size /}
-                            #{/if}
-                            #{else}
-                                #{set menucount: menucount + 1/}
-                            #{/else}
-                        #{/list}
-
-                      <td colspan="4" rowspan="${menucount+1}">
-                        <label class="checkbox">
-                          <input type="checkbox" name="privilegeId" value="${module.id}"
-                          ${role.isHavePrivilege(module) ?'checked' : ''}>
-                          <a href="javascript:;" rel="tooltip" title="${module.name}">${module.memo}</a>
-                        </label>
-                      </td>
-
-                        #{list items:maps.get(module.id), as:'function'}
-                        <tr id="menu">
-
-                            #{if    ((List)maps.get(function.id)).size>0}
-                            <td colspan="4" rowspan="${((List)maps.get(function.id)).size+1}">
-                            #{/if}
-                            #{else}
-                            <td colspan="4" rowspan="${((List)maps.get(function.id)).size+2}">
-                            #{/else}
-
-                          <label class="checkbox">
-                            <input type="checkbox" id="checkboxmenu" class="menu${module.id}" pid="${module.id}"
-                                   name="privilegeId"
-                                   value="${function.id}"
-                            ${role.isHavePrivilege(function) ?
-                            'checked' : ''}>
-                            <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
-                          </label>
-                        </td>
-
-                            #{if maps.get(function.id)!=null && maps.get(function.id).size()>0}
-                                #{list items:maps.get(function.id), as:'menu'}
-                                  <tr>
-                                    <td colspan="6">
-                                      <label class="checkbox">
-                                        <input type="checkbox" name="privilegeId" class="menu${function.id}"
-                                               pid="${function.id}"
-                                               value="${menu.id}" ${role.isHavePrivilege(menu) ?
-                                        'checked' : ''}>
-                                        <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
-                                      </label>
-                                    </td>
-                                  </tr>
-                                #{/list}
-                            #{/if}
-                            #{else}
+                      <input type="checkbox" id="checkboxmenu" class="menu${module.id}" pid="${module.id}"
+                             name="privilegeId" value="${function.id}"
+                      ${role.isHavePrivilege(function) ? 'checked' : ''}>
+                      <a href="javascript:;" rel="tooltip" title="${function.name}">${function.memo}</a>
+                    </td>
+                        #{if maps.get(function.id)!=null && maps.get(function.id).size()>0}
+                            #{list items:maps.get(function.id), as:'menu'}
                               <tr>
-                                <td colspan="6">
-                                  <label class="checkbox">
-                                    <a href="javascript:;" rel="tooltip" title=""></a>
-                                  </label>
+                                <td colspan="4">
+                                  <input type="checkbox" name="privilegeId" class="menu${function.id}" pid="${function.id}"
+                                         value="${menu.id}" ${role.isHavePrivilege(menu) ? 'checked' : ''}>
+                                  <a href="javascript:;" rel="tooltip" title="${menu.name}">${menu.memo}</a>
                                 </td>
                               </tr>
-                            #{/else}
-
-
+                            #{/list}
+                        #{/if}
+                        #{else}
+                          <tr>
+                            <td colspan="6">
+                              <a href="javascript:;" rel="tooltip" title=""></a>
+                            </td>
                           </tr>
-                        #{/list}
+                        #{/else}
                       </tr>
                     #{/list}
-
-                  <tr>
-                    <td colspan="14">
-                      <input type="hidden" name="id" value="${role.roleId}">
-                      <button class="btn btn-primary">提交</button>
-                    </td>
                   </tr>
                 </table>
-              </form>
-            </tr>
-
-          </table>
+              </div>
+              <div class="box-footer">
+                <button class="btn btn-primary">提交</button>
+                <input type="hidden" name="id" value="${role.roleId}" id="submit_btn">
+              </div>
+            </div>
+          </div>
+        #{/list}
         </div>
-      </div>
-
-        #{info_row title:'用户'/}
-      <div class="row-fluid">
-        <div class="span12">
-          <table class="table table-bordered table-condensed">
-            <tr>
-              <th>username</th>
-              <th>email</th>
-              <th>closed</th>
-            </tr>
-              #{list items:role.users, as:'usr'}
-                <tr>
-                  <td>${usr.username}</td>
-                  <td>${usr.email}</td>
-                  <td>#{yesOrNo f:!usr.closed, id:usr.id/}</td>
-                </tr>
-              #{/list}
-          </table>
-        </div>
-      </div>
-
-
+      </form>
     </div>
+
   </div>
 </div>
-#{/else}
-</div>
+
+

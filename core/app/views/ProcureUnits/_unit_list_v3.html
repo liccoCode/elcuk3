@@ -19,7 +19,7 @@
     <th width="40px;">阶段</th>
     <th width="170px;">Selling</th>
     <th width="120px">Sku</th>
-    <th width="150px;">FBA-ShipmentId<br>CenterId</th>
+    <th width="155px;">FBA-ShipmentId<br>CenterId</th>
     <th width="100px;">采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="120px;">数量<br>(计划/交货/入库)</th>
@@ -36,8 +36,8 @@
     <th>预计交货时间</th>
     <th>预计运输时间</th>
     <th>实际交货时间</th>
-    <th>是否核准</th>
-    <th>质检结果</th>
+    <th width="40px;">是否核准</th>
+    <th width="40px;">质检结果</th>
     <th width="90px;">创建人/<br>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
@@ -119,7 +119,7 @@
             #{/if}
             #{set fbaCenter: unit.fba.fbaCenter/}
             #{if fbaCenter}
-              <a href="javascript:void(0)" rel="tooltip" placement="top" title="检查 FBA Label 中的 Ship To 是否正确"
+              <a href="javascript:void(0)" data-toggle="tooltip" title="检查 FBA Label 中的 Ship To 是否正确"
                  name="checkFBALabel"
                  data-addressline1="${fbaCenter.addressLine1}"
                  data-addressline2="${fbaCenter.addressLine2}"
@@ -166,7 +166,8 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" rel="tooltip" title="增加了 国家 信息">
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" data-toggle="tooltip"
+             title="增加了 国家 信息，供应商SKU为${unit.product?.supplierSku}">
             <i class="icon-download-alt"></i> New
           </a>
         #{/if}

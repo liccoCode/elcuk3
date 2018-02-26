@@ -462,6 +462,16 @@ public class Product extends GenericModel implements ElcukRecord.Log {
     @Expose
     public WhouseAttrs whouseAttrs = new WhouseAttrs();
 
+    /**
+     * 供应商sku
+     */
+    public String supplierSku;
+
+    /**
+     * 下载fnsku时是否显示
+     */
+    public Boolean display;
+
     @Transient
     public int iscopy = 0;
 
@@ -689,6 +699,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "subtitle", "副标题", pro.subtitle));
         logs.addAll(Reflects.logFieldFade(this, "marketTime", "上市时间", pro.marketTime));
         logs.addAll(Reflects.logFieldFade(this, "delistingTime", "退市时间", pro.delistingTime));
+        logs.addAll(Reflects.logFieldFade(this, "supplierSku", "供应商SKU", pro.supplierSku));
+        logs.addAll(Reflects.logFieldFade(this, "display", "是否显示", pro.display));
 
         //productAttrs
         this.productAttrs = new java.util.ArrayList<>();
