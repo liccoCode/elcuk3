@@ -44,7 +44,8 @@ public class EbayOrderPost extends Post<EbayOrder> {
             params.add(state);
         }
         if(StringUtils.isNotBlank(this.search)) {
-            sbd.append(" AND i.product.sku = ? ");
+            sbd.append(" AND (i.product.sku = ? or e.orderId = ? )");
+            params.add(this.search);
             params.add(this.search);
         }
 

@@ -612,7 +612,7 @@ public class Orderr extends GenericModel {
         }
         if(!StringUtils.isBlank(this.address)) {
             editaddress = editaddress + "," + this.address;
-        } 
+        }
         if(!StringUtils.isBlank(this.address1)) {
             editaddress = editaddress + "," + this.address1;
         }
