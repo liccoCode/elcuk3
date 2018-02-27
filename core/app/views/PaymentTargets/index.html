@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:"支付方式"  /}
 #{set 'moreStyles'}
 #{/set}
@@ -6,143 +6,147 @@
     #{script 'paymentTargets/paymenttargets.coffee'/}
 #{/set}
 
-<div class="row-fluid">
-  <div class="span12">
-  #{errorMsgs /}
-  #{flash_alert /}
-    <div class="btn-toolbar">
-    #{power.ck 'paymenttargets.save'}
-      <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
-    #{/power.ck}
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header">
+      #{power.ck 'paymenttargets.save'}
+        <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
+      #{/power.ck}
+      </div>
+      <div class="box-body">
+        <table class="table table-bordered table-condensed">
+          <tr>
+            <th>#</th>
+            <th>名称</th>
+            <th>账户</th>
+            <th>账号</th>
+            <th width="150px;">创建时间</th>
+            <th width="120px;">Action</th>
+          </tr>
+        #{list items:targets, as:'tgt'}
+          <tr>
+            <td>${tgt.id}</td>
+            <td copId=${tgt.cooper.id}>${tgt.name}</td>
+            <td>${tgt.accountUser}</td>
+            <td>${tgt.accountNumber}</td>
+            <td>#{time_tooltip_v3 time:tgt.createdAt, datetime:true/}</td>
+            <td>
+                #{power.ck 'paymenttargets.update'}
+                  <a href="javascript:void(0);" id="updateBtn" class="btn btn-xs btn-primary"
+                     data-url='@{PaymentTargets.showJson(tgt.id)}'><i class="icon-refresh"></i> 编辑</a>
+                #{/power.ck}
+                #{power.ck 'paymenttargets.destroy'}
+                  <a href="javascript:void(0);" data-method='delete' class="btn btn-xs btn-danger"
+                     data-id='${tgt.id}'><i class="icon-remove"></i> 删除</a>
+                #{/power.ck }
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
     </div>
-    <table class="table table-bordered table-condensed">
-      <tr>
-        <th>#</th>
-        <th>名称</th>
-        <th>账户</th>
-        <th>账号</th>
-        <th>银行地址</th>
-        <th width="140px;">创建时间</th>
-        <th width="110px;"></th>
-      </tr>
-    #{list items:targets, as:'tgt'}
-      <tr>
-        <td>${tgt.id}</td>
-        <td copId=${tgt.cooper.id}>${tgt.name}</td>
-        <td>${tgt.accountUser}</td>
-        <td>${tgt.accountNumber}</td>
-        <td>${tgt.accountAddress}</td>
-        <td>#{time_tooltip time:tgt.createdAt, datetime:true/}</td>
-        <td>
-            #{power.ck 'paymenttargets.update'}
-              <a href="javascript:void(0);" id="updateBtn" class="btn btn-mini btn-success"
-                 data-url='@{PaymentTargets.showJson(tgt.id)}'><i class="icon-refresh"></i> 编辑</a>
-            #{/power.ck}
-            #{power.ck 'paymenttargets.destroy'}
-              <a href="javascript:void(0);" data-method='delete' class="btn btn-mini btn-danger"
-                 data-id='${tgt.id}'><i class="icon-remove"></i> 删除</a>
-            #{/power.ck }
-        </td>
-      </tr>
-    #{/list}
-    </table>
   </div>
 </div>
 
-#{form @PaymentTargets.save()}
-<div id="create_modal" class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>添加一个新的支付账号</h3>
-  </div>
 
-  <div class="modal-body" style="height:300px;">
-      #{errorMsgs /}
-      #{flash_alert /}
-    <dl class="dl-horizontal">
-      <dt>合作伙伴</dt>
-      <dd>
-        <select class="selectize" name="c.id" style="width:240px;">
-            #{list items:copers, as:'c'}
-              <option value="${c.id}">${c.name}</option>
-            #{/list}
-        </select>
-      </dd>
+<div id="create_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">添加一个新的支付账号</h4>
+      </div>
+      <form action="@{PaymentTargets.save()}" method="post" class="form-horizontal">
+        <div class="modal-body" style="height:300px;">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>合作伙伴</th>
+              <td>
+                <select class="selectize" name="c.id" style="width:240px;" class="form-control">
+                #{list items:copers, as:'c'}
+                  <option value="${c.id}">${c.name}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>账户</th>
+              <td><input type="text" name="t.accountUser" value="${t.accountUser}" class="form-control"></td>
+            </tr>
+            <tr>
+              <th>账号</th>
+              <td><input type="text" name="t.accountNumber" value="${t.accountNumber}" class="form-control"></td>
+            </tr>
+            <tr>
+              <th>银行地址</th>
+              <td><input type="text" name="t.accountAddress" value="${t.accountAddress}" class="form-control"></td>
+            </tr>
+            <tr>
+              <th>备注</th>
+              <td><textarea name="t.memo" class="form-control">${t.memo}</textarea></td>
+            </tr>
+          </table>
+        </div>
 
-      <dt>账户</dt>
-      <dd>
-        <input type="text" name="t.accountUser" value="${t.accountUser}">
-      </dd>
-
-      <dt>账号</dt>
-      <dd>
-        <input type="text" name="t.accountNumber" value="${t.accountNumber}">
-      </dd>
-
-      <dt>银行地址</dt>
-      <dd>
-        <input type="text" name="t.accountAddress" value="${t.accountAddress}">
-      </dd>
-
-      <dt>备注</dt>
-      <dd>
-        <textarea name="t.memo">${t.memo}</textarea>
-      </dd>
-    </dl>
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <input type="submit" value="添加" class="btn btn-primary">
+        <div class="modal-footer">
+          <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" value="添加" class="btn btn-primary btn-xs">
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-#{/form}
 
-<div id="update_modal" class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3>修改支付目标</h3>
-  </div>
-
-  <div class="modal-body">
-  #{form @PaymentTargets.update(), id:'update_form'}
-    <dl class="dl-horizontal">
-      <dt>名称</dt>
-      <dd>
-        <input type="hidden" id="target_id" name="t.id" value="">
-        <input type="text" id="target_name" name="t.name" value="">
-      </dd>
-
-      <dt>账户</dt>
-      <dd>
-        <input type="text" id="target_accountUser" name="t.accountUser" value="">
-      </dd>
-
-      <dt>账号</dt>
-      <dd>
-        <input type="text" id="target_accountNumber" name="t.accountNumber" value="">
-      </dd>
-
-      <dt>银行地址</dt>
-      <dd>
-        <input type="text" id="target_accountAddress" name="t.accountAddress">
-      </dd>
-
-      <dt>合作伙伴</dt>
-      <dd>
-          #{select 'c.id', id:'target_cooperId', items:copers, valueProperty:'id', labelProperty:'name', style:"margin-bottom:10px"}#{/select}
-      </dd>
-
-      <dt>备注</dt>
-      <dd>
-        <textarea id="target_memo" name="t.memo"></textarea>
-      </dd>
-    </dl>
-  #{/form}
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <input type="submit" value="修改" class="btn btn-primary">
+<div id="update_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">修改支付目标</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{PaymentTargets.update()}" method="post" id="update_form" class="form-horizontal">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>名称</th>
+              <td>
+                <input type="text" id="target_name" name="t.name" value="" class="form-control">
+                <input type="hidden" id="target_id" name="t.id" value="">
+              </td>
+            </tr>
+            <tr>
+              <th>账户</th>
+              <td><input type="text" id="target_accountUser" name="t.accountUser" value="" class="form-control"></td>
+            </tr>
+            <tr>
+              <th>银行地址</th>
+              <td><input type="text" id="target_accountAddress" name="t.accountAddress" class="form-control"></td>
+            </tr>
+            <tr>
+              <th>合作伙伴</th>
+              <td>
+                <select id="target_cooperId" name="c.id" class="form-control selectize">
+                #{list items:copers, as:'c'}
+                  <option value="${c.id}">${c.name}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>备注</th>
+              <td><textarea id="target_memo" name="t.memo" class="form-control"></textarea></td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <input type="submit" value="修改" class="btn btn-primary btn-xs">
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+      </div>
+    </div>
   </div>
 </div>
