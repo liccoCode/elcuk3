@@ -868,7 +868,7 @@ public class Excels extends Controller {
     public static void exportInventoryCostsReport(Integer year, Integer month) {
         Date target = new DateTime().withYear(year).withMonthOfYear(month).toDate();
         List<InventoryCostUnit> units = InventoryCostUnit.find(
-                "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC",
+                "date BETWEEN ? AND ? ORDER BY categoryId ASC, SKU ASC, market ",
                 Dates.morning(Dates.monthBegin(target)), Dates.monthEnd(target)).fetch();
         List<Map<String, Object>> summaries = InventoryCostUnit.countByCategory(target);
         ImmutablePair<List<InventoryCostUnit>, List<Map<String, Object>>> immutablePair =

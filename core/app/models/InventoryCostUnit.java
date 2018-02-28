@@ -100,7 +100,7 @@ public class InventoryCostUnit extends GenericModel {
         sql.append(" FROM( ");
         sql.append(" SELECT `date`, categoryId, ");
         sql.append(" SUM(reservedQty) AS reservedQty, ");
-        sql.append(" productionQty AS productionQty, ");
+        sql.append(" SUM(productionQty) AS productionQty, ");
         sql.append(" SUM(transitQty) AS transitQty, ");
         sql.append(" SUM(transitQty*procurementPrice+transitQty*transportPrice) AS transitCost, ");
         sql.append(" SUM(stockQty) AS stockQty, ");
@@ -125,23 +125,27 @@ public class InventoryCostUnit extends GenericModel {
 
         /** 1 循环明细集合,将 categoryId-sku-market : vat费用 存入map **/
         for(InventoryCostUnit unit : units) {
-            priceMap.put(String.format("taxPrice-%s-%s-%s", unit.categoryId, unit.sku, unit.market.name()),
-                    unit.taxPrice);
-            priceMap.put(String.format("transportPrice-%s-%s-%s", unit.categoryId, unit.sku, unit.market.name()),
-                    unit.transportPrice);
-            unit.transportPriceTemp = unit.transportPrice;
-            unit.taxPriceTemp = unit.taxPrice;
+            if(unit.market != null) {
+                priceMap.put(String.format("taxPrice-%s-%s-%s", unit.categoryId, unit.sku, unit.market.name()),
+                        unit.taxPrice);
+                priceMap.put(String.format("transportPrice-%s-%s-%s", unit.categoryId, unit.sku, unit.market.name()),
+                        unit.transportPrice);
+                unit.transportPriceTemp = unit.transportPrice;
+                unit.taxPriceTemp = unit.taxPrice;
+            }
         }
 
         /** 2 循环明细集合,处理 欧洲五国vat费用为0的数据并按 品线汇总 存入map **/
         for(InventoryCostUnit unit : units) {
-            if(unit.taxPrice == 0 && marketlist.contains(unit.market)) {
-                unit.taxPriceTemp = getTaxPrice(priceMap, unit.categoryId, unit.sku, marketlist);
+            if(unit.market != null) {
+                if(unit.taxPrice == 0 && marketlist.contains(unit.market)) {
+                    unit.taxPriceTemp = getTaxPrice(priceMap, unit.categoryId, unit.sku, marketlist);
+                }
+                if(unit.transportPrice == 0 && marketlist.contains(unit.market)) {
+                    unit.transportPriceTemp = getTransportPrice(priceMap, unit.categoryId, unit.sku, marketlist);
+                }
+                setTotalMap(unit, totalMap);
             }
-            if(unit.transportPrice == 0 && marketlist.contains(unit.market)) {
-                unit.transportPriceTemp = getTransportPrice(priceMap, unit.categoryId, unit.sku, marketlist);
-            }
-            setTotalMap(unit, totalMap);
         }
 
         /** 3 汇总结果 匹配计算好的totalMap**/
