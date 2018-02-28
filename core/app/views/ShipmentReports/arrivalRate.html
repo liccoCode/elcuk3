@@ -1,146 +1,147 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:'运输到货率统计'/}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
+#{/set}
 #{set 'moreScripts'}
+    #{script 'bootstrap3/jquery.dataTables.js'/}
+    #{script 'bootstrap3/dataTables.bootstrap.js'/}
     #{script 'highstock.js'/}
-    #{script 'jquery.dataTables.js'/}
     #{script 'ShipmentReports/arrivalRate.coffee'/}
 #{/set}
 
-<ul class="nav nav-tabs">
-  <li class="active">
-    <a href="#" data-toggle='tab' id="firstTab">运输准时到货统计</a>
-  </li>
-  <li>
-    <a href="#" data-toggle='tab' id="secondTab">年度趋势图</a>
-  </li>
-</ul>
 
-<div id="below_tabContent" class="tab-content">
-  <div class="tab-pane active in" id='activeprocess'>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="#" data-toggle='tab' id="firstTab">运输准时到货统计</a>
+        </li>
+        <li>
+          <a href="#" data-toggle='tab' id="secondTab">年度趋势图</a>
+        </li>
+      </ul>
 
-    <form action="@{ShipmentReports.arrivalRate()}" method="get" class="search_form" id='search_form'>
-      <div class="row-fluid">
-        <div class="span12">
-          <div class="input-prepend inline">
-            <span class="add-on">From:</span>
-            <input type="date" name="p.from" value="${p.from.date()}">
+      <div id="below_tabContent" class="tab-content">
+        <div class="tab-pane active" id="activeprocess">
+          <div class="box">
+            <form action="@{ShipmentReports.arrivalRate()}" method="get" class="form-inline" id="search_form">
+              <div class="box-header with-border">
+                <div class="form-group">
+                  <div class="input-group">
+                    <div class="input-group-addon">From:</div>
+                    <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="input-group">
+                    <div class="input-group-addon">To:</div>
+                    <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+                  </div>
+                </div>
+                <button class="btn btn-primary" data-loading>统计</button>
+                <button class="btn btn-success" id="exceldown">导出Excel</button>
+              </div>
+            </form>
+            <div class="box-body">
+              <div class="col-md-12"><b style="color:#0e90d2">运输准时到货统计</b></div>
+              <table id="shipItemTable" class="table table-condensed table-bordered">
+                <thead>
+                <tr>
+                  <th>国家</th>
+                  <th>运输方式</th>
+                  <th>总票数</th>
+                  <th>准时票数</th>
+                  <th>准时率%</th>
+                  <th>超时票数</th>
+                  <th>超时率%</th>
+                  <th>提前票数</th>
+                  <th>提前率%</th>
+                </tr>
+                </thead>
+                <tbody>
+                #{list items:arrivals, as:'arr'}
+                <tr>
+                  <td>${arr.market?.name()}</td>
+                  <td>${arr.shipType}</td>
+                  <td>${arr.totalShipNum}</td>
+                  <td>${arr.onTimeShipNum}</td>
+                  <td>${arr.onTimeRate}%</td>
+                  <td>${arr.overTimeShipNum}</td>
+                  <td>${arr.overTimeRate}%</td>
+                  <td>${arr.earlyTimeShipNum}</td>
+                  <td>${arr.earlyTimeRate}%</td>
+                </tr>
+                #{/list}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div class="input-prepend inline">
-            <span class="add-on">To:</span>
-            <input type="date" name="p.to" value="${p.to.date()}">
+          <div class="box">
+            <div class="box-header with-border"><h4 class="box-title"><b style="color:#0e90d2">运输超时到货明细表</b></h4></div>
+            <div class="box-body">
+              <table id="shipmentTable" class="table table-condensed table-bordered">
+                <thead>
+                <tr>
+                  <th>运输单号</th>
+                  <th>运输方式</th>
+                  <th>仓库</th>
+                  <th>CenterId</th>
+                  <th>Track No.</th>
+                  <th>预计发货时间</th>
+                  <th>约定到货时间</th>
+                  <th>实际签收时间</th>
+                  <th>晚到货原因</th>
+                </tr>
+                </thead>
+                <tbody>
+                #{list items:shipments, as:'ship'}
+                <tr>
+                  <td>${ship.id}</td>
+                  <td>${ship.type.label()}</td>
+                  <td>${ship.whouse.name}</td>
+                  <td>${ship.fetchCenterId()}</td>
+                  <td>${ship.showTrackNo()}</td>
+                  <td>#{time_tooltip time: ship.dates.planBeginDate/}</td>
+                  <td>#{time_tooltip time: ship.dates.planArrivDateForCountRate/}</td>
+                  <td>#{time_tooltip time: ship.dates.receiptDate/}</td>
+                  <td>${ship.reason}</td>
+                </tr>
+                #{/list}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
 
-          <div class="input-append input-prepend inline">
-            <button class="btn btn-primary" data-loading>统计</button>
-            <button class="btn btn-success" id="exceldown">导出Excel</button>
+        <div class="tab-pane" id="runprocess" data-method="ajaxRunPocesss">
+          <div class="box">
+            <div class="box-header form-inline">
+            #{select_year class:'form-control', name:'select_year'/}
+              <select class="form-control" name="ship_type">
+                <option value="">请选择</option>
+              #{list items: models.procure.Shipment.T, as: 't'}
+                <option value="${t.name()}">${t.label()}</option>
+              #{/list}
+              </select>
+              <select class="form-control" name="count_type">
+                <option value="ReceiptDate">签收时间</option>
+                <option value="PlanBeginDate">预计发货日期</option>
+              </select>
+              <input type="button" class="btn btn-primary" value="Search" id="submit_btn">
+            </div>
+            <div class="box-body">
+              <div class="col-md-12" style="height:450px;" id="arrival_rate_line" data-url="@{ShipmentReports.countArrivalRate()}"></div>
+            </div>
           </div>
         </div>
       </div>
-    </form>
-
-    <div class="row-fluid">
-      <div class="span12">
-        <b style="color:#0e90d2">运输准时到货统计</b>
-        <table id="shipItemTable" class="table table-condensed table-bordered">
-          <thead>
-          <tr>
-            <th>国家</th>
-            <th>运输方式</th>
-            <th>总票数</th>
-            <th>准时票数</th>
-            <th>准时率%</th>
-            <th>超时票数</th>
-            <th>超时率%</th>
-            <th>提前票数</th>
-            <th>提前率%</th>
-          </tr>
-          </thead>
-          <tbody>
-          #{list items:arrivals, as:'arr'}
-          <tr>
-            <td>${arr.market?.name()}</td>
-            <td>${arr.shipType}</td>
-            <td>${arr.totalShipNum}</td>
-            <td>${arr.onTimeShipNum}</td>
-            <td>${arr.onTimeRate}%</td>
-            <td>${arr.overTimeShipNum}</td>
-            <td>${arr.overTimeRate}%</td>
-            <td>${arr.earlyTimeShipNum}</td>
-            <td>${arr.earlyTimeRate}%</td>
-          </tr>
-          #{/list}
-          </tbody>
-        </table>
-      </div>
     </div>
 
-    <div class="row-fluid">
-      <div class="span12">
-        <b style="color:#0e90d2">运输超时到货明细表</b>
-        <table id="shipmentTable" class="table table-condensed table-bordered">
-          <thead>
-          <tr>
-            <th>运输单号</th>
-            <th>运输方式</th>
-            <th>仓库</th>
-            <th>CenterId</th>
-            <th>Track No.</th>
-            <th>预计发货时间</th>
-            <th>约定到货时间</th>
-            <th>实际签收时间</th>
-            <th>晚到货原因</th>
-          </tr>
-          </thead>
-          <tbody>
-          #{list items:shipments, as:'ship'}
-          <tr>
-            <td>${ship.id}</td>
-            <td>${ship.type.label()}</td>
-            <td>${ship.whouse.name}</td>
-            <td>${ship.fetchCenterId()}</td>
-            <td>${ship.showTrackNo()}</td>
-            <td>#{time_tooltip time: ship.dates.planBeginDate/}</td>
-            <td>#{time_tooltip time: ship.dates.planArrivDateForCountRate/}</td>
-            <td>#{time_tooltip time: ship.dates.receiptDate/}</td>
-            <td>${ship.reason}</td>
-          </tr>
-          #{/list}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-pane" id='runprocess' data-method="ajaxRunPocesss">
-
-    <div class="row-fluid">
-      <div class="span12">
-        <span>年份:</span>
-      #{select_year class:'span1', name:'select_year'/}
-        &nbsp;
-
-        <span>运输方式:</span>
-        <select class="span1" name="ship_type">
-          <option value="">请选择</option>
-        #{list items: models.procure.Shipment.T, as: 't'}
-          <option value="${t.name()}">${t.label()}</option>
-        #{/list}
-        </select>
-
-        <span>统计方式:</span>
-        <select class="span1" name="count_type">
-          <option value="ReceiptDate">签收时间</option>
-          <option value="PlanBeginDate">预计发货日期</option>
-        </select>
-
-        <input type="button" class="btn" value="Search" id="submit_btn">
-      </div>
-    </div>
-
-
-    <div class="row-fluid">
-      <div class="span12" style="height:450px;" id='arrival_rate_line' data-url="@{ShipmentReports.countArrivalRate()}"></div>
-    </div>
   </div>
 </div>
+
+
+

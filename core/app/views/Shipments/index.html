@@ -83,34 +83,30 @@
         </div>
 
         <div class="box-body">
-          <div class="row-fluid">
-            <div class="span12">
-            #{render 'Shipments/_shipment_list.html', shipments:shipments/}
-            </div>
-            <div class="btn-toolbar">
-            #{power.ck 'applys.shipmenttoapply'}
-              <button id="createApplyBtn" class="btn btn-default" data-url='@{Applys.shipmentToApply()}'
-                      data-disable-with='创建请款单中...'> <b>创建运输请款单</b>
-              </button>
-            #{/power.ck}
-            #{power.ck 'outbounds.index'}
-              <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-default" id="outboundBtn">
-                <b>创建出库单</b>
-              </a>
-            #{/power.ck}
-              <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-success">
-                <i class="icon-download-alt"></i> 运输单发货明细excel</a>
-              <a href="javascript:void(0)" data-url="@{Excels.shipmentDetailCost()}" target="_blank" id="exportBtn" class="btn btn-success">
-                <i class="icon-download-alt"></i> 物流费用报表</a>
-              <a href="javascript:void(0)" data-url="@{Excels.packingList()}" target="_blank" id="packingBtn" class="btn btn-primary">
-                <i class="icon-download-alt"></i> 装箱单</a>
-            #{power.ck 'shipments.deliveryment'}
-              <a href="javascript:void(0)" data-url="@{Excels.exportDeliverymentByShipment()}" target="_blank"
-                 id="deliverymentBtn" class="btn btn-warning">
-                <i class="icon-download-alt"></i>生成进出口采购合同</a>
-            #{/power.ck}
-            </div>
-          </div>
+        #{render 'Shipments/_shipment_list.html', shipments:shipments/}
+        </div>
+        <div class="box-footer">
+        #{power.ck 'applys.shipmenttoapply'}
+          <button id="createApplyBtn" class="btn btn-default" data-url='@{Applys.shipmentToApply()}'
+                  data-disable-with='创建请款单中...'><b>创建运输请款单</b>
+          </button>
+        #{/power.ck}
+        #{power.ck 'outbounds.index'}
+          <a href="javascript:void(0)" data-url="@{Shipments.outbound()}" class="btn btn-default" id="outboundBtn">
+            <b>创建出库单</b>
+          </a>
+        #{/power.ck}
+          <a href="javascript:void(0)" data-url="@{Excels.shipmentDetails()}" id="download_excel" class="btn btn-success">
+            <i class="icon-download-alt"></i> 运输单发货明细excel</a>
+          <a href="javascript:void(0)" data-url="@{Excels.shipmentDetailCost()}" target="_blank" id="exportBtn" class="btn btn-success">
+            <i class="icon-download-alt"></i> 物流费用报表</a>
+          <a href="javascript:void(0)" data-url="@{Excels.packingList()}" target="_blank" id="packingBtn" class="btn btn-primary">
+            <i class="icon-download-alt"></i> 装箱单</a>
+        #{power.ck 'shipments.deliveryment'}
+          <a href="javascript:void(0)" data-url="@{Excels.exportDeliverymentByShipment()}" target="_blank"
+             id="deliverymentBtn" class="btn btn-warning">
+            <i class="icon-download-alt"></i>生成进出口采购合同</a>
+        #{/power.ck}
         </div>
       </form>
     </div>

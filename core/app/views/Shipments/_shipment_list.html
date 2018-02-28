@@ -30,7 +30,7 @@
         #{list items:ship.tracknolist, as:'trackno'}
         ${trackno+" "}
         #{/list}
-      <span class="badge bg-light-blue">${ship.items.size()}</span>
+      <span class="label ${ship.items?.size()==0 ? 'label-default' : 'label label-success'}">${ship.items.size()}</span>
     </td>
     <td>${ship.cooper?.name}</td>
     <td>${ship.internationExpress}</td>

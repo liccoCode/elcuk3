@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'B2B销售订单信息列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -7,54 +7,61 @@
 
 #{flash_alert /}
 
-<div class="row-fluid">
-  <form action="@{BtbCustoms.btbOrderIndex()}" method="POST" class="search_form" id='search_form'>
-    <div class="span12">
-      <div class="input-prepend input-append inline">
-        <span class="add-on">时间</span>
-        <input type="date" name="p.from" value="${p.from.date()}">
-        <span class="add-on">To:</span>
-        <input type="date" name="p.to" value="${p.to.date()}">
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <form action="@{BtbCustoms.btbOrderIndex()}" method="POST" class="form-inline" id='search_form'>
+        <div class="box-header with-border">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+            </div>
+          </div>
+
+          <select name="p.categoryId" class="form-control">
+            <option value="">品线</option>
+          #{list items:categorys, as:'c'}
+            <option value="${c}" #{if c==p.categoryId} selected #{/if}>${c}</option>
+          #{/list}
+          </select>
+
+          <select name="p.btbCustomId" style="width:220px;" class="form-control selectize">
+            <option value="">客户/公司名称</option>
+          #{list items:customList, as:'c'}
+            <option value="${c.id}" #{if c.id==p.btbCustomId} selected #{/if}>${c.customName}</option>
+          #{/list}
+          </select>
+
+          <div class="input-group">
+            <div class="input-group-addon"><i class="icon-search"></i>关键字</div>
+            <input style="width:200px;" class="form-control" name="p.keywords" placeHolder="SKU/订单号" value="${p.keywords}">
+            <input type="hidden" name="p.page" value="${p.page}">
+          </div>
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button data-url='@{BtbCustoms.btbOrderIndex()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
+          <a href="javascript:void(0)" id="download_excel" class="btn btn-info">导出excel</a>
+          <a href="@{BtbCustoms.createBtbOrderPage()}" class="btn btn-success">添加订单</a>
+        </div>
+
+      </form>
+
+      <div class="box-body">
+      #{render 'BtbCustoms/_order_list.html', orderList:orderList, p:p/}
       </div>
-
-      <select name="p.categoryId" class="inline">
-        <option value="">品线</option>
-      #{list items:categorys, as:'c'}
-        <option value="${c}" #{if c==p.categoryId} selected #{/if}>${c}</option>
-      #{/list}
-      </select>
-
-      <select name="p.btbCustomId" style="width:220px;" class="inline selectize">
-        <option value="">客户/公司名称</option>
-      #{list items:customList, as:'c'}
-        <option value="${c.id}" #{if c.id==p.btbCustomId} selected #{/if}>${c.customName}</option>
-      #{/list}
-      </select>
-
-      <div class="input-prepend input-append inline">
-        <span class="add-on">关键字</span>
-        <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="SKU/订单号"/>
-      </div>
-
-      <div class="input-append input-prepend inline">
-        <input type="hidden" name="p.page" value="${p.page}">
-        <button data-url='@{BtbCustoms.btbOrderIndex()}' class="btn btn-primary" data-disable-with='提交中...'>搜索</button>
-        &nbsp;
-      </div>
-
-      <div class="input-append input-prepend inline">
-        <a href="javascript:void(0)" id="download_excel" class="btn btn-info">导出excel</a>
-      </div>
-
-      <div class="input-append input-prepend inline">
-        <a href="@{BtbCustoms.createBtbOrderPage()}" class="btn btn-success">添加订单</a>
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
       </div>
 
     </div>
-  </form>
+  </div>
 </div>
 
-<div class="row-fluid" style="overflow-x:auto;">
-#{render 'BtbCustoms/_order_list.html', orderList:orderList, p:p/}
-</div>
 

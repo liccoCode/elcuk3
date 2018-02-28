@@ -5,11 +5,6 @@
     #{script 'ShipmentReports/monthlyShipment.es6'/}
 #{/set}
 
-#{info_row}
-<ul>
-  <li><strong>单月物流发货量报表</strong></li>
-</ul>
-#{/info_row}
 #{flash_alert /}
 
 <div class="row">
@@ -40,7 +35,6 @@
               <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.exportMonthlyShipment()}"
                      value="导出Excel"/>
             </div>
-
           </div>
         </form>
       </div>

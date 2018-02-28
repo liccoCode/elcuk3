@@ -20,99 +20,99 @@
       <div class="col-md-5" id="totalAjaxUnitDiv" style="height:300px;"></div>
       <div class="col-md-4" id="ajaxMap" style="height:300px;"></div>
     </div>
-    <div class="box-footer"></div>
   </div>
+  <div class="box-footer"></div>
+</div>
 
-  <div class="box box-success box-solid">
-    <div class="box-header"><h3 class="box-title">近7日各市场订单信息汇总</h3></div>
-    <div class="box-body">
-      <div class="nav-tabs-custom">
-        <ul class="nav nav-tabs">
-        #{list items:map.keySet(), as:'key'}
-          <li #{if key_isFirst} class="active" #{/if}>
-            <a href="#${key}" data-toggle='tab'><i class="fa fa-calendar"></i> ${key}</a>
-          </li>
-        #{/list}
-        </ul>
+<div class="box">
+  <div class="box-header with-border"><h4 class="box-title">近7日各市场订单信息汇总</h4></div>
+  <div class="box-body">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+      #{list items:map.keySet(), as:'key'}
+        <li #{if key_isFirst} class="active" #{/if}>
+          <a href="#${key}" data-toggle='tab'><i class="fa fa-calendar"></i> ${key}</a>
+        </li>
+      #{/list}
+      </ul>
 
-        <div class="tab-content">
-        #{list items:map.keySet(), as:'key'}
-            #{set current_total_orders: 0 /}
-            #{set yesterday_total_orders: 0 /}
-          <div class="tab-pane ${key_isFirst? 'active' : ''}" id='${key}'>
-            <table class="table table-bordered">
-              <tr>
-                <th width="45px;">国家</th>
-                <th>Market</th>
-                <th>PENDING</th>
-                <th>PAYMENT</th>
-                <th>SHIPPED</th>
-                <th>REFUNDED</th>
-                <th>RETURNNEW</th>
-                <th>CANCEL</th>
-                <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
-                <th width="180px;"  data-toggle="tooltip" title="括号内代表昨日销量">比前一天</th>
-              </tr>
-                #{list items:map.get(key), as:'m'}
-                  <tr>
-                    <td style="padding: 0;">
-                      <div class="flag-wrapper" style="margin:0;">
-                        <div class="img-thumbnail flag flag-icon-background ${m.marketEnum?.pic()}"></div>
-                      </div>
-                    </td>
-                    <td>${m.marketEnum?.countryName()}</td>
-                    <td class="text-success">${m.pendingOrders}</td>
-                    <td class="text-orange">${m.paymentOrders}</td>
-                    <td class="text-info">${m.shippedOrders}</td>
-                    <td class="text-red">${m.refundOrders}</td>
-                    <td>${m.returnNewOrders}</td>
-                    <td class="text-purple">${m.cancelOrders}</td>
-                    <td class="text-blue">${m.totalOrders}</td>
-                    <td class="${m.rose > 0 ? 'text-red' : m.rose==0 ? 'text-info' : 'text-green'}">
-                        #{if m.rose > 0}
-                          <span class="glyphicon glyphicon-arrow-up"></span>
-                        #{/if}
-                        #{elseif m.rose == 0}
-                         <i class="fa fa-arrows-h"></i>
-                        #{/elseif}
-                        #{else }
-                          <span class="glyphicon glyphicon-arrow-down"></span>
-                        #{/else}
-                    ${m.rose}% (${m.yesterdayTotalOrders})
-                    </td>
-                  </tr>
-                    #{set current_total_orders:  m.totalOrders + current_total_orders/}
-                    #{set yesterday_total_orders:  m.yesterdayTotalOrders + yesterday_total_orders/}
-                #{/list}
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <th>总和:</th>
-                <td class="text-blue">${current_total_orders}</td>
-                  #{set diff: current_total_orders - yesterday_total_orders /}
-                <td class="${diff > 0 ? 'text-red' : diff ==0 ? '' : 'text-green'}">
-                    #{if diff > 0}
-                      <span class="glyphicon glyphicon-arrow-up"></span>
-                    #{/if}
-                    #{elseif diff == 0}
-                      <span class="glyphicon glyphicon-option-horizontal"></span>
-                    #{/elseif}
-                    #{elseif diff < 0}
-                      <span class="glyphicon glyphicon-arrow-down"></span>
-                    #{/elseif}
-                ${(diff*100/(yesterday_total_orders==0 ? 1 : yesterday_total_orders)).format("#.##")}%
-                  (${yesterday_total_orders})
-                </td>
-              </tr>
-            </table>
-          </div>
-        #{/list}
+      <div class="tab-content">
+      #{list items:map.keySet(), as:'key'}
+          #{set current_total_orders: 0 /}
+          #{set yesterday_total_orders: 0 /}
+        <div class="tab-pane ${key_isFirst? 'active' : ''}" id='${key}'>
+          <table class="table table-bordered">
+            <tr>
+              <th width="45px;">国家</th>
+              <th>Market</th>
+              <th>PENDING</th>
+              <th>PAYMENT</th>
+              <th>SHIPPED</th>
+              <th>REFUNDED</th>
+              <th>RETURNNEW</th>
+              <th>CANCEL</th>
+              <th><a href="#" data-toggle="tooltip" title="是当天的成功的订单数量, 而不是销量">订单数</a></th>
+              <th width="180px;" data-toggle="tooltip" title="括号内代表昨日销量">比前一天</th>
+            </tr>
+              #{list items:map.get(key), as:'m'}
+                <tr>
+                  <td style="padding: 0;">
+                    <div class="flag-wrapper" style="margin:0;">
+                      <div class="img-thumbnail flag flag-icon-background ${m.marketEnum?.pic()}"></div>
+                    </div>
+                  </td>
+                  <td>${m.marketEnum?.countryName()}</td>
+                  <td class="text-success">${m.pendingOrders}</td>
+                  <td class="text-orange">${m.paymentOrders}</td>
+                  <td class="text-info">${m.shippedOrders}</td>
+                  <td class="text-red">${m.refundOrders}</td>
+                  <td>${m.returnNewOrders}</td>
+                  <td class="text-purple">${m.cancelOrders}</td>
+                  <td class="text-blue">${m.totalOrders}</td>
+                  <td class="${m.rose > 0 ? 'text-red' : m.rose==0 ? 'text-info' : 'text-green'}">
+                      #{if m.rose > 0}
+                        <span class="glyphicon glyphicon-arrow-up"></span>
+                      #{/if}
+                      #{elseif m.rose == 0}
+                        <i class="fa fa-arrows-h"></i>
+                      #{/elseif}
+                      #{else }
+                        <span class="glyphicon glyphicon-arrow-down"></span>
+                      #{/else}
+                  ${m.rose}% (${m.yesterdayTotalOrders})
+                  </td>
+                </tr>
+                  #{set current_total_orders:  m.totalOrders + current_total_orders/}
+                  #{set yesterday_total_orders:  m.yesterdayTotalOrders + yesterday_total_orders/}
+              #{/list}
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <th>总和:</th>
+              <td class="text-blue">${current_total_orders}</td>
+                #{set diff: current_total_orders - yesterday_total_orders /}
+              <td class="${diff > 0 ? 'text-red' : diff ==0 ? '' : 'text-green'}">
+                  #{if diff > 0}
+                    <span class="glyphicon glyphicon-arrow-up"></span>
+                  #{/if}
+                  #{elseif diff == 0}
+                    <span class="glyphicon glyphicon-option-horizontal"></span>
+                  #{/elseif}
+                  #{elseif diff < 0}
+                    <span class="glyphicon glyphicon-arrow-down"></span>
+                  #{/elseif}
+              ${(diff*100/(yesterday_total_orders==0 ? 1 : yesterday_total_orders)).format("#.##")}%
+                (${yesterday_total_orders})
+              </td>
+            </tr>
+          </table>
         </div>
+      #{/list}
       </div>
     </div>
   </div>
