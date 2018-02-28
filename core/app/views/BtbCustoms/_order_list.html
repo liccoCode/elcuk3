@@ -23,18 +23,10 @@
     <td>${b.btbCustom?.customName}</td>
     <td>${b.stage?.label()}</td>
     <td>
-      <a href="@{BtbCustoms.createBtbOrderPage(b.id)}" class="btn btn-mini btn-primary">编辑</a>
-      <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-mini btn-warning">下载PI</a>
-      <a href="@{BtbCustoms.cancelBtbOrder(b.id)}" class="btn btn-mini btn-danger">取消</a>
+      <a href="@{BtbCustoms.createBtbOrderPage(b.id)}" class="btn btn-xs btn-primary">编辑</a>
+      <a href="@{Excels.downloadB2BPi(b.id)}" target="_blank" class="btn btn-xs btn-warning">下载PI</a>
+      <a href="@{BtbCustoms.cancelBtbOrder(b.id)}" class="btn btn-xs btn-default">取消</a>
     </td>
   </tr>
 #{/list}
-#{if p}
-  <tr class="tb_footer">
-    <td colspan="14">
-        #{bootstrap_pager pi:p, url:'' /}
-    </td>
-  </tr>
-#{/if}
-
 </table>

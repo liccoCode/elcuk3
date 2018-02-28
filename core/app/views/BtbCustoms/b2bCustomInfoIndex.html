@@ -1,4 +1,4 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'B2B客户信息列表' /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
@@ -7,67 +7,64 @@
 
 #{flash_alert /}
 
-<form action="@{BtbCustoms.b2bCustomInfoIndex()}" method="POST" class="search_form" id='search_form'>
-  <div class="row-fluid">
-    <div class="span12">
-      <div class="input-prepend inline">
-        <span class="add-on">关键字</span>
-        <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="客户/公司名称模糊查询"/>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <form action="@{BtbCustoms.b2bCustomInfoIndex()}" method="POST" class="form-inline" id='search_form'>
+        <div class="box-header with-border">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">关键字</div>
+              <input type="text" style="width:200px;" name="p.keywords" value="${p.keywords}" class="form-control"
+                     placeHolder="客户/公司名称模糊查询"/>
+            </div>
+          </div>
+          <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>查询</button>
+          <a href="@{BtbCustoms.createB2BCustomInfoPage()}" class="btn btn-success">新增客户</a>
+          <input type="hidden" name="p.page" value="${p.page}">
+        </div>
+      </form>
+      <div class="box-body">
+        <table class="table table-bordered table-condensed">
+          <tr>
+            <th width="40px;">序号</th>
+            <th width="380px;">客户/公司名称</th>
+            <th>联系人</th>
+            <th>联系电话</th>
+            <th>邮箱</th>
+            <th>创建人</th>
+            <th>创建时间</th>
+            <th>最新修改时间</th>
+            <th width="190px;">操作</th>
+          </tr>
+        #{list items:dots, as:'b'}
+          <tr>
+            <td>${b_index}</td>
+            <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
+              <span><i class="icon-reorder"></i></span>
+              <span>${b.customName}</span>
+              <span class="badge bg-light-blue">${b.orders.size()}</span>
+            </td>
+            <td>${b.contacts}</td>
+            <td>${b.contactPhone}</td>
+            <td>${b.email}</td>
+            <td>${b.creator?.username}</td>
+            <td>#{time_tooltip time:b.createDate/}</td>
+            <td>#{time_tooltip time:b.updateDate/}</td>
+            <td>
+              <a href="@{BtbCustoms.createBtbOrderByCustom(b.id)}" class="btn btn-xs btn-success">新建订单</a>
+              <a href="@{BtbCustoms.createB2BCustomInfoPage(b.id)}" class="btn btn-xs btn-primary">Edit</a>
+              <a href="@{BtbCustoms.deleteB2BCustom(b.id)}" class="btn btn-xs btn-danger">Delete</a>
+            </td>
+          </tr>
+        #{/list}
+        </table>
       </div>
-
-      <div class="input-append input-prepend inline">
-        <button data-url='@{Shipments.index()}' class="btn btn-primary" data-disable-with='提交中...'>查询</button>
-        &nbsp;
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
       </div>
-      <div class="input-append input-prepend inline">
-        <a href="@{BtbCustoms.createB2BCustomInfoPage()}" class="btn btn-success">新增客户</a>
-      </div>
-
-      <input type="hidden" name="p.page" value="${p.page}">
     </div>
   </div>
-</form>
-
-<div class="row-fluid" style="overflow-x:auto;">
-  <table class="table table-bordered table-condensed">
-    <tr>
-      <th width="40px;">序号</th>
-      <th width="380px;">客户/公司名称</th>
-      <th>联系人</th>
-      <th>联系电话</th>
-      <th>邮箱</th>
-      <th>创建人</th>
-      <th>创建时间</th>
-      <th>最新修改时间</th>
-      <th width="190px;">操作</th>
-    </tr>
-  #{list items:dots, as:'b'}
-    <tr>
-      <td>${b_index}</td>
-      <td style="cursor:pointer;" name="clickTd" data-id="${b.id}">
-        <span><i class="icon-reorder"></i></span>
-        <span>${b.customName}</span>
-        <span class="badge badge-info">${b.orders.size()}</span>
-      </td>
-      <td>${b.contacts}</td>
-      <td>${b.contactPhone}</td>
-      <td>${b.email}</td>
-      <td>${b.creator?.username}</td>
-      <td>#{time_tooltip time:b.createDate/}</td>
-      <td>#{time_tooltip time:b.updateDate/}</td>
-      <td>
-        <a href="@{BtbCustoms.createBtbOrderByCustom(b.id)}" class="btn btn-mini btn-success">新建订单</a>
-        <a href="@{BtbCustoms.createB2BCustomInfoPage(b.id)}" class="btn btn-mini btn-primary">Edit</a>
-        <a href="@{BtbCustoms.deleteB2BCustom(b.id)}" class="btn btn-mini btn-danger">Delete</a>
-      </td>
-    </tr>
-  #{/list}
-
-    <tr class="tb_footer">
-      <td colspan="14">
-      #{bootstrap_pager pi:p, url:'' /}
-      </td>
-    </tr>
-  </table>
 </div>
+
 

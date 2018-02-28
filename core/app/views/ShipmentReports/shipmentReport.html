@@ -1,16 +1,9 @@
 #{extends 'main_full_v3.html' /}
-#{set title:'单月物流发货量报表'/}
+#{set title:'单个sku物流费年均价报表'/}
 #{set 'moreScripts'}
-    #{script 'jquery.dataTables.js'/}
     #{script 'ShipmentReports/monthlyShipment.es6'/}
 #{/set}
 
-#{info_row}
-<ul>
-  <li><strong>单月运输时效统计</strong></li>
-</ul>
-
-#{/info_row}
 #{flash_alert /}
 
 <div class="row">
@@ -19,7 +12,6 @@
       <div class="box-header with-border">
         <form action="@{ShipmentReports.shipmentReport()}" method="get" class="form-inline" id='search_form'>
           <div class="row-fluid">
-
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">From:</div>
@@ -35,22 +27,18 @@
             </div>
 
             <div class="input-group">
-              <div class="input-group-addon"><i class="icon-search"></i></div>
-              <button class="btn btn-primary" data-loading>统计</button>
+              <button class="btn btn-primary" data-loading> <i class="icon-search"></i> 统计</button>
             </div>
 
             <div class="input-group">
-              <div class="input-group-addon"><i class="icon-file"></i></div>
-              <input type="button" class="btn btn-success" id="download_excel" data-url="@{Excels.skuShipmentReport()}"
-                     value="导出Excel"/>
+              <button class="btn btn-success" id="download_excel" data-url="@{Excels.skuShipmentReport()}" data-loading>
+                <i class="icon-file"></i> 导出Excel</button>
             </div>
-
           </div>
         </form>
       </div>
 
       <div class="box-body">
-        <b style="color:#0e90d2">单个sku物流费均价报表</b>
         <table id="shipItemTable" class="table table-condensed table-bordered">
           <tr>
             <th>SKU</th>
