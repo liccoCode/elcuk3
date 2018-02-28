@@ -33,7 +33,7 @@ $(() => {
     $("#update_modal").modal('show');
   });
 
-  $("#submitUpdateBtn").click(() => {
+  $("#submitUpdateBtn").click(function () {
     $("#update_form").submit();
   });
 

@@ -440,6 +440,13 @@ public class Shipments extends Controller {
         show(item.shipment.id);
     }
 
+    public static void syncReceiveQty(Long itemId) {
+        ShipItem item = ShipItem.findById(itemId);
+        item.syncReceiveQty(item.unit.id);
+        flash.success(" 运输项目 %s 同步receiveQty!", item.unit.id);
+        show(item.shipment.id);
+    }
+
     public static void refreshProcuress(final String id) {
         Shipment ship = Shipment.findById(id);
         Validation.required("shipment.trackNo", ship.trackNo);

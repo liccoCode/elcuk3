@@ -152,9 +152,12 @@
   <tr id="${tr_key}_${itm.id}" style="display:none;">
     <td colspan="10"><a id="unitbutton">${itm.unit.sid}</a></td>
     <td colspan="10">
-      #{if itm.shipment.state.name()=='RECEIVING'}
-        <a href="@{Shipments.endShipByItem(itm.id)}" class="btn btn-xs btn-warning">完成运输</a>
-      #{/if}
+        #{if itm.shipment.state.name()=='RECEIVING'}
+          <a href="@{Shipments.endShipByItem(itm.id)}" class="btn btn-xs btn-warning" data-toggle="tooltip"
+             title="单个采购计划完成运输">完成运输</a>
+          <a href="@{Shipments.syncReceiveQty(itm.id)}" class="btn btn-xs btn-info" data-toggle="tooltip"
+             title="如果Receive数值不正确，可点击次按钮">同步Receive</a>
+        #{/if}
     </td>
   </tr>
 

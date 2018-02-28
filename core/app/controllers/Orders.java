@@ -7,6 +7,7 @@ import controllers.api.SystemOperation;
 import helper.Constant;
 import helper.HTTP;
 import helper.OrderInvoiceFormat;
+import helper.Webs;
 import models.ElcukRecord;
 import models.User;
 import models.finance.EbayFee;
@@ -23,6 +24,8 @@ import mws.MWSOrders;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import play.Logger;
+import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Before;
@@ -111,6 +114,7 @@ public class Orders extends Controller {
 
     public static void refreshFeeByEbay(String id) {
         EbayOrder orderr = EbayOrder.findById(id);
+        orderr.fees.forEach(GenericModel::delete);
         try {
             Account account = Account.findById(orderr.account.id);
             MWSFinancesServiceClient client = MWSFinances.client(account, orderr.market);
@@ -123,6 +127,7 @@ public class Orders extends Controller {
             flash.success("重新抓取费用成功");
             indexEbay(new EbayOrderPost());
         } catch(Exception e) {
+            Webs.e(e);
             renderJSON(new Ret(false, e.getMessage()));
         }
     }

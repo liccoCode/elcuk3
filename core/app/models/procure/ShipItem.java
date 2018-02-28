@@ -1,5 +1,8 @@
 package models.procure;
 
+import com.amazonservices.mws.FulfillmentInboundShipment.FBAInboundServiceMWSClient;
+import com.amazonservices.mws.FulfillmentInboundShipment.model.InboundShipmentItem;
+import com.amazonservices.mws.FulfillmentInboundShipment.model.ListInboundShipmentItemsRequest;
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import helper.DBUtils;
@@ -8,10 +11,12 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
+import models.market.Account;
 import models.market.Selling;
 import models.product.Template;
 import models.view.dto.AnalyzeDTO;
 import models.whouse.Outbound;
+import mws.MWSFulfilment;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Validation;
@@ -466,6 +471,19 @@ public class ShipItem extends GenericModel {
         if(Validation.hasErrors()) return;
         this.unitStage(ProcureUnit.STAGE.CLOSE);
         new ElcukRecord("shipitem.endShipByHand", "手动完成", this.id.toString()).save();
+    }
+
+    public void syncReceiveQty(Long unitId) {
+        ProcureUnit procureUnit = ProcureUnit.findById(unitId);
+        Account account = procureUnit.fba.account;
+        FBAInboundServiceMWSClient client =  MWSFulfilment.client(account, procureUnit.fba.market());
+        ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest(account.merchantId);
+        request.setMWSAuthToken(account.token);
+        request.setShipmentId(procureUnit.fba.shipmentId);
+        List<InboundShipmentItem> items = client.listInboundShipmentItems(request).getListInboundShipmentItemsResult()
+                .getItemData().getMember();
+        this.recivedQty = items.stream().mapToInt(InboundShipmentItem::getQuantityReceived).sum();
+        this.save();
     }
 
 }
