@@ -18,9 +18,34 @@ $(() => {
     e.preventDefault();
   });
 
-
   $("#submitUpdateBtn").click(function () {
     $("#payment_form").submit();
+  });
+
+  $("#showTrackNo").click(function () {
+    $("#show_trackNo_modal").modal("show");
+  });
+
+  //trace_no新增一行
+  $("#more_trackno_btn").click(function () {
+    let $btn = $(this);
+    let $table = $("#trackno_table");
+    let trs = $table.find("tr");
+    $(trs[trs.size() - 1]).before(
+    "<tr><td><input type='text' style='width:200px' class='form-control' name='ship.tracknolist[" + (trs.size() - 1) + "]'> " +
+    "<a class='btn btn-danger' name='delete_trackno_row'><i class='icon-remove'></a>" +
+    "</td></tr>");
+  });
+
+  $("#trackno_table a[name='delete_trackno_row']").click(function () {
+    let $btn = $(this);
+    $btn.parent("td").parent().remove();
+    let trs = $("table[id=trackno_table]").find("tr");
+    $.each(trs, function (index, tr) {
+      let $tr = $(tr);
+      $tr.find("input").attr("name", "ship.tracknolist[" + index + "]")
+    });
+
   });
 
 });

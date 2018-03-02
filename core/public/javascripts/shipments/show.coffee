@@ -107,27 +107,6 @@ $ ->
       EF.scoll(targetTr)
       EF.colorAnimate(targetTr)
 
-  # trace_no新增一行
-  $("#shipment_form").on("click", "#more_trackno_btn", () ->
-    $btn = $(@)
-    table = $btn.parents('table[id=trackno_table]')
-    trs = table.find("tr")
-    $(trs[trs.size() - 1]).before(
-      "<tr><td>" +
-        "<input type='text' class='input-medium' name='ship.tracknolist[#{trs.size() - 1}]'> " +
-        "<a class='btn' name='delete_trackno_row'><i class='icon-remove'></a>" +
-        "</td></tr>"
-    )
-  ).on("click", "[name='delete_trackno_row']", () ->
-    $btn = $(@)
-    $btn.parent("td").parent().remove()
-    trs = $('table[id=trackno_table]').find("tr")
-    $.each(trs, (index, tr) ->
-      $tr = $(tr)
-      $tr.find("input").attr('name', "ship.tracknolist[#{index}]")
-    )
-  )
-
   $("#adjust_ship_items").on("click", "#unitbutton", () ->
     $td = $(@)
     sid = $td.text().trim()

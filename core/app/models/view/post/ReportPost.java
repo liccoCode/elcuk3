@@ -6,6 +6,7 @@ import play.libs.F;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,13 +16,11 @@ import java.util.List;
  * Time: 6:59 PM
  */
 public class ReportPost extends Post<ReportRecord> {
+    private static final long serialVersionUID = -4955491389269838111L;
+
     public ReportPost() {
         this.perSize = 25;
         this.page = 1;
-    }
-
-    public ReportPost(int perSize) {
-        this.perSize = perSize;
     }
 
     public int year;
@@ -43,6 +42,10 @@ public class ReportPost extends Post<ReportRecord> {
         return Arrays.asList(ReportRecord.RT.SKUMONTHALL, ReportRecord.RT.SKUMONTHCATEGORY, ReportRecord.RT.SKUINVTOTAL,
                 ReportRecord.RT.SKUINVSELLING, ReportRecord.RT.SALEYEARTOTAL, ReportRecord.RT.SALEYEARCATEGORY,
                 ReportRecord.RT.INVENTORYRATIANALITY, ReportRecord.RT.SELLINGCYCLE, ReportRecord.RT.INVRNTORYCOST);
+    }
+
+    public static List<ReportRecord.RT> shipmentMonthlyTypes(){
+        return Collections.singletonList(ReportRecord.RT.SHIPMENTMONTHLY);
     }
 
     /**

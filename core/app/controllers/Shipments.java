@@ -247,6 +247,12 @@ public class Shipments extends Controller {
         Shipments.show(shipid);
     }
 
+    public static void updateTrackNo(String shipId, Shipment ship) {
+        Shipment old = Shipment.findById(shipId);
+        old.updateTrackNo(ship);
+        Shipments.show(shipId);
+    }
+
     /**
      * 用来更新 Shipment 的 coment 与 trackNo
      */
