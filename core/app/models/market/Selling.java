@@ -236,6 +236,29 @@ public class Selling extends GenericModel {
     public String productTypeName;
     public String publisher;
 
+    public Date pirateDate;
+
+    @Enumerated(EnumType.STRING)
+    public PS pirateState = PS.NORMAL;
+
+    /**
+     * 订单的状态 State
+     */
+    public enum PS {
+        /**
+         * 正常(未发现盗卖)
+         */
+        NORMAL,
+        /**
+         * 盗卖
+         */
+        PIRATE,
+        /**
+         * 盗卖并发送邮件通知
+         */
+        SEND
+    }
+
     /**
      * 系统自动同步时间
      */
