@@ -51,7 +51,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public Shipment() {
         this.createDate = new Date();
-        // 暂时这么写
         this.source = "深圳";
     }
 
@@ -1519,7 +1518,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
 
-    /**
+    /*
      * 初始化不同运输方式的标准运输量对应关系
      */
     static {
@@ -1557,11 +1556,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public float minimumTraffic() {
         //海运和空运暂时的最小运输量是500 而快递是不能超过500
         String key = this.minimumTrafficMapKey();
-        if(MINIMUM_TRAFFICMAP.containsKey(key)) {
-            return MINIMUM_TRAFFICMAP.get(key);
-        } else {
-            return 500;
-        }
+        return MINIMUM_TRAFFICMAP.getOrDefault(key, 500);
     }
 
     public void sendMsgMail(Date planArrivDate, String username) {
@@ -1789,8 +1784,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.whouse = newShip.whouse;
         this.title = newShip.title;
         this.reason = newShip.reason;
-        this.tracknolist = newShip.tracknolist;
-        this.trackNo = newShip.trackNo;
         this.memo = newShip.memo;
         this.source = newShip.source;
         this.target = newShip.target;
@@ -1829,6 +1822,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         }
         this.validate();
         Validation.current().valid(this);
+    }
+
+    public void updateTrackNo(Shipment newShip) {
+        this.tracknolist = newShip.tracknolist;
+        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
+        this.save();
     }
 
     public String showRealDay() {
@@ -1881,4 +1880,44 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return key.split(":")[1];
     }
 
+    public static List<Shipment> shipmentMonthly() {
+        Date lastMonthBegin = Dates.monthBegin(Dates.aMonthAgo());
+        Date lastMonthEnd = Dates.monthEnd(Dates.aMonthAgo());
+        return Shipment.find("dates.planBeginDate >= ? AND dates.planBeginDate <= ? ", lastMonthBegin,
+                lastMonthEnd).fetch();
+    }
+
+    /**
+     * 显示标准运输时间  预计到库时间与预计运输时间的差值
+     *
+     * @return
+     */
+    public int showStandarDay() {
+        return (int) (this.dates.planArrivDate.getTime() - this.dates.planBeginDate.getTime()) / 1000 / 3600 / 24;
+    }
+
+    /**
+     * 实际签收时间与预计到库时间的差值，填写正负值
+     *
+     * @return
+     */
+    public int showDelayDay() {
+        if(this.dates.receiptDate == null) return 0;
+        return (int) (this.dates.receiptDate.getTime() - this.dates.planArrivDate.getTime()) / 1000 / 3600 / 24;
+    }
+
+    public int showClearanceDay() {
+        if(this.dates.receiptDate != null) {
+            if(this.dates.deliverDate != null) {
+                return (int) (this.dates.receiptDate.getTime() - this.dates.deliverDate.getTime()) / 1000 / 3600 / 24;
+            }
+            if(this.dates.bookDate != null) {
+                return (int) (this.dates.receiptDate.getTime() - this.dates.bookDate.getTime()) / 1000 / 3600 / 24;
+            }
+            if(this.dates.atPortDate != null) {
+                return (int) (this.dates.atPortDate.getTime() - this.dates.atPortDate.getTime()) / 1000 / 3600 / 24;
+            }
+        }
+        return 0;
+    }
 }

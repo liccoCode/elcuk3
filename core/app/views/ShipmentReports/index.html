@@ -1,0 +1,57 @@
+#{extends 'main_full_v3.html' /}
+#{set title:'物流月度报表'/}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <form action="@{ShipmentReports.lossRateReport()}" method="get" class="form-inline" id='search_form'>
+        <div class="box-header with-border">
+          <div class="form-group">
+            <div class="input-group">
+            #{select_year  name: "p.year", value: p.year, class:"form-control", style:"width:100px;"/}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+            #{select_all_month  name: "p.month", value: p.month, class:"form-control", style:"width:100px;"/}
+            </div>
+          </div>
+          <button class="btn btn-primary" data-loading>搜索</button>
+        </div>
+      </form>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>序号</th>
+            <th>报表类型</th>
+            <th>报表名称</th>
+            <th>年份</th>
+            <th>月份</th>
+            <th>生成时间</th>
+            <th>下载次数</th>
+            <th width="200px;">操作</th>
+          </tr>
+        #{list items:reports, as:'r'}
+          <tr>
+            <td>${r.id}</td>
+            <td>${r.reporttype?r.reporttype.label():''}</td>
+            <td>${r.filename}</td>
+            <td>${r.year}</td>
+            <td>${r.month}</td>
+            <td>#{time_tooltip_v3 time:r.createAt/}</td>
+            <td>${r.downloadcount}</td>
+            <td>
+              <a class="btn btn-primary btn-xs" href="@{ShipmentReports.downloadShipmentMonthlyReport(r.year, r.month)}">下载</a>
+                #{if r.canBeRecalculated()}
+                  <a class="btn btn-warning btn-xs" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
+                #{/if}
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
