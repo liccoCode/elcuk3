@@ -155,6 +155,9 @@ public class Selling extends GenericModel {
     @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
     public List<SellingQTY> qtys = new ArrayList<>();
 
+    @OneToMany(mappedBy = "selling", fetch = FetchType.LAZY)
+    public List<SellingRank> ranks = new ArrayList<>();
+
     /**
      * 1. 在 Amazon 上架的唯一的 merchantSKU(SKU,UPC);
      * 2. 在 ebay 上唯一的 itemid(因为 ebay 的 itemid 是唯一的, 所以对于 ebay 的 selling, merchantSKU 与 asin 将会一样)
@@ -234,9 +237,9 @@ public class Selling extends GenericModel {
     public String publisher;
 
     /**
-     * 系统自动同步
+     * 系统自动同步时间
      */
-    public boolean sync = false;
+    public Date syncTime;
 
     // -------------------------- ebay 上架使用的信息 TBD ---------------------
 
