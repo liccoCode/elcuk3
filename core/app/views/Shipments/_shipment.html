@@ -56,36 +56,8 @@
       <div class="form-group">
         <label for="trackno_table" class="col-sm-1 control-label">Track No.</label>
         <div class="col-sm-2">
-          <table class="table table-hover table-condensed table-bordered" id="trackno_table" style="max-width: 260px;">
-          #{if ship.tracknolist==null || ship.tracknolist.isEmpty()}
-            <tr>
-              <td>
-                <input type="text" class="input-sm" name="ship.tracknolist[${0}]" value="">
-              </td>
-            </tr>
-          #{/if}
-          #{else }
-              #{list items:ship.tracknolist, as:'trackno'}
-                <tr>
-                  <td>
-                    <input type="text" class="input-medium" name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
-                      #{if ship.internationExpress && trackno}
-                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank"
-                           class="btn btn-primary btn-xs"><i class="icon-external-link"></i></a>
-                      #{/if}
-                    <a class="btn btn-xs" name='delete_trackno_row'><i class="icon-remove"></i></a>
-                  </td>
-                </tr>
-              #{/list}
-          #{/else}
-            <tr>
-              <td>
-                <a class="btn" rel="popover" content="不够?再来一行" placement="right" id="more_trackno_btn" data-table="trackno_table">
-                  <i class="icon-plus"></i>
-                </a>
-              </td>
-            </tr>
-          </table>
+          <span class="badge bg-light-blue">${ship.tracknolist.size()}</span>
+          <input type="button" id="showTrackNo" class="btn btn-default" value="查看">
         </div>
         <label for="jobNumber" class="col-sm-1 control-label">工作号</label>
         <div class="col-sm-2">
@@ -171,7 +143,7 @@
         <div class="col-sm-2">
           <input class="form-control" value="${ship.totalUnitQuaTest()}" readonly>
         </div>
-        <label for="" class="col-sm-1 control-label">实际总重量/总体积</label>
+        <label for="" class="col-sm-1 control-label">实际重量/体积</label>
         <div class="col-sm-2">
           <input class="form-control" value="${ship.totalRealWeight()} kg /${ship.totalRealVolume().format('#.####')} m³" readonly/>
         </div>
@@ -214,4 +186,56 @@
     #{/if}
     </div>
   </form>
+</div>
+
+<div id="show_trackNo_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Track No.列表</h4>
+      </div>
+      <form action="@{Shipments.updateTrackNo()}" method="post" class="form-inline">
+        <div class="modal-body" style="height:300px;">
+          <table class="table table-condensed table-bordered" id="trackno_table">
+          #{if ship.tracknolist==null || ship.tracknolist.isEmpty()}
+            <tr>
+              <td>
+                <input type="text" class="input-sm" name="ship.tracknolist[${0}]" value="">
+              </td>
+            </tr>
+          #{/if}
+          #{else }
+              #{list items:ship.tracknolist, as:'trackno'}
+                <tr>
+                  <td>
+                    <input type="text" style="width:200px;" class="form-control"
+                           name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
+                      #{if ship.internationExpress && trackno}
+                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-info"
+                           data-toggle="tooltip" title="查看详情"><i class="icon-external-link"></i></a>
+                      #{/if}
+                    <a class="btn btn-danger" name="delete_trackno_row"><i class="icon-remove"></i></a>
+                  </td>
+                </tr>
+              #{/list}
+          #{/else}
+            <tr>
+              <td>
+                <a class="btn btn-default" data-toggle="tooltip" title="不够?再来一行" id="more_trackno_btn"
+                   data-table="trackno_table"><i class="icon-plus"></i>
+                </a>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" value="保存" class="btn btn-primary btn-xs">
+          <input type="hidden" name="shipId" value="${ship.id}">
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

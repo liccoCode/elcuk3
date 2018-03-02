@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
 import helper.*;
+import models.ReportRecord;
 import models.procure.ShipItem;
 import models.procure.Shipment;
+import models.procure.ShipmentMonthly;
 import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
@@ -16,10 +18,12 @@ import models.view.highchart.HighChart;
 import models.view.post.ArrivalRatePost;
 import models.view.post.LossRatePost;
 import models.view.post.MonthlyShipmentPost;
+import models.view.post.ReportPost;
 import models.view.report.ArrivalRate;
 import models.view.report.LossRate;
 import org.apache.commons.lang.StringUtils;
 import play.libs.F;
+import play.modules.excel.RenderExcel;
 import play.mvc.Before;
 import play.mvc.Controller;
 import play.mvc.With;
@@ -46,6 +50,30 @@ public class ShipmentReports extends Controller {
         renderArgs.put("skus", J.json(skusToJson._2));
         ShipmentWeight excel = new ShipmentWeight();
         renderArgs.put("excel", excel);
+    }
+
+    public static void index(ReportPost p) {
+        if(p == null) p = new ReportPost();
+        p.reportTypes = ReportPost.shipmentMonthlyTypes();
+        List<ReportRecord> reports = p.query();
+        render(p, reports);
+    }
+
+    public static void downloadShipmentMonthlyReport(int year, int month) {
+        List<ShipmentMonthly> seaList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+                year, month, Shipment.T.SEA).fetch();
+        List<ShipmentMonthly> expressList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+                year, month, Shipment.T.EXPRESS).fetch();
+        List<ShipmentMonthly> airList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+                year, month, Shipment.T.AIR).fetch();
+        List<ShipmentMonthly> dedicatedList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+                year, month, Shipment.T.DEDICATED).fetch();
+        List<ShipmentMonthly> railWayList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+                year, month, Shipment.T.RAILWAY).fetch();
+        request.format = "xls";
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("月度物流报表_%s年_%s月.xls", year, month));
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render(seaList, expressList, airList, dedicatedList, railWayList);
     }
 
     /**

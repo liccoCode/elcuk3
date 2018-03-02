@@ -476,7 +476,7 @@ public class ShipItem extends GenericModel {
     public void syncReceiveQty(Long unitId) {
         ProcureUnit procureUnit = ProcureUnit.findById(unitId);
         Account account = procureUnit.fba.account;
-        FBAInboundServiceMWSClient client =  MWSFulfilment.client(account, procureUnit.fba.market());
+        FBAInboundServiceMWSClient client = MWSFulfilment.client(account, procureUnit.fba.market());
         ListInboundShipmentItemsRequest request = new ListInboundShipmentItemsRequest(account.merchantId);
         request.setMWSAuthToken(account.token);
         request.setShipmentId(procureUnit.fba.shipmentId);
@@ -484,6 +484,18 @@ public class ShipItem extends GenericModel {
                 .getItemData().getMember();
         this.recivedQty = items.stream().mapToInt(InboundShipmentItem::getQuantityReceived).sum();
         this.save();
+    }
+
+    public void crawlWeight(ShipmentMonthly monthly) {
+        PaymentUnit paymentUnit = PaymentUnit.find("shipItem.id = ? AND remove = ? ", this.id, false).first();
+        if(paymentUnit != null) {
+            if(Objects.equals(paymentUnit.chargingWay, PaymentUnit.W.VOLUME)) {
+                monthly.volumeWeight = Double.parseDouble(String.valueOf(paymentUnit.unitQty));
+            } else {
+                monthly.realWeight = Double.parseDouble(String.valueOf(paymentUnit.unitQty));
+            }
+            monthly.totalShippingFee = String.valueOf(paymentUnit.amount);
+        }
     }
 
 }

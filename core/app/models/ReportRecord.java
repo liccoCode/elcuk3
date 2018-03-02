@@ -22,6 +22,8 @@ import java.util.Date;
 @Entity
 public class ReportRecord extends Model {
 
+    private static final long serialVersionUID = 6902337215866962838L;
+    
     @Expose
     public Integer year;
     @Expose
@@ -166,9 +168,16 @@ public class ReportRecord extends Model {
             public String label() {
                 return "采购成本报表";
             }
+        },
+        SHIPMENTMONTHLY {
+            @Override
+            public String label() {
+                return "物流运输月度报表";
+            }
         };
 
         public abstract String label();
+        
         /**
          * Warning:
          * <p/>
@@ -177,6 +186,11 @@ public class ReportRecord extends Model {
          *
          * 2、能够重新计算的报表类型请添加到下方的 canBeRecalculated 方法内。
          */
+    }
+
+    public ReportRecord() {
+        this.createAt = new Date();
+        this.downloadcount = 0;
     }
 
     /**
@@ -191,6 +205,7 @@ public class ReportRecord extends Model {
             case SKUMONTHCATEGORY:
             case SALEYEARTOTAL:
             case SALEYEARCATEGORY:
+            case SHIPMENTMONTHLY:
                 return true;
             case INVRNTORYCOST:
                 return this.year == DateTime.now().getYear();

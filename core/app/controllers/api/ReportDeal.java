@@ -11,6 +11,8 @@ import models.ReportRecord;
 import models.finance.SaleFee;
 import models.market.OrderInvoice;
 import models.market.Orderr;
+import models.procure.Shipment;
+import models.procure.ShipmentMonthly;
 import models.view.Ret;
 import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
@@ -29,10 +31,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -42,6 +41,7 @@ import java.util.Map;
  */
 @With({APIChecker.class})
 public class ReportDeal extends Controller {
+
     /**
      * 销量分析执行完后清理缓存
      */
@@ -213,4 +213,25 @@ public class ReportDeal extends Controller {
         }
     }
 
+    public static void genreateShipmentMonthlyReport() {
+        List<Shipment> list = Shipment.shipmentMonthly();
+        list.stream().filter(shipment -> shipment.items.size() > 0).forEach(shipment -> shipment.items.forEach(item -> {
+            ShipmentMonthly monthly = new ShipmentMonthly();
+            monthly.unit = item.unit;
+            monthly.shipItem = item;
+            monthly.year = DateTime.now().minusMonths(1).getYear();
+            monthly.month = DateTime.now().minusMonths(1).getMonthOfYear();
+            monthly.type = item.shipment.type;
+            if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(item.shipment.type)) {
+                item.crawlWeight(monthly);
+            }
+            monthly.save();
+        }));
+        ReportRecord record = new ReportRecord();
+        record.reporttype = ReportRecord.RT.SHIPMENTMONTHLY;
+        record.year = DateTime.now().minusMonths(1).getYear();
+        record.month = DateTime.now().minusMonths(1).getMonthOfYear();
+        record.filename = String.format("月度物流报表_%s年_%s月", record.year, record.month);
+        record.save();
+    }
 }

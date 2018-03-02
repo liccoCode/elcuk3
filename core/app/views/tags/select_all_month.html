@@ -2,7 +2,7 @@
 #{if _native}
     native
 #{/if}
-    name="${_name}" id="${_id}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''}>
+    name="${_name}" id="${_id}" class="${_class ? _class : ''}" ${_disabled ? 'disabled' :''} style="${_style ? _style : ''}">
 #{set month: Integer.parseInt(new Date().format("MM"))/}
 
   <option value="0" selected>月份</option>
