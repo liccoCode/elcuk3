@@ -28,12 +28,12 @@ public class SellingPost extends Post<Selling> {
     public String keywords;
     public String categoryid;
     public int perSize = 25;
+    public Selling.PS pirateState;
 
     @Override
     public F.T2<String, List<Object>> params() {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT DISTINCT s FROM Selling s WHERE 1 = 1 ");
-
         if(StringUtils.isNotBlank(analyzeResult)) {
             params.add(analyzeResult);
         }
@@ -58,13 +58,16 @@ public class SellingPost extends Post<Selling> {
             sql.append(" AND s.product.category.categoryId = ? ");
             params.add(categoryid);
         }
+        if(pirateState != null) {
+            sql.append(" AND pirateState = ? ");
+            params.add(pirateState);
+        }
         if(StringUtils.isNotBlank(keywords)) {
             sql.append(" AND (s.sellingId LIKE ? OR s.asin LIKE ? OR s.product.sku LIKE ? ) ");
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
             params.add("%" + keywords + "%");
         }
-
         String username = Login.currentUserName();
         List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
                 .collect(Collectors.toList());
@@ -75,7 +78,6 @@ public class SellingPost extends Post<Selling> {
             categoryList.add("-1");
             sql.append(" AND s.product.category.categoryId in ").append(SqlSelect.inlineParam(categoryList));
         }
-
         sql.append(" ORDER BY s.createDate DESC ");
         return new F.T2<>(sql.toString(), params);
     }

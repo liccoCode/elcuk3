@@ -313,6 +313,17 @@ public class Sellings extends Controller {
         render(sellings, p);
     }
 
+    public static void pirateIndex(SellingPost p) {
+        if(p == null) p = new SellingPost();
+        String username = Login.currentUserName();
+        List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
+                .collect(Collectors.toList());
+        renderArgs.put("categoryList", categoryList);
+        p.pirateState = Selling.PS.PIRATE;
+        List<Selling> sellings = p.query();
+        render(p, sellings);
+    }
+
     public static void createSelling(Selling s) {
         render(s);
     }
