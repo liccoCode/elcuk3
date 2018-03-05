@@ -19,7 +19,8 @@ import java.util.Map;
 public class LinkHelper extends JavaExtensions {
     /**
      * 生成 Listing 在 Amazon 展示的页面链接
-     *                                 gs
+     * gs
+     *
      * @param s
      * @return
      */
@@ -41,7 +42,26 @@ public class LinkHelper extends JavaExtensions {
             default:
                 return "#";
         }
+    }
 
+    public static String showPirateLink(Selling s) {
+        if(StringUtils.isBlank(s.asin) || StringUtils.isBlank(s.market.toString())) {
+            return "#";
+        }
+        switch(s.market) {
+            case AMAZON_CA:
+            case AMAZON_US:
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_JP:
+            case AMAZON_FR:
+            case AMAZON_IT:
+            case AMAZON_MX:
+                return String.format("http://www.%s/gp/offer-listing/%s", s.market, s.asin);
+            default:
+                return "#";
+        }
     }
 
     public static String showRecordLink(StockRecord stockRecord) {

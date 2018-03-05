@@ -1,0 +1,121 @@
+#{extends 'main_full_v3.html' /}
+#{set title:'Selling列表' /}
+#{set 'moreScripts'}
+    #{script 'component/pagination.coffee'/}
+    #{script 'sellings/index.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{errorMsgs /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Sellings.index()}" method="POST" class="form-inline" id="search_form">
+          <div class="row-fluid">
+            <div class="form-group">
+              <p class="form-control-static">市场</p>
+              <select name="p.market" style="width:120px;" class="form-control">
+                <option value="">ALL</option>
+              #{list items:models.market.M, as:'m'}
+                <option value="${m.name()}" #{if m.name()==p.market?.name()} selected #{/if}>${m.name()}</option>
+              #{/list}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <p class="form-control-static">系统内上架</p>
+              <select name="p.systemUp" class="form-control" style="width:80px;">
+                <option value="">ALL</option>
+                <option value="是" #{if "是".equals(p.systemUp)} selected #{/if}>是</option>
+                <option value="否" #{if "否".equals(p.systemUp)} selected #{/if}>否</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <p class="form-control-static">生命周期</p>
+              <select name="p.sellingCycle" style="width:120px;" class="form-control">
+                <option value="">ALL</option>
+              #{list items:models.market.Selling.SC, as:'s'}
+                <option value="${s.name()}" #{if s.name()==p.sellingCycle?.name()} selected #{/if}>${s.label()}</option>
+              #{/list}
+              </select>
+            </div>
+
+            <div class="form-group">
+              <p class="form-control-static">品线</p>
+              <select name="p.categoryid" style="width:80px;" class="form-control">
+                <option value="">ALL</option>
+              #{list items:categoryList, as:'c'}
+                <option value="${c}" #{if c==p.categoryid} selected #{/if}>${c}</option>
+              #{/list}
+              </select>
+            </div>
+
+            <div class="input-group">
+              <div class="input-group-addon">关键字</div>
+              <input class="form-control" style="width:200px;" name="p.keywords" value="${p.keywords}" placeHolder="sellingID/SKU/ASIN"/>
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+            <button class="btn btn-primary" data-loading="提交中...">搜索</button>
+           
+          </div>
+        </form>
+      </div>
+
+      <div class="box-body">
+        <table class="table table-bordered table-condensed no-margin" id="data-table">
+          <tr>
+            <th width="20px;"><input type="checkbox" class="checkall"></th>
+            <th width="40px;">Image</th>
+            <th width="350px;">SellingID</th>
+            <th width="40px;">市场</th>
+            <th width="120px;">FnSku</th>
+            <th width="80px;">实时价格</th>
+            <th width="120px;">ASIN</th>
+            <th width="">跟卖网址</th>
+            <th width="145px;">发现时间</th>
+            <th width="130px;">操作</th>
+          </tr>
+        #{list items:sellings , as:'s'}
+          <tr>
+            <td>
+                #{if !s.state.name().equals("DOWN")}
+                  <input type="checkbox" value="${s.sellingId}">
+                #{/if}
+            </td>
+            <td style="text-align:center;"><img height="30px;" width="40px;" src="${s.aps.imageUrl}"></td>
+            <td style="word-break:break-all;">
+              <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a>
+            </td>
+            <td style="padding: 0; vertical-align:middle;" data-toggle="tooltip" title="${s.market.countryName()}">
+              <div class="flag-wrapper" style="margin:0">
+                <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
+              </div>
+            </td>
+            <td>${s.fnSku}</td>
+            <td>${s.aps.salePrice}</td>
+            <td><a href="${s.showListingLink()}" target="_blank">${s.asin}</a></td>
+            <td><a href="${s.showPirateLink()}">${s.showPirateLink()}</a></td>
+            <td>#{time_tooltip_v3 time:s.pirateDate, datetime:true /}</td>
+            <td>
+              <a href="javascript:void(0);" class="btn btn-xs btn-danger" rel="popover" title="删除" name='remove'
+                 data-url='@{Sellings.destroy(s.sellingId)}'>Del</a>
+              <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-xs btn-info">Edit</a>
+                #{if !s.state.name().equals("DOWN")}
+                  <button class="btn btn-xs btn-success" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
+                          data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
+                  </button>
+                #{/if}
+            </td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+      <div class="box-footer clearfix">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
+      </div>
+    </div>
+  </div>
+</div>
