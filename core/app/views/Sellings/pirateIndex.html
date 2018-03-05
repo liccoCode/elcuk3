@@ -12,7 +12,7 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <div class="box-header with-border">
-        <form action="@{Sellings.index()}" method="POST" class="form-inline" id="search_form">
+        <form action="@{Sellings.pirateIndex()}" method="POST" class="form-inline" id="search_form">
           <div class="row-fluid">
             <div class="form-group">
               <p class="form-control-static">市场</p>
@@ -59,7 +59,7 @@
               <input type="hidden" name="p.page" value="${p.page}">
             </div>
             <button class="btn btn-primary" data-loading="提交中...">搜索</button>
-           
+
           </div>
         </form>
       </div>
@@ -97,7 +97,7 @@
             <td>${s.fnSku}</td>
             <td>${s.aps.salePrice}</td>
             <td><a href="${s.showListingLink()}" target="_blank">${s.asin}</a></td>
-            <td><a href="${s.showPirateLink()}">${s.showPirateLink()}</a></td>
+            <td><a href="${s.showPirateLink()}" target="_blank">${s.showPirateLink()}</a></td>
             <td>#{time_tooltip_v3 time:s.pirateDate, datetime:true /}</td>
             <td>
               <a href="javascript:void(0);" class="btn btn-xs btn-danger" rel="popover" title="删除" name='remove'
