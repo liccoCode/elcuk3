@@ -4,6 +4,7 @@ import controllers.api.SystemOperation;
 import helper.Caches;
 import helper.J;
 import helper.Webs;
+import models.ElcukRecord;
 import models.OperatorConfig;
 import models.User;
 import models.market.*;
@@ -18,6 +19,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
 import play.cache.CacheFor;
+import play.i18n.Messages;
 import play.jobs.Job;
 import play.mvc.After;
 import play.mvc.Before;
@@ -238,6 +240,7 @@ public class Analyzes extends Controller {
     public static void batchDelete( String key) {
         try {
             Caches.batchDelete(key);
+            new ElcukRecord("删除销量分析缓存",key).save();
             renderJSON(new Ret());
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
