@@ -3,6 +3,7 @@ package controllers;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
+import ext.ElcukConfigHelper;
 import helper.*;
 import helper.Currency;
 import models.InventoryCostUnit;
@@ -460,6 +461,11 @@ public class Excels extends Controller {
     public static void arrivalRateReport(ArrivalRatePost p) {
         if(p == null) p = new ArrivalRatePost();
         List<ArrivalRate> dtos = p.query();
+        dtos.forEach(arrivalRate -> {
+            if(arrivalRate.market != null && arrivalRate.shipType != null) {
+                arrivalRate.sumShipDay = ElcukConfigHelper.sumShipDay(arrivalRate.market + "_" + arrivalRate.shipType);
+            }
+        });
         if(dtos != null && dtos.size() > 1) {
             List<Shipment> shipments = p.queryOverTimeShipment();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
@@ -827,8 +833,9 @@ public class Excels extends Controller {
             renderText("请选择需要打印的运输单！");
         } else {
             List<ShipItem> items = ShipItem.find("shipment.id IN " + JpqlSelect.inlineParam(shipmentId)).fetch();
-            if(items.stream().noneMatch(item -> item.unit != null && item.unit.taxPoint != null && item.unit.taxPoint > 0)) {
-                       renderText("没有含税数据无法生成Excel文件！");
+            if(items.stream()
+                    .noneMatch(item -> item.unit != null && item.unit.taxPoint != null && item.unit.taxPoint > 0)) {
+                renderText("没有含税数据无法生成Excel文件！");
             }
             Shipment ship = Shipment.find("id = ? ", shipmentId.get(0)).first();
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
@@ -983,7 +990,7 @@ public class Excels extends Controller {
         String currency = unit.planCurrency.symbol();
 
         String brandname = Objects.equals(excel.dmt.projectName, User.COR.MengTop)
-                       ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
+                ? models.OperatorConfig.getVal("b2bbrandname") : models.OperatorConfig.getVal("brandname");
         render("Excels/material/materialPurchases" + brandname.toLowerCase() + ".xls", excel, currency);
     }
 

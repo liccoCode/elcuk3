@@ -66,3 +66,10 @@ $ ->
       aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}]
     )
 
+
+  # Form 搜索功能
+  $("#exceldown").click((e)->
+    e.preventDefault()
+    $form = $('#search_form')
+    window.open('/Excels/arrivalRateReport?' + $form.serialize(), "_blank")
+  )

@@ -1,5 +1,18 @@
 $(() => {
 
+
+  function fidCallBack () {
+    return {
+      fid: $('#p_sku').val(),
+      p: 'SKU'
+    }
+  }
+
+  let dropbox = $('#dropbox');
+  window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
+  window.dropUpload.iniDropbox(fidCallBack, dropbox);
+
+
   $("#update_product_form").on("click", "#more_locate_btn, #more_selling_point_btn", function () {
     let div = $("#" + $(this).data("table"));
     let rowsCount = div.find(".form-group").length;
@@ -276,13 +289,3 @@ $(() => {
   });
 });
 
-function fidCallBack () {
-  return {
-    fid: $('#p_sku').val(),
-    p: 'SKU'
-  }
-}
-
-let dropbox = $('#dropbox');
-window.dropUpload.loadImages(fidCallBack()['fid'], dropbox, fidCallBack()['p'], 'span1');
-window.dropUpload.iniDropbox(fidCallBack, dropbox);

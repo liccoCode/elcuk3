@@ -53,5 +53,10 @@ public class ArrivalRate implements Serializable {
      */
     public float earlyTimeRate;
 
+    /**
+     * 提前率
+     */
+    public float sumShipDay;
+
 
 }
