@@ -3,6 +3,7 @@ package controllers;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import controllers.api.SystemOperation;
+import ext.ElcukConfigHelper;
 import helper.*;
 import models.ReportRecord;
 import models.procure.ShipItem;
@@ -152,6 +153,11 @@ public class ShipmentReports extends Controller {
     public static void arrivalRate(ArrivalRatePost p) {
         if(p == null) p = new ArrivalRatePost();
         List<ArrivalRate> arrivals = p.query();
+        arrivals.forEach(arrivalRate -> {
+            if(arrivalRate.market != null && arrivalRate.shipType != null) {
+                arrivalRate.sumShipDay = ElcukConfigHelper.sumShipDay(arrivalRate.market + "_" + arrivalRate.shipType);
+            }
+        });
         List<Shipment> shipments = p.queryOverTimeShipment();
         render(arrivals, shipments, p);
     }

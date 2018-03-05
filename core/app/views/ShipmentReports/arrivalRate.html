@@ -51,6 +51,7 @@
                 <tr>
                   <th>国家</th>
                   <th>运输方式</th>
+                  <th>标准运输天数</th>
                   <th>总票数</th>
                   <th>准时票数</th>
                   <th>准时率%</th>
@@ -65,6 +66,7 @@
                 <tr>
                   <td>${arr.market?.name()}</td>
                   <td>${arr.shipType}</td>
+                  <td>${arr.sumShipDay}</td>
                   <td>${arr.totalShipNum}</td>
                   <td>${arr.onTimeShipNum}</td>
                   <td>${arr.onTimeRate}%</td>
@@ -90,6 +92,8 @@
                   <th>仓库</th>
                   <th>CenterId</th>
                   <th>Track No.</th>
+                  <th>VAT选择</th>
+                  <th>清关地</th>
                   <th>预计发货时间</th>
                   <th>约定到货时间</th>
                   <th>实际签收时间</th>
@@ -104,6 +108,8 @@
                   <td>${ship.whouse.name}</td>
                   <td>${ship.fetchCenterId()}</td>
                   <td>${ship.showTrackNo()}</td>
+                  <td>${ship.vat?.name()}</td>
+                  <td>${ship.clearance}</td>
                   <td>#{time_tooltip time: ship.dates.planBeginDate/}</td>
                   <td>#{time_tooltip time: ship.dates.planArrivDateForCountRate/}</td>
                   <td>#{time_tooltip time: ship.dates.receiptDate/}</td>
