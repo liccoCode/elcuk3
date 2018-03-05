@@ -26,10 +26,7 @@
     <th>可用库存</th>
   #{ifnot deliveryplan}
     <th width="60px;">单价</th>
-    <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
-      <abbr>总价</abbr>
-    </th>
-    <th>剩余请款金额</th>
+    <th width="100px;" data-toggle="popover" data-content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">总价<br>剩余请款金额</th>
   #{/ifnot}
     <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="95px;">FnSku</th>
     <th width="40px;">运输方式</th>
@@ -151,13 +148,12 @@
               <div class="label label-danger">税点:${unit.taxPoint}</div>
             #{/if}
         </td>
-        <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
-        <td>
+        <td>总:${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}<br>
             #{if unit.type?.name() == 'StockSplit'}
               0
             #{/if}
             #{else }
-            ${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+            剩:${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
             #{/else}
         </td>
       #{/ifnot}
