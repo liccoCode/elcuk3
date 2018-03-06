@@ -352,7 +352,87 @@ public enum Currency {
         @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
-            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(墨西哥元) td:eq(1)").text()) / 100;
+        }
+    },
+
+    AUD {
+        @Override
+        public Float toUSD(Float value) {
+            return value * AUD_USD;
+        }
+
+        @Override
+        public Float toCNY(Float value) {
+            return value * AUD_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return AUD_CNY;
+                case USD:
+                    return AUD_USD;
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "A$";
+        }
+
+        @Override
+        public String label() {
+            return "澳大利亚元";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            return NumberUtils.toFloat(doc.select("tr:contains(澳大利亚元) td:eq(1)").text()) / 100;
+        }
+    },
+
+    INR {
+        @Override
+        public Float toUSD(Float value) {
+            return value * INR_USD;
+        }
+
+        @Override
+        public Float toCNY(Float value) {
+            return value * INR_CNY;
+        }
+
+        @Override
+        public float ratio(Currency currency) {
+            switch(currency) {
+                case CNY:
+                    return INR_CNY;
+                case USD:
+                    return INR_USD;
+                default:
+                    return 1;
+            }
+        }
+
+        @Override
+        public String symbol() {
+            return "₹";
+        }
+
+        @Override
+        public String label() {
+            return "印度卢比";
+        }
+
+        @Override
+        public Float rate(String html) {
+            Document doc = Jsoup.parse(html);
+            return NumberUtils.toFloat(doc.select("tr:contains(印度卢比) td:eq(1)").text()) / 100;
         }
     };
 
@@ -402,6 +482,11 @@ public enum Currency {
     private static float MXN_CNY = 0.3481f;
     private static float MXN_USD = 0.0524f;
 
+    private static float AUD_CNY = 4.9340f;
+    private static float AUD_USD = 0.7781f;
+
+    private static float INR_CNY = 0.0976f;
+    private static float INR_USD = 0.0154f;
 
 
     public static void updateCRY() {
@@ -464,6 +549,10 @@ public enum Currency {
                 return EUR;
             case AMAZON_US:
                 return USD;
+            case AMAZON_AU:
+                return AUD;
+            case AMAZON_IN:
+                return INR;
             default:
                 return USD;
         }
@@ -477,7 +566,7 @@ public enum Currency {
     public static String bocRatesHtml() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
         Element table = doc.select(".BOC_main .publish table").last();
-        String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元"};
+        String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元", "澳大利亚元", "印度卢比"};
         for(Element tr : table.select("tr")) {
             boolean find = false;
             for(String c : currencies) {

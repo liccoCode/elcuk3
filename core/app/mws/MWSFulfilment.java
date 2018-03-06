@@ -26,25 +26,7 @@ public class MWSFulfilment {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
                 FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();
-                switch(market) {
-                    case AMAZON_CA:
-                    case AMAZON_MX:
-                    case AMAZON_US:
-                        config.setServiceURL("https://mws.amazonservices.com");
-                        break;
-                    case AMAZON_UK:
-                    case AMAZON_IT:
-                    case AMAZON_FR:
-                    case AMAZON_ES:
-                    case AMAZON_DE:
-                        config.setServiceURL("https://mws-eu.amazonservices.com/");
-                        break;
-                    case AMAZON_JP:
-                        config.setServiceURL("https://mws.amazonservices.jp");
-                        break;
-                    default:
-                        break;
-                }
+                config.setServiceURL(MWSProducts.getMwsUrl(market));
                 client = new FBAInboundServiceMWSClient(account.accessKey, account.token, "elcuk2", "1.0", config);
                 cached.put(key, client);
             }

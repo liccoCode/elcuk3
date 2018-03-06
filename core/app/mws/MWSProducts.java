@@ -27,31 +27,36 @@ public class MWSProducts {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
                 MarketplaceWebServiceProductsConfig config = new MarketplaceWebServiceProductsConfig();
-                switch(market) {
-                    case AMAZON_CA:
-                    case AMAZON_MX:
-                    case AMAZON_US:
-                        config.setServiceURL("https://mws.amazonservices.com");
-                        break;
-                    case AMAZON_UK:
-                    case AMAZON_IT:
-                    case AMAZON_FR:
-                    case AMAZON_ES:
-                    case AMAZON_DE:
-                        config.setServiceURL("https://mws-eu.amazonservices.com/");
-                        break;
-                    case AMAZON_JP:
-                        config.setServiceURL("https://mws.amazonservices.jp");
-                        break;
-                    default:
-                        break;
-                }
+                config.setServiceURL(getMwsUrl(market));
                 client = new MarketplaceWebServiceProductsClient(account.accessKey, account.token,
                         "elcuk2", "1.0", config);
                 cached.put(key, client);
             }
         }
         return client;
+    }
+
+    public static String getMwsUrl(M market) {
+        switch(market) {
+            case AMAZON_CA:
+            case AMAZON_MX:
+            case AMAZON_US:
+                return "https://mws.amazonservices.com";
+            case AMAZON_UK:
+            case AMAZON_IT:
+            case AMAZON_FR:
+            case AMAZON_ES:
+            case AMAZON_DE:
+                return "https://mws-eu.amazonservices.com";
+            case AMAZON_JP:
+                return "https://mws.amazonservices.jp";
+            case AMAZON_AU:
+                return "https://mws.amazonservices.com.au";
+            case AMAZON_IN:
+                return "https://mws.amazonservices.in";
+            default:
+                return "";
+        }
     }
 
 }
