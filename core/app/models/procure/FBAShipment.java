@@ -318,6 +318,7 @@ public class FBAShipment extends Model {
         try {
             updateFBAShipment(state);
         } catch(Exception e) {
+            Webs.e(e);
             if(times > 0)
                 updateFBAShipmentRetry(--times, state);
             else

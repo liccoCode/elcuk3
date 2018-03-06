@@ -297,12 +297,7 @@ public class Shipments extends Controller {
             Webs.errorToFlash(flash);
             show(id);
         }
-        try {
-            ship.beginShip(date, sync);
-        } catch(Exception e) {
-            Webs.e(e);
-            Validation.addError("", Webs.e(e));
-        }
+        ship.beginShip(date, sync);
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             show(id);
