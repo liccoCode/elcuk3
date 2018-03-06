@@ -352,7 +352,7 @@ public enum Currency {
         @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
-            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(墨西哥元) td:eq(1)").text()) / 100;
         }
     },
 
@@ -392,7 +392,7 @@ public enum Currency {
         @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
-            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(澳大利亚元) td:eq(1)").text()) / 100;
         }
     },
 
@@ -432,7 +432,7 @@ public enum Currency {
         @Override
         public Float rate(String html) {
             Document doc = Jsoup.parse(html);
-            return NumberUtils.toFloat(doc.select("tr:contains(港币) td:eq(1)").text()) / 100;
+            return NumberUtils.toFloat(doc.select("tr:contains(印度卢比) td:eq(1)").text()) / 100;
         }
     };
 
@@ -566,7 +566,7 @@ public enum Currency {
     public static String bocRatesHtml() {
         Document doc = Jsoup.parse(HTTP.get("http://www.boc.cn/sourcedb/whpj/"));
         Element table = doc.select(".BOC_main .publish table").last();
-        String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元"};
+        String[] currencies = new String[]{"英镑", "港币", "美元", "欧元", "日元", "澳大利亚元", "印度卢比"};
         for(Element tr : table.select("tr")) {
             boolean find = false;
             for(String c : currencies) {
