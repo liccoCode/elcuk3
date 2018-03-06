@@ -398,6 +398,10 @@ public enum M {
                 return Currency.JPY;
             case AMAZON_MX:
                 return Currency.MXN;
+            case AMAZON_AU:
+                return Currency.AUD;
+            case AMAZON_IN:
+                return Currency.INR;
             case AMAZON_UK:
             case EBAY_UK:
             default:
@@ -427,6 +431,10 @@ public enum M {
                 return "amazon.co.jp";
             case AMAZON_MX:
                 return "amazon.com.mx";
+            case AMAZON_AU:
+                return "amazon.com.au";
+            case AMAZON_IN:
+                return "amazon.in";
             default:
                 return "amazon.co.uk";
         }
@@ -502,6 +510,8 @@ public enum M {
             case AMAZON_US:
             case AMAZON_JP:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return "https://sellercentral." + this.toString();
             case EBAY_UK:
                 return "unknow..";
@@ -556,28 +566,10 @@ public enum M {
                 return String.format(baseUrl, this.toString(), "us");
             case AMAZON_MX:
                 return String.format(baseUrl, this.toString(), "mx");
-            case EBAY_UK:
-                return "unknow..";
-            default:
-                return "Not Support.";
-        }
-    }
-
-    public String amazonLikeLink() {
-        //http://www.amazon.de/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513
-        switch(this) {
-            case AMAZON_CA:
-            case AMAZON_UK:
-            case AMAZON_DE:
-            case AMAZON_ES:
-            case AMAZON_FR:
-            case AMAZON_IT:
-            case AMAZON_US:
-            case AMAZON_JP:
-                /*最后的 _cachebust 为随即生成的值*/
-                return String
-                        .format("http://www.%s/gp/like/external/submit.html/ref=pd_like_submit_like_dp?_cachebust=0.7498981582466513",
-                                this.toString());
+            case AMAZON_AU:
+                return String.format(baseUrl, this.toString(), "au");
+            case AMAZON_IN:
+                return String.format(baseUrl, this.toString(), "in");
             case EBAY_UK:
                 return "unknow..";
             default:
@@ -600,6 +592,9 @@ public enum M {
             case AMAZON_IT:
             case AMAZON_US:
             case AMAZON_JP:
+            case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return String.format("http://www.%s/gp/registry/wishlist", this.toString());
             case EBAY_UK:
                 return "unknow..";
@@ -618,6 +613,9 @@ public enum M {
             case AMAZON_IT:
             case AMAZON_US:
             case AMAZON_JP:
+            case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return String.format("https://www.%s/gp/registry/wishlist/ref=cm_wl_rl-create-pub-list",
                         this.toString());
             case EBAY_UK:
@@ -638,6 +636,8 @@ public enum M {
             case AMAZON_US:
             case AMAZON_JP:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return String.format("http://www.%s/dp/%s", this.toString(), asin);
             case EBAY_UK:
                 return "unknow..";
@@ -665,6 +665,8 @@ public enum M {
             case AMAZON_US:
             case AMAZON_JP:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return "https://sellercentral." + this.toString()
                         + "/gp/feedback-manager/view-all-feedback.html?ie=UTF8&sortType=sortByDate&pageSize=50"
                         + "&dateRange=&descendingOrder=1&currentPage=" + page;
@@ -693,6 +695,8 @@ public enum M {
             case AMAZON_JP:
             case AMAZON_IT:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return "https://sellercentral." + this.toString()
                         + "/gp/utilities/set-rainier-prefs.html?ie=UTF8&marketplaceID=" + marketplaceID;
             case EBAY_UK:
@@ -717,6 +721,8 @@ public enum M {
             case AMAZON_IT: // TODO IT 与 FR 会有过渡阶段
             case AMAZON_FR:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return "https://sellercentral." + this.toString() + "/gp/orders-v2/details?orderID=" + oid;
             case AMAZON_DE:
             case AMAZON_ES:
@@ -749,6 +755,8 @@ public enum M {
             case AMAZON_IT: // TODO IT 与 FR 会有过渡阶段
             case AMAZON_FR:
             case AMAZON_MX:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return "https://sellercentral." + this.toString() + "/gp/orders-v2/remote-actions/action.html";
             case AMAZON_DE:
             case AMAZON_ES:
@@ -835,6 +843,8 @@ public enum M {
             case AMAZON_US:
             case AMAZON_MX:
             case AMAZON_JP:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return String
                         .format("https://sellercentral.%s/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx", this.toString());
             //https://sellercentral.amazon.it/gp/ssof/product-label.pdf/ref=ag_xx_cont_xx
@@ -862,6 +872,8 @@ public enum M {
             case AMAZON_US:
             case AMAZON_MX:
             case AMAZON_JP:
+            case AMAZON_AU:
+            case AMAZON_IN:
                 return String
                         .format("https://sellercentral.%s/gp/ssof/knights/items-list.html/ref=ag_fbalist_cont_fbamnginv",
                                 this.toString());
@@ -976,6 +988,8 @@ public enum M {
             case EBAY_UK:
             case AMAZON_UK:
                 return -8;
+            case AMAZON_IN:
+                return -3;
             default:
                 return 0;
         }
@@ -1044,6 +1058,10 @@ public enum M {
                 return "FBA_ES";
             case AMAZON_MX:
                 return "FBA_MX";
+            case AMAZON_AU:
+                return "FBA_AU";
+            case AMAZON_IN:
+                return "FBA_IN";
             default:
                 return null;
         }
@@ -1172,6 +1190,12 @@ public enum M {
         if(market.equals("amazon.co.jp")) {
             return AMAZON_JP;
         }
+        if(market.equals("amazon.com.au")) {
+            return AMAZON_AU;
+        }
+        if(market.equals("amazon.in")) {
+            return AMAZON_IN;
+        }
         return AMAZON_UK;
     }
 
@@ -1226,6 +1250,10 @@ public enum M {
                 return "US";
             case AMAZON_MX:
                 return "MX";
+            case AMAZON_AU:
+                return "AU";
+            case AMAZON_IN:
+                return "IN";
             default:
                 return null;
         }
@@ -1256,6 +1284,10 @@ public enum M {
                 return "US";
             case AMAZON_MX:
                 return "MX";
+            case AMAZON_AU:
+                return "AU";
+            case AMAZON_IN:
+                return "IN";
             default:
                 return null;
         }
@@ -1277,6 +1309,10 @@ public enum M {
                 return "US";
             case AMAZON_MX:
                 return "MX";
+            case AMAZON_AU:
+                return "AU";
+            case AMAZON_IN:
+                return "IN";
             default:
                 return null;
         }
