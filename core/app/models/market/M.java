@@ -171,6 +171,36 @@ public enum M {
         public String pic() {
             return "flag-icon-mx";
         }
+    }, AMAZON_AU {
+        @Override
+        public String label() {
+            return "澳大利亚亚马逊";
+        }
+
+        @Override
+        public String countryName() {
+            return "澳大利亚";
+        }
+
+        @Override
+        public String pic() {
+            return "flag-icon-au";
+        }
+    }, AMAZON_IN {
+        @Override
+        public String label() {
+            return "印度亚马逊";
+        }
+
+        @Override
+        public String countryName() {
+            return "印度";
+        }
+
+        @Override
+        public String pic() {
+            return "flag-icon-in";
+        }
     };
 
     public abstract String label();
@@ -219,7 +249,15 @@ public enum M {
         /**
          * MX
          */
-        A1AM78C64UM0Y8;
+        A1AM78C64UM0Y8,
+        /**
+         * AU
+         */
+        A39IBJ37TRP1C6,
+        /**
+         * IN
+         */
+        A21TJRUUN4KGV;
 
         public M market() {
             switch(this) {
@@ -241,6 +279,10 @@ public enum M {
                     return AMAZON_CA;
                 case A1AM78C64UM0Y8:
                     return AMAZON_MX;
+                case A39IBJ37TRP1C6:
+                    return AMAZON_AU;
+                case A21TJRUUN4KGV:
+                    return AMAZON_IN;
                 case EBAY_UK:
                 default:
                     return M.EBAY_UK;
@@ -298,6 +340,10 @@ public enum M {
                 return MID.A2EUQ1WTGCTBG2;
             case AMAZON_MX:
                 return MID.A1AM78C64UM0Y8;
+            case AMAZON_AU:
+                return MID.A39IBJ37TRP1C6;
+            case AMAZON_IN:
+                return MID.A21TJRUUN4KGV;
             case EBAY_UK:
             default:
                 return MID.EBAY_UK;

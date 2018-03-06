@@ -42,6 +42,10 @@ public class MWSFinances {
                         break;
                     case AMAZON_JP:
                         config.setServiceURL("https://mws.amazonservices.jp");
+                    case AMAZON_AU:
+                        config.setServiceURL("https://mws.amazonservices.com.au/");
+                    case AMAZON_IN:
+                        config.setServiceURL("https://mws.amazonservices.in");
                         break;
                     default:
                         break;
