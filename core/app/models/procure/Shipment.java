@@ -715,6 +715,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
         }
+        if(this.dates.planArrivDate == null) {
+            Validation.addError("", "预计到达时间为空");
+        }
         if(this.items.size() <= 0) {
             Validation.addError("", "没有运输项目可以运输.");
         }
