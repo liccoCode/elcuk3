@@ -27,29 +27,7 @@ public class MWSFinances {
             synchronized(cached) {
                 if(cached.containsKey(key)) return cached.get(key);
                 MWSFinancesServiceConfig config = new MWSFinancesServiceConfig();
-                switch(market) {
-                    case AMAZON_CA:
-                    case AMAZON_MX:
-                    case AMAZON_US:
-                        config.setServiceURL("https://mws.amazonservices.com");
-                        break;
-                    case AMAZON_UK:
-                    case AMAZON_IT:
-                    case AMAZON_FR:
-                    case AMAZON_ES:
-                    case AMAZON_DE:
-                        config.setServiceURL("https://mws-eu.amazonservices.com/");
-                        break;
-                    case AMAZON_JP:
-                        config.setServiceURL("https://mws.amazonservices.jp");
-                    case AMAZON_AU:
-                        config.setServiceURL("https://mws.amazonservices.com.au/");
-                    case AMAZON_IN:
-                        config.setServiceURL("https://mws.amazonservices.in");
-                        break;
-                    default:
-                        break;
-                }
+                config.setServiceURL(MWSProducts.getMwsUrl(market));
                 client = new MWSFinancesServiceClient(account.accessKey, account.token, "elcuk2", "1.0", config);
                 cached.put(key, client);
             }
