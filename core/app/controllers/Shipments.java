@@ -294,13 +294,13 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         try {
             ship.beginShip(date, sync);
-            if(Validation.hasErrors()) {
-                Webs.errorToFlash(flash);
-                show(id);
-            }
         } catch(Exception e) {
             Webs.e(e);
             Validation.addError("", Webs.e(e));
+        }
+        if(Validation.hasErrors()) {
+            Webs.errorToFlash(flash);
+            show(id);
         }
         new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id),
                 ship.id).save();

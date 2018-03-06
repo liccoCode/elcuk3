@@ -739,7 +739,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.tracknolist == null || this.tracknolist.size() == 0) {
             Validation.addError("", "请填写运输单的跟踪号");
         }
-
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
 
