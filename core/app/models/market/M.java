@@ -1025,6 +1025,12 @@ public enum M {
         } else if(s.equals("amx") || s.equals("amazon_mx") || s.equals("amazon.com.mx") || s.equals("mx")
                 || s.equals("www.amazon.com.mx") || s.equals("fba_mx")) {
             return AMAZON_MX;
+        } else if(s.equals("aau") || s.equals("amazon_au") || s.equals("amazon.com.au") || s.equals("au")
+                || s.equals("www.amazon.com.au") || s.equals("fba_au")) {
+            return AMAZON_AU;
+        } else if(s.equals("ain") || s.equals("amazon_in") || s.equals("amazon.in") || s.equals("in")
+                || s.equals("www.amazon.in") || s.equals("fba_in")) {
+            return AMAZON_IN;
         } else if(s.equals("euk") || s.equals("ebay_uk") || s.equals("ebay.co.uk")
                 || s.equals("www.ebay.co.uk")) {
             return EBAY_UK;
