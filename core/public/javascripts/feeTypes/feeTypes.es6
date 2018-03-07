@@ -17,7 +17,7 @@ $(() => {
     }
   });
 
-  $("#show_modal").click(() => {
+  $("button[name='show_modal']").click(() => {
     $("#create_modal").modal('show');
   });
 
