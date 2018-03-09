@@ -44,6 +44,9 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 @Entity
 @DynamicUpdate
 public class Orderr extends GenericModel {
+
+    private static final long serialVersionUID = -2646244667522316390L;
+
     public static final String FRONT_TABLE = "Orderr.frontPageOrderTable";
     public static final Pattern AMAZON_ORDERID = Pattern.compile("^\\d{3}-\\d{7}-\\d{7}$");
 
