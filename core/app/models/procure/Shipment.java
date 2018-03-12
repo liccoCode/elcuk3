@@ -1712,6 +1712,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "A";
             case SEA:
                 return "S";
+            case DEDICATED:
+                return "KP";
+            case RAILWAY:
+                return "R";
             default:
                 return null;
         }
