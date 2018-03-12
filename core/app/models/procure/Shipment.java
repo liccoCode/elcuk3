@@ -1807,7 +1807,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.totalVolumeShipment = newShip.totalVolumeShipment;
         this.shipmentTpye = newShip.shipmentTpye;
         this.totalStockShipment = newShip.totalStockShipment;
-        this.arryParamSetUP(Shipment.FLAG.ARRAY_TO_STR);
 
         //日期发生改变则记录旧的日期
         if(this.dates != null) {
