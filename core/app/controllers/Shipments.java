@@ -233,11 +233,6 @@ public class Shipments extends Controller {
         Shipment old = Shipment.findById(shipid);
         Date realPlanArrivDate = old.dates != null ? old.dates.planArrivDate : null;
         old.update(ship);
-        if(Validation.hasErrors()) {
-            old.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
-            renderArgs.put("ship", old);
-            render("Shipments/show.html");
-        }
         old.updateShipment();
         //向采购计划负责人发送邮件
         old.sendMsgMail(realPlanArrivDate, Secure.Security.connected());
