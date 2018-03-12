@@ -69,7 +69,8 @@
               </div>
             </div>
           </div>
-        #{render './_paymentunits_v3.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: ship.type==models.procure.Shipment.T.EXPRESS/}
+        #{set isExpress: java.util.Arrays.asList("EXPRESS","DEDICATED").contains(ship.type.name())/}
+        #{render './_paymentunits_v3.html', ship: ship, feeTypes: feeTypes, cooperators: cooperators, isExpress: isExpress/}
         </div>
 
         <div class="tab-pane" id="fileManagementBtn">
@@ -106,7 +107,6 @@
 </div>
 
 
-
 <!--  导入运输费用 弹出div begin   -->
 <div id="payment_modal" class="modal fade bs-example-modal-lg">
   <div class="modal-dialog modal-lg" role="document">
@@ -115,7 +115,7 @@
         <h4>导入运输费用</h4>
       </div>
       <div class="modal-body">
-        <form action="@{Shipments.importPayment()}" method="POST" enctype="multipart/form-data"   id="payment_form">
+        <form action="@{Shipments.importPayment()}" method="POST" enctype="multipart/form-data" id="payment_form">
           <input type="hidden" name="shipId" id="shipId" value="${ship.id}">
           <table class="table table-condensed table-bordered">
             <tr>
