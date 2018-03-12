@@ -53,7 +53,7 @@
   </div>
   <label for="unit_price" class="col-sm-1 control-label">是否含税</label>
   <div class="col-sm-2 form-inline">
-    <select class="form-control" name="unit.containTax" style="width:80px;" #{if !isEdit } disabled #{/if}>
+    <select class="form-control" name="unit.containTax" style="width:80px;" #{if !isEdit } readonly #{/if}>
       <option #{if unit.containTax} selected #{/if} value="true">是</option>
       <option #{if !unit.containTax} selected #{/if} value="false">否</option>
     </select>
