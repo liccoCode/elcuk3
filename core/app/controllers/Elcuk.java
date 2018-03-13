@@ -7,6 +7,7 @@ import models.ElcukConfig;
 import models.OperatorConfig;
 import models.market.M;
 import models.procure.Shipment;
+import models.view.dto.TransportChannelDto;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -42,9 +43,23 @@ public class Elcuk extends Controller {
         OperatorConfig config = OperatorConfig.findById(id);
         if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
             render("Elcuk/showMarketShipDay.html", config);
+        } else if(config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")) {
+            List<TransportChannelDto> dtoList = OperatorConfig.initShipChannel();
+            render("Elcuk/showShipType.html", dtoList);
         } else {
             render(config);
         }
+    }
+
+    public static void showShipChannel() {
+        List<OperatorConfig> configs = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
+        List<TransportChannelDto> dtoList = new ArrayList<>();
+        configs.forEach(config -> {
+            Shipment.T type = Shipment.T.valueOf(config.paramcode.split("_")[1]);
+            TransportChannelDto dto = new TransportChannelDto(type, config.initChannelList(), config);
+            dtoList.add(dto);
+        });
+        render(configs, dtoList);
     }
 
     /**
@@ -68,7 +83,6 @@ public class Elcuk extends Controller {
      */
     @Check("elcuk.index")
     public static void editShipDayConfigs(String market, Shipment.T shipType, long operatorConfigId) {
-
         List<ElcukConfig> configs = ElcukConfig.find("name like ?",
                 M.val(market).sortName() + "_" + shipType.toString().toLowerCase() + "_%").fetch();
         render(market, shipType, operatorConfigId, configs);

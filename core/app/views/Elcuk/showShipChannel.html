@@ -1,0 +1,40 @@
+#{extends 'main_full_v3.html'/}
+#{set title:"查看运输渠道" /}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+#{list items:dtoList, as:'dto'}
+  <div class="col-sm-3">
+    <div class="box">
+      <div class="box-header"></div>
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>运输方式</th>
+            <td>
+              <input class="form-control" value="${dto.type.label()}" readonly>
+            </td>
+          </tr>
+          <tr>
+            <th>运输渠道</th>
+            <td>
+              <select class="form-control">
+                  #{list dto.channels, as:'c'}
+                    <option value="${c}">${c}</option>
+                  #{/list}
+              </select>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="box-footer">
+        <a href="@{Elcuk.edit(dto.config.id)}" class="btn btn-xs btn-warning">修改</a>
+        <a class="btn btn-default btn-xs" href="@{Elcuk.index()}">返回</a>
+      </div>
+    </div>
+  </div>
+#{/list}
+</div>
+
