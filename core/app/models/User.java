@@ -334,6 +334,22 @@ public class User extends Model {
                 return "fa-female";
             }
         },
+        Simpeak {
+            @Override
+            public String label() {
+                return "Simpeak";
+            }
+
+            @Override
+            public String url() {
+                return "https://simpeak.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-stethoscope";
+            }
+        },
         MengTop {
             @Override
             public String label() {

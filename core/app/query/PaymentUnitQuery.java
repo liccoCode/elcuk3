@@ -62,11 +62,12 @@ public class PaymentUnitQuery {
                         "group_concat(s.id) as shipmentIds")
                 .from("PaymentUnit p")
                 .leftJoin("Shipment s ON p.shipment_id=s.id")
+                .leftJoin("Whouse w ON w.id=s.whouse_id")
                 .where("p.createdAt>=?").param(from)
                 .where("p.createdAt<=?").param(to)
                 .where("p.feeType_name=?").param(feeTypeName)
                 .where("s.type=?").param(shipType.name())
-                .where("s.whouse.market=?").param(market.name())
+                .where("w.market=?").param(market.name())
                 .groupBy("p.currency");
 
         List<Map<String, Object>> rows = DBUtils.rows(totalAmount.toString(), totalAmount.getParams().toArray());

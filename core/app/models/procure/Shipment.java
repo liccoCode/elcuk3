@@ -559,8 +559,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return day;
     }
 
-
-    public List<ProcureUnit> multipleUnitValidate(List<Long> units) {
+    private List<ProcureUnit> multipleUnitValidate(List<Long> units) {
         List<ProcureUnit> procureUnits = ProcureUnit.find(SqlSelect.whereIn("id", units)).fetch();
         if(procureUnits.size() != units.size())
             Validation.addError("", "提交的采购计划数量与系统存在的不一致!");
@@ -689,7 +688,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.items.add(shipitem.save());
     }
 
-
     public void comment(String cmt) {
         if(!StringUtils.isNotBlank(cmt)) return;
         this.memo = String.format("%s%n%s", cmt, this.memo).trim();
@@ -715,6 +713,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.state != S.CONFIRM) {
             Validation.addError("", "运输单非 " + S.CONFIRM.label() + " 状态, 不可以运输");
         }
+        if(this.dates.planArrivDate == null) {
+            Validation.addError("", "预计到达时间为空");
+        }
         if(this.items.size() <= 0) {
             Validation.addError("", "没有运输项目可以运输.");
         }
@@ -736,7 +737,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this.tracknolist == null || this.tracknolist.size() == 0) {
             Validation.addError("", "请填写运输单的跟踪号");
         }
-
         if(Validation.hasErrors()) return;
         if(datetime == null) datetime = new Date();
 
@@ -870,9 +870,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void pickGoods(Date date) {
         shouldSomeStateValidate(S.CLEARANCE, "提货");
-
         if(Validation.hasErrors()) return;
-
         if(date == null) date = new Date();
         this.state = S.BOOKED;
         this.dates.pickGoodDate = date;
@@ -886,9 +884,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void booking(Date date) {
         shouldSomeStateValidate(S.CLEARANCE, "预约");
-
         if(Validation.hasErrors()) return;
-
         if(date == null) date = new Date();
         this.state = S.BOOKED;
         this.dates.bookDate = date;
@@ -1038,10 +1034,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     public void logEvent(String msg) {
-        new ERecordBuilder("shipment.logEvent")
-                .msgArgs(this.state.label(), msg)
-                .fid(this.id)
-                .save();
+        new ERecordBuilder("shipment.logEvent").msgArgs(this.state.label(), msg).fid(this.id).save();
     }
 
     public List<ElcukRecord> logEvents() {
@@ -1374,12 +1367,8 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         Shipment shipment = (Shipment) o;
-
-        if(id != null ? !id.equals(shipment.id) : shipment.id != null) return false;
-
-        return true;
+        return id != null ? id.equals(shipment.id) : shipment.id == null;
     }
 
     @Override
@@ -1417,13 +1406,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         DateTime dt = DateTime.now();
         DateTime nextMonth = dt.plusMonths(1);
         String count = Shipment.count("createDate>=? AND createDate<?",
-                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear()))
-                        .toDate(),
-                DateTime.parse(
-                        String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear()))
-                        .toDate()) + "";
-        return String.format("SP|%s|%s", dt.toString("yyyyMM"),
-                count.length() == 1 ? "0" + count : count);
+                DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate()) +
+                "";
+        return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
     /**
@@ -1516,7 +1502,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         new Shipment(planBeginDate, type, whouse).save();
     }
 
-    public static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
+    private static final HashMap<String, Integer> MINIMUM_TRAFFICMAP = new HashMap<>();
 
     /*
      * 初始化不同运输方式的标准运输量对应关系
@@ -1544,7 +1530,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         MINIMUM_TRAFFICMAP.put("AMAZON_CA_AIR", 700);
     }
 
-    public String minimumTrafficMapKey() {
+    private String minimumTrafficMapKey() {
         return String.format("%s_%s", this.whouse.account.type.name(), this.type.name());
     }
 
@@ -1617,7 +1603,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                     LogUtils.JOBLOG.info(this.trackNo + "--" + e.getMessage());
                 }
             }
-
         }
     }
 
@@ -1630,7 +1615,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         target.removeIf(Objects::isNull);
         return target;
     }
-
 
     /**
      * 对空字符进行处理
@@ -1686,7 +1670,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return this.invoiceNo;
     }
 
-    public String fetchMaxInvoiceNoForDB() {
+    private String fetchMaxInvoiceNoForDB() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         String now = formatter.format(this.dates.planBeginDate);
         List<Shipment> shipments = Shipment.find("invoiceNo like ?",
@@ -1694,7 +1678,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(shipments == null || shipments.size() == 0) return null;
 
         //开始排序 从小到大
-        Collections.sort(shipments, (o1, o2) -> {
+        shipments.sort((o1, o2) -> {
             Integer invoiceNo1 = NumberUtils.toInt(StringUtils.substring(o1.invoiceNo, o1.invoiceNo.length() - 2));
             Integer invoiceNo2 = NumberUtils.toInt(StringUtils.substring(o2.invoiceNo, o2.invoiceNo.length() - 2));
             return invoiceNo1.compareTo(invoiceNo2);
@@ -1702,7 +1686,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return shipments.get(shipments.size() - 1).invoiceNo;
     }
 
-    public String invoiceNOTitle() {
+    private String invoiceNOTitle() {
         switch(this.type) {
             case EXPRESS:
                 return "E";
@@ -1710,6 +1694,10 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 return "A";
             case SEA:
                 return "S";
+            case DEDICATED:
+                return "KP";
+            case RAILWAY:
+                return "R";
             default:
                 return null;
         }

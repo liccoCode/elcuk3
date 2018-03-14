@@ -287,23 +287,18 @@ public class Shipments extends Controller {
     @Check("shipments.beginship")
     public static void beginShip(String id, Date date, boolean sync) {
         Shipment ship = Shipment.findById(id);
-        Validation.required("shipment.planArrivDate", ship.dates.planArrivDate);
-        if(Validation.hasErrors()) {
-            Webs.errorToFlash(flash);
-            show(id);
-        }
         try {
             ship.beginShip(date, sync);
         } catch(Exception e) {
+            Webs.e(e);
             Validation.addError("", Webs.e(e));
-
         }
         if(Validation.hasErrors()) {
             Webs.errorToFlash(flash);
             show(id);
         }
-        new ElcukRecord(Messages.get("shipment.beginShip"),
-                Messages.get("shipment.beginShip.msg", ship.id), ship.id).save();
+        new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id),
+                ship.id).save();
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
         show(id);
     }

@@ -1,6 +1,9 @@
 package models;
 
+import com.alibaba.fastjson.JSON;
 import helper.GTs;
+import models.procure.Shipment;
+import models.view.dto.TransportChannelDto;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -23,10 +26,13 @@ import java.util.*;
 @Entity
 @DynamicUpdate
 public class OperatorConfig extends Model {
-    public static final Map<String, T> NAME_Type_MAPS;
-    public static final Map<String, String> VALUES_MAPS;
 
-    public static Map<String, String> VALUES_SYSPARAM;
+    private static final long serialVersionUID = 8915050087466259315L;
+
+    private static final Map<String, T> NAME_Type_MAPS;
+    private static final Map<String, String> VALUES_MAPS;
+
+    private static Map<String, String> VALUES_SYSPARAMS;
 
     static {
         NAME_Type_MAPS = Collections.unmodifiableMap(
@@ -58,15 +64,32 @@ public class OperatorConfig extends Model {
         /**
          * 运营类型
          */
-        OPERATIONS,
+        OPERATIONS {
+            @Override
+            public String label() {
+                return "运营参数";
+            }
+        },
         /**
          * 物流类型
          */
-        SHIPMENT,
+        SHIPMENT {
+            @Override
+            public String label() {
+                return "物流参数";
+            }
+        },
         /**
          * 系统参数
          */
-        SYSPARAM,
+        SYSPARAM {
+            @Override
+            public String label() {
+                return "系统参数";
+            }
+        };
+
+        public abstract String label();
     }
 
     /**
@@ -111,30 +134,40 @@ public class OperatorConfig extends Model {
     }
 
     public static void init() {
-        /**
-         * 运营报表参数初始化
-         */
+        /*运营报表参数初始化*/
         for(Map.Entry<String, T> nameAndTypeEntry : NAME_Type_MAPS.entrySet()) {
             OperatorConfig config = OperatorConfig.config(nameAndTypeEntry.getKey(), nameAndTypeEntry.getValue(),
                     VALUES_MAPS.get(nameAndTypeEntry.getKey()));
             if(!config.exist()) config.save();
         }
 
-        if(VALUES_SYSPARAM == null) VALUES_SYSPARAM = new HashMap<>();
+        if(VALUES_SYSPARAMS == null) VALUES_SYSPARAMS = new HashMap<>();
         List<OperatorConfig> configs = OperatorConfig.findAll();
         for(OperatorConfig config : configs) {
             if(!StringUtils.isBlank(config.paramcode)) {
-                VALUES_SYSPARAM.put(config.paramcode, config.val);
+                VALUES_SYSPARAMS.put(config.paramcode, config.val);
 
+            }
+        }
+        /* 物流运输渠道初始化*/
+        List<OperatorConfig> list = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
+        if(list.size() == 0) {
+            for(Shipment.T type : Shipment.T.values()) {
+                OperatorConfig config = new OperatorConfig();
+                config.name = String.format("%s运输渠道", type.label());
+                config.updateAt = new Date();
+                config.type = T.SHIPMENT;
+                config.paramcode = String.format("ShipChannel_%s", type.name());
+                config.save();
             }
         }
     }
 
     public static String getVal(String param) {
-        if(VALUES_SYSPARAM == null) OperatorConfig.init();
-        String sysval = VALUES_SYSPARAM.get(param);
-        if(StringUtils.isBlank(sysval)) sysval = "";
-        return sysval;
+        if(VALUES_SYSPARAMS == null) OperatorConfig.init();
+        String sysVal = VALUES_SYSPARAMS.get(param);
+        if(StringUtils.isBlank(sysVal)) sysVal = "";
+        return sysVal;
     }
 
     public boolean exist() {
@@ -169,5 +202,23 @@ public class OperatorConfig extends Model {
         } else {
             return null;
         }
+    }
+
+    public static List<TransportChannelDto> initShipChannel() {
+        List<OperatorConfig> configs = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
+        List<TransportChannelDto> dtoList = new ArrayList<>();
+        configs.forEach(config -> {
+            if(StringUtils.isNotBlank(config.val)) {
+                Shipment.T type = Shipment.T.valueOf(config.paramcode.split("_")[1]);
+                List<String> list = JSON.parseArray(config.val, String.class);
+                dtoList.add(new TransportChannelDto(type, list, config));
+            }
+        });
+        return dtoList;
+    }
+
+    public List<String> initChannelList() {
+        if(StringUtils.isNotBlank(this.val)) return new ArrayList<>(Arrays.asList(this.val.split(",")));
+        else return new ArrayList<>();
     }
 }

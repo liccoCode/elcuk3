@@ -98,7 +98,7 @@ $(() => {
     $o.parents('table').find(`:checkbox[class='${id}menu${$o.attr('value')}']`).trigger('change');
   });
 
-  $("#select_all_category").click(function (e) {
+  $("a[name='select_all_category']").click(function (e) {
     e.preventDefault();
     $(this).parent().parent().parent().find("input[type='checkbox']").each(function () {
       $(this).prop("checked", !$(this).prop("checked"));

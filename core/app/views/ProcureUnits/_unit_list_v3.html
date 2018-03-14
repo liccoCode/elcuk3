@@ -17,19 +17,16 @@
     <th width="45px;">#</th>
     <th>父ID</th>
     <th width="40px;">阶段</th>
-    <th width="170px;">Selling</th>
+    <th width="190px;">Selling</th>
     <th width="120px">Sku</th>
-    <th width="155px;">FBA-ShipmentId<br>CenterId</th>
+    <th width="160px;">FBA-ShipmentId<br>CenterId</th>
     <th width="100px;">采购单<br>供应商</th>
     <th>去往市场</th>
     <th width="120px;">数量<br>(计划/交货/入库)</th>
     <th>可用库存</th>
   #{ifnot deliveryplan}
     <th width="60px;">单价</th>
-    <th rel="popover" content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">
-      <abbr>总价</abbr>
-    </th>
-    <th>剩余请款金额</th>
+    <th width="100px;" data-toggle="popover" data-content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">总价<br>剩余请款金额</th>
   #{/ifnot}
     <th rel="popover" content="<img src='/img/helper/fnsku.png'/>" width="95px;">FnSku</th>
     <th width="40px;">运输方式</th>
@@ -38,7 +35,7 @@
     <th>实际交货时间</th>
     <th width="40px;">是否核准</th>
     <th width="40px;">质检结果</th>
-    <th width="90px;">创建人/<br>创建时间</th>
+    <th width="85px;">创建人/<br>创建时间</th>
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
@@ -151,13 +148,12 @@
               <div class="label label-danger">税点:${unit.taxPoint}</div>
             #{/if}
         </td>
-        <td>${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}</td>
-        <td>
+        <td>总:${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}<br>
             #{if unit.type?.name() == 'StockSplit'}
               0
             #{/if}
             #{else }
-            ${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+            剩:${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
             #{/else}
         </td>
       #{/ifnot}

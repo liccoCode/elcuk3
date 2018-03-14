@@ -714,9 +714,8 @@ public class Excels extends Controller {
         List<PurchasePaymentDTO> dtos = p.payablesReport();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         request.format = "xls";
-        renderArgs.put(RenderExcel.RA_FILENAME,
-                String.format("采购应付未付报表%s至%s.xls",
-                        new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
+        renderArgs.put(RenderExcel.RA_FILENAME, String.format("采购应付未付报表%s至%s.xls",
+                new SimpleDateFormat("yyyy/MM").format(p.from), new SimpleDateFormat("yyyy/MM").format(p.to)));
         render(dtos, dateFormat);
     }
 
