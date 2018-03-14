@@ -6,6 +6,7 @@ import models.User;
 import models.embedded.ERecordBuilder;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.product.Category;
 import models.view.post.StockPost;
 import models.view.post.StockRecordPost;
 import models.whouse.Outbound;
@@ -47,6 +48,7 @@ public class StockRecords extends Controller {
         if(p == null) p = new StockPost();
         List<ProcureUnit> units = p.query();
         Map<String, String> total = p.total();
+        renderArgs.put("categoryIds", Category.findAll());
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
         if(isB2B) {
             render("/StockRecords/stockIndexB2B.html", p, units, total);

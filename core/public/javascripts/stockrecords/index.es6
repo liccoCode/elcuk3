@@ -16,4 +16,11 @@ $(() => {
     includeSelectAllOption: true
   });
 
+  $("#categories").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '品线',
+    maxHeight: 200,
+    includeSelectAllOption: true
+  });
+
 });

@@ -63,6 +63,15 @@
         <div class="col-sm-2">
           <input class="form-control" name="ship.jobNumber" value="${ship.jobNumber}" id="jobNumber"/>
         </div>
+        <label for="whouseSelect" class="col-sm-1 control-label">去往国家</label>
+        <div class="col-sm-2">
+          <select name="ship.whouse.id" id="whouseSelect" class="form-control">
+            <option value="">选择仓库</option>
+          #{list items:whouses, as:'w'}
+            <option value="${w.id}" ${w.id==ship.whouse?.id ? 'selected' : ''}>${w.name}</option>
+          #{/list}
+          </select>
+        </div>
         <label for="vat" class="col-sm-1 control-label">VAT选择</label>
         <div class="col-sm-2">
           <select class="form-control" id="vat" name="ship.vat">
@@ -77,7 +86,8 @@
       <div class="form-group">
         <label for="internationExpressSelect" class="col-sm-1 control-label">国际快递商</label>
         <div class="col-sm-2">
-          <select name="ship.internationExpress" class="form-control" id="internationExpressSelect">
+          <select name="ship.internationExpress" class="form-control" id="internationExpressSelect"
+                  data-url="@{Shipments.changeInternationExpress()}">
             <option value="">选择快递商</option>
           #{list items:models.procure.Shipment.express(), as:'i'}
             <option value="${i.name()}" ${i.name()==ship.internationExpress?.name() ? 'selected' : ''}>${i.name()}</option>
@@ -93,18 +103,20 @@
           #{/list}
           </select>
         </div>
-        <label for="whouseSelect" class="col-sm-1 control-label">去往国家</label>
+        <label for="channelSelect" class="col-sm-1 control-label">运输渠道</label>
         <div class="col-sm-2">
-          <select name="ship.whouse.id" id="whouseSelect" class="form-control">
-            <option value="">选择仓库</option>
-          #{list items:whouses, as:'w'}
-            <option value="${w.id}" ${w.id==ship.whouse?.id ? 'selected' : ''}>${w.name}</option>
+          <select name="ship.channel" id="channelSelect" class="form-control">
+            <option value="">请选择</option>
+          #{list items:channels, as:'c'}
+            <option value="${c}" ${c==ship.channel ? 'selected' : ''}>${c}</option>
           #{/list}
           </select>
         </div>
+
         <label for="" class="col-sm-1 control-label">运输方式</label>
         <div class="col-sm-2">
           <input class="form-control" style="color:${ship?.type?.rgb()}" value="${ship?.type?.label()}" readonly>
+          <input type="hidden" id="shipTypeInput" value="${ship?.type?.name()}">
         </div>
       </div>
 

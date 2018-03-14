@@ -41,6 +41,12 @@
             #{/list}
             </select>
 
+            <select name="p.categories" multiple="multiple" id="categories" class="form-control">
+            #{list items:categoryIds, as:'c'}
+              <option value="${c.categoryId}" ${p.categories.contains(c.categoryId) ? 'selected':''}>${c.categoryId}</option>
+            #{/list}
+            </select>
+
             <div class="input-group">
               <div class="input-group-addon"><i class="icon-search"></i></div>
               <input style="width:200px;" class="form-control" name="p.search" placeHolder="搜索 SKU,采购计划ID,FBA"
@@ -80,8 +86,8 @@
             <td>${u.inboundQty}</td>
             <td>${u.availableQty}</td>
             <td>${u.unqualifiedQty}</td>
-            <td>#{time_tooltip time:u.attrs.planDeliveryDate/}</td>
-            <td>#{time_tooltip time:u.attrs.deliveryDate/}</td>
+            <td>#{time_tooltip_v3 time:u.attrs.planDeliveryDate/}</td>
+            <td>#{time_tooltip_v3 time:u.attrs.deliveryDate/}</td>
             <td>${u.fba?.shipmentId}</td>
             <td>${u.projectName}</td>
             <td>
