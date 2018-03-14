@@ -44,7 +44,12 @@
             <div style="float:left;"><b>${selling.product?.supplierSku}</b></div><br>
           #{/if}
           <div style="float:left;"><b>NEW</b></div>
-          <div style="float:right;padding-right:10px;"><b>${selling.market?.uropeShow()}</b></div>
+          #{if models.OperatorConfig.getVal("brandname")=='Tripetals'}
+            <div style="float:right;padding-right:10px;"><b>${selling.market?.uropeChineseShow()}</b></div>
+          #{/if}
+          #{else }
+            <div style="float:right;padding-right:20px;"><b>${selling.market?.uropeShow()}</b></div>
+          #{/else}
           <br>
         </td>
       #{/list}
