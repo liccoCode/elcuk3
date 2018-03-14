@@ -1324,6 +1324,31 @@ public enum M {
         }
     }
 
+    public String uropeChineseShow() {
+        switch(this) {
+            case AMAZON_UK:
+            case AMAZON_DE:
+            case AMAZON_ES:
+            case AMAZON_FR:
+            case AMAZON_IT:
+                return "欧洲";
+            case AMAZON_JP:
+                return "日本";
+            case AMAZON_CA:
+                return "加拿大";
+            case AMAZON_US:
+                return "美国";
+            case AMAZON_MX:
+                return "墨西哥";
+            case AMAZON_AU:
+                return "澳大利亚";
+            case AMAZON_IN:
+                return "印度";
+            default:
+                return null;
+        }
+    }
+
     public String earChannel() {
         return OperatorConfig.getVal(this.sortName() + "earchannelid");
     }
