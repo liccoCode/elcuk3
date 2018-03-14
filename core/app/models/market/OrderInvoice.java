@@ -138,7 +138,7 @@ public class OrderInvoice extends GenericModel {
     public static float itvat = 1.22f;
 
     @Transient
-    public static float esvat = 1.20f;
+    public static float esvat = 1.21f;
 
 
     /**
