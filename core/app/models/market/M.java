@@ -1002,7 +1002,7 @@ public enum M {
                 || s.equals("www.amazon.ca") || s.equals("fba_ca")) {
             return AMAZON_CA;
         } else if(s.equals("auk") || s.equals("amazon_uk") || s.equals("amazon.co.uk") || s.equals("gb")
-                || s.equals("www.amazon.co.uk") || s.equals("fba_uk")) {
+                || s.equals("uk") || s.equals("www.amazon.co.uk") || s.equals("fba_uk")) {
             return AMAZON_UK;
         } else if(s.equals("afr") || s.equals("amazon_fr") || s.equals("amazon.fr") || s.equals("fr")
                 || s.equals("www.amazon.fr") || s.equals("fba_fr")) {
