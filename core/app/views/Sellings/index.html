@@ -89,7 +89,7 @@
             <th>生命周期</th>
             <th>ERP上架</th>
             <th width="145px;">feed更新时间</th>
-            <th>feed更新状态</th>
+            <th width="120px;" data-toggle="tooltip" title="rank">Amazon排名</th>
             <th width="145px;">创建时间</th>
             <th width="145px;">ERP下架时间</th>
             <th width="180px;">操作</th>
@@ -116,7 +116,12 @@
             <td>${s.sellingCycle?.label()}</td>
             <td>${s.state.name().equals("DOWN") ? '否' : '是'}</td>
             <td>#{time_tooltip_v3 time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
-            <td>${s.recentlyFeed()?.analyzeResult}</td>
+            <td>
+              #{list items:s.ranks, as:'r'}
+              <a href="${r.ladderUrl}" data-toggle="tooltip" title="品类:${r.ladderName}" target="_blank">
+              <i class="fa fa-fw fa-diamond"></i>${r.rank}</a>
+              #{/list}
+            </td>
             <td>#{time_tooltip_v3 time:s.createDate, datetime:true /}</td>
             <td>#{time_tooltip_v3 time:s.showDownDate(), datetime:true /}</td>
             <td>
