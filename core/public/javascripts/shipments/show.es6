@@ -45,7 +45,21 @@ $(() => {
       let $tr = $(tr);
       $tr.find("input").attr("name", "ship.tracknolist[" + index + "]")
     });
+  });
 
+  $("#internationExpressSelect").change(function () {
+    let internationExpress = $(this).val();
+    let type = $("#shipTypeInput").val();
+    $.post($(this).data("url"), {
+      internationExpress: internationExpress,
+      type: type
+    }, function (r) {
+      $("#channelSelect").empty();
+      $("#channelSelect").append("<option value=''>请选择</option>");
+      $.each(r, function (index, data) {
+        $("#channelSelect").append("<option value='" + data + "'>" + data + "</option>");
+      });
+    });
   });
 
 });

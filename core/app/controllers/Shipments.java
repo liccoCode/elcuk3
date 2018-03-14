@@ -3,8 +3,10 @@ package controllers;
 import controllers.api.SystemOperation;
 import ext.ShipmentsHelper;
 import helper.Dates;
+import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.User;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
@@ -201,11 +203,21 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.dates = ship.dates == null ? new ShipmentDates() : ship.dates;
         ship.endShipByComputer();
+        List<String> channels = OperatorConfig.initShipChannelByType(ship);
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
         List<BtbCustom> customs = BtbCustom.find(" isDel=?", false).fetch();
-        render(ship, cooperators, customs);
+        render(ship, cooperators, customs, channels);
+    }
+
+    public static void changeInternationExpress(String internationExpress, String type) {
+        OperatorConfig config = OperatorConfig.find("paramcode =?", String.format("ShipChannel_%s", type)).first();
+        if(StringUtils.isNotBlank(config.val) && StringUtils.isNotBlank(internationExpress)) {
+            HashMap<String, List<String>> map = J.from(config.val, HashMap.class);
+            List<String> list = map.get(internationExpress);
+            renderJSON(list);
+        }
     }
 
     public static void preview(String id) {

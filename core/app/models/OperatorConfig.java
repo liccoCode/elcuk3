@@ -2,6 +2,7 @@ package models;
 
 import com.alibaba.fastjson.JSON;
 import helper.GTs;
+import helper.J;
 import models.procure.Shipment;
 import models.view.dto.TransportChannelDto;
 import org.apache.commons.lang.StringUtils;
@@ -215,6 +216,17 @@ public class OperatorConfig extends Model {
             }
         });
         return dtoList;
+    }
+
+    public static List<String> initShipChannelByType(Shipment ship) {
+        OperatorConfig config = OperatorConfig.find("paramcode =?", String.format("ShipChannel_%s",
+                ship.type.name())).first();
+        if(StringUtils.isNotBlank(config.val) && ship.internationExpress != null) {
+            HashMap<String, List<String>> map = J.from(config.val, HashMap.class);
+            return map.get(ship.internationExpress.name());
+        } else {
+            return null;
+        }
     }
 
     public List<String> initChannelList() {
