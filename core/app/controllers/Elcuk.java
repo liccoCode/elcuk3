@@ -12,9 +12,7 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,10 +44,27 @@ public class Elcuk extends Controller {
         } else if(config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")) {
             List<TransportChannelDto> dtoList = OperatorConfig.initShipChannel();
             render("Elcuk/showShipType.html", dtoList);
+        } else if(config.fullName().equalsIgnoreCase("SHIPMENT_海运运输单自动生成规则")
+                || config.fullName().equalsIgnoreCase("SHIPMENT_空运运输单自动生成规则")
+                || config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")) {
+
+            Map<String, List<String>> map = J.from(config.val, HashMap.class);
+            render("Elcuk/editShipmentmarket.html", config , map);
         } else {
             render(config);
         }
     }
+
+
+    /**
+     * 报表相关参数设置
+     */
+    @Check("elcuk.index")
+    public static void editJson(Long id) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        renderJSON(J.json(config));
+    }
+
 
     public static void showShipChannel() {
         List<OperatorConfig> configs = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
@@ -141,4 +156,29 @@ public class Elcuk extends Controller {
             editShipDayConfigs(market, shipType, operatorConfigId);
         }
     }
+
+
+    /**
+     * 批量更新运输天数配置
+     */
+    @Check("elcuk.index")
+    public static void updateShipmentMarketConfigs(long id, List<M> day1, List<M> day2, List<M> day3, List<M> day4,
+                                                   List<M> day5, List<M> day6, List<M> day7) {
+        OperatorConfig config = OperatorConfig.findById(id);
+        Map<String, List<String>> map = J.from(config.val, HashMap.class);
+        List<List<M>> days = Arrays.asList(day1,day2,day3,day4,day5,day6,day7);
+        for(int i=1;i<=7;i++){
+            List<M> day = days.get(i-1);
+            if(day!=null&&day.size()>0){
+                List<String> dayStr = new ArrayList<>();
+                day.forEach(m -> dayStr.add(m.name()));
+                map.put(i+"",dayStr);
+            }
+        }
+        config.val = J.json(map);
+        config.save();
+        flash.success("批量更新成功!");
+        edit(id);
+    }
+
 }
