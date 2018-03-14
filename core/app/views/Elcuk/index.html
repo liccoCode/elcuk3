@@ -1,5 +1,8 @@
 #{extends 'main_full_v3.html'/}
 #{set title:"Elcuk 系统参数" /}
+#{set 'moreScripts'}
+    #{script 'elcuk/index.es6'/}
+#{/set}
 
 #{errorMsgs /}
 #{flash_alert /}
@@ -34,7 +37,16 @@
                       <td>${config.val}</td>
                       <td>#{time_tooltip_v3 time:config.updateAt, datetime:true/}</td>
                       <td>
-                        <a href="@{Elcuk.edit(config.id)}" class="btn btn-warning btn-xs">修改</a>
+                          #{if config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")||config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_海运运输单自动生成规则")
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_空运运输单自动生成规则")
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")}
+                            <a href="@{Elcuk.edit(config.id)}" class="btn btn-warning btn-xs">修改</a>
+                          #{/if}
+                          #{else}
+                            <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-primary"
+                               uid="${config.id}">修改</a>
+                          #{/else}
                           #{if config.paramcode!=null && config.paramcode.split("_")[0]=="ShipChannel"}
                             <a href="@{Elcuk.showShipChannel()}" class="btn btn-default btn-xs">查看</a>
                           #{/if}
@@ -49,3 +61,51 @@
     </div>
   </div>
 </div>
+
+
+<!--  修改 弹出div begin   -->
+<div id="bom_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>参数值修改</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{Elcuk.update()}" method="post" id="updateUnit_form">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">参数类型</th>
+              <td>
+                <span id="configType"></span>
+              </td>
+            </tr>
+            <tr>
+              <th width="30%">参数编码</th>
+              <td>
+                <span id="configParamcode"></span>
+              </td>
+            </tr>
+            <tr>
+              <th width="30%">参数名称</th>
+              <td>
+                <span id="configName"></span>
+              </td>
+            </tr>
+            <tr>
+              <th>参数值</th>
+              <td>
+                <input type="text" id="configVal" name="val">
+                <input type="hidden" id="configId" name="id">
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--  修改 弹出div end   -->
