@@ -161,6 +161,20 @@ public class OperatorConfig extends Model {
                 config.save();
             }
         }
+
+        /* 运输单自动生成规则初始化*/
+        List<OperatorConfig> shipmentList = OperatorConfig.find("paramcode LIKE ? ", "shipmentmarket_%").fetch();
+        if(shipmentList.size() == 0) {
+            for(Shipment.T type : Shipment.T.values()) {
+                OperatorConfig config = new OperatorConfig();
+                config.name = String.format("%s运输单自动生成规则", type.label());
+                config.updateAt = new Date();
+                config.type = T.SHIPMENT;
+                config.paramcode = String.format("shipmentmarket_%s", type.name().toLowerCase());
+                config.save();
+            }
+        }
+
     }
 
     public static String getVal(String param) {

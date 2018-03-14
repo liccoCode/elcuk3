@@ -27,7 +27,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day1" value="${market.name()}" style="vertical-align:middle;"
-                  ${map.get("1").contains(market.name()) ? 'checked':''}
+                  ${map!=null&&map.get("1").contains(market.name()) ? 'checked':''}
             />
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
@@ -38,7 +38,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day2" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("2").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("2").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>
@@ -48,7 +48,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day3" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("3").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("3").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>
@@ -58,7 +58,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day4" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("4").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("4").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>
@@ -68,7 +68,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day5" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("5").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("5").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>
@@ -78,7 +78,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day6" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("6").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("6").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>
@@ -88,7 +88,7 @@
       <td>
           #{list items:models.market.M.values(), as:'market'}
             <input type="checkbox" name="day7" value="${market.name()}" style="vertical-align:middle;"
-            ${map.get("7").contains(market.name()) ? 'checked':''}/>
+            ${map!=null&&map.get("7").contains(market.name()) ? 'checked':''}/>
             <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           #{/list}
       </td>

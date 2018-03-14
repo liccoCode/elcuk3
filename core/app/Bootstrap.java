@@ -6,7 +6,6 @@ import models.Privilege;
 import models.User;
 import models.finance.FeeType;
 import models.market.Account;
-import models.market.ListingStateRecord;
 import org.apache.commons.lang.StringUtils;
 import play.Play;
 import play.jobs.Job;
