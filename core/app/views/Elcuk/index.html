@@ -40,7 +40,9 @@
                           #{if config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")||config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")
                           ||config.fullName().equalsIgnoreCase("SHIPMENT_海运运输单自动生成规则")
                           ||config.fullName().equalsIgnoreCase("SHIPMENT_空运运输单自动生成规则")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")}
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_快递运输单自动生成规则")
+                          ||config.fullName().equalsIgnoreCase("SHIPMENT_专线运输单自动生成规则")}
                             <a href="@{Elcuk.edit(config.id)}" class="btn btn-warning btn-xs">修改</a>
                           #{/if}
                           #{else}

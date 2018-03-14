@@ -44,12 +44,9 @@ public class Elcuk extends Controller {
         } else if(config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")) {
             List<TransportChannelDto> dtoList = OperatorConfig.initShipChannel();
             render("Elcuk/showShipType.html", dtoList);
-        } else if(config.fullName().equalsIgnoreCase("SHIPMENT_海运运输单自动生成规则")
-                || config.fullName().equalsIgnoreCase("SHIPMENT_空运运输单自动生成规则")
-                || config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")) {
-
+        } else if(config.paramcode.indexOf("shipmentmarket_") > -1) {
             Map<String, List<String>> map = J.from(config.val, HashMap.class);
-            render("Elcuk/editShipmentmarket.html", config , map);
+            render("Elcuk/editShipmentmarket.html", config, map);
         } else {
             render(config);
         }
@@ -166,13 +163,14 @@ public class Elcuk extends Controller {
                                                    List<M> day5, List<M> day6, List<M> day7) {
         OperatorConfig config = OperatorConfig.findById(id);
         Map<String, List<String>> map = J.from(config.val, HashMap.class);
-        List<List<M>> days = Arrays.asList(day1,day2,day3,day4,day5,day6,day7);
-        for(int i=1;i<=7;i++){
-            List<M> day = days.get(i-1);
-            if(day!=null&&day.size()>0){
+        if(map == null) map = new HashMap<>();
+        List<List<M>> days = Arrays.asList(day1, day2, day3, day4, day5, day6, day7);
+        for(int i = 1; i <= 7; i++) {
+            List<M> day = days.get(i - 1);
+            if(day != null && day.size() > 0) {
                 List<String> dayStr = new ArrayList<>();
                 day.forEach(m -> dayStr.add(m.name()));
-                map.put(i+"",dayStr);
+                map.put(i + "", dayStr);
             }
         }
         config.val = J.json(map);
