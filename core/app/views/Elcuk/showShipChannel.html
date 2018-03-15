@@ -34,7 +34,9 @@
             <td>${d.channel}</td>
             <td>#{time_tooltip_v3 time:d.createDate, datetime:true/}</td>
             <td>
-              <a href="" class="btn btn-warning btn-xs">Update</a>
+              <button class="btn btn-warning btn-xs" name="updateChannelBtn" data-type="${d.type.name()}"
+                      data-internation="${d.internationExpress}" data-channel="${d.channel}" data-id="${d.id}">Update
+              </button>
               <a href="@{Elcuk.deleteChannel(d.id)}" class="btn btn-danger btn-xs">Delete</a>
             </td>
           </tr>
@@ -46,11 +48,11 @@
 </div>
 
 
-<div id="add_modal" class="modal fade">
+<div id="channel_modal" class="modal fade">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">参数值修改</h4>
+        <h4 class="modal-title">添加修改渠道</h4>
       </div>
       <form action="@{Elcuk.addChannel()}" method="post" id="updateUnit_form" class="form-horizontal">
         <div class="modal-body">
@@ -80,6 +82,7 @@
               <th width="30%">运输渠道</th>
               <td>
                 <input type="text" name="detail.channel" class="form-control" value="">
+                <input type="hidden" name="channelId" id="channelId" value="">
               </td>
             </tr>
           </table>

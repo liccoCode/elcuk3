@@ -79,11 +79,19 @@ public class Elcuk extends Controller {
         render(details);
     }
 
-    public static void addChannel(TransportChannelDetail detail) {
-        detail.creator = Login.current();
-        detail.createDate = new Date();
-        detail.save();
-        flash.success("添加成功");
+    public static void addChannel(TransportChannelDetail detail, Long channelId) {
+        if(channelId == null) {
+            detail.creator = Login.current();
+            detail.createDate = new Date();
+            detail.save();
+        } else {
+            TransportChannelDetail old = TransportChannelDetail.findById(channelId);
+            old.channel = detail.channel;
+            old.type = detail.type;
+            old.internationExpress = detail.internationExpress;
+            old.save();
+        }
+        flash.success("操作成功");
         showShipChannel();
     }
 
