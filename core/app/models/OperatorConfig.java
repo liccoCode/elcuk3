@@ -1,10 +1,7 @@
 package models;
 
-import com.alibaba.fastjson.JSON;
 import helper.GTs;
-import helper.J;
 import models.procure.Shipment;
-import models.view.dto.TransportChannelDto;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.hibernate.annotations.DynamicUpdate;
@@ -43,6 +40,7 @@ public class OperatorConfig extends Model {
                         .put("采货天数", T.OPERATIONS)
                         .put("合理库存周转天数", T.OPERATIONS)
                         .put("运输天数", T.SHIPMENT)
+                        .put("运输渠道", T.SHIPMENT)
                         .put("标准断货期天数", T.OPERATIONS)
                         .put("标准断货期天数区间", T.OPERATIONS)
                         .put("退货率天数", T.OPERATIONS)
@@ -150,19 +148,6 @@ public class OperatorConfig extends Model {
 
             }
         }
-        /* 物流运输渠道初始化*/
-        List<OperatorConfig> list = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
-        if(list.size() == 0) {
-            for(Shipment.T type : Shipment.T.values()) {
-                OperatorConfig config = new OperatorConfig();
-                config.name = String.format("%s运输渠道", type.label());
-                config.updateAt = new Date();
-                config.type = T.SHIPMENT;
-                config.paramcode = String.format("ShipChannel_%s", type.name());
-                config.save();
-            }
-        }
-
         /* 运输单自动生成规则初始化*/
         List<OperatorConfig> shipmentList = OperatorConfig.find("paramcode LIKE ? ", "shipmentmarket_%").fetch();
         if(shipmentList.size() == 0) {
@@ -175,7 +160,6 @@ public class OperatorConfig extends Model {
                 config.save();
             }
         }
-
     }
 
     public static String getVal(String param) {
@@ -217,34 +201,5 @@ public class OperatorConfig extends Model {
         } else {
             return null;
         }
-    }
-
-    public static List<TransportChannelDto> initShipChannel() {
-        List<OperatorConfig> configs = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
-        List<TransportChannelDto> dtoList = new ArrayList<>();
-        configs.forEach(config -> {
-            if(StringUtils.isNotBlank(config.val)) {
-                Shipment.T type = Shipment.T.valueOf(config.paramcode.split("_")[1]);
-                List<String> list = JSON.parseArray(config.val, String.class);
-                dtoList.add(new TransportChannelDto(type, list, config));
-            }
-        });
-        return dtoList;
-    }
-
-    public static List<String> initShipChannelByType(Shipment ship) {
-        OperatorConfig config = OperatorConfig.find("paramcode =?", String.format("ShipChannel_%s",
-                ship.type.name())).first();
-        if(StringUtils.isNotBlank(config.val) && ship.internationExpress != null) {
-            HashMap<String, List<String>> map = J.from(config.val, HashMap.class);
-            return map.get(ship.internationExpress.name());
-        } else {
-            return null;
-        }
-    }
-
-    public List<String> initChannelList() {
-        if(StringUtils.isNotBlank(this.val)) return new ArrayList<>(Arrays.asList(this.val.split(",")));
-        else return new ArrayList<>();
     }
 }

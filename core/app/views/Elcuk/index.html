@@ -37,21 +37,13 @@
                       <td>${config.val}</td>
                       <td>#{time_tooltip_v3 time:config.updateAt, datetime:true/}</td>
                       <td>
-                          #{if config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")||config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_海运运输单自动生成规则")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_空运运输单自动生成规则")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_铁路运输单自动生成规则")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_快递运输单自动生成规则")
-                          ||config.fullName().equalsIgnoreCase("SHIPMENT_专线运输单自动生成规则")}
+                          #{if java.util.Arrays.asList("运输天数","运输渠道").contains(config.name) || (config.paramcode != null&& config.paramcode.split("_")[0].equalsIgnoreCase("shipmentmarket"))}
                             <a href="@{Elcuk.edit(config.id)}" class="btn btn-warning btn-xs">修改</a>
                           #{/if}
                           #{else}
                             <a href="javascript:void(0)" name="unitUpdateBtn" class="btn btn-xs btn-primary"
-                               uid="${config.id}">修改</a>
+                               data-uid="${config.id}">修改</a>
                           #{/else}
-                          #{if config.paramcode!=null && config.paramcode.split("_")[0]=="ShipChannel"}
-                            <a href="@{Elcuk.showShipChannel()}" class="btn btn-default btn-xs">查看</a>
-                          #{/if}
                       </td>
                     </tr>
                   #{/if}

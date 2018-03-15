@@ -12,6 +12,7 @@ import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.procure.*;
+import models.shipment.TransportChannelDetail;
 import models.view.Ret;
 import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
@@ -203,7 +204,7 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.dates = ship.dates == null ? new ShipmentDates() : ship.dates;
         ship.endShipByComputer();
-        List<String> channels = OperatorConfig.initShipChannelByType(ship);
+        List<String> channels = TransportChannelDetail.initShipChannelByType(ship);
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
