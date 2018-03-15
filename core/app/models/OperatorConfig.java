@@ -63,21 +63,21 @@ public class OperatorConfig extends Model {
 
     public enum T {
         /**
-         * 运营类型
-         */
-        OPERATIONS {
-            @Override
-            public String label() {
-                return "运营参数";
-            }
-        },
-        /**
          * 物流类型
          */
         SHIPMENT {
             @Override
             public String label() {
                 return "物流参数";
+            }
+        },
+        /**
+         * 运营类型
+         */
+        OPERATIONS {
+            @Override
+            public String label() {
+                return "运营参数";
             }
         },
         /**
