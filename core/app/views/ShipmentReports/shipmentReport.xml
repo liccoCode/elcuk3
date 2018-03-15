@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook>
+  <worksheet name="快递">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="expressList" var="shipmentMonthly"
+          varType="models.procure.ShipmentMonthly">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentMonthly.unitId</mapping>
+        <mapping row="1" col="17">shipmentMonthly.price</mapping>
+        <mapping row="1" col="18">shipmentMonthly.customsPrepaidFee</mapping>
+        <mapping row="1" col="19">shipmentMonthly.declarationFee</mapping>
+        <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
+        <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
+        <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+  <worksheet name="专线">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="dedicatedList" var="shipmentMonthly"
+          varType="models.procure.ShipmentMonthly">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentMonthly.unitId</mapping>
+        <mapping row="1" col="17">shipmentMonthly.price</mapping>
+        <mapping row="1" col="18">shipmentMonthly.customsPrepaidFee</mapping>
+        <mapping row="1" col="19">shipmentMonthly.declarationFee</mapping>
+        <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
+        <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
+        <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+  <worksheet name="空运">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="airList" var="shipmentMonthly"
+          varType="models.procure.ShipmentMonthly">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentMonthly.unitId</mapping>
+        <mapping row="1" col="17">shipmentMonthly.price</mapping>
+        <mapping row="1" col="18">shipmentMonthly.customsPrepaidFee</mapping>
+        <mapping row="1" col="19">shipmentMonthly.declarationFee</mapping>
+        <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
+        <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
+        <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+  <worksheet name="海运">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="seaList" var="shipmentMonthly"
+          varType="models.procure.ShipmentMonthly">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentMonthly.unitId</mapping>
+        <mapping row="1" col="17">shipmentMonthly.price</mapping>
+        <mapping row="1" col="18">shipmentMonthly.customsPrepaidFee</mapping>
+        <mapping row="1" col="19">shipmentMonthly.declarationFee</mapping>
+        <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
+        <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
+        <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+  <worksheet name="铁路">
+    <section startRow="0" endRow="0"/>
+    <loop startRow="1" endRow="1" items="railWayList" var="shipmentMonthly"
+          varType="models.procure.ShipmentMonthly">
+      <section startRow="1" endRow="1">
+        <mapping row="1" col="0">shipmentMonthly.unitId</mapping>
+        <mapping row="1" col="17">shipmentMonthly.price</mapping>
+        <mapping row="1" col="18">shipmentMonthly.customsPrepaidFee</mapping>
+        <mapping row="1" col="19">shipmentMonthly.declarationFee</mapping>
+        <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
+        <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
+        <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+</workbook>
