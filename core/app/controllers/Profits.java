@@ -10,7 +10,6 @@ import jobs.analyze.ProfitInventorySearch;
 import jobs.analyze.SellingSaleAnalyzeJob;
 import models.ElcukRecord;
 import models.User;
-import models.product.Category;
 import models.product.Product;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;

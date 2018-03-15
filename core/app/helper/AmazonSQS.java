@@ -36,8 +36,6 @@ public class AmazonSQS {
     public static void sendMessage(String message) {
         client().sendMessage(new SendMessageRequest(SQS_QUEUE, message));
     }
-
-    
     /**
      *  延迟发送sqs消息队列
      * @param message      消息内容

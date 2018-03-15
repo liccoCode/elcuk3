@@ -101,8 +101,8 @@ public class Excels extends Controller {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
 
-        String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN " +
-                JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
+        String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN "
+                + JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
         List<ProcureUnit> units = ProcureUnit.find(sql).fetch();
         String currency = units.get(0).attrs.currency.symbol();
         if(units.stream().noneMatch(unit -> unit.taxPoint != null && unit.taxPoint > 0)) {

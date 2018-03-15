@@ -9,7 +9,6 @@ import models.OperatorConfig;
 import models.finance.FeeType;
 import models.material.MaterialUnit;
 import models.procure.Cooperator;
-import models.procure.ProcureUnit;
 import models.product.Category;
 import models.view.Ret;
 import models.view.post.MaterialUnitPost;
@@ -150,7 +149,6 @@ public class MaterialUnits extends Controller {
         }
         Applys.material(applyId);
     }
-    
     /**
      * 付款申请
      *

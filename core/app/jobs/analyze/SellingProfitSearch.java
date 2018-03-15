@@ -3,11 +3,9 @@ package jobs.analyze;
 import models.view.post.ProfitPost;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
-import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

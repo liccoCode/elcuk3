@@ -67,7 +67,6 @@ public class SellingQTY extends GenericModel implements ElcukRecord.Log {
     public Integer unsellable = 0;
 
     public Date updateDate;
-    
     public SellingQTY() {
     }
 

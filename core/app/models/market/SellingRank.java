@@ -27,6 +27,4 @@ public class SellingRank extends Model {
 
     private Date createDate;
 
-    
-
 }

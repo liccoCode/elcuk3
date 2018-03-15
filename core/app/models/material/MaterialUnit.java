@@ -1,5 +1,4 @@
 package models.material;
-
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;
@@ -20,7 +19,6 @@ import play.db.jpa.Model;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -282,8 +280,8 @@ public class MaterialUnit extends Model {
                 message.append("<p>").append(text).append("<p>");
             }
         }
-        if(material.cooperItems != null && material.cooperItems.size() > 0 &&
-                StringUtils.isNotEmpty(material.cooperItems.get(0).productTerms)) {
+        if(material.cooperItems != null && material.cooperItems.size() > 0
+                && StringUtils.isNotEmpty(material.cooperItems.get(0).productTerms)) {
             message.append("<span class='label label-info'>产品要求:</span><br>");
             String[] messageArray = StringUtils.split(material.cooperItems.get(0).productTerms, "\n");
             for(String text : messageArray) {
@@ -404,7 +402,6 @@ public class MaterialUnit extends Model {
         if(Validation.hasErrors()) {
             return null;
         }
-        
         PaymentUnit fee = new PaymentUnit(this);
         // 预付款的逻辑在这里实现, 总额的 30% 为预付款
         fee.feeType = FeeType.cashpledge();
@@ -414,9 +411,7 @@ public class MaterialUnit extends Model {
 
         this.materialPurchase.applyPurchase.updateAt = new Date();
         this.materialPurchase.applyPurchase.save();
-        
-        new ERecordBuilder("procureunit.prepay")
-                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+        new ERecordBuilder("procureunit.prepay").msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
         return fee;
     }
@@ -446,10 +441,8 @@ public class MaterialUnit extends Model {
 
         this.materialPurchase.applyPurchase.updateAt = new Date();
         this.materialPurchase.applyPurchase.save();
-        
         new ERecordBuilder("materialPlanUnit.prepay")
-                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
-                .fid(this.id, ProcureUnit.class).save();
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount)).fid(this.id, ProcureUnit.class).save();
         return fee;
     }
 
@@ -463,5 +456,4 @@ public class MaterialUnit extends Model {
     public boolean hasPrePay() {
         return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.cashpledge());
     }
-    
 }
