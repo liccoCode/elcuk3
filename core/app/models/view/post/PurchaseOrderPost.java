@@ -133,6 +133,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append("       t1.name,");
         sql.append("       t1.currency,");
         sql.append("       t1.a1 AS 'totalPurchases',");
+        sql.append("       IFNULL(t1.containTax, 0) AS 'containTax',");
         sql.append("       IFNULL(t2.a2, 0) AS 'totalPayment',");
         sql.append("       IFNULL(t3.a3, 0) AS 'notPayAmount',");
         sql.append("       IFNULL(t4.a4, 0) AS 'paidAmount'");
@@ -142,7 +143,8 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
         sql.append("          p.currency,");
         sql.append("          IFNULL(round(sum(p.price * CASE p.`stage` WHEN 'DELIVERY' ");
         sql.append("  THEN p.`planQty` WHEN 'DONE' THEN p.`qty`  ");
-        sql.append("  ELSE p.`inboundQty` end ),2),0) AS 'a1' ");
+        sql.append("  ELSE p.`inboundQty` end ),2),0) AS 'a1' , ");
+        sql.append(" sum(p.`containTax`) containTax ");
         sql.append("   FROM Deliveryment m");
         sql.append("   LEFT JOIN ProcureUnit p ON p.deliveryment_id = m.id");
         sql.append("   LEFT JOIN Cooperator c ON c.id = m.cooperator_id ");
@@ -200,6 +202,7 @@ public class PurchaseOrderPost extends Post<ProcureUnit> {
             dto.totalPayment = Float.valueOf(row.get("totalPayment").toString());
             dto.paidAmount = Float.valueOf(row.get("paidAmount").toString());
             dto.notPayAmount = Float.valueOf(row.get("notPayAmount").toString());
+            dto.containTax = Integer.parseInt(row.get("containTax").toString());
             list.add(dto);
         });
         return list;

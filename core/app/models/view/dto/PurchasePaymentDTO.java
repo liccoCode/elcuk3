@@ -24,6 +24,7 @@ public class PurchasePaymentDTO implements Serializable {
     public ProcureUnit.STAGE stage;
 
     public int qty;
+    public int containTax;
 
     public float price;
 
