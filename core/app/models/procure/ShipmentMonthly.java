@@ -5,10 +5,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import play.data.validation.Required;
 import play.db.jpa.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -98,5 +95,18 @@ public class ShipmentMonthly extends Model {
      * 丢货
      */
     public String lost;
+
+    @Transient
+    public Long unitId;
+    public void setAndSave() {
+        ShipmentMonthly db = ShipmentMonthly.find(" unit.id=? ", this.unitId).first();
+        db.price = this.price;
+        db.customsPrepaidFee = this.customsPrepaidFee;
+        db.declarationFee = this.declarationFee;
+        db.otherFee = this.otherFee;
+        db.declaredValue = this.declaredValue;
+        db.tariff = this.tariff;
+        db.save();
+    }
 
 }

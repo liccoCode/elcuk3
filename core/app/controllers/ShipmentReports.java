@@ -22,7 +22,11 @@ import models.view.post.MonthlyShipmentPost;
 import models.view.post.ReportPost;
 import models.view.report.ArrivalRate;
 import models.view.report.LossRate;
+import net.sf.jxls.reader.ReaderBuilder;
+import net.sf.jxls.reader.XLSReadStatus;
+import net.sf.jxls.reader.XLSReader;
 import org.apache.commons.lang.StringUtils;
+import play.data.Upload;
 import play.libs.F;
 import play.modules.excel.RenderExcel;
 import play.mvc.Before;
@@ -31,6 +35,10 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.ShipmentReportESQuery;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -251,5 +259,76 @@ public class ShipmentReports extends Controller {
         }
         render(list, p);
     }
+
+    /**
+     * 导入物流运输月度报表
+     *
+     * @param xlsx
+     */
+    public static void importShipmentReport(String xlsx) {
+        try {
+            /** 第一步上传excel文件 **/
+            List<Upload> files = (List<Upload>) request.args.get("__UPLOADS");
+            Upload upload = files.get(0);
+            List<ShipmentMonthly> expressList = new ArrayList<>();
+            List<ShipmentMonthly> dedicatedList = new ArrayList<>();
+            List<ShipmentMonthly> airList = new ArrayList<>();
+            List<ShipmentMonthly> seaList = new ArrayList<>();
+            List<ShipmentMonthly> railWayList = new ArrayList<>();
+
+
+            /** 第二步根据定义好xml进行jxls映射 **/
+            File directory = new File("");
+            String courseFile = directory.getCanonicalPath();
+            String xmlPath = courseFile + "/app/views/ShipmentReports/shipmentReport.xml";
+            InputStream inputXML = new BufferedInputStream(new FileInputStream(xmlPath));
+            XLSReader mainReader = ReaderBuilder.buildFromXML(inputXML);
+            InputStream inputXLS = new BufferedInputStream(new FileInputStream(upload.asFile()));
+            Map<String, Object> beans = new HashMap<>();
+            beans.put("expressList", expressList);
+            beans.put("dedicatedList", dedicatedList);
+            beans.put("airList", airList);
+            beans.put("seaList", seaList);
+            beans.put("railWayList", railWayList);
+
+            XLSReadStatus readStatus = mainReader.read(inputXLS, beans);
+            if(readStatus.isStatusOK()) {
+                /** 第四步 数据插入ShipmentMonthly **/
+                if(expressList != null && expressList.size() > 0) {
+                    expressList.forEach(shipmentMonthly -> {
+                        shipmentMonthly.setAndSave();
+                    });
+                }
+                if(dedicatedList != null && dedicatedList.size() > 0) {
+                    dedicatedList.forEach(shipmentMonthly -> {
+                        shipmentMonthly.setAndSave();
+                    });
+                }
+                if(airList != null && airList.size() > 0) {
+                    airList.forEach(shipmentMonthly -> {
+                        shipmentMonthly.setAndSave();
+                    });
+                }
+                if(seaList != null && seaList.size() > 0) {
+                    seaList.forEach(shipmentMonthly -> {
+                        shipmentMonthly.setAndSave();
+                    });
+                }
+                if(railWayList != null && railWayList.size() > 0) {
+                    railWayList.forEach(shipmentMonthly -> {
+                        shipmentMonthly.setAndSave();
+                    });
+                }
+                flash.success("上传成功！");
+            } else {
+                flash.error("上传失败!");
+            }
+            index(new ReportPost());
+        } catch(Exception e) {
+            Webs.e(e);
+            flash.error(String.format("上传失败!原因:[%s]", e.toString()));
+        }
+    }
+
 
 }

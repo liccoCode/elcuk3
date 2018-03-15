@@ -1,5 +1,9 @@
 #{extends 'main_full_v3.html' /}
 #{set title:'物流月度报表'/}
+#{set 'moreScripts'}
+    #{script 'jquery.filedrop.js'/}
+    #{script 'ShipmentReports/index.es6'/}
+#{/set}
 
 <div class="row">
   <div class="col-md-12">
@@ -46,6 +50,7 @@
                 #{if r.canBeRecalculated()}
                   <a class="btn btn-warning btn-xs" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
                 #{/if}
+              <button id="improtPayment" class="btn btn-success btn-xs">导入运输费用</button>
             </td>
           </tr>
         #{/list}
@@ -53,5 +58,31 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<div id="shipment_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">参数值修改</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{ShipmentReports.importShipmentReport()}" method="POST" enctype="multipart/form-data" id="payment_form">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">物流运输月度xlsx</th>
+              <td>
+                <input type="file" multiple id="attachment" name="attachment">
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary btn-xs" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
   </div>
 </div>
