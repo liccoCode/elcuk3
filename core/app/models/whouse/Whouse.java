@@ -283,7 +283,7 @@ public class Whouse extends Model {
            空运: 每周三;
            海运: US 周一, IT 周五, DE/UK 周四
          */
-        List<OperatorConfig> list = OperatorConfig.find("paramcode like ?", "shipmentmarket_%").fetch();
+        List<OperatorConfig> list = OperatorConfig.find("paramcode like ? and val is not null", "shipmentmarket_%").fetch();
         DateTime now = new DateTime(Dates.morning(new Date()));
         for(int i = 0; i < 60; i++) {
             DateTime nextBeginDate = now.plusDays(i);
