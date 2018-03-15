@@ -1,40 +1,98 @@
 #{extends 'main_full_v3.html'/}
 #{set title:"查看运输渠道" /}
 
+#{set 'moreScripts'}
+    #{script 'elcuk/showShipChannel.es6'/}
+#{/set}
+
+
 #{errorMsgs /}
 #{flash_alert /}
 
 <div class="row">
-#{list items:dtoList, as:'dto'}
-  <div class="col-sm-3">
+  <div class="col-sm-12">
     <div class="box">
-      <div class="box-header"></div>
+      <div class="box-header">
+        <input type="button" class="btn btn-warning" value="添加渠道" id="addChannelBtn">
+        <a class="btn btn-default" href="@{Elcuk.index()}">返回</a>
+      </div>
       <div class="box-body">
         <table class="table table-condensed table-bordered">
           <tr>
+            <th>#</th>
             <th>运输方式</th>
-            <td>
-              <input class="form-control" value="${dto.type.label()}" readonly>
-            </td>
+            <td>国际快递商</td>
+            <td>运输渠道</td>
+            <td width="150px;">创建时间</td>
+            <td width="120px;">Action</td>
           </tr>
+        #{list items:details, as:'d'}
           <tr>
-            <th>运输渠道</th>
+            <td>${d_index}</td>
+            <td>${d.type.label()}</td>
+            <td>${d.internationExpress}</td>
+            <td>${d.channel}</td>
+            <td>#{time_tooltip_v3 time:d.createDate, datetime:true/}</td>
             <td>
-              <select class="form-control">
-                  #{list dto.channels, as:'c'}
-                    <option value="${c}">${c}</option>
-                  #{/list}
-              </select>
+              <button class="btn btn-warning btn-xs" name="updateChannelBtn" data-type="${d.type.name()}"
+                      data-internation="${d.internationExpress}" data-channel="${d.channel}" data-id="${d.id}">Update
+              </button>
+              <a href="@{Elcuk.deleteChannel(d.id)}" class="btn btn-danger btn-xs">Delete</a>
             </td>
           </tr>
+        #{/list}
         </table>
-      </div>
-      <div class="box-footer">
-        <a href="@{Elcuk.edit(dto.config.id)}" class="btn btn-xs btn-warning">修改</a>
-        <a class="btn btn-default btn-xs" href="@{Elcuk.index()}">返回</a>
       </div>
     </div>
   </div>
-#{/list}
+</div>
+
+
+<div id="channel_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">添加修改渠道</h4>
+      </div>
+      <form action="@{Elcuk.addChannel()}" method="post" id="updateUnit_form" class="form-horizontal">
+        <div class="modal-body">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">运输方式</th>
+              <td>
+                <select class="form-control" name="detail.type">
+                #{list items:models.procure.Shipment.T.values(), as:'t'}
+                  <option value="${t.name()}">${t.label()}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th width="30%">国际快递商</th>
+              <td>
+                <select name="detail.internationExpress" class="form-control">
+                  <option value="">选择快递商</option>
+                #{list items:models.procure.Shipment.express(), as:'i'}
+                  <option value="${i.name()}">${i.name()}</option>
+                #{/list}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th width="30%">运输渠道</th>
+              <td>
+                <input type="text" name="detail.channel" class="form-control" value="">
+                <input type="hidden" name="channelId" id="channelId" value="">
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary btn-xs" value="提交"/>
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 

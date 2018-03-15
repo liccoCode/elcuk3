@@ -3,11 +3,9 @@
  */
 $(() => {
 
-
   //点击明细修改按钮，显示弹出框,并初始化明细数据
   $("a[name='unitUpdateBtn']").click(function (e) {
-    let id = $(this).attr("uid");
-    let $input = $(this);
+    let id = $(this).data("uid");
     $.get('/Elcuk/editJson', {
       id: id
     }, function (r) {

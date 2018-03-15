@@ -7,7 +7,7 @@ import models.ElcukConfig;
 import models.OperatorConfig;
 import models.market.M;
 import models.procure.Shipment;
-import models.view.dto.TransportChannelDto;
+import models.shipment.TransportChannelDetail;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -42,8 +42,8 @@ public class Elcuk extends Controller {
         if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
             render("Elcuk/showMarketShipDay.html", config);
         } else if(config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")) {
-            List<TransportChannelDto> dtoList = OperatorConfig.initShipChannel();
-            render("Elcuk/showShipType.html", dtoList);
+            List<TransportChannelDetail> details = TransportChannelDetail.initShipChannel();
+            render("Elcuk/showShipChannel.html", details);
         } else if(config.paramcode.indexOf("shipmentmarket_") > -1) {
             Map<String, List<String>> map = J.from(config.val, HashMap.class);
             render("Elcuk/editShipmentmarket.html", config, map);
@@ -62,18 +62,6 @@ public class Elcuk extends Controller {
         renderJSON(J.json(config));
     }
 
-
-    public static void showShipChannel() {
-        List<OperatorConfig> configs = OperatorConfig.find("paramcode LIKE ? ", "ShipChannel%").fetch();
-        List<TransportChannelDto> dtoList = new ArrayList<>();
-        configs.forEach(config -> {
-            Shipment.T type = Shipment.T.valueOf(config.paramcode.split("_")[1]);
-            TransportChannelDto dto = new TransportChannelDto(type, config.initChannelList(), config);
-            dtoList.add(dto);
-        });
-        render(configs, dtoList);
-    }
-
     /**
      * 报表相关参数设置
      */
@@ -84,6 +72,34 @@ public class Elcuk extends Controller {
         config.save();
         flash.success("参数 %s 设置成功!", config.name);
         index();
+    }
+
+    public static void showShipChannel() {
+        List<TransportChannelDetail> details = TransportChannelDetail.initShipChannel();
+        render(details);
+    }
+
+    public static void addChannel(TransportChannelDetail detail, Long channelId) {
+        if(channelId == null) {
+            detail.creator = Login.current();
+            detail.createDate = new Date();
+            detail.save();
+        } else {
+            TransportChannelDetail old = TransportChannelDetail.findById(channelId);
+            old.channel = detail.channel;
+            old.type = detail.type;
+            old.internationExpress = detail.internationExpress;
+            old.save();
+        }
+        flash.success("操作成功");
+        showShipChannel();
+    }
+
+    public static void deleteChannel(Long id) {
+        TransportChannelDetail detail = TransportChannelDetail.findById(id);
+        detail.delete();
+        flash.success("删除成功");
+        showShipChannel();
     }
 
     /**
