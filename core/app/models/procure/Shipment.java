@@ -1413,12 +1413,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         DateTime next = dt.plusMonths(1);
         String count = Shipment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
-<<<<<<< HEAD
-                DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
-                + "";
-=======
                 DateTime.parse(String.format("%s-%s-01", next.getYear(), next.getMonthOfYear())).toDate()) + "";
->>>>>>> bee79931c7258a8b5190ce5e4581c26693459abb
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
