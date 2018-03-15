@@ -27,8 +27,4 @@ public class SellingRank extends Model {
     private String ladderUrl;
 
     private Date createDate;
-<<<<<<< HEAD
-
-=======
->>>>>>> bee79931c7258a8b5190ce5e4581c26693459abb
 }
