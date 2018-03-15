@@ -9,7 +9,6 @@ import models.view.Ret;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;
-import play.db.jpa.JPA;
 import play.mvc.Controller;
 import play.mvc.With;
 import play.utils.FastRuntimeException;

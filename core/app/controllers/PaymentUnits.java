@@ -59,10 +59,9 @@ public class PaymentUnits extends Controller {
     public static void destroyByShipment(Long id, String reason) {
         PaymentUnit payUnit = PaymentUnit.findById(id);
         payUnit.transportFeeRemove(reason);
-        if(Validation.hasErrors()){
+        if(Validation.hasErrors()) {
             renderJSON(Webs.vJson(Validation.errors()));
-        }
-        else {
+        } else {
             renderJSON(new Ret(true, "#" + id + " 请款项删除成功"));
         }
     }

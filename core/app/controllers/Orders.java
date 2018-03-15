@@ -24,7 +24,6 @@ import mws.MWSOrders;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
 import play.modules.pdf.PDF;

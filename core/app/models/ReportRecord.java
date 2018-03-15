@@ -23,7 +23,6 @@ import java.util.Date;
 public class ReportRecord extends Model {
 
     private static final long serialVersionUID = 6902337215866962838L;
-    
     @Expose
     public Integer year;
     @Expose
@@ -177,7 +176,6 @@ public class ReportRecord extends Model {
         };
 
         public abstract String label();
-        
         /**
          * Warning:
          * <p/>

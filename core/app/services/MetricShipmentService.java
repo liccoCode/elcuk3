@@ -13,7 +13,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import play.Logger;
 import play.db.helper.SqlSelect;
 import play.utils.FastRuntimeException;
 

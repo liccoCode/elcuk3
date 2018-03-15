@@ -138,10 +138,6 @@ public class MonthlyShipmentPost extends Post<MonthlyShipmentDTO> {
         String kgsKey = String.format("kgs_%s_%s", sku, type);
         String cbmKey = String.format("cbm_%s_%s", sku, type);
 
-        if(sku.equals("11CAR2U1C68A-B")) {
-            System.out.println(11111);
-        }
-
         if(unitMap.get("mainBoxInfo") != null && StringUtils.isNotBlank(unitMap.get("mainBoxInfo").toString())) {
             CheckTaskDTO mainBox = JSON.parseObject(unitMap.get("mainBoxInfo").toString(), CheckTaskDTO.class);
             /** 1 计算kgs**/
