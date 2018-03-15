@@ -21,11 +21,13 @@ import java.util.stream.Collectors;
  */
 public class StockPost extends Post<ProcureUnit> {
 
+    private static final long serialVersionUID = 430478932544672708L;
     private static final Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
 
     public Long[] whouses;
     public Cooperator cooperator;
     public String projectName;
+    public List<String> categories = new ArrayList<>();
 
     public boolean flag = false;
 
@@ -47,7 +49,7 @@ public class StockPost extends Post<ProcureUnit> {
         }
 
         if(this.whouses != null && this.whouses.length > 0) {
-            sbd.append(" AND p.currWhouse.id IN  " + SqlSelect.inlineParam(whouses));
+            sbd.append(" AND p.currWhouse.id IN  ").append(SqlSelect.inlineParam(whouses));
         }
 
         if(cooperator != null && this.cooperator.id != null) {
@@ -63,6 +65,9 @@ public class StockPost extends Post<ProcureUnit> {
             sbd.append(" AND (p.product.sku LIKE ? OR p.fba.shipmentId LIKE ? )");
             for(int i = 0; i < 2; i++) params.add(this.word());
         }
+        if(categories.size() > 0) {
+            sbd.append(" AND p.product.category.id IN ").append(SqlSelect.inlineParam(categories));
+        }
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -74,7 +79,7 @@ public class StockPost extends Post<ProcureUnit> {
     public List<ProcureUnit> query() {
         F.T2<String, List<Object>> params = this.params();
         this.count = this.count(params);
-        String sql = params._1 + " ORDER BY p.currWhouse.id DESC, p.createDate DESC";
+        String sql = params._1 + " ORDER BY p.createDate DESC, p.currWhouse.id DESC";
         if(this.pagination)
             return ProcureUnit.find(sql, params._2.toArray()).fetch(this.page, this.perSize);
         else

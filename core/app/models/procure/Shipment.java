@@ -378,6 +378,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public String target;
 
     /**
+     * 运输渠道
+     */
+    @Expose
+    public String channel;
+
+    /**
      * 清关地
      */
     @Expose
@@ -1404,11 +1410,15 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public static String id() {
         DateTime dt = DateTime.now();
-        DateTime nextMonth = dt.plusMonths(1);
+        DateTime next = dt.plusMonths(1);
         String count = Shipment.count("createDate>=? AND createDate<?",
                 DateTime.parse(String.format("%s-%s-01", dt.getYear(), dt.getMonthOfYear())).toDate(),
+<<<<<<< HEAD
                 DateTime.parse(String.format("%s-%s-01", nextMonth.getYear(), nextMonth.getMonthOfYear())).toDate())
                 + "";
+=======
+                DateTime.parse(String.format("%s-%s-01", next.getYear(), next.getMonthOfYear())).toDate()) + "";
+>>>>>>> bee79931c7258a8b5190ce5e4581c26693459abb
         return String.format("SP|%s|%s", dt.toString("yyyyMM"), count.length() == 1 ? "0" + count : count);
     }
 
@@ -1789,6 +1799,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.totalVolumeShipment = newShip.totalVolumeShipment;
         this.shipmentTpye = newShip.shipmentTpye;
         this.totalStockShipment = newShip.totalStockShipment;
+        this.channel = newShip.channel;
 
         //日期发生改变则记录旧的日期
         if(this.dates != null) {
