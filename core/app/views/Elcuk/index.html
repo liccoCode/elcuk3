@@ -66,14 +66,14 @@
 
 
 <!--  修改 弹出div begin   -->
-<div id="bom_modal" class="modal fade bs-example-modal-lg">
-  <div class="modal-dialog modal-lg" role="document">
+<div id="bom_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4>参数值修改</h4>
+        <h4 class="modal-title">参数值修改</h4>
       </div>
       <div class="modal-body">
-        <form action="@{Elcuk.update()}" method="post" id="updateUnit_form">
+        <form action="@{Elcuk.update()}" method="post" id="updateUnit_form" class="form-horizontal">
           <table class="table table-condensed table-bordered">
             <tr>
               <th width="30%">参数类型</th>
@@ -96,7 +96,7 @@
             <tr>
               <th>参数值</th>
               <td>
-                <input type="text" id="configVal" name="val">
+                <input type="text" id="configVal" name="val" class="form-control">
                 <input type="hidden" id="configId" name="id">
               </td>
             </tr>
@@ -104,8 +104,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <button class="btn btn-primary" id="submitUpdateBtn">提交</button>
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary btn-xs" id="submitUpdateBtn">提交</button>
       </div>
     </div>
   </div>
