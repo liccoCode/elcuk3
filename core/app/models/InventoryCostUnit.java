@@ -80,6 +80,16 @@ public class InventoryCostUnit extends GenericModel {
     public Date date;
 
     /**
+     * 国内制作中、已交货成本
+     */
+    public Float internalStockCost;
+
+    /**
+     * 国内制作中、已交货数量
+     */
+    public Integer internalQty;
+
+    /**
      * 报表显示冗余字段,不做数据库映射
      */
     @Transient
