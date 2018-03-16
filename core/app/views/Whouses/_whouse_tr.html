@@ -15,7 +15,7 @@
     <select name="wh.account.id" class="form-control" style="width:200px;">
       <option value="">请选择</option>
     #{list items:accs, as:'acc'}
-      <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.prettyName()}</option>
+      <option ${acc.id == wh.account?.id ? 'selected' : ''} value="${acc.id}">${acc.uniqueName}</option>
     #{/list}
     </select>
   </td>
