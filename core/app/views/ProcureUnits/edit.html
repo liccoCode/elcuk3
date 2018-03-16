@@ -37,12 +37,13 @@
         </div>
         <div class="box-footer form-inline">
           <input type="hidden" id="oldPlanQty" name="oldPlanQty" value="${oldPlanQty}">
-          <select name="msg" class="form-control">
+          <select name="msg" class="form-control" id="cgMsg">
             <option value="">变更原因</option>
             <option value="供应商原因">供应商原因</option>
             <option value="我司原因">我司原因</option>
           </select>
-          <button type="submit" class="btn btn-primary" rel="popover" content="当[采购计划的FBA]已生成后再修改[运输方式]或[采购数量]时必须填写原因" placement="right" data-loading>
+          <button type="submit" id="submitUpdateBtn" class="btn btn-primary" rel="popover" placement="right"
+                  content="当[采购计划的FBA]已生成后再修改[运输方式]或[采购数量]时必须填写原因">
             更新
           </button>
         </div>
