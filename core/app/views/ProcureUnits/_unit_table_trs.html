@@ -104,7 +104,9 @@
   </div>
   <label for="" class="col-sm-1 control-label">预计运输时间</label>
   <div class="col-sm-2">
-    <input role="date" class="form-control" name="unit.attrs.planShipDate" value="${unit.attrs.planShipDate.date()}" required>
+    <input role="date" class="form-control" name="unit.attrs.planShipDate" id="planShipDate" value="${unit.attrs.planShipDate.date()}"
+           required>
+    <input type="hidden" id="planShipDateHd" value="${unit.attrs.planShipDate.date()}">
   </div>
   <label for="" class="col-sm-1 control-label">预计到库时间</label>
   <div class="col-sm-2">

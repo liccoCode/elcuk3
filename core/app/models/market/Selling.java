@@ -236,6 +236,10 @@ public class Selling extends GenericModel {
     public String productTypeName;
     public String publisher;
 
+    @Column(columnDefinition = "int(2) DEFAULT '0'")
+    public Integer pirateBeginHour;
+    @Column(columnDefinition = "int(2) DEFAULT ''")
+    public Integer pirateEndHour ;
     public Date pirateDate;
 
     @Enumerated(EnumType.STRING)
