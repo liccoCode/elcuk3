@@ -59,7 +59,7 @@
           #{if itm.unit.fba}
             <td>
                 #{if itm.unit.fba.records}
-                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg" >
                   <span data-toggle="popover" data-placement="bottom" data-content="${itm.unit.fba?.records()}">
                   ${itm.unit.fba.shipmentId}
                   </span>
@@ -67,7 +67,7 @@
                   <i class="icon-search"></i>
                 #{/if}
                 #{else }
-                  <a href="${itm.unit.fba.fbaLink()}" target="_blank">${itm.unit.fba.shipmentId}</a>
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg">${itm.unit.fba.shipmentId}</a>
                 #{/else}
             </td>
           #{/if}
