@@ -25,17 +25,17 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">市场模块 <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-              #{power.ck "sellings.index"}
-                <li><a href="@{Sellings.index()}">Selling列表</a></li>
-              #{/power.ck}
-              #{power.ck "orders.index"}
-                <li><a href="@{Orders.index()}">订单</a></li>
-              #{/power.ck}
               #{power.ck "analyzes.index"}
                 <li><a href="@{Analyzes.index()}">销量分析</a></li>
               #{/power.ck}
               #{power.ck "sellings.index"}
                 <li><a href="@{Sellings.pirateIndex()}" style="color:red;">跟卖产品</a></li>
+              #{/power.ck}
+              #{power.ck "sellings.index"}
+                <li><a href="@{Sellings.index()}">Selling列表</a></li>
+              #{/power.ck}
+              #{power.ck "orders.index"}
+                <li><a href="@{Orders.index()}">订单</a></li>
               #{/power.ck}
               #{power.ck "analyzes.operateInfo"}
                 <li><a href="@{Analyzes.operateInfo()}">运营信息分析</a></li>
@@ -139,7 +139,6 @@
               #{/power.ck}
           </ul>
         </li>
-
       #{/power.ck}
 
       #{power.ck "shipment"}

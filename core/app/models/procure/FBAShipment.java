@@ -330,6 +330,7 @@ public class FBAShipment extends Model {
         try {
             FBA.putTransportContent(this, shipment);
         } catch(Exception e) {
+            e.printStackTrace();
             if(times > 0)
                 putTransportContentRetry(--times, shipment);
             else
@@ -470,6 +471,7 @@ public class FBAShipment extends Model {
     public TransportDetailInput transportDetails(Shipment shipment) {
         TransportDetailInput input = new TransportDetailInput();
         switch(shipment.type) {
+            case DEDICATED:
             case EXPRESS:
                 input.setNonPartneredSmallParcelData(this.smallParcelDataInput(shipment));
                 break;

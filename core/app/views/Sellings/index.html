@@ -77,75 +77,7 @@
       </div>
 
       <div class="box-body">
-        <table class="table table-bordered table-condensed no-margin" id="data-table">
-          <tr>
-            <th><input type="checkbox" class="checkall"></th>
-            <th width="40px;">Image</th>
-            <th width="350px;">SellingID</th>
-            <th width="40px;">市场</th>
-            <th width="120px;">FnSku</th>
-            <th>价格</th>
-            <th>ASIN</th>
-            <th width="70px;">生命周期</th>
-            <th width="70px;">ERP上架</th>
-            <th width="145px;">feed更新时间</th>
-            <th width="120px;" data-toggle="tooltip" title="rank">Amazon排名</th>
-            <th width="145px;">创建时间</th>
-            <th width="145px;">ERP下架时间</th>
-            <th width="180px;">操作</th>
-          </tr>
-        #{list items:sellings , as:'s'}
-          <tr>
-            <td>
-                #{if !s.state.name().equals("DOWN")}
-                  <input type="checkbox" value="${s.sellingId}">
-                #{/if}
-            </td>
-            <td style="text-align:center;"><img height="40px;" width="45px;" src="${s.aps.imageUrl}"></td>
-            <td style="word-break:break-all;">
-              <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a><br>
-            ${s.product?.chineseName}
-            </td>
-            <td style="padding: 0; vertical-align:middle; width:50px;" data-toggle="tooltip" title="${s.market
-            .countryName()}">
-              <div class="flag-wrapper" style="margin:0">
-                <div class="img-thumbnail flag flag-icon-background ${s.market.pic()}"></div>
-              </div>
-            </td>
-            <td>${s.fnSku}</td>
-            <td>${s.aps.salePrice}</td>
-            <td>
-              <a href="${s.showListingLink()}" target="_blank">${s.asin}</a><br>
-                #{if "PIRATE"==s.pirateState?.name()}
-                  <a href="${s.showPirateLink()}" style="color:red;"><i class="fa fa-fw fa-bomb"></i>被盗卖</a>
-                #{/if}
-            </td>
-            <td>${s.sellingCycle?.label()}</td>
-            <td>${s.state.name().equals("DOWN") ? '否' : '是'}</td>
-            <td>#{time_tooltip_v3 time:s.recentlyFeed()?.createdAt, datetime:true/}</td>
-            <td>
-                #{list items:s.ranks, as:'r'}
-                  <a href="${r.ladderUrl}" data-toggle="tooltip" title="品类:${r.ladderName}" target="_blank">
-                    <i class="fa fa-fw fa-diamond"></i>${r.rank}</a>
-                #{/list}
-            </td>
-            <td>#{time_tooltip_v3 time:s.createDate, datetime:true /}</td>
-            <td>#{time_tooltip_v3 time:s.showDownDate(), datetime:true /}</td>
-            <td>
-              <a href="javascript:void(0);" class="btn btn-xs btn-danger" rel="popover" title="删除" name='remove'
-                 data-url='@{Sellings.destroy(s.sellingId)}'>Del</a>
-              <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-xs btn-info">Edit</a>
-                #{if !s.state.name().equals("DOWN")}
-                  <button class="btn btn-xs btn-success" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
-                          data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
-                  </button>
-                #{/if}
-              <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-xs btn-github" rel="popover"
-                 title="创建采购计划">Create</a>
-            </td>
-          </tr>
-        #{/list}
-        </table>
+      #{include '/Sellings/_selling_list.html', sellings: sellings/}
       </div>
       <div class="box-footer clearfix">
       #{bootstrap_pager_v3 pi:p, url:'' /}
