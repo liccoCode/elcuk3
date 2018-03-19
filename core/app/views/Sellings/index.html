@@ -29,7 +29,7 @@
               <select name="p.market" style="width:120px;" class="form-control">
                 <option value="">ALL</option>
               #{list items:models.market.M, as:'m'}
-                <option value="${m.name()}" #{if m.name()==p.market?.name()} selected #{/if}>${m.name()}</option>
+                <option value="${m.name()}" #{if m.name()==p.market?.name()} selected #{/if}>${m.label()}</option>
               #{/list}
               </select>
             </div>

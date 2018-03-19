@@ -57,8 +57,8 @@
          data-url='@{Sellings.destroy(s.sellingId)}'>Del</a>
       <a href="@{Sellings.selling(s.sellingId)}" class="btn btn-xs btn-info">Edit</a>
         #{if !s.state.name().equals("DOWN")}
-          <button class="btn btn-xs btn-success" name="amz-sync" content="从 Amazon 同步回来更新到数据库" placement='bottom'
-                  data-sid="${s.sellingId}" rel="popover" title="Sync From Amazon Button">Sync
+          <button class="btn btn-xs btn-success" name="amz-sync" data-content="从 Amazon 同步回来更新到数据库"
+                  data-placement='bottom' data-sid="${s.sellingId}" data-toggle="popover">Sync
           </button>
         #{/if}
       <a href="@{ProcureUnits.blank(s.sellingId)}" target="_blank" class="btn btn-xs btn-github" rel="popover"
