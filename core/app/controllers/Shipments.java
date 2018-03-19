@@ -304,6 +304,7 @@ public class Shipments extends Controller {
             ship.beginShip(date, sync);
         } catch(Exception e) {
             Webs.e(e);
+            e.printStackTrace();
             Validation.addError("", Webs.e(e));
         }
         if(Validation.hasErrors()) {

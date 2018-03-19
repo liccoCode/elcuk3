@@ -356,6 +356,11 @@ public class Sellings extends Controller {
         render("Sellings/_saleAmazon.html", product, s);
     }
 
+    public static void showSellingList(String sku) {
+        List<Selling> sellings = Selling.find("product.sku=?", sku).fetch();
+        render("Sellings/_selling_list.html", sellings);
+    }
+
     public static void batchDownSelling(String[] sellingIds) {
         try {
             for(String sellingId : sellingIds) {
