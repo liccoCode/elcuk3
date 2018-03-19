@@ -95,13 +95,17 @@ public class Sellings extends Controller {
         render();
     }
 
-    public static void create(String sku, String upc, String asin, String market, Account acc) {
+    public static void create(String sku, String upc, String asin, String market, Account acc,
+                              Integer pirateBeginHour, Integer pirateEndHour) {
         try {
             if(StringUtils.isBlank(sku)) Webs.error("SKU 必须存在");
             if(StringUtils.isBlank(upc)) Webs.error("UPC 必须存在");
             if(StringUtils.isBlank(asin)) Webs.error("ASIN 必须存在");
             if(StringUtils.isBlank(market)) Webs.error("Market 必须存在");
             Selling selling = Selling.blankSelling(sku, asin, upc, acc, M.val(market));
+            selling.pirateBeginHour = pirateBeginHour;
+            selling.pirateEndHour = pirateEndHour;
+            selling.save();
             renderJSON(new Ret(true, selling.sellingId));
         } catch(FastRuntimeException e) {
             renderJSON(new Ret(Webs.e(e)));
@@ -238,6 +242,21 @@ public class Sellings extends Controller {
             //存储 Listing 状态变更记录
             selling.recordingListingState(DateTime.now().toDate(), selling.state.name());
             renderJSON(new Ret(true, sellingId));
+        } catch(Exception e) {
+            renderJSON(new Ret(Webs.e(e)));
+        }
+    }
+
+    /**
+     * 修改 Selling 在系统内的状态
+     */
+    public static void changePirateHour(Selling s) {
+        try {
+            Selling selling = Selling.findById(s.sellingId);
+            selling.pirateBeginHour = s.pirateBeginHour;
+            selling.pirateEndHour = s.pirateEndHour;
+            selling.save();
+            renderJSON(new Ret(true, s.sellingId));
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
         }

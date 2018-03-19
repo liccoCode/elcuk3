@@ -1,5 +1,24 @@
 $(() => {
 
+  $("#submitUpdateBtn").click(function (e) {
+    e.preventDefault();
+    var btn = $(this).button('loading');
+    setTimeout(function () {
+         btn.button('reset');
+       }, 3000);
+    
+    if ($("#planShipDateHd").val() != '' && $("#planShipDateHd").val() != null) {
+      if ($("#planShipDateHd").val() != $("#planShipDate").val() && $("#cgMsg").val() == '') {
+        noty({
+          text: "修改预计运输时间请填写变更原因!!!",
+          type: 'error'
+        });
+        return;
+      }
+    }
+    $("#unitEditForm").submit();
+  });
+
   //切换供应商, 自行寻找价格
   $("select[name='unit.cooperator.id']").change(function () {
     let id = $(this).val();

@@ -44,4 +44,22 @@ $(() => {
     });
   });
 
+  $("#pirateBtn").click(function (e) {
+    e.stopPropagation();
+    $.post('/Sellings/changePirateHour', $("#pirateForm").serialize(), function (re) {
+      if (re) {
+        noty({
+          text: '更新成功!',
+          type: 'success'
+        });
+        window.location.reload();
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+  });
+
 });
