@@ -1,6 +1,5 @@
 #{extends 'main_full_v3.html'/}
 #{set title:"查看运输渠道" /}
-
 #{set 'moreScripts'}
     #{script 'elcuk/showShipChannel.es6'/}
 #{/set}
@@ -15,6 +14,7 @@
       <div class="box-header">
         <input type="button" class="btn btn-warning" value="添加渠道" id="addChannelBtn">
         <a class="btn btn-default" href="@{Elcuk.index()}">返回</a>
+        <a class="btn btn-info" href="@{Elcuk.showTransportFee()}">运输费用</a>
       </div>
       <div class="box-body">
         <table class="table table-condensed table-bordered">
@@ -26,7 +26,7 @@
             <td width="150px;">创建时间</td>
             <td width="120px;">Action</td>
           </tr>
-        #{list items:details, as:'d'}
+        #{list items:channels, as:'d'}
           <tr>
             <td>${d_index}</td>
             <td>${d.type.label()}</td>
@@ -60,7 +60,7 @@
             <tr>
               <th width="30%">运输方式</th>
               <td>
-                <select class="form-control" name="detail.type">
+                <select class="form-control" name="channel.type">
                 #{list items:models.procure.Shipment.T.values(), as:'t'}
                   <option value="${t.name()}">${t.label()}</option>
                 #{/list}
@@ -70,7 +70,7 @@
             <tr>
               <th width="30%">国际快递商</th>
               <td>
-                <select name="detail.internationExpress" class="form-control">
+                <select name="channel.internationExpress" class="form-control">
                   <option value="">选择快递商</option>
                 #{list items:models.procure.Shipment.express(), as:'i'}
                   <option value="${i.name()}">${i.name()}</option>
@@ -81,7 +81,7 @@
             <tr>
               <th width="30%">运输渠道</th>
               <td>
-                <input type="text" name="detail.channel" class="form-control" value="">
+                <input type="text" name="channel.channel" class="form-control" value="">
                 <input type="hidden" name="channelId" id="channelId" value="">
               </td>
             </tr>

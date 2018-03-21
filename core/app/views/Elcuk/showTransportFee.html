@@ -1,10 +1,203 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+#{extends 'main_full_v3.html'/}
+#{set title:"查看运输渠道" /}
+#{set 'moreScripts'}
+    #{script 'elcuk/showFee.es6'/}
+#{/set}
+
+
+
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+      #{list items:models.procure.Shipment.T.values(), as:'t'}
+        <li #{if t_isFirst} class="active" #{/if}>
+          <a href="#${t.name()}" data-toggle='tab'><i class="${t.pic()}"></i>${t.label()}</a>
+        </li>
+      #{/list}
+      </ul>
+
+      <div class="tab-content">
+      #{list items:models.procure.Shipment.T.values(), as:'t'}
+        <div class="tab-pane ${t_isFirst ? 'active' : ''}" id="${t.name()}">
+          <table class="table table-condensed table-bordered" id="data-table">
+            <tr>
+              <th>运输渠道</th>
+              <th>目的地</th>
+              <th>运输时效(DAY)</th>
+              <th>重量段(KG)</th>
+              <th>价格范围(CNY)</th>
+              <th>备注</th>
+              <th>Action</th>
+            </tr>
+              #{list items:map.keySet(), as:'k'}
+                  #{if k.split("_")[0]==t.name()}
+                  <tr>
+                    <td rowspan="${rowMap.get(k)}">${k.split("_")[1]}</td>
+                      #{list items:map.get(k), as:'d'}
+                          #{if !d_isFirst}
+                          <tr>
+                          #{/if}
+                        <td rowspan="${d.ranges.size()==0?1:d.ranges.size()}">${d.destination.showChineseName()}</td>
+                        <td rowspan="${d.ranges.size()==0?1:d.ranges.size()}">${d.transportDay}</td>
+                          #{if d.ranges.size()==0}
+                            <td></td>
+                            <td></td>
+                          #{/if}
+                          #{else }
+                              #{list items:d.ranges, as:'r'}
+                                  #{if r_isFirst}
+                                    <td>${r.weightRange}</td>
+                                    <td>${r.priceRange}</td>
+                                  #{/if}
+                              #{/list}
+                          #{/else}
+                        <td rowspan="${d.ranges.size()==0?1:d.ranges.size()}">${d.memo}</td>
+                        <td rowspan="${d.ranges.size()==0?1:d.ranges.size()}">
+                          <input type="button" class="btn btn-xs btn-warning" value="修改" name="updateFee" data-url="@{Elcuk.updateTransportFee(d.id)}"/>
+                        </td>
+                      </tr>
+                          #{list items:d.ranges, as:'r'}
+                              #{if !r_isFirst}
+                                <tr>
+                                  <td>${r.weightRange}</td>
+                                  <td>${r.priceRange}</td>
+                                </tr>
+                              #{/if}
+                          #{/list}
+                      #{/list}
+                      #{if !d_isFirst}
+                        </tr>
+                      #{/if}
+                  #{/if}
+              #{/list}
+          </table>
+        </div>
+      #{/list}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="row-fluid">
+  <div class="btn-toolbar">
+    <a class="btn btn-primary" id="addFeeBtn">添加物流费用</a>
+    <a class="btn btn-default" href="@{Elcuk.index()}">返回</a>
+  </div>
+</div>
+
+<div id="channel_fee_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">添加物流渠道费用</h4>
+      </div>
+      <form action="@{Elcuk.addChannelFee()}" method="post" id="updateUnit_form" class="form-horizontal">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="" class="col-sm-2 control-label">运输渠道</label>
+            <div class="col-sm-4">
+              <select class="form-control" name="detail.channel.id" id="channelSelect">
+                <option value="">请选择</option>
+              #{list items:channels, as:'c'}
+                <option value="${c.id}">${c.type.name()}_${c.internationExpress}_${c.channel}</option>
+              #{/list}
+              </select>
+            </div>
+            <label for="" class="col-sm-2 control-label">运输时效</label>
+            <div class="col-sm-4 form-inline">
+              <input class="form-control" style="width:100px;" name="detail.transportDay" value=""> ~
+              <div class="input-group">
+                <input style="width:100px;" class="form-control" name="detail.transportDay" value="">
+                <div class="input-group-addon">Day</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-2 control-label">目的地</label>
+            <div class="col-sm-10 ">
+              <div class="checkbox">
+              #{list items:models.market.M.amazonVals(), as:'m'}
+                <label>
+                  <input type="checkbox" name="detail.destination" value="${m.name()}">${m.countryName()}
+                </label>
+              #{/list}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-2 control-label">重量段</label>
+            <div class="col-sm-4 form-inline">
+              <input class="form-control" style="width:80px;" name="ranges[0].weightBegin" value=""> ~
+              <div class="input-group">
+                <input style="width:80px;" class="form-control" name="ranges[0].weightEnd" value="">
+                <div class="input-group-addon">KG</div>
+              </div>
+              <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
+            </div>
+            <label for="" class="col-sm-2 control-label">价格</label>
+            <div class="col-sm-4 form-inline">
+              <input class="form-control" style="width:95px;" name="ranges[0].priceBegin" value=""> ~
+              <div class="input-group">
+                <input style="width:95px;" class="form-control" name="ranges[0].priceEnd" value="">
+                <div class="input-group-addon">CNY</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p_sku" class="col-sm-2 control-label">备注</label>
+            <div class="col-sm-10">
+              <textarea class="form-control" rows="5" name="detail.memo"></textarea>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <input type="submit" class="btn btn-primary btn-xs" value="提交"/>
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script type="text/template" id="copy">
+  <div class="form-group">
+    <label for="p_sku" class="col-sm-2 control-label"></label>
+    <div class="col-sm-4 form-inline">
+      <input class="form-control" style="width:80px;" name="ranges[<%= num %>].weightBegin" value=""> ~
+      <div class="input-group">
+        <input style="width:80px;" class="form-control" name="ranges[<%= num %>].weightEnd" value="">
+        <div class="input-group-addon">KG</div>
+      </div>
+      <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
+    </div>
+    <label for="" class="col-sm-2 control-label"></label>
+    <div class="col-sm-4 form-inline">
+      <input class="form-control" style="width:95px;" name="ranges[<%= num %>].priceBegin" value=""> ~
+      <div class="input-group">
+        <input style="width:95px;" class="form-control" name="ranges[<%= num %>].priceEnd" value="">
+        <div class="input-group-addon">CNY</div>
+      </div>
+    </div>
+  </div>
+</script>
+
+
+<div id="update_fee_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">修改物流渠道费用</h4>
+      </div>
+      <div id="update_div"></div>
+    </div>
+  </div>
+</div>

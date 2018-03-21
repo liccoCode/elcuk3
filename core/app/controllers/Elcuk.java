@@ -7,7 +7,9 @@ import models.ElcukConfig;
 import models.OperatorConfig;
 import models.market.M;
 import models.procure.Shipment;
+import models.shipment.TransportChannel;
 import models.shipment.TransportChannelDetail;
+import models.shipment.TransportRange;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -42,9 +44,8 @@ public class Elcuk extends Controller {
         if(config.fullName().equalsIgnoreCase("SHIPMENT_运输天数")) {
             render("Elcuk/showMarketShipDay.html", config);
         } else if(config.fullName().equalsIgnoreCase("SHIPMENT_运输渠道")) {
-            List<TransportChannelDetail> details = TransportChannelDetail.initShipChannel();
-            render("Elcuk/showShipChannel.html", details);
-        } else if(config.paramcode.indexOf("shipmentmarket_") > -1) {
+            showShipChannel();
+        } else if(config.paramcode.contains("shipmentmarket_")) {
             Map<String, List<String>> map = J.from(config.val, HashMap.class);
             render("Elcuk/editShipmentmarket.html", config, map);
         } else {
@@ -75,24 +76,57 @@ public class Elcuk extends Controller {
     }
 
     public static void showShipChannel() {
-        List<TransportChannelDetail> details = TransportChannelDetail.initShipChannel();
-        render(details);
+        List<TransportChannel> channels = TransportChannel.findAll();
+        render(channels);
     }
 
-    public static void addChannel(TransportChannelDetail detail, Long channelId) {
+    public static void addChannel(TransportChannel channel, Long channelId) {
         if(channelId == null) {
-            detail.creator = Login.current();
-            detail.createDate = new Date();
-            detail.save();
+            channel.creator = Login.current();
+            channel.createDate = new Date();
+            channel.save();
         } else {
-            TransportChannelDetail old = TransportChannelDetail.findById(channelId);
-            old.channel = detail.channel;
-            old.type = detail.type;
-            old.internationExpress = detail.internationExpress;
+            TransportChannel old = TransportChannel.findById(channelId);
+            old.channel = channel.channel;
+            old.type = channel.type;
+            old.internationExpress = channel.internationExpress;
             old.save();
         }
         flash.success("操作成功");
         showShipChannel();
+    }
+
+    public static void addChannelFee(TransportChannelDetail detail, List<TransportRange> ranges) {
+        String day = detail.transportDay.replace(" ", "");
+        detail.transportDay = String.format("%s-%s", day.split(",")[0], day.split(",")[1]);
+        detail.createDate = new Date();
+        detail.creator = Login.current();
+        detail.save();
+        ranges.forEach(range -> {
+            TransportRange transportRange = new TransportRange();
+            transportRange.detail = detail;
+            transportRange.weightRange = String.format("%s-%s", range.weightBegin, range.weightEnd);
+            transportRange.priceRange = String.format("%s-%s", range.priceBegin, range.priceEnd);
+            transportRange.save();
+        });
+        showTransportFee();
+    }
+
+    public static void updateChannelFee(TransportChannelDetail detail, List<TransportRange> ranges, Long detailId) {
+        TransportChannelDetail old = TransportChannelDetail.findById(detailId);
+        old.channel.id = detail.channel.id;
+        String day = detail.transportDay.replace(" ", "");
+        old.transportDay = String.format("%s-%s", day.split(",")[0], day.split(",")[1]).trim();
+        old.destination = detail.destination;
+        old.save();
+        ranges.stream().filter(Objects::nonNull).forEach(range -> {
+            TransportRange transportRange = TransportRange.findById(range.rangeId);
+            transportRange.detail = old;
+            transportRange.weightRange = String.format("%s-%s", range.weightBegin, range.weightEnd);
+            transportRange.priceRange = String.format("%s-%s", range.priceBegin, range.priceEnd);
+            transportRange.save();
+        });
+        showTransportFee();
     }
 
     public static void deleteChannel(Long id) {
@@ -100,6 +134,36 @@ public class Elcuk extends Controller {
         detail.delete();
         flash.success("删除成功");
         showShipChannel();
+    }
+
+    public static void showTransportFee() {
+        List<TransportChannelDetail> details = TransportChannelDetail.findAll();
+        Map<String, List<TransportChannelDetail>> map = new HashMap<>();
+        Map<String, Integer> rowMap = new HashMap<>();
+        details.forEach(detail -> detail.rowspan = detail.ranges.size() == 0 ? 1 : detail.ranges.size());
+        details.forEach(detail -> {
+            String key = String.format("%s_%s", detail.channel.type.name(), detail.channel.channel);
+            if(map.containsKey(key)) {
+                List<TransportChannelDetail> temp = map.get(key);
+                int rowNum = rowMap.get(key);
+                rowNum += detail.ranges.size() == 0 ? 1 : detail.ranges.size();
+                rowMap.put(key, rowNum);
+                temp.add(detail);
+            } else {
+                List<TransportChannelDetail> temp = new ArrayList<>();
+                temp.add(detail);
+                map.put(key, temp);
+                rowMap.put(key, detail.rowspan);
+            }
+        });
+        List<TransportChannel> channels = TransportChannel.findAll();
+        render(details, map, rowMap, channels);
+    }
+
+    public static void updateTransportFee(Long id) {
+        TransportChannelDetail detail = TransportChannelDetail.findById(id);
+        List<TransportChannel> channels = TransportChannel.findAll();
+        render(detail, channels);
     }
 
     /**
