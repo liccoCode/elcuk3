@@ -3,16 +3,14 @@ package controllers;
 import controllers.api.SystemOperation;
 import ext.ShipmentsHelper;
 import helper.Dates;
-import helper.J;
 import helper.Webs;
 import models.ElcukRecord;
-import models.OperatorConfig;
 import models.User;
 import models.embedded.ShipmentDates;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.procure.*;
-import models.shipment.TransportChannelDetail;
+import models.shipment.TransportChannel;
 import models.view.Ret;
 import models.view.post.ProcureUnitShipPost;
 import models.view.post.ShipmentPost;
@@ -37,7 +35,10 @@ import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 
 import static play.modules.pdf.PDF.renderPDF;
@@ -204,7 +205,8 @@ public class Shipments extends Controller {
         Shipment ship = Shipment.findById(id);
         ship.dates = ship.dates == null ? new ShipmentDates() : ship.dates;
         ship.endShipByComputer();
-        List<String> channels = TransportChannelDetail.initShipChannelByType(ship);
+        List<String> channels = TransportChannel.initShipChannelByType(ship.type,
+                ship.internationExpress == null ? "" : ship.internationExpress.name());
         List<Cooperator> cooperators = Cooperator.shippers();
         ship.arryParamSetUP(Shipment.FLAG.STR_TO_ARRAY);
         Shipment.handleQty1(null, ship);
@@ -213,12 +215,8 @@ public class Shipments extends Controller {
     }
 
     public static void changeInternationExpress(String internationExpress, String type) {
-        OperatorConfig config = OperatorConfig.find("paramcode =?", String.format("ShipChannel_%s", type)).first();
-        if(StringUtils.isNotBlank(config.val) && StringUtils.isNotBlank(internationExpress)) {
-            HashMap<String, List<String>> map = J.from(config.val, HashMap.class);
-            List<String> list = map.get(internationExpress);
-            renderJSON(list);
-        }
+        List<String> channels = TransportChannel.initShipChannelByType(Shipment.T.valueOf(type), internationExpress);
+        renderJSON(channels);
     }
 
     public static void preview(String id) {

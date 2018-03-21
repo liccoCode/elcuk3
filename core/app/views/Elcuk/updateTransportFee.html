@@ -1,0 +1,106 @@
+<form action="@{Elcuk.updateChannelFee()}" method="post" id="updateUnit_form" class="form-horizontal">
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="" class="col-sm-2 control-label">运输渠道</label>
+      <div class="col-sm-4">
+        <select class="form-control" name="detail.channel.id" id="channelSelect">
+          <option value="">请选择</option>
+        #{list items:channels, as:'c'}
+          <option value="${c.id}" ${c.id==detail.channel.id?'selected':''}>
+          ${c.type.name()}_${c.internationExpress}_${c.channel}
+          </option>
+        #{/list}
+        </select>
+      </div>
+      <label for="" class="col-sm-2 control-label">运输时效</label>
+      <div class="col-sm-4 form-inline">
+        <input class="form-control" style="width:100px;" name="detail.transportDay"
+               value="${detail.transportDay.split("-")[0]}"> ~
+        <div class="input-group">
+          <input style="width:100px;" class="form-control" name="detail.transportDay"
+                 value="${detail.transportDay.split("-")[1]}">
+          <div class="input-group-addon">Day</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="p_sku" class="col-sm-2 control-label">目的地</label>
+      <div class="col-sm-10 ">
+        <div class="checkbox">
+        #{list items:models.market.M.amazonVals(), as:'m'}
+          <label>
+            <input type="checkbox" name="detail.destination" value="${m.name()}"
+            ${detail.destination.contains(m.name())?'checked':''}>${m.countryName()}
+          </label>
+        #{/list}
+        </div>
+      </div>
+    </div>
+
+  #{if detail.ranges.size()==0}
+    <div class="form-group">
+      <label for="p_sku" class="col-sm-2 control-label">重量段</label>
+      <div class="col-sm-4 form-inline">
+        <input class="form-control" style="width:80px;" name="ranges[0].weightBegin" value=""> ~
+        <div class="input-group">
+          <input style="width:80px;" class="form-control" name="ranges[0].weightEnd" value="">
+          <div class="input-group-addon">KG</div>
+        </div>
+        <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
+      </div>
+      <label for="" class="col-sm-2 control-label">价格</label>
+      <div class="col-sm-4 form-inline">
+        <input class="form-control" style="width:95px;" name="ranges[0].priceBegin" value=""> ~
+        <div class="input-group">
+          <input style="width:95px;" class="form-control" name="ranges[0].priceEnd" value="">
+          <div class="input-group-addon">CNY</div>
+        </div>
+      </div>
+    </div>
+  #{/if}
+  #{else }
+      #{list items:detail.ranges, as:'r'}
+        <div class="form-group">
+          <label for="p_sku" class="col-sm-2 control-label">#{if r_isFirst}重量段#{/if}</label>
+          <div class="col-sm-4 form-inline">
+            <input class="form-control" style="width:80px;" name="ranges[${r_index}].weightBegin"
+                   value="${r.weightRange.split("-")[0]}"> ~
+            <div class="input-group">
+              <input style="width:80px;" class="form-control" name="ranges[${r_index}].weightEnd"
+                     value="${r.weightRange.split("-")[1]}">
+              <div class="input-group-addon">KG</div>
+            </div>
+              #{if r_isLast}
+                <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
+              #{/if}
+          </div>
+          <label for="" class="col-sm-2 control-label">#{if r_isFirst}价格#{/if}</label>
+          <div class="col-sm-4 form-inline">
+            <input class="form-control" style="width:95px;" name="ranges[${r_index}].priceBegin"
+                   value="${r.priceRange.split("-")[0]}"> ~
+            <div class="input-group">
+              <input style="width:95px;" class="form-control" name="ranges[${r_index}].priceEnd"
+                     value="${r.priceRange.split("-")[1]}">
+              <div class="input-group-addon">CNY</div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" name="ranges[${r_index}].rangeId" value="${r.id}">
+      #{/list}
+  #{/else}
+
+    <div class="form-group">
+      <label for="p_sku" class="col-sm-2 control-label">备注</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" rows="5" name="detail.memo">${detail.memo}</textarea>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer">
+    <input type="submit" class="btn btn-primary btn-xs" value="修改"/>
+    <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+    <input type="hidden" name="detailId" value="${detail.id}">
+  </div>
+</form>

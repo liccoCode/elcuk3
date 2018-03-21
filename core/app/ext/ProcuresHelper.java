@@ -422,4 +422,17 @@ public class ProcuresHelper extends JavaExtensions {
             return "progress-bar-red";
         }
     }
+
+    public static String showChineseName(String markets) {
+        if(StringUtils.isNotBlank(markets)){
+            for(M market : M.amazonVals()){
+                if(markets.contains(market.name())){
+                    markets = markets.replace(market.name(), market.countryName());
+                }
+            }
+            return markets;
+        } else {
+            return "";
+        }
+    }
 }
