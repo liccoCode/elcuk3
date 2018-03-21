@@ -120,7 +120,12 @@ public class Elcuk extends Controller {
         old.destination = detail.destination;
         old.save();
         ranges.stream().filter(Objects::nonNull).forEach(range -> {
-            TransportRange transportRange = TransportRange.findById(range.rangeId);
+            TransportRange transportRange;
+            if(range.rangeId != null) {
+                transportRange = TransportRange.findById(range.rangeId);
+            } else {
+                transportRange = new TransportRange();
+            }
             transportRange.detail = old;
             transportRange.weightRange = String.format("%s-%s", range.weightBegin, range.weightEnd);
             transportRange.priceRange = String.format("%s-%s", range.priceBegin, range.priceEnd);

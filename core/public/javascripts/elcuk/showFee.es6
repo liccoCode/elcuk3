@@ -4,7 +4,7 @@ $(() => {
     $("#channel_fee_modal").modal("show");
   });
 
-  $("#updateUnit_form").on("click", "#addWeight", function () {
+  $("#updateUnit_form,#update_fee_modal").on("click", "#addWeight", function () {
     let index = $("input[name$='weightEnd']").length;
     let html = _.template($("#copy").text())({"num": index});
     $(this).parent().parent("div").after(html);
