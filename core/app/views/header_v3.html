@@ -29,9 +29,6 @@
                 <li><a href="@{Analyzes.index()}">销量分析</a></li>
               #{/power.ck}
               #{power.ck "sellings.index"}
-                <li><a href="@{Sellings.pirateIndex()}" style="color:red;">跟卖产品</a></li>
-              #{/power.ck}
-              #{power.ck "sellings.index"}
                 <li><a href="@{Sellings.index()}">Selling列表</a></li>
               #{/power.ck}
               #{power.ck "orders.index"}
@@ -51,6 +48,10 @@
               #{/power.ck}
               #{power.ck "reportdownloads"}
                 <li><a href="@{ReportDownloads.index()}">运营报表下载</a></li>
+              #{/power.ck}
+            <li class="divider"></li>
+              #{power.ck "sellings.index"}
+                <li><a href="@{Sellings.pirateIndex()}" style="color:red;">跟卖产品</a></li>
               #{/power.ck}
           </ul>
         </li>
