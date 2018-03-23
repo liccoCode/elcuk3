@@ -50,7 +50,7 @@
                 #{if r.canBeRecalculated()}
                   <a class="btn btn-warning btn-xs" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
                 #{/if}
-              <button id="improtPayment" class="btn btn-success btn-xs">导入运输费用</button>
+              <a href="javascript:void(0)" name="improtPayment" class="btn btn-success btn-xs">导入运输费用</a>
             </td>
           </tr>
         #{/list}
@@ -65,7 +65,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">参数值修改</h4>
+        <h4 class="modal-title">导入运输费用</h4>
       </div>
       <div class="modal-body">
         <form action="@{ShipmentReports.importShipmentReport()}" method="POST" enctype="multipart/form-data" id="payment_form">
