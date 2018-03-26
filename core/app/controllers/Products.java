@@ -15,8 +15,12 @@ import models.procure.Cooperator;
 import models.product.*;
 import models.view.Ret;
 import models.view.post.ProductPost;
+import net.sf.jxls.reader.ReaderBuilder;
+import net.sf.jxls.reader.XLSReadStatus;
+import net.sf.jxls.reader.XLSReader;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import play.data.Upload;
 import play.data.validation.Validation;
 import play.i18n.Messages;
 import play.libs.F;
@@ -27,6 +31,10 @@ import play.mvc.With;
 import play.utils.FastRuntimeException;
 import query.SkuESQuery;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -563,5 +571,48 @@ public class Products extends Controller {
      */
     public static void source(String search) {
         renderJSON(J.json(Product.pickSourceItems(search)));
+    }
+
+
+    /**
+     * 导入物流运输月度报表
+     *
+     * @param xlsx
+     */
+    public static void importProductReport(String xlsx) {
+        try {
+            /** 第一步上传excel文件 **/
+            List<Upload> files = (List<Upload>) request.args.get("__UPLOADS");
+            Upload upload = files.get(0);
+            List<ProductJxl> productList = new ArrayList<>();
+
+            /** 第二步根据定义好xml进行jxls映射 **/
+            File directory = new File("");
+            String courseFile = directory.getCanonicalPath();
+            String xmlPath = courseFile + "/app/views/Products/productsReport.xml";
+            InputStream inputXML = new BufferedInputStream(new FileInputStream(xmlPath));
+            XLSReader mainReader = ReaderBuilder.buildFromXML(inputXML);
+            InputStream inputXLS = new BufferedInputStream(new FileInputStream(upload.asFile()));
+            Map<String, Object> beans = new HashMap<>();
+            beans.put("productList", productList);
+
+            XLSReadStatus readStatus = mainReader.read(inputXLS, beans);
+            if(readStatus.isStatusOK()) {
+                /** 第三步 数据插入Product **/
+                if(productList != null && productList.size() > 0) {
+                    for(int i = 5; i < productList.size(); i++) {
+                        ProductJxl jxl = productList.get(i);
+                        jxl.setProduct();
+                    }
+                }
+                flash.success("上传成功！");
+            } else {
+                flash.error("上传失败!");
+            }
+            index(new ProductPost());
+        } catch(Exception e) {
+            Webs.e(e);
+            flash.error(String.format("上传失败!原因:[%s]", e.toString()));
+        }
     }
 }

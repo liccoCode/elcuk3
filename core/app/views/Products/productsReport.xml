@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook>
+  <worksheet name="sku">
+    <section startRow="5" endRow="5"/>
+    <loop startRow="5" endRow="5" items="productList" var="product"
+          varType="models.product.ProductJxl">
+      <section startRow="5" endRow="5">
+        <mapping row="5" col="0">product.categoryId</mapping>
+        <mapping row="5" col="1">product.sku</mapping>
+        <mapping row="5" col="2">product.lengths</mapping>
+        <mapping row="5" col="3">product.width</mapping>
+        <mapping row="5" col="4">product.heigh</mapping>
+        <mapping row="5" col="5">product.weight</mapping>
+        <mapping row="5" col="6">product.productLengths</mapping>
+        <mapping row="5" col="7">product.productWidth</mapping>
+        <mapping row="5" col="8">product.productHeigh</mapping>
+        <mapping row="5" col="9">product.productWeight</mapping>
+        <mapping row="5" col="10">product.declaredValue</mapping>
+        <mapping row="5" col="11">product.declareName</mapping>
+        <mapping row="5" col="12">product.useWay</mapping>
+        <mapping row="5" col="13">product.chineseName</mapping>
+        <mapping row="5" col="14">product.salesLevel</mapping>
+        <mapping row="5" col="15">product.marketState</mapping>
+        <mapping row="5" col="16">product.procureState</mapping>
+        <mapping row="5" col="17">product.productState</mapping>
+        <mapping row="5" col="18">product.upc</mapping>
+        <mapping row="5" col="19">product.partNumber</mapping>
+        <mapping row="5" col="20">product.upcJP</mapping>
+        <mapping row="5" col="21">product.partNumberJP</mapping>
+        <mapping row="5" col="22">product.abbreviation</mapping>
+        <mapping row="5" col="23">product.marketTime</mapping>
+        <mapping row="5" col="24">product.delistingTime</mapping>
+        <mapping row="5" col="25">product.productName</mapping>
+        <mapping row="5" col="26">product.subtitle</mapping>
+        <mapping row="5" col="27">product.state</mapping>
+      </section>
+      <loopbreakcondition>
+        <rowcheck offset="0">
+          <cellcheck offset="0"></cellcheck>
+        </rowcheck>
+      </loopbreakcondition>
+    </loop>
+  </worksheet>
+</workbook>

@@ -204,6 +204,20 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         };
 
         public abstract String label();
+
+        public static T val(String str) {
+            if(StringUtils.isBlank(str)) return null;
+            String s = str.toLowerCase();
+            if(s.equals("未上架")) {
+                return NOMARKET;
+            } else if(s.equals("上架")) {
+                return MARKETING;
+            } else if(s.equals("下架")) {
+                return DOWN;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -244,6 +258,20 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         };
 
         public abstract String label();
+
+        public static P val(String str) {
+            if(StringUtils.isBlank(str)) return null;
+            String s = str.toLowerCase();
+            if(s.equals("未采购")) {
+                return NONE;
+            } else if(s.equals("正常采购")) {
+                return NORMAL;
+            } else if(s.equals("停止采购")) {
+                return STOP;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -314,6 +342,26 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         };
 
         public abstract String label();
+
+        public static L val(String str) {
+            if(StringUtils.isBlank(str)) return null;
+            String s = str.toLowerCase();
+            if(s.equals("开发期")) {
+                return DEVELOP;
+            } else if(s.equals("引进期")) {
+                return INTRODUCE;
+            } else if(s.equals("成长期")) {
+                return GROWTH;
+            } else if(s.equals("成熟期")) {
+                return MATURE;
+            } else if(s.equals("衰退期")) {
+                return DOWNTURN;
+            } else if(s.equals("退市")) {
+                return EXIT;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -369,6 +417,24 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         };
 
         public abstract String label();
+
+        public static E val(String str) {
+            if(StringUtils.isBlank(str)) return null;
+            String s = str.toLowerCase();
+            if(s.equals("A")) {
+                return A;
+            } else if(s.equals("B")) {
+                return B;
+            } else if(s.equals("C")) {
+                return C;
+            } else if(s.equals("D")) {
+                return D;
+            } else if(s.equals("E")) {
+                return E;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -414,6 +480,7 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 在系统内下架
          */
         DOWN
+        
     }
 
     /**
@@ -474,6 +541,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
     @Transient
     public int iscopy = 0;
+
+    @Transient
+    public String categoryId;
 
     public Product() {
     }
@@ -1215,13 +1285,17 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
 
     public String showImg() {
-        Attach attach = Attach.find(" fid=? and originName=?", this.sku,"0.jpg").first();
+        Attach attach = Attach.find(" fid=? and originName=?", this.sku, "0.jpg").first();
         if(attach == null)
             return null;
         else
             return attach.qiniuLocation;
     }
 
+    public static void saveReport() {
+
+
+    }
 
 }
 
