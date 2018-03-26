@@ -1118,4 +1118,12 @@ public class Excels extends Controller {
     }
 
 
+    public static void downloadProductTemplate() {
+        request.format = "xlsx";
+        renderArgs.put(RenderExcel.RA_FILENAME, "sku导入.xlsx");
+        renderArgs.put(RenderExcel.RA_ASYNC, false);
+        render();
+    }
+
+
 }

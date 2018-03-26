@@ -12,6 +12,7 @@
         <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
         <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
         <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+        <mapping row="1" col="30">shipmentMonthly.lost</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
@@ -32,6 +33,7 @@
         <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
         <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
         <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+        <mapping row="1" col="30">shipmentMonthly.lost</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
@@ -52,6 +54,7 @@
         <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
         <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
         <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+        <mapping row="1" col="30">shipmentMonthly.lost</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
@@ -72,6 +75,7 @@
         <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
         <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
         <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+        <mapping row="1" col="30">shipmentMonthly.lost</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
@@ -92,6 +96,7 @@
         <mapping row="1" col="20">shipmentMonthly.otherFee</mapping>
         <mapping row="1" col="22">shipmentMonthly.declaredValue</mapping>
         <mapping row="1" col="23">shipmentMonthly.tariff</mapping>
+        <mapping row="1" col="30">shipmentMonthly.lost</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
