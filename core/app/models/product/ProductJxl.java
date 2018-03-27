@@ -48,7 +48,7 @@ public class ProductJxl {
 
     public SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 
-    public Product setProduct() throws ParseException {
+    public Product setProduct() throws Exception {
         Product pro = Product.findById(sku);
         if(pro == null) pro = new Product();
         pro.sku = this.sku;
@@ -57,6 +57,7 @@ public class ProductJxl {
         if(StringUtils.isNotBlank(this.lengths)) pro.lengths = Float.valueOf(this.lengths);
         if(StringUtils.isNotBlank(this.width)) pro.width = Float.valueOf(this.width);
         if(StringUtils.isNotBlank(this.heigh)) pro.heigh = Float.valueOf(this.heigh);
+        if(StringUtils.isNotBlank(this.weight)) pro.weight = Float.valueOf(this.weight);
         if(StringUtils.isNotBlank(this.productLengths)) pro.productLengths = Float.valueOf(this.productLengths);
         if(StringUtils.isNotBlank(this.productWidth)) pro.productWidth = Float.valueOf(this.productWidth);
         if(StringUtils.isNotBlank(this.productHeigh)) pro.productHeigh = Float.valueOf(this.productHeigh);
