@@ -317,8 +317,8 @@ public class ProcureUnits extends Controller {
         double total = units.stream().mapToDouble(ProcureUnit::reallyWeight).sum();
         total = new BigDecimal(total).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         Product product = Product.findById(sku);
-        double weight = new BigDecimal(product.getRecentlyWeight()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        String currentWeight = (weight * qty) + "kg";
+        String currentWeight = new BigDecimal(product.getRecentlyWeight() * qty).setScale(2, BigDecimal
+                .ROUND_HALF_UP).toString();
         String show = String.format("%s/%s", currentWeight, total + "kg");
         renderText(show);
     }

@@ -25,6 +25,7 @@ $(() => {
     $("input[name='unit.shipType']").each(function () {
       if ($(this).val() === type) {
         $(this).prop("checked", true);
+        getShipmentList();
       }
     });
   });
@@ -80,7 +81,6 @@ $(() => {
   //快递同步预计到达时间
   $("[name='unit.attrs.planShipDate']").change(() => {
     let shipType = $("[name='unit.shipType']:checked").val();
-
     if (shipType !== 'EXPRESS') {
       return;
     }
@@ -371,6 +371,7 @@ $(() => {
     if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS' && $("#unitId").val()) {
       getShipmentList();
     }
+    showSameDayTotalWeight();
   });
 
   function showSameDayTotalWeight () {
@@ -390,5 +391,4 @@ $(() => {
       });
     }
   }
-
 });
