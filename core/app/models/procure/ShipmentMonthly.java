@@ -106,6 +106,7 @@ public class ShipmentMonthly extends Model {
         db.otherFee = this.otherFee;
         db.declaredValue = this.declaredValue;
         db.tariff = this.tariff;
+        db.lost = this.lost;
         db.save();
     }
 

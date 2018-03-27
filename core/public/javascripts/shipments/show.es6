@@ -62,4 +62,12 @@ $(() => {
     });
   });
 
+
+  $("a[name='fbabg']").click(function () {
+    let $btn = $(this);
+    $btn.parent("td").attr("bgcolor","#FBE1B6");
+    var url = $btn.attr("href")
+    window.open(url, "_blank")
+  });
+
 });

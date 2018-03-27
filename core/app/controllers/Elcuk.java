@@ -10,6 +10,7 @@ import models.procure.Shipment;
 import models.shipment.TransportChannel;
 import models.shipment.TransportChannelDetail;
 import models.shipment.TransportRange;
+import org.apache.commons.lang.StringUtils;
 import play.mvc.Controller;
 import play.mvc.Util;
 import play.mvc.With;
@@ -102,7 +103,7 @@ public class Elcuk extends Controller {
         detail.createDate = new Date();
         detail.creator = Login.current();
         detail.save();
-        ranges.forEach(range -> {
+        ranges.stream().filter(range -> StringUtils.isNotBlank(range.weightBegin)).forEach(range -> {
             TransportRange transportRange = new TransportRange();
             transportRange.detail = detail;
             transportRange.weightRange = String.format("%s-%s", range.weightBegin, range.weightEnd);

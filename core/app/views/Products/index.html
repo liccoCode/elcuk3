@@ -58,6 +58,10 @@
           #{/power.ck}
           #{power.ck "elcuk.index"}
             <a href="@{Attachs.productSync()}" data-method='post' class="btn btn-warning">同步附件</a>
+            <a href="@{Excels.downloadProductTemplate()}" target="_blank"  class="btn btn-primary">
+              <i class="icon-download-alt"></i>下載SKU导入模板
+            </a>
+            <a href="javascript:void(0)" name="improtProduct" class="btn btn-success">上传产品</a>
           #{/power.ck}
 
           </div>
@@ -188,6 +192,34 @@
 </div>
 
 #{include 'Products/_destroyLogForm.html'/}
+
+
+
+<div id="shipment_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">上传sku</h4>
+      </div>
+      <div class="modal-body">
+        <form action="@{Products.importProductReport()}" method="POST" enctype="multipart/form-data" id="payment_form">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th width="30%">产品xlsx</th>
+              <td>
+                <input type="file" multiple id="attachment" name="attachment">
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <button class="btn btn-primary btn-xs" id="submitUpdateBtn">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
