@@ -600,7 +600,7 @@ public class Products extends Controller {
             if(readStatus.isStatusOK()) {
                 /** 第三步 数据插入Product **/
                 if(productList != null && productList.size() > 0) {
-                    for(int i = 5; i < productList.size(); i++) {
+                    for(int i = 1; i < productList.size(); i++) {
                         ProductJxl jxl = productList.get(i);
                         jxl.setProduct();
                     }

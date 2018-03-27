@@ -48,7 +48,7 @@ public class ProductJxl {
 
     public SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 
-    public Product setProduct() throws ParseException {
+    public Product setProduct() throws Exception {
         Product pro = Product.findById(sku);
         if(pro == null) pro = new Product();
         pro.sku = this.sku;
