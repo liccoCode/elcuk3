@@ -2,7 +2,7 @@ $(() => {
 
   $("#recommend_shipment_btn").click(function (e) {
     e.preventDefault();
-    if ($("#planQty").val()) {
+    if ($("input[placeholder='具体数量']").val()) {
       $("#show_recommend_modal").modal("show");
       let sku = $("#unit_sku").val();
       let warehouse = $("#warehouse_select").val();
@@ -378,7 +378,7 @@ $(() => {
     let shipType = $("[name='unit.shipType']:checked").val();
     let planShipDate = $("[name='unit.attrs.planShipDate']").val();
     let sku = $("#unit_sku").val();
-    let qty = $("#planQty").val();
+    let qty = $("input[placeholder='具体数量']").val();
     let url = $("#showSameDayLabel").data("url");
     if (shipType && planShipDate) {
       $.post(url, {
