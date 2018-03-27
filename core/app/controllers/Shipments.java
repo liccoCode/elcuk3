@@ -24,6 +24,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
+import play.Logger;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
@@ -297,6 +298,7 @@ public class Shipments extends Controller {
 
     @Check("shipments.beginship")
     public static void beginShip(String id, Date date, boolean sync) {
+        Long start = System.currentTimeMillis();
         Shipment ship = Shipment.findById(id);
         try {
             ship.beginShip(date, sync);
@@ -312,6 +314,7 @@ public class Shipments extends Controller {
         new ElcukRecord(Messages.get("shipment.beginShip"), Messages.get("shipment.beginShip.msg", ship.id),
                 ship.id).save();
         flash.success("运输单已经标记运输, FBA 已经标记 SHIPPED.");
+        Logger.info(ship.id + " 开始运输消耗时间为：" + (System.currentTimeMillis() - start) + "ms");
         show(id);
     }
 

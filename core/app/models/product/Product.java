@@ -480,7 +480,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
          * 在系统内下架
          */
         DOWN
-        
     }
 
     /**
@@ -1283,7 +1282,6 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             return products.get(0);
     }
 
-
     public String showImg() {
         Attach attach = Attach.find(" fid=? and originName=?", this.sku, "0.jpg").first();
         if(attach == null)
@@ -1292,10 +1290,15 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             return attach.qiniuLocation;
     }
 
-    public static void saveReport() {
-
-
+    public double getRecentlyWeight() {
+        List<ProcureUnit> units = ProcureUnit.find("product.sku =? AND mainBoxInfo IS NOT NULL "
+                + " ORDER BY createDate DESC", this.sku).fetch();
+        if(units.size() == 0) {
+            return this.weight;
+        } else {
+            ProcureUnit unit = units.get(0);
+            return unit.mainBox.singleBoxWeight / unit.mainBox.num;
+        }
     }
-
 }
 

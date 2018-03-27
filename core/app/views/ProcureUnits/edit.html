@@ -42,8 +42,8 @@
             <option value="供应商原因">供应商原因</option>
             <option value="我司原因">我司原因</option>
           </select>
-          <button type="submit" id="submitUpdateBtn" class="btn btn-primary" rel="popover" placement="right"
-                  content="当[采购计划的FBA]已生成后再修改[运输方式]或[采购数量]时必须填写原因">
+          <button type="submit" id="submitUpdateBtn" class="btn btn-primary" data-toggle="popover" data-placement="right"
+                  data-content="当[采购计划的FBA]已生成后再修改[运输方式]或[采购数量]时必须填写原因">
             更新
           </button>
         </div>
@@ -54,3 +54,19 @@
 <input type="hidden" id="unitId" value="${unit.id}">
 
 #{records_v3 records:logs/}
+
+<div id="show_recommend_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">查看推荐物流渠道</h4>
+      </div>
+      <div class="modal-body">
+        <div id="update_div"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>

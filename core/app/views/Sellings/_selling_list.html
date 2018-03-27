@@ -5,7 +5,7 @@
     <th width="350px;">SellingID</th>
     <th width="40px;">市场</th>
     <th width="120px;">FnSku</th>
-    <th>价格</th>
+    <th width="50px;">价格</th>
     <th>ASIN</th>
     <th width="70px;">生命周期</th>
     <th width="70px;">ERP上架</th>
@@ -23,9 +23,9 @@
         #{/if}
     </td>
     <td style="text-align:center;"><img height="40px;" width="45px;" src="${s.aps.imageUrl}"></td>
-    <td style="word-break:break-all;">
+    <td style="word-break:break-all;" data-toggle="popover" data-content="${s.product?.chineseName}" data-placement="top">
       <a href="@{Sellings.selling(s.sellingId)}" target="_blank">${s.sellingId}</a><br>
-    ${s.product?.chineseName}
+    ${s.product?.chineseName?.xxLong()}
     </td>
     <td style="padding: 0; vertical-align:middle; width:50px;" data-toggle="tooltip" title="${s.market
     .countryName()}">

@@ -47,7 +47,8 @@
   </div>
   <label for="unit_price" class="col-sm-1 control-label">单价</label>
   <div class="col-sm-2 form-inline">
-    <input type="text" class="form-control" id="unit_price" name="unit.attrs.price" value="${unit.attrs.price}"
+    <input type="text" class="form-control" style="width:160px;" id="unit_price" name="unit.attrs.price"
+           value="${unit.attrs.price}"
     #{if !isEdit} readonly #{/if}/>
   #{pickCurrency id:'unit_currency', name:'unit.attrs.currency',class:'form-control', c:unit.attrs.currency?:helper.Currency.CNY /}
   </div>
@@ -162,6 +163,14 @@
       <i class="${t.pic()}"></i>${t.label()}
     </label>
   #{/list}
+    <label class="radio-inline">
+      <button class="btn btn-xs btn-default" style="color:red;" id="recommend_shipment_btn"
+              data-url="@{ProcureUnits.showRecommendChannelList()}"><i class="fa fa-star"></i> 推荐物流
+      </button>
+    </label>
+    <label class="radio-inline" data-url="@{ProcureUnits.showSameDayTotalWeight()}" id="showSameDayLabel">
+      <span class="label label-default" id="showTotalWeight" data-toggle="tooltip" title="当前重量/当天出货重量"></span>
+    </label>
   </div>
   <label class="col-sm-1 control-label">所属运输单</label>
   <div class="col-sm-2">

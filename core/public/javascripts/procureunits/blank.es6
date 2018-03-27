@@ -1,12 +1,42 @@
 $(() => {
 
+  $("#recommend_shipment_btn").click(function (e) {
+    e.preventDefault();
+    if ($("#planQty").val()) {
+      $("#show_recommend_modal").modal("show");
+      let sku = $("#unit_sku").val();
+      let warehouse = $("#warehouse_select").val();
+      $("#update_div").load($(this).data("url"), {
+        sku: sku,
+        whouseId: warehouse,
+        qty: $("#planQty").val()
+      });
+    } else {
+      noty({
+        text: "请先填写需要运输的数量！",
+        type: 'warning'
+      });
+      $("#planQty").focus();
+    }
+  });
+
+  $("#show_recommend_modal").on("change", "input[name='selectType']", function () {
+    let type = $(this).val();
+    $("input[name='unit.shipType']").each(function () {
+      if ($(this).val() === type) {
+        $(this).prop("checked", true);
+        getShipmentList();
+      }
+    });
+  });
+
   $("#submitUpdateBtn").click(function (e) {
     e.preventDefault();
-    var btn = $(this).button('loading');
+    let btn = $(this).button('loading');
     setTimeout(function () {
-         btn.button('reset');
-       }, 3000);
-    
+      btn.button('reset');
+    }, 3000);
+
     if ($("#planShipDateHd").val() != '' && $("#planShipDateHd").val() != null) {
       if ($("#planShipDateHd").val() != $("#planShipDate").val() && $("#cgMsg").val() == '') {
         noty({
@@ -51,7 +81,7 @@ $(() => {
   //快递同步预计到达时间
   $("[name='unit.attrs.planShipDate']").change(() => {
     let shipType = $("[name='unit.shipType']:checked").val();
-    if (shipType != 'EXPRESS') {
+    if (shipType !== 'EXPRESS') {
       return;
     }
     let planShipDate = $("[name='unit.attrs.planShipDate']").val();
@@ -64,6 +94,7 @@ $(() => {
       $("[name='unit.attrs.planArrivDate']").val(r['arrivedate']);
       showDay();
     });
+    showSameDayTotalWeight();
   });
 
   $("#planQty,#availableQty").change(function () {
@@ -148,6 +179,7 @@ $(() => {
     if (planDeliveryDate && whouseId) {
       getShipmentList();
     }
+    showSameDayTotalWeight();
   });
 
   //异步加载 Shipment
@@ -339,6 +371,24 @@ $(() => {
     if ($shipType.val() !== void 0 && $shipType.val() !== 'EXPRESS' && $("#unitId").val()) {
       getShipmentList();
     }
+    showSameDayTotalWeight();
   });
 
+  function showSameDayTotalWeight () {
+    let shipType = $("[name='unit.shipType']:checked").val();
+    let planShipDate = $("[name='unit.attrs.planShipDate']").val();
+    let sku = $("#unit_sku").val();
+    let qty = $("#planQty").val();
+    let url = $("#showSameDayLabel").data("url");
+    if (shipType && planShipDate) {
+      $.post(url, {
+        shipType: shipType,
+        planShipDate: planShipDate,
+        sku: sku,
+        qty: qty
+      }, function (e) {
+        $("#showTotalWeight").text(e);
+      });
+    }
+  }
 });

@@ -5,6 +5,7 @@ import play.db.jpa.Model;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
 import javax.persistence.Transient;
 
 /**
@@ -46,5 +47,17 @@ public class TransportRange extends Model {
 
     @Transient
     public Long rangeId;
+
+    @PostLoad
+    public void postPersist() {
+        this.weightBegin = this.weightRange.split("-")[0];
+        this.weightEnd = this.weightRange.split("-")[1];
+        this.priceBegin = this.priceRange.split("-")[0];
+        this.priceEnd = this.priceRange.split("-")[1];
+    }
+
+    public boolean containWeight(double weight) {
+        return (weight >= Double.parseDouble(weightBegin) && weight <= Double.parseDouble(weightEnd));
+    }
 
 }

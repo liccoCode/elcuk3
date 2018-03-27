@@ -32,7 +32,7 @@
         </div>
         <div class="box-footer">
           <input type="button" class="btn btn-primary" id="create_unit" value="创建">
-          <input type="button" id="refreshShipmentBtn" title="刷新运输单" class="btn btn-inverse" value="刷新">
+          <input type="button" id="refreshShipmentBtn" data-toggle="tooltip" title="刷新运输单" class="btn btn-default" value="刷新">
         </div>
       </form>
     </div>
@@ -40,4 +40,20 @@
 </div>
 
 <input type="hidden" id="unitId" value="${unit.id}">
+
+<div id="show_recommend_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">查看推荐物流渠道</h4>
+      </div>
+      <div class="modal-body">
+        <div id="update_div"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
 
