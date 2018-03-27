@@ -28,11 +28,9 @@
         <mapping row="2" col="20">product.upcJP</mapping>
         <mapping row="2" col="21">product.partNumberJP</mapping>
         <mapping row="2" col="22">product.abbreviation</mapping>
-        <mapping row="2" col="23">product.marketTime</mapping>
-        <mapping row="2" col="24">product.delistingTime</mapping>
-        <mapping row="2" col="25">product.productName</mapping>
-        <mapping row="2" col="26">product.subtitle</mapping>
-        <mapping row="2" col="27">product.state</mapping>
+        <mapping row="2" col="23">product.productName</mapping>
+        <mapping row="2" col="24">product.subtitle</mapping>
+        <mapping row="2" col="25">product.state</mapping>
       </section>
       <loopbreakcondition>
         <rowcheck offset="0">
