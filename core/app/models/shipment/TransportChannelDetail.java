@@ -1,6 +1,7 @@
 package models.shipment;
 
 import models.User;
+import models.market.M;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.Model;
 
@@ -8,6 +9,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 运输渠道
@@ -47,5 +49,12 @@ public class TransportChannelDetail extends Model {
 
     @Transient
     public int rowspan;
+
+
+    public static List<TransportRange> findOptimalChannelList(double weight, M market) {
+        List<TransportRange> rangeList = TransportRange.find("detail.destination LIKE ? ",
+                "%" + market.name() + "%").fetch();
+        return rangeList.stream().filter(range -> range.containWeight(weight)).collect(Collectors.toList());
+    }
 
 }

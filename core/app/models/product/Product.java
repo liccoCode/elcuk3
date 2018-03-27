@@ -1215,13 +1215,22 @@ public class Product extends GenericModel implements ElcukRecord.Log {
 
 
     public String showImg() {
-        Attach attach = Attach.find(" fid=? and originName=?", this.sku,"0.jpg").first();
+        Attach attach = Attach.find(" fid=? and originName=?", this.sku, "0.jpg").first();
         if(attach == null)
             return null;
         else
             return attach.qiniuLocation;
     }
 
-
+    public double getRecentlyWeight() {
+        List<ProcureUnit> units = ProcureUnit.find("product.sku =? AND mainBoxInfo IS NOT NULL "
+                + " ORDER BY createDate DESC", this.sku).fetch();
+        if(units.size() == 0) {
+            return this.weight;
+        } else {
+            ProcureUnit unit = units.get(0);
+            return unit.mainBox.singleBoxWeight / unit.mainBox.num;
+        }
+    }
 }
 

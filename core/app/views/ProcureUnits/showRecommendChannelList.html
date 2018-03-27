@@ -1,0 +1,24 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th width="80px;">运输方式</th>
+    <th width="80px;">运输渠道</th>
+    <th width="120px;">运输时效(DAY)</th>
+    <th width="100px;">重量段(KG)</th>
+    <th width="120px;">价格范围(CNY)</th>
+    <th>备注</th>
+    <th width="30px;">Action</th>
+  </tr>
+#{list items:ranges, as:'r'}
+  <tr>
+    <td>${r.detail.channel.type.label()}</td>
+    <td>${r.detail.channel.channel}</td>
+    <td>${r.detail.transportDay}</td>
+    <td>${r.weightRange}</td>
+    <td>${r.priceRange}</td>
+    <td data-toggle="tooltip" title="${r.detail}">${r.detail.memo?.overLong()}</td>
+    <td style="text-align:center;">
+      <input type="radio" value="${r.detail.channel.type.name()}" name="selectType">
+    </td>
+  </tr>
+#{/list}
+</table>

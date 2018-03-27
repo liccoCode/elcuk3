@@ -2713,18 +2713,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return ProcureUnit.count("parent.id=?", this.id) > 0;
     }
 
-
     public boolean includePayment(Long paymentId) {
-        if(paymentId == null) {
-            return false;
-        }
-        return this.fees.stream().filter(unit -> unit.payment.id - paymentId == 0).count() > 0 ? true : false;
+        return paymentId != null && (this.fees.stream().filter(unit -> unit.payment.id - paymentId == 0).count() > 0);
     }
-
 
     public Date yesterdayPlanShipDate() {
         if(this.attrs == null || this.attrs.planShipDate == null) return null;
         return new Date((this.attrs.planShipDate.getTime() - 24 * 60 * 60 * 1000));
     }
 
+    public double reallyWeight() {
+        if(this.mainBox != null) {
+            return this.totalBoxWeight();
+        } else {
+            return this.product.weight * this.qtyForFba();
+        }
+    }
 }

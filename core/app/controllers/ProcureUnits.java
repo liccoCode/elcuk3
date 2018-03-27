@@ -17,6 +17,8 @@ import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import models.procure.Shipment;
 import models.product.Product;
+import models.shipment.TransportChannelDetail;
+import models.shipment.TransportRange;
 import models.view.Ret;
 import models.view.post.AnalyzePost;
 import models.view.post.ProcurePost;
@@ -301,6 +303,25 @@ public class ProcureUnits extends Controller {
         Analyzes.index();
     }
 
+    public static void showRecommendChannelList(String sku, Long whouseId, int qty) {
+        Product product = Product.findById(sku);
+        Whouse whouse = Whouse.findById(whouseId);
+        List<TransportRange> ranges = TransportChannelDetail.findOptimalChannelList(product.getRecentlyWeight() * qty,
+                whouse.market);
+        render(ranges);
+    }
+
+    public static void showSameDayTotalWeight(Date planShipDate, String shipType, String sku, int qty) {
+        List<ProcureUnit> units = ProcureUnit.find("attrs.planShipDate=? AND shipType=?",
+                planShipDate, Shipment.T.valueOf(shipType)).fetch();
+        double total = units.stream().mapToDouble(ProcureUnit::reallyWeight).sum();
+        total = new BigDecimal(total).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        Product product = Product.findById(sku);
+        double weight = new BigDecimal(product.getRecentlyWeight()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        String currentWeight = (weight * qty) + "kg";
+        String show = String.format("%s/%s", currentWeight, total + "kg");
+        renderText(show);
+    }
 
     public static void edit(long id) {
         ProcureUnit unit = ProcureUnit.findById(id);
