@@ -28,4 +28,13 @@ public class OrderHelper extends JavaExtensions {
         }
         return StringUtils.EMPTY;
     }
+
+    public static String formatSku(String temp) {
+        String[] sku = temp.split(";");
+        if(sku.length == 1) {
+            return temp;
+        } else {
+            return sku[0] + ";  ...";
+        }
+    }
 }

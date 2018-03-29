@@ -715,15 +715,14 @@ public class Orderr extends GenericModel {
     }
 
     public String showItemSku() {
-        String show = "";
+        StringBuilder show = new StringBuilder();
         List<OrderItem> orderItems = OrderItem.find("order.orderId = ? ", this.orderId).fetch();
         if(orderItems != null && orderItems.size() > 0) {
             for(OrderItem item : orderItems) {
-                show += item.product.sku + ";";
+                show.append(item.product.sku).append(";");
             }
-
         }
-        return show;
+        return show.toString();
     }
 
     public String showPromotionIDs() {

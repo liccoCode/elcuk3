@@ -380,10 +380,12 @@ $(() => {
     let sku = $("#unit_sku").val();
     let qty = $("input[placeholder='具体数量']").val();
     let url = $("#showSameDayLabel").data("url");
+    let fbaId = $("#warehouse_select").val();
     if (shipType && planShipDate) {
       $.post(url, {
         shipType: shipType,
         planShipDate: planShipDate,
+        fbaId: fbaId,
         sku: sku,
         qty: qty
       }, function (e) {

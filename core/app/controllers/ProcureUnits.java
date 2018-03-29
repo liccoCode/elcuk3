@@ -311,9 +311,9 @@ public class ProcureUnits extends Controller {
         render(ranges);
     }
 
-    public static void showSameDayTotalWeight(Date planShipDate, String shipType, String sku, int qty) {
-        List<ProcureUnit> units = ProcureUnit.find("attrs.planShipDate=? AND shipType=?",
-                planShipDate, Shipment.T.valueOf(shipType)).fetch();
+    public static void showSameDayTotalWeight(Date planShipDate, String shipType, Long fbaId,String sku, int qty) {
+        List<ProcureUnit> units = ProcureUnit.find("attrs.planShipDate=? AND shipType=? ADN fba.id=?",
+                planShipDate, Shipment.T.valueOf(shipType), fbaId).fetch();
         double total = units.stream().mapToDouble(ProcureUnit::reallyWeight).sum();
         total = new BigDecimal(total).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
         Product product = Product.findById(sku);
