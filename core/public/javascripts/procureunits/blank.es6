@@ -6,10 +6,13 @@ $(() => {
       $("#show_recommend_modal").modal("show");
       let sku = $("#unit_sku").val();
       let warehouse = $("#warehouse_select").val();
+      let planShipDate = $("[name='unit.attrs.planShipDate']").val();
       $("#update_div").load($(this).data("url"), {
         sku: sku,
         whouseId: warehouse,
-        qty: $("#planQty").val()
+        qty: $("input[placeholder='具体数量']").val(),
+        unitId: $("#unitId").val(),
+        planShipDate: planShipDate
       });
     } else {
       noty({

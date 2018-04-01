@@ -303,16 +303,36 @@ public class ProcureUnits extends Controller {
         Analyzes.index();
     }
 
-    public static void showRecommendChannelList(String sku, Long whouseId, int qty) {
+    public static void showRecommendChannelList(String sku, Long whouseId, int qty, long unitId, Date planShipDate) {
+        ProcureUnit unit = ProcureUnit.findById(unitId);
         Product product = Product.findById(sku);
+        double currUnitWeight = product.getRecentlyWeight() * qty;
         Whouse whouse = Whouse.findById(whouseId);
-        List<TransportRange> ranges = TransportChannelDetail.findOptimalChannelList(product.getRecentlyWeight() * qty,
-                whouse.market);
-        render(ranges);
+        List<TransportRange> ranges = new ArrayList<>();
+        if(unit.fba != null) {
+            Map<String, Double> map = new HashMap<>();
+            for(Shipment.T type : Shipment.T.values()) {
+                List<ProcureUnit> units = ProcureUnit.find("fba.centerId=? AND attrs.planShipDate=? AND id <>? "
+                        + "AND shipType=?", unit.fba.centerId, planShipDate, unit.id, type).fetch();
+                double totalWeigh = units.stream().mapToDouble(ProcureUnit::getRecentlyWeight).sum();
+                List<TransportRange> rangeList = TransportChannelDetail.findOptimalChannelList(
+                        currUnitWeight + totalWeigh, whouse.market, type);
+                ranges.addAll(rangeList);
+                map.put(type.name(), totalWeigh);
+            }
+            render(ranges, currUnitWeight, map, unit);
+        } else {
+            for(Shipment.T type : Shipment.T.values()) {
+                List<TransportRange> rangeList = TransportChannelDetail
+                        .findOptimalChannelList(currUnitWeight, whouse.market, type);
+                ranges.addAll(rangeList);
+            }
+            render(ranges, unit, currUnitWeight);
+        }
     }
 
-    public static void showSameDayTotalWeight(Date planShipDate, String shipType, Long fbaId,String sku, int qty) {
-        List<ProcureUnit> units = ProcureUnit.find("attrs.planShipDate=? AND shipType=? ADN fba.id=?",
+    public static void showSameDayTotalWeight(Date planShipDate, String shipType, Long fbaId, String sku, int qty) {
+        List<ProcureUnit> units = ProcureUnit.find("attrs.planShipDate=? AND shipType=? AND whouse.id=?",
                 planShipDate, Shipment.T.valueOf(shipType), fbaId).fetch();
         double total = units.stream().mapToDouble(ProcureUnit::reallyWeight).sum();
         total = new BigDecimal(total).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
@@ -758,7 +778,6 @@ public class ProcureUnits extends Controller {
         options.pageSize = IHtmlToPdfTransformer.A4P;
         renderPDF(options, selling, includeSku);
     }
-
 
     /**
      * FBA 箱包装信息

@@ -80,9 +80,9 @@
     ${unit.id}
     </td>
     <td>
-        ${unit.parent?.id}<br>
+    ${unit.parent?.id}<br>
         #{if unit.sample}
-        <span style="color:red">样品</span>
+          <span style="color:red">样品</span>
         #{/if}
     </td>
     <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
@@ -129,6 +129,9 @@
             #{/if}
         #{/if}
       <br><span style="color:#0075cf">${unit.fba?.centerId}</span>
+        #{if unit.fba}
+          <a href="@{ProcureUnits.edit(unit.id)}" class="btn btn-xs btn-default">物流信息</a>
+        #{/if}
     </td>
     <td>
         #{if unit.deliveryment}
@@ -153,7 +156,7 @@
               0
             #{/if}
             #{else }
-            剩:${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+              剩:${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
             #{/else}
         </td>
       #{/ifnot}

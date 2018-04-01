@@ -2037,6 +2037,24 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         return mainWeight + lastWeight;
     }
 
+    /**
+     * 获取当前采购计划重量
+     * 如果包装信息没填，则取sku重量
+     *
+     * @return
+     */
+    public double getRecentlyWeight() {
+        double mainWeight, lastWeight = 0;
+        if(this.mainBox != null) {
+            mainWeight = this.mainBox.singleBoxWeight * this.mainBox.boxNum;
+        } else {
+            mainWeight = this.product.getRecentlyWeight();
+        }
+        if(this.lastBox != null)
+            lastWeight = this.lastBox.singleBoxWeight * this.lastBox.boxNum;
+        return mainWeight + lastWeight;
+    }
+
     public double totalBoxVolume() {
         double mainVolume = 0, lastVolume = 0;
         if(this.mainBox != null)

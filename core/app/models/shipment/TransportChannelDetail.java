@@ -2,6 +2,7 @@ package models.shipment;
 
 import models.User;
 import models.market.M;
+import models.procure.Shipment;
 import org.hibernate.annotations.DynamicUpdate;
 import play.db.jpa.Model;
 
@@ -51,9 +52,9 @@ public class TransportChannelDetail extends Model {
     public int rowspan;
 
 
-    public static List<TransportRange> findOptimalChannelList(double weight, M market) {
-        List<TransportRange> rangeList = TransportRange.find("detail.destination LIKE ? ",
-                "%" + market.name() + "%").fetch();
+    public static List<TransportRange> findOptimalChannelList(double weight, M market, Shipment.T type) {
+        List<TransportRange> rangeList = TransportRange.find("detail.destination LIKE ? AND detail.channel.type = ?",
+                "%" + market.name() + "%", type).fetch();
         return rangeList.stream().filter(range -> range.containWeight(weight)).collect(Collectors.toList());
     }
 
