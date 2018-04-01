@@ -4,6 +4,7 @@
     #{stylesheet 'bootstrap3/workflow.css'/}
 #{/set}
 #{set 'moreScripts'}
+    #{script 'externalcall.js'/}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
     #{script 'timeline/timeline_js/timeline-api.js'/}
@@ -49,22 +50,13 @@
             <div class="col-sm-6">
               <div class="box box-info">
                 <div class="box-header">
-                  <h3 class="box-title">运输进度<i class="icon-sort-down"></i></h3>
+                  <h3 class="box-title">运输进度</h3>
                   <a href="@{Shipments.refreshProcuress(ship.id)}" class="btn btn-xs btn-danger" data-method='PUT'>
                     <i class="icon-refresh"></i>
                   </a>
                 </div>
-                <div class="box-body">
-                  <div id="shipping_details" class="span12" style="overflow:auto;height:280px;">
-                  #{set logEvents: ship.logEvents()/}
-                  #{records_ul records: ship.logEvents()/}
-                  #{if ship.iExpressHTML.trim().size() > 0}
-                  ${ship.iExpressHTML.raw()}
-                  #{/if}
-                  #{elseif logEvents.size() == 0}
-                    还没有跟踪信息
-                  #{/elseif}
-                  </div>
+                <div class="box-body" style="height:600px;">
+                  <div id="YQContainer"></div>
                 </div>
               </div>
             </div>

@@ -62,12 +62,26 @@ $(() => {
     });
   });
 
-
   $("a[name='fbabg']").click(function () {
     let $btn = $(this);
-    $btn.parent("td").attr("bgcolor","#FBE1B6");
-    var url = $btn.attr("href")
-    window.open(url, "_blank")
+    $btn.parent("td").attr("bgcolor", "#FBE1B6");
+    let url = $btn.attr("href");
+    window.open(url, "_blank");
   });
 
+  let tackNo = $("input[name='ship.tracknolist[0]']").val();
+  let fc = $("#fc_input").val();
+
+  YQV5.trackSingle({
+    //必须，指定承载内容的容器ID。
+    YQ_ContainerId: "YQContainer",
+    //可选，指定查询结果高度，最大为800px，默认为560px。
+    YQ_Height: 560,
+    //可选，指定运输商，默认为自动识别。
+    YQ_Fc: fc,
+    //可选，指定UI语言，默认根据浏览器自动识别。
+    YQ_Lang: "zh-cn",
+    //必须，指定要查询的单号。
+    YQ_Num: tackNo
+  });
 });

@@ -224,7 +224,7 @@
                     <input type="text" style="width:200px;" class="form-control"
                            name="ship.tracknolist[${trackno_index - 1}]" value="${trackno}">
                       #{if ship.internationExpress && trackno}
-                        <a href="${ship.internationExpress.trackUrl(trackno)}" target="_blank" class="btn btn-info"
+                        <a href="${ship.internationExpress.oneSevenTrackUrl(trackno)}" target="_blank" class="btn btn-info"
                            data-toggle="tooltip" title="查看详情"><i class="icon-external-link"></i></a>
                       #{/if}
                     <a class="btn btn-danger" name="delete_trackno_row"><i class="icon-remove"></i></a>
@@ -246,6 +246,7 @@
           <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
           <input type="submit" value="保存" class="btn btn-primary btn-xs">
           <input type="hidden" name="shipId" value="${ship.id}">
+          <input type="hidden" id="fc_input" value="${ship.internationExpress.fcNum()}">
         </div>
       </form>
     </div>

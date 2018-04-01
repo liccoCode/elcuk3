@@ -1,5 +1,6 @@
 #{extends 'main_full_v3.html'/}
 #{set title:'Orders'/}
+
 #{set 'moreScripts'}
     #{script 'orders/orders.es6'/}
 #{/set}
@@ -26,15 +27,15 @@
         <div class="tab-pane active" id='orderinfo'>
           <div class="box box-primary">
             <div class="box-header with-border">
-              <h3 class="box-title">Order Basic</h3>
+              <h4 class="box-title">Order Basic</h4>
             </div>
             <div class="box-body">
               <table class="table table-condensed table-bordered">
                 <tr>
                   <th>OrderId:</th>
                   <td>
-                    <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}
-                    </a></td>
+                    <a href="${ord.orderLink()}" target="_blank"><i class="icon-external-link"></i> ${ord.orderId}</a>
+                  </td>
                   <th>Address:</th>
                   <td>${ord.address}</td>
                   <th>Address1:</th>
@@ -110,13 +111,12 @@
             </div>
           </div>
 
-          <div class="box box-info box-solid">
-            <div class="box-header"><h3 class="box-title">Order Items</h3></div>
+          <div class="box box-info">
+            <div class="box-header with-border"><h3 class="box-title">Order Items</h3></div>
             <div class="box-body">
               <table class="table table-bordered">
                 <tr>
                   <th>SKU</th>
-                  <th>Id</th>
                   <th>Qty</th>
                   <th>Price</th>
                   <th>ShipPrice</th>
@@ -127,14 +127,15 @@
               #{list items:ord.items, as:'item'}
                 <tr>
                   <td>${item.product.sku}</td>
-                  <td>${item.id}</td>
                   <td>${item.quantity}</td>
                   <td>${item.price} ${item.currency}</td>
                   <td>${item.shippingPrice}</td>
                   <td>
-                    <a target="_blank" href="${item.selling.asinLink()}"><i class="icon-external-link"></i> ${item.listingName}
-                    </a></td>
-                  <td>${item.createDate}</td>
+                    <a target="_blank" href="${item.selling.asinLink()}" data-toggle="tooltip" title="${item.listingName}">
+                      <i class="icon-external-link"></i> ${item.listingName.xxLong()}
+                    </a>
+                  </td>
+                  <td>#{time_tooltip_v3 time:item.createDate, datetime:true/}</td>
                   <td>${item.memo}</td>
                 </tr>
               #{/list}
@@ -142,13 +143,12 @@
             </div>
           </div>
 
-          <div class="box box-warning box-solid">
-            <div class="box-header"><h3 class="box-title">Order Fees</h3></div>
+          <div class="box box-warning">
+            <div class="box-header with-border"><h4 class="box-title">Order Fees</h4></div>
             <div class="box-body">
             #{render 'Orders/_order_fees.html', fees:ord.fees/}
             </div>
           </div>
-
         </div>
 
         <div class="tab-pane" id='invoiceinfo'>

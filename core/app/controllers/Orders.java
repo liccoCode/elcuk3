@@ -83,16 +83,13 @@ public class Orders extends Controller {
                         .setScale(2, 4)
                         .floatValue();
             }
-            List<ElcukRecord> records = ElcukRecord.find(" fid = '" + id + "' and "
-                    + "action like '%orderinvoice.invoice%' ORDER BY "
-                    + " createAt  DESC")
-                    .fetch();
+            List<ElcukRecord> records = ElcukRecord.find(" fid =? and "
+                    + "action like '%orderinvoice.invoice%' ORDER BY createAt DESC ", id).fetch();
             OrderInvoiceFormat invoiceformat = OrderInvoice.invoiceformat(ord.market);
             String editaddress = ord.formataddress(invoiceformat.country);
             Date returndate = ord.returndate();
             //判断是否存在退款
             int isreturn = ord.isreturn();
-
             render(ord, totalamount, tax, notaxamount, invoice, records, editaddress, invoiceformat, returndate,
                     isreturn);
         } else
