@@ -1,6 +1,5 @@
 package models.procure;
 
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -32,10 +31,9 @@ import java.util.*;
 public enum iExpress {
     DHL {
         @Override
-        public String trackUrl(String tracNo) {
-            return String
-                    .format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s",
-                            tracNo.trim());
+        public String trackUrl(String trackNo) {
+            return String.format("http://www.cn.dhl.com/content/cn/zh/express/tracking.shtml?brand=DHL&AWB=%s",
+                    trackNo.trim());
         }
 
         @Override
@@ -70,6 +68,11 @@ public enum iExpress {
             return Arrays.asList(M.AMAZON_US, M.AMAZON_CA).contains(m) ? "DHL_EXPRESS_USA_INC" : "DHL_UK";
         }
 
+        @Override
+        public String fcNum() {
+            return "100001";
+        }
+
         public F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String text) {
             if(StringUtils.isNotBlank(iExpressHTML)) {
                 Document doc = Jsoup.parse(iExpressHTML);
@@ -96,14 +99,14 @@ public enum iExpress {
 
     FEDEX {
         @Override
-        public String trackUrl(String tracNo) {
-            return String.format(
-                    "https://www.fedex.com/apps/fedextrack/index.html?tracknumbers=%s&locale=zh_CN&cntry_code=cn",
-                    tracNo);
+        public String trackUrl(String trackNo) {
+            return String
+                    .format("https://www.fedex.com/apps/fedextrack/index.html?tracknumbers=%s&locale=zh_CN&cntry_code=cn",
+                            trackNo);
         }
 
         @Override
-        public String fetchStateHTML(String tracNo) {
+        public String fetchStateHTML(String trackNo) {
             Map<String, Map> data = new HashMap<>();
             Map<String, Object> trackpackgeRequest = new HashMap<>();
             List<Map<String, Object>> trackingInfoList = new ArrayList<>();
@@ -123,7 +126,7 @@ public enum iExpress {
 
             trackingInfoList.add(trackNumberInfo);
             trackNumberInfo.put("trackNumberInfo", trackNumber);
-            trackNumber.put("trackingNumber", tracNo);
+            trackNumber.put("trackingNumber", trackNo);
 
             // Fedex 的 url 不一样
             return HTTP.post("https://www.fedex.com/trackingCal/track",
@@ -139,7 +142,6 @@ public enum iExpress {
         @Override
         public String parseExpress(String html, String trackNo) {
             JSONObject infos = JSON.parseObject(html);
-
             StringBuilder sbd = new StringBuilder("<table>")
                     // header
                     .append("<tr>")
@@ -148,7 +150,6 @@ public enum iExpress {
                     .append("<td>").append("地点").append("</td>")
                     .append("<td>").append("详细信息").append("</td>")
                     .append("</tr>");
-
             JSONArray events = infos.getJSONObject("TrackPackagesResponse")
                     .getJSONArray("packageList").getJSONObject(0).getJSONArray("scanEventList");
             for(Object obj : events) {
@@ -188,6 +189,11 @@ public enum iExpress {
             return Arrays.asList(M.AMAZON_US, M.AMAZON_CA).contains(m) ? "FEDERAL_EXPRESS_CORP" : "OTHER";
         }
 
+        @Override
+        public String fcNum() {
+            return "100003";
+        }
+
         private F.T2<Boolean, DateTime> isAnyState(String iExpressHTML, String state) {
             if(StringUtils.isNotBlank(iExpressHTML)) {
                 Document doc = Jsoup.parse(iExpressHTML);
@@ -200,14 +206,13 @@ public enum iExpress {
             }
             return new F.T2<>(false, DateTime.now());
         }
-
     },
 
     UPS {
         @Override
-        public String trackUrl(String tracNo) {
+        public String trackUrl(String trackNo) {
             return String.format("http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes"
-                    + "&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", tracNo.trim());
+                    + "&tracknum=%s&HTMLVersion=5.0&loc=zh_CN&Requester=UPSHome", trackNo.trim());
         }
 
         @Override
@@ -265,31 +270,105 @@ public enum iExpress {
             return "UNITED_PARCEL_SERVICE_INC";
         }
 
+        @Override
+        public String fcNum() {
+            return "100002";
+        }
+
         private DateTime trToDate(Element trElement) {
-            return DateTime.parse(
-                    String.format("%s %s",
-                            trElement.select("td:eq(1)").text(),
-                            trElement.select("td:eq(2)").text()),
-                    DateTimeFormat.forPattern("yyyy/MM/dd HH:mm"));
+            return DateTime.parse(String.format("%s %s", trElement.select("td:eq(1)").text(),
+                    trElement.select("td:eq(2)").text()), DateTimeFormat.forPattern("yyyy/MM/dd HH:mm"));
+        }
+    },
+    DPD {
+        @Override
+        public String trackUrl(String trackNo) {
+            return null;
+        }
+
+        @Override
+        public String parseExpress(String html, String trackNo) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isClearance(String content) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
+            return null;
+        }
+
+        @Override
+        public String carrierName(M m) {
+            return m == M.AMAZON_UK ? "DPD" : "OTHER";
+        }
+
+        @Override
+        public String fcNum() {
+            return "100010";
+        }
+    },
+    TNT {
+        @Override
+        public String trackUrl(String trackNo) {
+            return null;
+        }
+
+        @Override
+        public String parseExpress(String html, String trackNo) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isClearance(String content) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isDelivered(String iExpressHTML) {
+            return null;
+        }
+
+        @Override
+        public F.T2<Boolean, DateTime> isReceipt(String iExpressHTML) {
+            return null;
+        }
+
+        @Override
+        public String carrierName(M m) {
+            return m == M.AMAZON_UK ? "TNT" : "OTHER";
+        }
+
+        @Override
+        public String fcNum() {
+            return "100004";
         }
     };
 
     /**
      * 0. 抓取快递单的地址
      *
-     * @param tracNo
+     * @param trackNo
      * @return
      */
-    public abstract String trackUrl(String tracNo);
+    public abstract String trackUrl(String trackNo);
 
     /**
      * 1. 直接返回抓取的 HTML 代码
      *
-     * @param tracNo
+     * @param trackNo
      * @return
      */
-    public String fetchStateHTML(String tracNo) {
-        return HTTP.get(this.trackUrl(tracNo));
+    public String fetchStateHTML(String trackNo) {
+        return HTTP.get(this.trackUrl(trackNo));
     }
 
     /**
@@ -324,4 +403,10 @@ public enum iExpress {
     public abstract F.T2<Boolean, DateTime> isReceipt(String iExpressHTML);
 
     public abstract String carrierName(M m);
+
+    public abstract String fcNum();
+
+    public String oneSevenTrackUrl(String trackNo) {
+        return String.format("https://t.17track.net/zh-cn#nums=%s&fc=%s", trackNo.trim(), this.fcNum());
+    }
 }
