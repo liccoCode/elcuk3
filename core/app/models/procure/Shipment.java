@@ -1269,7 +1269,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         for(ShipItem itm : this.items) {
             if(itm.unit == null || itm.unit.mainBox == null) continue;
             Double volume = itm.unit.mainBox.length * itm.unit.mainBox.width * itm.unit.mainBox.height;
-            Logger.info(itm.unit.product.sku);
             if((volume / 5000) > itm.unit.mainBox.singleBoxWeight) {
                 totalWeight += (volume * itm.unit.mainBox.boxNum) / 5000;
             } else {
