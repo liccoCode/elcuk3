@@ -5,6 +5,7 @@ import helper.DBUtils;
 import helper.Dates;
 import models.procure.Cooperator;
 import models.procure.ProcureUnit;
+import models.whouse.StockRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import play.db.helper.SqlSelect;
@@ -100,6 +101,19 @@ public class StockPost extends Post<ProcureUnit> {
                 .mapToDouble(unit -> unit.availableQty * unit.attrs.price).sum();
         b = new BigDecimal(totalUSD);
         map.put("totalUSD", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+
+        Date now = new Date();
+        List<StockRecord> recordList = StockRecord.find("createDate>=? AND createDate<=? AND type IN (?,?,?,?,?)",
+                Dates.morning(now), Dates.night(now), StockRecord.T.Inbound, StockRecord.T.Unqualified_Transfer,
+                StockRecord.T.Outbound, StockRecord.T.OtherOutbound, StockRecord.T.Refund).fetch();
+        Integer inboundQty = recordList.stream()
+                .filter(record -> Arrays.asList(StockRecord.T.Inbound, StockRecord.T.Unqualified_Transfer)
+                        .contains(record.type)).mapToInt(record -> record.qty).sum();
+        Integer outboundQty = recordList.stream().filter(record -> Arrays
+                .asList(StockRecord.T.Outbound, StockRecord.T.OtherOutbound, StockRecord.T.Refund).contains(record.type))
+                .mapToInt(record -> record.qty).sum();
+        map.put("inboundQty", inboundQty.toString());
+        map.put("outboundQty", outboundQty.toString());
         return map;
     }
 

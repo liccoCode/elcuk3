@@ -27,4 +27,14 @@ public class DailyStock extends Model {
     public double totalCNY;
 
     public double totalUSD;
+
+    /**
+     * 当日入库数量
+     */
+    public int inboundQty;
+
+    /**
+     * 当日出库数量
+     */
+    public int outboundQty;
 }
