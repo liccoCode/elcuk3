@@ -90,7 +90,8 @@
       <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
     </td>
     <td style="word-break:break-all;">
-      <a href="@{Products.show(unit.sku)}" target="_blank" rel="popover" content="${cooperItem?.memo}">${unit.sku}</a>
+      <a href="@{Products.show(unit.sku)}" target="_blank" data-toggle="popover" data-content="${cooperItem?.memo}"
+         data-title="${unit.product.abbreviation}">${unit.sku}</a>
     </td>
     <td>
         #{if unit.fba}
