@@ -246,7 +246,7 @@
           <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
           <input type="submit" value="保存" class="btn btn-primary btn-xs">
           <input type="hidden" name="shipId" value="${ship.id}">
-          <input type="hidden" id="fc_input" value="${ship.internationExpress.fcNum()}">
+          <input type="hidden" id="fc_input" value="${ship.internationExpress?.fcNum()}">
         </div>
       </form>
     </div>
