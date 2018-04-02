@@ -55,42 +55,27 @@ public class TrafficRatePost extends Post<TrafficRate> {
     public List<TrafficRate> query() {
         String cacheKey = Caches.Q.cacheKey("trafficRate", this.market, this.from, this.to, this.SellingId);
         List<TrafficRate> cacheElement = Cache.get(cacheKey, List.class);
-        if(cacheElement != null) return cacheElement;
+        if(cacheElement != null && cacheElement.size()>0) return cacheElement;
 
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<>();
-        sbd.append("date").append(">=?").append(" AND ")
-                .append("date<=?");
+        sbd.append("sellDate").append(">=?").append(" AND ")
+                .append("sellDate<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
 
         if(StringUtils.isNotBlank(this.SellingId)) {
-            sbd.append(" AND selling.sellingId like ?");
+            sbd.append(" AND sellingId like ?");
             params.add(this.SellingId + "%");
         }
         if(this.market != null) {
             sbd.append(" AND market=? ");
             params.add(this.market);
         }
-        sbd.append(" ORDER BY selling.sellingId,date");
-
-        List<SellingRecord> dateMixRecords = SellingRecord
-                .find(sbd.toString(), params.toArray()).fetch();
-
-        List<TrafficRate> traffics = new ArrayList<>();
-        for(SellingRecord rcd : dateMixRecords) {
-            TrafficRate traffic = new TrafficRate();
-            traffic.sellingId = rcd.selling.sellingId;
-            traffic.sessions = rcd.sessions;
-            traffic.pageViews = rcd.pageViews;
-            traffic.sellDate = rcd.date;
-            traffic.orders = rcd.orders;
-            traffic.units = rcd.units;
-            traffic.market = rcd.market;
-            traffic.turnRatio = Webs.scalePointUp(3, (float) rcd.orders / (rcd.sessions == 0 ? 1 : rcd.sessions));
-            traffics.add(traffic);
-        }
-
+        sbd.append(" ORDER BY sellingId,sellDate");
+        
+        List<TrafficRate> traffics =  TrafficRate
+                        .find(sbd.toString(), params.toArray()).fetch();
         Cache.set(cacheKey, traffics, "4h");
         return traffics;
     }

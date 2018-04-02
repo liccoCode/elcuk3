@@ -1,8 +1,11 @@
 package models.view.report;
 
+import com.google.gson.annotations.Expose;
 import models.market.M;
+import org.hibernate.annotations.DynamicUpdate;
+import play.db.jpa.GenericModel;
 
-import java.io.Serializable;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -11,11 +14,21 @@ import java.util.Date;
  * Date: 14-6-9
  * Time: 上午9:27
  */
-public class TrafficRate implements Serializable {
+@Entity
+@DynamicUpdate
+public class TrafficRate extends GenericModel {
+
+    @Id
+    @Column(length = 80)
+    @Expose
+    public String id;
+
     public String sellingId;
 
+    @Temporal(TemporalType.DATE)
     public Date sellDate;
 
+    @Enumerated(EnumType.STRING)
     public M market;
 
     public float pageViews;
@@ -26,6 +39,9 @@ public class TrafficRate implements Serializable {
 
     public float turnRatio;
 
-    public float units;
+    public float sales;
 
+    public float returnd;
+
+    public Date updateDate;
 }
