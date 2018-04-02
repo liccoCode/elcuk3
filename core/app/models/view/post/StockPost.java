@@ -102,10 +102,9 @@ public class StockPost extends Post<ProcureUnit> {
         b = new BigDecimal(totalUSD);
         map.put("totalUSD", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 
-        Date now = new Date();
-        List<StockRecord> recordList = StockRecord.find("createDate>=? AND createDate<=? AND type IN (?,?,?,?,?)",
-                Dates.morning(now), Dates.night(now), StockRecord.T.Inbound, StockRecord.T.Unqualified_Transfer,
-                StockRecord.T.Outbound, StockRecord.T.OtherOutbound, StockRecord.T.Refund).fetch();
+        F.T2<String, List<Object>> stockParams = this.stockParams();
+
+        List<StockRecord> recordList = StockRecord.find(stockParams._1, stockParams._2.toArray()).fetch();
         Integer inboundQty = recordList.stream()
                 .filter(record -> Arrays.asList(StockRecord.T.Inbound, StockRecord.T.Unqualified_Transfer)
                         .contains(record.type)).mapToInt(record -> record.qty).sum();
@@ -115,6 +114,53 @@ public class StockPost extends Post<ProcureUnit> {
         map.put("inboundQty", inboundQty.toString());
         map.put("outboundQty", outboundQty.toString());
         return map;
+    }
+
+    public F.T2<String, List<Object>> stockParams() {
+        Date now = new Date();
+        StringBuilder sbd = new StringBuilder("SELECT r FROM StockRecord r LEFT JOIN r.unit p LEFT JOIN p.fba fba ");
+        List<Object> params = new ArrayList<>();
+        sbd.append("WHERE 1=1 AND r.createDate>=? AND r.createDate<=? AND r.type IN (?,?,?,?,?)");
+        params.add(Dates.morning(now));
+        params.add(Dates.night(now));
+        params.add(StockRecord.T.Inbound);
+        params.add(StockRecord.T.Unqualified_Transfer);
+        params.add(StockRecord.T.Outbound);
+        params.add(StockRecord.T.OtherOutbound);
+        params.add(StockRecord.T.Refund);
+        if(this.flag) {
+            sbd.append(" AND p.unqualifiedQty > 0 ");
+        } else {
+            sbd.append(" AND p.availableQty > 0 ");
+        }
+        Long unit_id = isSearchForId();
+        if(unit_id != null) {
+            sbd.append(" AND p.id=?");
+            params.add(unit_id);
+            return new F.T2<>(sbd.toString(), params);
+        }
+
+        if(this.whouses != null && this.whouses.length > 0) {
+            sbd.append(" AND p.currWhouse.id IN  ").append(SqlSelect.inlineParam(whouses));
+        }
+
+        if(cooperator != null && this.cooperator.id != null) {
+            sbd.append(" AND p.cooperator.id=?");
+            params.add(this.cooperator.id);
+        }
+
+        if(StringUtils.isNotBlank(this.projectName)) {
+            sbd.append(" AND p.projectName=?");
+            params.add(this.projectName);
+        }
+        if(StringUtils.isNotBlank(this.search)) {
+            sbd.append(" AND (p.product.sku LIKE ? OR p.fba.shipmentId LIKE ? )");
+            for(int i = 0; i < 2; i++) params.add(this.word());
+        }
+        if(categories.size() > 0) {
+            sbd.append(" AND p.product.category.id IN ").append(SqlSelect.inlineParam(categories));
+        }
+        return new F.T2<>(sbd.toString(), params);
     }
 
 
