@@ -26,6 +26,4 @@ public class ShipmentRatioJob extends BaseJob {
             Logger.info(shipment.id + "完成计算占比！");
         });
     }
-
-
 }
