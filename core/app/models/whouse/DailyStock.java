@@ -2,9 +2,7 @@ package models.whouse;
 
 import play.db.jpa.Model;
 
-import javax.persistence.Entity;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -37,4 +35,28 @@ public class DailyStock extends Model {
      * 当日出库数量
      */
     public int outboundQty;
+
+    /**
+     * 当日计划数量
+     */
+    public int planQty;
+
+    /**
+     * 当日下单数量
+     */
+    public int deliveryQty;
+
+    /**
+     * 当日收货数量
+     */
+    public int doneQty;
+
+    public enum T {
+        ProcureUnit,
+        Whouse
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    public T type;
 }

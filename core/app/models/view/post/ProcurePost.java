@@ -1,6 +1,7 @@
 package models.view.post;
 
 import controllers.Login;
+import helper.Currency;
 import helper.DBUtils;
 import helper.Dates;
 import models.OperatorConfig;
@@ -21,6 +22,7 @@ import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -116,12 +118,10 @@ public class ProcurePost extends Post<ProcureUnit> {
     public C isConfirm;
     public ProcureUnit.T type;
 
-
     /**
      * 屏蔽无效计划
      */
     public Boolean shield;
-
 
     public ProcurePost() {
         this.from = DateTime.now().minusDays(25).toDate();
@@ -265,10 +265,9 @@ public class ProcurePost extends Post<ProcureUnit> {
             categoryList.add("-1");
             sbd.append(" AND p.product.category.categoryId IN ").append(SqlSelect.inlineParam(categoryList));
         }
-        if(shield != null && shield){
+        if(shield != null && shield) {
             sbd.append(" AND p.attrs.planQty > 0 ");
         }
-
         return new F.T2<>(sbd.toString(), params);
     }
 
@@ -385,15 +384,46 @@ public class ProcurePost extends Post<ProcureUnit> {
     }
 
     public static HighChart perCreateTotalNum() {
-        StringBuilder sql = new StringBuilder("SELECT u.username, count(1) as perNum FROM ProcureUnit p ");
-        sql.append(" LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ");
         HighChart columnChart = new HighChart(Series.COLUMN);
-        DBUtils.rows(sql.toString()).forEach(row -> {
+        DBUtils.rows("SELECT u.username, count(1) as perNum FROM ProcureUnit p " +
+                " LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ").forEach(row -> {
             Series.Column column = new Series.Column(row.get("username").toString());
             column.add(row.get("username").toString(), Float.parseFloat(row.get("perNum").toString()));
             columnChart.series(column);
         });
         return columnChart;
+    }
+
+    public Map<String, String> total(List<ProcureUnit> units) {
+        Map<String, String> map = new HashMap<>();
+        Integer totalQty = units.stream().mapToInt(ProcureUnit::qty).sum();
+        map.put("totalQty", totalQty.toString());
+        Double totalCNY = units.stream().filter(unit -> Objects.equals(helper.Currency.CNY, unit.attrs.currency))
+                .mapToDouble(unit -> unit.qty() * unit.attrs.price).sum();
+        BigDecimal b = new BigDecimal(totalCNY);
+        map.put("totalCNY", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        Double totalUSD = units.stream().filter(unit -> Objects.equals(Currency.USD, unit.attrs.currency))
+                .mapToDouble(unit -> unit.qty() * unit.attrs.price).sum();
+        b = new BigDecimal(totalUSD);
+        map.put("totalUSD", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        F.T2<String, List<Object>> params = this.params();
+        params._2.add(Dates.morning(new Date()));
+        params._2.add(Dates.night(new Date()));
+        List<ProcureUnit> details = ProcureUnit.find(params._1 + " AND p.createDate>=? AND p.createDate<=?",
+                params._2.toArray()).fetch();
+        Integer planQty = details.stream().filter(detail -> detail.parent == null)
+                .filter(detail -> Objects.equals(ProcureUnit.STAGE.PLAN, detail.stage))
+                .mapToInt(ProcureUnit::qty).sum();
+        Integer deliveryQty = details.stream().filter(detail -> detail.parent == null)
+                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DELIVERY, detail.stage))
+                .mapToInt(ProcureUnit::qty).sum();
+        Integer doneQty = details.stream().filter(detail -> detail.parent == null)
+                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DONE, detail.stage))
+                .mapToInt(ProcureUnit::qty).sum();
+        map.put("planQty", planQty.toString());
+        map.put("deliveryQty", deliveryQty.toString());
+        map.put("doneQty", doneQty.toString());
+        return map;
     }
 
 }
