@@ -55,7 +55,7 @@ import static play.modules.pdf.PDF.renderPDF;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class ProcureUnits extends Controller {
 
-    @Before(only = {"index", "indexWhouse"})
+    @Before(only = {"index", "indexWhouse", "detailIndex"})
     public static void beforeIndex() {
         List<Cooperator> cooperators = Cooperator.suppliers();
         String brandName = OperatorConfig.getVal("brandname");
@@ -94,6 +94,17 @@ public class ProcureUnits extends Controller {
             p.stages.add(ProcureUnit.STAGE.OUTBOUND);
         }
         render("ProcureUnits/index_v3.html", p);
+    }
+
+    public static void detailIndex(ProcurePost p) {
+        if(p == null) {
+            p = new ProcurePost();
+            p.stages.add(ProcureUnit.STAGE.PLAN);
+            p.stages.remove(ProcureUnit.STAGE.IN_STORAGE);
+        }
+        List<ProcureUnit> units = p.query();
+        Map<String, String> map = p.total(units);
+        render(p, units, map);
     }
 
     @Check("procures.indexWhouse")

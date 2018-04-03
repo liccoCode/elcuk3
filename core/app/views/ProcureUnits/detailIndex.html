@@ -1,0 +1,223 @@
+#{extends 'main_full_v3.html' /}
+#{set title:"采购详情分析"/}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap-multiselect.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap-multiselect.js'/}
+    #{script 'component/pagination.coffee'/}
+    #{script 'procureunits/index.coffee'/}
+    #{script 'procureunits/index.es6'/}
+    #{script 'procureunits/_unit_list.coffee'/}
+#{/set}
+
+#{errorMsgs /}
+#{flash_alert /}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>总数量</th>
+            <th>当天计划数</th>
+            <th>当天下单</th>
+            <th>当天收货</th>
+            <th style="width:20%;" data-toggle="tooltip" title="库存资金币种为人民币部分">总金额(¥)</th>
+            <th style="width:20%;" data-toggle="tooltip" title="库存资金币种为美元部分">总金额($)</th>
+          </tr>
+          <tr>
+            <td style="color:blue;">${map.get("totalQty")}</td>
+            <td style="color:sandybrown;">${map.get("planQty")}</td>
+            <td style="color:red;">${map.get("deliveryQty")}</td>
+            <td style="color:green;">${map.get("doneQty")}</td>
+            <td>${map.get("totalCNY")}</td>
+            <td>${map.get("totalUSD")}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-header with-border">
+        <form action="@{ProcureUnits.detailIndex()}" class="form-inline" id="search_Form">
+          <div class="row-fluid">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">From:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">To:</div>
+                <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+              </div>
+            </div>
+
+            <select name="p.dateType" class="form-control" style="width:100px;">
+            #{list items:models.view.post.ProcurePost.DATE_TYPES, as:'t'}
+              <option ${t._1 == p.dateType ? 'selected' : ''} value="${t._1}">${t._2}</option>
+            #{/list}
+            </select>
+
+            <select name="p.whouseId" class="form-control">
+              <option value="0">去往市场</option>
+            #{list items:whouses, as:'wh'}
+              <option ${wh.id == p.whouseId ? 'selected' : ''} value="${wh.id}">${wh.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.shipType" class="form-control" style="width:82px;">
+              <option value="">运输方式</option>
+            #{list items:models.procure.Shipment.T.values(), as:'t'}
+              <option ${t == p.shipType ? 'selected' : ''} value="${t.name()}">${t.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.isConfirm" class="form-control">
+              <option value="">是否核单</option>
+            #{list items:models.view.post.ProcurePost.C, as:'c'}
+              <option ${c == p.isConfirm ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+            #{/list}
+            </select>
+
+            <select name="p.categories" multiple="multiple" id="categories" class="form-control">
+            #{list items:categoryIds, as:'c'}
+              <option value="${c.categoryId}" ${p.categories.contains(c.categoryId) ? 'selected':''}>${c.categoryId}</option>
+            #{/list}
+            </select>
+
+            <select name="p.stages" multiple="multiple" id="stage" class="form-control">
+            #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+                #{if stage.label() != '审批中'}
+                  <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
+                #{/if}
+            #{/list}
+            </select>
+
+            <select name="p.cooperatorId" class="form-control selectize" style="width:100px;">
+              <option value="">供应商</option>
+            #{list items:cooperators, as:'cop'}
+              <option ${cop.id == p.cooperatorId ? 'selected' : ''} value="${cop.id}">${cop.name}</option>
+            #{/list}
+            </select>
+
+            <select name="p.projectName" class="form-control">
+              <option value="">项目名称</option>
+            #{list items:models.User.COR, as:'c'}
+                #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
+                  <option ${c.name() == p.projectName ? 'selected' : ''} value="${c.name()}">${c.label()}</option>
+                #{/if}
+            #{/list}
+            </select>
+
+            <select name="p.shield" class="form-control" style="width:100px;">
+              <option value="1" ${p.shield ? 'selected' : ''}>屏蔽无效计划</option>
+              <option value="0" ${!p.shield ? 'selected' : ''}>不屏蔽无效计划</option>
+            </select>
+
+            <div class="input-group">
+              <div class="input-group-addon"><i class="icon-search"></i></div>
+              <input style="width:200px;" class="form-control" name="p.search" placeholder="sellingId or SKU" value="${p.search}">
+              <input type="hidden" name="p.page" value="${p.page}">
+            </div>
+            <button class="btn btn-primary" data-loading>搜索</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="box-body">
+        <table class="table table-condensed table-bordered dataTable" id="unit_table">
+          <tr>
+            <th width="20px;"></th>
+            <th width="45px;">#</th>
+            <th width="45px;">父ID</th>
+            <th width="40px;">阶段</th>
+            <th width="190px;">Selling</th>
+            <th width="120px">Sku</th>
+            <th width="100px;">采购单<br>供应商</th>
+            <th width="60px;">去往市场</th>
+            <th width="120px;">数量<br>(计划/交货/入库)</th>
+            <th width="80px;">可用库存</th>
+            <th width="60px;">单价</th>
+            <th width="120px;" data-toggle="popover" data-content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">总价<br>剩余请款金额</th>
+            <th width="70px;">运输方式</th>
+            <th width="100px;">预计交货时间</th>
+            <th width="100px;">预计运输时间</th>
+            <th width="100px;">实际交货时间</th>
+            <th width="85px;">创建人/<br>创建时间</th>
+          </tr>
+        #{list items:units, as:'unit'}
+          <tr>
+            <td><img height="40px;" width="45px;" src="${unit.selling?.aps?.imageUrl}"></td>
+            <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
+              <i class="icon-reorder"></i>
+                #{if unit.parent}
+                  <i class="icon-retweet" style="color:${unit.type.name()=='ProcureSplit'?'blue':'orange'}"
+                     rel="tooltip" title="${unit.type?.label()}"></i>
+                #{/if}<br>
+            ${unit.id}
+            </td>
+            <td>
+            ${unit.parent?.id}<br>
+                #{if unit.sample}
+                  <span style="color:red">样品</span>
+                #{/if}
+            </td>
+            <td style="background:${unit.stage.rgb()}">${unit.stage.label()}</td>
+            <td class="selling_id" style="word-break:break-all;">
+              <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a>
+            </td>
+            <td style="word-break:break-all;">
+              <a href="@{Products.show(unit.sku)}" target="_blank" data-toggle="popover" data-content="${cooperItem?.memo}"
+                 data-title="${unit.product.abbreviation}">${unit.sku}</a>
+            </td>
+            <td>
+                #{if unit.deliveryment}
+                  <a href="@{Deliveryments.show(unit.deliveryment.id)}">${unit.deliveryment.id}</a>
+                #{/if}
+              <br>${unit.cooperator?.name}
+            </td>
+            <td data-toggle="tooltip" title="${unit.whouse?.name}">${unit.whouse?.name}</td>
+            <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
+            ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
+            </td>
+            <td>${unit.availableQty}</td>
+            <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
+                #{if unit.containTax}
+                  <br>
+                  <div class="label label-danger">税点:${unit.taxPoint}</div>
+                #{/if}
+            </td>
+            <td>总:${unit.attrs.currency?.symbol()} ${unit.totalAmount().format('#,###.##')}<br>
+                #{if unit.type?.name() == 'StockSplit'}
+                  0
+                #{/if}
+                #{else }
+                  剩:${unit.attrs.currency?.symbol()} ${unit.leftAmount().format('#,###.##')}
+                #{/else}
+            </td>
+            <td style="color:${unit.shipType.rgb()}">
+              <i class="${unit.shipType?.pic()}"></i>${unit.shipType?.label()}
+            </td>
+            <td>#{time_tooltip_v3 time:unit.attrs.planDeliveryDate/}</td>
+            <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
+            <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>
+            <td>${unit.handler?.username}<br>#{time_tooltip time:unit.createDate/}</td>
+          </tr>
+        #{/list}
+        </table>
+      </div>
+
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
