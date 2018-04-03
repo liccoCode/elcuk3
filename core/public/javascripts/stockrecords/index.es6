@@ -23,4 +23,11 @@ $(() => {
     includeSelectAllOption: true
   });
 
+  $("#type_select").multiselect({
+    buttonWidth: '120px',
+    nonSelectedText: '异动类型',
+    maxHeight: 200,
+    includeSelectAllOption: true
+  });
+
 });

@@ -4,6 +4,7 @@ import helper.Dates;
 import models.whouse.StockRecord;
 import models.whouse.Whouse;
 import org.apache.commons.lang.StringUtils;
+import play.db.helper.SqlSelect;
 import play.libs.F;
 
 import java.util.ArrayList;
@@ -19,12 +20,13 @@ import java.util.regex.Pattern;
  * Time: 6:00 PM
  */
 public class StockRecordPost extends Post<StockRecord> {
+    private static final long serialVersionUID = -4525833753528075605L;
     public Date from;
     public Date to;
     public Whouse whouse;
     public Long unitId;
-    public StockRecord.T type;
     public Long cooperatorId;
+    public List<String> typeList = new ArrayList<>();
 
     private static Pattern ID = Pattern.compile("^-?[1-9]\\d*$");
 
@@ -66,9 +68,8 @@ public class StockRecordPost extends Post<StockRecord> {
             params.add("%" + search + "%");
         }
 
-        if(this.type != null) {
-            sbd.append(" AND s.type=? ");
-            params.add(this.type);
+        if(this.typeList.size() > 0) {
+            sbd.append(" AND s.type IN ").append(SqlSelect.inlineParam(this.typeList));
         }
 
         if(this.cooperatorId != null) {
@@ -115,5 +116,4 @@ public class StockRecordPost extends Post<StockRecord> {
     public Long getTotalCount() {
         return this.count();
     }
-
 }
