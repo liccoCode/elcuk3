@@ -63,31 +63,31 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">添加FeeType信息</h4>
+        <h4 class="modal-title"><h4 class="modal-title">添加FeeType信息</h4></h4>
       </div>
-      <div class="modal-body" style="height:300px;">
-        <form action="@{FeeTypes.create()}" method="post" id="create_form">
+      <form action="@{FeeTypes.create()}" method="post" id="create_form" class="form-horizontal">
+        <div class="modal-body" style="height:300px;">
           <table class="table table-condensed table-bordered">
             <tr>
               <th>费用名称:</th>
-              <td><input type="text" name="ft.name" required></td>
+              <td><input type="text" name="ft.name" required class="form-control"></td>
             </tr>
             <tr>
               <th>NickName:</th>
-              <td><input type="text" name="ft.nickName" required></td>
+              <td><input type="text" name="ft.nickName" required class="form-control"></td>
             </tr>
             <tr>
               <th>费用解释:</th>
-              <td><input type="text" name="ft.memo" required></td>
+              <td><input type="text" name="ft.memo" required class="form-control"></td>
             </tr>
             <tr>
               <th>快捷查询:</th>
-              <td><input type="text" name="ft.shortcut" required></td>
+              <td><input type="text" name="ft.shortcut" class="form-control"></td>
             </tr>
             <tr>
               <th>父费用类型:</th>
               <td>
-                <select name="parentName">
+                <select name="parentName" class="form-control">
                   <option value="">TOP</option>
                 #{list items:types, as:'parent'}
                   <option value="${parent.name}">${parent.name}:${parent.memo}</option>
@@ -96,12 +96,12 @@
               </td>
             </tr>
           </table>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary btn-xs" id="submitCreateBtn">创建</button>
-        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary btn-xs" id="submitCreateBtn">创建</button>
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
