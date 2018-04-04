@@ -1,0 +1,141 @@
+#{extends 'main_full_v3.html'/}
+#{set title:'Analyze'/}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap3/jquery.dataTables.js'/}
+    #{script 'bootstrap3/dataTables.bootstrap.js'/}
+    #{script 'highstock.js'/}
+    #{script 'timeline/timeline_js/timeline-api.js'/}
+    #{script 'analyzes/timeline.coffee'/}
+    #{script 'analyzes/analyzes.coffee'/}
+    #{script 'analyzes/analyzes_temp.es6'/}
+#{/set}
+
+<div class="box box-success">
+  <div class="box-body">
+    <div class="row" id="basic" style="height:400px;">
+      <div class="col-md-6" style="height:300px;">
+        <div id="a_units" data-method="ajaxUnit"></div>
+      </div>
+      <div class="col-md-3" style="height:300px;">
+        <div id="a_turn" data-method="ajaxSellingTurn"></div>
+      </div>
+      <div class="col-md-3" style="height:350px;">
+        <div id="a_ss" data-method="ajaxSellingRecord"></div>
+      </div>
+    </div>
+  </div>
+  <div class="box-footer">
+    <button class="btn btn-xs btn-default" data-market='amazon.de'>德国</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.com'>美国</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.es'>西班牙</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.fr'>法国</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.co.uk'>英国</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.it'>意大利</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.jp'>日本</button>
+    <button class="btn btn-xs btn-default" data-market='amazon.ca'>加拿大</button>
+    <button class="btn btn-xs btn-default" data-market=''>汇总</button>
+  #{power.ck "elcuk.index"}
+    <a class="btn btn-xs btn-danger" name="refreshCache" key="unit">清除缓存</a>
+  #{/power.ck}
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-body">
+    <div id="tl" class="col-md-12" style="height:350px;"></div>
+  </div>
+</div>
+
+<div class="box box-primary">
+  <div class="box-header">
+    <form action="@{Analyzes.analyzes()}" method="get" id="click_param" class="form-inline">
+      <div class="row-fluid">
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">From:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-group">
+            <div class="input-group-addon">To:</div>
+            <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+          </div>
+        </div>
+
+        <a class="form-control btn btn-default" id="all_search" rel="popover" content="按照时间重新加载数据, 主要用于查看长时间 ALL SKU 的数据">
+          Reload
+        </a>
+
+        <select name="p.aid" class="form-control" style="width:80px;">
+          <option value="">Account</option>
+        #{list items:accs, as:'a'}
+          <option value="${a.id}" #{if p.aid==a.id} selected #{/if}>${a.prettyName()}</option>
+        #{/list}
+        </select>
+
+        <select name="p.market" style="width: 100px;" class="form-control">
+          <option value="">Market</option>
+        #{list items:models.market.M.values(), as:'d'}
+          <option value="${d.toString()}">${d.toString()}</option>
+        #{/list}
+        </select>
+
+      #{select 'p.categoryId', items:categoryIds, value: p.categoryId, class: 'form-control selectize',style:"width:100px;"}
+          #{option ''}Category#{/option}
+      #{/select}
+
+      #{select 'p.state', items:['Active', 'Inactive', 'All'], value: p.state, class: 'form-control selectize',
+      style:"width:80px;"}
+      #{/select}
+
+        <select name="p.flag" class="form-control" style="width:80px;">
+          <option value="1">PS day1 库存大于0</option>
+          <option value="2">显示所有</option>
+        </select>
+
+        <div class="input-group">
+          <div class="input-group-addon"><i class="icon-search"></i></div>
+          <input class="form-control" id="a_param" name="p.search" placeholder="搜索 MSKU/SKU/ASIN/^71xx">
+        </div>
+
+        <a class="btn btn-primary" id="a_search">搜索</a>
+        <a class="btn btn-success" id="exceldown">下载Excel(SID)</a>
+      #{power.ck "elcuk.index"}
+        <a class="btn btn-danger" name="refreshCache" key="analyze_post_sid">清除缓存</a>
+       #{/power.ck}
+
+        <a href="javascript:;" class="btn btn-primary disabled pull-right" style="margin-right:5px;margin-top:5px;">
+          Next Refresh At ${jobs.analyze.SellingSaleAnalyzeJob.cachedDate(p.type).datetime()}
+        </a>
+
+        <input type="hidden" id="postPage" name="p.page" value="1">
+        <input type="hidden" id="postType" name="p.type" value="sid">
+        <input type="hidden" id="postOrderBy" name="p.orderBy" value="day7">
+        <input type="hidden" id="postVal" name="p.val" value="all">
+        <input type="hidden" id="postDesc" name="p.desc" value="${p.desc}">
+      </div>
+    </form>
+  </div>
+  <div class="box-body">
+    <div class="row-fluid">
+      <div class="nav-tabs-custom">
+        <ul id="below_tab" class="nav nav-tabs">
+          <li class="active"><a href="#sid" data-toggle="tab" data-type="sid">SID</a></li>
+          <li class=""><a href="#sku" data-toggle="tab" data-type="sku">SKU</a></li>
+        </ul>
+
+        <div id="below_tabContent" class="tab-content">
+          <div class="tab-pane fade active in" id="sid">wait</div>
+          <div class="tab-pane fade" id="sku">wait</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
