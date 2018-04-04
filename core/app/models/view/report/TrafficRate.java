@@ -35,13 +35,13 @@ public class TrafficRate extends GenericModel {
 
     public float sessions;
 
-    public float orders;
+    public int orders;
 
     public float turnRatio;
 
-    public float sales;
+    public int sales;
 
-    public float returnd;
+    public int returnd;
 
     public Date updateDate;
 }
