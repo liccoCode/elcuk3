@@ -67,7 +67,7 @@ public class Analyzes extends Controller {
         List<Account> accs = Account.openedSaleAcc();
         List<String> categoryIds = Category.categoryIds();
         AnalyzePost p = new AnalyzePost();
-        render("Analyzes/index_v3.html", accs, categoryIds, p);
+        render("Analyzes/index_v3_temp.html", accs, categoryIds, p);
     }
 
     public static void operateInfo() {
@@ -111,6 +111,26 @@ public class Analyzes extends Controller {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
     }
+
+
+    public static void analyzesSid(final AnalyzePost p) {
+        try {
+            User user = User.findById(Login.current().id);
+            List<String> categories =
+                    user.categories.stream().map(category -> category.categoryId).collect(Collectors.toList());
+            if(categories.size() == 0) {
+                List<AnalyzeDTO> dtos = new ArrayList<>();
+                render("Analyzes/" + p.type + ".html", dtos, p);
+            }
+            Long start = System.currentTimeMillis();
+            List<AnalyzeDTO> dtos = AnalyzeDTO.findAll();
+            Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) + "ms");
+            render("Analyzes/sid.html", dtos, p);
+        } catch(FastRuntimeException e) {
+            renderHtml("<h3>" + e.getMessage() + "</h3>");
+        }
+    }
+
 
     /**
      * 流量转化率统计报表
