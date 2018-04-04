@@ -345,20 +345,15 @@ public class Payment extends Model {
 
         if(!Arrays.asList(S.WAITING, S.LOCKED).contains(this.state))
             Validation.addError("", String.format("%s 状态不允许支付.", this.state.label()));
-
         if(ratio == null || ratio <= 0)
             Validation.addError("", "汇率的值不合法.");
-
         if(!Dates.date2Date().equals(Dates.date2Date(ratioPublishDate)))
             Validation.addError("", "汇率时间错误, 并非当前支付的汇率时间.");
-
         if(Validation.hasErrors()) return;
-
         for(PaymentUnit unit : this.units()) {
             unit.state = PaymentUnit.S.PAID;
             unit.save();
         }
-
         this.rate = ratio;
         this.ratePublishDate = ratioPublishDate;
         this.paymentDate = new Date();
@@ -372,7 +367,6 @@ public class Payment extends Model {
         this.state = S.PAID;
         this.shouldPaid = new BigDecimal(Webs.scalePointUp(4, Float.parseFloat(this.approvalAmount()) * this.rate));
         this.save();
-
         //2018-02-05 要求付款单付款操作修改请款单的paymentDate
         if(this.pApply != null) {
             this.pApply.paymentDate = new Date();
@@ -384,13 +378,9 @@ public class Payment extends Model {
             this.mApply.paymentDate = new Date();
             this.mApply.save();
         }
-        
-        new ERecordBuilder("payment.payit")
-                .msgArgs(this.target.toString(),
-                        this.actualCurrency.symbol() + " " + this.actualPaid,
-                        this.rate + "", Dates.date2Date(this.ratePublishDate))
-                .fid(this.id)
-                .save();
+        new ERecordBuilder("payment.payit").msgArgs(this.target.toString(),
+                this.actualCurrency.symbol() + " " + this.actualPaid, this.rate + "",
+                Dates.date2Date(this.ratePublishDate)).fid(this.id).save();
     }
 
     /**
@@ -455,7 +445,6 @@ public class Payment extends Model {
             return Collections.EMPTY_LIST;
         }
     }
-
 
     /**
      * 批准后的总金额

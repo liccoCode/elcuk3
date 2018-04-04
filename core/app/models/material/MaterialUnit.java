@@ -1,4 +1,5 @@
 package models.material;
+
 import com.google.gson.annotations.Expose;
 import helper.Currency;
 import models.User;

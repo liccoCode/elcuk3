@@ -3,7 +3,6 @@ package models.product;
 import controllers.Login;
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,7 +14,6 @@ import java.util.Date;
  */
 
 public class ProductJxl {
-
 
     public String categoryId;
     public String sku;
@@ -88,9 +86,6 @@ public class ProductJxl {
         pro.creator = Login.current();
         pro.save();
         return pro;
-
     }
-
-
 }
 

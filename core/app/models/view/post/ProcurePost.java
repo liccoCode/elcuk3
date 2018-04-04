@@ -385,8 +385,8 @@ public class ProcurePost extends Post<ProcureUnit> {
 
     public static HighChart perCreateTotalNum() {
         HighChart columnChart = new HighChart(Series.COLUMN);
-        DBUtils.rows("SELECT u.username, count(1) as perNum FROM ProcureUnit p " +
-                " LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ").forEach(row -> {
+        DBUtils.rows("SELECT u.username, count(1) as perNum FROM ProcureUnit p "
+                + " LEFT JOIN `User` u ON p.handler_id = u.id  GROUP BY p.handler_id ").forEach(row -> {
             Series.Column column = new Series.Column(row.get("username").toString());
             column.add(row.get("username").toString(), Float.parseFloat(row.get("perNum").toString()));
             columnChart.series(column);
