@@ -1,5 +1,5 @@
 #{extends 'main_full_v3.html'/}
-#{set title:'FeeTypes'/}
+#{set title:'费用类型'/}
 #{set 'moreScripts'}
     #{script 'feeTypes/feeTypes.es6'/}
 #{/set}
@@ -109,15 +109,13 @@
 <div id="update_modal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h4>修改FeeType信息</h4>
-      </div>
+      <div class="modal-header"><h4 class="modal-title">修改FeeType信息</h4></div>
       <div class="modal-body" style="height:200px;">
         <form action="@{FeeTypes.update()}" method="post" id="update_form" class="form-horizontal">
           <table class="table table-condensed table-bordered">
             <tr>
               <th>费用名称:</th>
-              <td><input type="text" name="ft.name" readonly class="form-control"></td>
+              <td><input type="text" name="ft.name" readonly class="form-control" required></td>
             </tr>
             <tr>
               <th>NickName:</th>

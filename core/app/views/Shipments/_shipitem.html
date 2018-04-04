@@ -59,7 +59,7 @@
           #{if itm.unit.fba}
             <td>
                 #{if itm.unit.fba.records}
-                  <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg" >
+                  <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg">
                   <span data-toggle="popover" data-placement="bottom" data-content="${itm.unit.fba?.records()}">
                   ${itm.unit.fba.shipmentId}
                   </span>
@@ -152,7 +152,7 @@
   <tr id="${tr_key}_${itm.id}" style="display:none;">
     <td colspan="10"><a id="unitbutton">${itm.unit.sid}</a></td>
     <td colspan="10">
-        #{if itm.shipment.state.name()=='RECEIVING'}
+        #{if Arrays.asList("RECEIVING","DONE").contains(itm.shipment.state.name())}
           <a href="@{Shipments.endShipByItem(itm.id)}" class="btn btn-xs btn-warning" data-toggle="tooltip"
              title="单个采购计划完成运输">完成运输</a>
           <a href="@{Shipments.syncReceiveQty(itm.id)}" class="btn btn-xs btn-info" data-toggle="tooltip"
