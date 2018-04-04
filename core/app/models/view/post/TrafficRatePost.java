@@ -2,9 +2,7 @@ package models.view.post;
 
 import helper.Caches;
 import helper.Dates;
-import helper.Webs;
 import models.market.M;
-import models.market.SellingRecord;
 import models.view.report.TrafficRate;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -23,7 +21,7 @@ import java.util.List;
  */
 public class TrafficRatePost extends Post<TrafficRate> {
 
-
+    private static final long serialVersionUID = -2081286181455788781L;
     /**
      * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
      */
@@ -56,14 +54,12 @@ public class TrafficRatePost extends Post<TrafficRate> {
         String cacheKey = Caches.Q.cacheKey("trafficRate", this.market, this.from, this.to, this.SellingId);
         List<TrafficRate> cacheElement = Cache.get(cacheKey, List.class);
         if(cacheElement != null && cacheElement.size()>0) return cacheElement;
-
         StringBuilder sbd = new StringBuilder();
         List<Object> params = new ArrayList<>();
         sbd.append("sellDate").append(">=?").append(" AND ")
                 .append("sellDate<=?");
         params.add(Dates.morning(this.from));
         params.add(Dates.night(this.to));
-
         if(StringUtils.isNotBlank(this.SellingId)) {
             sbd.append(" AND sellingId like ?");
             params.add(this.SellingId + "%");
@@ -73,9 +69,7 @@ public class TrafficRatePost extends Post<TrafficRate> {
             params.add(this.market);
         }
         sbd.append(" ORDER BY sellingId,sellDate");
-        
-        List<TrafficRate> traffics =  TrafficRate
-                        .find(sbd.toString(), params.toArray()).fetch();
+        List<TrafficRate> traffics =  TrafficRate.find(sbd.toString(), params.toArray()).fetch();
         Cache.set(cacheKey, traffics, "4h");
         return traffics;
     }

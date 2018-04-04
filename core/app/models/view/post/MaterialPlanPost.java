@@ -67,7 +67,6 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
         StringBuilder sbd = new StringBuilder(
                 "SELECT DISTINCT d FROM MaterialPlan d LEFT JOIN d.units u WHERE 1=1 AND");
         List<Object> params = new ArrayList<>();
-
         /* 时间参数 **/
         if(this.dateType != null) {
             if(this.dateType == MaterialPlanPost.DateType.DELIVERY) {
@@ -78,33 +77,26 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
             params.add(Dates.morning(this.from));
             params.add(Dates.night(this.to));
         }
-
         if(this.planState != null) {
             sbd.append(" AND d.state=?");
             params.add(this.planState);
         }
-        
         if(this.userId != null && this.userId > 0) {
             sbd.append(" AND d.handler.id=?");
             params.add(this.userId);
         }
-
-
         if(this.cooperId != null && this.cooperId > 0) {
             sbd.append(" AND d.cooperator.id=?");
             params.add(this.cooperId);
         }
-
         if(this.receipt != null) {
             sbd.append(" AND d.receipt=?");
             params.add(this.receipt);
         }
-
         if(this.financeState != null) {
             sbd.append(" AND d.financeState=?");
             params.add(this.financeState);
         }
-
         /* 模糊查询参数 **/
         if(StringUtils.isNotBlank(this.search)) {
             String word = this.word();
@@ -116,7 +108,6 @@ public class MaterialPlanPost extends Post<MaterialPlan> {
                 params.add(word);
             }
         }
-
         return new F.T2<>(sbd.toString(), params);
     }
 

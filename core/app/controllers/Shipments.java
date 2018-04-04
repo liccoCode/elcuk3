@@ -28,6 +28,7 @@ import play.Logger;
 import play.data.Upload;
 import play.data.validation.Validation;
 import play.db.helper.SqlSelect;
+import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.modules.excel.RenderExcel;
 import play.modules.pdf.PDF;
@@ -294,7 +295,6 @@ public class Shipments extends Controller {
             index(null);
         }
     }
-
 
     @Check("shipments.beginship")
     public static void beginShip(String id, Date date, boolean sync) {
@@ -571,13 +571,13 @@ public class Shipments extends Controller {
      */
     public static void importPayment(String xlsx, String shipId) {
         try {
-            /** 第一步上传excel文件 **/
+            /* 第一步上传excel文件 **/
             List<Upload> files = (List<Upload>) request.args.get("__UPLOADS");
             Upload upload = files.get(0);
             List<ShipmentPayment> shipmentPaymentList = new ArrayList<>();
 
 
-            /** 第二步根据定义好xml进行jxls映射 **/
+            /* 第二步根据定义好xml进行jxls映射 **/
             File directory = new File("");
             String courseFile = directory.getCanonicalPath();
             String xmlPath = courseFile + "/app/views/Shipments/shipmentPayment.xml";
@@ -594,7 +594,7 @@ public class Shipments extends Controller {
                 if(shipmentPaymentList.size() == 0) {
                     error.append("未读取道费用信息,请确保Excel第一个Sheet页的名字为'Sheet1'");
                 } else {
-                    /** 第三步 把excel对象解析成PaymentUnit  **/
+                    /* 第三步 把excel对象解析成PaymentUnit  **/
                     Date date = new Date();
                     Shipment shipment = Shipment.findById(shipId);
                     notFoundIfNull(shipment);
@@ -627,10 +627,8 @@ public class Shipments extends Controller {
                 if(error.length() > 0) {
                     flash.error(error.substring(0, error.length() - 1));
                 } else {
-                    /** 第四步 数据插入PaymentUnit **/
-                    paymentUnitList.forEach(unit -> {
-                        unit.save();
-                    });
+                    /* 第四步 数据插入PaymentUnit **/
+                    paymentUnitList.forEach(GenericModel::save);
                     flash.success(String.format("已成功上传 %s 条运输费用", paymentUnitList.size()));
                 }
             } else {
@@ -641,5 +639,4 @@ public class Shipments extends Controller {
         }
         show(shipId);
     }
-
 }
