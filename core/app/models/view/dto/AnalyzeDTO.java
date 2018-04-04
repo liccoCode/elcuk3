@@ -1,11 +1,15 @@
 package models.view.dto;
 
+import com.google.gson.annotations.Expose;
 import helper.Webs;
 import models.market.M;
 import models.market.Selling;
 import models.view.post.AnalyzePost;
+import org.hibernate.annotations.DynamicUpdate;
+import play.db.jpa.GenericModel;
 import play.libs.F;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -19,7 +23,9 @@ import java.util.Objects;
  * Date: 8/31/12
  * Time: 6:03 PM
  */
-public class AnalyzeDTO implements Serializable {
+@Entity
+@DynamicUpdate
+public class AnalyzeDTO extends GenericModel implements Serializable {
 
     private static final long serialVersionUID = -6922565933590728789L;
 
@@ -35,6 +41,9 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 用来表示 SKU/Msku
      */
+    @Id
+    @Column(length = 80)
+    @Expose
     public String fid;
 
     /**
@@ -134,6 +143,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 市场
      */
+    @Enumerated(EnumType.STRING)
     public M market;
 
     /**
@@ -159,6 +169,7 @@ public class AnalyzeDTO implements Serializable {
     /**
      * 生命周期
      */
+    @Enumerated(EnumType.STRING)
     public Selling.SC sellingCycle;
 
     /**
