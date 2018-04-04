@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 @Entity
 public class FeeType extends GenericModel {
 
+    private static final long serialVersionUID = -7697550855014607999L;
+
     public FeeType() {
     }
 

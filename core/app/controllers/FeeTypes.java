@@ -41,7 +41,6 @@ public class FeeTypes extends Controller {
         FeeType ft = FeeType.findById(name);
         if(ft == null)
             renderJSON(new Ret("不存在, 无法删除"));
-
         try {
             ft.remove();
         } catch(PaymentException e) {
