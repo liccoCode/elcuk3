@@ -6,7 +6,7 @@ $ ->
       .done((r) ->
         LoadMask.unmask()
         # 填充参数
-        _.each(["accountAddress", "accountNumber", "accountUser", "name", "id", "c.id"], (field) ->
+        _.each(["accountAddress", "accountNumber", "accountUser", "name", "id", "c.id", "memo"], (field) ->
           if field == "c.id"
             target = $("#target_cooperId").selectize()
             selectize = target[0].selectize
