@@ -1,57 +1,64 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'编辑出库单' /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
     #{script 'outbounds/blank.js'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Outbounds.update(), method:'POST', id: 'new_outbound'}
-    #{info_row title:'出库单'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-bordered">
-      <tr>
-        <th>出库单ID</th>
-        <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
-        <th>所属公司</th>
-        <td>
-          <select name="outbound.projectName">
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="modal-title">出库单详情</h4></div>
+      <form action="@{Outbounds.update()}" method="post" class="form-horizontal" id="new_outbound">
+        <div class="box-body">
+          <div class="form-group">
+            <label class="col-sm-1 control-label">出库单ID</label>
+            <div class="col-sm-2">
+              <input type="text" name="outbound.id" value="${outbound?.id}" readonly class="form-control"/>
+            </div>
+            <label class="col-sm-1 control-label">所属公司</label>
+            <div class="col-sm-2">
+              <select name="outbound.projectName" class="form-control">
               #{list items:models.User.COR, as:'c'}
                   #{if java.util.Arrays.asList(brandName,models.User.COR.MengTop.name()).contains(c.name())}
                     <option value="${c.name()}" ${c.name()==outbound.projectName?'selected':''}>${c.label()}</option>
                   #{/if}
               #{/list}
-          </select>
-        </td>
-        <th>状态</th>
-        <td style="color:${outbound.status.rgb()}"><b>${outbound.status.label()}</b></td>
-      </tr>
-      <tr>
-        <th>目的国家</th>
-        <td><input type="text" value="${outbound.whouse?.name}" readonly>
-        </td>
-        <th>运输方式</th>
-        <td>
-          <input type="text" value="${outbound.shipType?.label()}" readonly/>
-        </td>
-        <th>运输单号</th>
-        <td><input type="text" value="" readonly/></td>
-      </tr>
-      <tr>
-        <th>出库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="outbound.name" value="${outbound.name}" required></td>
-        <th>出库类型</th>
-        <td>
-          <select name="outbound.type">
+              </select>
+            </div>
+            <label class="col-sm-1 control-label">状态</label>
+            <div class="col-sm-2">
+              <input style="color:${outbound.status.rgb()}" value="${outbound.status.label()}" readonly class="form-control"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-1 control-label">目的国家</label>
+            <div class="col-sm-2">
+              <input value="${outbound.whouse?.name}" readonly class="form-control"/>
+            </div>
+            <label class="col-sm-1 control-label">运输方式</label>
+            <div class="col-sm-2">
+              <input value="${outbound.shipType?.label()}" readonly class="form-control"/>
+            </div>
+            <label class="col-sm-1 control-label">运输单号</label>
+            <div class="col-sm-2">
+              <input value="" readonly class="form-control"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-1 control-label">出库单名称<span style="color:red">*</span></label>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="outbound.name" value="${outbound.name}" required>
+            </div>
+            <label class="col-sm-1 control-label">出库类型</label>
+            <div class="col-sm-2">
+              <select name="outbound.type" class="form-control">
               #{list items:models.whouse.StockRecord.C, as:'t'}
                   #{if outbound.type.name()=='Normal' && t.name() == 'Normal'}
                     <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
@@ -60,157 +67,170 @@
                     <option value="${t.name()}" #{if outbound.type==t} selected #{/if}>${t.label()}</option>
                   #{/elseif}
               #{/list}
-          </select>
-        </td>
-        <th>货代公司</th>
-        <td>
-          <!-------------------------- targetId 备选项 ---------------------------------------------------------->
-          <select style="display:none;" id="shipperOptions">
+              </select>
+            </div>
+            <label class="col-sm-1 control-label">货代公司</label>
+            <div class="col-sm-2">
+              <select style="display:none;" id="shipperOptions" class="form-control">
               #{list items:shippers, as: 'ship'}
                 <option ${ship.id.toString() == outbound?.targetId ? 'selected' : ''} value="${ship.id}">
                 ${ship.name}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="supplierOptions">
+              </select>
+              <select style="display:none;" id="supplierOptions" class="form-control">
               #{list items:suppliers, as: 'sup'}
                 <option ${sup.id.toString() == outbound?.targetId ? 'selected' : ''} value="${sup.id}">
                 ${sup.name}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="sampleOptions">
+              </select>
+              <select style="display:none;" id="sampleOptions" class="form-control">
               #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
                 <option ${outbound?.targetId == target ? 'selected' : ''} value="${target}">
                 ${target}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="processOptions">
-            <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
-              品拓生产部
-            </option>
-          </select>
-          <!--------------------------------------------------------------------------------------------------->
-          <select name="outbound.targetId" style="width: 230px;">
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th>出库日期<span style="color:red">*</span></th>
-        <td><input type="date" name="outbound.outboundDate" value="${outbound.outboundDate.date()}" required></td>
-        <th>发货人</th>
-        <td>
-          <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">
-            <option value="">发货人</option>
+              </select>
+              <select style="display:none;" id="processOptions" class="form-control">
+                <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+                  品拓生产部
+                </option>
+              </select>
+              <!--------------------------------------------------------------------------------------------------->
+              <select name="outbound.targetId" style="width: 230px;" class="form-control">
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-1 control-label">出库日期<span style="color:red">*</span></label>
+            <div class="col-sm-2">
+              <input role="date" name="outbound.outboundDate" value="${outbound.outboundDate.date()}" required class="form-control">
+            </div>
+            <label class="col-sm-1 control-label">发货人</label>
+            <div class="col-sm-2">
+              <select name="outbound.consignor.id" class="form-control inline selectize" style="width:120px;">
+                <option value="">发货人</option>
               #{list items:users, as:'u'}
                 <option value="${u.id}" #{if outbound.consignor?.id==u.id}selected#{/if}>${u.username}</option>
               #{/list}
-          </select>
-        </td>
-        <th>创建人</th>
-        <td><input type="text" value="${outbound.creator?.username}" readonly="true"></td>
-      </tr>
-      <tr>
-        <th>备注</th>
-        <td colspan="5">
-          <textarea name="outbound.memo" rows="4" class="input-block-level">${outbound.memo}</textarea>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="6">
-            #{if outbound.status.name()=='Create'}
-                #{power.ck 'outbounds.update'}
-                  <button class="btn btn-primary" name="create_record">更新</button>
-                #{/power.ck}
-            #{/if}
-          <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
-#{/form}
+              </select>
+            </div>
+            <label class="col-sm-1 control-label">创建人</label>
+            <div class="col-sm-2">
+              <input type="text" value="${outbound.creator?.username}" readonly class="form-control">
+            </div>
+          </div>
 
-#{info_row title:'已添加进入【出库单】的【采购单元】'/}
-<div class="row-fluid">
-  <div class="span12">
-  #{if outbound.type.name().equals("Normal") || outbound.type.name().equals("B2B")}
-      #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
-  #{/if}
-  #{else }
-      #{render 'Outbounds/_records.html', records:outbound.records/}
-  #{/else}
-
-  #{if outbound.status.name()=='Create'}
-      #{power.ck 'outbounds.delete'}
-        <button class="btn btn-danger" id="deleteBtn">解除</button>
-      #{/power.ck}
-  #{/if}
-  #{else }
-    <button class="btn btn-warning" id="cancelBtn">撤销出库</button>
-  #{/else}
-  </div>
-</div>
-<br>
-
-#{if outbound.status.name().equals('Create') && Arrays.asList("Normal","B2B").contains(outbound.type.name())}
-    #{warning_row title:'可添加进入[出库单]的[采购单元]'/}
-<form action="@{Outbounds.addUnits()}" method="post">
-  <div class="row-fluid">
-    <div class="span12">
-        #{render 'Outbounds/_units.html', units:outbound.availableUnits(), is_check: true/}
+          <div class="form-group">
+            <label class="col-sm-1 control-label">备注<span style="color:red">*</span></label>
+            <div class="col-sm-11">
+              <textarea class="form-control" rows="10" name="outbound.memo">${outbound.memo}</textarea>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
         #{if outbound.status.name()=='Create'}
-            #{power.ck 'outbounds.add'}
-              <button class="btn btn-success" id="addBtn">添加</button>
+            #{power.ck 'outbounds.update'}
+              <button class="btn btn-primary" name="create_record">更新</button>
             #{/power.ck}
         #{/if}
-      <input type="hidden" name="outId" value="${outbound.id}">
+          <a href="@{Outbounds.index()}" class="btn btn-default">取消</a>
+        </div>
+      </form>
     </div>
-  </div>
-</form>
 
-<div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">
-  <div class="modal-body">
-    <div id="refresh_div"></div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-    <a class="btn btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">已添加进入[出库单]的[采购单元]</h4></div>
+      <div class="box-body">
+      #{if outbound.type.name().equals("Normal") || outbound.type.name().equals("B2B")}
+          #{render 'Outbounds/_units.html', units:outbound.units, is_check: true/}
+      #{/if}
+        #{else }
+          #{render 'Outbounds/_records.html', records:outbound.records/}
+      #{/else}
+      </div>
+      <div class="box-footer">
+      #{if outbound.status.name()=='Create'}
+          #{power.ck 'outbounds.delete'}
+            <button class="btn btn-danger" id="deleteBtn">解除</button>
+          #{/power.ck}
+      #{/if}
+      #{else }
+        <button class="btn btn-warning" id="cancelBtn">撤销出库</button>
+      #{/else}
+      </div>
+    </div>
+
+  #{if outbound.status.name().equals('Create') && Arrays.asList("Normal","B2B").contains(outbound.type.name())}
+    <div class="box box-warning">
+      <div class="box-header with-border"><h4 class="box-title">可添加进入[出库单]的[采购单元]</h4></div>
+      <form action="@{Outbounds.addUnits()}" method="post" class="form-horizontal">
+        <div class="box-body">
+            #{render 'Outbounds/_units.html', units:outbound.availableUnits(), is_check: true/}
+        </div>
+        <div class="box-footer">
+            #{if outbound.status.name()=='Create'}
+                #{power.ck 'outbounds.add'}
+                  <button class="btn btn-success" id="addBtn">添加</button>
+                #{/power.ck}
+            #{/if}
+          <input type="hidden" name="outId" value="${outbound.id}">
+        </div>
+      </form>
+    </div>
+  #{/if}
+
+    <div class="box">
+      <div class="box-header with-border"><h3 class="box-title">附件 <i class="icon-sort-down"></i></h3></div>
+      <div class="box-body">
+        <div style="min-height:300px;" class="col-md-12 well" id="dropbox">
+          <ul class="thumbnails uploaded"></ul>
+          <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-#{/if}
-
-<div class="row-fluid">
-  <div class="span12">
-    <h4 class="alert alert-success">附件 <i class="icon-sort-down"></i></h4>
+<div id="fba_carton_contents_modal" class="modal fade bs-example-modal-lg">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div id="refresh_div"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+        <a class="btn btn-xs btn-primary" id="submitBoxInfoBtn" data-action="@{Inbounds.updateBoxInfo()}">提交</a>
+      </div>
+    </div>
   </div>
 </div>
-<div class="row-fluid">
-  <div style="min-height:300px;" class="span12 well" id="dropbox">
-    <ul class="thumbnails uploaded"></ul>
-    <div class="message" style="height:150px;padding-top:145px;text-align:center;">Drag & Drop</div>
-  </div>
-</div>
 
-<div id="cancel_outbound_modal" class="modal hide fade">
-  <form action="@{StockRecords.cancelOutbound()}" method="post">
-    <div class="modal-body">
-      <table>
-        <tr>
-          <th style="width:70px;">撤销原因:</th>
-          <td>
-            <textarea style="height:150px;width:430px;" name="msg" required></textarea>
-            <input type="hidden" id="recordIds" name="ids" value=""/>
-            <input type="hidden" name="outboundId" value="${outbound.id}"/>
-          </td>
-        </tr>
-      </table>
+<div id="cancel_outbound_modal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header"><h4 class="modal-title">撤销出库</h4></div>
+      <form action="@{StockRecords.cancelOutbound()}" method="post" class="form-horizontal">
+        <div class="modal-body">
+          <table class="table table-condensed table-condensed">
+            <tr>
+              <th style="width:70px;">撤销原因:</th>
+              <td>
+                <textarea class="form-control" rows="5" name="msg" required></textarea>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-xs btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" value="提交" class="btn btn-xs btn-primary">
+          <input type="hidden" id="recordIds" name="ids" value=""/>
+          <input type="hidden" name="outboundId" value="${outbound.id}"/>
+        </div>
+      </form>
     </div>
-    <div class="modal-footer">
-      <button class="btn" data-dismiss="modal" aria-hidden="true">关闭</button>
-      <input type="submit" value="提交" class="btn btn-primary">
-    </div>
-  </form>
+  </div>
 </div>

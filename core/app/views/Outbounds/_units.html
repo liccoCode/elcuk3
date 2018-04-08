@@ -3,13 +3,11 @@
   #{if is_check}
     <th><input type="checkbox" id="checkbox_all" class="checkall" value=""></th>
   #{/if}
-    <th>采购ID</th>
-    <th>采购单</th>
-    <th>Selling</th>
-    <th>产品名称</th>
+    <th width="30px;">Image</th>
+    <th width="30px;">采购单<br/>采购ID</th>
+    <th width="360px;">Selling<br>产品名称</th>
     <th>供应商</th>
-    <th>去往仓库</th>
-    <th>运输方式</th>
+    <th width="80px;">去往仓库<br/>运输方式</th>
     <th>FBA-ShipmentId</th>
     <th>预计运输时间</th>
     <th>可用库存</th>
@@ -23,27 +21,28 @@
     <th>备注</th>
   </tr>
 #{list items:units, as:'unit'}
-  <tr class="text-center" id="unit_${unit.id}">
+  <tr id="unit_${unit.id}">
       #{if is_check}
         <td>
           <input type="checkbox" name="pids" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
         </td>
       #{/if}
-    <td>${unit.id}</td>
-    <td>${unit.deliveryment?.id}</td>
-    <td><a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a></td>
-    <td title="${unit.product.abbreviation}">${unit.product.abbreviation.overLong()}</td>
+    <td style="text-align:center;"><img height="40px;" width="45px;" src="${unit.selling?.aps?.imageUrl}"></td>
+    <td>${unit.deliveryment?.id}<br><span style="color:blue">${unit.id}</span></td>
+    <td data-toggle="tooltip" title="${unit.product.abbreviation}">
+      <a href="@{Sellings.selling(unit.selling?.sellingId)}" target="_blank">${unit.selling?.sellingId}</a><br/>
+    ${unit.product.abbreviation.overLong()}
+    </td>
     <td>${unit.cooperator?.name}</td>
-    <td>${unit.whouse?.name}</td>
-    <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+    <td>${unit.whouse?.name}<br><span style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</span></td>
     <td>${unit.fba?.shipmentId}</td>
     <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
     <td>${unit.availableQty}</td>
     <td>${unit.totalOutBoundQty()}</td>
     <td>${unit.outQty}</td>
     <td>
-      <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+      <input type="button" class="btn btn-xs btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
         #{if !unit.validBoxInfoIsComplete()}
           <i class="icon-remove" style="color:red"></i>
         #{/if}
@@ -54,8 +53,8 @@
     <td>${unit.currWhouse?.name}</td>
     <td>${unit.showInboundUnitIds()}</td>
     <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
-    <td rel="tooltip" title="${unit.revokeMsg}" style="color:red">${unit.revokeStatus?.label()}</td>
-    <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
+    <td data-toggle="tooltip" title="${unit.revokeMsg}" style="color:red">${unit.revokeStatus?.label()}</td>
+    <td data-toggle="tooltip" title="${unit.comment}"><a>${unit.comment.nineLong()}</a></td>
   </tr>
 #{/list}
 </table>

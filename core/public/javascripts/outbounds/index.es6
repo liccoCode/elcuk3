@@ -8,7 +8,7 @@ $(() => {
     if ($("#div" + format_id).html() != undefined) {
       tr.next("tr").toggle();
     } else {
-      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'><div id='div" + format_id + "'></div></td></tr>";
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='14'><div id='div" + format_id + "'></div></td></tr>";
       tr.after(html);
       if (type == 'Normal' || type == 'B2B') {
         $("#div" + format_id).load("/Outbounds/showProcureUnitList", {id: id});

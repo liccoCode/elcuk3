@@ -12,9 +12,9 @@
 <div class="row">
   <div class="col-md-12">
     <div class="box">
-      <div class="box-header">
+      <div class="box-header with-border">
       #{power.ck 'paymenttargets.save'}
-        <a href="#create_modal" class="btn btn-success" data-toggle='modal'>添加一个支付账号</a>
+        <a href="#create_modal" class="btn btn-default" data-toggle='modal'>添加一个支付账号</a>
       #{/power.ck}
       </div>
       <div class="box-body">
@@ -66,7 +66,7 @@
             <tr>
               <th>合作伙伴</th>
               <td>
-                <select class="selectize" name="c.id" style="width:240px;" class="form-control">
+                <select name="c.id" style="width:240px;" class="form-control selectize">
                 #{list items:copers, as:'c'}
                   <option value="${c.id}">${c.name}</option>
                 #{/list}
