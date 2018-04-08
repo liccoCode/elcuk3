@@ -1,12 +1,10 @@
 <table class="table table-condensed table-bordered" id="data_table">
   <tr>
     <td><input type="checkbox" id="checkbox_all" class="checkall" value=""></td>
-    <th>采购计划ID</th>
-    <th>采购单</th>
-    <th>Selling</th>
-    <th>SKU</th>
-    <th>产品名称</th>
-    <th>供应商</th>
+    <td width="30px">Image</td>
+    <th width="30px;">采购单<br/>采购ID</th>
+    <th width="350px;">Selling<br/>产品名称</th>
+    <th>SKU<br/>供应商</th>
     <th>剩余库存</th>
     <th>出库数量</th>
     <th>包装信息</th>
@@ -17,18 +15,18 @@
     <th>备注</th>
   </tr>
 #{list items:records, as:'r'}
-  <tr class="text-center" id="unit_${r.unit.id}">
+  <tr id="unit_${r.unit.id}">
     <td><input type="checkbox" value="${r.id}"></td>
-    <td>${r.unit.id}</td>
-    <td>${r.unit.deliveryment?.id}</td>
-    <td>${r.unit.selling?.sellingId}</td>
-    <td>${r.unit.sku}</td>
-    <td>${r.unit.product.abbreviation}</td>
-    <td>${r.unit.cooperator?.name}</td>
+    <td style="text-align:center;"><img height="40px;" width="45px;" src="${r.unit?.selling?.aps?.imageUrl}"></td>
+    <td>${r.unit.deliveryment?.id}<br/>${r.unit.id}</td>
+    <td data-toggle="tooltip" title="${r.unit.product.abbreviation}">${r.unit.selling?.sellingId}<br/>
+      <span style="color:blue">${r.unit.product.abbreviation?.xxLong()}</span>
+    </td>
+    <td>${r.unit.sku}<br/>${r.unit.cooperator?.name}</td>
     <td>${r.unit.availableQty}</td>
     <td>${r.qty}</td>
     <td>
-      <input type="button" class="btn btn-mini btn-success" data-id="${r.unit.id}" name="editBoxInfo" value="填写">
+      <input type="button" class="btn btn-xs btn-success" data-id="${r.unit.id}" name="editBoxInfo" value="填写">
     </td>
     <td>${r.unit.currWhouse?.name}</td>
     <td>${r.unit.showInboundIds()}</td>

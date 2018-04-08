@@ -252,7 +252,7 @@ public class MaterialUnit extends Model {
      * @return
      */
     public float totallanPrice() {
-        return this.planPrice*this.planQty;
+        return this.planPrice * this.planQty;
     }
 
     /**
@@ -357,7 +357,6 @@ public class MaterialUnit extends Model {
         }
     }
 
-
     /**
      * 是否拥有了尾款
      *
@@ -412,7 +411,8 @@ public class MaterialUnit extends Model {
 
         this.materialPurchase.applyPurchase.updateAt = new Date();
         this.materialPurchase.applyPurchase.save();
-        new ERecordBuilder("procureunit.prepay").msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+        new ERecordBuilder("procureunit.prepay")
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
         return fee;
     }
@@ -421,7 +421,7 @@ public class MaterialUnit extends Model {
      * 付款申请
      */
     public PaymentUnit billingTailPay() {
-        /**
+        /*
          * 0. 基本检查
          * 1. 申请付款
          */
@@ -443,11 +443,10 @@ public class MaterialUnit extends Model {
         this.materialPurchase.applyPurchase.updateAt = new Date();
         this.materialPurchase.applyPurchase.save();
         new ERecordBuilder("materialPlanUnit.prepay")
-                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount)).fid(this.id, ProcureUnit.class).save();
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
         return fee;
     }
-
-
 
     /**
      * 是否拥有了 预付款

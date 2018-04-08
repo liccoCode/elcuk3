@@ -6,9 +6,11 @@ $ ->
       .done((r) ->
         LoadMask.unmask()
         # 填充参数
-        _.each(["accountAddress", "accountNumber", "accountUser", "name", "id", "cooper.id"], (field) ->
-          if field == "cooper.id"
-            $("#target_cooperId").val(r["cooper"]["id"])
+        _.each(["accountAddress", "accountNumber", "accountUser", "name", "id", "c.id"], (field) ->
+          if field == "c.id"
+            target = $("#target_cooperId").selectize()
+            selectize = target[0].selectize
+            selectize.setValue(r['cooper']['id'], false);
           else
             $("#target_#{field}").val(r[field])
         )
@@ -28,6 +30,7 @@ $ ->
         type = if r.flag is false then 'error' else 'success'
         noty({text: r.message, type: type})
         LoadMask.unmask()
+        window.location.reload()
       )
       .fail((r) ->
         noty({text: r.responseType, type: 'error'})
