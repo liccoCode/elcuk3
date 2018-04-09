@@ -64,16 +64,21 @@
         <div class="form-group">
           <label for="p_sku" class="col-sm-2 control-label">#{if r_isFirst}重量段#{/if}</label>
           <div class="col-sm-4 form-inline">
-            <input class="form-control" style="width:80px;" name="ranges[${r_index}].weightBegin"
+            <input class="form-control" style="width:60px;" name="ranges[${r_index}].weightBegin"
                    value="${r.weightRange.split("-")[0]}"> ~
             <div class="input-group">
-              <input style="width:80px;" class="form-control" name="ranges[${r_index}].weightEnd"
+              <input style="width:60px;" class="form-control" name="ranges[${r_index}].weightEnd"
                      value="${r.weightRange.split("-")[1]}">
               <div class="input-group-addon">KG</div>
             </div>
+
               #{if r_isLast}
                 <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
               #{/if}
+            <a class="btn btn-danger" name="deleteWeight" data-url="@{Elcuk.deleteChannelFee(r.id)}"
+               data-refresh="@{Elcuk.updateTransportFee(r.detail.id)}">
+              <span class="glyphicon glyphicon-trash"></span>
+            </a>
           </div>
           <label for="" class="col-sm-2 control-label">#{if r_isFirst}价格#{/if}</label>
           <div class="col-sm-4 form-inline">

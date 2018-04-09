@@ -1,47 +1,57 @@
-#{extends 'main.html'/}
-#{set title:"修改参数值" /}
+#{extends 'main_full_v3.html'/}
+#{set title:"修改运输天数" /}
 #{set 'moreScripts'}
     #{script 'elcuk/editConfig.coffee'/}
 #{/set}
+
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid">
-#{info_row title: '修改参数值'/}
-  <div>
-    <span class="label label-success">市场: ${market}</span>
-    <span class="label label-success">运输方式: ${shipType}</span>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header with-border">
+        <h4 class="box-title">修改参数值
+          <span class="label label-success">市场: ${market}</span>
+          <span class="label label-success">运输方式: ${shipType}</span>
+        </h4>
+      </div>
+      <form action="@{Elcuk.updateShipDayConfigs()}" method="post" class="form-inline">
+        <div class="box-body">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>阶段类型</th>
+              <th>时长</th>
+              <th>当前值(天)</th>
+            </tr>
+          #{list items: configs, as: 'config'}
+            <tr>
+              <td>
+              ${config.shipType()}
+              </td>
+              <td>
+                <input type="text" name="val" placeholder="平均持续天数" data-id="${config.id}" class="form-control">
+              </td>
+              <td>
+                <input type="text" name="${config.id + "_currentVal"}" value="${config.val}" readonly class="form-control">
+              </td>
+            </tr>
+          #{/list}
+            <tr>
+              <td colspan="3">
+                <input type="hidden" name="vals">
+                <input type="hidden" name="operatorConfigId" value="${operatorConfigId}">
+                <input type="hidden" name="market" value="${market}">
+                <input type="hidden" name="shipType" value="${shipType}">
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="box-footer">
+          <a class="btn btn-primary" id="submitBtn" href="javascript:void(0);" data-loading>更新</a>
+          <a class="btn btn-default" href="@{Elcuk.edit(operatorConfigId)}">返回</a>
+        </div>
+      </form>
+    </div>
   </div>
-#{form @Elcuk.updateShipDayConfigs(), method: 'POST', class: 'search_form'}
-  <table class="table table-condensed table-bordered">
-    <tr>
-      <th>阶段类型</th>
-      <th>时长</th>
-      <th>当前值(天)</th>
-    </tr>
-      #{list items: configs, as: 'config'}
-        <tr>
-          <td>
-          ${config.shipType()}
-          </td>
-          <td>
-            <input type="text" name="val" placeholder="平均持续天数" data-id="${config.id}">
-          </td>
-          <td>
-            <input type="text" name="${config.id + "_currentVal"}" value="${config.val}" readonly>
-          </td>
-        </tr>
-      #{/list}
-    <tr>
-      <td colspan="3">
-        <input type="hidden" name="vals">
-        <input type="hidden" name="operatorConfigId" value="${operatorConfigId}">
-        <input type="hidden" name="market" value="${market}">
-        <input type="hidden" name="shipType" value="${shipType}">
-        <a class="btn" href="@{Elcuk.edit(operatorConfigId)}">返回</a>
-        <a class="btn btn-primary" id="submitBtn" href="javascript:void(0)" data-loading>更新</a>
-      </td>
-    </tr>
-  </table>
-#{/form}
 </div>

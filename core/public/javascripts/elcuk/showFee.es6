@@ -9,6 +9,15 @@ $(() => {
     let html = _.template($("#copy").text())({"num": index});
     $(this).parent().parent("div").after(html);
     $(this).remove();
+  }).on("click", "a[name='deleteWeight']", function () {
+    let refresh = $(this).data("refresh");
+    $.post($(this).data("url"), {}, function (r) {
+      if (r.flag) {
+        $("#update_div").html("");
+
+        $("#update_div").load(refresh);
+      }
+    });
   });
 
   $("#data-table td").attr("style", "vertical-align:middle");
