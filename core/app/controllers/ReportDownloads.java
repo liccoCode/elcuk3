@@ -23,11 +23,6 @@ import java.util.List;
 @With({SystemOperation.class})
 public class ReportDownloads extends Controller {
 
-    /**
-     * 销售报表
-     *
-     * @param p
-     */
     public static void index(ReportPost p) {
         if(p == null) p = new ReportPost();
         p.reportTypes = ReportPost.saleReportTypes();
