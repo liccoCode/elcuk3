@@ -238,7 +238,6 @@ public class Selling extends GenericModel {
 
     @Column(columnDefinition = "int(2) DEFAULT '-1'")
     public Integer pirateBeginHour;
-    
     @Column(columnDefinition = "int(2) DEFAULT '-1'")
     public Integer pirateEndHour ;
 

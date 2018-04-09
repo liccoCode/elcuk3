@@ -1,159 +1,161 @@
-#{extends 'main_full.html' /}
+#{extends 'main_full_v3.html' /}
 #{set title:'其它出库单' /}
 #{set 'moreScripts'}
     #{script 'jquery.filedrop.js'/}
     #{script 'component/dropUpload.coffee'/}
     #{script 'outbounds/blank.js'/}
 #{/set}
-<style>
-  .table td{
-    vertical-align:middle;
-  }
-</style>
 
 #{errorMsgs /}
 #{flash_alert/}
 
-#{form @Outbounds.otherCreate(), method:'POST', id: 'new_outbound'}
-    #{info_row title:'出库单'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-bordered">
-      <tr>
-        <th>出库单ID</th>
-        <td><input type="text" name="outbound.id" value="${outbound?.id}" readonly/></td>
-        <th>出库单名称<span style="color:red">*</span></th>
-        <td><input type="text" class="span8" name="outbound.name" value="${name}" required></td>
-        <th>出库日期<span style="color:red">*</span></th>
-        <td><input type="date" name="outbound.outboundDate" required></td>
-      </tr>
-      <tr>
-        <th>出库类型</th>
-        <td>
-          <select name="outbound.type">
+
+<div class="row">
+  <div class="col-md-12">
+    <form action="@{Outbounds.otherCreate()}" method="post" id="new_outbound" class="form-horizontal">
+      <div class="box">
+        <div class="box-header"><h4 class="box-title">出库单详情</h4></div>
+        <div class="box-body">
+          <div class="form-group">
+            <label class="col-sm-1 control-label">出库单ID</label>
+            <div class="col-sm-2">
+              <input type="text" name="outbound.id" value="${outbound?.id}" readonly class="form-control"/>
+            </div>
+            <label class="col-sm-1 control-label">出库单名称<span style="color:red">*</span></label>
+            <div class="col-sm-5">
+              <input type="text" class="form-control" name="outbound.name" value="${name}" required>
+            </div>
+            <label class="col-sm-1 control-label">出库日期<span style="color:red">*</span></label>
+            <div class="col-sm-2">
+              <input role="date" name="outbound.outboundDate" required class="form-control">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-1 control-label">出库类型</label>
+            <div class="col-sm-2">
+              <select name="outbound.type" class="form-control">
               #{list items:models.whouse.StockRecord.C, as:'t'}
                   #{if !t.name().equals("Normal")}
                     <option value="${t.name()}">${t.label()}</option>
                   #{/if}
               #{/list}
-          </select>
-        </td>
-        <th>货代公司</th>
-        <td>
-          <!-------------------------- targetId 备选项 ---------------------------------------------------------->
-          <select style="display:none;" id="shipperOptions">
+              </select>
+            </div>
+            <label class="col-sm-1 control-label">货代公司</label>
+            <div class="col-sm-2">
+              <select style="display:none;" id="shipperOptions" class="form-control">
               #{list items:shippers, as: 'ship'}
                 <option ${ship.id.toString() == outbound?.targetId ? 'selected' : ''} value="${ship.id}">
                 ${ship.name}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="supplierOptions">
+              </select>
+              <select style="display:none;" id="supplierOptions" class="form-control">
               #{list items:suppliers, as: 'sup'}
                 <option ${sup.id.toString() == outbound?.targetId ? 'selected' : ''} value="${sup.id}">
                 ${sup.name}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="sampleOptions">
+              </select>
+              <select style="display:none;" id="sampleOptions" class="form-control">
               #{list items: ["质检部", "采购部", "运营部", "研发部", "生产部"], as: 'target'}
                 <option ${outbound?.targetId == target ? 'selected' : ''} value="${target}">
                 ${target}
                 </option>
               #{/list}
-          </select>
-          <select style="display:none;" id="processOptions">
-            <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
-              品拓生产部
-            </option>
-          </select>
-          <!--------------------------------------------------------------------------------------------------->
-          <select name="outbound.targetId" style="width: 230px;">
-          </select>
-        </td>
-        <th>发货人</th>
-        <td>
-          <select name="outbound.consignor.id" class="inline selectize" style="width:120px;">
-            <option value="">发货人</option>
+              </select>
+              <select style="display:none;" id="processOptions" class="form-control">
+                <option ${outbound?.targetId == '品拓生产部' ? 'selected' : ''} value="品拓生产部">
+                  品拓生产部
+                </option>
+              </select>
+              <!--------------------------------------------------------------------------------------------------->
+              <select name="outbound.targetId" style="width: 230px;" class="form-control">
+              </select>
+            </div>
+            <label class="col-sm-1 control-label">发货人</label>
+            <div class="col-sm-2">
+              <select name="outbound.consignor.id" class="form-control inline selectize" style="width:120px;">
+                <option value="">发货人</option>
               #{list items:users, as:'u'}
                 <option value="${u.id}">${u.username}</option>
               #{/list}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th>备注</th>
-        <td colspan="5">
-          <textarea name="outbound.memo" rows="4" class="input-block-level"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="6">
-          <button class="btn btn-primary" name="create_record">创建</button>
-          <a href="@{Outbounds.index()}" class="btn btn-success">取消</a>
-        </td>
-      </tr>
-    </table>
-  </div>
-</div>
-    #{info_row title:'已添加进入【出库单】的【采购单元】'/}
-<div class="row-fluid">
-  <div class="span12">
-    <table class="table table-condensed table-bordered" id="data_table">
-      <tr>
-        <th>
-          <label class="checkbox">
-            <input type="checkbox" id="checkbox_all" class="checkall" value="">
-          </label>
-        </th>
-        <th>采购计划ID</th>
-        <th>采购单</th>
-        <th>Selling</th>
-        <th>SKU</th>
-        <th>产品名称</th>
-        <th>供应商</th>
-        <th>可用库存</th>
-        <th>实际出库数量</th>
-        <th>仓库名称</th>
-        <th>收货入库记录ID</th>
-        <th>阶段</th>
-        <th>项目名称</th>
-        <th>备注</th>
-      </tr>
-        #{list items:units, as:'unit'}
-          <tr class="text-center">
-            <td>
-              <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
-              <input type="hidden" name="pids" value="${unit.id}">
-            </td>
-            <td>${unit.id}</td>
-            <td>${unit.deliveryment.id}</td>
-            <td>${unit.selling?.sellingId}</td>
-            <td>${unit.product.abbreviation}</td>
-            <td>${unit.cooperator?.name}</td>
-            <td>${unit.whouse?.name}</td>
-            <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
-            <td>${unit.fba?.shipmentId}</td>
-            <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
-            <td>${unit.availableQty}</td>
-            <td>${unit.outQty}</td>
-            <td>
-              <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
-            </td>
-            <td>${unit.currWhouse?.name}</td>
-            <td>${unit.showInboundIds()}</td>
-            <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
-            <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
-          </tr>
-        #{/list}
-    </table>
-  </div>
-</div>
-#{/form}
+              </select>
+            </div>
+          </div>
 
-<div class="input-append">
-  <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId">
-  <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+          <div class="form-group">
+            <label class="col-sm-1 control-label">备注</label>
+            <div class="col-sm-11">
+              <textarea name="outbound.memo" rows="9" class="form-control"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="box-footer">
+          <button class="btn btn-primary" name="create_record">创建</button>
+          <a href="@{Outbounds.index()}" class="btn btn-default">取消</a>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-header"><h4 class="box-title">已添加进入[出库单]的[采购单元]</h4></div>
+        <div class="box-body">
+          <table class="table table-condensed table-bordered" id="data_table">
+            <tr>
+              <th>
+                <input type="checkbox" id="checkbox_all" class="checkall" value="">
+              </th>
+              <th>采购计划ID</th>
+              <th>采购单</th>
+              <th>Selling</th>
+              <th>SKU</th>
+              <th>产品名称</th>
+              <th>供应商</th>
+              <th>可用库存</th>
+              <th>实际出库数量</th>
+              <th>仓库名称</th>
+              <th>收货入库记录ID</th>
+              <th>阶段</th>
+              <th>项目名称</th>
+              <th>备注</th>
+            </tr>
+          #{list items:units, as:'unit'}
+            <tr class="text-center">
+              <td>
+                <input type="checkbox" name="dtos[${unit_index-1}].unitId" value="${unit.id}">
+                <input type="hidden" name="pids" value="${unit.id}">
+              </td>
+              <td>${unit.id}</td>
+              <td>${unit.deliveryment.id}</td>
+              <td>${unit.selling?.sellingId}</td>
+              <td>${unit.product.abbreviation}</td>
+              <td>${unit.cooperator?.name}</td>
+              <td>${unit.whouse?.name}</td>
+              <td style="color:${unit.shipType?.rgb()}">${unit.shipType?.label()}</td>
+              <td>${unit.fba?.shipmentId}</td>
+              <td>#{time_tooltip time:unit.attrs.planShipDate /}</td>
+              <td>${unit.availableQty}</td>
+              <td>${unit.outQty}</td>
+              <td>
+                <input type="button" class="btn btn-mini btn-success" data-id="${unit.id}" name="editBoxInfo" value="填写">
+              </td>
+              <td>${unit.currWhouse?.name}</td>
+              <td>${unit.showInboundIds()}</td>
+              <td style="background-color:${unit.stage.rgb()}">${unit.stage?.label()}</td>
+              <td rel="tooltip" title="${unit.comment}"><a>${unit.comment.xxLong()}</a></td>
+            </tr>
+          #{/list}
+          </table>
+        </div>
+        <div class="box-footer form-inline">
+          <input type="text" name="msg" value="" placeholder="采购计划ID" id="procureId" class="form-control">
+          <input type="button" class="btn btn-warning" rel="tooltip" id="quickAdd" title="输入采购ID，可以快速添加采购计划" value="快速添加">
+        </div>
+      </div>
+
+    </form>
+  </div>
 </div>
 
 <div id="fba_carton_contents_modal" class="modal hide fade" style="width:1000px;left: 40%;">

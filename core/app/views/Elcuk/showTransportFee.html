@@ -29,7 +29,7 @@
               <th>目的地</th>
               <th>运输时效(DAY)</th>
               <th>重量段(KG)</th>
-              <th>价格范围(CNY)</th>
+              <th>价格范围(CNY/KG)</th>
               <th>备注</th>
               <th>Action</th>
             </tr>
@@ -172,9 +172,9 @@
   <div class="form-group">
     <label for="p_sku" class="col-sm-2 control-label"></label>
     <div class="col-sm-4 form-inline">
-      <input class="form-control" style="width:80px;" name="ranges[<%= num %>].weightBegin" value=""> ~
+      <input class="form-control" style="width:60px;" name="ranges[<%= num %>].weightBegin" value=""> ~
       <div class="input-group">
-        <input style="width:80px;" class="form-control" name="ranges[<%= num %>].weightEnd" value="">
+        <input style="width:60px;" class="form-control" name="ranges[<%= num %>].weightEnd" value="">
         <div class="input-group-addon">KG</div>
       </div>
       <a class="btn btn-warning" id="addWeight"><span class="glyphicon glyphicon-plus"></span></a>
