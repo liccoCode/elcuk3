@@ -4,6 +4,7 @@ import models.ReportRecord;
 import play.db.helper.SqlSelect;
 import play.libs.F;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,7 +20,8 @@ public class ReportPost extends Post<ReportRecord> {
     private static final long serialVersionUID = -4955491389269838111L;
 
     public ReportPost() {
-        this.perSize = 25;
+        this.year = LocalDate.now().getYear();
+        this.perSize = 10;
         this.page = 1;
     }
 
@@ -44,7 +46,7 @@ public class ReportPost extends Post<ReportRecord> {
                 ReportRecord.RT.INVENTORYRATIANALITY, ReportRecord.RT.SELLINGCYCLE, ReportRecord.RT.INVRNTORYCOST);
     }
 
-    public static List<ReportRecord.RT> shipmentMonthlyTypes(){
+    public static List<ReportRecord.RT> shipmentMonthlyTypes() {
         return Collections.singletonList(ReportRecord.RT.SHIPMENTMONTHLY);
     }
 
@@ -54,26 +56,24 @@ public class ReportPost extends Post<ReportRecord> {
      * @return
      */
     public static List<ReportRecord.RT> applyReportTypes() {
-        return Arrays
-                .asList(ReportRecord.RT.REVENUEANDCOST, ReportRecord.RT.SALESFEELIST, ReportRecord.RT.PAYBILLDETAIL,
-                        ReportRecord.RT.ANALYZEREPORT);
+        return Arrays.asList(ReportRecord.RT.REVENUEANDCOST, ReportRecord.RT.SALESFEELIST, ReportRecord.RT.PAYBILLDETAIL,
+                ReportRecord.RT.ANALYZEREPORT);
     }
 
     public static List<ReportRecord.RT> procureReportTypes() {
         return Arrays.asList(ReportRecord.RT.PROCURECOSTANALYSIS);
     }
 
-    @SuppressWarnings("unchecked")
     public List<ReportRecord> query() {
         F.T2<String, List<Object>> params = params();
-        return ReportRecord.find(params._1 + " ORDER BY createAt DESC", params._2.toArray()).fetch();
+        this.count = ReportRecord.find(params._1, params._2.toArray()).fetch().size();
+        return ReportRecord.find(params._1 + " ORDER BY createAt DESC", params._2.toArray())
+                .fetch(this.page, this.perSize);
     }
 
     @Override
     public Long count(F.T2<String, List<Object>> params) {
-        return ReportRecord.count("SELECT COUNT(*) FROM ReportRecord WHERE " + params._1,
-                params._2.toArray()
-        );
+        return this.count;
     }
 
     public Long getTotalCount() {
@@ -97,7 +97,7 @@ public class ReportPost extends Post<ReportRecord> {
             sbd.append("AND reporttype=?");
             params.add(this.reporttype);
         } else {
-            sbd.append("AND reporttype IN " + SqlSelect.inlineParam(this.reportTypes));
+            sbd.append("AND reporttype IN ").append(SqlSelect.inlineParam(this.reportTypes));
         }
         return new F.T2<>(sbd.toString(), params);
     }
