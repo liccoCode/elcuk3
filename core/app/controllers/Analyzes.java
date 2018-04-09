@@ -112,7 +112,6 @@ public class Analyzes extends Controller {
         }
     }
 
-
     public static void analyzesSid(final AnalyzePost p) {
         try {
             User user = User.findById(Login.current().id);
@@ -123,9 +122,13 @@ public class Analyzes extends Controller {
                 render("Analyzes/" + p.type + ".html", dtos, p);
             }
             Long start = System.currentTimeMillis();
-            List<AnalyzeDTO> dtos = AnalyzeDTO.findAll();
+            List<AnalyzeDTO> dtos = null;
+            if(p.type.equals("sid")) dtos = AnalyzeDTO.find(" type='SELLING'").fetch();
+            else  dtos =  AnalyzeDTO.find(" type='SKU'").fetch();
+
+            dtos = p.query(dtos);
             Logger.info("销量分析首页后台耗时：" + (System.currentTimeMillis() - start) + "ms");
-            render("Analyzes/sid.html", dtos, p);
+            render("Analyzes/" + p.type + ".html", dtos, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
         }
@@ -256,10 +259,10 @@ public class Analyzes extends Controller {
     /**
      * 删除页面缓存
      */
-    public static void batchDelete( String key) {
+    public static void batchDelete(String key) {
         try {
             Caches.batchDelete(key);
-            new ElcukRecord("删除销量分析缓存",key).save();
+            new ElcukRecord("删除销量分析缓存", key).save();
             renderJSON(new Ret());
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));

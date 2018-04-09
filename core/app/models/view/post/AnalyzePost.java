@@ -124,6 +124,34 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
         return dtos;
     }
 
+
+    public List<AnalyzeDTO> query(List<AnalyzeDTO> dtos) {
+        if(this.type.equals("sid")) {
+            setOutDayColor(dtos, null);
+            calculationEurInventory(dtos);
+        }
+
+        // 过滤各种条件
+        if(StringUtils.isNotBlank(this.categoryId))
+            CollectionUtils.filter(dtos, new SearchPredicate("^" + this.categoryId));
+        if(StringUtils.isNotBlank(this.search))
+            CollectionUtils.filter(dtos, new SearchPredicate(this.search));
+        if(StringUtils.isNotBlank(this.orderBy))
+            Collections.sort(dtos, new FieldComparator(this.orderBy, this.desc));
+        if(StringUtils.isNotBlank(this.aid) && "sid".equalsIgnoreCase(this.type))
+            CollectionUtils.filter(dtos, new AccountIdPredicate(this.aid));
+        if(this.filterDot2) CollectionUtils.filter(dtos, new UnContainsPredicate(",2"));
+        if(StringUtils.isNotBlank(this.market))
+            CollectionUtils.filter(dtos, new MarketPredicate(M.val(this.market)));
+        if(StringUtils.isNotBlank(this.state) && !this.state.equals("All"))
+            CollectionUtils.filter(dtos, new StatePredicate(this.state));
+        if(Objects.equals(this.flag, "1")) {
+            return dtos.stream().filter(dto -> (dto.day1 > 0 || dto.ps > 0 || dto.qty > 0)).collect(Collectors.toList());
+        }
+        return dtos;
+    }
+
+
     public List<AnalyzeDTO> queryByPrivate(List<AnalyzeDTO> dtos, List<String> categories) {
         return dtos.stream().filter(dto -> dto.containsCategory(categories)).collect(Collectors.toList());
     }

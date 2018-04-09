@@ -85,7 +85,7 @@ public class SellingRecord extends GenericModel {
      * hash(sid_date) 值, 为 ID
      */
     @Id
-    @Column(length = 40)
+    @Column(length = 80)
     public String id;
 
     /**
@@ -218,8 +218,14 @@ public class SellingRecord extends GenericModel {
     /**
      * 记录的时间
      */
-    @Expose
+    @Temporal(TemporalType.DATE)
     public Date date = new Date();
+    /**
+     * 退货数
+     */
+    public Integer returnd = 0;
+    
+    public String product_sku;
 
     /**
      * 使用平均值的方式对成本等进行均等化处理;

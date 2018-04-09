@@ -197,6 +197,15 @@ public class AnalyzeDTO extends GenericModel implements Serializable {
      */
     public float returnRates = 0;
 
+    @Enumerated(EnumType.STRING)
+    public TYPE type;
+
+    public enum TYPE {
+        SELLING,
+        SKU
+    }
+
+
     public static String[] indexColor = {"progress-bar-aqua", "progress-bar-red", "progress-bar-green",
             "progress-bar-yellow"};
 
