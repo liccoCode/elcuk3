@@ -1,107 +1,109 @@
-#{extends 'main.html'/}
+#{extends 'main_full_v3.html'/}
+
 #{set title:"修改(${config.name})参数值" /}
-#{set 'moreScripts'}
-#{/set}
+
 #{errorMsgs /}
 #{flash_alert /}
 
-<div class="row-fluid">
-#{info_row title: '修改参数值'/}
-#{form @Elcuk.updateShipmentMarketConfigs(), method: 'POST'}
-  <input type="hidden" value="${config.id}" name="id">
-  <table class="table table-condensed table-bordered">
-    <tr>
-      <th>参数类型</th>
-      <td>${config.type}</td>
-    </tr>
-    <tr>
-      <td>参数编码</td>
-      <td>${config.paramcode}</td>
-    </tr>
-    <tr>
-      <td>参数名称</td>
-      <td>${config.name}</td>
-    </tr>
-    <tr>
-      <td>星期一</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day1" value="${market.name()}" style="vertical-align:middle;"
-                  ${map!=null&&map.get("1").contains(market.name()) ? 'checked':''}
-            />
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期二</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day2" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("2").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期三</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day3" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("3").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期四</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day4" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("4").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期五</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day5" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("5").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期六</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day6" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("6").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    <tr>
-      <td>星期日</td>
-      <td>
-          #{list items:models.market.M.values(), as:'market'}
-            <input type="checkbox" name="day7" value="${market.name()}" style="vertical-align:middle;"
-            ${map!=null&&map.get("7").contains(market.name()) ? 'checked':''}/>
-            <span style="vertical-align:middle;" >${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          #{/list}
-      </td>
-    </tr>
-    
 
-
-    <tr>
-      <td colspan="2">
-        <a href="@{Elcuk.index()}" class="btn">返回</a>
-        <button class="btn btn-primary">提交</button>
-      </td>
-    </tr>
-  </table>
-#{/form}
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">修改(${config.name})参数值</h4></div>
+      <form action="@{Elcuk.updateShipmentMarketConfigs()}" method="post" class="form-inline">
+        <div class="box-body">
+          <table class="table table-condensed table-bordered">
+            <tr>
+              <th>参数类型</th>
+              <td>${config.type}</td>
+            </tr>
+            <tr>
+              <td>参数编码</td>
+              <td>${config.paramcode}</td>
+            </tr>
+            <tr>
+              <td>参数名称</td>
+              <td>${config.name}</td>
+            </tr>
+            <tr>
+              <td>星期一</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day1" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("1").contains(market.name()) ? 'checked':''}
+                />
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期二</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day2" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("2").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期三</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day3" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("3").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期四</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day4" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("4").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期五</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day5" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("5").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期六</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day6" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("6").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+            <tr>
+              <td>星期日</td>
+              <td>
+              #{list items:models.market.M.amazonVals(), as:'market'}
+                <input type="checkbox" name="day7" value="${market.name()}" style="vertical-align:middle;"
+                ${map!=null&&map.get("7").contains(market.name()) ? 'checked':''}/>
+                <span style="vertical-align:middle;">${market.countryName()}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              #{/list}
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="box-footer">
+          <button class="btn btn-primary">提交</button>
+          <a href="@{Elcuk.index()}" class="btn btn-default">返回</a>
+          <input type="hidden" value="${config.id}" name="id">
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

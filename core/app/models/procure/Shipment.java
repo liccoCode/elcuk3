@@ -1450,8 +1450,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
             whouse.checkWhouseNewShipment(planedShipments);
         }
         // 加载
-        StringBuilder where = new StringBuilder("state IN (?,?)");
-        List<Object> params = new ArrayList<>(Arrays.asList(S.PLAN, S.CONFIRM));
+        List<Object> params = new ArrayList<>();
+        StringBuilder where = new StringBuilder("state =?");
+        params.add(S.PLAN);
         if(whouseId != null) {
             Whouse whouse = Whouse.findById(whouseId);
             where.append("AND (whouse.market=? OR whouse.id IS NULL)");

@@ -10,6 +10,7 @@ import models.procure.Shipment;
 import models.shipment.TransportChannel;
 import models.shipment.TransportChannelDetail;
 import models.shipment.TransportRange;
+import models.view.Ret;
 import org.apache.commons.lang.StringUtils;
 import play.mvc.Controller;
 import play.mvc.Util;
@@ -113,6 +114,12 @@ public class Elcuk extends Controller {
         showTransportFee();
     }
 
+    public static void deleteChannelFee(Long id) {
+        TransportRange range = TransportRange.findById(id);
+        range.delete();
+        renderJSON(new Ret(true, "删除成功"));
+    }
+
     public static void updateChannelFee(TransportChannelDetail detail, List<TransportRange> ranges, Long detailId) {
         TransportChannelDetail old = TransportChannelDetail.findById(detailId);
         old.channel.id = detail.channel.id;
@@ -136,8 +143,12 @@ public class Elcuk extends Controller {
     }
 
     public static void deleteChannel(Long id) {
-        TransportChannelDetail detail = TransportChannelDetail.findById(id);
-        detail.delete();
+        TransportChannel channel = TransportChannel.findById(id);
+        if(channel.detailList.size() > 0) {
+            flash.error("删除失败,该渠道下已经有" + channel.detailList.size() + "条明细");
+            showShipChannel();
+        }
+        channel.delete();
         flash.success("删除成功");
         showShipChannel();
     }
