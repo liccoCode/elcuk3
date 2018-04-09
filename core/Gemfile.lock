@@ -14,7 +14,7 @@ GEM
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (3.2.0)
-    rake (10.5.0)
+    rake (12.0.0)
     sshkit (1.11.4)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
@@ -23,7 +23,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  capistrano (~> 3.6.1)
+  capistrano
 
 BUNDLED WITH
-   1.13.6
+   1.16.1
