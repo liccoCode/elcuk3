@@ -1297,6 +1297,9 @@ public class Product extends GenericModel implements ElcukRecord.Log {
             return this.weight;
         } else {
             ProcureUnit unit = units.get(0);
+            if(unit.mainBox.singleBoxWeight / unit.mainBox.num == 0) {
+                return this.weight;
+            }
             return unit.mainBox.singleBoxWeight / unit.mainBox.num;
         }
     }

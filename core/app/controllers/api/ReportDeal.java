@@ -22,6 +22,8 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
+import play.db.jpa.GenericModel;
+import play.db.jpa.Model;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
@@ -213,14 +215,18 @@ public class ReportDeal extends Controller {
         }
     }
 
-    public static void genreateShipmentMonthlyReport() {
+    public static void generateShipmentMonthlyReport() {
         List<Shipment> list = Shipment.shipmentMonthly();
+        int year = DateTime.now().minusMonths(1).getYear();
+        int month = DateTime.now().minusMonths(1).getMonthOfYear();
+        List<ShipmentMonthly> monthlyList = ShipmentMonthly.find("year=? AND month=?", year, month).fetch();
+        monthlyList.forEach(GenericModel::delete);
         list.stream().filter(shipment -> shipment.items.size() > 0).forEach(shipment -> shipment.items.forEach(item -> {
             ShipmentMonthly monthly = new ShipmentMonthly();
             monthly.unit = item.unit;
             monthly.shipItem = item;
-            monthly.year = DateTime.now().minusMonths(1).getYear();
-            monthly.month = DateTime.now().minusMonths(1).getMonthOfYear();
+            monthly.year = year;
+            monthly.month = month;
             monthly.type = item.shipment.type;
             if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(item.shipment.type)) {
                 item.crawlWeight(monthly);

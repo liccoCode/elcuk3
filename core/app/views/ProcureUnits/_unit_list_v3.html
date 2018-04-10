@@ -142,7 +142,8 @@
     </td>
     <td data-toggle="tooltip" title="${unit.whouse?.name}">${unit.whouse?.name}</td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
-    ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}
+    ${unit.attrs.planQty}/${unit.attrs.qty}/${unit.inboundQty}<br>
+      <span class="label label-default" data-toggle="tooltip" title="当前重量">${unit.currentWeight()} kg</span>
     </td>
     <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}

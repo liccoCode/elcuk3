@@ -2747,4 +2747,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             return this.product.weight * this.qtyForFba();
         }
     }
+
+    public double currentWeight() {
+        return new BigDecimal(this.product.getRecentlyWeight() * this.shipmentQty())
+                .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
 }
