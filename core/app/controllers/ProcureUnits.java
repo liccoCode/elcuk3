@@ -103,7 +103,9 @@ public class ProcureUnits extends Controller {
             p.stages.remove(ProcureUnit.STAGE.IN_STORAGE);
         }
         List<ProcureUnit> units = p.query();
-        Map<String, String> map = p.total(units);
+        p.pagination = false;
+        List<ProcureUnit> allUnits = p.query();
+        Map<String, String> map = p.total(allUnits);
         render(p, units, map);
     }
 
@@ -782,12 +784,18 @@ public class ProcureUnits extends Controller {
         redirect("/activitis/index");
     }
 
-    public static void fnSkuLable(String sid, boolean includeSku) {
+    public static void fnSkuLable(String sid, Long unitId, boolean includeSku) {
         Selling selling = Selling.findById(sid);
+        ProcureUnit unit = ProcureUnit.findById(unitId);
         final PDF.Options options = new PDF.Options();
         options.filename = selling.fnSku + ".pdf";
-        options.pageSize = IHtmlToPdfTransformer.A4P;
-        renderPDF(options, selling, includeSku);
+        if(Objects.equals(unit.cooperator.barCode, Cooperator.C.FOUR)) {
+            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8D, 29.6D, 0.1D, 0.1D, 0.0D, 0.3D);
+            renderPDF("ProcureUnits/fnSkuLable4P.html", options, selling, includeSku);
+        } else {
+            options.pageSize = IHtmlToPdfTransformer.A4P;
+            renderPDF(options, selling, includeSku);
+        }
     }
 
     /**

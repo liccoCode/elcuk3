@@ -94,7 +94,7 @@
     <td>
       <!-- FnSku 下载 Label -->
         #{if unit.selling?.fnSku}
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid, false)}" class="btn btn-success btn-block">
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid, unit.id, false)}" class="btn btn-success btn-block">
             <i class="icon-download-alt"></i> ${unit.selling.fnSku}
           </a>
         #{/if}

@@ -186,6 +186,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
+    public static List<STAGE> procureStage() {
+        return Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE);
+    }
 
     /**
      * 出货单阶段
@@ -2746,5 +2749,10 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         } else {
             return this.product.weight * this.qtyForFba();
         }
+    }
+
+    public double currentWeight() {
+        return new BigDecimal(this.product.getRecentlyWeight() * this.shipmentQty())
+                .setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 }

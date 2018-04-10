@@ -1876,8 +1876,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     public static List<Shipment> shipmentMonthly() {
         Date lastMonthBegin = Dates.monthBegin(Dates.aMonthAgo());
         Date lastMonthEnd = Dates.monthEnd(Dates.aMonthAgo());
-        return Shipment.find("dates.planBeginDate >= ? AND dates.planBeginDate <= ? ", lastMonthBegin,
-                lastMonthEnd).fetch();
+        return Shipment.find("dates.beginDate >= ? AND dates.beginDate <= ? ", lastMonthBegin, lastMonthEnd).fetch();
     }
 
     /**
