@@ -90,6 +90,14 @@
                       <div class="col-sm-3">
                         <input type="text" name="cop.address" class="form-control" value="${coper.address}" placeholder="详细地址">
                       </div>
+                      <label for="" class="col-sm-1 control-label">条码</label>
+                      <div class="col-sm-2">
+                        <select class="form-control" name="cop.barCode">
+                        #{list models.procure.Cooperator.C.values(), as:'c'}
+                          <option value="${c.name()}" ${c==coper.barCode? 'selected':''}>${c.label()}</option>
+                        #{/list}
+                        </select>
+                      </div>
                     </div>
 
                     <div class="form-group">

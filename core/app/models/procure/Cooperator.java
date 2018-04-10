@@ -293,6 +293,27 @@ public class Cooperator extends Model {
         public abstract String label();
     }
 
+    public enum C {
+        THREE {
+            public String label() {
+                return "每行3个";
+            }
+        },
+        FOUR {
+            public String label() {
+                return "每行4个";
+            }
+        };
+
+        public abstract String label();
+    }
+
+    /**
+     * 下载条码的格式
+     */
+    @Enumerated(EnumType.STRING)
+    public C barCode;
+
     /**
      * 性质
      */
@@ -317,8 +338,6 @@ public class Cooperator extends Model {
         } else {
             this.updateDate = new Date();
         }
-        this.creator = Login.current();
-        this.createDate = new Date();
         this.save();
     }
 

@@ -14,31 +14,36 @@
   </style>
 </head>
 <body style="margin:0 0 0 0;">
-<table border="0" style="margin:0 0 0 0;width: 160mm; font-size:10px;" cellpadding="0" cellspacing="0">
-#{list items:1..9}
-  <tr style="height: 12mm; vertical-align:bottom;">
+<table border="0" style="margin:0 0 0 0; font-size:10px;" cellpadding="0" cellspacing="0">
+#{list items:1..10}
+  <tr style="height: 11.5mm; vertical-align:bottom;">
     <td style="vertical-align:middle; text-align:center;">
-      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="61mm;" height="7mm;" border="0"
-           style="padding-top:10px">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="47mm;" height="8mm;" border="0"
+           style="padding-top:0px;padding-left:0px;margin:0 0 0 0">
       <span class="small"> ${selling.fnSku}</span>
     </td>
     <td style="vertical-align:middle;text-align:center;">
-      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="61mm;" height="7mm;" border="0"
-           style="padding-top:10px">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="47mm;" height="8mm;" border="0"
+           style="padding-top:0px;padding-left:0px;margin:0 0 0 0">
       <span class="small"> ${selling.fnSku}</span>
     </td>
     <td style="vertical-align:middle;text-align:center;">
-      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="61mm;" height="7mm;" border="0"
-           style="padding-top:10px">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="47mm;" height="8mm;" border="0"
+           style="padding-top:0px;padding-left:0px;margin:0 0 0 0">
+      <span class="small"> ${selling.fnSku}</span>
+    </td>
+    <td style="vertical-align:middle;text-align:center;">
+      <img src="http://127.0.0.1:9000/fnSkuCode128/${selling.fnSku}" width="47mm;" height="8mm;" border="0"
+           style="padding-top:0px;padding-left:0px;margin:0 0 0 0">
       <span class="small"> ${selling.fnSku}</span>
     </td>
   </tr>
-  <tr style="height:16mm; vertical-align:top;">
+  <tr style="height:17.5mm; vertical-align:top; margin:0 0 0 0;">
       #{set title: selling.aps?.title/}
       #{set length: title?.length()/}
-      #{list items:1..3, as:'num'}
+      #{list items:1..4, as:'num'}
         <td style="padding-left: 18px;">
-        ${selling.aps?.sortTitle()}
+        ${selling.aps?.sortTitle4P()}
           <br>
             #{if selling.product.display}
               <div style="float:left;"><b>${selling.product?.supplierSku}</b></div>

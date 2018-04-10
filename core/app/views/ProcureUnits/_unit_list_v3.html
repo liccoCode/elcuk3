@@ -17,7 +17,7 @@
     <th width="45px;">#</th>
     <th>父ID</th>
     <th width="40px;">阶段</th>
-    <th width="190px;">Selling</th>
+    <th width="200px;">Selling</th>
     <th width="120px">Sku</th>
     <th width="160px;">FBA-ShipmentId<br>CenterId</th>
     <th width="100px;">采购单<br>供应商</th>
@@ -166,7 +166,7 @@
         #{if unit.selling?.fnSku}
         ${unit.selling.fnSku}
           <br/>
-          <a href="@{ProcureUnits.fnSkuLable(unit.sid)}" target="_blank" data-toggle="tooltip"
+          <a href="@{ProcureUnits.fnSkuLable(unit.sid, unit.id)}" target="_blank" data-toggle="tooltip"
              title="增加了 国家 信息，供应商SKU为${unit.product?.supplierSku}">
             <i class="icon-download-alt"></i> New
           </a>
