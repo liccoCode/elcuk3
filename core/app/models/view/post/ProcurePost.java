@@ -397,7 +397,16 @@ public class ProcurePost extends Post<ProcureUnit> {
     public Map<String, String> total(List<ProcureUnit> units) {
         Map<String, String> map = new HashMap<>();
         Integer totalQty = units.stream().mapToInt(ProcureUnit::qty).sum();
+        Integer totalPlanQty = units.stream().filter(unit -> Objects.equals(ProcureUnit.STAGE.PLAN, unit.stage))
+                .mapToInt(ProcureUnit::qty).sum();
+        Integer totalDeliveryQty = units.stream().filter(unit -> Objects.equals(ProcureUnit.STAGE.DELIVERY, unit.stage))
+                .mapToInt(ProcureUnit::qty).sum();
+        Integer totalDoneQty = units.stream().filter(unit -> Objects.equals(ProcureUnit.STAGE.DONE, unit.stage))
+                .mapToInt(ProcureUnit::qty).sum();
         map.put("totalQty", totalQty.toString());
+        map.put("totalPlanQty", totalPlanQty.toString());
+        map.put("totalDeliveryQty", totalDeliveryQty.toString());
+        map.put("totalDoneQty", totalDoneQty.toString());
         Double totalCNY = units.stream().filter(unit -> Objects.equals(helper.Currency.CNY, unit.attrs.currency))
                 .mapToDouble(unit -> unit.qty() * unit.attrs.price).sum();
         BigDecimal b = new BigDecimal(totalCNY);

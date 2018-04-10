@@ -7,10 +7,13 @@ import models.view.post.ProcurePost;
 import models.view.post.StockPost;
 import models.whouse.DailyStock;
 import models.whouse.StockRecord;
+import play.Logger;
 import play.jobs.On;
-import play.libs.F;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,6 +26,7 @@ public class DailyStockJob extends BaseJob {
 
     @Override
     public void doit() {
+        Logger.info("开始执行 DailyStockJob ");
         Date now = new Date();
         StockPost p = new StockPost();
         Map<String, String> total = p.total();
@@ -44,33 +48,20 @@ public class DailyStockJob extends BaseJob {
         stock.save();
 
         ProcurePost procure = new ProcurePost();
+        procure.pagination = false;
         procure.stages.add(ProcureUnit.STAGE.PLAN);
         procure.stages.remove(ProcureUnit.STAGE.IN_STORAGE);
-
         Map<String, String> map = procure.total(procure.query());
         DailyStock daily = new DailyStock();
         daily.date = now;
         daily.qty = Integer.parseInt(map.get("totalQty"));
         daily.totalCNY = Double.parseDouble(map.get("totalCNY"));
         daily.totalUSD = Double.parseDouble(map.get("totalUSD"));
-
-        F.T2<String, List<Object>> params = procure.params();
-        params._2.add(Dates.morning(new Date()));
-        params._2.add(Dates.night(new Date()));
-        List<ProcureUnit> details = ProcureUnit.find(params._1 + " AND p.createDate>=? AND p.createDate<=?",
-                params._2.toArray()).fetch();
-        Integer planQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.PLAN, detail.stage))
-                .mapToInt(ProcureUnit::qty).sum();
-        Integer deliveryQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DELIVERY, detail.stage))
-                .mapToInt(ProcureUnit::qty).sum();
-        Integer doneQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DONE, detail.stage))
-                .mapToInt(ProcureUnit::qty).sum();
-        daily.planQty = planQty;
-        daily.deliveryQty = deliveryQty;
-        daily.doneQty = doneQty;
+        daily.planQty = Integer.parseInt(map.get("planQty"));
+        daily.deliveryQty = Integer.parseInt(map.get("deliveryQty"));
+        daily.doneQty = Integer.parseInt(map.get("doneQty"));
+        daily.type = DailyStock.T.ProcureUnit;
         daily.save();
+        Logger.info("DailyStockJob执行完毕");
     }
 }

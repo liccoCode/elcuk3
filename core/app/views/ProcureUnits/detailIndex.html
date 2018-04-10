@@ -20,7 +20,7 @@
       <div class="box-body">
         <table class="table table-condensed table-bordered">
           <tr>
-            <th>总数量</th>
+            <th>总数量(计划/采购/交货)</th>
             <th>当天计划数</th>
             <th>当天下单</th>
             <th>当天收货</th>
@@ -28,7 +28,11 @@
             <th style="width:20%;" data-toggle="tooltip" title="库存资金币种为美元部分">总金额($)</th>
           </tr>
           <tr>
-            <td style="color:blue;">${map.get("totalQty")}</td>
+            <td><span style="color:blue;">${map.get("totalQty")}</span>
+              (<span style="color:#E8ECF1;">${map.get("totalPlanQty")}</span>/
+              <span style="color:#40B0F9;">${map.get("totalDeliveryQty")}</span>/
+              <span style="color:#88BEF5;">${map.get("totalDoneQty")}</span>)
+            </td>
             <td style="color:sandybrown;">${map.get("planQty")}</td>
             <td style="color:red;">${map.get("deliveryQty")}</td>
             <td style="color:green;">${map.get("doneQty")}</td>
@@ -91,7 +95,7 @@
             </select>
 
             <select name="p.stages" multiple="multiple" id="stage" class="form-control">
-            #{list items:models.procure.ProcureUnit.STAGE.values(), as:'stage'}
+            #{list items:models.procure.ProcureUnit.procureStage(), as:'stage'}
                 #{if stage.label() != '审批中'}
                   <option value="${stage.name()}" ${p.stages.contains(stage) ? 'selected' : ''}>${stage.label()}</option>
                 #{/if}

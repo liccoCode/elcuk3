@@ -103,7 +103,9 @@ public class ProcureUnits extends Controller {
             p.stages.remove(ProcureUnit.STAGE.IN_STORAGE);
         }
         List<ProcureUnit> units = p.query();
-        Map<String, String> map = p.total(units);
+        p.pagination = false;
+        List<ProcureUnit> allUnits = p.query();
+        Map<String, String> map = p.total(allUnits);
         render(p, units, map);
     }
 

@@ -186,6 +186,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         public abstract String label();
     }
 
+    public static List<STAGE> procureStage() {
+        return Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.DONE);
+    }
 
     /**
      * 出货单阶段
