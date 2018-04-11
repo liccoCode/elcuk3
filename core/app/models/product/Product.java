@@ -1294,11 +1294,13 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         List<ProcureUnit> units = ProcureUnit.find("product.sku =? AND mainBoxInfo IS NOT NULL "
                 + " ORDER BY createDate DESC", this.sku).fetch();
         if(units.size() == 0) {
-            return this.weight;
+            return this.weight == null ? 0 : this.weight;
         } else {
+            units = units.stream().filter(unit -> unit.mainBox.singleBoxWeight > 0 && unit.mainBox.num > 0)
+                    .collect(Collectors.toList());
             ProcureUnit unit = units.get(0);
             if(unit.mainBox.singleBoxWeight / unit.mainBox.num == 0) {
-                return this.weight;
+                return this.weight == null ? 0 : this.weight;
             }
             return unit.mainBox.singleBoxWeight / unit.mainBox.num;
         }
