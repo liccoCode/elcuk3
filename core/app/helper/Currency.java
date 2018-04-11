@@ -1,14 +1,19 @@
 package helper;
 
+import com.alibaba.fastjson.JSONObject;
 import models.market.M;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import play.Logger;
 import play.jobs.Job;
+
+import java.net.URI;
 
 /**
  * 不同货币单位的枚举类
@@ -498,6 +503,9 @@ public enum Currency {
             HKD_USD = ratio("HKD", "USD");
             JPY_USD = ratio("JPY", "USD");
             CAD_USD = ratio("CAD", "USD");
+            INR_USD = ratio("INR", "USD");
+            AUD_USD = ratio("AUD", "USD");
+            MXN_USD = ratio("MXN", "USD");
 
             EUR_CNY = ratio("EUR", "CNY");
             GBP_CNY = ratio("GBP", "CNY");
@@ -505,6 +513,9 @@ public enum Currency {
             USD_CNY = ratio("USD", "CNY");
             JPY_CNY = ratio("JPY", "CNY");
             CAD_CNY = ratio("CAD", "CNY");
+            INR_CNY = ratio("INR", "CNY");
+            AUD_CNY = ratio("AUD", "CNY");
+            MXN_CNY = ratio("MXN", "CNY");
         }
     }
 
@@ -515,10 +526,15 @@ public enum Currency {
         // 2. http://api.fixer.io/latest?base=USD (**** 免费, 只支持部分从银行获取)
         if(from.equalsIgnoreCase(to)) return 1f;
         try {
-            String body = HTTP.get(String.format("https://www.exchangerate-api.com/%s/%s?k=%s", from, to,
-                    System.getenv(Constant.EXCHANGERATE_TOKEN)));
-            Logger.info("[1 %s TO %s %s]", from, body, to);
-            return NumberUtils.toFloat(body.trim());
+            final String url = String.format("https://api.ofx.com/PublicSite.ApiService/OFX/spotrate/Individual"
+                    + "/%s/%s/1?format=json", from, to);
+            HttpGet get = new HttpGet();
+            get.setHeader("Content-Type", "application/json; charset=utf-8");
+            URI uri = new URIBuilder(url).build();
+            get.setURI(uri);
+            String result = HTTP.get(get);
+            JSONObject object = (JSONObject) JSONObject.parse(result);
+            return NumberUtils.toFloat(object.get("InterbankRate").toString());
         } catch(Exception e) {
             Logger.warn(Webs.e(e));
         }
