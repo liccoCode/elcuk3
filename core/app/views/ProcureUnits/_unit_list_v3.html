@@ -14,6 +14,7 @@
       <input type="checkbox" name="checkAll" data-index="${dpIndex}">
     </th>
   #{/if}
+    <th width="30px;"></th>
     <th width="45px;">#</th>
     <th>父ID</th>
     <th width="40px;">阶段</th>
@@ -21,9 +22,8 @@
     <th width="120px">Sku</th>
     <th width="160px;">FBA-ShipmentId<br>CenterId</th>
     <th width="105px;">采购单<br>供应商</th>
-    <th>去往市场</th>
-    <th width="120px;">数量<br>(计划/交货/入库)</th>
-    <th>可用库存</th>
+    <th width="45px;">去往<br/>市场</th>
+    <th width="120px;">数量(计划/交货/入库)<span style="color:green">库存</span></th>
   #{ifnot deliveryplan}
     <th width="60px;">单价</th>
     <th width="110px;" data-toggle="popover" data-content="如果交货, 数量为交货数量, 如果没有交货,则为计划采购数量">总价<br>剩余请款金额</th>
@@ -71,6 +71,11 @@
           <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
+    <td style="text-align:center;">
+      <a href="${unit.selling?.aps?.imageUrl}" target="_blank">
+        <img height="40px;" width="45px;" src="${unit.selling?.aps?.imageUrl}">
+      </a>
+    </td>
     <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
       <i class="icon-reorder"></i>
         #{if unit.parent}
@@ -140,12 +145,12 @@
         #{/if}
       <br>${unit.cooperator?.name}
     </td>
-    <td data-toggle="tooltip" title="${unit.whouse?.name}">${unit.whouse?.name}</td>
+    <td data-toggle="tooltip" title="${unit.whouse?.name}" style="word-break:break-all;">${unit.whouse?.name}</td>
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty==null?'0':unit.attrs.qty}/${unit.inboundQty}<br>
       <span class="label label-default" data-toggle="tooltip" title="当前重量">${unit.currentWeight()} kg</span>
+      <span class="label label-success" data-toggle="tooltip" title="当前可用库存">${unit.availableQty}</span>
     </td>
-    <td>${unit.availableQty}</td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
             #{if unit.containTax}
