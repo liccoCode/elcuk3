@@ -1296,8 +1296,8 @@ public class Product extends GenericModel implements ElcukRecord.Log {
         if(units.size() == 0) {
             return this.weight == null ? 0 : this.weight;
         } else {
-            units = units.stream().filter(unit -> unit.mainBox.singleBoxWeight > 0 && unit.mainBox.num > 0)
-                    .collect(Collectors.toList());
+            units = units.stream().filter(unit -> unit.mainBox != null
+                    && unit.mainBox.singleBoxWeight > 0 && unit.mainBox.num > 0).collect(Collectors.toList());
             if(units.size() == 0) {
                 return this.weight == null ? 0 : this.weight;
             }
