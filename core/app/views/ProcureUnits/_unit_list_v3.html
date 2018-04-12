@@ -149,7 +149,9 @@
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty==null?'0':unit.attrs.qty}/${unit.inboundQty}<br>
       <span class="label label-default" data-toggle="tooltip" title="当前重量">${unit.currentWeight()} kg</span>
-      <span class="label label-success" data-toggle="tooltip" title="当前可用库存">${unit.availableQty}</span>
+        #{if unit.availableQty>0}
+          <span class="label label-success" data-toggle="tooltip" title="当前可用库存">${unit.availableQty}</span>
+        #{/if}
     </td>
       #{ifnot deliveryplan}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.formatPrice().format('#,###.##')}
