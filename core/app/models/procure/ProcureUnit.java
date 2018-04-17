@@ -26,7 +26,6 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.DynamicUpdate;
 import play.Logger;
@@ -2267,11 +2266,12 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                     this.product.abbreviation,
                     this.id
             );
-
             Map<String, Object> map = new HashMap<>();
+            PDF.Options options = new PDF.Options();
+            //只设置 width height    margin 为零
+            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
             String shipmentid = fba.shipmentId;
             shipmentid = shipmentid.trim() + "U";
-
             map.put("shipmentId", shipmentid);
             map.put("shipFrom", Account.address(this.fba.account.type));
             map.put("fba", this.fba);
@@ -2283,29 +2283,23 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 map.put("isexpress", "0");
             }
 
-            PDF.Options options = new PDF.Options();
-            //只设置 width height    margin 为零
-            options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
-
             //生成箱外卖 PDF
             String path = Objects.equals(this.projectName, User.COR.MengTop.name())
                     ? "FBAs/b2bBoxLabel.html" : "FBAs/boxLabel.html";
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", path, options, map);
-        } else if(Objects.equals(this.projectName, User.COR.MengTop.name())) {
-            String namePDF = String
-                    .format("MengTop_[%s][%s][%s]", this.attrs.planQty, this.product.abbreviation, this.id);
+        } else {
+            String namePDF = String.format("[%s]_[%s][%s][%s]", this.projectName, this.attrs.planQty,
+                    this.product.abbreviation, this.id);
             Map<String, Object> map = new HashMap<>();
             map.put("procureUnit", this);
             map.put("boxNumber", boxNumber);
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
             options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
+            String path = Objects.equals(this.projectName, User.COR.MengTop.name()) ? "FBAs/b2bBoxLabel.html" :
+                    "FBAs/noFbaBoxLabel.html";
             //生成箱外卖 PDF
-            String path = "FBAs/b2bBoxLabel.html";
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", path, options, map);
-        } else {
-            String message = "#" + this.id + "  " + this.sku + " 还没创建 FBA";
-            FileUtils.writeStringToFile(new File(folder, message + ".txt"), message, "UTF-8");
         }
     }
 

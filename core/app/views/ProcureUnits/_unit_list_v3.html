@@ -40,7 +40,7 @@
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
       #{if checkbox}
-        <td>
+        <td style="vertical-align:middle;">
             #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
             #{if unit.fba && unit.fba.dto}
               <!-- 优先使用自身的 FBA 箱包装数据 -->

@@ -17,13 +17,17 @@
             #{render './brandworlShipmentDetail.html', procureUnit: procureUnit, box_num:i/}
         #{/if}
         #{else}
-        #{render './shipmentDetail.html', procureUnit: procureUnit, box_num:i/}
-    #{/else}
+            #{render './shipmentDetail.html', procureUnit: procureUnit, box_num:i/}
+        #{/else}
     </td>
     <td width="2%"></td>
     <td width="49%" style="vertical-align:middle">
-        #{render './fba.html', isexpress: isexpress,shipmentId: shipmentId, fba: fba, shipFrom: shipFrom,
-          boxNumber: procureUnit.numberToStr(i)/}
+        #{if Arrays.asList("Brandworl","Visio", "Wisle").contains(models.OperatorConfig.getVal("addressname"))}
+            #{render './brandworlShipmentDetail.html', procureUnit: procureUnit, box_num:i/}
+        #{/if}
+        #{else}
+            #{render './shipmentDetail.html', procureUnit: procureUnit, box_num:i/}
+        #{/else}
     </td>
   </tr>
 #{/list}
