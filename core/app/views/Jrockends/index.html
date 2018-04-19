@@ -299,7 +299,7 @@
           </tr>
 
           <tr>
-            <td>analyzesSellingJob</td>
+            <td>analyzesSkuJob</td>
             <td>sku销量分析</td>
             <td>0 45 1,8,12,17 * * ?</td>
             <td></td>
@@ -310,7 +310,7 @@
           </tr>
 
           <tr>
-            <td>analyzesSellingJob</td>
+            <td>analyzesProfitJob</td>
             <td>利润分析汇总统计</td>
             <td>0 45 1,8,12,17 * * ?</td>
             <td></td>
@@ -320,6 +320,16 @@
             </td>
           </tr>
 
+          <tr>
+            <td>esIndexBuildJob</td>
+            <td>生成es索引mapping</td>
+            <td>新开服务器第一次(仅一次)</td>
+            <td></td>
+            <td>需要手动PUT索引</td>
+            <td><a href="javascript:void(0)" name="unitUpdateBtn" data-job="esIndexBuildJob"
+                   data-confirm="确认运行?" class="btn btn-xs btn-danger">运行</a>
+            </td>
+          </tr>
 
         </table>
       </div>
