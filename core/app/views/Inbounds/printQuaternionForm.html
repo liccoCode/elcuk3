@@ -92,7 +92,7 @@
           </td>
           <td rowspan="${rowNum}">${i.unit?.whouse?.name}</td>
           <td rowspan="${rowNum}">${i.unit?.shipType?.label()}</td>
-          <td rowspan="${rowNum}"></td>
+          <td rowspan="${rowNum}">${i.unit?.qcLevel?.label()}</td>
           <td rowspan="${rowNum}"></td>
         </tr>
           #{if rowNum == 2}

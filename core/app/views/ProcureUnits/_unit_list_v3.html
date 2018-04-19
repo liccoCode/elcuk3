@@ -40,7 +40,7 @@
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
       #{if checkbox}
-        <td>
+        <td style="vertical-align:middle;">
             #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
             #{if unit.fba && unit.fba.dto}
               <!-- 优先使用自身的 FBA 箱包装数据 -->
@@ -190,7 +190,7 @@
     <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>
     <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
-    <td>
+    <td><div class="label label-danger">${unit.qcLevel?.label()}</div><br>
       <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
       ${unit.result?.label()}
       </a>

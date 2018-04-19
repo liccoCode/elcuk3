@@ -47,18 +47,5 @@ $ ->
     objE.innerHTML = arg
     objE.childNodes[0]
 
-  $("#download_excel").click((e) ->
-    e.preventDefault()
-    $form = $("#search_Form")
-    window.open('/Excels/procureUnitSearchExcel?' + $form.serialize(), "_blank")
-  )
 
-  $("#create_deliverplan_btn").click (e) ->
-    e.preventDefault()
-    $form = $("#create_deliveryment")
-    window.open('/deliverplans/deliverplan?' + $form.serialize(), "_blank")
 
-  $("#create_deliveryment_btn").click (e) ->
-    e.preventDefault()
-    $form = $("#create_deliveryment")
-    window.open('/deliveryments/create?' + $form.serialize(), "_blank")
