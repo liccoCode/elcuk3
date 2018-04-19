@@ -42,6 +42,7 @@ public class Bootstrap extends Job {
         ENV_MSG.put(Constant.ES_INDEX, "没有指明系统在 ElasticSearch 中所使用的索引名字(Index)");
         ENV_MSG.put(Constant.ES_HOST, "没有指明系统在 ElasticSearch 实例 Host");
         ENV_MSG.put(Constant.EXCHANGERATE_TOKEN, "没有指定所依赖的 Currency 获取的 API Token");
+        ENV_MSG.put("ERP_VERSION", "不知道ERP版本");
     }
 
     @Override

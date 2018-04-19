@@ -534,6 +534,7 @@ public enum Currency {
             get.setURI(uri);
             String result = HTTP.get(get);
             JSONObject object = (JSONObject) JSONObject.parse(result);
+            Logger.info(from + "/" + to + ":" + object.get("InterbankRate").toString());
             return NumberUtils.toFloat(object.get("InterbankRate").toString());
         } catch(Exception e) {
             Logger.warn(Webs.e(e));

@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 import controllers.Login;
 import helper.*;
 import models.ElcukRecord;
+import models.OperatorConfig;
 import models.Role;
 import models.User;
 import models.activiti.ActivitiDefinition;
@@ -1401,6 +1402,11 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
         logs.addAll(Reflects.logFieldFade(this, "qcLevel", unit.qcLevel));
+        if(Objects.equals(OperatorConfig.ERP_VERSION, "SIMPLE")) {
+            logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
+            logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+            logs.addAll(Reflects.logFieldFade(this, "shipType", unit.shipType));
+        }
         return logs;
     }
 
@@ -2308,8 +2314,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             PDF.Options options = new PDF.Options();
             //只设置 width height    margin 为零
             options.pageSize = new IHtmlToPdfTransformer.PageSize(20.8d, 29.6d);
-            String path = Objects.equals(this.projectName, User.COR.MengTop.name()) ? "FBAs/b2bBoxLabel.html" :
-                    "FBAs/noFbaBoxLabel.html";
+            String path = Objects.equals(this.projectName, User.COR.MengTop.name()) ? "FBAs/b2bBoxLabel.html"
+                    : "FBAs/noFbaBoxLabel.html";
             //生成箱外卖 PDF
             PDFs.templateAsPDF(folder, namePDF + "外麦.pdf", path, options, map);
         }

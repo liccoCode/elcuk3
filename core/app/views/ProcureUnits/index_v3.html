@@ -106,14 +106,14 @@
           </div>
           <div class="row-fluid">
             <div class="input-prepend input-append inline">
-              <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-default" rel="popover"
-                 content="明天需要交货的采购计划" data-loading="loading"><b>明天计划</b></a>
-              <a href="@{ProcureUnits.planView(tomorrow2)}" class="btn btn-default" rel="popover"
-                 content="后天需要交货的采购计划" data-loading="loading"><b>后天计划</b></a>
-              <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-default" rel="popover"
-                 content="第三天需要交货的采购计划" data-loading="loading"><b>大后天计划</b></a>
-              <a href="@{ProcureUnits.noPlaced()}" class="btn btn-default" rel="popover" content="发货时间为当天,
-                          同时货物还没有抵达货代的采购计划" data-loading="loading"><b>当天未抵达</b></a>
+              <a href="@{ProcureUnits.planView(tomorrow1)}" class="btn btn-default" data-toggle="popover"
+                 data-content="明天需要交货的采购计划" data-loading="loading"><b>明天计划</b></a>
+              <a href="@{ProcureUnits.planView(tomorrow2)}" class="btn btn-default" data-toggle="popover"
+                 data-content="后天需要交货的采购计划" data-loading="loading"><b>后天计划</b></a>
+              <a href="@{ProcureUnits.planView(tomorrow3)}" class="btn btn-default" data-toggle="popover"
+                 data-content="第三天需要交货的采购计划" data-loading="loading"><b>大后天计划</b></a>
+              <a href="@{ProcureUnits.noPlaced()}" class="btn btn-default" rel="popover"
+                 data-content="发货时间为当天,同时货物还没有抵达货代的采购计划" data-loading="loading"><b>当天未抵达</b></a>
             </div>
 
             <div class="input-prepend input-append inline">
@@ -124,14 +124,17 @@
 
             <div class="inline">
               <input type="hidden" name="p.unitIds" id="unitIds"/>
-              <a target="_blank" class="btn bg-navy margin" rel="popover" content="将选中的数据，按照日期-工厂名称进行压缩打包 " id="downloadFBAZIP">
-                <i class="icon-download-alt"></i>下载ZIP
+              <a target="_blank" class="btn bg-navy margin" data-toggle="popover" id="downloadFBAZIP"
+                 data-content="将选中的数据，按照日期-工厂名称进行压缩打包"><i class="icon-download-alt"></i>下载ZIP
               </a>
               <a target="_blank" href="@{ProcureUnits.exportLogs()}" class="btn btn-primary">导出修改日志</a>
             #{power.ck "procures.downloadreports"}
               <a href="javascript:void(0)" id="download_excel" class="btn btn-success">
                 <i class="icon-download-alt"></i>导出采购计划</a>
             #{/power.ck}
+
+              <a href="javascript:void(0)" id="batch_inbound_btn" data-url="@{ProcureUnits.batchDoneByIds()}"
+                 class="btn btn-info">批量收货</a>
             </div>
           #{include 'Deliveryments/_box_number_model.html'/}
 
