@@ -285,26 +285,21 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
-
         if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
         } else {
             Validation.required("运输单", shipmentId);
         }
-
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
-
         if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
-
         if(!Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Shipment ship = Shipment.findById(shipmentId);
             ship.addToShip(unit);
         }
-
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
             unit.remove();

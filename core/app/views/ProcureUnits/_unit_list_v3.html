@@ -190,7 +190,7 @@
     <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>
     <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
-    <td>
+    <td><div class="label label-danger">${unit.qcLevel?.label()}</div><br>
       <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
       ${unit.result?.label()}
       </a>

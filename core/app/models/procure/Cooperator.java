@@ -230,19 +230,19 @@ public class Cooperator extends Model {
         MILD {
             @Override
             public String label() {
-                return "轻度检";
+                return "轻检";
             }
         },
         MEDIUM {
             @Override
             public String label() {
-                return "中度检";
+                return "中检";
             }
         },
         SEVERR {
             @Override
             public String label() {
-                return "重度检";
+                return "重检";
             }
         };
 

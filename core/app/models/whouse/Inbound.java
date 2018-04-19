@@ -460,10 +460,14 @@ public class Inbound extends GenericModel {
 
     public void saveAndLog(Inbound inbound) {
         List<String> logs = new ArrayList<>();
-        logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));
-        logs.addAll(Reflects.logFieldFade(this, "receiveDate", inbound.receiveDate));
-        logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
-        logs.addAll(Reflects.logFieldFade(this, "deliveryMethod", inbound.deliveryMethod));
+        if(Objects.equals(S.End, this.status)) {
+            logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
+        } else {
+            logs.addAll(Reflects.logFieldFade(this, "name", inbound.name));
+            logs.addAll(Reflects.logFieldFade(this, "receiveDate", inbound.receiveDate));
+            logs.addAll(Reflects.logFieldFade(this, "memo", inbound.memo));
+            logs.addAll(Reflects.logFieldFade(this, "deliveryMethod", inbound.deliveryMethod));
+        }
         if(logs.size() > 0) {
             new ERecordBuilder("inbound.update").msgArgs(this.id, StringUtils.join(logs, "<br>")).fid(this.id)
                     .save();

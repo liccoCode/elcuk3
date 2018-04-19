@@ -698,6 +698,13 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 质检的级别
+     */
+    @Enumerated(EnumType.STRING)
+    @Expose
+    public Cooperator.L qcLevel;
+
+    /**
      * 仓库周转天数
      */
     @Transient
@@ -846,6 +853,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         }
         newUnit.attrs.planQty = unit.attrs.planQty;
         newUnit.comment = unit.comment;
+        newUnit.qcLevel = this.qcLevel;
         if(type)
             newUnit.validate();
         List<Shipment> shipments = Shipment
@@ -902,6 +910,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         newUnit.deliveryment = this.deliveryment;
         newUnit.deliverplan = this.deliverplan;
         newUnit.noPayment = this.noPayment;
+        newUnit.qcLevel = this.qcLevel;
         newUnit.whouse = unit.whouse;
         newUnit.stage = STAGE.IN_STORAGE;
         newUnit.planstage = PLANSTAGE.DONE;
@@ -1138,7 +1147,8 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
                 Validation.addError("", "修改值" + unit.attrs.planQty + " 过大，请重新填写数量！");
             }
         }
-        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId) && unit.stage != STAGE.DONE
+        if(StringUtils.isNotEmpty(unit.selling.sellingId) && StringUtils.isEmpty(shipmentId)
+                && Arrays.asList(STAGE.PLAN, STAGE.DELIVERY, STAGE.IN_STORAGE).contains(unit.stage)
                 && !Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Validation.addError("", "请选择运输单！");
         }
@@ -1382,6 +1392,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         logs.addAll(Reflects.logFieldFade(this, "whouse", unit.whouse));
         logs.addAll(Reflects.logFieldFade(this, "selling", unit.selling));
         logs.addAll(Reflects.logFieldFade(this, "cooperator", unit.cooperator));
+        logs.addAll(Reflects.logFieldFade(this, "qcLevel", unit.qcLevel));
         return logs;
     }
 
@@ -1389,6 +1400,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         List<String> logs = new ArrayList<>();
         logs.addAll(Reflects.logFieldFade(this, "attrs.planShipDate", unit.attrs.planShipDate));
         logs.addAll(Reflects.logFieldFade(this, "attrs.planArrivDate", unit.attrs.planArrivDate));
+        logs.addAll(Reflects.logFieldFade(this, "qcLevel", unit.qcLevel));
         return logs;
     }
 

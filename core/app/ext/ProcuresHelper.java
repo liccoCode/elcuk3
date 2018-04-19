@@ -113,21 +113,21 @@ public class ProcuresHelper extends JavaExtensions {
     }
 
     public static String rgb(BatchReviewApply.S status) {
-            switch(status) {
-                case Pending:
-                    return "#40B0F9";
-                case Brand:
-                    return "#88BEF5";
-                case Audit:
-                    return "#FBBC05";
-                case Finance:
-                    return "#FF6464";
-                case End:
-                    return "#00a65a";
-                default:
-                    return "#E8ECF1";
-            }
+        switch(status) {
+            case Pending:
+                return "#40B0F9";
+            case Brand:
+                return "#88BEF5";
+            case Audit:
+                return "#FBBC05";
+            case Finance:
+                return "#FF6464";
+            case End:
+                return "#00a65a";
+            default:
+                return "#E8ECF1";
         }
+    }
 
     public static String overLong(String value) {
         if(StringUtils.isNotBlank(value)) {
@@ -424,15 +424,30 @@ public class ProcuresHelper extends JavaExtensions {
     }
 
     public static String showChineseName(String markets) {
-        if(StringUtils.isNotBlank(markets)){
-            for(M market : M.amazonVals()){
-                if(markets.contains(market.name())){
+        if(StringUtils.isNotBlank(markets)) {
+            for(M market : M.amazonVals()) {
+                if(markets.contains(market.name())) {
                     markets = markets.replace(market.name(), market.countryName());
                 }
             }
             return markets;
         } else {
             return "";
+        }
+    }
+
+    public static String rgb(Cooperator.L level) {
+        switch(level) {
+            case MICRO:
+                return "label-success";
+            case MILD:
+                return "label-info";
+            case MEDIUM:
+                return "label-warning";
+            case SEVERR:
+                return "label-danger";
+            default:
+                return "";
         }
     }
 }
