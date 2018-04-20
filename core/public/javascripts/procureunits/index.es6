@@ -214,5 +214,32 @@ $(() => {
     window.open('/deliveryments/create?' + $form.serialize(), "_blank");
   });
 
+  $("#batch_inbound_btn").click(function (e) {
+    e.preventDefault();
+    let $btn = $(this);
+    if ($("input[name='pids']:checked").length == 0) {
+      noty({
+        text: '请选择需要收货的采购单元',
+        type: 'error'
+      });
+      return false;
+    } else {
+      $.post($btn.data("url"), $("#create_deliveryment").serialize(), r => {
+        if (r.flag) {
+          noty({
+            text: r.message,
+            type: 'success'
+          });
+          window.location.reload();
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
+  });
+
 });
 

@@ -31,6 +31,7 @@ public class OperatorConfig extends Model {
     private static final Map<String, String> VALUES_MAPS;
 
     private static Map<String, String> VALUES_SYSPARAMS;
+    public static String ERP_VERSION;
 
     static {
         NAME_Type_MAPS = Collections.unmodifiableMap(
@@ -160,6 +161,7 @@ public class OperatorConfig extends Model {
                 config.save();
             }
         }
+        ERP_VERSION = System.getenv("ERP_VERSION");
     }
 
     public static String getVal(String param) {

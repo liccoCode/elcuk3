@@ -415,19 +415,16 @@ public class ProcurePost extends Post<ProcureUnit> {
                 .mapToDouble(unit -> unit.qty() * unit.attrs.price).sum();
         b = new BigDecimal(totalUSD);
         map.put("totalUSD", b.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
-        F.T2<String, List<Object>> params = this.params();
-        params._2.add(Dates.morning(new Date()));
-        params._2.add(Dates.night(new Date()));
-        List<ProcureUnit> details = ProcureUnit.find(params._1 + " AND p.createDate>=? AND p.createDate<=?",
-                params._2.toArray()).fetch();
-        Integer planQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.PLAN, detail.stage))
+        List<ProcureUnit> details = ProcureUnit.find(" createDate>=? AND createDate<=?",
+                Dates.morning(new Date()), Dates.night(new Date())).fetch();
+        Integer planQty = details.stream().filter(detail -> Objects.equals(ProcureUnit.STAGE.PLAN, detail.stage))
                 .mapToInt(ProcureUnit::qty).sum();
-        Integer deliveryQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DELIVERY, detail.stage))
+        Integer deliveryQty = details.stream().filter(detail -> Objects.equals(ProcureUnit.STAGE.DELIVERY, detail.stage))
                 .mapToInt(ProcureUnit::qty).sum();
-        Integer doneQty = details.stream().filter(detail -> detail.parent == null)
-                .filter(detail -> Objects.equals(ProcureUnit.STAGE.DONE, detail.stage))
+        List<ProcureUnit> doneUnits = ProcureUnit
+                .find(" attrs.deliveryDate>=? AND attrs.deliveryDate<=?",
+                        Dates.morning(new Date()), Dates.night(new Date())).fetch();
+        Integer doneQty = doneUnits.stream().filter(detail -> Objects.equals(ProcureUnit.STAGE.DONE, detail.stage))
                 .mapToInt(ProcureUnit::qty).sum();
         map.put("planQty", planQty.toString());
         map.put("deliveryQty", deliveryQty.toString());

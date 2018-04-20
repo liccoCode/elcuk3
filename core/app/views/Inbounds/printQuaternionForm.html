@@ -92,7 +92,11 @@
           </td>
           <td rowspan="${rowNum}">${i.unit?.whouse?.name}</td>
           <td rowspan="${rowNum}">${i.unit?.shipType?.label()}</td>
-          <td rowspan="${rowNum}">${i.unit?.qcLevel?.label()}</td>
+          <td rowspan="${rowNum}">
+              #{if i.unit?.qcLevel?.name()=='SEVERR'}
+                ${i.unit?.qcLevel?.label()}
+              #{/if}
+          </td>
           <td rowspan="${rowNum}"></td>
         </tr>
           #{if rowNum == 2}

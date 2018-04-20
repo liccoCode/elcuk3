@@ -160,9 +160,8 @@
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio-inline">
       <input type="radio" name="unit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}
-      ${unit.stage.name()=='DONE'? 'disabled' :''}
-          #{if unit.projectName=='B2B' && t.name()!='EXPRESS'} style="display:none;"#{/if}>
-      <i class="${t.pic()}"></i>${t.label()}
+      ${unit.stage.name()=='DONE' && ERP_VERSION=='FULL' ? 'disabled' :''}
+          #{if unit.projectName=='B2B' && t.name()!='EXPRESS'} style="display:none;"#{/if}><i class="${t.pic()}"></i>${t.label()}
     </label>
   #{/list}
     <label class="radio-inline">
