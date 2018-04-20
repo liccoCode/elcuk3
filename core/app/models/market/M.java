@@ -462,6 +462,10 @@ public enum M {
                 return "E_UK";
             case AMAZON_MX:
                 return "A_MX";
+            case AMAZON_AU:
+                return "A_AU";
+            case AMAZON_IN:
+                return "A_IN";
             default:
                 return "A_UK";
         }
