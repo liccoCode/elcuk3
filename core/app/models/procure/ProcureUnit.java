@@ -2759,7 +2759,7 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         if(this.mainBox != null) {
             return this.totalBoxWeight();
         } else {
-            return this.product.weight * this.qtyForFba();
+            return (this.product.weight == null ? 0 : this.product.weight) * this.qtyForFba();
         }
     }
 
