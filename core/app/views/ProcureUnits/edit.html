@@ -19,7 +19,7 @@
       <form action="@{ProcureUnits.update(unit.id)}" method="post" data-method='PUT' id="unitEditForm" class="form-horizontal">
         <div class="box-body">
         #{render 'ProcureUnits/_unit_table_trs.html', unit:unit, whouses:whouses, currWhouses:currWhouses,
-        brandName:brandName, isEdit:isEdit/}
+        brandName:brandName, isEdit:isEdit, ERP_VERSION:ERP_VERSION/}
         #{if unit.selling}
           <div class="form-group">
             <label class="col-sm-1 control-label">选择运输单(Option)</label>

@@ -31,6 +31,7 @@ public class SystemOperation extends Controller {
         //这里应该是用于记录整个应用所有 Controller 的数据统计信息.
         boolean isB2B = Objects.equals(OperatorConfig.getVal("brandname"), User.COR.MengTop.name());
         renderArgs.put("isB2B", isB2B);
+        renderArgs.put("ERP_VERSION", OperatorConfig.ERP_VERSION);
         Logger.info("playurl:%s playpath:%s username:%s ", request.url, Play.ctxPath, user.username);
 
     }

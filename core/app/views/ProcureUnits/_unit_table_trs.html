@@ -139,11 +139,13 @@
       <span class="input-group-addon">个</span>
     </div>
   </div>
-  <label for="" class="col-sm-1 control-label">质检取样</label>
+  <label for="" class="col-sm-1 control-label">质检级别</label>
   <div class="col-sm-2">
-    <div class="input-group">
-      <input type="text" class="form-control" value="" readonly/><span class="input-group-addon">个</span>
-    </div>
+    <select class="form-control" name="unit.qcLevel">
+    #{list items:models.procure.Cooperator.L.values(), as:'l'}
+      <option value="${l.name()}" ${unit.qcLevel==l?'selected':''}>${l.label()}</option>
+    #{/list}
+    </select>
   </div>
   <label for="" class="col-sm-1 control-label">所属公司</label>
   <div class="col-sm-2">
@@ -158,9 +160,8 @@
   #{list items:models.procure.Shipment.T.values(), as:'t'}
     <label class="radio-inline">
       <input type="radio" name="unit.shipType" value="${t.name()}" ${t == unit.shipType ? 'checked': 'unchecked'}
-      ${unit.stage.name()=='DONE'? 'disabled' :''}
-          #{if unit.projectName=='B2B' && t.name()!='EXPRESS'} style="display:none;"#{/if}>
-      <i class="${t.pic()}"></i>${t.label()}
+      ${unit.stage.name()=='DONE' && ERP_VERSION=='FULL' ? 'disabled' :''}
+          #{if unit.projectName=='B2B' && t.name()!='EXPRESS'} style="display:none;"#{/if}><i class="${t.pic()}"></i>${t.label()}
     </label>
   #{/list}
     <label class="radio-inline">

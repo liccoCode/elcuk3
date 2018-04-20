@@ -32,7 +32,12 @@
           <input type="checkbox" value="${unit.id}">
           <input type="hidden" name="dtos[${unit_index-1}].id" value="${unit.id}">
         </td>
-        <td>${unit.unit?.id} <br>${unit.unit?.deliveryment?.id}</td>
+        <td>
+        ${unit.unit?.id}
+          <div class="label ${unit.unit?.qcLevel?.rgb()}">${unit.unit?.qcLevel?.label()}</div>
+          <br>
+          <span style="color:blue;">${unit.unit?.deliveryment?.id}</span>
+        </td>
           #{if !is_b2b}
             <td style="word-break:break-all;">
               <a href="@{Sellings.selling(unit.unit?.selling?.sellingId)}" target="_blank">${unit.unit?.selling?.sellingId}</a>
@@ -50,7 +55,7 @@
         <td>
           <input type="text" name="qty" autocomplete="off" data-qty="${unit.unit?.attrs.planQty}"
                  style="width:58px; padding:10px;
-                 #{if unit.qty>0 && unit.qty != unit.planQty} background-color:red; #{/if}"
+                     #{if unit.qty>0 && unit.qty != unit.planQty} background-color:red; #{/if}"
                  value="${unit.qty}" data-origin="${unit.qty}" class="form-control"
               #{if !Arrays.asList('Create','Receive').contains(unit.status.name())}
                  readonly
@@ -58,7 +63,7 @@
         </td>
         <td>
           <select name="handType" style="width:75px; ${unit.qty==unit.planQty?'display:none;':''}" class="form-control"
-            #{if !Arrays.asList('Create','Receive').contains(unit.status.name())} disabled #{/if}>
+              #{if !Arrays.asList('Create','Receive').contains(unit.status.name())} disabled #{/if}>
               #{list items:models.whouse.InboundUnit.H, as:'h'}
                 <option ${h.name() == unit.handType?.name() ? 'selected' : ''}  value="${h.name()}">${h.label()}</option>
               #{/list}

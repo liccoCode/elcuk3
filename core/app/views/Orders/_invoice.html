@@ -72,9 +72,7 @@
     </tr>
     <tr>
       <td class="td1">
-        <strong>
-          <font style="font-weight: bold;" size="4pt">${invoiceformat.title} #: ${ord.orderId}</font>
-        </strong><br>
+        <span style="font-weight:bold;font-size:14pt;">${invoiceformat.title} #: ${ord.orderId}</span><br>
       ${invoiceformat.date}: ${ord.euDate()}
       </td>
       <td rowspan="1" class="td2" style="vertical-align:bottom;">
@@ -85,36 +83,31 @@
     </tr>
     <tr>
       <td class="td4">
-        <strong>${invoiceformat.to}</strong> <br>
+        <strong>${invoiceformat.to}</strong><br>
       #{if invoice}
         <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${invoice.formatStr(invoice.invoiceto)}">
       #{/if}
       #{else}
-          #{if ord.address1 && ord.address1.length() > 0}
-            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${ord.formatAddress1()}">
-          #{/if}
-          #{else}
-            <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
-          #{/else}
+        <input class="form-control input-sm" type="text" id="invoiceto" name="invoice.invoiceto" value="${editaddress}">
       #{/else}
       </td>
       <td class="td2">
         <strong>${invoiceformat.from}</strong><br>
       #{if market == 'AMAZON_IT' && invoice?.isEurope()}
-      ${invoiceformat.fromeurinfo1} <br>
-      ${invoiceformat.fromeurinfo2} <br>
+      ${invoiceformat.fromeurinfo1}<br>
+      ${invoiceformat.fromeurinfo2}<br>
       ${invoiceformat.fromeurinfo3}<br>
-      ${invoiceformat.fromeurinfo4} <br>
-      ${invoiceformat.fromeurinfo5} <br>
+      ${invoiceformat.fromeurinfo4}<br>
+      ${invoiceformat.fromeurinfo5}<br>
         <strong>${invoiceformat.fromeurinfo6}</strong> <br>
         <strong>${invoiceformat.fromeurinfo7}</strong> <br>
       #{/if}
       #{else}
-      ${invoiceformat.frominfo1} <br>
-      ${invoiceformat.frominfo2} <br>
+      ${invoiceformat.frominfo1}<br>
+      ${invoiceformat.frominfo2}<br>
       ${invoiceformat.frominfo3}<br>
-      ${invoiceformat.frominfo4} <br>
-      ${invoiceformat.frominfo5} <br>
+      ${invoiceformat.frominfo4}<br>
+      ${invoiceformat.frominfo5}<br>
         <strong>${invoiceformat.frominfo6}</strong> <br>
         <strong>${invoiceformat.frominfo7}</strong> <br>
       #{/else}

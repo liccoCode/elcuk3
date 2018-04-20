@@ -40,7 +40,7 @@
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
       #{if checkbox}
-        <td>
+        <td style="vertical-align:middle;">
             #{set cooperItem: unit.cooperator?.cooperItem(unit.sku)/}
             #{if unit.fba && unit.fba.dto}
               <!-- 优先使用自身的 FBA 箱包装数据 -->
@@ -149,7 +149,7 @@
     <td #{if unit.attrs.planQty != unit.attrs.qty && (unit.attrs.qty !=0 && unit.attrs.qty)} style="color:red"#{/if}>
     ${unit.attrs.planQty}/${unit.attrs.qty==null?'0':unit.attrs.qty}/${unit.inboundQty}<br>
       <span class="label label-default" data-toggle="tooltip" title="当前重量">${unit.currentWeight()} kg</span>
-        #{if unit.availableQty>0}
+        #{if unit.availableQty>0 || unit.stage.name()=='IN_STORAGE'}
           <span class="label label-success" data-toggle="tooltip" title="当前可用库存">${unit.availableQty}</span>
         #{/if}
     </td>
@@ -190,7 +190,7 @@
     <td>#{time_tooltip_v3 time:unit.attrs.planShipDate/}</td>
     <td>#{time_tooltip_v3 time:unit.attrs.deliveryDate/}</td>
     <td name="isConfirm">#{yesOrNo f:unit.isConfirm/}</td>
-    <td>
+    <td><div class="label label-danger">${unit.qcLevel?.label()}</div><br>
       <a href="@{Inbounds.editByUnitId(unit.id)}" target="_blank">
       ${unit.result?.label()}
       </a>

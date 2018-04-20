@@ -15,34 +15,50 @@
 #{flash_alert /}
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-6">
     <div class="box">
       <div class="box-body">
         <table class="table table-condensed table-bordered">
           <tr>
             <th>总数量(计划/采购/交货)</th>
-            <th>当天计划数</th>
-            <th>当天下单</th>
-            <th>当天收货</th>
-            <th style="width:20%;" data-toggle="tooltip" title="库存资金币种为人民币部分">总金额(¥)</th>
-            <th style="width:20%;" data-toggle="tooltip" title="库存资金币种为美元部分">总金额($)</th>
+            <th style="width:30%;" data-toggle="tooltip" title="库存资金币种为人民币部分">总金额(¥)</th>
+            <th style="width:30%;" data-toggle="tooltip" title="库存资金币种为美元部分">总金额($)</th>
           </tr>
           <tr>
-            <td><span style="color:blue;">${map.get("totalQty")}</span>
+            <td>
+              <span style="color:blue;">${map.get("totalQty")}</span>
               (<span style="color:#E8ECF1;">${map.get("totalPlanQty")}</span>/
               <span style="color:#40B0F9;">${map.get("totalDeliveryQty")}</span>/
               <span style="color:#88BEF5;">${map.get("totalDoneQty")}</span>)
             </td>
-            <td style="color:sandybrown;">${map.get("planQty")}</td>
-            <td style="color:red;">${map.get("deliveryQty")}</td>
-            <td style="color:green;">${map.get("doneQty")}</td>
             <td>${map.get("totalCNY")}</td>
             <td>${map.get("totalUSD")}</td>
           </tr>
         </table>
       </div>
     </div>
+  </div>
 
+  <div class="col-md-6">
+    <div class="box">
+      <div class="box-body">
+        <table class="table table-condensed table-bordered">
+          <tr>
+            <th>当天计划数</th>
+            <th>当天下单</th>
+            <th>当天收货</th>
+          </tr>
+          <tr>
+            <td style="color:sandybrown;">${map.get("planQty")}</td>
+            <td style="color:red;">${map.get("deliveryQty")}</td>
+            <td style="color:green;">${map.get("doneQty")}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12">
     <div class="box">
       <div class="box-header with-border">
         <form action="@{ProcureUnits.detailIndex()}" class="form-inline" id="search_Form">

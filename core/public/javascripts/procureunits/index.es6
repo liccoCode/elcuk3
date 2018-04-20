@@ -59,17 +59,17 @@ $(() => {
         k++;
       }
       if ($(this).attr("unqualifiedQty") > 0) {
-        l+=$(this).val()+",";
+        l += $(this).val() + ",";
       }
     });
-    if (l.length > 0  && $btn.attr("id") == 'createInboundBtn') {
+    if (l.length > 0 && $btn.attr("id") == 'createInboundBtn') {
       noty({
-        text: '【'+l.substring(0,l.length-1)+'】存在不良品数未处理，请处理！',
+        text: '【' + l.substring(0, l.length - 1) + '】存在不良品数未处理，请处理！',
         type: 'error'
       });
       return false;
     }
-    
+
     if (j > 0 && $btn.attr("id") != 'createOutboundBtn') {
       noty({
         text: '请选择【供应商】一致的采购计划！',
@@ -168,9 +168,9 @@ $(() => {
       $.getScript('/public/javascripts/inbounds/boxInfo.js');
     });
     let stage = $(this).data("stage");
-    if (stage=='IN_STORAGE'){
+    if (stage == 'IN_STORAGE') {
       $("#submitBoxInfoBtn").show();
-    }else{
+    } else {
       $("#submitBoxInfoBtn").hide();
     }
   });
@@ -194,6 +194,51 @@ $(() => {
         });
       }
     });
+  });
+
+  $("#download_excel").click(function (e) {
+    e.preventDefault();
+    let $form = $("#search_Form");
+    window.open('/Excels/procureUnitSearchExcel?' + $form.serialize(), "_blank");
+  });
+
+  $("#create_deliverplan_btn").click(function (e) {
+    e.preventDefault();
+    let $form = $("#create_deliveryment");
+    window.open('/deliverplans/deliverplan?' + $form.serialize(), "_blank");
+  });
+
+  $("#create_deliveryment_btn").click(function (e) {
+    e.preventDefault();
+    let $form = $("#create_deliveryment");
+    window.open('/deliveryments/create?' + $form.serialize(), "_blank");
+  });
+
+  $("#batch_inbound_btn").click(function (e) {
+    e.preventDefault();
+    let $btn = $(this);
+    if ($("input[name='pids']:checked").length == 0) {
+      noty({
+        text: '请选择需要收货的采购单元',
+        type: 'error'
+      });
+      return false;
+    } else {
+      $.post($btn.data("url"), $("#create_deliveryment").serialize(), r => {
+        if (r.flag) {
+          noty({
+            text: r.message,
+            type: 'success'
+          });
+          window.location.reload();
+        } else {
+          noty({
+            text: r.message,
+            type: 'error'
+          });
+        }
+      });
+    }
   });
 
 });

@@ -31,6 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.data.validation.Validation;
+import play.db.helper.JpqlSelect;
 import play.db.helper.SqlSelect;
 import play.i18n.Messages;
 import play.libs.F;
@@ -214,6 +215,20 @@ public class ProcureUnits extends Controller {
         deliveryUnit(id);
     }
 
+    public static void batchDoneByIds(List<Long> pids) {
+        List<ProcureUnit> units = ProcureUnit.find("id IN " + JpqlSelect.inlineParam(pids)).fetch();
+        if(units.stream().anyMatch(unit -> !Objects.equals(ProcureUnit.STAGE.DELIVERY, unit.stage))) {
+            renderJSON(new Ret(false, "请选择状态为[采购中]的采购计划！"));
+        }
+        units.forEach(unit -> {
+            unit.stage = ProcureUnit.STAGE.DONE;
+            unit.attrs.qty = unit.attrs.planQty;
+            unit.attrs.deliveryDate = new Date();
+            unit.save();
+        });
+        renderJSON(new Ret(true, "收货成功"));
+    }
+
     /**
      * 交货更新
      *
@@ -285,26 +300,21 @@ public class ProcureUnits extends Controller {
     public static void create(ProcureUnit unit, String shipmentId) {
         unit.handler = User.findByUserName(Secure.Security.connected());
         unit.validate();
-
         if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             if(StringUtils.isNotBlank(shipmentId)) Validation.addError("", "快递运输方式, 不需要指定运输单");
         } else {
             Validation.required("运输单", shipmentId);
         }
-
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.findByAccount(unit.selling.account);
             render("ProcureUnits/blank.html", unit, whouses);
         }
-
         if(unit.isCheck != 1) unit.isCheck = 0;
         unit.save();
-
         if(!Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(unit.shipType)) {
             Shipment ship = Shipment.findById(shipmentId);
             ship.addToShip(unit);
         }
-
         if(Validation.hasErrors()) {
             List<Whouse> whouses = Whouse.find("market=?", unit.selling.market).fetch();
             unit.remove();
