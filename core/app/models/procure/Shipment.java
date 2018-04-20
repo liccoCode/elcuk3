@@ -1887,7 +1887,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * @return
      */
     public int showStandarDay() {
-        return (int) (this.dates.planArrivDate.getTime() - this.dates.planBeginDate.getTime()) / 1000 / 3600 / 24;
+        return (int) ((this.dates.planArrivDate.getTime() - this.dates.planBeginDate.getTime()) / 1000 / 3600 / 24);
     }
 
     /**
