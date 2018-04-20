@@ -23,7 +23,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.db.jpa.GenericModel;
-import play.db.jpa.Model;
 import play.libs.F;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
@@ -220,7 +219,10 @@ public class ReportDeal extends Controller {
         int year = DateTime.now().minusMonths(1).getYear();
         int month = DateTime.now().minusMonths(1).getMonthOfYear();
         List<ShipmentMonthly> monthlyList = ShipmentMonthly.find("year=? AND month=?", year, month).fetch();
+        List<ReportRecord> records = ReportRecord.find("year=? AND month=? AND reporttype=?",
+                year, month, ReportRecord.RT.SHIPMENTMONTHLY).fetch();
         monthlyList.forEach(GenericModel::delete);
+        records.forEach(GenericModel::delete);
         list.stream().filter(shipment -> shipment.items.size() > 0).forEach(shipment -> shipment.items.forEach(item -> {
             ShipmentMonthly monthly = new ShipmentMonthly();
             monthly.unit = item.unit;
