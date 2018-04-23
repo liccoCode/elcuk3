@@ -222,8 +222,7 @@ public class ShipItem extends GenericModel {
     }
 
     public double totalVolume() {
-        return this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height *
-                this.unit.mainBox.boxNum / 1000000;
+        return this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height * this.unit.mainBox.boxNum;
     }
 
 

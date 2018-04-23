@@ -810,9 +810,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 if(totalShipWeight > 0)
                     item.weightRatio = BigDecimal.valueOf(itemWeight)
                             .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
-                if(totalShipVolume > 0)
-                    item.volumeRatio = BigDecimal.valueOf(itemVolume)
+                if(totalShipVolume > 0) {
+                    Logger.info("### itemVolume=" + itemVolume + " @@totalRealVolume" + totalRealVolume);
+                    item.volumeRatio = BigDecimal.valueOf(itemVolume / 1000000)
                             .divide(BigDecimal.valueOf(totalRealVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                }
+
                 if(totalRealWeight > 0) {
                     if(Objects.equals(this.type, T.SEA)) {
                         item.finalRatio = item.volumeRatio;
