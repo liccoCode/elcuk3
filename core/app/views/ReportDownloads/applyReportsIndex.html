@@ -1,230 +1,234 @@
-#{extends 'main_full.html'/}
+#{extends 'main_full_v3.html'/}
 #{set title:"财务报表下载" /}
 #{set 'moreScripts'}
     #{script 'jquery.dataTables.js'/}
-    #{script 'ReportDownloads/index.coffee'/}
+    #{script 'ReportDownloads/index.es6'/}
 #{/set}
 
 #{flash_alert /}
 #{errorMsgs /}
 
-#{success_row}
-<ul>
-  <li>已完成报表(可直接下载)</li>
-</ul>
-#{/success_row}
-<br/>
-#{form @ReportDownloads.applyReportsIndex(), class:'search_form', id:'reports_form'}
-<div class="row-fluid">
-  <div class="span12">
-    <span>年份:</span>
-      #{select_year class:'span1', name:'p.year', value: p.year, native: true/}
-    &nbsp;
-
-    <span class="add-on">月份:</span>
-      #{select_all_month  class:'span1', name: "p.month", value: p.month, native: true/}
-    &nbsp;
-
-    <span class="add-on">报表类型:</span>
-    <select class="span1" name="p.reporttype" native>
-      <option value="">请选择</option>
-        #{list items:models.view.post.ReportPost.applyReportTypes(), as: 'reportType'}
-          <option ${p.reporttype == reportType ? 'selected=selected' : ''} value="${reportType.name()}">${reportType.label()}</option>
-        #{/list}
-    </select>
-    &nbsp;
-
-    <button class="btn" data-loading>Search</button>
+<div class="row">
+  <div class="col-md-12">
+    <div class="box">
+      <form action="@{ReportDownloads.applyReportsIndex()}" method="post" class="form-inline" id="reports_form">
+        <div class="box-header with-border">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">年:</div>
+            #{select_year  name: "p.year", value: p.year, native: true, class:"form-control"/}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">月:</div>
+            #{select_all_month  name: "p.month", value: p.month, native: true, class:"form-control"/}
+            </div>
+          </div>
+        #{select_enum name:'p.reporttype', items:models.view.post.ReportPost.saleReportTypes(), value:p.reporttype, class:"form-control"}
+          <option value="">报表类型</option>
+        #{/select_enum}
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-default" data-loading>搜索</button>
+        </div>
+      </form>
+      <div class="box-body">
+        <table id="reports" class="table table-condensed table-bordered">
+          <thead>
+          <tr>
+            <th>序号</th>
+            <th>报表类型</th>
+            <th>报表名称</th>
+            <th>年份</th>
+            <th>月份</th>
+            <th>生成时间</th>
+            <th>下载次数</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          #{list items:reports, as:'r'}
+          <tr>
+            <td>${r.id}</td>
+            <td>${r.reporttype?r.reporttype.label():''}</td>
+            <td>${r.filename}</td>
+            <td>${r.year}</td>
+            <td>${r.month}</td>
+            <td>${r.createAt}</td>
+            <td>${r.downloadcount}</td>
+            <td><a class="btn btn-primary" href="@{ReportDownloads.download(r.id)}">下载</a>
+                #{if r.canBeRecalculated()}
+                  <a class="btn btn-primary" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
+                #{/if}
+            </td>
+          </tr>
+          #{/list}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</div>
-#{/form}
-<div class="row-fluid">
-  <div class="span12">
-    <table id="reports" class="table table-condensed table-bordered">
-      <thead>
-      <tr>
-        <th>序号</th>
-        <th>报表类型</th>
-        <th>报表名称</th>
-        <th>年份</th>
-        <th>月份</th>
-        <th>生成时间</th>
-        <th>下载次数</th>
-        <th>操作</th>
-      </tr>
-      </thead>
-      <tbody>
-      #{list items:reports, as:'r'}
-      <tr>
-        <td>${r.id}</td>
-        <td>${r.reporttype?r.reporttype.label():''}</td>
-        <td>${r.filename}</td>
-        <td>${r.year}</td>
-        <td>${r.month}</td>
-        <td>${r.createAt}</td>
-        <td>${r.downloadcount}</td>
-        <td><a class="btn btn-primary" href="@{ReportDownloads.download(r.id)}">下载</a>
-            #{if r.canBeRecalculated()}
-              <a class="btn btn-primary" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
-            #{/if}
-        </td>
-      </tr>
-      #{/list}
-      </tbody>
-    </table>
-  </div>
-</div>
-<br/><br/>
 
-#{success_row}
-<ul>
-  <li>实时计算报表(需要等待计算完成后才能下载)</li>
-</ul>
-#{/success_row}
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.revenueAndCostReport()}" target="_blank">
-        <span class="label label-info">主营收入与成本报表:</span>
-
-        <span style="margin-left:10px;">年份:</span>
-      #{select_year class:'span1', name:'year', value: new org.joda.time.DateTime().getYear()/}
-        &nbsp;
-
-        <span class="add-on">月份:</span>
-      #{select_all_month  class:'span1', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
-        &nbsp;
-        <button class="btn">导出</button>
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">主营收入与成本报表:</h4></div>
+      <form action="@{Excels.revenueAndCostReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">年份:</div>
+            #{select_year class:'form-control', name:'year', value: new org.joda.time.DateTime().getYear()/}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">月份:</div>
+            #{select_all_month  class:'form-control', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
+            </div>
+          </div>
+          <button class="btn btn-default">导出</button>
+        </div>
       </form>
     </div>
   </div>
-</div>
 
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.orderFeesCostReport()}" target="_blank">
-        <div class="inline" style="margin-top:4px;">
-          <span class="label label-info">订单费用汇总报表:</span>
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">订单费用汇总报表:</h4></div>
+      <form action="@{Excels.orderFeesCostReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input class="form-control" role="date" name="from" value="${helper.Dates.aMonthAgo().date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input class="form-control" role="date" name="to" value="${new java.util.Date().date()}">
+            </div>
+          </div>
+          <select class="form-control" name="market">
+          #{list items: models.market.M, as: 'm'}
+            <option value="${m.name()}">${m}</option>
+          #{/list}
+          </select>
+          <button class="btn btn-default">导出</button>
         </div>
-
-        <div class="input-prepend input-append inline" style="margin-left:10px;">
-          <span class="add-on">From:</span>
-          <input type="date" name="from" value="${helper.Dates.aMonthAgo().date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="to" value="${new org.joda.time.DateTime()}">
-        </div>
-
-        <span class="add-on">市场:</span>
-        <select class="inline" name="market">
-        #{list items: models.market.M, as: 'm'}
-          <option value="${m.name()}">${m}</option>
-        #{/list}
-        </select>
-        &nbsp;
-        <button class="btn">导出</button>
       </form>
     </div>
   </div>
-</div>
 
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.purchasePaymentReport()}" target="_blank" method="post">
-        <div class="inline" style="margin-top:4px;">
-          <span class="label label-info">采购付款明细报表:</span>
-        </div>
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">采购付款明细报表:</h4></div>
+      <form action="@{Excels.purchasePaymentReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input class="form-control" role="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+            </div>
+          </div>
 
-        <div class="input-prepend input-append inline" style="margin-left:10px;">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
-        </div>
-
-        <div class="input-prepend input-append inline" style="margin-left:10px;">
-          <span class="add-on">供应商:</span>
-          <select name="p.cooperatorId" class="inline selectize" style="width:150px;">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input class="form-control" role="date" name="p.to" value="${new java.util.Date().date()}">
+            </div>
+          </div>
+          <select name="p.cooperatorId" class="form-control selectize" style="width:150px;">
             <option value="">供应商</option>
           #{list items:cooperators, as:'cop'}
             <option value="${cop.id}">${cop.name}</option>
           #{/list}
           </select>
+          <select class="form-control" name="p.stage" style="width:80px;">
+            <option value="">ALL</option>
+          #{list items: models.procure.ProcureUnit.STAGE, as: 'm'}
+              #{if m.name()!='APPROVE'}
+                <option value="${m.name()}">${m.label()}</option>
+              #{/if}
+          #{/list}
+          </select>
+          <button class="btn btn-default">导出</button>
         </div>
+      </form>
+    </div>
+  </div>
 
-        <span class="add-on">阶段:</span>
-        <select class="inline" name="p.stage" style="width:80px;">
-          <option value="">ALL</option>
-        #{list items: models.procure.ProcureUnit.STAGE, as: 'm'}
-            #{if m.name()!='APPROVE'}
-              <option value="${m.name()}">${m.label()}</option>
-            #{/if}
-        #{/list}
-        </select>
-        &nbsp;
-        <button class="btn">导出</button>
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">采购应付未付款报表:</h4></div>
+      <form action="@{Excels.purchaseReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input class="form-control" role="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input class="form-control" role="date" name="p.to" value="${new java.util.Date().date()}">
+            </div>
+          </div>
+          <button class="btn btn-default">导出</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">物流应付未付款报表:</h4></div>
+      <form action="@{Excels.shipmentReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input class="form-control" role="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input class="form-control" role="date" name="p.to" value="${new java.util.Date().date()}">
+            </div>
+          </div>
+          <button class="btn btn-default">导出</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">库存占用资金报表:</h4></div>
+      <form action="@{Excels.exportInventoryCostsReport()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">年份:</div>
+            #{select_year class:'form-control', name:'year', value: new org.joda.time.DateTime().getYear()/}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">月份:</div>
+            #{select_all_month  class:'form-control', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
+            </div>
+          </div>
+          <button class="btn btn-default">导出</button>
+        </div>
       </form>
     </div>
   </div>
 </div>
 
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.purchaseReport()}" target="_blank" method="post">
-        <div class="inline" style="margin-top:4px;">
-          <span class="label label-info">采购应付未付款报表:</span>
-        </div>
-
-        <div class="input-prepend input-append inline" style="margin-left:10px;">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
-        </div>
-        <button class="btn">导出</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.shipmentReport()}" target="_blank" method="post">
-        <div class="inline" style="margin-top:4px;">
-          <span class="label label-info">物流应付未付款报表:</span>
-        </div>
-
-        <div class="input-prepend input-append inline" style="margin-left:10px;">
-          <span class="add-on">From:</span>
-          <input type="date" name="p.from" value="${helper.Dates.aMonthAgo().date()}">
-          <span class="add-on">To:</span>
-          <input type="date" name="p.to" value="${new org.joda.time.DateTime()}">
-        </div>
-        <button class="btn">导出</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="row-fluid">
-  <div class="span12">
-    <div class="bs-docs-form">
-      <form class="search_form" action="@{Excels.exportInventoryCostsReport()}" target="_blank">
-        <span class="label label-info">库存占用资金报表:</span>
-
-        <span style="margin-left:10px;">年份:</span>
-      #{select_year class:'span1', name:'year', value: new org.joda.time.DateTime().getYear()/}
-        &nbsp;
-
-        <span class="add-on">月份:</span>
-      #{select_all_month  class:'span1', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
-        &nbsp;
-        <button class="btn">导出</button>
-      </form>
-    </div>
-  </div>
-</div>
 
