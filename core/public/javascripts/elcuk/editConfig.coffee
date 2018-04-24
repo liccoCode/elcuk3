@@ -1,12 +1,12 @@
 $ ->
-  $('.search_form').on('click', '#submitBtn', (e) ->
+  $('#cigForm').on('click', '#submitBtn', (e) ->
     vals = {}
     for input in $("input[name=val]")
       $input = $(input)
       unless $input.val() is ""
         vals[$input.data('id')] = $input.val()
     $("input[name=vals]").val(JSON.stringify(vals))
-    $('.search_form').submit()
+    $('#cigForm').submit()
   ).on('change', "input[name=val]", (e) ->
     $input = $(@)
     if isNaN($input.val())
