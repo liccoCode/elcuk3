@@ -21,7 +21,7 @@ import java.util.Map;
  * Date: 2018/4/2
  * Time: 上午11:36
  */
-@On("0 0 23 * * ?")
+//@On("0 0 23 * * ?")
 public class DailyStockJob extends BaseJob {
 
     @Override
