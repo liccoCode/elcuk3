@@ -19,7 +19,8 @@ public class ShipmentRatioJob extends BaseJob {
     public void doit() {
         List<Shipment> shipments = Shipment.find("SELECT DISTINCT s FROM Shipment s LEFT JOIN s.items i "
                         + " LEFT JOIN i.unit u LEFT JOIN u.product p "
-                        + " WHERE i.weightRatio IS NULL AND s.state NOT IN (?, ?, ?) AND p.weight > 0 AND i.qty > 0 ",
+                        + " WHERE i.weightRatio IS NULL AND s.state NOT IN (?, ?, ?) AND p.weight > 0 AND i.qty > 0 "
+                        + " ORDER BY s.dates.beginDate DESC ",
                 Shipment.S.CONFIRM, Shipment.S.PLAN, Shipment.S.CANCEL).fetch(50);
         shipments.forEach(shipment -> {
             shipment.calculationRatio();

@@ -783,7 +783,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      * 注：综合重为所有sku的体积与重量对比取大值*数量的总和
      */
     public void calculationRatio() {
-        float totalShipWeight = this.totalWeight();
+        float totalShipWeight = this.totalPackageWeight();
         float totalShipVolume = this.totalVolume();
         float totalRealWeight = this.totalRealWeight();
         double totalRealVolume = this.totalRealVolume();
@@ -810,9 +810,12 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 if(totalShipWeight > 0)
                     item.weightRatio = BigDecimal.valueOf(itemWeight)
                             .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
-                if(totalShipVolume > 0)
-                    item.volumeRatio = BigDecimal.valueOf(itemVolume)
+                if(totalShipVolume > 0) {
+                    Logger.info("### itemVolume=" + itemVolume + " @@totalRealVolume" + totalRealVolume);
+                    item.volumeRatio = BigDecimal.valueOf(itemVolume / 1000000)
                             .divide(BigDecimal.valueOf(totalRealVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                }
+
                 if(totalRealWeight > 0) {
                     if(Objects.equals(this.type, T.SEA)) {
                         item.finalRatio = item.volumeRatio;
@@ -1266,6 +1269,23 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         return totalWeight;
     }
 
+    /**
+     * 实际包装总重量
+     * @return
+     */
+    public float totalPackageWeight() {
+        float totalWeight = 0f;
+        for(ShipItem itm : this.items) {
+            if(itm.unit == null || itm.unit.mainBox == null) continue;
+            totalWeight += itm.unit.mainBox.singleBoxWeight * itm.unit.mainBox.boxNum;
+        }
+        return totalWeight;
+    }
+
+    /**
+     *
+     * @return
+     */
     public float totalRealWeight() {
         float totalWeight = 0f;
         for(ShipItem itm : this.items) {
