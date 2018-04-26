@@ -387,26 +387,26 @@ public class FBA {
                 FBAInboundServiceMWSConfig config = new FBAInboundServiceMWSConfig();
                 // 设置服务器地址
                 switch(acc.type) {
-                    case AMAZON_UK:
-                        config.setServiceURL(MWSEndpoint.UK.toString());
-                        break;
-                    case AMAZON_DE:
-                        config.setServiceURL(MWSEndpoint.DE.toString());
-                        break;
+                    case AMAZON_CA:
+                    case AMAZON_MX:
                     case AMAZON_US:
-                        config.setServiceURL(MWSEndpoint.US.toString());
+                        config.setServiceURL("https://mws.amazonservices.com");
                         break;
+                    case AMAZON_UK:
                     case AMAZON_IT:
-                        config.setServiceURL(MWSEndpoint.IT.toString());
-                        break;
                     case AMAZON_FR:
-                        config.setServiceURL(MWSEndpoint.FR.toString());
+                    case AMAZON_ES:
+                    case AMAZON_DE:
+                        config.setServiceURL("https://mws-eu.amazonservices.com");
                         break;
                     case AMAZON_JP:
-                        config.setServiceURL(MWSEndpoint.JP.toString());
+                        config.setServiceURL("https://mws.amazonservices.jp");
                         break;
-                    case AMAZON_CA:
-                        config.setServiceURL("https://mws.amazonservices.ca/FulfillmentInboundShipment/2010-10-01/");
+                    case AMAZON_AU:
+                        config.setServiceURL("https://mws.amazonservices.com.au");
+                        break;
+                    case AMAZON_IN:
+                        config.setServiceURL("https://mws.amazonservices.in");
                         break;
                     default:
                         throw new UnsupportedOperationException("不支持的 FBA 地址");
