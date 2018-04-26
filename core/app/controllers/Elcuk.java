@@ -259,7 +259,7 @@ public class Elcuk extends Controller {
     public static void updateShipmentMarketConfigs(long id, List<M> day1, List<M> day2, List<M> day3, List<M> day4,
                                                    List<M> day5, List<M> day6, List<M> day7) {
         OperatorConfig config = OperatorConfig.findById(id);
-        Map<String, List<String>> map = J.from(config.val, HashMap.class);
+        Map<String, List<String>> map =new HashMap<>();
         if(map == null) map = new HashMap<>();
         List<List<M>> days = Arrays.asList(day1, day2, day3, day4, day5, day6, day7);
         for(int i = 1; i <= 7; i++) {

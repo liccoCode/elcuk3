@@ -81,16 +81,15 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     @SuppressWarnings("unchecked")
     public List<AnalyzeDTO> analyzes() {
-        String cacke_key = "sid".equals(this.type)
-                ? SellingSaleAnalyzeJob.AnalyzeDTO_SID_CACHE : SellingSaleAnalyzeJob.AnalyzeDTO_SKU_CACHE;
+        String cacke_key = "sid".equals(this.type) ? "analyze_post_sid_jrockend" : "analyze_post_sku_jrockend";
 
         List<AnalyzeDTO> dtos = null;
         String cache_str = Caches.get(cacke_key);
         if(StringUtils.isNotBlank(cache_str)) dtos = JSON.parseArray(cache_str, AnalyzeDTO.class);
-        // 用于提示后台正在运行计算
+        // 从数据库抓取
         if(StringUtils.isBlank(cache_str) || dtos == null || dtos.isEmpty()) {
-            HTTP.get(System.getenv(Constant.ROCKEND_HOST) + "/selling_sale_analyze");
-            throw new FastRuntimeException("正在计算中, 请稍后再来查看 ^_^");
+            if(this.type.equals("sid")) dtos = AnalyzeDTO.find(" type='SELLING'").fetch();
+            else dtos = AnalyzeDTO.find(" type='SKU'").fetch();
         }
         return dtos;
     }
