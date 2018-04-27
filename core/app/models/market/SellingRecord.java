@@ -101,6 +101,10 @@ public class SellingRecord extends GenericModel {
     public Integer pageViews = 0;
 
 
+    @Expose
+    public Integer turnRatio = 0;
+
+
     /**
      * 当天产生的订单数量(计算系统数据)
      */
@@ -226,6 +230,9 @@ public class SellingRecord extends GenericModel {
     public Integer returnd = 0;
     
     public String product_sku;
+
+    @Temporal(TemporalType.DATE)
+    public Date updateDate;
 
     /**
      * 使用平均值的方式对成本等进行均等化处理;

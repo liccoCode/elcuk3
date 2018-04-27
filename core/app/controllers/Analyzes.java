@@ -13,8 +13,7 @@ import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.highchart.HighChart;
 import models.view.post.AnalyzePost;
-import models.view.post.TrafficRatePost;
-import models.view.report.TrafficRate;
+import models.view.post.SellingRecordPost;
 import org.apache.commons.lang.math.NumberUtils;
 import play.Logger;
 import play.Play;
@@ -140,10 +139,10 @@ public class Analyzes extends Controller {
      *
      * @param p
      */
-    public static void trafficRate(TrafficRatePost p) {
+    public static void sellingRecord(SellingRecordPost p) {
         try {
-            if(p == null) p = new TrafficRatePost();
-            List<TrafficRate> trs = p.query();
+            if(p == null) p = new SellingRecordPost();
+            List<SellingRecord> trs = p.query();
             render(trs, p);
         } catch(FastRuntimeException e) {
             renderHtml("<h3>" + e.getMessage() + "</h3>");
