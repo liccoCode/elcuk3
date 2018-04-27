@@ -11,10 +11,7 @@ import models.OperatorConfig;
 import models.RevenueAndCostDetail;
 import models.User;
 import models.finance.BatchReviewApply;
-import models.market.BtbOrder;
-import models.market.BtbOrderItem;
-import models.market.M;
-import models.market.OrderItem;
+import models.market.*;
 import models.material.MaterialPlan;
 import models.material.MaterialPlanUnit;
 import models.material.MaterialPurchase;
@@ -210,8 +207,8 @@ public class Excels extends Controller {
     /**
      * 下载转化率Excel表格
      */
-    public static void trafficRate(TrafficRatePost p) {
-        List<TrafficRate> dtos = p.query();
+    public static void sellingRecord(SellingRecordPost p) {
+        List<SellingRecord> dtos = p.queryForExcel();
         if(dtos != null && dtos.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";

@@ -1,0 +1,98 @@
+#{extends 'main_full_v3.html'/}
+#{set title:"转化率统计报表"  /}
+#{set 'moreScripts'}
+    #{script 'analyzes/trafficrate.coffee'/}
+    #{script 'component/pagination.coffee'/}
+#{/set}
+<style>
+  .table td{
+    vertical-align:middle;
+  }
+</style>
+#{errorMsgs /}
+#{flash_alert /}
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Analyzes.sellingRecord()}" method="get" class="form-inline" id="search_Form">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+            </div>
+          </div>
+
+          <select id="o_market" name="p.market" class="form-control">
+            <option value="">Market(ALL)</option>
+          #{list items:models.market.M.values()}
+            <option ${_ == p.market ? 'selected' : ''} value="${_.name()}">${_}</option>
+          #{/list}
+          </select>
+
+          <div class="input-group">
+            <input type="text" name="p.search" value="${p.search}" placeHolder="SKU 搜索" class="form-control">
+          </div>
+          <input type="hidden" name="p.page" value="${p.page}">
+          <button class="btn btn-info" id="reflush_trafficrate" data-uri="@{Analyzes.sellingRecord()}">统计</button>
+          <a href="@{Excels.sellingRecord(p)}" class="btn btn-success" target="_blank"><i
+              class="icon-download-alt"></i>下载Excel</a>
+
+        </form>
+      </div>
+
+      <div class="box-body">
+        <table id="trafficrate" class="table table-condensed table-bordered">
+          <thead>
+          <tr>
+            <th>Selling</th>
+            <th>日期</th>
+            <th>市场</th>
+            <th>订单量</th>
+            <th>销量</th>
+            <th>退货数</th>
+            <th>销售额</th>
+            <th>亚马逊费用</th>
+            <th>FBA费用</th>
+            <th>Page view</th>
+            <th>Session</th>
+            <th>转化率(订单量/Session)</th>
+          </tr>
+          </thead>
+          <tbody>
+          #{list items:trs, as:'tr'}
+          <tr>
+            <td>${tr.selling.sellingId} </td>
+            <td>${tr.date}</td>
+            <td>${tr.market.label()}</td>
+            <td>${tr.orders}</td>
+            <td>${tr.units}</td>
+            <td>${tr.returnd}</td>
+            <td>${tr.sales}</td>
+            <td>${tr.amzFee}</td>
+            <td>${tr.fbaFee}</td>
+            <td>${tr.turnRatio}</td>
+            <td>${tr.pageViews}</td>
+            <td>${tr.sessions}</td>
+          </tr>
+          #{/list}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box-footer">
+      #{bootstrap_pager_v3 pi:p, url:'' /}
+      </div>
+
+    </div>
+  </div>
+</div>
