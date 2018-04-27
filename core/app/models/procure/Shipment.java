@@ -784,6 +784,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
      */
     public void calculationRatio() {
         float totalShipWeight = this.totalPackageWeight();
+        float totalWeight = this.totalWeight();
         float totalShipVolume = this.totalVolume();
         float totalRealWeight = this.totalRealWeight();
         double totalRealVolume = this.totalRealVolume();
@@ -806,16 +807,20 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 double itemVolume = item.totalVolume();
                 if(weight > 0) {
                     itemWeight = item.unit.mainBox.singleBoxWeight * item.unit.mainBox.boxNum;
+                } else {
+                    itemWeight = item.totalWeight();
                 }
                 if(totalShipWeight > 0)
                     item.weightRatio = BigDecimal.valueOf(itemWeight)
                             .divide(BigDecimal.valueOf(totalShipWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
-                if(totalShipVolume > 0) {
-                    Logger.info("### itemVolume=" + itemVolume + " @@totalRealVolume" + totalRealVolume);
+                Logger.info("### itemVolume=" + itemVolume + " @@totalRealVolume" + totalRealVolume);
+                if(totalRealVolume > 0) {
                     item.volumeRatio = BigDecimal.valueOf(itemVolume / 1000000)
                             .divide(BigDecimal.valueOf(totalRealVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
+                } else {
+                    item.volumeRatio = BigDecimal.valueOf(itemVolume / 1000000)
+                            .divide(BigDecimal.valueOf(totalShipVolume), 4, BigDecimal.ROUND_HALF_UP).floatValue();
                 }
-
                 if(totalRealWeight > 0) {
                     if(Objects.equals(this.type, T.SEA)) {
                         item.finalRatio = item.volumeRatio;
@@ -830,6 +835,9 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         item.finalRatio = BigDecimal.valueOf(currentWeight).divide(BigDecimal.valueOf(totalRealWeight),
                                 4, BigDecimal.ROUND_HALF_UP).floatValue();
                     }
+                } else {
+                    item.finalRatio = BigDecimal.valueOf(itemWeight)
+                            .divide(BigDecimal.valueOf(totalWeight), 4, BigDecimal.ROUND_HALF_UP).floatValue();
                 }
                 totalWeightRatio += item.weightRatio;
                 totalVolumeRatio += item.volumeRatio;
@@ -1271,6 +1279,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
 
     /**
      * 实际包装总重量
+     *
      * @return
      */
     public float totalPackageWeight() {
@@ -1283,7 +1292,6 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
     }
 
     /**
-     *
      * @return
      */
     public float totalRealWeight() {
