@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 2017/7/22
  * Time: 下午4:27
  */
-//@Every("5mn")
+@Every("5mn")
 public class ShipmentRatioJob extends BaseJob {
 
     public void doit() {

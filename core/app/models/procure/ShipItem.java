@@ -221,8 +221,19 @@ public class ShipItem extends GenericModel {
         return this.qty * (this.unit.product.weight == null ? 0 : this.unit.product.weight);
     }
 
+    /**
+     * 如果有包装则取包装体积
+     * 没有则取产品体积*数量
+     *
+     * @return
+     */
     public double totalVolume() {
-        return this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height * this.unit.mainBox.boxNum;
+        double volume = this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height;
+        if(volume > 0) return volume * this.unit.mainBox.boxNum;
+        Float productVolume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
+                * (this.unit.product.width == null ? 0 : this.unit.product.width)
+                * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
+        return productVolume * this.qty;
     }
 
 
@@ -330,10 +341,7 @@ public class ShipItem extends GenericModel {
             this.unit.stage = ProcureUnit.STAGE.CLOSE;
             this.unit.save();
         }
-        new ERecordBuilder("shipitem.receviedQty")
-                .msgArgs(msg, oldQty, adjustQty)
-                .fid(this.id)
-                .save();
+        new ERecordBuilder("shipitem.receviedQty").msgArgs(msg, oldQty, adjustQty).fid(this.id).save();
     }
 
     public List<ElcukRecord> recivedLogs() {
