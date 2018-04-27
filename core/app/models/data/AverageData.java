@@ -38,6 +38,36 @@ public class AverageData extends Model {
 
     public BigDecimal averageVATPrice;
 
+    /**
+     * 仓库库存（制作中+已交货）
+     */
+    public Long warehouseInventory;
+
+    /**
+     * amazon库存 （已入库+在库）
+     */
+    public Long amazonInventory;
+
+    /**
+     * 在途数量
+     */
+    public Long wayQty;
+
+    /**
+     * (制作中+已交货)库存占用资金总金额(USD)
+     */
+    public BigDecimal warehousePrice;
+
+    /**
+     * 在途库存占用资金总金额
+     */
+    public BigDecimal wayPrice;
+
+    /**
+     * (入库+在库)库存占用资金总金额(USD)
+     */
+    public BigDecimal amazonPrice;
+
     public Date updateDate;
 
 }
