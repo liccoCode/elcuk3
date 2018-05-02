@@ -81,7 +81,7 @@ public class AnalyzePost extends Post<AnalyzeDTO> {
 
     @SuppressWarnings("unchecked")
     public List<AnalyzeDTO> analyzes() {
-        String cacke_key = "sid".equals(this.type) ? "analyze_post_sid_jrockend" : "analyze_post_sku_jrockend";
+        String cacke_key = "sid".equals(this.type) ? "analyze_post_sid" : "analyze_post_sku";
 
         List<AnalyzeDTO> dtos = null;
         String cache_str = Caches.get(cacke_key);
