@@ -62,6 +62,25 @@ $(() => {
     let sku = $(this).data("sku");
     $($("#logForm input")[0]).val(sku);
     $logForm.modal();
+  }).on("click", "input[name='editDetail']", function () {
+    let data = $(this).parent("td").parent("tr").clone();
+    let form = $("<form method='post' action='#{action}'></form>");
+    form = form.append(data);
+    $.post($(this).data("url"), form.serialize(), function (re) {
+      if (re.flag) {
+        noty({
+          text: '修改成功!',
+          type: 'success'
+        });
+        window.location.reload();
+      } else {
+        noty({
+          text: r.message,
+          type: 'error'
+        });
+      }
+    });
+
   });
 
   $("#downloadBtn").click(function (e) {
@@ -95,6 +114,21 @@ $(() => {
 
   $("#submitUpdateBtn").click(function () {
     $("#payment_form").submit();
+  });
+
+  $("span[name='showDetail']").click(function () {
+    let sku = $(this).data("sku");
+    let tr = $(this).parent("td").parent("tr");
+
+    if ($("#div" + sku).html() != undefined) {
+      tr.next("tr").toggle();
+    } else {
+      let html = "<tr style='background-color:#F2F2F2'><td colspan='13'>";
+      html += "<div id='div" + sku + "'></div></td></tr>";
+      tr.after(html);
+      $("#div" + sku).load($(this).data("url"), {sku: sku});
+    }
+
   });
 
 });

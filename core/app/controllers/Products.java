@@ -615,4 +615,9 @@ public class Products extends Controller {
             flash.error(String.format("上传失败!原因:[%s]", e.toString()));
         }
     }
+
+    public static void showCooperatorDetail(String sku) {
+        List<CooperItem> cooperItems = CooperItem.find("product.sku=?", sku).fetch();
+        render(cooperItems);
+    }
 }

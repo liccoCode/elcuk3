@@ -34,7 +34,12 @@
         </td>
           #{set unit: prod.recentlyUnit()/}
         <td>${unit.attrs.currency?.symbol()} ${unit.attrs.price}</td>
-        <td><a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a></td>
+        <td>
+          <span style="cursor:pointer;" name="showDetail" data-sku="${prod.sku}" data-url="@{Products.showCooperatorDetail()}">
+            <i class="icon-reorder"></i>
+          </span>
+          <a href="@{Cooperators.show(unit.cooperator?.id)}" target="_blank">${unit.cooperator?.name}</a>
+        </td>
         <td>
           <select name='pro.state' style="width:90px;" class="form-control" data-sku="${prod.sku}">
             <option>请选择</option>
@@ -75,3 +80,5 @@
 </table>
 #{/else}
 
+
+<form action="@{Cooperators.saveItem()}" id="saveItemForm" method="post" style="display:none;"></form>

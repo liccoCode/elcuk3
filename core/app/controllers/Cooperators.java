@@ -21,6 +21,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -180,6 +181,21 @@ public class Cooperators extends Controller {
         new ElcukRecord(Messages.get("cooperators.savecooperitem"),
                 Messages.get("cooperators.savecooperitem.msg", copItem.id), copItem.id.toString()).save();
         show(cooperId, false);
+    }
+
+    public static void saveItem(CooperItem itm, long itemId) {
+        CooperItem item = CooperItem.findById(itemId);
+        item.currency = itm.currency;
+        item.price = itm.price;
+        item.taxCurrency = itm.taxCurrency;
+        item.taxPrice = itm.taxPrice;
+        item.taxPoint = itm.taxPoint;
+        item.period = itm.period;
+        item.boxSize = itm.boxSize;
+        item.lowestOrderNum = itm.lowestOrderNum;
+        item.updateDate = new Date();
+        item.save();
+        renderJSON(new Ret(true, "保存成功"));
     }
 
     public static void agreeCooperItem(Long id) {

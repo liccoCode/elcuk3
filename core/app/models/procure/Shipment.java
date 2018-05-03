@@ -803,7 +803,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                         4, BigDecimal.ROUND_HALF_UP).floatValue();
             } else {
                 double itemWeight = 0f;
-                double weight = item.unit.mainBox.singleBoxWeight;
+                double weight = item.unit.mainBox == null ? 0d : item.unit.mainBox.singleBoxWeight;
                 double itemVolume = item.totalVolume();
                 if(weight > 0) {
                     itemWeight = item.unit.mainBox.singleBoxWeight * item.unit.mainBox.boxNum;

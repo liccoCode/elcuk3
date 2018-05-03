@@ -176,8 +176,8 @@ $(() => {
   $("#submitBoxInfoBtn").click(function (e) {
     e.stopPropagation();
     let action = $(this).data('action');
-    let form = $("<form method='post' action='#{action}'></form>")
-    form = form.append($("#box_info_table").clone())
+    let form = $("<form method='post' action='#{action}'></form>");
+    form = form.append($("#box_info_table").clone());
     $.post('/Inbounds/updateBoxInfo', form.serialize(), function (re) {
       if (re) {
         noty({
