@@ -90,6 +90,7 @@ public class MWSOrders {
             if(item.getItemPrice() != null) {
                 orderItem.price = Float.parseFloat(item.getItemPrice().getAmount());
                 orderItem.currency = Currency.valueOf(item.getItemPrice().getCurrencyCode());
+                orderItem.usdCost = orderItem.currency.toUSD(orderItem.price);
             }
             if(item.getShippingDiscount() != null)
                 orderItem.discountPrice = Float.parseFloat(item.getShippingDiscount().getAmount());
@@ -102,7 +103,6 @@ public class MWSOrders {
             orderItem.product = Product.findByMerchantSKU(item.getSellerSKU());
             Selling selling = Selling.querySellingByAPI(item.getSellerSKU(), orderr.market, orderr.account.id);
             if(selling != null) orderItem.selling = selling;
-            orderItem.usdCost = orderItem.currency.toUSD(orderItem.price);
             if(item.getGiftWrapPrice() != null)
                 orderItem.giftWrap = Float.parseFloat(item.getGiftWrapPrice().getAmount());
             if(item.getPromotionIds() != null && item.getPromotionIds().size() > 0) {
