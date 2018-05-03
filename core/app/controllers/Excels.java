@@ -268,13 +268,13 @@ public class Excels extends Controller {
     /**
      * 利润下载
      */
-    public static void profit(ProfitPost p) {
-        List<Profit> profits = p.fetch();
+    public static void profit(SellingRecordPost p) {
+        List<Map<String, Object>>  profits = p.queryProfits();
         if(profits != null && profits.size() != 0) {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
             request.format = "xls";
             renderArgs.put(RenderExcel.RA_FILENAME,
-                    String.format("%s-%s销售库存利润报表.xls", formatter.format(p.begin), formatter.format(p.end)));
+                    String.format("%s-%s销售库存利润报表.xls", formatter.format(p.from), formatter.format(p.to)));
             renderArgs.put(RenderExcel.RA_ASYNC, false);
             renderArgs.put("dateFormat", formatter);
             render(profits, p);
