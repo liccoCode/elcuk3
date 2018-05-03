@@ -1,10 +1,8 @@
 package models.view.report;
 
-
 import helper.Currency;
 import models.market.M;
 import models.procure.ProcureUnit;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -15,6 +13,7 @@ import java.math.BigDecimal;
  * Time: 上午9:27
  */
 public class LossRate implements Serializable {
+    private static final long serialVersionUID = -7841401203972410589L;
     /**
      * sku
      */
@@ -43,7 +42,6 @@ public class LossRate implements Serializable {
      * FBA
      */
     public String fba;
-
 
     /**
      * 总丢失量

@@ -483,7 +483,7 @@ public class Excels extends Controller {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         if(type != null && type.equals("pay")) {
             Map<String, Object> map = p.queryDate();
-            List<LossRate> lossrates = (List<LossRate>) map.get("lossrate");
+            List<LossRate> lossrates = (List<LossRate>) map.get("lossRateList");
             LossRate losstotal = p.buildTotalLossRate(lossrates);
             if(lossrates != null && lossrates.size() != 0) {
                 request.format = "xls";

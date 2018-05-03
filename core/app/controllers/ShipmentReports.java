@@ -199,7 +199,7 @@ public class ShipmentReports extends Controller {
         LossRate losstotal = new LossRate();
         try {
             Map<String, Object> map = p.queryDate();
-            lossrates = (List<LossRate>) map.get("lossrate");
+            lossrates = (List<LossRate>) map.get("lossRateList");
             shipItems = (List<ShipItem>) map.get("shipItems");
             losstotal = p.buildTotalLossRate(lossrates);
         } catch(FastRuntimeException e) {

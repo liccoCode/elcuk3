@@ -7,7 +7,7 @@ import play.db.jpa.Model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.*;
 
 /**
  * 平均采购价，运输费用，vat费用的实体
@@ -69,5 +69,11 @@ public class AverageData extends Model {
     public BigDecimal amazonPrice;
 
     public Date updateDate;
+
+    public static Map<String, AverageData> buildMap(List<AverageData> dataList) {
+        Map<String, AverageData> map = new HashMap<>();
+        dataList.forEach(data -> map.put(data.selling.sellingId, data));
+        return map;
+    }
 
 }

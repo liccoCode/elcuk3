@@ -64,6 +64,7 @@ public class Webs {
      * @return
      */
     public static Float scale2PointUp(Float val) {
+        if(val == null) return 0f;
         return scalePointUp(2, val);
     }
 
