@@ -1,0 +1,38 @@
+<table class="table table-condensed table-bordered">
+  <tr>
+    <th>供应商</th>
+    <th>SKU</th>
+    <th>价格</th>
+    <th>含税价</th>
+    <th>税点</th>
+    <th>生产周期(day)</th>
+    <th>每箱数量</th>
+    <th>最低采购量</th>
+    <th>状态</th>
+    <th width="120px;">Action</th>
+  </tr>
+#{list items:cooperItems, as:'itm'}
+  <tr>
+    <td>${itm.cooperator.name}</td>
+    <td>${itm.product.sku}</td>
+    <td class="form-inline">
+        #{pickCurrency name:'itm.currency', c:itm.currency, class:'form-control input-sm'/}
+      <input class="form-control input-sm" value="${itm.price}" name="itm.price">
+    </td>
+    <td class="form-inline">
+        #{pickCurrency name:'itm.taxCurrency', c:itm.taxCurrency, class:'form-control input-sm'/}
+      <input class="form-control input-sm" value="${itm.taxPrice}" name="itm.taxPrice">
+    </td>
+    <td><input class="form-control input-sm" value="${itm.taxPoint}" name="itm.taxPoint"></td>
+
+    <td><input class="form-control input-sm" value="${itm.period}" name="itm.period"></td>
+    <td><input class="form-control input-sm" value="${itm.boxSize}" name="itm.boxSize"></td>
+    <td><input class="form-control input-sm" value="${itm.lowestOrderNum}" name="itm.lowestOrderNum"></td>
+    <td style="color:${itm.status.rgb()}">${itm.status?.label()}</td>
+    <td>
+      <input type="button" data-url="@{Cooperators.saveItem()}" class="btn btn-xs btn-default" name="editDetail" value="修改"/>
+      <input type="hidden" name="itemId" value="${itm.id}">
+    </td>
+  </tr>
+#{/list}
+</table>
