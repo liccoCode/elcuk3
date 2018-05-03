@@ -209,8 +209,7 @@ public class Dates {
      * @return
      */
     public static DateTime fromDatetime(String str, M market) {
-        return DateTime.parse(str,
-                DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(Dates.timeZone(market)));
+        return DateTime.parse(str, DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(Dates.timeZone(market)));
     }
 
     /**
@@ -221,8 +220,7 @@ public class Dates {
      * @return
      */
     public static DateTime fromDate(String str, M market) {
-        return DateTime.parse(str,
-                DateTimeFormat.forPattern("yyyy-MM-dd").withZone(Dates.timeZone(market)));
+        return DateTime.parse(str, DateTimeFormat.forPattern("yyyy-MM-dd").withZone(Dates.timeZone(market)));
     }
 
     public static DateTime cn(String time) {
@@ -239,7 +237,6 @@ public class Dates {
         return cn(Dates.date2DateTime(time));
     }
 
-
     /**
      * 返回年的第一天
      *
@@ -248,7 +245,11 @@ public class Dates {
      */
     public static Date startDayYear(int year) {
         return DateTime.now().withYear(year).withDayOfYear(1).toDate();
+    }
 
+    public static Date beginOfYear() {
+        int year = DateTime.now().getYear();
+        return DateTime.now().withYear(year).withDayOfYear(1).toDate();
     }
 
     /**
@@ -468,10 +469,10 @@ public class Dates {
             Date to;
             for(int i = 0; i <= Math.floor(day / (splitDay)); i++) {
                 c.setTime(begin);
-                if(i == Math.floor(day / (splitDay ))) {
+                if(i == Math.floor(day / (splitDay))) {
                     map.put(format.format(begin), format.format(end));
                 } else {
-                    c.add(Calendar.DATE, splitDay-1);
+                    c.add(Calendar.DATE, splitDay - 1);
                     to = c.getTime();
                     map.put(format.format(begin), format.format(to));
                     c.add(Calendar.DATE, 1);

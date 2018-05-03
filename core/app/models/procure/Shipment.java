@@ -1588,7 +1588,7 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         if(planArrivDate != null) {
             String subject = "";
             String content = "";
-            List<String> mailaddress = new ArrayList<>();
+            List<String> emailAddress = new ArrayList<>();
 
             if(this.dates.planArrivDate.compareTo(planArrivDate) != 0) {
                 subject = String.format("更改运输单[%s]预计到库时间", this.id);
@@ -1601,13 +1601,13 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
                 for(ProcureUnit pu : punits) {
                     String email = pu.handler.email;
                     if(StringUtils.isNotBlank(email)) {
-                        if(!mailaddress.contains(email)) {
-                            mailaddress.add(email);
+                        if(!emailAddress.contains(email)) {
+                            emailAddress.add(email);
                             LogUtils.JOBLOG.info("Email:::" + email);
                         }
                     }
                 }
-                if(mailaddress.size() > 0) Webs.systemMail(subject, content, mailaddress);
+                if(emailAddress.size() > 0) Webs.systemMail(subject, content, emailAddress);
             }
         }
     }

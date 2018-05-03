@@ -7,6 +7,7 @@ import models.market.AmazonListingReview;
 import models.market.Feedback;
 import models.product.Product;
 import models.view.dto.AnalyzeDTO;
+import org.apache.commons.mail.EmailAttachment;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.Play;
@@ -33,8 +34,8 @@ public class SystemMails extends Mailer {
      * @return
      */
     public static boolean dailyReviewMail(List<AmazonListingReview> reviews) {
-        String title = String.format("{INFO} %s Reviews Overview.",
-                Dates.date2Date(new DateTime().minusDays(1).toDate()));
+        String title = String
+                .format("{INFO} %s Reviews Overview.", Dates.date2Date(new DateTime().minusDays(1).toDate()));
         setSubject(title);
         mailBase();
         addRecipient("alerts@easya.cc", "m@easya.cc");
@@ -55,8 +56,9 @@ public class SystemMails extends Mailer {
 
     private static void mailBase() {
         SystemMails.setCharset("UTF-8");
-        if(Play.mode.isProd()) {
-            SystemMails.setFrom(models.OperatorConfig.getVal("addressname")+" "+models.OperatorConfig.getVal("supportemail"));
+        if(!Play.mode.isProd()) {
+            SystemMails.setFrom(
+                    models.OperatorConfig.getVal("addressname") + " " + models.OperatorConfig.getVal("supportemail"));
         } else {
             // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
             SystemMails.setFrom("EasyAcc <1733913823@qq.com>");
@@ -103,5 +105,13 @@ public class SystemMails extends Mailer {
                 mr.save();
         }
         return true;
+    }
+
+    public static void sendEmail(String title, EmailAttachment attachment) {
+        setSubject(title);
+        mailBase();
+        addAttachment(attachment);
+        addRecipient("licco@easya.cc");
+        send("hello");
     }
 }

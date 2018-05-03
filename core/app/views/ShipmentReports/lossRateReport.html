@@ -46,12 +46,12 @@
           </ul>
           <div id="below_tabContent" class="tab-content">
             <div class="tab-pane active" id="firstTab">
-              <table id="shipItemTable" class="table table-condensed table-bordered">
-                <thead>
+              <table class="table table-condensed table-bordered">
                 <tr>
-                  <th>selling</th>
-                  <th>FBA</th>
-                  <th>CenterID</th>
+                  <th width="40px;">Image</th>
+                  <th width="200px;">selling</th>
+                  <th>FBA-ShipmentId<br>CenterID</th>
+                  <th>运输单号<br>运输方式</th>
                   <th>Qty</th>
                   <th>Receive</th>
                   <th>Qty1</th>
@@ -65,33 +65,44 @@
                   <th>采购成本(USD)</th>
                   <th>物流成本(USD)</th>
                   <th>损失金额(USD)</th>
-                  <th>备注</th>
+                  <th width="150px;">备注</th>
                 </tr>
-                </thead>
-                <tbody>
-                #{list items:shipItems, as:'itm'}
+
+              #{list items:shipItems, as:'itm'}
                 <tr>
-                  <td>${itm.unit.sid}</td>
-                  <td>${itm.unit.fba?.shipmentId}</td>
-                  <td>${itm.unit.fba?.centerId}</td>
+                  <td style="text-align:center;">
+                    <a href="${itm.unit.selling?.aps?.imageUrl}" target="_blank">
+                      <img height="40px;" width="45px;" src="${itm.unit.selling?.aps?.imageUrl}">
+                    </a>
+                  </td>
+                  <td style="word-break:break-all;">${itm.unit.sid}</td>
+                  <td>
+                    <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg">${itm.unit.fba.shipmentId}</a>
+                  <br>${itm.unit.fba?.centerId}
+                  </td>
+                  <td>
+                  ${itm.shipment?.id}<br>
+                    <span style="color:${itm.unit.shipType.rgb()}">
+                      <i class="${itm.unit.shipType?.pic()}"></i>${itm.unit.shipType?.label()}
+                    </span>
+                  </td>
                   <td>${itm.qty - itm.unit.returnPurchaseSample()}(${itm.unit.attrs.planQty} | ${itm.unit.attrs.qty})
                   </td>
                   <td>${itm.recivedQty}</td>
                   <td>${itm.adjustQty}</td>
                   <td>${itm.showDeliverymentId()}</td>
-                  <td>#{time_tooltip time: itm.unit.attrs.planShipDate/}</td>
-                  <td>#{time_tooltip time: itm.unit.attrs.planArrivDate/}</td>
-                  <td>#{time_tooltip time: itm.unit.attrs.deliveryDate/}</td>
+                  <td>#{time_tooltip_v3 time: itm.unit.attrs.planShipDate/}</td>
+                  <td>#{time_tooltip_v3 time: itm.unit.attrs.planArrivDate/}</td>
+                  <td>#{time_tooltip_v3 time: itm.unit.attrs.deliveryDate/}</td>
                   <td>${itm.unit.cooperator?.name}</td>
-                  <td>${itm.lossqty}</td>
+                  <td>${itm.qty-itm.adjustQty}</td>
                   <td>${itm.compentype}</td>
                   <td>${itm.purchaseCost}</td>
                   <td>${itm.shipmentCost}</td>
                   <td>${itm.lossCost}</td>
-                  <td>${itm.memo}</td>
+                  <td style="word-break:break-all;">${itm.memo}</td>
                 </tr>
-                #{/list}
-                </tbody>
+              #{/list}
               </table>
             </div>
 

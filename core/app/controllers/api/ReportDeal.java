@@ -11,28 +11,35 @@ import models.ReportRecord;
 import models.finance.SaleFee;
 import models.market.OrderInvoice;
 import models.market.Orderr;
+import models.procure.ShipItem;
 import models.procure.Shipment;
 import models.procure.ShipmentMonthly;
 import models.view.Ret;
+import models.view.post.LossRatePost;
 import models.view.post.ProfitPost;
 import models.view.post.SkuProfitPost;
+import models.view.report.LossRate;
 import mws.MWSFinances;
 import org.allcolor.yahp.converter.IHtmlToPdfTransformer;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import play.Logger;
 import play.db.jpa.GenericModel;
 import play.libs.F;
+import play.modules.excel.RenderExcel;
 import play.modules.pdf.PDF;
 import play.mvc.Controller;
 import play.mvc.With;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.Future;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -42,6 +49,8 @@ import java.util.*;
  */
 @With({APIChecker.class})
 public class ReportDeal extends Controller {
+
+    public static final String BASE_PATH = "/Users/licco/myWork/elcuk2-licco/core/app/views/Excels";
 
     /**
      * 销量分析执行完后清理缓存
@@ -241,5 +250,37 @@ public class ReportDeal extends Controller {
         record.month = DateTime.now().minusMonths(1).getMonthOfYear();
         record.filename = String.format("月度物流报表_%s年_%s月", record.year, record.month);
         record.save();
+    }
+
+    /**
+     * 生成未完全入库的报表
+     */
+    public static void generateLossRateReport() throws IOException, InvalidFormatException {
+        LossRatePost p = new LossRatePost();
+        Map<String, Object> map = p.queryDate();
+        List<LossRate> lossrates = (List<LossRate>) map.get("lossRateList");
+        List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
+        LossRate losstotal = p.buildTotalLossRate(lossrates);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        renderArgs.put(RenderExcel.RA_FILENAME,
+                String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+        renderArgs.put("dmt", formatter);
+        renderArgs.put("dft", dateFormat);
+        Map<String, Object> beanParams = new HashMap<>();
+        beanParams.put("dmt", formatter);
+        beanParams.put("dft", dateFormat);
+        beanParams.put("dtos", dtos);
+        beanParams.put("p", p);
+        beanParams.put("lossrates", lossrates);
+        beanParams.put("losstotal", losstotal);
+        String filePath = Constant.TMP + String.format("%s-%s运输单丢失率报表.xls",
+                formatter.format(p.from), formatter.format(p.to));
+        new ExcelUtils().createExcel(BASE_PATH + "/lossRateReport.xls", beanParams, filePath);
+        File excel = new File(filePath);
+        List<String> emailAddress = new ArrayList<>();
+        emailAddress.add("licco@easya.cc");
+        Future<Boolean> result = Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+        excel.deleteOnExit();
     }
 }

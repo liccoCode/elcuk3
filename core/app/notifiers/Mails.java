@@ -124,10 +124,8 @@ public class Mails extends Mailer {
             if(mr != null)
                 mr.save();
         }
-
     }
 
-    // ----------------------------------------------
     private static void mailBase() {
         setCharset("UTF-8");
         if(Play.mode.isProd()) {

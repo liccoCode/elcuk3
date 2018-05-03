@@ -104,14 +104,13 @@ public class MailsRecord extends Model {
         List<MailsRecord> records = getMailsRecords(_from.toDate(), _to.toDate(), type, templates, success, group);
         HighChart lines = new HighChart().startAt(_from.getMillis());
         DateTime travel = _from.plusDays(0); // copy 一个新的
-
         //初始化不同邮件类型 模板的使用次数
         Map<String, Float> counts = new HashMap<>();
-        if(templates != null)
+        if(templates != null) {
             for(String t : templates) {
                 counts.put(t, 0f);
             }
-        else {
+        } else {
             if(type.equals(T.NORMAL)) {
                 counts.put(Mails.CLEARANCE, 0f);
                 counts.put(Mails.REVIEW_US, 0f);
@@ -131,11 +130,8 @@ public class MailsRecord extends Model {
                 counts.put(SystemMails.SKU_PIC_CHECK, 0f);
             }
         }
-
-
         while(travel.getMillis() < _to.getMillis()) {
             String travelStr = travel.toString("yyyy-MM-dd");
-
             //总数量
             float totalCount = 0;
             for(MailsRecord record : records) {
@@ -165,8 +161,7 @@ public class MailsRecord extends Model {
      * @param group
      * @return
      */
-    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type,
-                                                     List<String> templates, boolean success,
+    private static List<MailsRecord> getMailsRecords(Date from, Date to, T type, List<String> templates, boolean success,
                                                      String group) {
         String cacheKey = Caches.Q.cacheKey(from, to, type, success, group, templates);
         List<MailsRecord> records = Cache.get(cacheKey, List.class);

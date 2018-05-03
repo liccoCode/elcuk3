@@ -478,38 +478,24 @@ public class Excels extends Controller {
         }
     }
 
-    public static void lossRateReport(LossRatePost p, String type) {
+    public static void lossRateReport(LossRatePost p) {
         if(p == null) p = new LossRatePost();
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        if(type != null && type.equals("pay")) {
-            Map<String, Object> map = p.queryDate();
-            List<LossRate> lossrates = (List<LossRate>) map.get("lossrate");
-            LossRate losstotal = p.buildTotalLossRate(lossrates);
-            if(lossrates != null && lossrates.size() != 0) {
-                request.format = "xls";
-                renderArgs.put(RenderExcel.RA_ASYNC, false);
-                renderArgs.put(RenderExcel.RA_FILENAME,
-                        String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
-                renderArgs.put("dmt", formatter);
-                render(lossrates, losstotal, p);
-            } else {
-                renderText("没有数据无法生成Excel文件！");
-            }
+        Map<String, Object> map = p.queryDate();
+        List<LossRate> lossrates = (List<LossRate>) map.get("lossRateList");
+        List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
+        LossRate losstotal = p.buildTotalLossRate(lossrates);
+        if(lossrates != null && lossrates.size() != 0) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s运输单丢失率报表.xls", formatter.format(p.from), formatter.format(p.to)));
+            renderArgs.put("dmt", formatter);
+            renderArgs.put("dft", dateFormat);
+            render(dtos, p, lossrates, losstotal);
         } else {
-            Map<String, Object> map = p.queryDate();
-            List<ShipItem> dtos = (List<ShipItem>) map.get("shipItems");
-            if(dtos != null && dtos.size() > 0) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                request.format = "xls";
-                renderArgs.put(RenderExcel.RA_ASYNC, false);
-                renderArgs.put(RenderExcel.RA_FILENAME,
-                        String.format("%s-%s未完全入库统计报表.xls", formatter.format(p.from), formatter.format(p.to)));
-                renderArgs.put("dmt", formatter);
-                renderArgs.put("dft", dateFormat);
-                render("Excels/notFullyStorageReport.xls", dtos, p);
-            } else {
-                renderText("没有数据无法生成Excel文件！");
-            }
+            renderText("没有数据无法生成Excel文件！");
         }
     }
 
