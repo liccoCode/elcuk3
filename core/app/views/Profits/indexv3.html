@@ -1,0 +1,95 @@
+#{extends 'main_full_v3.html'/}
+#{set title:"SKU 利润分析" /}
+#{set 'moreStyles'}
+    #{stylesheet 'bootstrap3/dataTables.bootstrap.css'/}
+#{/set}
+#{set 'moreScripts'}
+    #{script 'bootstrap3/jquery.dataTables.js'/}
+    #{script 'bootstrap3/dataTables.bootstrap.js'/}
+    #{script 'profits/index.coffee'/}
+#{/set}
+
+#{flash_alert /}
+#{errorMsgs /}
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-primary">
+      <div class="box-header with-border">
+        <form action="@{Profits.indexv3()}" method="post" class="form-inline" id="profits_form">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">From:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">To:</div>
+              <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
+            </div>
+          </div>
+        #{select_enum name:'p.market', items:models.market.M.values(), value:p.market, class: 'form-control'}
+          <option value="">Market</option>
+        #{/select_enum}
+
+          <select class="form-control" style="width:100px;" name="p.categoryId">
+            <option value="">Category</option>
+          #{list items:categories, as:'c'}
+            <option value="${c.categoryId}" ${p.categoryId==c.categoryId?'selected':''}>${c.categoryId}</option>
+          #{/list}
+          </select>
+
+          <div class="input-group">
+            <div class="input-group-addon">SKU</div>
+            <input id="unit_sku" name="p.sku" data-provide="typeahead" data-source="${skus}" value="${p?.sku}" class="form-control">
+          </div>
+
+          <button class="btn btn-primary" data-loading>搜索</button>
+          <button class="btn btn-success" id="exceldown"><i class="icon-download-alt"></i> 导出Excel</button>
+        </form>
+      </div>
+      <div class="box-body">
+        <table id="profit" class="table table-condensed table-bordered" width="100%">
+          <thead>
+          <tr>
+            <th width="15%">SKU</th>
+            <th>市场</th>
+            <th>SKU总利润(USD)</th>
+            <th>SKU利润率(%)</th>
+            <th>SKU销售额(USD)</th>
+            <th>亚马逊费用(USD)</th>
+            <th>FBA费用(USD)</th>
+            <th>SKU销量</th>
+            <th>平均采购价(USD)</th>
+            <th>平均运费单价(USD)</th>
+            <th>关税和VAT单价(USD)</th>
+
+          </tr>
+          </thead>
+          <tbody>
+          #{list items:profits, as:'pro'}
+          <tr>
+            <td>${pro.sku}</td>
+            <td>${pro.market}</td>
+            <td>${pro.totalprofit}</td>
+            <td>${pro.profitrate.format('#.##')}</td>
+            <td>${pro.totalfee}</td>
+            <td>${pro.amazonfee}</td>
+            <td>${pro.fbafee}</td>
+            <td>${pro.quantity.format("#")}</td>
+            <td>${pro.procureprice}</td>
+            <td>${pro.shipprice}</td>
+            <td>${pro.vatprice}</td>
+           
+          </tr>
+          #{/list}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

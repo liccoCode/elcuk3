@@ -14,8 +14,10 @@ import models.product.Product;
 import models.view.Ret;
 import models.view.dto.AnalyzeDTO;
 import models.view.post.ProfitPost;
+import models.view.post.SellingRecordPost;
 import models.view.report.Profit;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import play.libs.F;
 import play.mvc.Before;
 import play.mvc.Controller;
@@ -24,6 +26,7 @@ import play.mvc.With;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 利润计算
@@ -80,4 +83,17 @@ public class Profits extends Controller {
             renderJSON(new Ret("正在计算库存成本!"));
         }
     }
+
+    @Check("profits.index")
+    public static void indexv3(SellingRecordPost p) {
+        List<Map<String, Object>> profits = Collections.emptyList();
+        if(p == null) {
+            p = new SellingRecordPost();
+            p.from = DateTime.now().minusMonths(1).toDate();
+        } else {
+            profits = p.queryProfits();
+        }
+        render(profits, p);
+    }
+
 }

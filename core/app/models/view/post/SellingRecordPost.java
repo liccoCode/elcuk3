@@ -1,16 +1,18 @@
 package models.view.post;
 
+import helper.DBUtils;
 import helper.Dates;
 import models.market.M;
 import models.market.SellingRecord;
-import models.procure.Deliveryment;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import play.libs.F;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,9 +23,7 @@ import java.util.List;
 public class SellingRecordPost extends Post<SellingRecord> {
 
     private static final long serialVersionUID = -2081286181455788781L;
-    /**
-     * 在 ProcureUnits中，planView 和noPlaced 方法 需要调用 index，必须重写，否则总是构造方法中的时间
-     */
+
     public Date from;
     public Date to;
     public int perSize = 50;
@@ -33,7 +33,8 @@ public class SellingRecordPost extends Post<SellingRecord> {
      */
     public M market;
 
-    public String SellingId;
+    public String sku;
+    public String categoryId;
 
 
     @Override
@@ -80,6 +81,52 @@ public class SellingRecordPost extends Post<SellingRecord> {
 
     public Long getTotalCount() {
         return this.count;
+    }
+
+    public List<Map<String, Object>> queryProfits() {
+        StringBuffer sql = new StringBuffer();
+        List<Object> params = new ArrayList<>();
+        sql.append(" select t.product_sku sku,t.market,units quantity,cast(sales as decimal(18,2)) totalfee, ");
+        sql.append(" cast(amzFee as decimal(18,2)) amazonfee,cast(fbaFee as decimal(18,2)) fbafee,  ");
+        sql.append(" cast(averageProcurePrice as decimal(18,2))  procureprice,  ");
+        sql.append(" cast(averageShipPrice as decimal(18,2)) shipprice, ");
+        sql.append(" cast(averageVATPrice as decimal(18,2)) vatprice, ");
+        sql.append(" cast((sales+ amzFee+fbaFee-(averageProcurePrice+averageShipPrice+averageVATPrice)*units) ");   
+        sql.append(" as decimal (18, 2)) totalprofit , ");
+        sql.append(" ifnull(cast((sales+ amzFee+fbaFee-(averageProcurePrice+averageShipPrice+averageVATPrice)*units) ");
+        sql.append(" /sales as decimal(18,4)),0)*100 profitrate ");
+        sql.append(" from ( ");
+        sql.append(" select  t.product_sku,t.market,sum(t.units) units,");
+        sql.append(" sum(t.sales) sales,sum(t.amzFee) amzFee, sum(t.fbaFee) fbaFee,  ");
+        sql.append(" ifnull(a.averageProcurePrice,0) averageProcurePrice, ");
+        sql.append(" ifnull(a.averageShipPrice,0) averageShipPrice,  ifnull(a.averageVATPrice,0) averageVATPrice ");
+        sql.append(" from SellingRecord t  left join  AverageData a on  a.selling_sellingId = t.selling_sellingId ");
+        sql.append(" left join Product p on p.sku = t.product_sku ");
+        sql.append(" where 1=1  ");
+
+        if(from != null) {
+            sql.append("  AND t.date >= ?");
+            params.add(new SimpleDateFormat("yyyy-MM-dd").format(from));
+        }
+        if(to != null) {
+            sql.append("  AND t.date <=?  ");
+            params.add(new SimpleDateFormat("yyyy-MM-dd").format(to));
+        }
+        if(market != null) {
+            sql.append(" AND t.market = ? ");
+            params.add(market.name());
+        }
+        if(sku != null && !"".equals(sku)) {
+            sql.append(" AND t.product_sku = ? ");
+            params.add(sku.trim());
+        }
+        if(categoryId != null && !"".equals(categoryId)) {
+            sql.append(" AND p.category_categoryId = ? ");
+            params.add(categoryId);
+        }
+        sql.append(" group by t.product_sku,t.market  ");
+        sql.append(" ) t ");
+        return DBUtils.rows(sql.toString(), params.toArray());
     }
 
 }
