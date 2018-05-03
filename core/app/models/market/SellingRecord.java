@@ -228,7 +228,7 @@ public class SellingRecord extends GenericModel {
      * 退货数
      */
     public Integer returnd = 0;
-    
+
     public String product_sku;
 
     @Temporal(TemporalType.DATE)
@@ -646,6 +646,8 @@ public class SellingRecord extends GenericModel {
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
     }
+
+
 
 
     @Override

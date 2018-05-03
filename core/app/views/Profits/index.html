@@ -21,25 +21,24 @@
           <div class="form-group">
             <div class="input-group">
               <div class="input-group-addon">From:</div>
-              <input style="width:100px;" class="form-control" role="date" name="p.begin" value="${p.begin.date()}">
+              <input style="width:100px;" class="form-control" role="date" name="p.from" value="${p.from.date()}">
             </div>
           </div>
 
           <div class="form-group">
             <div class="input-group">
               <div class="input-group-addon">To:</div>
-              <input style="width:100px;" class="form-control" role="date" name="p.end" value="${p.end.date()}">
+              <input style="width:100px;" class="form-control" role="date" name="p.to" value="${p.to.date()}">
             </div>
           </div>
-        #{select_enum name:'p.pmarket', items:models.market.M.values(), value:p.market, class: 'form-control'}
-          <option value="market">Market</option>
-          <option value="total">汇总</option>
+        #{select_enum name:'p.market', items:models.market.M.values(), value:p.market, class: 'form-control'}
+          <option value="">Market</option>
         #{/select_enum}
 
-          <select class="form-control" style="width:100px;" name="p.category">
+          <select class="form-control" style="width:100px;" name="p.categoryId">
             <option value="">Category</option>
           #{list items:categories, as:'c'}
-            <option value="${c.categoryId}" ${p.category==c.categoryId?'selected':''}>${c.categoryId}</option>
+            <option value="${c.categoryId}" ${p.categoryId==c.categoryId?'selected':''}>${c.categoryId}</option>
           #{/list}
           </select>
 
@@ -50,14 +49,13 @@
 
           <button class="btn btn-primary" data-loading>搜索</button>
           <button class="btn btn-success" id="exceldown"><i class="icon-download-alt"></i> 导出Excel</button>
-          <button class="btn btn-info" id="reportInventory">计算Inventory成本</button>
         </form>
       </div>
       <div class="box-body">
-        <table id="profit" class="table table-condensed table-bordered">
+        <table id="profit" class="table table-condensed table-bordered" width="100%">
           <thead>
           <tr>
-            <th>SKU</th>
+            <th width="15%">SKU</th>
             <th>市场</th>
             <th>SKU总利润(USD)</th>
             <th>SKU利润率(%)</th>
@@ -69,22 +67,15 @@
             <th>平均运费单价(USD)</th>
             <th>关税和VAT单价(USD)</th>
 
-            <th>(制作中+已交货)库存量</th>
-            <th>在途库存量</th>
-            <th>(入库+在库)库存量</th>
-            <th>(制作中+已交货)库存占用资金总金额(USD)</th>
-            <th>在途库存占用资金总金额(USD)</th>
-            <th>(入库+在库)库存占用资金总金额(USD)</th>
-            <th>备注</th>
           </tr>
           </thead>
           <tbody>
           #{list items:profits, as:'pro'}
           <tr>
             <td>${pro.sku}</td>
-            <td>${pro.market?pro.market.label():"汇总"}</td>
+            <td>${pro.market}</td>
             <td>${pro.totalprofit}</td>
-            <td>${pro.profitrate}</td>
+            <td>${pro.profitrate.format('#.##')}</td>
             <td>${pro.totalfee}</td>
             <td>${pro.amazonfee}</td>
             <td>${pro.fbafee}</td>
@@ -92,13 +83,7 @@
             <td>${pro.procureprice}</td>
             <td>${pro.shipprice}</td>
             <td>${pro.vatprice}</td>
-            <td>${pro.workingqty}</td>
-            <td>${pro.wayqty}</td>
-            <td>${pro.inboundqty}</td>
-            <td>${pro.workingfee}</td>
-            <td>${pro.wayfee}</td>
-            <td>${pro.inboundfee}</td>
-            <td>${pro.memo}</td>
+           
           </tr>
           #{/list}
           </tbody>
@@ -106,6 +91,5 @@
       </div>
     </div>
 
-  #{records_v3 records:records/}
   </div>
 </div>
