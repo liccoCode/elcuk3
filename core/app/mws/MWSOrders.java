@@ -87,8 +87,10 @@ public class MWSOrders {
             orderItem.id = orderr.orderId + "_" + item.getSellerSKU().split(",")[0];
             orderItem.market = orderr.market;
             orderItem.createDate = orderr.paymentDate;
-            orderItem.price = Float.parseFloat(item.getItemPrice().getAmount());
-            orderItem.currency = Currency.valueOf(item.getItemPrice().getCurrencyCode());
+            if(item.getItemPrice() != null) {
+                orderItem.price = Float.parseFloat(item.getItemPrice().getAmount());
+                orderItem.currency = Currency.valueOf(item.getItemPrice().getCurrencyCode());
+            }
             if(item.getShippingDiscount() != null)
                 orderItem.discountPrice = Float.parseFloat(item.getShippingDiscount().getAmount());
             orderItem.memo = "ERP订单项重新抓取";
@@ -103,7 +105,7 @@ public class MWSOrders {
             orderItem.usdCost = orderItem.currency.toUSD(orderItem.price);
             if(item.getGiftWrapPrice() != null)
                 orderItem.giftWrap = Float.parseFloat(item.getGiftWrapPrice().getAmount());
-            if(item.getPromotionIds().size() > 0) {
+            if(item.getPromotionIds() != null && item.getPromotionIds().size() > 0) {
                 StringBuffer promotionIds = new StringBuffer();
                 item.getPromotionIds().forEach(promotion -> promotionIds.append(promotion).append(";"));
                 orderItem.promotionIDs = promotionIds.toString();
