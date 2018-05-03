@@ -25,17 +25,15 @@ public class FBAMails extends Mailer {
 
     /**
      * FBA 的状态改变的时候发送邮件
+     * Mailer 的返回值必须为基本类型
      *
      * @param fba
      * @param oldState FBA 的原始状态
      * @param newState FBA 改变的新状态
      * @return
      */
-    public static /*Mailer 的返回值必须为基本类型*/boolean shipmentStateChange(FBAShipment fba,
-                                                                    FBAShipment.S oldState,
-                                                                    FBAShipment.S newState) {
-        setSubject(String.format("{INFO} FBA %s state FROM %s To %s",
-                fba.shipmentId, oldState, newState));
+    public static boolean shipmentStateChange(FBAShipment fba, FBAShipment.S oldState, FBAShipment.S newState) {
+        setSubject(String.format("{INFO} FBA %s state FROM %s To %s", fba.shipmentId, oldState, newState));
         mailBase();
         addRecipient("s@easya.cc");
         MailsRecord mr = null;
@@ -58,10 +56,8 @@ public class FBAMails extends Mailer {
      * @param state
      * @return
      */
-    public static boolean shipmentsNotify(List<Shipment> ships, Shipment.S state,
-                                          ElcukConfig cfg) {
-        setSubject("%s 个%s阶段运输单为顺利进行下一阶段提前 3 天提醒",
-                ships.size(), cfg.fullName);
+    public static boolean shipmentsNotify(List<Shipment> ships, Shipment.S state, ElcukConfig cfg) {
+        setSubject("%s 个%s阶段运输单为顺利进行下一阶段提前 3 天提醒", ships.size(), cfg.fullName);
         mailBase();
         addRecipient("s@easya.cc");
         try {
@@ -73,11 +69,10 @@ public class FBAMails extends Mailer {
         return true;
     }
 
-    // ----------------------------------------------
     private static void mailBase() {
         setCharset("UTF-8");
         if(Play.mode.isProd()) {
-            setFrom(models.OperatorConfig.getVal("addressname")+" "+models.OperatorConfig.getVal("supportemail"));
+            setFrom(models.OperatorConfig.getVal("addressname") + " " + models.OperatorConfig.getVal("supportemail"));
         } else {
             setFrom("EasyAcc <1733913823@qq.com>"); // 因为在国内 Gmail 老是被墙, 坑爹!! 所以非 产品环境 使用 QQ 邮箱测试.
         }

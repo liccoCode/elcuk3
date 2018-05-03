@@ -141,6 +141,23 @@ public class Webs {
         return Mail.send(email);
     }
 
+    public static Future<Boolean> sendEmailWithAttach(String subject, String content, List<String> emailAddress, File file) {
+        HtmlEmail email = new HtmlEmail();
+        try {
+            email.embed(file);
+            email.setCharset("UTF-8");
+            email.setSubject(subject);
+            for(String address : emailAddress) {
+                email.addTo(address);
+            }
+            email.setFrom(models.OperatorConfig.getVal("supportemail"), models.OperatorConfig.getVal("addressname"));
+            email.setHtmlMsg(content);
+        } catch(EmailException e) {
+            Logger.warn("Email error: " + e.getMessage());
+        }
+       return Mail.send(email);
+    }
+
 
     /**
      * 这种是可以解析   1.234,23(DE) 与 1,234.23(US) 为 1234.23(CN)

@@ -18,7 +18,7 @@ public class ExcelUtils {
     public void createExcel(String templateFileName, Map<String, Object> beanParams, String resultFileName)
             throws InvalidFormatException, IOException {
         XLSTransformer transformer = new XLSTransformer();
-        InputStream is = this.getClass().getResourceAsStream(templateFileName);
+        InputStream is = new FileInputStream(templateFileName);
         Workbook workbook = transformer.transformXLS(is, beanParams);
         OutputStream os = new BufferedOutputStream(new FileOutputStream(resultFileName));
         workbook.write(os);

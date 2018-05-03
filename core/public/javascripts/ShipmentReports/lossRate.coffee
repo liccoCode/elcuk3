@@ -27,13 +27,7 @@ $ ->
   $("#exceldown").click((e)->
     e.preventDefault()
     $form = $('#search_form')
-    if $("#firstTab").attr("class") == 'tab-pane active'
-      window.open('/Excels/lossRateReport?' + $form.serialize(), "_blank")
-    else
-      if $('.alert-error').text().length > 0
-        alert '后台正在计算赔偿统计数据，请稍后再试！'
-      else
-        window.open('/Excels/lossRateReport?type=pay&' + $form.serialize(), "_blank")
+    window.open('/Excels/lossRateReport?' + $form.serialize(), "_blank")
   )
 
 $ ->
