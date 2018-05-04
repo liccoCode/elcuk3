@@ -54,20 +54,11 @@ public class Bootstrap extends Job {
         if(Play.id.equalsIgnoreCase("test")) {
             return;
         }
-        // 1. 初始化系统内的用户
-        long users = User.count();
-        if(users == 0) {
-            Fixtures.delete(User.class);
-            Fixtures.loadModels("users.yml");
-        }
-
         long feeTypes = FeeType.count();
         if(feeTypes == 0) {
             Fixtures.delete(FeeType.class);
             Fixtures.loadModels("feetypes.yml");
         }
-
-
         /**
          * 初始化日志类
          */
