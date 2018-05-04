@@ -228,12 +228,14 @@ public class ShipItem extends GenericModel {
      * @return
      */
     public double totalVolume() {
+        if(this.unit.mainBox == null) {
+            Float productVolume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
+                    * (this.unit.product.width == null ? 0 : this.unit.product.width)
+                    * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
+            return productVolume * this.qty;
+        }
         double volume = this.unit.mainBox.length * this.unit.mainBox.width * this.unit.mainBox.height;
-        if(volume > 0) return volume * this.unit.mainBox.boxNum;
-        Float productVolume = (this.unit.product.lengths == null ? 0 : this.unit.product.lengths)
-                * (this.unit.product.width == null ? 0 : this.unit.product.width)
-                * (this.unit.product.heigh == null ? 0 : this.unit.product.heigh);
-        return productVolume * this.qty;
+        return volume * this.unit.mainBox.boxNum;
     }
 
 
