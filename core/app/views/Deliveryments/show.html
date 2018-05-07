@@ -84,7 +84,11 @@
             </div>
             <label for="p_sku" class="col-sm-1 control-label">供应商</label>
             <div class="col-sm-2">
-              <input type="text" class="form-control" value="${dmt.cooperator?.name}" readonly>
+              <select name="dmt.cooperator.id" class="form-control">
+              #{list items:cooperatorList, as:'c'}
+                <option value="${c.id}" ${dmt.cooperator?.id==c.id? 'selected':''}>${c.name}</option>
+              #{/list}
+              </select>
             </div>
           </div>
 
@@ -225,7 +229,7 @@
           <div class="form-group">
             <label for="excel_tradeTerms" class="col-sm-1 control-label">交易条款<br>(供应商)</label>
             <div class="col-sm-5">
-              <textarea rows="10" name="excel.tradeTerms" id="excel_tradeTerms" class="form-control">${dmt.cooperator.tradingTerms}</textarea>
+              <textarea rows="10" name="excel.tradeTerms" id="excel_tradeTerms" class="form-control">${dmt.cooperator?.tradingTerms}</textarea>
             </div>
             <label for="excel_deliveryAddress" class="col-sm-1 control-label">产品要求<br>(产品线)</label>
             <div class="col-sm-5">

@@ -205,7 +205,7 @@ public class OrderItem extends GenericModel {
                 }
             }
 
-            Cache.add(cache_key, highChart, "2h");
+            Cache.add(cache_key, highChart, "1h");
         }
         return Cache.get(cache_key, HighChart.class);
     }

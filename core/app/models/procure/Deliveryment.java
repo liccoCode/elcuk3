@@ -16,12 +16,14 @@ import org.joda.time.DateTime;
 import play.data.validation.Required;
 import play.data.validation.Validation;
 import play.db.helper.JpqlSelect;
+import play.db.helper.SqlSelect;
 import play.db.jpa.GenericModel;
 import play.i18n.Messages;
 import play.libs.F;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 采购单, 用来记录所采购的 ProcureUnit
@@ -579,6 +581,12 @@ public class Deliveryment extends GenericModel {
         String sql = "cooperator.id=? AND createDate >=? AND createDate<=? AND state <>?";
         return Deliveryment.find(sql, this.cooperator.id,
                 Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
+    }
+
+    public static List<Cooperator> getDeliverymentCooperList(String id) {
+        List<ProcureUnit> unitList = ProcureUnit.find("deliveryment.id=?", id).fetch();
+        List<Long> cooperIds = unitList.stream().map(unit -> unit.cooperator.id).collect(Collectors.toList());
+        return Cooperator.find(" id IN " + SqlSelect.inlineParam(cooperIds)).fetch();
     }
 
 }

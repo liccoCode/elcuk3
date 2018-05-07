@@ -100,8 +100,8 @@ public class Deliveryments extends Controller {
             applyMsg = dmt.validDmtIsNeedApply().message;
             deliveryments = dmt.getRelateDelivery();
         }
-        boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
-        render(dmt, expressid, total, applyMsg, deliveryments, isB2b);
+        List<Cooperator> cooperatorList = Deliveryment.getDeliverymentCooperList(id);
+        render(dmt, expressid, total, applyMsg, deliveryments, cooperatorList);
     }
 
     public static void showPayment(String id, Long paymentId) {
@@ -128,8 +128,8 @@ public class Deliveryments extends Controller {
             applyMsg = dmt.validDmtIsNeedApply().message;
             deliveryments = dmt.getRelateDelivery();
         }
-        boolean isB2b = Objects.equals(dmt.handler.projectName, User.COR.MengTop);
-        render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, isB2b, paymentId);
+        List<Cooperator> cooperatorList = Deliveryment.getDeliverymentCooperList(id);
+        render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, paymentId, cooperatorList);
     }
 
 
