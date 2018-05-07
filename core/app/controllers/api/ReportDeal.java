@@ -50,7 +50,7 @@ import java.util.concurrent.Future;
 @With({APIChecker.class})
 public class ReportDeal extends Controller {
 
-    public static final String BASE_PATH = "/core/app/views/Excels";
+    public static final String BASE_PATH = "/core/app/views/";
 
     /**
      * 销量分析执行完后清理缓存
@@ -276,7 +276,7 @@ public class ReportDeal extends Controller {
         beanParams.put("losstotal", losstotal);
         String filePath = Constant.TMP + String.format("%s-%s运输单丢失率报表.xls",
                 formatter.format(p.from), formatter.format(p.to));
-        new ExcelUtils().createExcel(BASE_PATH + "/lossRateReport.xls", beanParams, filePath);
+        new ExcelUtils().createExcel("Excels/lossRateReport.xls", beanParams, filePath);
         File excel = new File(filePath);
         List<String> emailAddress = new ArrayList<>();
         emailAddress.add("licco@easya.cc");
