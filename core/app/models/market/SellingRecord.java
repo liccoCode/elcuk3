@@ -231,8 +231,9 @@ public class SellingRecord extends GenericModel {
 
     public String product_sku;
 
-    @Temporal(TemporalType.DATE)
-    public Date updateDate;
+    public Date orderUpdateDate;
+    
+    public Date feeUpdateDate;
 
     /**
      * 使用平均值的方式对成本等进行均等化处理;
