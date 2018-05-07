@@ -50,7 +50,7 @@ import java.util.concurrent.Future;
 @With({APIChecker.class})
 public class ReportDeal extends Controller {
 
-    public static final String BASE_PATH = "/Users/licco/myWork/elcuk2-licco/core/app/views/Excels";
+    public static final String BASE_PATH = "/core/app/views/Excels";
 
     /**
      * 销量分析执行完后清理缓存
