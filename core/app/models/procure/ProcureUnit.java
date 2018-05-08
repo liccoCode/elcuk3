@@ -2493,10 +2493,9 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
             shiptype = shipment.type;
             c = shipment.cooper;
         }
-        return Whouse.findByCooperatorAndShipType(
-                c != null ? c : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
-                shiptype != null ? shiptype : this.shipType
-        );
+        return Whouse
+                .findByCooperatorAndShipType(c != null ? c : (Cooperator) Cooperator.find("name LIKE '%欧嘉国际%'").first(),
+                        shiptype != null ? shiptype : this.shipType);
     }
 
     /**
