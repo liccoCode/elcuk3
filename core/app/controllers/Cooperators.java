@@ -38,6 +38,14 @@ public class Cooperators extends Controller {
     @Check("cooperators.index")
     public static void index(CooperatorPost p) {
         if(p == null) p = new CooperatorPost();
+        p.type = Cooperator.T.SUPPLIER;
+        List<Cooperator> coopers = p.query();
+        render(p, coopers);
+    }
+
+    public static void indexTransporter(CooperatorPost p) {
+        if(p == null) p = new CooperatorPost();
+        p.type = Cooperator.T.SHIPPER;
         List<Cooperator> coopers = p.query();
         render(p, coopers);
     }
