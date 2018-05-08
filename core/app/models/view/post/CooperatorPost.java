@@ -28,7 +28,6 @@ public class CooperatorPost extends Post<Cooperator> {
     private static final long serialVersionUID = 4613786316373015576L;
 
     public Cooperator.T type;
-
     public boolean visible = true;
 
     @Override
@@ -47,18 +46,13 @@ public class CooperatorPost extends Post<Cooperator> {
         }
         User user = Login.current();
         if(!user.isHaveCrossCop()) {
-            if(user.isShipmentRole()) {
-                sql.append(" AND c.type = ? ");
-                params.add(Cooperator.T.SHIPPER);
-            } else {
-                sql.append(" AND c.type = ? ");
-                params.add(Cooperator.T.SUPPLIER);
-            }
             sql.append(" AND c.projectName = ? ");
             params.add(user.projectName);
         }
         sql.append(" AND c.visible = ? ");
         params.add(visible);
+        sql.append(" AND c.type = ? ");
+        params.add(type);
 
         String username = Login.currentUserName();
         List<String> categoryList = Category.categories(username).stream().map(category -> category.categoryId)
