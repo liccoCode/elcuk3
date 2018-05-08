@@ -239,7 +239,7 @@ public class Selling extends GenericModel {
     @Column(columnDefinition = "int(2) DEFAULT '-1'")
     public Integer pirateBeginHour;
     @Column(columnDefinition = "int(2) DEFAULT '-1'")
-    public Integer pirateEndHour ;
+    public Integer pirateEndHour;
 
     public Date pirateDate;
 
@@ -761,6 +761,9 @@ public class Selling extends GenericModel {
             if(this.account == null)
                 throw new FastRuntimeException("Selling account can not be null.");
             this.sellingId = Selling.sid(this.merchantSKU, this.market, this.account);
+            if(Selling.count("sellingId=?", this.sellingId) > 0) {
+                throw new FastRuntimeException("Selling已经存在，您可以选择重新上架该Selling");
+            }
         }
         return this.sellingId;
     }
