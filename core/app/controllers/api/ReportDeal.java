@@ -7,6 +7,7 @@ import helper.*;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
+import models.OperatorConfig;
 import models.ReportRecord;
 import models.finance.SaleFee;
 import models.market.OrderInvoice;
@@ -278,9 +279,12 @@ public class ReportDeal extends Controller {
                 formatter.format(p.from), formatter.format(p.to));
         new ExcelUtils().createExcel(BASE_PATH + "/Excels/lossRateReport.xls", beanParams, filePath);
         File excel = new File(filePath);
-        List<String> emailAddress = new ArrayList<>();
-        emailAddress.add("licco@easya.cc");
-        Future<Boolean> result = Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+        String config = OperatorConfig.getVal("shipmentlossreport");
+        if(StringUtils.isNotBlank(config)) {
+            String[] emailData = config.split(",");
+            List<String> emailAddress = new ArrayList<>(Arrays.asList(emailData));
+            Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+        }
         excel.deleteOnExit();
     }
 }
