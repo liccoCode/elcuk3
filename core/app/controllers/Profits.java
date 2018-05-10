@@ -37,7 +37,7 @@ import java.util.Map;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class Profits extends Controller {
 
-    @Before(only = {"index"})
+    @Before(only = {"index","indexv3"})
     public static void setUpIndexPage() {
         User user = User.findById(Login.current().id);
         renderArgs.put("categories", user.categories);
