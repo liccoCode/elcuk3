@@ -87,7 +87,7 @@
               <td>${pay.payer?.username}</td>
               <td>
                   #{list items:pay.cooperators(), as:'cop'}
-                      ${cop.fullName}
+                      ${cop.name}
                     #{/list}
               </td>
               <td>${pay.batchReviewApply?.status?.label()}</td>
