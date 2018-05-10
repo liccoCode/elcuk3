@@ -90,10 +90,11 @@ public class Cooperators extends Controller {
     /**
      * 创建新的 Cooperator
      *
-     * @param cop
+     * @param type
      */
-    public static void newCooper(Cooperator cop) {
-        if(cop == null) cop = new Cooperator();
+    public static void newCooper(String type) {
+        Cooperator cop = new Cooperator();
+        cop.type = Cooperator.T.valueOf(type);
         render(cop);
     }
 
