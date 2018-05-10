@@ -78,10 +78,10 @@
                   <td style="word-break:break-all;">${itm.unit.sid}</td>
                   <td>
                     <a href="${itm.unit.fba.fbaLink()}" target="_blank" name="fbabg">${itm.unit.fba.shipmentId}</a>
-                  <br>${itm.unit.fba?.centerId}
+                    <br>${itm.unit.fba?.centerId}
                   </td>
                   <td>
-                  ${itm.shipment?.id}<br>
+                    <a target="_blank" href="@{Shipments.show(itm.shipment?.id)}">${itm.shipment?.id}</a><br>
                     <span style="color:${itm.unit.shipType.rgb()}">
                       <i class="${itm.unit.shipType?.pic()}"></i>${itm.unit.shipType?.label()}
                     </span>

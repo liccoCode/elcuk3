@@ -100,7 +100,7 @@ public class Deliveryments extends Controller {
             applyMsg = dmt.validDmtIsNeedApply().message;
             deliveryments = dmt.getRelateDelivery();
         }
-        List<Cooperator> cooperatorList = Deliveryment.getDeliverymentCooperList(id);
+        List<Cooperator> cooperatorList = dmt.getDeliverymentCooperList();
         render(dmt, expressid, total, applyMsg, deliveryments, cooperatorList);
     }
 
@@ -128,7 +128,7 @@ public class Deliveryments extends Controller {
             applyMsg = dmt.validDmtIsNeedApply().message;
             deliveryments = dmt.getRelateDelivery();
         }
-        List<Cooperator> cooperatorList = Deliveryment.getDeliverymentCooperList(id);
+        List<Cooperator> cooperatorList = dmt.getDeliverymentCooperList();
         render("Deliveryments/show.html", dmt, expressid, total, applyMsg, deliveryments, paymentId, cooperatorList);
     }
 

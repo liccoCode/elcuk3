@@ -583,9 +583,9 @@ public class Deliveryment extends GenericModel {
                 Dates.morning(Dates.getMondayOfWeek()), Dates.night(new Date()), S.PENDING).fetch();
     }
 
-    public static List<Cooperator> getDeliverymentCooperList(String id) {
-        List<ProcureUnit> unitList = ProcureUnit.find("deliveryment.id=?", id).fetch();
-        List<Long> cooperIds = unitList.stream().map(unit -> unit.cooperator.id).collect(Collectors.toList());
+    public List<Cooperator> getDeliverymentCooperList() {
+        List<Long> cooperIds = this.units.stream().map(unit -> unit.cooperator.id).collect(Collectors.toList());
+        if(cooperIds.size() == 0) return new ArrayList<>();
         return Cooperator.find(" id IN " + SqlSelect.inlineParam(cooperIds)).fetch();
     }
 
