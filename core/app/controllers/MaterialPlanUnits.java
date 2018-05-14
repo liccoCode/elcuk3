@@ -25,13 +25,27 @@ import java.util.List;
 @With({GlobalExceptionHandler.class, Secure.class, SystemOperation.class})
 public class MaterialPlanUnits extends Controller {
 
+    public static void billingPrePay(Long id, Long applyId) {
+        MaterialPlanUnit unit = MaterialPlanUnit.findById(id);
+        try {
+            unit.billingPrePay();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 请款成功", FeeType.cashpledge().nickName);
+        Applys.material(applyId);
+    }
+
 
     /**
      * 付款申请
      *
      * @param id
      */
-    public static void billingPrePay(Long id, Long applyId) {
+    public static void billingTailPay(Long id, Long applyId) {
         MaterialPlanUnit unit = MaterialPlanUnit.findById(id);
         try {
             unit.billingTailPay();

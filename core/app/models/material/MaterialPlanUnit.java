@@ -8,6 +8,7 @@ import models.embedded.ERecordBuilder;
 import models.finance.FeeType;
 import models.finance.PaymentUnit;
 import models.procure.CooperItem;
+import models.procure.Cooperator;
 import models.procure.ProcureUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -151,7 +152,7 @@ public class MaterialPlanUnit extends Model {
      */
     public float totalAmount() {
         return new BigDecimal(this.getPrice().toString())
-                .multiply(new BigDecimal(this.receiptQty >0 ? this.receiptQty : this.qty))
+                .multiply(new BigDecimal(this.receiptQty > 0 ? this.receiptQty : this.qty))
                 .setScale(2, 4)
                 .floatValue();
     }
@@ -193,26 +194,49 @@ public class MaterialPlanUnit extends Model {
     }
 
     /**
+     * 申请预付款
+     *
+     * @return
+     */
+    public PaymentUnit billingPrePay() {
+        this.billingValid();
+        if(Validation.hasErrors()) return null;
+        if(this.hasPrePay())
+            Validation.addError("", "存在重复申请预付款的物料，请查证！");
+
+        PaymentUnit fee = new PaymentUnit(this);
+        Cooperator cooperator = this.materialPlan.cooperator;
+        if(cooperator.materialFirst > 0) {
+            fee.amount = this.totalAmount() * cooperator.materialFirst / 100;
+        } else {
+            Validation.addError("", "该物料预付款设置的比例为0，请查证！");
+        }
+        if(Validation.hasErrors()) return null;
+        fee.feeType = FeeType.cashpledge();
+        fee.save();
+        this.materialPlan.apply.updateAt = new Date();
+        this.materialPlan.apply.save();
+        new ERecordBuilder("materialPlanUnit.prepay")
+                .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class).save();
+        return fee;
+    }
+
+    /**
      * 付款申请
      */
     public PaymentUnit billingTailPay() {
-        /**
-         * 0. 基本检查
-         * 1. 申请付款
-         */
         this.billingValid();
         if(Validation.hasErrors()) return null;
         if(this.hasTailPay())
             Validation.addError("", "存在重复申请尾款的物料，请查证！");
         if(Validation.hasErrors()) return null;
-
         PaymentUnit fee = new PaymentUnit(this);
+        fee.amount = this.totalAmount() - this.appliedAmount();
         fee.feeType = FeeType.procurement();
         fee.save();
-
         this.materialPlan.apply.updateAt = new Date();
         this.materialPlan.apply.save();
-
         new ERecordBuilder("materialPlanUnit.prepay")
                 .msgArgs(this.id, String.format("%s %s", fee.currency.symbol(), fee.amount))
                 .fid(this.id, ProcureUnit.class).save();
@@ -228,6 +252,15 @@ public class MaterialPlanUnit extends Model {
             Validation.addError("", String.format("采购计划所属的采购单[%s]还没有规划的请款单", this.materialPlan.id));
     }
 
+    /**
+     * 是否拥有了预付款
+     *
+     * @return
+     */
+    public boolean hasPrePay() {
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.cashpledge());
+    }
+
 
     /**
      * 是否拥有了尾款
@@ -235,12 +268,7 @@ public class MaterialPlanUnit extends Model {
      * @return
      */
     public boolean hasTailPay() {
-        for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.procurement()) {
-                return true;
-            }
-        }
-        return false;
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.procurement());
     }
 
     /**
