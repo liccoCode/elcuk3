@@ -126,7 +126,7 @@ public class PaymentUnit extends Model {
         this();
         this.materialPlanUnit = materialPlanUnit;
         this.materialPlan = materialPlanUnit.materialPlan;
-        this.amount = materialPlanUnit.totalAmount();
+
         this.unitQty = materialPlanUnit.receiptQty > 0 ? materialPlanUnit.receiptQty : materialPlanUnit.qty;
         this.currency = materialPlanUnit.getCurrency();
         this.payment = Payment.buildPayment(materialPlanUnit.materialPlan.cooperator, materialPlanUnit.getCurrency(),

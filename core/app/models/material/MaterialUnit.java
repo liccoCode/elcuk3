@@ -220,10 +220,7 @@ public class MaterialUnit extends Model {
      * @return
      */
     public float totalAmount() {
-        return new BigDecimal(this.planPrice)
-                .multiply(new BigDecimal(this.planQty))
-                .setScale(2, 4)
-                .floatValue();
+        return new BigDecimal(this.planPrice).multiply(new BigDecimal(this.planQty)).setScale(2, 4).floatValue();
     }
 
     public float formatPrice() {
