@@ -40,7 +40,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.Future;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
