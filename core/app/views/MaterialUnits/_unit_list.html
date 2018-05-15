@@ -7,7 +7,7 @@
   #{/if}
     <th width="40px;">#</th>
     <th width="60px;">阶段</th>
-    <th width="200px;">物料编码</th>
+    <th width="240px;">物料编码</th>
     <th width="250px;">物料名称</th>
     <th>工厂物料代码</th>
     <th width="95px;">物料采购单</th>
@@ -25,20 +25,17 @@
   </tr>
 #{list items:units, as:'unit'}
   <tr id="procureUnit_${unit.id}">
-
       #{if materialUnitsIndex}
         <td>
           <input type="checkbox" name="pids" value="${unit.id}" project="${unit.projectName}" cooper="${unit.cooperator?.id}">
         </td>
       #{/if}
-    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">
-    ${unit.id}
-    </td>
+    <td data-toggle="toggle" data-target="#${tr_key}_${unit.id}" style="cursor:pointer;">${unit.id}</td>
     <td style="background:${unit.stage?.rgb()}">${unit.stage.label()}</td>
     <td>${unit.material?.code}${str}</td>
-    <td>${unit.material?.name}</td>
+    <td data-toggle="tooltip" title="${unit.material?.name}">${unit.material?.name?.xxLong()}</td>
     <td>${unit.material?.version}</td>
-    <td>${unit.materialPurchase?.id}</td>
+    <td><a href="@{MaterialPurchases.show(unit.materialPurchase?.id)}" target="_blank">${unit.materialPurchase?.id}</a></td>
     <td>${unit.cooperator?.name}</td>
     <td>${unit.planQty}</td>
     <td>${unit.planCurrency?.symbol()} ${unit.planPrice}</td>
