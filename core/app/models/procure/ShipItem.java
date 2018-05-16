@@ -497,6 +497,9 @@ public class ShipItem extends GenericModel {
             } else {
                 monthly.realWeight = Double.parseDouble(String.valueOf(paymentUnit.unitQty));
             }
+            if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(this.shipment.type)) {
+                monthly.price = String.valueOf(paymentUnit.unitPrice);
+            }
             monthly.totalShippingFee = String.valueOf(paymentUnit.amount);
         }
     }

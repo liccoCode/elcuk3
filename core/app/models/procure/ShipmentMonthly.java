@@ -98,6 +98,7 @@ public class ShipmentMonthly extends Model {
 
     @Transient
     public Long unitId;
+    
     public void setAndSave() {
         ShipmentMonthly db = ShipmentMonthly.find(" unit.id=? ", this.unitId).first();
         db.price = this.price;
@@ -109,5 +110,4 @@ public class ShipmentMonthly extends Model {
         db.lost = this.lost;
         db.save();
     }
-
 }
