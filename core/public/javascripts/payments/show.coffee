@@ -128,15 +128,6 @@ $ ->
   ajaxBocRate()
   ajaxExRate()
 
-  # 初始化上传图片
-  # 1. 首先初始化 dropbox
-  # 2. Load 图片
-  fid = ->
-    fid: $('#dropbox').attr('paymentId')
-    p: 'PAYMENTS'
-
-  window.dropUpload.iniDropbox(fid, $('#dropbox'), '/payment/files/upload')
-  window.dropUpload.loadImages($('#dropbox').attr('paymentId'), $('#dropbox'), 'PAYMENTS')
 
   do ->
     paymentUnitId = window.location.hash[1..-1]
