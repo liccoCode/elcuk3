@@ -74,8 +74,7 @@ public class Attachs extends Controller {
             String bucket = String.format("erp-%s", models.OperatorConfig.getVal("brandname")).toLowerCase();
             String fileName = String.format("%s/%s", attach.p.name(), attach.fileName);
             QiniuUtils.delete(fileName, bucket);
-            attach.rm();
-
+            attach.delete();
         } catch(Exception e) {
             renderJSON(new Ret(Webs.e(e)));
         }

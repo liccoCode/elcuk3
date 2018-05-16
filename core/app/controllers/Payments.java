@@ -84,7 +84,9 @@ public class Payments extends Controller {
         Payment payment = Payment.findById(id);
         PaymentUnitPost post = new PaymentUnitPost(id, p);
         List<PaymentUnit> units = post.query();
-        render(payment, units, p, post);
+        User user = User.findById(Login.current().id);
+        boolean isFinance = Objects.equals(User.D.Finance, user.department);
+        render(payment, units, p, post, isFinance);
     }
 
     public static void batchApply(List<Long> pids) {

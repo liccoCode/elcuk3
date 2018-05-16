@@ -38,6 +38,14 @@ public class Cooperators extends Controller {
     @Check("cooperators.index")
     public static void index(CooperatorPost p) {
         if(p == null) p = new CooperatorPost();
+        p.type = Cooperator.T.SUPPLIER;
+        List<Cooperator> coopers = p.query();
+        render(p, coopers);
+    }
+
+    public static void indexTransporter(CooperatorPost p) {
+        if(p == null) p = new CooperatorPost();
+        p.type = Cooperator.T.SHIPPER;
         List<Cooperator> coopers = p.query();
         render(p, coopers);
     }
@@ -82,10 +90,11 @@ public class Cooperators extends Controller {
     /**
      * 创建新的 Cooperator
      *
-     * @param cop
+     * @param type
      */
-    public static void newCooper(Cooperator cop) {
-        if(cop == null) cop = new Cooperator();
+    public static void newCooper(String type) {
+        Cooperator cop = new Cooperator();
+        cop.type = Cooperator.T.valueOf(type);
         render(cop);
     }
 

@@ -7,6 +7,7 @@ import helper.*;
 import jobs.analyze.SellingProfitJob;
 import jobs.analyze.SellingProfitSearch;
 import jobs.analyze.SkuSaleProfitJob;
+import models.OperatorConfig;
 import models.ReportRecord;
 import models.finance.SaleFee;
 import models.market.OrderInvoice;
@@ -39,7 +40,6 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.Future;
 
 /**
  * 销量分析执行后需要清理缓存，保证数据及时
@@ -50,7 +50,7 @@ import java.util.concurrent.Future;
 @With({APIChecker.class})
 public class ReportDeal extends Controller {
 
-    public static final String BASE_PATH = "/Users/licco/myWork/elcuk2-licco/core/app/views/Excels";
+    public static final String BASE_PATH = "/root/cap_elcuk2/current/core/app/views/";
 
     /**
      * 销量分析执行完后清理缓存
@@ -276,11 +276,14 @@ public class ReportDeal extends Controller {
         beanParams.put("losstotal", losstotal);
         String filePath = Constant.TMP + String.format("%s-%s运输单丢失率报表.xls",
                 formatter.format(p.from), formatter.format(p.to));
-        new ExcelUtils().createExcel(BASE_PATH + "/lossRateReport.xls", beanParams, filePath);
+        new ExcelUtils().createExcel(BASE_PATH + "/Excels/lossRateReport.xls", beanParams, filePath);
         File excel = new File(filePath);
-        List<String> emailAddress = new ArrayList<>();
-        emailAddress.add("licco@easya.cc");
-        Future<Boolean> result = Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+        String config = OperatorConfig.getVal("shipmentlossreport");
+        if(StringUtils.isNotBlank(config)) {
+            String[] emailData = config.split(",");
+            List<String> emailAddress = new ArrayList<>(Arrays.asList(emailData));
+            Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+        }
         excel.deleteOnExit();
     }
 }

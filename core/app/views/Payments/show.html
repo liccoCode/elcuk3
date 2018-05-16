@@ -88,7 +88,7 @@
         <div class="form-group">
           <label for="inputEmail3" class="col-sm-3 control-label">名称</label>
           <div class="col-sm-9">
-            <input class="form-control" value="${payment.target.name}" readonly>
+            <input class="form-control" value="${isFinance ? payment.target.name:payment.cooperator?.name}" readonly>
           </div>
         </div>
         <div class="form-group">
@@ -104,8 +104,6 @@
   <div class="col-sm-3">
     <div class="box box-danger">
       <div class="box-body">
-
-
       #{if payment.state == models.finance.Payment.S.PAID}
         <dl class="dl-horizontal">
           <dt>支付状态</dt>

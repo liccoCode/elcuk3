@@ -36,8 +36,7 @@
       <button class="btn btn-danger" disabled="">请款单已经确认</button>
     #{/if}
     #{else }
-      <a href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success"
-         data-disable-with='确认中...'>确认请款单</a>
+      <a href='@{Applys.procureConfirm(apply.id)}' class="btn btn-success" data-disable-with='确认中...'>确认请款单</a>
     #{/else}
     </div>
   </div>
@@ -136,9 +135,9 @@
           ${procureUnit.attrs.planQty}/${procureUnit.attrs.qty?:0}/${procureUnit.inboundQty}
           </td>
           <td>${procureUnit.attrs.currency.symbol()} ${procureUnit.attrs.price}
-            #{if procureUnit.containTax}
-               <div class="label label-important">税点:${procureUnit.taxPoint}</div>
-             #{/if}
+              #{if procureUnit.containTax}
+                <div class="label label-important">税点:${procureUnit.taxPoint}</div>
+              #{/if}
           </td>
           <td class="price" amount="${procureUnit.totalAmount()}">
           ${procureUnit.attrs.currency.symbol()} ${procureUnit.totalAmount().format('#,###.##')}</td>
@@ -216,6 +215,7 @@
                           <th>付款单</th>
                           <th>#</th>
                           <th>状态</th>
+                          zx
                           <th>请款类型</th>
                           <th>请款金额</th>
                           <th>修正值</th>

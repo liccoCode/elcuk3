@@ -84,7 +84,11 @@
             </div>
             <label for="p_sku" class="col-sm-1 control-label">供应商</label>
             <div class="col-sm-2">
-              <input type="text" class="form-control" value="${dmt.cooperator?.name}" readonly>
+              <select name="dmt.cooperator.id" class="form-control">
+              #{list items:cooperatorList, as:'c'}
+                <option value="${c.id}" ${dmt.cooperator?.id==c.id? 'selected':''}>${c.name}</option>
+              #{/list}
+              </select>
             </div>
           </div>
 
@@ -225,7 +229,7 @@
           <div class="form-group">
             <label for="excel_tradeTerms" class="col-sm-1 control-label">交易条款<br>(供应商)</label>
             <div class="col-sm-5">
-              <textarea rows="10" name="excel.tradeTerms" id="excel_tradeTerms" class="form-control">${dmt.cooperator.tradingTerms}</textarea>
+              <textarea rows="10" name="excel.tradeTerms" id="excel_tradeTerms" class="form-control">${dmt.cooperator?.tradingTerms}</textarea>
             </div>
             <label for="excel_deliveryAddress" class="col-sm-1 control-label">产品要求<br>(产品线)</label>
             <div class="col-sm-5">
@@ -256,7 +260,7 @@
             <label for="excel_buyerCompany" class="col-sm-1 control-label">买方</label>
             <div class="col-sm-2">
               <input class="form-control" name="excel.buyerCompany" id="excel_buyerCompany"
-                     value="${isB2b ? models.OperatorConfig.getVal("b2bbuyercompany"):models.OperatorConfig.getVal("buyercompany")}">
+                     value="${isB2B ? models.OperatorConfig.getVal("b2bbuyercompany"):models.OperatorConfig.getVal("buyercompany")}">
             </div>
             <label for="excel_tradeTerms" class="col-sm-1 control-label">经办人</label>
             <div class="col-sm-2">
@@ -280,7 +284,7 @@
             </div>
             <label for="excel_buyerTel" class="col-sm-1 control-label">固定电话</label>
             <div class="col-sm-2">
-              <input class="form-control" name="excel.buyerTel" id="excel_buyerTel" value="${isB2b ? '' : models.OperatorConfig.getVal("buyertel")}">
+              <input class="form-control" name="excel.buyerTel" id="excel_buyerTel" value="${isB2B ? '' : models.OperatorConfig.getVal("buyertel")}">
             </div>
           </div>
 
@@ -317,7 +321,7 @@
             <label for="excel_buyerAddress" class="col-sm-1 control-label">地址</label>
             <div class="col-sm-5">
               <input class="form-control" name="excel.buyerAddress" id="excel_buyerAddress"
-                     value="${isB2b ? models.OperatorConfig.getVal("b2bbuyeraddress") :models.OperatorConfig.getVal("buyeraddress")}">
+                     value="${isB2B ? models.OperatorConfig.getVal("b2bbuyeraddress") :models.OperatorConfig.getVal("buyeraddress")}">
             </div>
           </div>
         </div>

@@ -127,8 +127,8 @@ public class Attach extends Model {
         public void delete(Attach attach) {
             attach.delete();
             //QiniuUtils.delete(attach.fid+"-"+attach.originName);
-            String localtion = attach.location;
-            FileUtils.deleteQuietly(new File(localtion));
+            //String localtion = attach.location;
+            //FileUtils.deleteQuietly(new File(localtion));
         }
     }
 

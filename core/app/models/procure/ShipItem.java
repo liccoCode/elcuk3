@@ -368,12 +368,8 @@ public class ShipItem extends GenericModel {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
         if(!super.equals(o)) return false;
-
         ShipItem shipItem = (ShipItem) o;
-
-        if(!id.equals(shipItem.id)) return false;
-
-        return true;
+        return id.equals(shipItem.id);
     }
 
     @Override
@@ -389,7 +385,7 @@ public class ShipItem extends GenericModel {
      * @param fee
      */
     public void produceFee(PaymentUnit fee, FeeType feeType) {
-        /**
+        /*
          * 1. 检查是否拥有运输运费
          * 2. 选择运输运费类型
          * 3. 记录数量, 请款人...
@@ -407,11 +403,8 @@ public class ShipItem extends GenericModel {
         fee.amount = fee.unitPrice * fee.unitQty;
         this.shipment.fees.add(fee);
         this.shipment.save();
-
-        new ERecordBuilder("paymentunit.applynew")
-                .msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
-                .fid(fee.shipment.id)
-                .save();
+        new ERecordBuilder("paymentunit.applynew").msgArgs(fee.currency, fee.amount(), fee.feeType.nickName)
+                .fid(fee.shipment.id).save();
     }
 
     /**
@@ -504,7 +497,19 @@ public class ShipItem extends GenericModel {
             } else {
                 monthly.realWeight = Double.parseDouble(String.valueOf(paymentUnit.unitQty));
             }
+            if(Arrays.asList(Shipment.T.EXPRESS, Shipment.T.DEDICATED).contains(this.shipment.type)) {
+                monthly.price = String.valueOf(paymentUnit.unitPrice);
+            }
             monthly.totalShippingFee = String.valueOf(paymentUnit.amount);
+        }
+    }
+
+    public double packWeight() {
+        FBAShipment fba = this.unit.fba;
+        if(fba != null) {
+            return fba.dto.singleBoxWeight / fba.dto.num * this.qty;
+        } else {
+            return 0d;
         }
     }
 

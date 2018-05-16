@@ -1,5 +1,5 @@
 #{extends 'main_full_v3.html'/}
-#{set title:"Cooperators(${p.totalCount})" /}
+#{set title:"运输商(${p.totalCount})" /}
 #{set 'moreScripts'}
     #{script 'component/pagination.coffee'/}
     #{script 'cooperators/index.es6'/}
@@ -15,7 +15,7 @@
   <div class="col-md-12">
     <div class="box box-primary">
       <div class="box-header with-border">
-        <form action="@{Cooperators.index()}" method="get" class="form-inline" id="search_Form">
+        <form action="@{Cooperators.indexTransporter()}" method="get" class="form-inline" id="search_Form">
           <div class="row-fluid">
             <select class="form-control" style="width:80px;" name="p.visible">
               <option value="true">显示</option>
@@ -30,7 +30,7 @@
             </div>
 
             <button class="btn btn-primary" data-loading>搜索</button>
-            <a href="@{Cooperators.newCooper('SUPPLIER')}" class="btn btn-warning">添加新合作伙伴</a>
+            <a href="@{Cooperators.newCooper('SHIPPER')}" class="btn btn-warning">添加运输商</a>
             <a href="@{Excels.exportCooperItemLogs()}" class="btn btn-success"> 下载日志</a>
           </div>
         </form>
@@ -39,8 +39,6 @@
         <table class="table table-condensed table-bordered dataTable" id="data-table">
           <tr>
             <th>供应商全称</th>
-            <th width="100px;">SKU</th>
-            <th width="120px;">物料</th>
             <th>代码</th>
             <th>供应商类型</th>
             <th>订单数</th>
@@ -50,25 +48,11 @@
             <th>操作</th>
           </tr>
         #{list items:coopers, as:'c'}
-          #{set category:c.containCategory() /}
+            #{set category:c.containCategory() /}
           <tr style="background:#{if c.showRed()} red #{/if}">
             <td data-toggle="tooltip" title="涉及品线【${category}】">${c.fullName}
-              #{if category}
-                <span style="color:blue">【${category}】</span>
-              #{/if}
-            </td>
-            <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showCooperItem()}">
-              <span><i class="icon-reorder"></i></span>
-                #{if c.type==models.procure.Cooperator.T.SUPPLIER}
-                  <span class="badge bg-light-blue">${c.showItemNum(true)}</span>
-                #{/if}
-            </td>
-            <td style="cursor:pointer;" name="clickTd" data-id="${c.id}" data-url="@{Cooperators.showMaterialItem()}">
-                #{if c.showItemNum(false) > 0}
-                  <span><i class="icon-reorder"></i></span>
-                    #{if c.type==models.procure.Cooperator.T.SUPPLIER}
-                      <span class="badge bg-green">${c.showItemNum(false)}</span>
-                    #{/if}
+                #{if category}
+                  <span style="color:blue">【${category}】</span>
                 #{/if}
             </td>
             <td>${c.name}</td>
