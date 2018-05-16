@@ -350,6 +350,38 @@ public class User extends Model {
                 return "fa-stethoscope";
             }
         },
+        Ilinkome {
+            @Override
+            public String label() {
+                return "Ilinkome";
+            }
+
+            @Override
+            public String url() {
+                return "https://ilinkome.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-home";
+            }
+        },
+        Funme {
+            @Override
+            public String label() {
+                return "Funme";
+            }
+
+            @Override
+            public String url() {
+                return "https://funme.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-gift";
+            }
+        },
         MengTop {
             @Override
             public String label() {
