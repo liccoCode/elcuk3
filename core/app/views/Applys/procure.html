@@ -184,6 +184,12 @@
                                          rel="tooltip" title="${apply.cooperator.tail}%">
                                 #{/form}
                             #{/ifnot}
+                            #{if procureUnit.hasTailPay()}
+                                #{form @ProcureUnits.billingSupplementPay(pid, apply.id), method:'POST'}
+                                  <input type="submit" value="申请补款" class="btn btn-mini btn-inverse"
+                                         rel="tooltip" title="${apply.cooperator.tail}%">
+                                #{/form}
+                            #{/if}
                         #{/power.ck}
                         #{power.ck 'procureunits.billingreworkpay'}
                             #{form @ProcureUnits.billingReworkPay(pid, apply.id), method:'POST',
@@ -215,7 +221,6 @@
                           <th>付款单</th>
                           <th>#</th>
                           <th>状态</th>
-                          zx
                           <th>请款类型</th>
                           <th>请款金额</th>
                           <th>修正值</th>
