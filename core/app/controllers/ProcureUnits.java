@@ -620,6 +620,19 @@ public class ProcureUnits extends Controller {
         Applys.procure(applyId);
     }
 
+    public static void billingSupplementPay(Long id, Long applyId) {
+        ProcureUnit unit = ProcureUnit.findById(id);
+        try {
+            unit.billingSupplementPay();
+        } catch(PaymentException e) {
+            Validation.addError("", e.getMessage());
+        }
+        if(Validation.hasErrors())
+            Webs.errorToFlash(flash);
+        else
+            flash.success("%s 请款成功", FeeType.procurement().nickName);
+        Applys.procure(applyId);
+    }
 
     public static void batchTailPay(Long[] unitIds) {
         if(unitIds.length == 0) renderJSON(new Ret(false, "请选择请款明细!"));

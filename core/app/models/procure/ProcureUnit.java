@@ -1803,6 +1803,21 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
         this.save();
     }
 
+    public PaymentUnit billingSupplementPay() {
+        PaymentUnit fee = new PaymentUnit(this);
+        fee.feeType = FeeType.procurement();
+        fee.amount = this.leftAmount();
+        fee.save();
+        //2018-02-05 要求请款操作修改请款单的 updateAt
+        this.deliveryment.apply.updateAt = new Date();
+        this.deliveryment.apply.save();
+        new ERecordBuilder("procureunit.tailpay")
+                .msgArgs(this.product.sku, String.format("%s %s", fee.currency.symbol(), fee.amount))
+                .fid(this.id, ProcureUnit.class)
+                .save();
+        return fee;
+    }
+
     /**
      * 尾款申请
      */
