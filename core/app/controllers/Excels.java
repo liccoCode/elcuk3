@@ -95,9 +95,7 @@ public class Excels extends Controller {
      * 进出口版合同下载
      */
     public static void exportDeliverymentByShipment(List<String> shipmentId) {
-
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
-
         String sql = "SELECT c FROM ProcureUnit c, IN(c.shipItems) ci WHERE ci.shipment.id IN "
                 + JpqlSelect.inlineParam(shipmentId) + "  ORDER BY ci.id";
         List<ProcureUnit> units = ProcureUnit.find(sql).fetch();
