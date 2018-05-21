@@ -2024,6 +2024,20 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
     }
 
     /**
+     * 是否拥有已经付款了的尾款
+     *
+     * @return
+     */
+    public boolean hasPaidTailPay() {
+        for(PaymentUnit fee : this.fees()) {
+            if(fee.feeType == FeeType.procurement() && fee.state == PaymentUnit.S.PAID) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 尾款
      *
      * @return
