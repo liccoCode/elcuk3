@@ -3,6 +3,7 @@ package models.product;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.annotations.Expose;
+import controllers.Login;
 import exception.PaymentException;
 import helper.*;
 import models.User;
@@ -43,6 +44,8 @@ import java.util.List;
 @Entity
 @DynamicUpdate
 public class Attach extends Model {
+
+    private static final long serialVersionUID = -9108328568374866591L;
 
     /**
      * 一个额外的添加字段, 指明这个产品附属与谁
@@ -240,6 +243,9 @@ public class Attach extends Model {
      */
     public int sync;
 
+    @ManyToOne
+    public User creator;
+
     public void setFid(String fid) {
         this.fid = fid.toUpperCase();
     }
@@ -276,7 +282,7 @@ public class Attach extends Model {
      *
      * @return
      */
-    public Attach setUpAttachName() {
+    public void setUpAttachName() {
         long subfix = RandomUtils.nextInt();
         this.fileSize = this.file.length();
         this.originName = URLDecoder.decode(this.file.getName());
@@ -284,7 +290,7 @@ public class Attach extends Model {
                 this.file.getPath().substring(this.file.getPath().lastIndexOf("."))).trim();
         this.location = this.location();
         this.createDate = new Date();
-        return this;
+        this.creator = Login.current();
     }
 
     public String location() {
@@ -366,26 +372,14 @@ public class Attach extends Model {
      */
     public static List<java.util.Map<String, String>> attachImages(String fid) {
         List<java.util.Map<String, String>> imgs = new ArrayList<>();
-        JSONObject jsonObject = HTTP.getJson(kodCookieStore(), attachsLink(fid));
-
-        if(jsonObject != null) {
-            JSONArray fileList = null;
-            try {
-                fileList = jsonObject.getJSONObject("data").getJSONArray("filelist");
-            } catch(NullPointerException e) {
-                Logger.error(e.getMessage());
-            }
-            if(fileList == null || fileList.isEmpty()) return imgs;
-
-            for(Object object : fileList) {
-                JSONObject entry = (JSONObject) object;
-                String name = entry.getString("name");
-
-                imgs.add(GTs.MapBuilder.map("name", name)
-                        .put("href", Attach.attachImage(fid, name))
+        List<Attach> attachList = Attach.find("p=? AND fid=? AND remove=0", P.SKU, fid).fetch();
+        if(attachList.size() > 0) {
+            attachList.forEach(attach -> {
+                imgs.add(GTs.MapBuilder.map("name", attach.originName)
+                        .put("href", attach.qiniuLocation)
                         .build()
                 );
-            }
+            });
         }
         return imgs;
     }
