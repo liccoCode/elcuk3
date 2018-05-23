@@ -184,7 +184,7 @@
                                          rel="tooltip" title="${apply.cooperator.tail}%">
                                 #{/form}
                             #{/ifnot}
-                            #{if procureUnit.hasTailPay()}
+                            #{if procureUnit.hasPaidTailPay()}
                                 #{form @ProcureUnits.billingSupplementPay(pid, apply.id), method:'POST'}
                                   <input type="submit" value="申请补款" class="btn btn-mini btn-inverse"
                                          rel="tooltip" title="${apply.cooperator.tail}%">

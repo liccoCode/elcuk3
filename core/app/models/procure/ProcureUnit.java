@@ -2016,11 +2016,17 @@ public class ProcureUnit extends Model implements ElcukRecord.Log {
      * @return
      */
     public boolean hasTailPay() {
-        for(PaymentUnit fee : this.fees()) {
-            if(fee.feeType == FeeType.procurement())
-                return true;
-        }
-        return false;
+        return this.fees().stream().anyMatch(fee -> fee.feeType == FeeType.procurement());
+    }
+
+    /**
+     * 是否拥有已经付款了的尾款
+     *
+     * @return
+     */
+    public boolean hasPaidTailPay() {
+        return this.fees().stream()
+                .anyMatch(fee -> fee.feeType == FeeType.procurement() && fee.state == PaymentUnit.S.PAID);
     }
 
     /**
