@@ -51,6 +51,7 @@ public class OutboundPost extends Post<Outbound> {
                 return "出库时间";
             }
         };
+
         public abstract String label();
     }
 
@@ -113,7 +114,11 @@ public class OutboundPost extends Post<Outbound> {
                 }
                 return new F.T2<>(sbd.toString(), params);
             }
-            sbd.append(" AND o.unit.sku LIKE ? ");
+            if(Objects.equals(flag, StockRecord.C.Normal.name()) || Objects.equals(flag, StockRecord.C.B2B.name())) {
+                sbd.append(" AND u.sku LIKE ? ");
+            } else {
+                sbd.append(" AND u.unit.sku LIKE ? ");
+            }
             params.add("%" + this.search + "%");
         }
         if(status != null) {
