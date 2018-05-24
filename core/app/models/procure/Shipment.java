@@ -774,6 +774,18 @@ public class Shipment extends GenericModel implements ElcukRecord.Log {
         this.state = S.SHIPPING;
         this.calculationRatio();
         this.save();
+        /*向TrackingMore发送请求*/
+        if(this.internationExpress != null) {
+            this.tracknolist.forEach(num -> {
+                String requestData = "{\"tracking_number\": \"" + num + "\",\"carrier_code\":\""
+                        + this.internationExpress.trackingCode() + "\"}";
+                try {
+                    new Tracker().orderOnlineByJson(requestData, null, "post");
+                } catch(Exception e) {
+                    Webs.systemMail("向TrackingMore发送请求出现未知错误", Webs.s(e), Collections.singletonList("licco@easya.cc"));
+                }
+            });
+        }
     }
 
     /**
