@@ -95,6 +95,11 @@ public enum iExpress {
             return DateTime.parse(dateString,
                     DateTimeFormat.forPattern("E, MMM dd, yyyy HH:mm").withLocale(Locale.CHINESE));
         }
+
+        @Override
+        public String trackingCode() {
+            return "dhl";
+        }
     },
 
     FEDEX {
@@ -206,6 +211,11 @@ public enum iExpress {
             }
             return new F.T2<>(false, DateTime.now());
         }
+
+        @Override
+        public String trackingCode() {
+            return "fedex";
+        }
     },
 
     UPS {
@@ -279,6 +289,11 @@ public enum iExpress {
             return DateTime.parse(String.format("%s %s", trElement.select("td:eq(1)").text(),
                     trElement.select("td:eq(2)").text()), DateTimeFormat.forPattern("yyyy/MM/dd HH:mm"));
         }
+
+        @Override
+        public String trackingCode() {
+            return "ups";
+        }
     },
     DPD {
         @Override
@@ -315,6 +330,11 @@ public enum iExpress {
         public String fcNum() {
             return "100010";
         }
+
+        @Override
+        public String trackingCode() {
+            return "dpd";
+        }
     },
     TNT {
         @Override
@@ -350,6 +370,11 @@ public enum iExpress {
         @Override
         public String fcNum() {
             return "100004";
+        }
+
+        @Override
+        public String trackingCode() {
+            return "tnt";
         }
     };
 
@@ -405,6 +430,8 @@ public enum iExpress {
     public abstract String carrierName(M m);
 
     public abstract String fcNum();
+
+    public abstract String trackingCode();
 
     public String oneSevenTrackUrl(String trackNo) {
         return String.format("https://t.17track.net/zh-cn#nums=%s&fc=%s", trackNo.trim(), this.fcNum());
