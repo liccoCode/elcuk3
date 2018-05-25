@@ -50,7 +50,7 @@
           <td width="13%" style="border:1px solid #000000; padding-left:6px;">
           #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null && procureUnit.fba.dto!=null &&
           procureUnit.fba.dto.singleBoxWeight>0}
-                ${procureUnit.fba.dto.singleBoxWeight} ${procureUnit.selling?.market.name()=='AMAZON_US'?'lb.':'kg'}
+                ${procureUnit.fba.dto.singleBoxWeight} ${procureUnit?.selling?.market?.name()=='AMAZON_US'?'lb.':'kg'}
             #{/if}
           <td width="10%" style="line-height:0.7em;">
             箱子体积<br>
@@ -60,7 +60,7 @@
           #{if procureUnit.fba!=null && procureUnit.fba.fbaCartonContents!=null && procureUnit.fba.dto!=null && 
           procureUnit.fba.dto?.length > 0}
             <span style="font-size:5pt">${procureUnit.fba.dto?.length} x  ${procureUnit.fba.dto?.width}
-              x ${procureUnit.fba.dto?.height}</span> ${procureUnit.selling?.market.name()=='AMAZON_US'?'in.':'CM'}
+              x ${procureUnit.fba.dto?.height}</span> ${procureUnit?.selling?.market?.name()=='AMAZON_US'?'in.':'CM'}
           #{/if}
           </td>
         </tr>

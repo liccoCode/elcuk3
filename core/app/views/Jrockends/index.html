@@ -362,13 +362,12 @@
 
 <button id="syncOrderr" class="btn btn-primary" data-disable-with='同步中'>同步报表</button>
 
-
 <div id="runDialog" class="modal fade bs-example-modal-lg">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header"><h4 class="modal-title">Job</h4></div>
-      <div class="modal-body">
-        <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
+      <form action="@{Jrockends.run()}" class="form-inline" id="job_form">
+        <div class="modal-body">
           <div class="row-fluid">
             <div class="form-group">
               <div class="input-group">
@@ -399,12 +398,12 @@
           </div>
           <input name="jobName" id="jobName" type="hidden">
           <input name="esType" id="esType" type="hidden">
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
-        <button class="btn btn-warning btn-xs">Run</button>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default btn-xs" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <button class="btn btn-warning btn-xs">Run</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
