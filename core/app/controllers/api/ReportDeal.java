@@ -281,8 +281,9 @@ public class ReportDeal extends Controller {
         String config = OperatorConfig.getVal("shipmentlossreport");
         if(StringUtils.isNotBlank(config)) {
             String[] emailData = config.split(",");
-            List<String> emailAddress = new ArrayList<>(Arrays.asList(emailData));
-            Webs.sendEmailWithAttach("运输单丢失率报表", "FYI", emailAddress, excel);
+            for(String to : emailData) {
+                new MailUtils().sendMail(to, "运输单丢失率报表", "FYI", excel);
+            }
         }
         excel.deleteOnExit();
     }
