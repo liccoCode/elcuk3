@@ -5,6 +5,7 @@ window.$dataui = {
       format: 'yyyy-mm-dd',
       autoclose: true
     });
+    $("input[role='date']").attr("autocomplete","off");
   },
 
   selectize: function () {
