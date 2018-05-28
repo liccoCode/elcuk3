@@ -94,7 +94,6 @@
     #{if (ord.market==models.market.M.AMAZON_FR || ord.market==models.market.M.AMAZON_IT) ||((ord.market==models.market
     .M.AMAZON_DE || ord.market==models.market.M.AMAZON_ES) && invoice.europevat==models.market.OrderInvoice.VAT.EUROPE)}
       <br>
-    ${invoiceformat.rate}<br>
     #{/if}
     </td>
     <td rowspan="2"></td>
@@ -120,9 +119,7 @@
               #{/if}
               #{else}
                 <td class="td3">${invoice.price.get(item_index-1)}</td>
-                <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get
-                (item_index-1)))
-                .setScale(2, 4).floatValue()}</td>
+                <td class="td3">${new BigDecimal(item.quantity).multiply(new BigDecimal(invoice.price.get(item_index-1))).setScale(2, 4).floatValue()}</td>
               #{/else}
           #{/if}
       </tr>

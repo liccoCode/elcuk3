@@ -69,7 +69,7 @@ public class OrderInvoiceFormat {
         format.taxamount = "MwST";
         format.taxamountper = "MwST(19%)";
         format.totalamount = "Summe";
-        format.country = "Deutschland";
+        format.country = "De";
         format.filename = "Rechnung de";
         format.returntitle = "Gutschrift";
         format.returntitle1 = "Originalrechnung";
