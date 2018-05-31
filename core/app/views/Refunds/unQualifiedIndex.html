@@ -92,7 +92,7 @@
                        data-url="@{Refunds.unQualifiedHandle()}" data-id="${u.id}">
                   #{if Arrays.asList('IN_STORAGE','DELIVERY','DONE').contains(u.stage.name())}
                     <input type="button" class="btn btn-success btn-xs" name="transferBtn" value="转入成品"
-                           data-url="@{Refunds.transferQty()}" data-id="${u.id}">
+                           data-url="@{Refunds.transferQty()}" data-id="${u.id}" data-unqualified="${u.unqualifiedQty}">
                   #{/if}
               </td>
             </tr>
