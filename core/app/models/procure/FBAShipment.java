@@ -276,7 +276,6 @@ public class FBAShipment extends Model {
             Thread.sleep(500);
         } catch(Exception e) {
             e.printStackTrace();
-            Webs.e(e);
             if(e.getClass() == FBAInboundServiceMWSException.class) {
                 FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat((FBAInboundServiceMWSException) e);
                 switch(errorType) {
@@ -298,9 +297,11 @@ public class FBAShipment extends Model {
                     case NON_SORTABLE:
                     case NOT_ELIGIBLE_FC_FOR_ITEM:
                     case UNKNOWN_ERROR:
-                        throw new FastRuntimeException(String.format("向 Amazon 更新失败. %s", errorType.message()));
+                        throw new FastRuntimeException(String.format("s% 向 Amazon 更新失败. %s",
+                                this.shipmentId, errorType.message()));
                     default:
-                        throw new FastRuntimeException(String.format("向 Amazon 更新出现未知错误. %s", Webs.e(e)));
+                        throw new FastRuntimeException(String.format("s% 向 Amazon 更新出现未知错误. %s", this.shipmentId,
+                                Webs.e(e)));
                 }
             } else {
                 throw new FastRuntimeException("向 Amazon 更新失败. " + Webs.e(e));
