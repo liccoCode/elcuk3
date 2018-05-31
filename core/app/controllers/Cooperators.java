@@ -149,6 +149,7 @@ public class Cooperators extends Controller {
         redirect("/cooperators/index#" + cooperId);
     }
 
+    @Check("cooperators.index")
     public static void editCooperItem(long cooperId) {
         CooperItem copItem = CooperItem.findById(cooperId);
         copItem.getAttributes();

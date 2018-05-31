@@ -229,9 +229,8 @@ public class CooperItem extends Model {
         logs.addAll(Reflects.logFieldFade(this, "taxPrice", entity.taxPrice));
         logs.addAll(Reflects.logFieldFade(this, "taxPoint", entity.taxPoint));
         logs.addAll(Reflects.logFieldFade(this, "taxCurrency", entity.taxCurrency));
-
-        this.productTerms = entity.productTerms;
-        this.memo = entity.memo;
+        logs.addAll(Reflects.logFieldFade(this, "productTerms", entity.productTerms));
+        logs.addAll(Reflects.logFieldFade(this, "memo", entity.memo));
         this.items = entity.items;
         this.setAttributes();
         this.setDefaultValue();
