@@ -2,7 +2,7 @@
 lock '3.6.1'
 
 set :application, 'elcuk2'
-set :repo_url, 'ssh://git@tig.easyacc.com:21022/ea/elcuk2.git'
+set :repo_url, 'ssh://git@tig.easya.cc:21022/ea/elcuk2.git'
 set :deploy_to, '/root/cap_elcuk2'
 
 # Default branch is :master
