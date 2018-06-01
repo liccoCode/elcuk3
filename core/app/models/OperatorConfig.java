@@ -29,7 +29,6 @@ public class OperatorConfig extends Model {
 
     private static final Map<String, T> NAME_Type_MAPS;
     private static final Map<String, String> VALUES_MAPS;
-
     private static Map<String, String> VALUES_SYSPARAMS;
     public static String ERP_VERSION;
 
@@ -86,6 +85,12 @@ public class OperatorConfig extends Model {
             @Override
             public String label() {
                 return "系统参数";
+            }
+        },
+        REPORT {
+            @Override
+            public String label() {
+                return "报表类型";
             }
         };
 
@@ -178,7 +183,6 @@ public class OperatorConfig extends Model {
     public static boolean exist(String name) {
         return OperatorConfig.count("name=?", name) == 1;
     }
-
 
     public static OperatorConfig config(String name, T type, Number val) {
         return OperatorConfig.config(name, type, val.toString());

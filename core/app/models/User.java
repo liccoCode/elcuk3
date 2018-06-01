@@ -166,7 +166,7 @@ public class User extends Model {
 
             @Override
             public String url() {
-                return "https://e.easya.cc/";
+                return "https://easyacc.elcuk-erp.com/";
             }
 
             @Override
@@ -380,6 +380,22 @@ public class User extends Model {
             @Override
             public String pic() {
                 return "fa-gift";
+            }
+        },
+        Aphion {
+            @Override
+            public String label() {
+                return "Aphion";
+            }
+
+            @Override
+            public String url() {
+                return "https://aphion.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-battery-full";
             }
         },
         MengTop {
