@@ -275,9 +275,10 @@ public class FBAShipment extends Model {
             this.state = FBA.update(this, state != null ? state : this.state);
             Thread.sleep(500);
         } catch(Exception e) {
-            e.printStackTrace();
+            Logger.error(Webs.e(e));
             if(e.getClass() == FBAInboundServiceMWSException.class) {
                 FBA.FBA_ERROR_TYPE errorType = FBA.fbaErrorFormat((FBAInboundServiceMWSException) e);
+                Logger.error(errorType.message());
                 switch(errorType) {
                     case LOCKED:
                         this.state = FBAShipment.S.RECEIVING;
