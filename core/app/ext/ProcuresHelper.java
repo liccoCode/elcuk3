@@ -346,7 +346,7 @@ public class ProcuresHelper extends JavaExtensions {
                     .append("<th>CenterId</th>")
                     .append("</tr>");
             for(String line : lines) {
-                String[] fields = StringUtils.splitByWholeSeparator(line, "\t");
+                String[] fields = StringUtils.splitByWholeSeparator(line, "||");
                 sb.append("<tr>").append("<td>")
                         .append(StringUtils.join(fields, "</td><td>"))
                         .append("</td></tr>");
