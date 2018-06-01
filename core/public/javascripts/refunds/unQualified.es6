@@ -28,10 +28,14 @@ $(() => {
       });
       return;
     }
-
     let memo = $tr.find("input[name='memo']").val();
     let qty = $tr.find("input[name$='attrs.qty']").val();
-    if (memo && qty) {
+    if (qty > $(this).data("unqualified")) {
+      noty({
+        text: '填写数量超过不良品数!',
+        type: 'warning'
+      });
+    } else if (memo && qty) {
       $("#id_input").val($(this).data("id"));
       $("#qty_input").val(qty);
       $("#memo_input").val(memo);
