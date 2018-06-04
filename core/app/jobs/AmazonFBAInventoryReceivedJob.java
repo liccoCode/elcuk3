@@ -45,7 +45,7 @@ public class AmazonFBAInventoryReceivedJob {
             if(records == null || records.size() == 0) return F.Option.None();
             List<Date> dates = new ArrayList<>();
             for(String record : records) {
-                String dateStr = record.split("\t")[0];
+                String dateStr = record.split("||")[0];
                 dates.add(DateTime.parse(dateStr).toDate());
             }
             Collections.sort(dates);
