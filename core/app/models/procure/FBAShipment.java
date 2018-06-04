@@ -389,7 +389,7 @@ public class FBAShipment extends Model {
     }
 
     public F.Option<Date> getEarliestDate() {
-        List<String> list = Arrays.asList(StringUtils.split(this.records, "\n"));
+        List<String> list = Arrays.asList(StringUtils.split(this.records, "||"));
         return AmazonFBAInventoryReceivedJob.Rows.getEarliestDate(list);
     }
 
