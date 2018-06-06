@@ -235,4 +235,29 @@
   </div>
 </div>
 
+<div class="row">
+  <div class="col-sm-6">
+    <div class="box">
+      <div class="box-header with-border"><h4 class="box-title">供销存数据报表:</h4></div>
+      <form action="@{Excels.exportProcureUnitAnalyze()}" target="_blank" class="form-inline">
+        <div class="box-body">
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">年份:</div>
+            #{select_year class:'form-control', name:'year', value: new org.joda.time.DateTime().getYear()/}
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="input-group">
+              <div class="input-group-addon">月份:</div>
+            #{select_all_month  class:'form-control', name: "month", value: new org.joda.time.DateTime().getMonthOfYear()/}
+            </div>
+          </div>
+          <button class="btn btn-default">导出</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 

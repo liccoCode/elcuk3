@@ -876,6 +876,28 @@ public class Excels extends Controller {
         }
     }
 
+    /**
+     * 供销存数据报表
+     *
+     * @param year
+     * @param month
+     */
+    public static void exportProcureUnitAnalyze(Integer year, Integer month) {
+        List<ProcureUnitAnalyze> units = ProcureUnitAnalyze.find("year=? AND month=?", year, month).fetch();
+        List<Map<String, Object>> totals = ProcureUnitAnalyze.getTotalPerMonth(year);
+        if(units != null && units.size() > 0) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String hostName = OperatorConfig.getVal("brandname");
+            request.format = "xls";
+            renderArgs.put(RenderExcel.RA_FILENAME,
+                    String.format("%s-%s年%s月供销存数据.xls", hostName, year, month));
+            renderArgs.put(RenderExcel.RA_ASYNC, false);
+            render(units, month, dateFormat, totals);
+        } else {
+            renderText("未找到当前日期的数据.");
+        }
+    }
+
     public static void downloadB2BPi(Long id) {
         BtbOrder order = BtbOrder.findById(id);
         int i = 1;
