@@ -2,7 +2,6 @@ package controllers;
 
 import controllers.api.SystemOperation;
 import helper.J;
-import helper.Tracker;
 import models.market.Account;
 import models.view.Ret;
 import play.data.validation.Validation;
@@ -49,13 +48,4 @@ public class Accounts extends Controller {
         a.save();
         redirect("/Accounts/index#" + a.id);
     }
-
-    public static void main(String[] args) throws Exception {
-        String urlStr = "/ups/1ZE504Y20456635317";
-        String requestData = null;
-        String result = new Tracker().orderOnlineByJson(requestData, urlStr, "codeNumberGet");
-        System.out.println("result=======" + result);
-    }
-
-
 }
