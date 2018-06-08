@@ -31,46 +31,46 @@ public class ProcureUnitAnalyze extends Model {
 
     public int month;
 
-    public int planQty;
+    public Integer planQty;
 
     /**
      * 收货数
      */
-    public int qty;
+    public Integer qty;
 
     /**
      * 入库数
      */
-    public int inboundQty;
+    public Integer inboundQty;
 
     /**
      * 不良品数
      */
-    public int unqualifiedQty;
+    public Integer unqualifiedQty;
 
     /**
      * 深圳出库数
      */
-    public int outQty;
+    public Integer outQty;
 
     /**
      * 其它出库数
      */
-    public int stockQty;
+    public Integer stockQty;
 
     /**
      * 仓库退货数
      */
-    public int refundQty;
+    public Integer refundQty;
 
     /**
      * 销量
      */
-    public int units;
+    public Integer units;
     /**
      * 退货量
      */
-    public int returnQty;
+    public Integer returnQty;
 
     public String market;
 
