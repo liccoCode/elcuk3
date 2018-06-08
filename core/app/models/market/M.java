@@ -491,6 +491,10 @@ public enum M {
                 return "us";
             case AMAZON_MX:
                 return "mx";
+            case AMAZON_IN:
+                return "in";
+            case AMAZON_AU:
+                return "au";
             case EBAY_UK:
                 return "uk";
             default:
