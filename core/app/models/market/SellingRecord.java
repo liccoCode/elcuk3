@@ -232,7 +232,7 @@ public class SellingRecord extends GenericModel {
     public String product_sku;
 
     public Date orderUpdateDate;
-    
+
     public Date feeUpdateDate;
 
     /**
@@ -476,7 +476,7 @@ public class SellingRecord extends GenericModel {
                 getEarDataBymMarket(chart, acc.type, msku, from, to);
             } else {
                 for(M market : M.values()) {
-                    if(!Objects.equals(market, M.EBAY_UK)) {
+                    if(!Arrays.asList(M.AMAZON_MX, M.AMAZON_AU, M.AMAZON_IN, M.EBAY_UK).contains(market)) {
                         getEarDataBymMarket(chart, market, msku, from, to);
                     }
                 }
@@ -647,8 +647,6 @@ public class SellingRecord extends GenericModel {
         result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
     }
-
-
 
 
     @Override
