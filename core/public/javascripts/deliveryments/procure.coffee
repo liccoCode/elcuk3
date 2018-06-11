@@ -79,8 +79,8 @@ $ ->
       total_usd_summery += usd_summery
       total_unknown_summery += unknown_summery
 
-    $('.totalQty').text("#{total_plan_qty} / #{total_qty} / #{total_inbound_qty}")
-    $('.totalCost').text("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
+    $('#totalQty').val("#{total_plan_qty} / #{total_qty} / #{total_inbound_qty}")
+    $('#totalCost').val("¥ #{format_Num(total_cny_summery)} | $ #{format_Num(total_usd_summery)} | ? #{format_Num(total_unknown_summery)}")
 
     pay_cny = 0
     pay_usd = 0

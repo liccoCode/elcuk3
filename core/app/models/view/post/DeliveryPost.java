@@ -58,7 +58,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         DELIVERY {
             @Override
             public String label() {
-                return "交货时间";
+                return "预计交货时间";
             }
         };
 
@@ -94,8 +94,7 @@ public class DeliveryPost extends Post<Deliveryment> {
         // +n 处理需要额外的搜索
         specialSearch = multiProcureUnit();
 
-        StringBuilder sbd = new StringBuilder(
-                "SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
+        StringBuilder sbd = new StringBuilder("SELECT DISTINCT d FROM Deliveryment d LEFT JOIN d.units u WHERE 1=1 AND");
         List<Object> params = new ArrayList<>();
 
         if(this.dateType != null) {
