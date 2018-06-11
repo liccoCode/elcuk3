@@ -186,14 +186,9 @@ public class LossRatePost extends Post<LossRate> {
         start = System.currentTimeMillis();
         List<ShipItem> shipItems = ShipItem.find(shipParams._1, Dates.beginOfYear()).fetch();
         for(ShipItem ship : shipItems) {
-            if(ship.recivedLogs().size() == 0) {
-                ship.adjustQty = ship.recivedQty;
-                ship.save();
-            }
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
             ship.purchaseCost = new BigDecimal(ship.unit.attrs.currency.toUSD(ship.unit.attrs.price) * lossNum)
                     .setScale(2, BigDecimal.ROUND_HALF_UP);
-
             if(dataMap.get(ship.unit.selling.sellingId) != null) {
                 AverageData data = dataMap.get(ship.unit.selling.sellingId);
                 ship.shipmentCost = (data.averageShipPrice.add(data.averageVATPrice)).multiply(new BigDecimal(lossNum))

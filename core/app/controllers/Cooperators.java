@@ -170,8 +170,9 @@ public class Cooperators extends Controller {
     public static void removeCooperItemById(Long id) {
         CooperItem item = CooperItem.findById(id);
         item.delete();
+        String msg = item.product != null ? item.product.sku : item.material.code;
         new ElcukRecord(Messages.get("cooperators.cooperitemdelete"),
-                Messages.get("cooperators.cooperitemdelete.msg", id), id.toString()).save();
+                Messages.get("cooperators.cooperitemdelete.msg", id + msg), id.toString()).save();
         flash.success("删除成功！");
         CooperatorPost p = new CooperatorPost();
         p.search = item.cooperator.fullName;
