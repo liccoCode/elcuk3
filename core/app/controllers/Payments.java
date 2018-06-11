@@ -30,6 +30,7 @@ import play.mvc.Controller;
 import play.mvc.With;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -85,8 +86,8 @@ public class Payments extends Controller {
         PaymentUnitPost post = new PaymentUnitPost(id, p);
         List<PaymentUnit> units = post.query();
         User user = User.findById(Login.current().id);
-        boolean isFinance = Objects.equals(User.D.Finance, user.department);
-        render(payment, units, p, post, isFinance);
+        boolean isShowFull = Arrays.asList(User.D.Finance, User.D.Shipment).contains(user.department);
+        render(payment, units, p, post, isShowFull);
     }
 
     public static void batchApply(List<Long> pids) {

@@ -512,6 +512,7 @@ public class ProcureUnits extends Controller {
         boolean noPayment = unit.noPayment;
         unit.noPayment = !noPayment;
         unit.save();
+        new ElcukRecord("采购计划纳入请款单", "是否统计值改为：" + unit.noPayment, String.valueOf(unit.id)).save();
         renderJSON(new Ret());
     }
 
