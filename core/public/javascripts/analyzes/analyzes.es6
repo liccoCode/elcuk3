@@ -1,8 +1,5 @@
 $(() => {
 
-
-
-
   // Form 搜索功能
   $("#click_param").on("change", "[name='p.market']", function () {
     ajaxSaleUnitLines();
