@@ -46,7 +46,7 @@
             <td>#{time_tooltip_v3 time:r.createAt/}</td>
             <td>${r.downloadcount}</td>
             <td>
-              <a class="btn btn-primary btn-xs" href="@{ShipmentReports.downloadShipmentMonthlyReport(r.year, r.month)}">下载</a>
+              <a class="btn btn-primary btn-xs" href="@{ShipmentReports.downloadShipmentMonthlyReport(r.year, r.month, r.id)}">下载</a>
                 #{if r.canBeRecalculated()}
                   <a class="btn btn-warning btn-xs" id="repeatcalculate" data-url="@{ReportDownloads.repeatCalculate(r.id)}">重新计算</a>
                 #{/if}

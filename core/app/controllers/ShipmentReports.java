@@ -68,16 +68,20 @@ public class ShipmentReports extends Controller {
         render(p, reports);
     }
 
-    public static void downloadShipmentMonthlyReport(int year, int month) {
-        List<ShipmentMonthly> seaList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+    public static void downloadShipmentMonthlyReport(int year, int month, Long id) {
+        ReportRecord record = ReportRecord.findById(id);
+        record.downloadcount++;
+        record.save();
+        String orderBy = "ORDER BY shipItem.shipment.dates.beginDate DESC";
+        List<ShipmentMonthly> seaList = ShipmentMonthly.find("year=? AND month=? AND type=? " + orderBy,
                 year, month, Shipment.T.SEA).fetch();
-        List<ShipmentMonthly> expressList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+        List<ShipmentMonthly> expressList = ShipmentMonthly.find("year=? AND month=? AND type=?" + orderBy,
                 year, month, Shipment.T.EXPRESS).fetch();
-        List<ShipmentMonthly> airList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+        List<ShipmentMonthly> airList = ShipmentMonthly.find("year=? AND month=? AND type=?" + orderBy,
                 year, month, Shipment.T.AIR).fetch();
-        List<ShipmentMonthly> dedicatedList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+        List<ShipmentMonthly> dedicatedList = ShipmentMonthly.find("year=? AND month=? AND type=?" + orderBy,
                 year, month, Shipment.T.DEDICATED).fetch();
-        List<ShipmentMonthly> railWayList = ShipmentMonthly.find("year=? AND month=? AND type=?",
+        List<ShipmentMonthly> railWayList = ShipmentMonthly.find("year=? AND month=? AND type=?" + orderBy,
                 year, month, Shipment.T.RAILWAY).fetch();
         request.format = "xls";
         renderArgs.put(RenderExcel.RA_FILENAME, String.format("月度物流报表_%s年_%s月.xls", year, month));
