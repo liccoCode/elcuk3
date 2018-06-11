@@ -47,10 +47,10 @@ public class CooperItem extends Model {
     public Material material;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    public List<ProductMaterial> skus = new ArrayList();
+    public List<ProductMaterial> skus = new ArrayList<>();
 
     @OneToMany(mappedBy = "material", fetch = FetchType.LAZY)
-    public List<ProductMaterial> mats = new ArrayList();
+    public List<ProductMaterial> mats = new ArrayList<>();
 
     /**
      * 冗余字段
