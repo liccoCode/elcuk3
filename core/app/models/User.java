@@ -398,6 +398,22 @@ public class User extends Model {
                 return "fa-battery-full";
             }
         },
+        Funtopia {
+            @Override
+            public String label() {
+                return "Funtopia";
+            }
+
+            @Override
+            public String url() {
+                return "https://funtopia.elcuk-erp.com";
+            }
+
+            @Override
+            public String pic() {
+                return "fa-image";
+            }
+        },
         MengTop {
             @Override
             public String label() {
