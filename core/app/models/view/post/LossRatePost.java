@@ -140,7 +140,6 @@ public class LossRatePost extends Post<LossRate> {
     }
 
     public Map<String, Object> lossRateMap(F.T2<String, List<Object>> params, F.T2<String, List<Object>> shipParams) {
-        long start = System.currentTimeMillis();
         /*查询丢失集合**/
         List<Map<String, Object>> rows = DBUtils.rows(params._1, Dates.morning(this.from), Dates.night(this.to));
         List<LossRate> lossRateList = new ArrayList<>();
@@ -181,9 +180,6 @@ public class LossRatePost extends Post<LossRate> {
                     .setScale(2, BigDecimal.ROUND_HALF_UP);
             lossRateList.add(loss);
         }
-        Logger.info("查询丢失集合耗时:" + (System.currentTimeMillis() - start) + " ms ");
-
-        start = System.currentTimeMillis();
         List<ShipItem> shipItems = ShipItem.find(shipParams._1, Dates.beginOfYear()).fetch();
         for(ShipItem ship : shipItems) {
             Integer lossNum = ship.qty - (ship.adjustQty == null ? 0 : ship.adjustQty);
@@ -202,7 +198,6 @@ public class LossRatePost extends Post<LossRate> {
         Map<String, Object> map = new HashMap<>();
         map.put("shipItems", shipItems);
         map.put("lossRateList", lossRateList);
-        Logger.info("查询今年数据耗时:" + (System.currentTimeMillis() - start) + " ms ");
         return map;
     }
 
