@@ -94,11 +94,11 @@
               <table class="table table-bordered table-condensed">
                 <tr>
                   <th width="15px;"><input type="checkbox" class="checkall" value=""></th>
-                  <th width="70px;">#</th>
+                  <th width="90px;">#</th>
                   <th>SKU</th>
                   <th>Selling</th>
                   <th>数量(计划/交货/入库)</th>
-                  <th width="110px;">单价</th>
+                  <th width="70px;">单价</th>
                   <th>单价*入库数量</th>
                   <th>剩余请款金额</th>
                   <th>阶段</th>
@@ -121,7 +121,7 @@
                       <i class="icon-reorder"></i>
                         #{if procureUnit.parent}
                           <i class="icon-retweet" style="color:${procureUnit.type?.name()=='ProcureSplit'?'blue':'orange'}"
-                             rel="tooltip" title="${procureUnit.type?.label()}"></i>
+                             data-toggle="tooltip" title="${procureUnit.type?.label()}"></i>
                         #{/if}
                     ${procureUnit.id}
                     </td>
@@ -130,7 +130,7 @@
                       <a href="@{Sellings.selling(procureUnit.sid)}" target="_blank" data-toggle="tooltip"
                          title="${procureUnit.sid}">${procureUnit.sid.overLong()}</a>
                         #{list items:procureUnit.fees(), as:'fee'}
-                          <span class="label ${fee.stateLabel()}">${fee.feeType.nickName}</span>
+                          <span class="label ${fee.stateLabelV3()}">${fee.feeType.nickName}</span>
                         #{/list}
                     </td>
                     <td class="qty" planQty="${procureUnit.attrs.planQty}" qty="${procureUnit.attrs.qty?:0}"
